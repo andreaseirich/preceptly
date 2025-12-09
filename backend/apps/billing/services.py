@@ -73,17 +73,14 @@ class InvoiceService:
             if not lessons.exists():
                 raise ValueError(_("No billable lessons found in the specified period."))
 
-        # Determine payer_name; payer_address is optional (Student has no address field)
-        if contract:
-            payer_name = contract.student.full_name
-            payer_address = ""
-        else:
-            # Nehme den ersten Vertrag als Basis
-            first_lesson = lessons.first()
-            payer_name = first_lesson.contract.student.full_name
-            payer_address = ""
+            if contract:
+                payer_name = contract.student.full_name
+                payer_address = ""
+            else:
+                first_lesson = lessons.first()
+                payer_name = first_lesson.contract.student.full_name
+                payer_address = ""
 
-            # Erstelle Invoice
             invoice = Invoice.objects.create(
                 payer_name=payer_name,
                 payer_address=payer_address,
@@ -93,10 +90,8 @@ class InvoiceService:
                 status="draft",
             )
 
-            # Erstelle InvoiceItems
             total_amount = Decimal("0.00")
             for lesson in lessons:
-                # Berechne Betrag basierend auf Einheiten
                 contract = lesson.contract
                 unit_duration = Decimal(str(contract.unit_duration_minutes))
                 lesson_duration = Decimal(str(lesson.duration_minutes))
@@ -119,11 +114,9 @@ class InvoiceService:
 
                 total_amount += amount
 
-                # Markiere Lesson als abgerechnet (Status PAID)
                 lesson.status = "paid"
                 lesson.save(update_fields=["status", "updated_at"])
 
-            # Setze Gesamtbetrag (Summe aller InvoiceItems)
             invoice.total_amount = total_amount
             invoice.save(update_fields=["total_amount", "updated_at"])
 
