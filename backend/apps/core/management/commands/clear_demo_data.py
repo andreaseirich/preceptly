@@ -7,7 +7,7 @@ from apps.billing.models import Invoice, InvoiceItem
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lesson_plans.models import LessonPlan
-from apps.lessons.models import Lesson, RecurringLesson
+from apps.lessons.models import Lesson
 from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
@@ -58,19 +58,12 @@ class Command(BaseCommand):
         Lesson.objects.all().delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {lessons_count} lessons"))
 
-        # 5. Delete RecurringLessons
-        recurring_lessons_count = RecurringLesson.objects.count()
-        RecurringLesson.objects.all().delete()
-        self.stdout.write(
-            self.style.SUCCESS(f"Deleted {recurring_lessons_count} recurring lessons")
-        )
-
-        # 6. Delete BlockedTimes
+        # 5. Delete BlockedTimes
         blocked_times_count = BlockedTime.objects.count()
         BlockedTime.objects.all().delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {blocked_times_count} blocked times"))
 
-        # 7. Delete ContractMonthlyPlans (they reference Contracts)
+        # 6. Delete ContractMonthlyPlans (they reference Contracts)
         monthly_plans_count = ContractMonthlyPlan.objects.count()
         ContractMonthlyPlan.objects.all().delete()
         self.stdout.write(
