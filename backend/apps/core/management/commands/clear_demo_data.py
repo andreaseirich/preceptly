@@ -4,7 +4,7 @@ while keeping admin users and system settings.
 """
 
 from apps.billing.models import Invoice, InvoiceItem
-from apps.blocked_times.models import BlockedTime, RecurringBlockedTime
+from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson, RecurringLesson
@@ -70,14 +70,7 @@ class Command(BaseCommand):
         BlockedTime.objects.all().delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {blocked_times_count} blocked times"))
 
-        # 7. Delete RecurringBlockedTimes
-        recurring_blocked_times_count = RecurringBlockedTime.objects.count()
-        RecurringBlockedTime.objects.all().delete()
-        self.stdout.write(
-            self.style.SUCCESS(f"Deleted {recurring_blocked_times_count} recurring blocked times")
-        )
-
-        # 8. Delete ContractMonthlyPlans (they reference Contracts)
+        # 7. Delete ContractMonthlyPlans (they reference Contracts)
         monthly_plans_count = ContractMonthlyPlan.objects.count()
         ContractMonthlyPlan.objects.all().delete()
         self.stdout.write(
