@@ -12,6 +12,7 @@ jobs:
     env:
       MOCK_LLM: 1
       DJANGO_SECRET_KEY: test-ci-secret
+      SECRET_KEY: test-ci-secret
       DJANGO_DEBUG: "False"
       DJANGO_SETTINGS_MODULE: tutorflow.settings
     steps:
