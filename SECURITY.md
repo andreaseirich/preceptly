@@ -52,6 +52,29 @@ All security-related information will be handled confidentially and will not be 
 - **Sanitized Context Only**: Lesson plans are generated from sanitized context to reduce exposure of personal data.
 - **Opt-in for Production**: Live AI calls require setting `LLM_API_KEY` and disabling `MOCK_LLM` explicitly.
 
+## Content Security Policy (CSP)
+
+TutorFlow implements a strict Content Security Policy to prevent XSS attacks and other injection vulnerabilities.
+
+### Policy Details
+
+- **Default Policy**: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'self';`
+- **No Inline Scripts/Styles**: The policy explicitly disallows `'unsafe-inline'` for scripts and styles
+- **Static Assets Only**: All JavaScript and CSS must be loaded from static files (`static/js/`, `static/css/`)
+- **Event Handlers**: Inline event handlers (`onclick`, `onchange`, etc.) are not used; JavaScript event listeners are used instead
+
+### Configuration
+
+- **Enable/Disable**: CSP can be controlled via the `ENABLE_CSP` environment variable (default: `true`)
+- **Customization**: To modify the CSP policy, edit `apps/core/middleware.py` (ContentSecurityPolicyMiddleware)
+- **External Resources**: If you need to load resources from external domains (CDNs, fonts, etc.), update the CSP policy accordingly
+
+### Enforcement
+
+- **Template Linting**: The `scripts/lint.sh` script checks for inline scripts, styles, and event handlers in templates
+- **CI Integration**: Template checks are run as part of the CI pipeline
+- **Manual Verification**: Use browser developer tools to verify CSP headers are present and working correctly
+
 ## Security Best Practices
 
 When using TutorFlow:
@@ -63,6 +86,7 @@ When using TutorFlow:
 - **Use strong passwords** and enable authentication features as appropriate
 - **No hardcoded secrets**: `SECRET_KEY`, database credentials, and LLM keys are expected from environment variables; defaults in the repo are demo-only
 - **Secure defaults**: In Produktion niemals mit `DEBUG=True` oder leeren `ALLOWED_HOSTS` betreiben; aktivieren Sie bei Bedarf `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` via ENV.
+- **CSP Enabled**: Keep CSP enabled in production (`ENABLE_CSP=true`) to prevent XSS attacks
 
 ## Acknowledgments
 
