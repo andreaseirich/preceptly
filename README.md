@@ -7,16 +7,16 @@
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![i18n](https://img.shields.io/badge/i18n-English%20%7C%20German-lightgrey.svg)](docs/ARCHITECTURE.md#internationalization-i18n)
 
-## TL;DR – Demo in 2 Befehlen
+## TL;DR – Demo in 2 commands
 
 ```bash
 cp .env.example .env
 ./scripts/run_demo.sh
 ```
 
-- Startet das Backend mit `MOCK_LLM=1`, lädt die deterministischen Fixtures und öffnet `http://127.0.0.1:8000/`.
-- Health-Check: `curl http://127.0.0.1:8000/health/` → `{ "status": "ok" }`
-- Smoke-Test ohne Browser: `./scripts/smoke_demo.sh` (wartet auf `/health/`)
+- Starts the backend with `MOCK_LLM=1`, loads deterministic fixtures, and opens `http://127.0.0.1:8000/`.
+- Health check: `curl http://127.0.0.1:8000/health/` → `{ "status": "ok" }`
+- Browser-free smoke test: `./scripts/smoke_demo.sh` (waits for `/health/`)
 
 **Demo-Logins**
 
@@ -31,11 +31,11 @@ TutorFlow is a comprehensive web application designed for tutors to manage their
 
 ## Submission (Teca Hacks)
 
-- **Devpost-Einreichung:** Trage den finalen Link zur TutorFlow-Projektseite auf Devpost ein (inkl. Teammitglieder und Tech-Stack).
-- **Demo-Video (empfohlen):** Kurzer Walkthrough (2–3 Minuten) mit Fokus auf Week View, Konflikterkennung und AI Lesson Plans.
-- **Kurzbeschreibung:** 2–3 Sätze zu Problem & Lösung (z. B. „Tutor:innen vermeiden Doppelbuchungen, erhalten finanzielle Übersicht und generieren AI-gestützte Lesson Plans“).
-- **Repository-Link & Deploy-Hinweis:** GitHub-Link (dieses Repo) plus kurzer Hinweis auf Demo-Setup (`./scripts/run_demo.sh`, Mock-LLM).
-- **Lernpunkte & Herausforderungen:** Notiere die wichtigsten Learnings (z. B. Konfliktdetektion, i18n, OpenAI-kompatibles API-Design).
+- **Devpost entry:** Add the final link to the TutorFlow project page on Devpost (include teammates and tech stack).
+- **Demo video (recommended):** Short walkthrough (2–3 minutes) focusing on Week View, conflict detection, and AI Lesson Plans.
+- **Short description:** 2–3 sentences on problem & solution (e.g., “Tutors avoid double bookings, gain financial clarity, and generate AI-powered lesson plans”).
+- **Repository link & deploy note:** GitHub link (this repo) plus a short note on the demo setup (`./scripts/run_demo.sh`, mock LLM).
+- **Learnings & challenges:** Summarize the key learnings (e.g., conflict detection, i18n, OpenAI-compatible API design).
 
 ## Key Features
 
@@ -49,10 +49,10 @@ TutorFlow is a comprehensive web application designed for tutors to manage their
 ### Feature Walkthrough in 2 Minuten
 
 1. **Dashboard** (`/`): Heute/kommende Lessons, Konflikt-Widget, Premium-Badge.
-2. **Week View** (`/lessons/week/`): Drag-to-create, Konflikt-Icons, Klick auf Lesson → Edit & AI Lesson Plan.
-3. **Income Overview** (`/income/`): Geplanter vs. realer Umsatz, Monats-/Jahressicht.
-4. **Billing** (`/billing/invoices/`): Rechnungen aus „taught“ Lessons erzeugen, HTML-Dokumente prüfen.
-5. **Lesson Detail** (`/admin/lessons/lesson/<id>/change/`): „Generate AI Lesson Plan“-Button für Premium, Konflikt-Hinweise einsehen.
+2. **Week View** (`/lessons/week/`): Drag-to-create, conflict badges, click a lesson → edit & AI lesson plan.
+3. **Income Overview** (`/income/`): Planned vs. actual revenue, monthly/yearly view.
+4. **Billing** (`/billing/invoices/`): Create invoices from taught lessons, review HTML documents.
+5. **Lesson Detail** (`/admin/lessons/lesson/<id>/change/`): “Generate AI Lesson Plan” button for premium; view conflict hints.
 
 ## Quick Start
 
@@ -176,9 +176,9 @@ python manage.py runserver
 
 ### UI & AI Highlights (Best UI/Creativity)
 
-- **Konflikt-First Kalender:** Week View mit roten Icons/Rändern für Konflikte; Blocked Times und Lessons nahtlos kombiniert.
-- **AI Lesson Plans im Flow:** Direkt aus dem Lesson-Detail per Button generierbar; Mock-LLM erlaubt reproduzierbare Demos ohne externe API.
-- **Demo-ready:** `./scripts/run_demo.sh` startet in <60 Sekunden mit deterministischen Daten; ideal für Video/GIF-Aufnahmen.
+- **Conflict-first calendar:** Week View with red icons/borders for conflicts; blocked times and lessons combined seamlessly.
+- **AI lesson plans in-flow:** Triggered from the lesson detail via button; mock LLM enables reproducible demos without external APIs.
+- **Demo-ready:** `./scripts/run_demo.sh` starts in under 60 seconds with deterministic data; ideal for video/GIF captures.
 
 ### Quick Demo Tour (2 Minutes)
 
@@ -311,7 +311,7 @@ venv\Scripts\activate  # Windows
 ```bash
 pip install -r requirements.txt
 ```
-> Tipp: Für reproduzierbare Builds kann `uv pip compile` oder `pip-compile` genutzt werden, um die Pins zu erneuern.
+> Tip: For reproducible builds, you can refresh pins with `uv pip compile` or `pip-compile`.
 
 4. Migrate database:
 ```bash
@@ -333,12 +333,12 @@ The application is then available at `http://127.0.0.1:8000/`.
 
 ## Security & Deployment Checklist
 
-- `.env` aus `.env.example` kopieren, dann **SECRET_KEY** stark setzen; `DEBUG` für Produktion leer lassen (→ `False`).
-- **ALLOWED_HOSTS** auf die tatsächlichen Domains/IPs setzen (kein Wildcard in Prod). **Nie** Produktion mit `DEBUG=True` und leeren ALLOWED_HOSTS starten.
-- **DATABASE_URL/POSTGRES_∗** für PostgreSQL-Deployments konfigurieren (Docker Compose unterstützt env-first Setup).
-- **STATIC_ROOT/collectstatic** für Prod-Builds ausführen; statische Assets über Webserver/CDN ausliefern.
-- **LLM_API_KEY/LLM_API_BASE_URL** nur setzen, wenn echtes LLM gewünscht; für Demos **MOCK_LLM=1** beibehalten.
-- TLS/Reverse Proxy (z. B. Nginx) mit Weiterleitung auf Gunicorn/Daphne absichern; Health-Check unter `/health/`.
+- Copy `.env` from `.env.example`, then set a strong **SECRET_KEY**; leave `DEBUG` empty for production (→ `False`).
+- Set **ALLOWED_HOSTS** to real domains/IPs (no wildcard in prod). Never run production with `DEBUG=True` and empty ALLOWED_HOSTS.
+- Configure **DATABASE_URL/POSTGRES_*** for PostgreSQL deployments (Docker Compose supports the env-first setup).
+- Run **STATIC_ROOT/collectstatic** for production builds; serve static assets via web server/CDN.
+- Set **LLM_API_KEY/LLM_API_BASE_URL** only if you want a real LLM; keep **MOCK_LLM=1** for demos.
+- Secure TLS/reverse proxy (e.g., Nginx) forwarding to Gunicorn/Daphne; health check at `/health/`.
 
 ### Load Demo Data
 

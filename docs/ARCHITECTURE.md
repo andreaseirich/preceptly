@@ -733,14 +733,14 @@ This structure makes it easy to find related code: if you're working on scheduli
   - Orchestrates context collection, prompt building and LLM call
   - Creates/updates LessonPlan model
 - **Configuration**: LLM settings via environment variables (LLM_API_KEY, LLM_API_BASE_URL, LLM_MODEL_NAME)
-- **Resilience**: Rate-limit backoff mit Jitter, Timeout-Logging, Mock-Mode (`MOCK_LLM=1`) als Default; Live-Mode schlägt fehl, wenn kein API-Key gesetzt ist.
+- **Resilience**: Rate-limit backoff with jitter, timeout logging, mock mode (`MOCK_LLM=1`) as the default; live mode fails fast if no API key is set.
 
 ## Timezone Handling
 
 - **Timezone**: Europe/Berlin (according to Master Prompt)
-- Anwendungen behandeln Zeiten lokal in Europe/Berlin; Persistierung wird konsistent in dieser Zone betrieben, keine automatische UTC-Konvertierung für Lesson-Zeiten vorgesehen.
-- Hinweis: Für spätere Multi-TZ-Szenarien ist eine explizite Konvertierung/Normalisierung zu planen.
-- Django ist mit `TIME_ZONE = 'Europe/Berlin'` und `USE_TZ = True` konfiguriert, UI/Tests berücksichtigen die lokale Zone.
+- Applications treat times locally in Europe/Berlin; persistence stays in that zone, no automatic UTC conversion for lesson times.
+- Note: For future multi-timezone scenarios, plan explicit conversion/normalization.
+- Django is configured with `TIME_ZONE = 'Europe/Berlin'` and `USE_TZ = True`; UI/tests respect the local zone.
 
 ## Security
 
@@ -759,12 +759,12 @@ The architecture is designed to be easily extended:
 - API endpoints can be added incrementally
 - Frontend can be integrated later (Django templates, HTMX, React, etc.)
 
-### Extending AI Providers (OpenAI-kompatibel)
+### Extending AI Providers (OpenAI-compatible)
 
-1. **Neuer Client**: Implementiere einen Provider-spezifischen Client, der das OpenAI-kompatible Interface von `apps.ai.client.LLMClient` nachbildet (z. B. Azure OpenAI oder lokales Gateway). Timeout- und Fehlerbehandlung beibehalten.
-2. **Konfiguration per Env**: Erweiterte Settings in `LLM_API_BASE_URL`, `LLM_MODEL_NAME` und optional provider-spezifische Header; `MOCK_LLM=1` bleibt als Fallback für Offline/Demo bestehen.
-3. **Service-Hooks**: `apps.ai.services.LessonPlanService` nutzt den Client über eine klar definierte Schnittstelle. Zusätzliche Provider können dort injiziert oder per Factory ausgewählt werden.
-4. **Tests & Samples**: Neue Provider sollten deterministische Beispielantworten in `docs/llm_samples.json` oder eigenen Fixtures ablegen, damit Smoke-Tests ohne externe Calls laufen.
+1. **New client**: Implement a provider-specific client that mirrors the OpenAI-compatible interface of `apps.ai.client.LLMClient` (e.g., Azure OpenAI or local gateway). Keep timeout and error handling intact.
+2. **Env configuration**: Extend settings via `LLM_API_BASE_URL`, `LLM_MODEL_NAME`, and optional provider-specific headers; keep `MOCK_LLM=1` as fallback for offline/demo.
+3. **Service hooks**: `apps.ai.services.LessonPlanService` consumes the client through a clear interface. Additional providers can be injected there or selected via a factory.
+4. **Tests & samples**: New providers should add deterministic sample responses in `docs/llm_samples.json` or their own fixtures so smoke tests run without external calls.
 
 ## Database Schema
 

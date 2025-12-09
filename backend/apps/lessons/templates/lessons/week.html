@@ -116,7 +116,7 @@
                                  onmouseover="showBlockedTimePreview(this, event); this.style.background='#e68900'; this.style.transform='scale(1.02)'; this.style.zIndex='20';"
                                  onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
                                  onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
-                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} bis {{ blocked_time.end_datetime|time:'H:i' }}">
+                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}">
                                 <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
                                 <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
                             </div>
@@ -183,14 +183,8 @@ function showCreateDialog(startDateTime, endDateTime, date) {
     const startStr = startDateTime.toISOString().slice(0, 16);
     const endStr = endDateTime.toISOString().slice(0, 16);
     
-    // Get current language from HTML lang attribute or default to 'en'
-    const currentLang = document.documentElement.lang || 'en';
-    const locale = currentLang === 'de' ? 'de-DE' : 'en-US';
-    const fromText = currentLang === 'de' ? 'Von:' : 'From:';
-    const toText = currentLang === 'de' ? 'bis' : 'to';
-    const onText = currentLang === 'de' ? 'am' : 'on';
-    
-    timeInfo.textContent = `${fromText} ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} ${toText} ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} ${onText} ${new Date(date).toLocaleDateString(locale)}`;
+    const locale = 'en-US';
+    timeInfo.textContent = `From: ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} to ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} on ${new Date(date).toLocaleDateString(locale)}`;
     
     dialog.dataset.start = startStr;
     dialog.dataset.end = endStr;
@@ -221,10 +215,10 @@ function cancelCreate() {
     document.getElementById('dialog-overlay').style.display = 'none';
 }
 
-// Schließe Dialog bei Klick auf Overlay
+// Close dialog when clicking on the overlay
 document.getElementById('dialog-overlay').addEventListener('click', cancelCreate);
 
-// Hover-Preview für Lessons
+// Hover preview for lessons
 let previewTooltip = null;
 
 function showLessonPreview(element, event) {

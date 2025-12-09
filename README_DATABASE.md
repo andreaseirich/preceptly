@@ -1,38 +1,38 @@
-# Datenbank zurücksetzen
+# Resetting the Database
 
-## Datenbank neu erstellen
+## Recreate the database
 
-Falls die Datenbank gelöscht wurde:
+If the database was deleted:
 
 ```bash
 cd backend
 python manage.py migrate
 ```
 
-## Demo-Daten löschen (behält Admin-User)
+## Delete demo data (keep admin user)
 
-Um alle Demo-Daten (Schüler, Stunden, Verträge, Rechnungen) zu löschen, aber Admin-User zu behalten:
+To remove all demo data (students, lessons, contracts, invoices) while keeping the admin user:
 
 ```bash
 cd backend
 python manage.py clear_demo_data --confirm
 ```
 
-Dieses Command löscht:
-- ✅ Alle Schüler (Students)
-- ✅ Alle Verträge (Contracts)
-- ✅ Alle Stunden (Lessons)
-- ✅ Alle Blockzeiten (BlockedTimes)
-- ✅ Alle Rechnungen (Invoices)
-- ✅ Alle Lesson Plans
+This command deletes:
+- ✅ All students
+- ✅ All contracts
+- ✅ All lessons
+- ✅ All blocked times
+- ✅ All invoices
+- ✅ All lesson plans
 
-Behält:
-- ✅ Admin-User (is_staff=True)
-- ✅ System-Einstellungen
+It keeps:
+- ✅ Admin user (is_staff=True)
+- ✅ System settings
 
-## Demo-Daten neu laden
+## Reload demo data
 
-Nach dem Löschen können Sie Demo-Daten neu laden:
+After deletion you can reload demo data:
 
 ```bash
 python manage.py seed_demo_data

@@ -1,33 +1,33 @@
 # TutorFlow – Judging Guide
 
-Eine einseitige Orientierung für Reviewer und Juroren (Teca Hacks). Fokus: schnell startbare Demo, klare Kernflows, Sicherheitshinweise.
+Single-page orientation for reviewers/judges (Teca Hacks). Focus: fast-start demo, clear core flows, safety notes.
 
-## Start in < 2 Minuten
+## Start in < 2 minutes
 - **Setup:**
   ```bash
   cp .env.example .env
   ./scripts/run_demo.sh
   ```
-- **Health-Check:** `curl http://127.0.0.1:8000/health/` → `{ "status": "ok" }`
+- **Health check:** `curl http://127.0.0.1:8000/health/` → `{ "status": "ok" }`
 - **Logins:**
   - Premium (AI): `demo_premium` / `demo123`
   - Standard: `demo_user` / `demo123`
-- **Mock-Sicherheit:** `MOCK_LLM=1` verhindert externe API-Calls; alle AI-Antworten stammen aus `docs/llm_samples.json`.
+- **Mock safety:** `MOCK_LLM=1` prevents external API calls; all AI responses come from `docs/llm_samples.json`.
 
-## Demo-Storyboard (ca. 3 Minuten)
-1. **Dashboard (30s):** Heute anstehende Termine + Konflikt-Summary zeigen.
-2. **Week-View Kernloop (60s):** `/lessons/week/` öffnen, Drag-to-Create demonstrieren, Konflikt-Badges und Blocked Times markieren.
-3. **AI-Lesson-Plan (30s):** Vorbefüllte Mock-Planung öffnen, Button „Generate AI Lesson Plan“ klicken, Mock-Hinweis betonen.
-4. **Billing & Income (45s):** Rechnung aus `taught`-Lesson erzeugen, Invoice-Liste + Income-Übersicht (planned/taught/paid) zeigen.
-5. **Safety & Reliability (15s):** Mock-Mode, PII-Scrubber, `/health/` und deterministische Fixtures nennen.
+## Demo storyboard (~3 minutes)
+1. **Dashboard (30s):** Show today’s appointments + conflict summary.
+2. **Week view core loop (60s):** Open `/lessons/week/`, demonstrate drag-to-create, highlight conflict badges and blocked times.
+3. **AI lesson plan (30s):** Open prefilled mock plan, click “Generate AI Lesson Plan,” emphasize the mock notice.
+4. **Billing & income (45s):** Create invoice from a `taught` lesson, show invoice list + income overview (planned/taught/paid).
+5. **Safety & reliability (15s):** Mention mock mode, PII scrubber, `/health/`, and deterministic fixtures.
 
-## Bewertungs-Shortcuts nach Kategorien
-- **Best UI/Creativity:** Interaktive Week-View (Drag-to-Create, Konflikt-Icons, Blocked Times), Dark/Light-Design ansprechen falls aktiviert.
-- **Best AI/ML:** AI-Lesson-Plan-Flow mit Mock-Mode + PII-Sanitizer; retries bei Rate-Limits erwähnt.
-- **Best Solo Build:** Hinweis auf Solo-Umfang, deterministische Demo + CI (MOCK_LLM, Django check/tests, Ruff) als Qualitätsmerkmal.
-- **Overall Excellence:** Klare Problem/Solution-Story, End-to-End-Flow (Planen → Konflikt → Billing → AI-Plan), stabile Demo ohne externe Abhängigkeiten.
+## Judging shortcuts by category
+- **Best UI/Creativity:** Interactive week view (drag-to-create, conflict icons, blocked times); mention dark/light design if enabled.
+- **Best AI/ML:** AI lesson plan flow with mock mode + PII sanitizer; note retries on rate limits.
+- **Best Solo Build:** Highlight solo scope, deterministic demo + CI (MOCK_LLM, Django check/tests, Ruff) as quality signals.
+- **Overall Excellence:** Clear problem/solution story, end-to-end flow (plan → conflict → billing → AI plan), stable demo without external dependencies.
 
 ## Troubleshooting
-- Health-Check schlägt fehl → `./scripts/smoke_demo.sh` ausführen und Container-Logs prüfen.
-- Übersetzungen fehlen → `python manage.py compilemessages` (bereits im Demo-Setup enthalten).
-- Daten resetten → `python manage.py loaddata fixtures/demo_data.json`.
+- Health check fails → run `./scripts/smoke_demo.sh` and inspect container logs.
+- Missing translations → `python manage.py compilemessages` (already in the demo setup).
+- Reset data → `python manage.py loaddata fixtures/demo_data.json`.
