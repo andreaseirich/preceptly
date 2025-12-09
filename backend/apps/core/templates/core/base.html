@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TutorFlow{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
     <nav>
@@ -42,7 +43,9 @@
         
         {% block content %}{% endblock %}
     </div>
+    {% block extra_scripts_before_base %}{% endblock %}
     <script src="{% static 'js/base.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
 
