@@ -1,0 +1,181 @@
+.calendar-note {
+    margin-top: 10px;
+    color: #495057;
+    font-size: 0.9em;
+}
+
+.week-calendar {
+    margin-top: 20px;
+    position: relative;
+    overflow-x: auto;
+}
+
+.week-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.week-table th,
+.week-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    background: #f5f5f5;
+}
+
+.week-table th.is-today {
+    background: #e3f2fd;
+}
+
+.time-slot {
+    padding: 0;
+    position: relative;
+    vertical-align: top;
+    cursor: pointer;
+    height: 60px;
+}
+
+.time-slot-label {
+    border: 1px solid #ddd;
+    padding: 4px;
+    text-align: center;
+    background: #f9f9f9;
+    font-size: 0.85em;
+}
+
+.slot-content {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.lesson-block {
+    position: absolute;
+    left: 0;
+    right: 0;
+    color: white;
+    padding: 2px 4px;
+    font-size: 0.75em;
+    border-radius: 3px;
+    cursor: pointer;
+    z-index: 10;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.lesson-block.status-planned {
+    background: #2196f3;
+}
+
+.lesson-block.status-taught {
+    background: #607d8b;
+}
+
+.lesson-block.status-paid {
+    background: #2e7d32;
+}
+
+.lesson-block.has-conflict {
+    border: 2px solid #dc3545 !important;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+}
+
+.lesson-block .lesson-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.lesson-block .lesson-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.lesson-block .lesson-meta {
+    opacity: 0.9;
+}
+
+.lesson-block .lesson-paid {
+    display: block;
+    opacity: 0.8;
+}
+
+.lesson-edit {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+    padding: 2px 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-left: 4px;
+    flex-shrink: 0;
+}
+
+.lesson-conflict-link {
+    color: #ffeb3b;
+    font-size: 1.1em;
+    margin-left: 4px;
+    text-decoration: none;
+}
+
+.blocked-time-block {
+    background: #ff9800;
+    color: white;
+    font-size: 0.75em;
+}
+
+.create-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 400px;
+}
+
+.dialog-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.dialog-body {
+    margin-bottom: 15px;
+}
+
+.lesson-preview {
+    position: absolute;
+    background: #2c3e50;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    max-width: 250px;
+    white-space: nowrap;
+}
+
+.time-slot:hover {
+    background: #f0f0f0;
+}
+
+.time-slot.dragging {
+    background: #e3f2fd;
+}
+

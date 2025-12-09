@@ -1,17 +1,22 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/lessons.css' %}">
+{% endblock %}
 
 {% block title %}{% blocktrans with date=lesson.date %}Conflicts - {{ date }}{% endblocktrans %} - TutorFlow{% endblock %}
 
 {% block content %}
 <h1>{% trans "Conflicts for Lesson" %}</h1>
 
-<div style="margin-bottom: 20px;">
+<div class="conflict-detail-container">
     <a href="{% url 'lessons:detail' lesson.pk %}" class="btn">← {% trans "Back to Lesson" %}</a>
     <a href="{% url 'lessons:week' %}?year={{ lesson.date.year }}&month={{ lesson.date.month }}&day={{ lesson.date.day }}" class="btn">← {% trans "Back to Calendar" %}</a>
 </div>
 
-<div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+<div class="conflict-info-box">
     <h2>{% trans "Lesson" %}</h2>
     <p><strong>{% trans "Date:" %}</strong> {{ lesson.date|date:"d.m.Y" }}</p>
     <p><strong>{% trans "Time:" %}</strong> {% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}</p>
@@ -19,27 +24,27 @@
 </div>
 
 {% if conflict_lessons %}
-<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h2>
+<div class="conflict-warning-box">
+    <h2>{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h2>
     
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+    <table class="conflict-table">
         <thead>
-            <tr style="background: #f5f5f5;">
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Date" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Time" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Student" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Action" %}</th>
+            <tr>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Time" %}</th>
+                <th>{% trans "Student" %}</th>
+                <th>{% trans "Action" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for conflict_lesson in conflict_lessons %}
             <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.date|date:"d.m.Y" }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.start_time|time:"H:i" }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.contract.student.full_name }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    <a href="{% url 'lessons:detail' conflict_lesson.pk %}" class="btn" style="font-size: 0.9em;">{% trans "View" %}</a>
-                    <a href="{% url 'lessons:update' conflict_lesson.pk %}" class="btn btn-primary" style="font-size: 0.9em;">{% trans "Edit" %}</a>
+                <td>{{ conflict_lesson.date|date:"d.m.Y" }}</td>
+                <td>{{ conflict_lesson.start_time|time:"H:i" }}</td>
+                <td>{{ conflict_lesson.contract.student.full_name }}</td>
+                <td>
+                    <a href="{% url 'lessons:detail' conflict_lesson.pk %}" class="btn btn-small">{% trans "View" %}</a>
+                    <a href="{% url 'lessons:update' conflict_lesson.pk %}" class="btn btn-primary btn-small">{% trans "Edit" %}</a>
                 </td>
             </tr>
             {% endfor %}
@@ -49,11 +54,11 @@
 {% endif %}
 
 {% if conflict_blocked_times %}
-<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% blocktrans count counter=conflict_blocked_times|length %}Conflicting Blocked Time{% plural %}Conflicting Blocked Times ({{ counter }}){% endblocktrans %}</h2>
+<div class="conflict-warning-box">
+    <h2>{% blocktrans count counter=conflict_blocked_times|length %}Conflicting Blocked Time{% plural %}Conflicting Blocked Times ({{ counter }}){% endblocktrans %}</h2>
     <ul>
         {% for blocked_time in conflict_blocked_times %}
-        <li style="margin-bottom: 10px;">
+        <li class="conflict-list-item">
             <strong>{{ blocked_time.title }}</strong><br>
             <small>{{ blocked_time.start_datetime|date:"SHORT_DATETIME_FORMAT" }} - {{ blocked_time.end_datetime|date:"SHORT_DATETIME_FORMAT" }}</small>
             {% if blocked_time.description %}
@@ -66,11 +71,11 @@
 {% endif %}
 
 {% if quota_conflicts %}
-<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">📊 {% blocktrans count counter=quota_conflicts|length %}Contract Quota Conflict{% plural %}Contract Quota Conflicts ({{ counter }}){% endblocktrans %}</h2>
+<div class="conflict-warning-box">
+    <h2>📊 {% blocktrans count counter=quota_conflicts|length %}Contract Quota Conflict{% plural %}Contract Quota Conflicts ({{ counter }}){% endblocktrans %}</h2>
     <ul>
         {% for conflict in quota_conflicts %}
-        <li style="margin-bottom: 10px;">
+        <li class="conflict-list-item">
             <strong>{% trans "Contract quota exceeded" %}</strong><br>
             <small>{{ conflict.message }}</small>
             {% if conflict.planned_total is not None and conflict.actual_total is not None %}
@@ -87,8 +92,8 @@
 {% endif %}
 
 {% if not conflict_lessons and not conflict_blocked_times and not quota_conflicts %}
-<div style="background: #d4edda; padding: 20px; border-radius: 5px; border-left: 4px solid #28a745;">
-    <p style="margin: 0;">{% trans "No conflicts found." %}</p>
+<div class="conflict-success-box">
+    <p>{% trans "No conflicts found." %}</p>
 </div>
 {% endif %}
 
