@@ -49,7 +49,7 @@ TutorFlow is a comprehensive web application designed for tutors to manage their
 ### Feature Walkthrough in 2 Minuten
 
 1. **Dashboard** (`/`): Heute/kommende Lessons, Konflikt-Widget, Premium-Badge.
-2. **Week View** (`/lessons/week/`): Drag-to-create, conflict badges, click a lesson → edit & AI lesson plan.
+2. **Week View** (`/lessons/week/`): Click-to-create lessons/blocked times, conflict badges, click a lesson → edit & AI lesson plan.
 3. **Income Overview** (`/income/`): Planned vs. actual revenue, monthly/yearly view.
 4. **Billing** (`/billing/invoices/`): Create invoices from taught lessons, review HTML documents.
 5. **Lesson Detail** (`/admin/lessons/lesson/<id>/change/`): “Generate AI Lesson Plan” button for premium; view conflict hints.
@@ -70,49 +70,7 @@ cp .env.example .env
 - Specify `ALLOWED_HOSTS` (comma-separated) for any non-local deployment to avoid wildcard hosts in production.
 - When using Docker Compose, adjust `POSTGRES_*` variables and `DATABASE_URL` in `.env` instead of relying on hard-coded defaults.
 
-### Prerequisites (manual setup)
-- Python 3.12 or higher
-- pip
-
-### Installation (manual)
-
-1. **Clone repository:**
-```bash
-git clone <repository-url>
-cd tutorflow
-```
-
-2. **Create and activate virtual environment:**
-```bash
-python3 -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate  # Windows
-```
-
-3. **Install dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Setup database:**
-```bash
-cd backend
-python manage.py migrate
-python manage.py compilemessages  # For i18n support
-```
-
-5. **Load deterministic demo data (optional):**
-```bash
-python manage.py loaddata fixtures/demo_data.json
-```
-
-6. **Start development server:**
-```bash
-python manage.py runserver
-```
-
-The application is available at `http://127.0.0.1:8000/`.
+For a full manual installation, see the **Setup** section below.
 
 ### Demo Login & Quick Tour
 
@@ -166,7 +124,7 @@ python manage.py runserver
 *Dashboard showing today's lessons, upcoming appointments, and conflicts*
 
 ![Week Calendar](docs/images/week_calendar.png)
-*Interactive week view with drag-to-create functionality for lessons and blocked times*
+*Interactive week view with click-to-create functionality for lessons and blocked times*
 
 ![Conflicts and Blocked Times](docs/images/conflicts_and_blocktimes.png)
 *Conflict detection and blocked time management in the week view*
@@ -232,7 +190,7 @@ TutorFlow provides a complete solution for managing tutoring activities:
 - **Lesson Planning**: Planning with date, time, travel times
   - **Week View**: Interactive week view (Mon-Sun, 08:00-22:00) as central UI for appointment planning
     - **Default calendar view**: Week view is the default calendar view
-    - **Drag-to-Create**: Drag a time range to create a new appointment (tutoring or blocked time)
+    - **Click-to-Create**: Click a time block to create a new appointment (tutoring or blocked time)
     - **Recurring option**: When creating a lesson, users can select "Repeat this lesson" with pattern (Weekly/Bi-weekly/Monthly) and weekday selection
     - **Appointment Display**: Lessons (blue), blocked times (orange), conflicts (red border/icon)
     - **Click on Lesson**: Opens lesson plan view (for viewing/creating AI lesson plans)
