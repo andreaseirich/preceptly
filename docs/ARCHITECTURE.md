@@ -504,7 +504,7 @@ The following entities form the core domain model and are implemented as Django 
 - **Important**: 
   - **Week view is the central UI for appointment planning** - Lessons and blocked times are primarily planned and edited via the week view.
   - **Default calendar view**: Week view is the default calendar view. The old monthly calendar view (`/lessons/calendar/`) redirects to week view for backward compatibility.
-  - **Drag-to-Create**: Users can drag time ranges in the weekly grid to create new appointments (lessons or blocked times).
+  - **Click-to-Create**: Users can click time blocks in the weekly grid to create new appointments (lessons or blocked times).
   - **Time axis**: 08:00-22:00 with hourly rows.
   - **Appointment display**: Lessons (blue), blocked times (orange), conflicts (red border/icon).
   - **Click on lesson**: Opens lesson plan view (for viewing/creating AI lesson plans)
@@ -593,7 +593,7 @@ This structure makes it easy to find related code: if you're working on scheduli
    - **Recurring option**: Checkbox "Repeat this lesson" with pattern selection (Weekly/Bi-weekly/Monthly) and weekday selection
    - If recurring: Creates RecurringLesson and generates all lessons automatically
    - If not recurring: Creates single lesson
-   - Blocked times can also be created via drag-to-create (🚫 symbol)
+   - Blocked times can also be created via click-to-create (click time blocks)
 3. **View Lesson Plan**: Click on lesson block in week view → Opens lesson plan view
    - Shows existing lesson plans (if any)
    - **Displays conflicts**: All conflicts (time overlaps, blocked times, quota violations) are shown
@@ -791,4 +791,13 @@ The architecture is designed to be easily extended:
 - Migrations successfully executed
 - 14 unit tests run successfully
 - IncomeSelector implemented as service layer
+
+## Hackathon Demo Architecture
+
+TutorFlow is designed for reproducible hackathon demos with the following architecture decisions:
+
+- **Mock LLM Mode**: `MOCK_LLM=1` is the default, using local samples (`docs/llm_samples.json`) instead of external API calls
+- **Deterministic Fixtures**: `backend/fixtures/demo_data.json` provides consistent demo data for reproducible scenarios
+- **Health Endpoint**: `/health/` endpoint enables quick verification of application status
+- **One-Command Setup**: `scripts/run_demo.sh` performs migrations, loads fixtures, compiles messages, and starts the server
 

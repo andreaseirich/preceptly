@@ -51,6 +51,7 @@ All security-related information will be handled confidentially and will not be 
 - **No Prompt Logs in Demo Mode**: User prompts/responses are not persisted when running with mock mode.
 - **Sanitized Context Only**: Lesson plans are generated from sanitized context to reduce exposure of personal data.
 - **Opt-in for Production**: Live AI calls require setting `LLM_API_KEY` and disabling `MOCK_LLM` explicitly.
+- **Hackathon Demos**: During hackathon demos (e.g., CodeCraze Hackathon), TutorFlow runs in `MOCK_LLM` mode with synthetic data only; no real student data or real LLM calls are used.
 
 ## Content Security Policy (CSP)
 

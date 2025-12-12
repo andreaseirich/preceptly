@@ -29,13 +29,15 @@ cp .env.example .env
 
 TutorFlow is a comprehensive web application designed for tutors to manage their tutoring business efficiently. It solves the challenge of organizing students, contracts, and lessons while avoiding scheduling conflicts and maintaining clear financial oversight. The application is built for tutors who need a structured, reliable tool to manage their teaching activities, track income, and generate invoices—all with intelligent conflict detection and AI-powered lesson planning support.
 
-## Submission (Teca Hacks)
+## About
 
-- **Devpost entry:** Add the final link to the TutorFlow project page on Devpost (include teammates and tech stack).
-- **Demo video (recommended):** Short walkthrough (2–3 minutes) focusing on Week View, conflict detection, and AI Lesson Plans.
-- **Short description:** 2–3 sentences on problem & solution (e.g., “Tutors avoid double bookings, gain financial clarity, and generate AI-powered lesson plans”).
-- **Repository link & deploy note:** GitHub link (this repo) plus a short note on the demo setup (`./scripts/run_demo.sh`, mock LLM).
-- **Learnings & challenges:** Summarize the key learnings (e.g., conflict detection, i18n, OpenAI-compatible API design).
+TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge focused on creativity, real-world impact, and technology.
+
+### How TutorFlow Fits CodeCraze Criteria
+
+- **Uniqueness of the Idea**: TutorFlow addresses a real problem faced by private tutors—managing complex schedules, avoiding double bookings, and tracking income—with an integrated solution that combines conflict-aware scheduling, billing automation, and AI-assisted lesson planning.
+- **Real World Impact**: The application directly improves the workflow of tutors by reducing administrative overhead, preventing scheduling conflicts, and providing clear financial oversight. It enables tutors to focus on teaching rather than paperwork.
+- **Technologies Used**: Built with Django 6.0, Python 3.12, and an OpenAI-compatible AI integration with privacy-first design (PII sanitization, mock mode for demos). Includes comprehensive i18n support, CI/CD with GitHub Actions, and security best practices (CSP, environment-based configuration).
 
 ## Key Features
 
@@ -132,11 +134,11 @@ python manage.py runserver
 ![Invoice Example](docs/images/invoice_example.png)
 *Invoice list and detail view with automatic generation from taught lessons*
 
-### UI & AI Highlights (Best UI/Creativity)
+### UI & AI Highlights
 
 - **Conflict-first calendar:** Week View with red icons/borders for conflicts; blocked times and lessons combined seamlessly.
 - **AI lesson plans in-flow:** Triggered from the lesson detail via button; mock LLM enables reproducible demos without external APIs.
-- **Demo-ready:** `./scripts/run_demo.sh` starts in under 60 seconds with deterministic data; ideal for video/GIF captures.
+- **Demo-ready:** `./scripts/run_demo.sh` starts in under 60 seconds with deterministic data; ideal for demo videos (GIF is optional).
 
 ### Quick Demo Tour (2 Minutes)
 

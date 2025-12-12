@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2025-12-09
+
+### Changed
+- **Documentation**: Adapted all documentation for CodeCraze Hackathon submission
+  - README.md: Updated hackathon references, added "How TutorFlow Fits CodeCraze Criteria" section, removed explicit GIF requirement
+  - DEVPOST.md: Completely rewritten with CodeCraze structure (Inspiration, What it does, How we built it, Challenges, Accomplishments, What we learned, What's next)
+  - SECURITY.md: Added note about hackathon demos running in MOCK_LLM mode
+  - ARCHITECTURE.md: Added "Hackathon Demo Architecture" section, corrected drag-to-create references to click-to-create
+  - CHECKPOINTS.md: Updated "Jury-Ready" to "Hackathon-Ready"
+  - JUDGING_GUIDE.md: Updated hackathon name, corrected drag-to-create to click-to-create
+  - VIDEO_SCRIPT.md: Neutralized "judges" reference
+  - cursor_master_prompt.txt: Updated hackathon name from "Teca-Hacks" to "CodeCraze Hackathon"
+
 ## [0.10.0] - 2025-12-09
 
 ### Added

@@ -1,6 +1,6 @@
 # TutorFlow – Judging Guide
 
-Single-page orientation for reviewers/judges (Teca Hacks). Focus: fast-start demo, clear core flows, safety notes.
+Single-page orientation for reviewers/judges (CodeCraze Hackathon). Focus: fast-start demo, clear core flows, safety notes.
 
 ## Start in < 2 minutes
 - **Setup:**
@@ -16,13 +16,13 @@ Single-page orientation for reviewers/judges (Teca Hacks). Focus: fast-start dem
 
 ## Demo storyboard (~3 minutes)
 1. **Dashboard (30s):** Show today’s appointments + conflict summary.
-2. **Week view core loop (60s):** Open `/lessons/week/`, demonstrate drag-to-create, highlight conflict badges and blocked times.
+2. **Week view core loop (60s):** Open `/lessons/week/`, demonstrate click-to-create (click time blocks to create appointments), highlight conflict badges and blocked times.
 3. **AI lesson plan (30s):** Open prefilled mock plan, click “Generate AI Lesson Plan,” emphasize the mock notice.
 4. **Billing & income (45s):** Create invoice from a `taught` lesson, show invoice list + income overview (planned/taught/paid).
 5. **Safety & reliability (15s):** Mention mock mode, PII scrubber, `/health/`, and deterministic fixtures.
 
 ## Judging shortcuts by category
-- **Best UI/Creativity:** Interactive week view (drag-to-create, conflict icons, blocked times); mention dark/light design if enabled.
+- **Best UI/Creativity:** Interactive week view (click-to-create, conflict icons, blocked times); mention dark/light design if enabled.
 - **Best AI/ML:** AI lesson plan flow with mock mode + PII sanitizer; note retries on rate limits.
 - **Best Solo Build:** Highlight solo scope, deterministic demo + CI (MOCK_LLM, Django check/tests, Ruff) as quality signals.
 - **Overall Excellence:** Clear problem/solution story, end-to-end flow (plan → conflict → billing → AI plan), stable demo without external dependencies.

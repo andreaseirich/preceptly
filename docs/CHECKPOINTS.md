@@ -41,7 +41,7 @@ This document logs the project's progress and important milestones.
 
 ---
 
-## Checkpoint 6: Jury-Ready Documentation & Quality Assurance
+## Checkpoint 6: Hackathon-Ready Documentation & Quality Assurance
 
 **Date**: 2025-12-04
 
@@ -54,6 +54,7 @@ This document logs the project's progress and important milestones.
   - README.md: Enhanced with screenshot section and 2-minute demo tour
   - ARCHITECTURE.md: German section headers translated to English
   - All docs (PHASES, CHECKPOINTS, ETHICS, DEPLOYMENT, DEVPOST) verified for English consistency
+  - Documentation adapted for CodeCraze Hackathon submission
 - ✅ **Code Quality**: Linting and formatting configuration added
   - `pyproject.toml` with ruff and black configuration
   - `scripts/lint.sh` for automated code quality checks

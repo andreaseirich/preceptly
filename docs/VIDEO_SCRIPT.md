@@ -6,5 +6,5 @@
 4. **Income & Billing (20s)** – Navigate to income overview and invoice list.
 5. **Demo Accounts & Health (15s)** – Mention `demo_premium/demo123`, `/health/` OK, fixtures deterministic.
 6. **How to Run (15s)** – `cp .env.example .env && ./scripts/run_demo.sh`.
-7. **Closing (5s)** – "No external calls by default; ready for judges."
+7. **Closing (5s)** – "No external calls by default; ready for review."
 

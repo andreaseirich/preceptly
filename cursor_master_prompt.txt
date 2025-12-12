@@ -29,7 +29,7 @@ beschreibung: >
     mithilfe einer LLM-API (z. B. ChatGPT)
 
 ziel: >
-  Ein funktionsfähiges, gut dokumentiertes MVP für den Teca-Hacks-Hackathon,
+  Ein funktionsfähiges, gut dokumentiertes MVP für den CodeCraze Hackathon,
   das technisch sauber, übersichtlich strukturiert und ethisch verantwortbar ist.
 
 
@@ -50,7 +50,7 @@ ethik:
 
 
 # =====================================================================
-# 3) HACKATHON-KONFORMITÄT (TECA HACKS)
+# 3) HACKATHON-KONFORMITÄT (CODECRAZE HACKATHON)
 # =====================================================================
 
 hackathon_regeln:
