@@ -115,11 +115,13 @@ class Command(BaseCommand):
                         }
                     )
                     if not created:
-                        # Update existing
+                        # Update existing (skip auto fields)
                         for key, value in fields.items():
                             if key not in ["created_at", "updated_at"]:
                                 setattr(student, key, value)
                         student.save()
+                    # Touch to ensure timestamps are set
+                    student.save(update_fields=['updated_at'])
                 elif model_name == "contracts.contract":
                     contract, created = Contract.objects.get_or_create(
                         id=pk,
@@ -135,10 +137,17 @@ class Command(BaseCommand):
                         }
                     )
                     if not created:
+                        # Update existing - handle ForeignKeys correctly
                         for key, value in fields.items():
                             if key not in ["created_at", "updated_at"]:
-                                setattr(contract, key, value)
+                                # ForeignKeys need _id suffix
+                                if key == "student":
+                                    contract.student_id = value
+                                else:
+                                    setattr(contract, key, value)
                         contract.save()
+                    # Touch to ensure timestamps are set
+                    contract.save(update_fields=['updated_at'])
                 elif model_name == "lessons.lesson":
                     lesson, created = Lesson.objects.get_or_create(
                         id=pk,
@@ -154,10 +163,17 @@ class Command(BaseCommand):
                         }
                     )
                     if not created:
+                        # Update existing - handle ForeignKeys correctly
                         for key, value in fields.items():
                             if key not in ["created_at", "updated_at"]:
-                                setattr(lesson, key, value)
+                                # ForeignKeys need _id suffix
+                                if key == "contract":
+                                    lesson.contract_id = value
+                                else:
+                                    setattr(lesson, key, value)
                         lesson.save()
+                    # Touch to ensure timestamps are set
+                    lesson.save(update_fields=['updated_at'])
                 elif model_name == "lesson_plans.lessonplan":
                     plan, created = LessonPlan.objects.get_or_create(
                         id=pk,
@@ -173,10 +189,19 @@ class Command(BaseCommand):
                         }
                     )
                     if not created:
+                        # Update existing - handle ForeignKeys correctly
                         for key, value in fields.items():
                             if key not in ["created_at", "updated_at"]:
-                                setattr(plan, key, value)
+                                # ForeignKeys need _id suffix
+                                if key == "student":
+                                    plan.student_id = value
+                                elif key == "lesson":
+                                    plan.lesson_id = value
+                                else:
+                                    setattr(plan, key, value)
                         plan.save()
+                    # Touch to ensure timestamps are set
+                    plan.save(update_fields=['updated_at'])
             
             self.stdout.write(self.style.SUCCESS("Demo data loaded using alternative method"))
 
