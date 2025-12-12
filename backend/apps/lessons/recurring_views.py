@@ -5,6 +5,8 @@ Views für RecurringLesson-CRUD-Operationen.
 from apps.lessons.recurring_forms import RecurringLessonForm
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -13,7 +15,7 @@ from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
-class RecurringLessonListView(ListView):
+class RecurringLessonListView(LoginRequiredMixin, ListView):
     """Liste aller wiederholenden Unterrichtsstunden."""
 
     model = RecurringLesson
@@ -22,7 +24,7 @@ class RecurringLessonListView(ListView):
     paginate_by = 20
 
 
-class RecurringLessonDetailView(DetailView):
+class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
     """Detailansicht einer wiederholenden Unterrichtsstunde."""
 
     model = RecurringLesson
@@ -38,7 +40,7 @@ class RecurringLessonDetailView(DetailView):
         return context
 
 
-class RecurringLessonCreateView(CreateView):
+class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
     """Neue wiederholende Unterrichtsstunde erstellen."""
 
     model = RecurringLesson
@@ -93,7 +95,7 @@ class RecurringLessonCreateView(CreateView):
         return super().form_valid(form)
 
 
-class RecurringLessonUpdateView(UpdateView):
+class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
     """Wiederholende Unterrichtsstunde bearbeiten."""
 
     model = RecurringLesson
@@ -106,7 +108,7 @@ class RecurringLessonUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class RecurringLessonDeleteView(DeleteView):
+class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
     """Wiederholende Unterrichtsstunde löschen."""
 
     model = RecurringLesson
@@ -118,6 +120,7 @@ class RecurringLessonDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
+@login_required
 def generate_lessons_from_recurring(request, pk):
     """Generiert Lessons aus einer RecurringLesson."""
     recurring_lesson = get_object_or_404(RecurringLesson, pk=pk)

@@ -4,12 +4,13 @@ Views für BlockedTime-CRUD-Operationen.
 
 from apps.blocked_times.forms import BlockedTimeForm
 from apps.blocked_times.models import BlockedTime
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 
-class BlockedTimeDetailView(DetailView):
+class BlockedTimeDetailView(LoginRequiredMixin, DetailView):
     """Detailansicht einer Blockzeit."""
 
     model = BlockedTime
@@ -17,7 +18,7 @@ class BlockedTimeDetailView(DetailView):
     context_object_name = "blocked_time"
 
 
-class BlockedTimeCreateView(CreateView):
+class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
     """Neue Blockzeit erstellen."""
 
     model = BlockedTime
@@ -99,7 +100,7 @@ class BlockedTimeCreateView(CreateView):
         return super().form_valid(form)
 
 
-class BlockedTimeUpdateView(UpdateView):
+class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
     """Blockzeit bearbeiten."""
 
     model = BlockedTime
@@ -130,7 +131,7 @@ class BlockedTimeUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class BlockedTimeDeleteView(DeleteView):
+class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
     """Blockzeit löschen."""
 
     model = BlockedTime

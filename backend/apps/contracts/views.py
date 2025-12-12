@@ -9,6 +9,7 @@ from apps.contracts.formsets import (
     iter_contract_months,
 )
 from apps.contracts.models import Contract, ContractMonthlyPlan
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -16,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
-class ContractListView(ListView):
+class ContractListView(LoginRequiredMixin, ListView):
     """List of all contracts."""
 
     model = Contract
@@ -25,7 +26,7 @@ class ContractListView(ListView):
     paginate_by = 20
 
 
-class ContractDetailView(DetailView):
+class ContractDetailView(LoginRequiredMixin, DetailView):
     """Detail view of a contract."""
 
     model = Contract
@@ -33,7 +34,7 @@ class ContractDetailView(DetailView):
     context_object_name = "contract"
 
 
-class ContractCreateView(CreateView):
+class ContractCreateView(LoginRequiredMixin, CreateView):
     """Create a new contract."""
 
     model = Contract
@@ -68,7 +69,7 @@ class ContractCreateView(CreateView):
             return redirect(self.success_url)
 
 
-class ContractUpdateView(UpdateView):
+class ContractUpdateView(LoginRequiredMixin, UpdateView):
     """Update a contract."""
 
     model = Contract
@@ -131,7 +132,7 @@ class ContractUpdateView(UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class ContractDeleteView(DeleteView):
+class ContractDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a contract."""
 
     model = Contract

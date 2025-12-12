@@ -10,6 +10,7 @@ from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.services import LessonConflictService
 from apps.lessons.status_service import LessonStatusService
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -17,7 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
-class LessonListView(ListView):
+class LessonListView(LoginRequiredMixin, ListView):
     """List of all lessons."""
 
     model = Lesson
@@ -34,7 +35,7 @@ class LessonListView(ListView):
         return queryset
 
 
-class LessonCreateView(CreateView):
+class LessonCreateView(LoginRequiredMixin, CreateView):
     """Create a new lesson."""
 
     model = Lesson
@@ -203,7 +204,7 @@ class LessonCreateView(CreateView):
         return super().form_valid(form)
 
 
-class LessonUpdateView(UpdateView):
+class LessonUpdateView(LoginRequiredMixin, UpdateView):
     """Update a lesson."""
 
     model = Lesson
@@ -241,7 +242,7 @@ class LessonUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class LessonDetailView(DetailView):
+class LessonDetailView(LoginRequiredMixin, DetailView):
     """Detail view of a lesson with conflict information and premium features."""
 
     model = Lesson
@@ -293,7 +294,7 @@ class LessonDetailView(DetailView):
         return context
 
 
-class LessonDeleteView(DeleteView):
+class LessonDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a lesson."""
 
     model = Lesson

@@ -4,13 +4,14 @@ Views for student CRUD operations.
 
 from apps.students.forms import StudentForm
 from apps.students.models import Student
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
-class StudentListView(ListView):
+class StudentListView(LoginRequiredMixin, ListView):
     """List of all students."""
 
     model = Student
@@ -19,7 +20,7 @@ class StudentListView(ListView):
     paginate_by = 20
 
 
-class StudentDetailView(DetailView):
+class StudentDetailView(LoginRequiredMixin, DetailView):
     """Detail view of a student."""
 
     model = Student
@@ -27,7 +28,7 @@ class StudentDetailView(DetailView):
     context_object_name = "student"
 
 
-class StudentCreateView(CreateView):
+class StudentCreateView(LoginRequiredMixin, CreateView):
     """Create a new student."""
 
     model = Student
@@ -40,7 +41,7 @@ class StudentCreateView(CreateView):
         return super().form_valid(form)
 
 
-class StudentUpdateView(UpdateView):
+class StudentUpdateView(LoginRequiredMixin, UpdateView):
     """Update a student."""
 
     model = Student
@@ -53,7 +54,7 @@ class StudentUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class StudentDeleteView(DeleteView):
+class StudentDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a student."""
 
     model = Student

@@ -9,6 +9,8 @@ from apps.billing.forms import InvoiceCreateForm
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -17,7 +19,7 @@ from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 
 
-class InvoiceListView(ListView):
+class InvoiceListView(LoginRequiredMixin, ListView):
     """Liste aller Rechnungen."""
 
     model = Invoice
@@ -26,7 +28,7 @@ class InvoiceListView(ListView):
     paginate_by = 20
 
 
-class InvoiceDetailView(DetailView):
+class InvoiceDetailView(LoginRequiredMixin, DetailView):
     """Detailansicht einer Rechnung."""
 
     model = Invoice
@@ -34,7 +36,7 @@ class InvoiceDetailView(DetailView):
     context_object_name = "invoice"
 
 
-class InvoiceCreateView(CreateView):
+class InvoiceCreateView(LoginRequiredMixin, CreateView):
     """Erstellung einer neuen Rechnung aus Lessons."""
 
     form_class = InvoiceCreateForm
@@ -136,7 +138,7 @@ class InvoiceCreateView(CreateView):
             return self.form_invalid(form)
 
 
-class InvoiceDeleteView(DeleteView):
+class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
     """Löschen einer Rechnung."""
 
     model = Invoice
@@ -163,6 +165,7 @@ class InvoiceDeleteView(DeleteView):
         return redirect(self.success_url)
 
 
+@login_required
 def generate_invoice_document(request, pk):
     """Generiert das Rechnungsdokument für eine Invoice."""
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -176,6 +179,7 @@ def generate_invoice_document(request, pk):
     return redirect("billing:invoice_detail", pk=pk)
 
 
+@login_required
 def serve_invoice_document(request, pk):
     """Serviert das Rechnungsdokument für eine Invoice."""
     import os

@@ -5,6 +5,8 @@ Views für RecurringBlockedTime-CRUD-Operationen.
 from apps.blocked_times.recurring_forms import RecurringBlockedTimeForm
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.blocked_times.recurring_service import RecurringBlockedTimeService
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -13,7 +15,7 @@ from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 
-class RecurringBlockedTimeDetailView(DetailView):
+class RecurringBlockedTimeDetailView(LoginRequiredMixin, DetailView):
     """Detailansicht einer wiederholenden Blockzeit."""
 
     model = RecurringBlockedTime
@@ -28,7 +30,7 @@ class RecurringBlockedTimeDetailView(DetailView):
         return context
 
 
-class RecurringBlockedTimeCreateView(CreateView):
+class RecurringBlockedTimeCreateView(LoginRequiredMixin, CreateView):
     """Neue wiederholende Blockzeit erstellen."""
 
     model = RecurringBlockedTime
@@ -47,7 +49,7 @@ class RecurringBlockedTimeCreateView(CreateView):
         return super().form_valid(form)
 
 
-class RecurringBlockedTimeUpdateView(UpdateView):
+class RecurringBlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
     """Wiederholende Blockzeit bearbeiten."""
 
     model = RecurringBlockedTime
@@ -66,7 +68,7 @@ class RecurringBlockedTimeUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class RecurringBlockedTimeDeleteView(DeleteView):
+class RecurringBlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
     """Wiederholende Blockzeit löschen."""
 
     model = RecurringBlockedTime
@@ -84,7 +86,7 @@ class RecurringBlockedTimeDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class RecurringBlockedTimeGenerateView(DetailView):
+class RecurringBlockedTimeGenerateView(LoginRequiredMixin, DetailView):
     """Generiert BlockedTime-Einträge aus einer RecurringBlockedTime."""
 
     model = RecurringBlockedTime

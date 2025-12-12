@@ -8,13 +8,14 @@ from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
 from apps.lessons.week_service import WeekService
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import ListView, TemplateView
 
 
-class WeekView(TemplateView):
+class WeekView(LoginRequiredMixin, TemplateView):
     """Week view for lessons and blocked times."""
 
     template_name = "lessons/week.html"
@@ -97,7 +98,7 @@ class WeekView(TemplateView):
         return context
 
 
-class LessonMonthView(ListView):
+class LessonMonthView(LoginRequiredMixin, ListView):
     """Month view of all lessons."""
 
     model = Lesson
@@ -124,7 +125,7 @@ class LessonMonthView(ListView):
         return context
 
 
-class CalendarView(TemplateView):
+class CalendarView(LoginRequiredMixin, TemplateView):
     """Redirect to week view - legacy calendar view."""
 
     def get(self, request, *args, **kwargs):
