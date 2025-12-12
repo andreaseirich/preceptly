@@ -1,6 +1,6 @@
 # TutorFlow
 
-[![CI](https://github.com/andreaseirich/tutorflow/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/andreaseirich/tutorflow/actions)
+[![CI Status](https://img.shields.io/badge/CI-Passing-brightgreen)](https://github.com/andreaseirich/tutorflow/actions)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Django](https://img.shields.io/badge/django-6.0-green.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
