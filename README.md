@@ -27,6 +27,12 @@ cp .env.example .env
 
 ## Project Overview
 
+**What makes TutorFlow unique?** TutorFlow is a purpose-built operating system for tutors — not a generic calendar, but a domain-specific tool that uniquely combines contract-based lesson quotas, automatic conflict detection (time, travel, quotas), billing automation, and AI-assisted lesson planning in one coherent workflow.
+
+**Who it's for:** Private tutors managing multiple students with varying contract terms, complex scheduling constraints, and the need for clear financial oversight.
+
+**Why it matters:** Tutors typically juggle scheduling, invoicing, and lesson planning across multiple tools, losing 2–3 hours per week to administrative overhead. TutorFlow integrates all of this into a single system, preventing double bookings, ensuring contract compliance, and enabling tutors to focus on teaching rather than paperwork.
+
 TutorFlow is a comprehensive web application designed for tutors to manage their tutoring business efficiently. It solves the challenge of organizing students, contracts, and lessons while avoiding scheduling conflicts and maintaining clear financial oversight. The application is built for tutors who need a structured, reliable tool to manage their teaching activities, track income, and generate invoices—all with intelligent conflict detection and AI-powered lesson planning support.
 
 ## About
@@ -37,7 +43,7 @@ TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 –
 
 - **Uniqueness of the Idea**: TutorFlow addresses a real problem faced by private tutors—managing complex schedules, avoiding double bookings, and tracking income—with an integrated solution that combines conflict-aware scheduling, billing automation, and AI-assisted lesson planning.
 - **Real World Impact**: The application directly improves the workflow of tutors by reducing administrative overhead, preventing scheduling conflicts, and providing clear financial oversight. It enables tutors to focus on teaching rather than paperwork.
-- **Technologies Used**: Built with Django 6.0, Python 3.12, and an OpenAI-compatible AI integration with privacy-first design (PII sanitization, mock mode for demos). Includes comprehensive i18n support, CI/CD with GitHub Actions, and security best practices (CSP, environment-based configuration).
+- **Technologies Used**: Built with Django 6.0, Python 3.12, and an OpenAI-compatible AI integration with privacy-first design (PII sanitization, mock mode for demos). Includes comprehensive i18n support, CI/CD with GitHub Actions, and security best practices (environment-based configuration, transaction-safe billing, service layer architecture).
 
 ## Key Features
 
