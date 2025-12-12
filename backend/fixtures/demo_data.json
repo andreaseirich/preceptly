@@ -28,22 +28,6 @@
       }
     },
     {
-      "model": "core.userprofile",
-      "pk": 1,
-      "fields": {
-        "user": 1,
-        "is_premium": true
-      }
-    },
-    {
-      "model": "core.userprofile",
-      "pk": 2,
-      "fields": {
-        "user": 2,
-        "is_premium": false
-      }
-    },
-    {
       "model": "students.student",
       "pk": 1,
       "fields": {

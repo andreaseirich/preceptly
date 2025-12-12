@@ -14,16 +14,21 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Loading demo data...")
 
-        # Delete demo users if they exist
+        # Delete demo users if they exist (including profiles)
         demo_usernames = ["demo_premium", "demo_user"]
         deleted_count = 0
+
+        from apps.core.models import UserProfile
 
         for username in demo_usernames:
             try:
                 user = User.objects.get(username=username)
                 # Delete associated profile if it exists
-                if hasattr(user, "profile"):
-                    user.profile.delete()
+                try:
+                    profile = UserProfile.objects.get(user=user)
+                    profile.delete()
+                except UserProfile.DoesNotExist:
+                    pass
                 user.delete()
                 deleted_count += 1
                 self.stdout.write(self.style.SUCCESS(f"Deleted existing user: {username}"))
@@ -35,8 +40,9 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Deleted {deleted_count} existing demo user(s)")
             )
 
-        # Load fixture
+        # Load fixture (excluding UserProfile entries - we'll create them manually)
         try:
+            # Load fixture but skip UserProfile entries
             call_command("loaddata", "fixtures/demo_data.json", verbosity=0)
             self.stdout.write(self.style.SUCCESS("Demo data loaded successfully"))
         except Exception as e:
@@ -45,9 +51,7 @@ class Command(BaseCommand):
             )
             raise
 
-        # Ensure passwords are set correctly
-        from apps.core.models import UserProfile
-
+        # Create UserProfiles manually (to avoid created_at/updated_at issues)
         for username, email, is_premium in [
             ("demo_premium", "demo_premium@example.com", True),
             ("demo_user", "demo_user@example.com", False),
@@ -59,9 +63,15 @@ class Command(BaseCommand):
                 user.is_active = True
                 user.save()
 
-                profile, _ = UserProfile.objects.get_or_create(user=user)
-                profile.is_premium = is_premium
-                profile.save()
+                # Delete existing profile if it exists (from fixture)
+                try:
+                    existing_profile = UserProfile.objects.get(user=user)
+                    existing_profile.delete()
+                except UserProfile.DoesNotExist:
+                    pass
+
+                # Create new profile (auto_now_add will set created_at automatically)
+                profile = UserProfile.objects.create(user=user, is_premium=is_premium)
 
                 self.stdout.write(
                     self.style.SUCCESS(f"Updated user: {username} (premium: {is_premium})")
