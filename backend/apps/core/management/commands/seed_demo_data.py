@@ -362,11 +362,11 @@ class Command(BaseCommand):
                 profile.premium_since = timezone.now()
             profile.save()
 
-        # Non-premium user for comparison
+        # Non-premium user for comparison (use demo_user for consistency with README)
         non_premium_user, created = User.objects.get_or_create(
-            username="demo_standard",
+            username="demo_user",
             defaults={
-                "email": "standard@example.com",
+                "email": "demo_user@example.com",
                 "is_staff": True,
                 "is_active": True,
             },
@@ -479,7 +479,7 @@ class Command(BaseCommand):
         self.stdout.write("    Username: demo_premium")
         self.stdout.write("    Password: demo123")
         self.stdout.write("  Standard User:")
-        self.stdout.write("    Username: demo_standard")
+        self.stdout.write("    Username: demo_user")
         self.stdout.write("    Password: demo123")
         self.stdout.write(self.style.WARNING("\n⚠️  Notes:"))
         self.stdout.write("  - Lesson1 and Lesson2 have a time conflict!")
