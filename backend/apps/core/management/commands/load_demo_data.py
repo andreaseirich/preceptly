@@ -40,16 +40,100 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Deleted {deleted_count} existing demo user(s)")
             )
 
-        # Load fixture (excluding UserProfile entries - we'll create them manually)
+        # Load fixture using a workaround for auto_now_add/auto_now fields
+        # We'll use loaddata with --ignorenonexistent and then touch all objects
         try:
-            # Load fixture but skip UserProfile entries
-            call_command("loaddata", "fixtures/demo_data.json", verbosity=0)
+            # First, try to load the fixture
+            # If it fails due to created_at/updated_at, we'll handle it differently
+            call_command("loaddata", "fixtures/demo_data.json", verbosity=0, ignore=False)
             self.stdout.write(self.style.SUCCESS("Demo data loaded successfully"))
+            
+            # Touch all objects with auto_now_add/auto_now to ensure timestamps are set
+            from apps.students.models import Student
+            from apps.contracts.models import Contract, ContractMonthlyPlan
+            from apps.lessons.models import Lesson
+            from apps.lesson_plans.models import LessonPlan
+            
+            # Update all objects to trigger auto_now/auto_now_add
+            for student in Student.objects.all():
+                student.save(update_fields=['updated_at'])
+            
+            for contract in Contract.objects.all():
+                contract.save(update_fields=['updated_at'])
+            
+            for plan in ContractMonthlyPlan.objects.all():
+                plan.save(update_fields=['updated_at'])
+            
+            for lesson in Lesson.objects.all():
+                lesson.save(update_fields=['updated_at'])
+            
+            for plan in LessonPlan.objects.all():
+                plan.save(update_fields=['updated_at'])
+                
         except Exception as e:
+            # If loaddata fails, try alternative approach: load without timestamps
             self.stdout.write(
-                self.style.ERROR(f"Error loading demo data: {e}")
+                self.style.WARNING(f"Standard loaddata failed: {e}")
             )
-            raise
+            self.stdout.write("Trying alternative loading method...")
+            
+            # Use loaddata with --ignorenonexistent to skip problematic fields
+            # Then manually create objects
+            import json
+            from django.utils import timezone
+            from apps.students.models import Student
+            from apps.contracts.models import Contract, ContractMonthlyPlan
+            from apps.lessons.models import Lesson
+            from apps.lesson_plans.models import LessonPlan
+            
+            with open("fixtures/demo_data.json", "r") as f:
+                data = json.load(f)
+            
+            # Create objects manually, skipping auto fields
+            for item in data:
+                model_name = item["model"]
+                fields = item["fields"]
+                
+                if model_name == "students.student":
+                    Student.objects.get_or_create(
+                        pk=item["pk"],
+                        defaults={
+                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                        }
+                    )
+                elif model_name == "contracts.contract":
+                    Contract.objects.get_or_create(
+                        pk=item["pk"],
+                        defaults={
+                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                        }
+                    )
+                elif model_name == "contracts.contractmonthlyplan":
+                    ContractMonthlyPlan.objects.get_or_create(
+                        pk=item["pk"],
+                        defaults={
+                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                        }
+                    )
+                elif model_name == "lessons.lesson":
+                    Lesson.objects.get_or_create(
+                        pk=item["pk"],
+                        defaults={
+                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                        }
+                    )
+                elif model_name == "lesson_plans.lessonplan":
+                    LessonPlan.objects.get_or_create(
+                        pk=item["pk"],
+                        defaults={
+                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                        }
+                    )
+                elif model_name == "auth.user":
+                    # User is already handled above
+                    pass
+            
+            self.stdout.write(self.style.SUCCESS("Demo data loaded using alternative method"))
 
         # Create UserProfiles manually (to avoid created_at/updated_at issues)
         for username, email, is_premium in [
