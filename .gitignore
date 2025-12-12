@@ -64,3 +64,5 @@ coverage.xml
 
 logs/
 *.log
+
+cursor_master_prompt.txt
