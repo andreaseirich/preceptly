@@ -46,11 +46,17 @@ class ContractAdmin(admin.ModelAdmin):
 
 @admin.register(ContractMonthlyPlan)
 class ContractMonthlyPlanAdmin(admin.ModelAdmin):
-    list_display = ["contract", "year", "month", "planned_units", "get_student_name"]
+    list_display = ["contract", "year", "month", "planned_units", "get_student_name", "created_at"]
     list_filter = ["year", "month", "contract__is_active"]
     search_fields = ["contract__student__first_name", "contract__student__last_name"]
     raw_id_fields = ["contract"]
-    date_hierarchy = "year"
+    readonly_fields = ["created_at", "updated_at"]
+    fieldsets = (
+        (_("Contract"), {"fields": ("contract",)}),
+        (_("Period"), {"fields": ("year", "month")}),
+        (_("Planning"), {"fields": ("planned_units",)}),
+        (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
 
     def get_student_name(self, obj):
         return obj.contract.student.full_name

@@ -8,14 +8,13 @@ from .models import BlockedTime
 class BlockedTimeAdmin(admin.ModelAdmin):
     list_display = ["title", "start_datetime", "end_datetime", "get_duration", "is_recurring", "created_at"]
     search_fields = ["title", "description"]
-    list_filter = ["is_recurring", "start_datetime", "recurring_blockedtime"]
+    list_filter = ["is_recurring", "start_datetime", "recurring_pattern"]
     date_hierarchy = "start_datetime"
     readonly_fields = ["created_at", "updated_at"]
-    raw_id_fields = ["recurring_blockedtime"]
     fieldsets = (
         (_("Details"), {"fields": ("title", "description")}),
         (_("Time"), {"fields": ("start_datetime", "end_datetime")}),
-        (_("Recurrence"), {"fields": ("is_recurring", "recurring_blockedtime")}),
+        (_("Recurrence"), {"fields": ("is_recurring", "recurring_pattern")}),
         (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
 
