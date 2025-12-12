@@ -5,11 +5,12 @@ Views for dashboard and income overview.
 from apps.core.selectors import IncomeSelector
 from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.views.generic import TemplateView
 
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard with overview of today's lessons, conflicts, and income."""
 
     template_name = "core/dashboard.html"
@@ -64,7 +65,7 @@ class DashboardView(TemplateView):
         return context
 
 
-class IncomeOverviewView(TemplateView):
+class IncomeOverviewView(LoginRequiredMixin, TemplateView):
     """Income overview with monthly and yearly views."""
 
     template_name = "core/income_overview.html"

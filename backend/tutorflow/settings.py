@@ -168,6 +168,11 @@ LANGUAGES = [
 # Timezone: Europe/Berlin
 TIME_ZONE = "Europe/Berlin"
 
+# Authentication
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/login/"
+
 USE_I18N = True
 USE_L10N = True
 
