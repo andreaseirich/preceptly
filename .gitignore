@@ -66,3 +66,11 @@ logs/
 *.log
 
 cursor_master_prompt.txt
+invoice*.html
+
+# Internal development documentation (not for jury)
+docs/PHASES.md
+docs/CHECKPOINTS.md
+docs/UX.md
+README_DATABASE.md
+docs/VIDEO_SCRIPT.md
