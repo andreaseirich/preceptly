@@ -144,7 +144,7 @@ python manage.py runserver
 
 - **Conflict-first calendar:** Week View with red icons/borders for conflicts; blocked times and lessons combined seamlessly.
 - **AI lesson plans in-flow:** Triggered from the lesson detail via button; mock LLM enables reproducible demos without external APIs.
-- **Demo-ready:** `./scripts/run_demo.sh` starts in under 60 seconds with deterministic data; ideal for demo videos (GIF is optional).
+- **Demo-ready:** `./scripts/run_demo.sh` starts in under 60 seconds with deterministic data; demo video available via Devpost submission.
 
 ### Quick Demo Tour (2 Minutes)
 

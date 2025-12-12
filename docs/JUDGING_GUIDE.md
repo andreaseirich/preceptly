@@ -14,13 +14,6 @@ Single-page orientation for reviewers/judges (CodeCraze Hackathon). Focus: fast-
   - Standard: `demo_user` / `demo123`
 - **Mock safety:** `MOCK_LLM=1` prevents external API calls; all AI responses come from `docs/llm_samples.json`.
 
-## Demo storyboard (~3 minutes)
-1. **Dashboard (30s):** Show today’s appointments + conflict summary.
-2. **Week view core loop (60s):** Open `/lessons/week/`, demonstrate click-to-create (click time blocks to create appointments), highlight conflict badges and blocked times.
-3. **AI lesson plan (30s):** Open prefilled mock plan, click “Generate AI Lesson Plan,” emphasize the mock notice.
-4. **Billing & income (45s):** Create invoice from a `taught` lesson, show invoice list + income overview (planned/taught/paid).
-5. **Safety & reliability (15s):** Mention mock mode, PII scrubber, `/health/`, and deterministic fixtures.
-
 ## Judging shortcuts by category
 - **Best UI/Creativity:** Interactive week view (click-to-create, conflict icons, blocked times); mention dark/light design if enabled.
 - **Best AI/ML:** AI lesson plan flow with mock mode + PII sanitizer; note retries on rate limits.
