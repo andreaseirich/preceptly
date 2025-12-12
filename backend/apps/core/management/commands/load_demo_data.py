@@ -90,48 +90,93 @@ class Command(BaseCommand):
                 data = json.load(f)
             
             # Create objects manually, skipping auto fields
+            # Process in order: Users first, then Students, Contracts, Lessons, LessonPlans
             for item in data:
                 model_name = item["model"]
                 fields = item["fields"]
+                pk = item["pk"]
                 
-                if model_name == "students.student":
-                    Student.objects.get_or_create(
-                        pk=item["pk"],
+                if model_name == "auth.user":
+                    # User is already handled above or will be created by fixture
+                    continue
+                elif model_name == "students.student":
+                    # Get or create student
+                    student, created = Student.objects.get_or_create(
+                        id=pk,
                         defaults={
-                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                            "first_name": fields["first_name"],
+                            "last_name": fields["last_name"],
+                            "email": fields.get("email", ""),
+                            "phone": fields.get("phone", ""),
+                            "school": fields.get("school", ""),
+                            "grade": fields.get("grade", ""),
+                            "subjects": fields.get("subjects", ""),
+                            "notes": fields.get("notes", ""),
                         }
                     )
+                    if not created:
+                        # Update existing
+                        for key, value in fields.items():
+                            if key not in ["created_at", "updated_at"]:
+                                setattr(student, key, value)
+                        student.save()
                 elif model_name == "contracts.contract":
-                    Contract.objects.get_or_create(
-                        pk=item["pk"],
+                    contract, created = Contract.objects.get_or_create(
+                        id=pk,
                         defaults={
-                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                            "student_id": fields["student"],
+                            "institute": fields.get("institute", ""),
+                            "hourly_rate": fields["hourly_rate"],
+                            "unit_duration_minutes": fields["unit_duration_minutes"],
+                            "start_date": fields.get("start_date"),
+                            "end_date": fields.get("end_date"),
+                            "is_active": fields.get("is_active", True),
+                            "notes": fields.get("notes", ""),
                         }
                     )
-                elif model_name == "contracts.contractmonthlyplan":
-                    ContractMonthlyPlan.objects.get_or_create(
-                        pk=item["pk"],
-                        defaults={
-                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
-                        }
-                    )
+                    if not created:
+                        for key, value in fields.items():
+                            if key not in ["created_at", "updated_at"]:
+                                setattr(contract, key, value)
+                        contract.save()
                 elif model_name == "lessons.lesson":
-                    Lesson.objects.get_or_create(
-                        pk=item["pk"],
+                    lesson, created = Lesson.objects.get_or_create(
+                        id=pk,
                         defaults={
-                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                            "contract_id": fields["contract"],
+                            "date": fields["date"],
+                            "start_time": fields["start_time"],
+                            "duration_minutes": fields["duration_minutes"],
+                            "status": fields.get("status", "planned"),
+                            "travel_time_before_minutes": fields.get("travel_time_before_minutes", 0),
+                            "travel_time_after_minutes": fields.get("travel_time_after_minutes", 0),
+                            "notes": fields.get("notes", ""),
                         }
                     )
+                    if not created:
+                        for key, value in fields.items():
+                            if key not in ["created_at", "updated_at"]:
+                                setattr(lesson, key, value)
+                        lesson.save()
                 elif model_name == "lesson_plans.lessonplan":
-                    LessonPlan.objects.get_or_create(
-                        pk=item["pk"],
+                    plan, created = LessonPlan.objects.get_or_create(
+                        id=pk,
                         defaults={
-                            **{k: v for k, v in fields.items() if k not in ["created_at", "updated_at"]}
+                            "student_id": fields["student"],
+                            "lesson_id": fields.get("lesson"),
+                            "topic": fields["topic"],
+                            "subject": fields["subject"],
+                            "content": fields["content"],
+                            "grade_level": fields.get("grade_level", ""),
+                            "duration_minutes": fields.get("duration_minutes"),
+                            "llm_model": fields.get("llm_model", ""),
                         }
                     )
-                elif model_name == "auth.user":
-                    # User is already handled above
-                    pass
+                    if not created:
+                        for key, value in fields.items():
+                            if key not in ["created_at", "updated_at"]:
+                                setattr(plan, key, value)
+                        plan.save()
             
             self.stdout.write(self.style.SUCCESS("Demo data loaded using alternative method"))
 
