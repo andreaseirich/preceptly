@@ -74,3 +74,6 @@ docs/CHECKPOINTS.md
 docs/UX.md
 README_DATABASE.md
 docs/VIDEO_SCRIPT.md
+
+# CI/CD configuration (internal)
+.github/
