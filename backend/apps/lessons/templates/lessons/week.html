@@ -1,11 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
-{% load static %}
 {% load lesson_filters %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
-{% endblock %}
 
 {% block title %}{% trans "Week View" %} - TutorFlow{% endblock %}
 
@@ -17,75 +12,115 @@
     <a href="{% url 'lessons:week' %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn">{% trans "Next Week" %} →</a>
 </div>
 
-<p class="calendar-note">
+<p style="margin-top: 10px; color: #495057; font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Lessons and blocked times can be created by clicking in a time block; drag-to-create is not implemented." %}
 </p>
 
-<div id="week-calendar" class="week-calendar">
-    <table class="week-table">
+<div id="week-calendar" style="margin-top: 20px; position: relative; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
         <thead>
             <tr>
-                <th class="time-slot-label">{% trans "Time" %}</th>
+                <th style="width: 80px; border: 1px solid #ddd; padding: 8px; background: #f5f5f5; text-align: center;">{% trans "Time" %}</th>
                 {% for weekday in weekdays %}
-                <th class="week-day-header {% if weekday.date == today %}is-today{% endif %}">
+                <th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5; text-align: center; {% if weekday.date == today %}background: #e3f2fd;{% endif %}">
                     {{ weekday.name_short }}<br>
-                    <small class="weekday-date">{{ weekday.date.day }}.{{ weekday.date.month }}.</small>
+                    <small style="font-weight: normal;">{{ weekday.date.day }}.{{ weekday.date.month }}.</small>
                 </th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% for hour in hours %}
-            <tr data-hour="{{ hour }}" class="time-row">
-                <td class="time-slot-label">
+            <tr data-hour="{{ hour }}" style="height: 60px;">
+                <td style="border: 1px solid #ddd; padding: 4px; text-align: center; background: #f9f9f9; font-size: 0.85em;">
                     {{ hour }}:00
                 </td>
                 {% for weekday in weekdays %}
-                <td class="time-slot"
-                    data-date="{{ weekday.date|date:'Y-m-d' }}"
-                    data-hour="{{ hour }}">
-                    <div class="slot-content">
+                <td class="time-slot" 
+                    data-date="{{ weekday.date|date:'Y-m-d' }}" 
+                    data-hour="{{ hour }}"
+                    style="border: 1px solid #ddd; padding: 0; position: relative; vertical-align: top; cursor: pointer;"
+                    onclick="openCreateFromSlot(this)">
+                    <div class="slot-content" style="position: relative; height: 100%; width: 100%;">
                         {% for lesson in weekday.lessons %}
                             {% if lesson.start_time.hour|add:0 == hour|add:0 %}
-                            <div class="lesson-block status-{{ lesson.status }} {% if lesson.id in conflicts_by_lesson %}has-conflict{% endif %}"
+                            <div class="lesson-block {% if lesson.id in conflicts_by_lesson %}has-conflict{% endif %}" 
                                  data-lesson-id="{{ lesson.id }}"
+                                 data-start-hour="{{ lesson.start_time.hour }}"
                                  data-start-minute="{{ lesson.start_time.minute }}"
                                  data-duration="{{ lesson.duration_minutes }}"
-                                 data-plan-url="{% url 'lesson_plans:lesson_plan' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}"
-                                 data-student="{{ lesson.contract.student.first_name }}"
-                                 data-time="{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans 'Min.' %}"
-                                 data-has-conflict="{% if lesson.id in conflicts_by_lesson %}true{% else %}false{% endif %}">
-                                <div class="lesson-header">
-                                    <div class="lesson-title">
-                                        <span>📚</span> <strong>{{ lesson.contract.student.first_name }}</strong>
+                                 style="position: absolute; 
+                                        top: {{ lesson.start_time.minute }}px; 
+                                        height: {{ lesson.duration_minutes }}px; 
+                                        left: 0; 
+                                        right: 0; 
+                                        background: {% if lesson.status == 'paid' %}#2e7d32{% elif lesson.status == 'taught' %}#607d8b{% else %}#2196f3{% endif %}; 
+                                        color: white; 
+                                        padding: 2px 4px; 
+                                        font-size: 0.75em; 
+                                        border-radius: 3px;
+                                        cursor: pointer;
+                                        z-index: 10;
+                                        overflow: hidden;
+                                        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                                        transition: all 0.2s;
+                                        {% if lesson.id in conflicts_by_lesson %}border: 2px solid #dc3545;{% endif %}"
+                                 onmouseover="showLessonPreview(this, event); this.style.transform='scale(1.02)'; this.style.zIndex='20';"
+                                 onmouseout="hideLessonPreview(); this.style.transform='scale(1)'; this.style.zIndex='10';"
+                                 onclick="event.stopPropagation(); window.location.href='{% url 'lesson_plans:lesson_plan' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
+                                 title="{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} Min.) - {% trans 'Click to view lesson plan' %}">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        <span style="font-size: 1.1em; margin-right: 4px;">📚</span> <strong>{{ lesson.contract.student.first_name }}</strong>
                                         {% if lesson.id in conflicts_by_lesson %}
-                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" class="lesson-conflict-link js-stop-propagation" title="{% trans 'Conflict detected - Click for details' %}" aria-label="{% trans 'View Conflicts' %}">⚠️</a>
-                                        {% endif %}
+                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" style="color: #ffeb3b; font-size: 1.1em; margin-left: 4px; text-decoration: none;" title="{% trans 'Conflict detected - Click for details' %}" aria-label="{% trans 'View Conflicts' %}" onclick="event.stopPropagation();">⚠️</a>
+                                        {% endif %}<br>
+                                        <small style="opacity: 0.9;">{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans "Min." %}</small>
+                                        {% if lesson.status == 'paid' %}<small style="display: block; opacity: 0.8;">✓ {% trans "Paid" %}</small>{% endif %}
                                     </div>
-                                    <a href="{% url 'lessons:update' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}"
-                                       class="lesson-edit js-stop-propagation"
-                                       title="{% trans 'Edit lesson' %}" aria-label="{% trans 'Edit Lesson' %}">
+                                    <a href="{% url 'lessons:update' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}" 
+                                       style="color: white; text-decoration: none; font-size: 1.1em; padding: 2px 4px; background: rgba(255,255,255,0.2); border-radius: 3px; margin-left: 4px; flex-shrink: 0;"
+                                       title="{% trans 'Edit lesson' %}" aria-label="{% trans 'Edit Lesson' %}"
+                                       onclick="event.stopPropagation();">
                                         ✏️
                                     </a>
                                 </div>
-                                <small class="lesson-meta">{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans "Min." %}</small>
-                                {% if lesson.status == 'paid' %}<small class="lesson-paid">✓ {% trans "Paid" %}</small>{% endif %}
                             </div>
                             {% endif %}
                         {% endfor %}
                         {% for blocked_time in weekday.blocked_times %}
                             {% with start_hour=blocked_time.start_datetime|local_hour start_minute=blocked_time.start_datetime|local_minute end_hour=blocked_time.end_datetime|local_hour end_minute=blocked_time.end_datetime|local_minute %}
                             {% if start_hour|add:0 == hour|add:0 %}
-                            <div class="blocked-time-block lesson-block"
+                            {% with duration_minutes=blocked_time.end_datetime|timesince:blocked_time.start_datetime %}
+                            <div class="blocked-time-block lesson-block" 
                                  data-blocked-time-id="{{ blocked_time.id }}"
+                                 data-start-hour="{{ start_hour }}"
                                  data-start-minute="{{ start_minute }}"
+                                 data-end-hour="{{ end_hour }}"
                                  data-end-minute="{{ end_minute }}"
-                                 data-edit-url="{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}"
-                                 data-title="{{ blocked_time.title }}"
-                                 data-time="{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}">
-                                <span>🚫</span> <strong>{{ blocked_time.title }}</strong><br>
+                                 style="position: absolute; 
+                                        top: {{ start_minute }}px; 
+                                        height: {% if start_hour == end_hour %}{{ end_minute|add:"-"|add:start_minute }}{% else %}60{% endif %}px; 
+                                        left: 0; 
+                                        right: 0; 
+                                        background: #ff9800; 
+                                        color: white; 
+                                        padding: 2px 4px; 
+                                        font-size: 0.75em; 
+                                        border-radius: 3px;
+                                        cursor: pointer;
+                                        z-index: 10;
+                                        overflow: hidden;
+                                        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                                        transition: all 0.2s;"
+                                 onmouseover="showBlockedTimePreview(this, event); this.style.background='#e68900'; this.style.transform='scale(1.02)'; this.style.zIndex='20';"
+                                 onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
+                                 onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
+                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}">
+                                <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
                                 <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
                             </div>
+                            {% endwith %}
                             {% endif %}
                             {% endwith %}
                         {% endfor %}
@@ -99,12 +134,10 @@
 </div>
 
 <!-- Dialog for appointment creation -->
-<div id="create-dialog" class="create-dialog"
-     data-lesson-create-url="{% url 'lessons:create' %}"
-     data-blocked-create-url="{% url 'blocked_times:create' %}">
-    <h3>{% trans "Create New Appointment" %}</h3>
-    <p id="dialog-time-info"></p>
-    <div class="dialog-body">
+<div id="create-dialog" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; min-width: 400px;">
+    <h3 style="margin-top: 0;">{% trans "Create New Appointment" %}</h3>
+    <p id="dialog-time-info" style="margin-bottom: 15px; color: #2c3e50;"></p>
+    <div style="margin-bottom: 15px;">
         <label>
             <input type="radio" name="event-type" value="lesson" checked> {% trans "Tutoring Lesson" %}
         </label><br>
@@ -113,15 +146,158 @@
         </label>
     </div>
     <div class="btn-group">
-        <button class="btn btn-success js-confirm-create" aria-label="{% trans 'Create Lesson' %}">{% trans "Create" %}</button>
-        <button type="button" class="btn btn-secondary js-cancel-create" aria-label="{% trans 'Cancel' %}">{% trans "Cancel" %}</button>
+        <button onclick="confirmCreate()" class="btn btn-success" aria-label="{% trans 'Create Lesson' %}">{% trans "Create" %}</button>
+        <button onclick="cancelCreate()" class="btn btn-secondary" aria-label="{% trans 'Cancel' %}">{% trans "Cancel" %}</button>
     </div>
 </div>
 
-<div id="dialog-overlay" class="dialog-overlay"></div>
+<div id="dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
 
-{% endblock %}
+<style>
+.time-slot:hover {
+    background: #f0f0f0;
+}
+.time-slot.dragging {
+    background: #e3f2fd;
+}
+.lesson-block.has-conflict {
+    border: 2px solid #dc3545 !important;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+}
+</style>
 
-{% block extra_scripts %}
-<script src="{% static 'js/calendar.js' %}"></script>
+<script>
+function openCreateFromSlot(cell) {
+    const date = cell.dataset.date;
+    const hour = parseInt(cell.dataset.hour);
+    const startDateTime = new Date(date + 'T' + String(hour).padStart(2, '0') + ':00:00');
+    const endDateTime = new Date(date + 'T' + String(hour + 1).padStart(2, '0') + ':00:00');
+    showCreateDialog(startDateTime, endDateTime, date);
+}
+
+function showCreateDialog(startDateTime, endDateTime, date) {
+    const dialog = document.getElementById('create-dialog');
+    const overlay = document.getElementById('dialog-overlay');
+    const timeInfo = document.getElementById('dialog-time-info');
+    
+    const startStr = startDateTime.toISOString().slice(0, 16);
+    const endStr = endDateTime.toISOString().slice(0, 16);
+    
+    const locale = 'en-US';
+    timeInfo.textContent = `From: ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} to ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} on ${new Date(date).toLocaleDateString(locale)}`;
+    
+    dialog.dataset.start = startStr;
+    dialog.dataset.end = endStr;
+    dialog.dataset.date = date;
+    
+    dialog.style.display = 'block';
+    overlay.style.display = 'block';
+}
+
+function confirmCreate() {
+    const dialog = document.getElementById('create-dialog');
+    const eventType = document.querySelector('input[name="event-type"]:checked').value;
+    const start = dialog.dataset.start;
+    const end = dialog.dataset.end;
+    
+    let url;
+    if (eventType === 'lesson') {
+        url = '{% url "lessons:create" %}?start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end);
+    } else {
+        url = '{% url "blocked_times:create" %}?start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end);
+    }
+    
+    window.location.href = url;
+}
+
+function cancelCreate() {
+    document.getElementById('create-dialog').style.display = 'none';
+    document.getElementById('dialog-overlay').style.display = 'none';
+}
+
+// Close dialog when clicking on the overlay
+document.getElementById('dialog-overlay').addEventListener('click', cancelCreate);
+
+// Hover preview for lessons
+let previewTooltip = null;
+
+function showLessonPreview(element, event) {
+    if (previewTooltip) return;
+    
+    const lessonId = element.dataset.lessonId;
+    const studentName = element.querySelector('strong').textContent.trim();
+    const timeInfo = element.querySelector('small').textContent.trim();
+    const hasConflict = element.classList.contains('has-conflict');
+    
+    previewTooltip = document.createElement('div');
+    previewTooltip.style.cssText = `
+        position: absolute;
+        background: #2c3e50;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        z-index: 1000;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        max-width: 250px;
+        white-space: nowrap;
+    `;
+    previewTooltip.innerHTML = `
+        <strong>${studentName}</strong><br>
+        <small>${timeInfo}</small>
+        ${hasConflict ? '<br><small style="color: #ffeb3b;">⚠️ {% trans "Conflict" %}</small>' : ''}
+    `;
+    
+    document.body.appendChild(previewTooltip);
+    const rect = element.getBoundingClientRect();
+    previewTooltip.style.left = (rect.left + rect.width / 2 - previewTooltip.offsetWidth / 2) + 'px';
+    previewTooltip.style.top = (rect.top - previewTooltip.offsetHeight - 8) + 'px';
+}
+
+function hideLessonPreview() {
+    if (previewTooltip) {
+        previewTooltip.remove();
+        previewTooltip = null;
+    }
+}
+
+function showBlockedTimePreview(element, event) {
+    if (previewTooltip) return;
+    
+    const title = element.querySelector('strong').textContent.trim();
+    const timeInfo = element.querySelector('small').textContent.trim();
+    
+    previewTooltip = document.createElement('div');
+    previewTooltip.style.cssText = `
+        position: absolute;
+        background: #2c3e50;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        z-index: 1000;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        max-width: 250px;
+        white-space: nowrap;
+    `;
+    previewTooltip.innerHTML = `
+        <strong>${title}</strong><br>
+        <small>${timeInfo}</small>
+    `;
+    
+    document.body.appendChild(previewTooltip);
+    const rect = element.getBoundingClientRect();
+    previewTooltip.style.left = (rect.left + rect.width / 2 - previewTooltip.offsetWidth / 2) + 'px';
+    previewTooltip.style.top = (rect.top - previewTooltip.offsetHeight - 8) + 'px';
+}
+
+function hideBlockedTimePreview() {
+    if (previewTooltip) {
+        previewTooltip.remove();
+        previewTooltip = null;
+    }
+}
+</script>
 {% endblock %}

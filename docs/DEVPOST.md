@@ -34,9 +34,9 @@ TutorFlow supports English/German, includes a one-command demo setup, and offers
 
 TutorFlow is built with modern Django 6.0 and a modular architecture:
 - **Backend**: Django + Django ORM + modular apps (students, lessons, billing, ai, etc.)
-- **Frontend**: Django templates, HTMX-style dynamic updates, custom JS/CSS (no inline scripts, CSP-compliant)
+- **Frontend**: Django templates, HTMX-style dynamic updates, custom JS/CSS
 - **AI Layer**: pluggable LLMClient with optional mock-mode (MOCK_LLM=1)
-- **Security**: CSP headers, PII sanitizer, strict ENV-based secrets, mock defaults
+- **Security**: PII sanitizer, strict ENV-based secrets, mock defaults
 - **Recurring Scheduling Engine**: weekly / biweekly / monthly rules
 - **Conflict Engine**: time conflicts + monthly quota checks + blocked-time overlaps
 - **Billing Engine**: transactional invoice creation, reversal logic, correct unit-pricing
@@ -51,7 +51,6 @@ All demo content is deterministic and free of personal data.
 - **Accurate conflict detection**: quota-based conflicts, time overlaps, and recurring events interacting cleanly was surprisingly intricate.
 - **Secure AI integration**: preventing personal data from entering prompts required a custom sanitization layer and a mock-LLM system.
 - **Invoice correctness**: correctly handling 45-minute units, taught vs. planned vs. invoiced states, and rollback on invoice deletion needed careful transactional design.
-- **Strict CSP**: removing all inline JS/CSS across templates took effort but greatly improves security.
 - **Demo reproducibility**: guaranteeing that "one command" fully sets up the system, including fake LLM responses and demo accounts.
 
 ## Accomplishments that we're proud of
@@ -62,7 +61,6 @@ All demo content is deterministic and free of personal data.
 - Internationalization (EN/DE) and deterministic demo
 - Polished UI with a week-calendar and conflict visualization
 - Robust invoice workflow with automatic state changes
-- CSP-compliant frontend with no inline scripts
 - Comprehensive documentation
 
 ## What we learned
@@ -70,7 +68,6 @@ All demo content is deterministic and free of personal data.
 - Good scheduling logic is harder than it looks — real-world time planning requires edge cases.
 - AI integration must be privacy-first, especially when dealing with minors.
 - Mock systems are crucial for stable demos and offline CI.
-- CSP without inline scripts forces better frontend design.
 - Documentation clarity significantly influences the evaluation experience for reviewers.
 
 ## What's next for TutorFlow

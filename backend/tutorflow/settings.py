@@ -96,7 +96,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.core.middleware.ContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "tutorflow.urls"
@@ -201,8 +200,6 @@ SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", default=False)
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=False)
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", default=False)
 
-# Content Security Policy
-ENABLE_CSP = env_bool("ENABLE_CSP", default=True)
 
 if not DEBUG:
     SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", default="3600"))

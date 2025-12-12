@@ -35,25 +35,6 @@ jobs:
       - name: Ruff lint
         run: ruff check backend/apps backend/tutorflow
 
-      - name: Check templates for inline assets
-        run: |
-          # Check for inline scripts/styles (excluding external script loading)
-          if grep -r "<script" backend/apps --include="*.html" | grep -v "{% static" | grep -v "src=" | grep -v "{% endblock %}"; then
-            echo "❌ Found inline <script> tags in templates"
-            exit 1
-          fi
-          # Check for inline style tags
-          if grep -r "<style" backend/apps --include="*.html" | grep -v "{% endblock %}"; then
-            echo "❌ Found inline <style> tags in templates"
-            exit 1
-          fi
-          # Check for inline event handlers
-          if grep -rE "(onclick=|onchange=|oninput=|onsubmit=|onload=)" backend/apps --include="*.html"; then
-            echo "❌ Found inline event handlers in templates"
-            exit 1
-          fi
-          echo "✅ Template inline asset checks passed"
-
       - name: Compile Python sources
         run: python -m compileall .
 

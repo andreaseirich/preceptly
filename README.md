@@ -242,14 +242,6 @@ TutorFlow provides a complete solution for managing tutoring activities:
   export LLM_MODEL_NAME="gpt-3.5-turbo"  # Optional
   ```
 
-### Frontend & Security
-
-**Static Assets & CSP:**
-- All JavaScript and CSS are served from static files (`static/js/`, `static/css/`)
-- No inline scripts or styles are used in templates (enforced by lint checks)
-- Content Security Policy (CSP) is enabled by default to prevent XSS attacks
-- CSP can be disabled via `ENABLE_CSP=false` environment variable (not recommended for production)
-
 ### Frontend
 - Django Templates with minimal JavaScript for the calendar UI
 

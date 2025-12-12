@@ -1,15 +1,104 @@
 {% load i18n %}
-{% load static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</title>
-    <link rel="stylesheet" href="{% static 'css/billing.css' %}">
+    <style>
+        /* Base styles - bright and print-friendly */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            color: #111827;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #111827;
+        }
+        .invoice-info {
+            margin-bottom: 30px;
+            color: #111827;
+        }
+        .payer-info {
+            margin-bottom: 30px;
+            color: #111827;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: #ffffff;
+        }
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            text-align: left;
+            color: #111827;
+        }
+        th {
+            background-color: #e5e7eb;
+            font-weight: 600;
+            color: #111827;
+        }
+        tbody tr {
+            background-color: #ffffff;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 1.2em;
+            background-color: #f3f4f6 !important;
+            color: #111827;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        h1, h2, h3 {
+            color: #111827;
+        }
+        p {
+            color: #111827;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body {
+                background-color: #ffffff;
+                color: #000000;
+            }
+            th {
+                background-color: #e5e7eb !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tbody tr:nth-child(even) {
+                background-color: #f9fafb !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .total {
+                background-color: #f3f4f6 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            @page {
+                margin: 1cm;
+            }
+        }
+    </style>
 </head>
-<body class="invoice-document">
-    <div class="invoice-header">
+<body>
+    <div class="header">
         <h1>{% trans "Invoice" %}</h1>
         <p>{% blocktrans with id=invoice.id %}Invoice Number: {{ id }}{% endblocktrans %}</p>
     </div>
@@ -19,7 +108,7 @@
         <p><strong>{% trans "Period:" %}</strong> {{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</p>
     </div>
     
-    <div class="invoice-payer-info">
+    <div class="payer-info">
         <h3>{% trans "Payer" %}</h3>
         <p><strong>{{ invoice.payer_name }}</strong></p>
         {% if invoice.payer_address %}
@@ -28,7 +117,7 @@
     </div>
     
     <h3>{% trans "Invoice Items" %}</h3>
-    <table class="invoice-table-doc">
+    <table>
         <thead>
             <tr>
                 <th>{% trans "Date" %}</th>
@@ -46,14 +135,14 @@
                 <td>{{ item.amount }}€</td>
             </tr>
             {% endfor %}
-            <tr class="invoice-total">
+            <tr class="total">
                 <td colspan="3"><strong>{% trans "Total Amount:" %}</strong></td>
                 <td><strong>{{ invoice.total_amount }}€</strong></td>
             </tr>
         </tbody>
     </table>
     
-    <div class="invoice-footer">
+    <div class="footer">
         <p>{% trans "Created with TutorFlow" %}</p>
     </div>
 </body>

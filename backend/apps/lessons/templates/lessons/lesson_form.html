@@ -1,88 +1,83 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
-{% load static %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/lessons.css' %}">
-{% endblock %}
-
-{% block title %}{% if object %}{% trans 'Edit Lesson' %}{% else %}{% trans 'New Lesson' %}{% endif %} - TutorFlow{% endblock %}
+{% block title %}{% if object %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %} - TutorFlow{% endblock %}
 
 {% block content %}
-<h1>{% if object %}{% trans 'Edit Lesson' %}{% else %}{% trans 'New Lesson' %}{% endif %}</h1>
+<h1>{% if object %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %}</h1>
 
 <form method="post">
     {% csrf_token %}
     
-    <div class="form-section">
-        <h3>{% trans 'Lesson Details' %}</h3>
+    <div style="margin-bottom: 20px;">
+        <h3>{% trans "Lesson Details" %}</h3>
         <p>
-            <label for="{{ form.contract.id_for_label }}">{% trans 'Contract:' %}</label>
+            <label for="{{ form.contract.id_for_label }}">{% trans "Contract:" %}</label>
             {{ form.contract }}
         </p>
         <p>
-            <label for="{{ form.date.id_for_label }}">{% trans 'Date:' %}</label>
+            <label for="{{ form.date.id_for_label }}">{% trans "Date:" %}</label>
             {{ form.date }}
         </p>
         <p>
-            <label for="{{ form.start_time.id_for_label }}">{% trans 'Start Time:' %}</label>
+            <label for="{{ form.start_time.id_for_label }}">{% trans "Start Time:" %}</label>
             {{ form.start_time }}
         </p>
         <p>
-            <label for="{{ form.duration_minutes.id_for_label }}">{% trans 'Duration (minutes):' %}</label>
+            <label for="{{ form.duration_minutes.id_for_label }}">{% trans "Duration (minutes):" %}</label>
             {{ form.duration_minutes }}
         </p>
         <p>
-            <label for="{{ form.travel_time_before_minutes.id_for_label }}">{% trans 'Travel Time Before (minutes):' %}</label>
+            <label for="{{ form.travel_time_before_minutes.id_for_label }}">{% trans "Travel Time Before (minutes):" %}</label>
             {{ form.travel_time_before_minutes }}
         </p>
         <p>
-            <label for="{{ form.travel_time_after_minutes.id_for_label }}">{% trans 'Travel Time After (minutes):' %}</label>
+            <label for="{{ form.travel_time_after_minutes.id_for_label }}">{% trans "Travel Time After (minutes):" %}</label>
             {{ form.travel_time_after_minutes }}
         </p>
         <p>
-            <label for="{{ form.notes.id_for_label }}">{% trans 'Notes:' %}</label>
+            <label for="{{ form.notes.id_for_label }}">{% trans "Notes:" %}</label>
             {{ form.notes }}
         </p>
     </div>
     
     {% if not object %}
-    <div id="recurrence-section" class="recurrence-box">
-        <h3>{% trans 'Recurrence (Optional)' %}</h3>
+    <div id="recurrence-section" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; border: 1px solid #ddd;">
+        <h3>{% trans "Recurrence (Optional)" %}</h3>
         <p>
-            <label for="{{ form.is_recurring.id_for_label }}" class="inline-checkbox">
+            <label for="{{ form.is_recurring.id_for_label }}" style="display: flex; align-items: center; gap: 8px;">
                 {{ form.is_recurring }}
-                <strong>{% trans 'Repeat this lesson' %}</strong>
+                <strong>{% trans "Repeat this lesson" %}</strong>
             </label>
             {% if form.is_recurring.help_text %}
-            <small class="muted">{{ form.is_recurring.help_text }}</small>
+            <small style="display: block; margin-left: 28px; color: #666;">{{ form.is_recurring.help_text }}</small>
             {% endif %}
         </p>
         
-        <div id="recurrence-fields" class="recurrence-fields">
+        <div id="recurrence-fields" style="display: none; margin-top: 15px; margin-left: 28px;">
             <p>
-                <label for="{{ form.recurrence_type.id_for_label }}">{% trans 'Repeat pattern:' %}</label>
+                <label for="{{ form.recurrence_type.id_for_label }}">{% trans "Repeat pattern:" %}</label>
                 {{ form.recurrence_type }}
             </p>
             <p>
-                <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans 'End date (optional):' %}</label>
+                <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans "End date (optional):" %}</label>
                 {{ form.recurrence_end_date }}
                 {% if form.recurrence_end_date.help_text %}
-                <small class="muted">{{ form.recurrence_end_date.help_text }}</small>
+                <small style="display: block; color: #666;">{{ form.recurrence_end_date.help_text }}</small>
                 {% endif %}
             </p>
             <p>
-                <label>{% trans 'Weekdays:' %}</label>
-                <div id="weekdays-container" class="weekdays-container">
+                <label>{% trans "Weekdays:" %}</label>
+                <div id="weekdays-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
                     {% for choice in form.recurrence_weekdays %}
-                    <label class="inline-checkbox">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
                         {{ choice.tag }}
                         <span>{{ choice.choice_label }}</span>
                     </label>
                     {% endfor %}
                 </div>
                 {% if form.recurrence_weekdays.help_text %}
-                <small class="muted">{{ form.recurrence_weekdays.help_text }}</small>
+                <small style="display: block; color: #666;">{{ form.recurrence_weekdays.help_text }}</small>
                 {% endif %}
             </p>
         </div>
@@ -90,12 +85,45 @@
     {% endif %}
     
     <div class="btn-group">
-        <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
-        <a href="{% url 'lessons:week' %}" class="btn btn-secondary">{% trans 'Cancel' %}</a>
+        <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
+        <a href="{% url 'lessons:week' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
+
+<script>
+function toggleRecurrenceFields() {
+    const isRecurring = document.getElementById('{{ form.is_recurring.id_for_label }}');
+    const recurrenceFields = document.getElementById('recurrence-fields');
+    const weekdaysContainer = document.getElementById('weekdays-container');
+    if (isRecurring && recurrenceFields) {
+        if (isRecurring.checked) {
+            recurrenceFields.style.display = 'block';
+            // Show recurrence fields
+            const recurrenceType = document.getElementById('{{ form.recurrence_type.id_for_label }}');
+            const recurrenceEndDate = document.getElementById('{{ form.recurrence_end_date.id_for_label }}');
+            if (recurrenceType) recurrenceType.style.display = 'block';
+            if (recurrenceEndDate) recurrenceEndDate.style.display = 'block';
+            // Show weekdays checkboxes
+            if (weekdaysContainer) {
+                weekdaysContainer.style.display = 'flex';
+                // Make sure all checkboxes are visible and enabled
+                const checkboxes = weekdaysContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.style.display = 'inline-block';
+                    checkbox.disabled = false;
+                    checkbox.style.pointerEvents = 'auto';
+                });
+            }
+        } else {
+            recurrenceFields.style.display = 'none';
+        }
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleRecurrenceFields();
+});
+</script>
 {% endblock %}
 
-{% block extra_scripts %}
-<script src="{% static 'js/lesson_form.js' %}"></script>
-{% endblock %}

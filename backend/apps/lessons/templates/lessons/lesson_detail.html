@@ -1,80 +1,82 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
-{% load static %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/lessons.css' %}">
-{% endblock %}
 
 {% block title %}{% blocktrans with date=lesson.date student=lesson.contract.student %}Lesson {{ date }} - {{ student }}{% endblocktrans %} - TutorFlow{% endblock %}
 
 {% block content %}
-<h1>{% trans 'Lesson' %}</h1>
+<h1>{% trans "Lesson" %}</h1>
 
-<div class="action-bar">
-    <a href="{% url 'lessons:week' %}?year={{ lesson.date.year }}&month={{ lesson.date.month }}&day={{ lesson.date.day }}" class="btn">← {% trans 'Back to Calendar' %}</a>
-    <a href="{% url 'lessons:update' lesson.pk %}" class="btn btn-primary">✏️ {% trans 'Edit' %}</a>
-    <a href="{% url 'lessons:delete' lesson.pk %}" class="btn btn-danger">🗑️ {% trans 'Delete' %}</a>
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'lessons:week' %}?year={{ lesson.date.year }}&month={{ lesson.date.month }}&day={{ lesson.date.day }}" class="btn">← {% trans "Back to Calendar" %}</a>
+    <a href="{% url 'lessons:update' lesson.pk %}" class="btn btn-primary">✏️ {% trans "Edit" %}</a>
+    <a href="{% url 'lessons:delete' lesson.pk %}" class="btn btn-danger">🗑️ {% trans "Delete" %}</a>
 </div>
 
-<div class="panel">
-    <h2>{% trans 'Details' %}</h2>
-    <table class="table-simple">
+<div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>{% trans "Details" %}</h2>
+    <table style="width: 100%;">
         <tr>
-            <td><strong>{% trans 'Date:' %}</strong></td>
-            <td>{{ lesson.date|date:"d.m.Y" }}</td>
+            <td style="padding: 8px; font-weight: bold;">{% trans "Date:" %}</td>
+            <td style="padding: 8px;">{{ lesson.date|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td><strong>{% trans 'Time:' %}</strong></td>
-            <td>{% blocktrans with time=lesson.start_time|time:'H:i' minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}</td>
+            <td style="padding: 8px; font-weight: bold;">{% trans "Time:" %}</td>
+            <td style="padding: 8px;">{% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}</td>
         </tr>
         <tr>
-            <td><strong>{% trans 'Student:' %}</strong></td>
-            <td><a href="{% url 'students:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a></td>
+            <td style="padding: 8px; font-weight: bold;">{% trans "Student:" %}</td>
+            <td style="padding: 8px;">
+                <a href="{% url 'students:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a>
+            </td>
         </tr>
         <tr>
-            <td><strong>{% trans 'Status:' %}</strong></td>
-            <td>{{ lesson.get_status_display }}</td>
+            <td style="padding: 8px; font-weight: bold;">{% trans "Status:" %}</td>
+            <td style="padding: 8px;">{{ lesson.get_status_display }}</td>
         </tr>
         {% if lesson.travel_time_before_minutes or lesson.travel_time_after_minutes %}
         <tr>
-            <td><strong>{% trans 'Travel Times:' %}</strong></td>
-            <td>{% blocktrans with before=lesson.travel_time_before_minutes after=lesson.travel_time_after_minutes %}Before: {{ before }} Min. | After: {{ after }} Min.{% endblocktrans %}</td>
+            <td style="padding: 8px; font-weight: bold;">{% trans "Travel Times:" %}</td>
+            <td style="padding: 8px;">
+                {% blocktrans with before=lesson.travel_time_before_minutes after=lesson.travel_time_after_minutes %}Before: {{ before }} Min. | After: {{ after }} Min.{% endblocktrans %}
+            </td>
         </tr>
         {% endif %}
         {% if lesson.notes %}
         <tr>
-            <td><strong>{% trans 'Notes:' %}</strong></td>
-            <td>{{ lesson.notes }}</td>
+            <td style="padding: 8px; font-weight: bold;">{% trans "Notes:" %}</td>
+            <td style="padding: 8px;">{{ lesson.notes }}</td>
         </tr>
         {% endif %}
     </table>
 </div>
 
 {% if has_conflicts %}
-<div class="panel panel-warning">
-    <h2>⚠ {% trans 'Conflicts' %}</h2>
-    <p>
-        <a href="{% url 'lessons:conflicts' lesson.pk %}" class="btn btn-conflict-details">{% trans 'Show Conflict Details' %}</a>
+<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
+    <h2 style="color: #dc3545; margin-top: 0;">⚠ {% trans "Conflicts" %}</h2>
+    <p style="margin-bottom: 15px;">
+        <a href="{% url 'lessons:conflicts' lesson.pk %}" class="btn" style="background: #dc3545; color: white;">
+            {% trans "Show Conflict Details" %}
+        </a>
     </p>
-    <div>
-        <h4>{% trans 'Conflict Reasons:' %}</h4>
-        <ul class="list-spaced">
+    
+    <div style="margin-top: 15px;">
+        <h4>{% trans "Conflict Reasons:" %}</h4>
+        <ul>
             {% for conflict in conflicts %}
-            <li>
+            <li style="margin-bottom: 8px;">
                 <strong>
                     {% if conflict.type == 'lesson' %}
-                        ⚠️ {% trans 'Time overlap with another lesson' %}
+                        ⚠️ {% trans "Time overlap with another lesson" %}
                     {% elif conflict.type == 'blocked_time' %}
-                        🚫 {% trans 'Time overlap with blocked time' %}
+                        🚫 {% trans "Time overlap with blocked time" %}
                     {% elif conflict.type == 'quota' %}
-                        📊 {% trans 'Contract quota exceeded' %}
+                        📊 {% trans "Contract quota exceeded" %}
                     {% endif %}
                 </strong>
                 {% if conflict.type == 'lesson' and conflict.object %}
-                    <br><small>{% trans 'Conflicting lesson:' %} <a href="{% url 'lessons:detail' conflict.object.pk %}">{{ conflict.object.contract.student.full_name }} - {{ conflict.object.date|date:'d.m.Y' }} {{ conflict.object.start_time|time:'H:i' }}</a></small>
+                    <br><small>{% trans "Conflicting lesson:" %} <a href="{% url 'lessons:detail' conflict.object.pk %}">{{ conflict.object.contract.student.full_name }} - {{ conflict.object.date|date:"d.m.Y" }} {{ conflict.object.start_time|time:"H:i" }}</a></small>
                 {% elif conflict.type == 'blocked_time' and conflict.object %}
-                    <br><small>{% trans 'Blocked time:' %} {{ conflict.object.title }} ({{ conflict.object.start_datetime|date:'d.m.Y H:i' }} - {{ conflict.object.end_datetime|date:'H:i' }})</small>
+                    <br><small>{% trans "Blocked time:" %} {{ conflict.object.title }} ({{ conflict.object.start_datetime|date:"d.m.Y H:i" }} - {{ conflict.object.end_datetime|date:"H:i" }})</small>
                 {% elif conflict.type == 'quota' %}
                     <br><small>{{ conflict.message }}</small>
                 {% endif %}
@@ -82,39 +84,39 @@
             {% endfor %}
         </ul>
     </div>
-
+    
     {% if conflict_lessons %}
     <h3>{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h3>
-    <table class="table-simple">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
         <thead>
-            <tr>
-                <th>{% trans 'Date' %}</th>
-                <th>{% trans 'Time' %}</th>
-                <th>{% trans 'Student' %}</th>
-                <th>{% trans 'Action' %}</th>
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Date" %}</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Time" %}</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Student" %}</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Action" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for conflict_lesson in conflict_lessons %}
             <tr>
-                <td>{{ conflict_lesson.date|date:"d.m.Y" }}</td>
-                <td>{{ conflict_lesson.start_time|time:"H:i" }}</td>
-                <td>{{ conflict_lesson.contract.student.full_name }}</td>
-                <td>
-                    <a href="{% url 'lessons:detail' conflict_lesson.pk %}" class="btn btn-small">{% trans 'View' %}</a>
-                    <a href="{% url 'lessons:update' conflict_lesson.pk %}" class="btn btn-primary btn-small">{% trans 'Edit' %}</a>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.date|date:"d.m.Y" }}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.start_time|time:"H:i" }}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.contract.student.full_name }}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">
+                    <a href="{% url 'lessons:detail' conflict_lesson.pk %}" class="btn" style="font-size: 0.9em;">{% trans "View" %}</a>
+                    <a href="{% url 'lessons:update' conflict_lesson.pk %}" class="btn btn-primary" style="font-size: 0.9em;">{% trans "Edit" %}</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% endif %}
-
+    
     {% if conflict_blocked_times %}
-    <h3>{% blocktrans count counter=conflict_blocked_times|length %}Conflicting Blocked Time{% plural %}Conflicting Blocked Times ({{ counter }}){% endblocktrans %}</h3>
-    <ul class="list-spaced">
+    <h3 style="margin-top: 20px;">{% blocktrans count counter=conflict_blocked_times|length %}Conflicting Blocked Time{% plural %}Conflicting Blocked Times ({{ counter }}){% endblocktrans %}</h3>
+    <ul>
         {% for blocked_time in conflict_blocked_times %}
-        <li>
+        <li style="margin-bottom: 8px;">
             <strong>{{ blocked_time.title }}</strong><br>
             <small>{{ blocked_time.start_datetime|date:"SHORT_DATETIME_FORMAT" }} - {{ blocked_time.end_datetime|date:"SHORT_DATETIME_FORMAT" }}</small>
             {% if blocked_time.description %}
@@ -124,20 +126,20 @@
         {% endfor %}
     </ul>
     {% endif %}
-
+    
     {% if quota_conflicts %}
-    <h3 class="quota-exceeded-title">⚠ {% blocktrans count counter=quota_conflicts|length %}Contract Quota Exceeded{% plural %}Contract Quota Exceeded ({{ counter }}){% endblocktrans %}</h3>
-    <div class="panel panel-danger quota-exceeded-content">
+    <h3 style="margin-top: 20px; color: #dc3545;">⚠ {% blocktrans count counter=quota_conflicts|length %}Contract Quota Exceeded{% plural %}Contract Quota Exceeded ({{ counter }}){% endblocktrans %}</h3>
+    <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin-top: 10px;">
         {% for quota_conflict in quota_conflicts %}
-        <p class="quota-exceeded-text">
+        <p style="margin: 5px 0; color: #721c24;">
             <strong>{{ quota_conflict.message }}</strong><br>
             <small>
                 {% blocktrans with planned=quota_conflict.planned_total actual=quota_conflict.actual_total %}Planned: {{ planned }} units | Actual: {{ actual }} hours{% endblocktrans %}
             </small>
         </p>
         {% endfor %}
-        <p class="quota-exceeded-note">
-            <strong>{% trans 'Note:' %}</strong> {% blocktrans with month=quota_conflicts.0.month|stringformat:'02d' year=quota_conflicts.0.year %}This lesson exceeds the planned quota until the end of {{ month }}.{{ year }}. Catching up is allowed, but pre-work is not.{% endblocktrans %}
+        <p style="margin-top: 10px; font-size: 0.9em; color: #721c24;">
+            <strong>{% trans "Note:" %}</strong> {% blocktrans with month=quota_conflicts.0.month|stringformat:"02d" year=quota_conflicts.0.year %}This lesson exceeds the planned quota until the end of {{ month }}.{{ year }}. Catching up is allowed, but pre-work is not.{% endblocktrans %}
         </p>
     </div>
     {% endif %}
@@ -145,42 +147,42 @@
 {% endif %}
 
 {% if is_premium %}
-<div class="panel panel-info">
-    <h2>🤖 {% trans 'AI Lesson Plan' %}</h2>
+<div style="background: #e7f3ff; padding: 20px; border-radius: 5px; border-left: 4px solid #007bff; margin-bottom: 20px;">
+    <h2 style="color: #007bff; margin-top: 0;">🤖 {% trans "AI Lesson Plan" %}</h2>
     {% if has_lesson_plan %}
-    <p>{% trans 'A lesson plan has already been generated for this lesson.' %}</p>
-    <div class="lesson-plan-section">
-        <h4>{% trans 'Latest Lesson Plan:' %}</h4>
-        <div class="panel lesson-plan-content">
-            <p><strong>{% trans 'Topic:' %}</strong> {{ latest_lesson_plan.topic }}</p>
-            <p><strong>{% trans 'Subject:' %}</strong> {{ latest_lesson_plan.subject }}</p>
+    <p>{% trans "A lesson plan has already been generated for this lesson." %}</p>
+    <div style="margin-top: 15px;">
+        <h4>{% trans "Latest Lesson Plan:" %}</h4>
+        <div style="background: white; padding: 15px; border-radius: 3px; margin-top: 10px;">
+            <p><strong>{% trans "Topic:" %}</strong> {{ latest_lesson_plan.topic }}</p>
+            <p><strong>{% trans "Subject:" %}</strong> {{ latest_lesson_plan.subject }}</p>
             {% if latest_lesson_plan.grade_level %}
-            <p><strong>{% trans 'Grade Level:' %}</strong> {{ latest_lesson_plan.grade_level }}</p>
+            <p><strong>{% trans "Grade Level:" %}</strong> {{ latest_lesson_plan.grade_level }}</p>
             {% endif %}
-            <div class="lesson-plan-text">{{ latest_lesson_plan.content }}</div>
+            <div style="margin-top: 10px; white-space: pre-wrap;">{{ latest_lesson_plan.content }}</div>
             {% if latest_lesson_plan.llm_model %}
-            <p class="muted lesson-plan-meta"><em>{% blocktrans with model=latest_lesson_plan.llm_model %}Generated with {{ model }}{% endblocktrans %}</em></p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;"><em>{% blocktrans with model=latest_lesson_plan.llm_model %}Generated with {{ model }}{% endblocktrans %}</em></p>
             {% endif %}
         </div>
     </div>
     {% endif %}
-    <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" class="lesson-plan-section">
+    <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" style="margin-top: 15px;">
         {% csrf_token %}
-        <button type="submit" class="btn btn-generate-plan">
+        <button type="submit" class="btn" style="background: #007bff; color: white;">
             {% if has_lesson_plan %}
-                🔄 {% trans 'Regenerate AI Lesson Plan' %}
+                🔄 {% trans "Regenerate AI Lesson Plan" %}
             {% else %}
-                ✨ {% trans 'Generate AI Lesson Plan' %}
+                ✨ {% trans "Generate AI Lesson Plan" %}
             {% endif %}
         </button>
     </form>
 </div>
 {% else %}
-<div class="panel panel-muted">
-    <h2>🤖 {% trans 'AI Lesson Plan' %} <span class="premium-badge">{% trans 'Premium' %}</span></h2>
-    <p>{% trans 'AI-powered lesson plan generation is only available for premium users.' %}</p>
-    <button type="button" class="btn btn-secondary btn-disabled" disabled>
-        ✨ {% trans 'Generate AI Lesson Plan' %}
+<div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #6c757d; margin-bottom: 20px;">
+    <h2 style="color: #6c757d; margin-top: 0;">🤖 {% trans "AI Lesson Plan" %} <span class="premium-badge">{% trans "Premium" %}</span></h2>
+    <p>{% trans "AI-powered lesson plan generation is only available for premium users." %}</p>
+    <button type="button" class="btn" style="background: #6c757d; color: white; cursor: not-allowed; opacity: 0.6;" disabled>
+        ✨ {% trans "Generate AI Lesson Plan" %}
     </button>
 </div>
 {% endif %}
