@@ -35,4 +35,3 @@ class ContentSecurityPolicyTest(TestCase):
         self.assertIn("font-src 'self'", csp)
         self.assertIn("connect-src 'self'", csp)
         self.assertIn("frame-ancestors 'self'", csp)
-

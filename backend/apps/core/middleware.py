@@ -9,7 +9,7 @@ from django.utils.deprecation import MiddlewareMixin
 class ContentSecurityPolicyMiddleware(MiddlewareMixin):
     """
     Middleware to set Content-Security-Policy header.
-    
+
     CSP is configured to prevent XSS attacks by disallowing inline scripts and styles.
     All JavaScript and CSS must be loaded from static files.
     """
@@ -29,4 +29,3 @@ class ContentSecurityPolicyMiddleware(MiddlewareMixin):
             )
             response["Content-Security-Policy"] = csp_policy
         return response
-
