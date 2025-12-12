@@ -20,10 +20,10 @@ cp .env.example .env
 
 **Demo-Logins**
 
-| Rolle            | Benutzername    | Passwort  | Bereich |
-| ---------------- | --------------- | --------- | ------- |
-| Premium (AI)     | `demo_premium`  | `demo123` | Admin   |
-| Standard         | `demo_user`     | `demo123` | Admin   |
+| Rolle            | Benutzername    | Passwort  |
+| ---------------- | --------------- | --------- |
+| Premium (AI)     | `demo_premium`  | `demo123` |
+| Standard         | `demo_user`     | `demo123` |
 
 ## Project Overview
 
@@ -60,7 +60,7 @@ TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 –
 2. **Week View** (`/lessons/week/`): Click-to-create lessons/blocked times, conflict badges, click a lesson → edit & AI lesson plan.
 3. **Income Overview** (`/income/`): Planned vs. actual revenue, monthly/yearly view.
 4. **Billing** (`/billing/invoices/`): Create invoices from taught lessons, review HTML documents.
-5. **Lesson Detail** (`/admin/lessons/lesson/<id>/change/`): “Generate AI Lesson Plan” button for premium; view conflict hints.
+5. **Lesson Detail** (`/lessons/<id>/`): "Generate AI Lesson Plan" button for premium; view conflict hints.
 
 ## Quick Start
 
@@ -104,11 +104,11 @@ python manage.py runserver
 
 **Logins:**
 - **Premium User:**
-  - URL: `http://127.0.0.1:8000/admin/`
+  - URL: `http://127.0.0.1:8000/`
   - Username: `demo_premium`
   - Password: `demo123`
 - **Standard User:**
-  - URL: `http://127.0.0.1:8000/admin/`
+  - URL: `http://127.0.0.1:8000/`
   - Username: `demo_user`
   - Password: `demo123`
 
@@ -148,7 +148,7 @@ python manage.py runserver
 
 ### Quick Demo Tour (2 Minutes)
 
-1. **Login**: Use demo credentials (`demo_premium` / `demo123`) to access the admin interface
+1. **Login**: Use demo credentials (`demo_premium` / `demo123`) to access the application
 2. **Dashboard**: View today's lessons, upcoming appointments, and conflicts overview
 3. **Week Calendar**: Open `/lessons/week/` to see the interactive calendar
    - Click in a time block to create a new lesson or blocked time
@@ -321,7 +321,7 @@ Creates:
 - LessonPlan entry pre-filled from Mock LLM
 - Premium vs. standard user for comparison
 
-**Demo Logins (via Admin):**
+**Demo Logins:**
 - `demo_premium` / `demo123` (premium)
 - `demo_user` / `demo123` (standard)
 

@@ -146,11 +146,6 @@ LOGGING = {
    python manage.py collectstatic --noinput
    ```
 
-7. **Create superuser:**
-   ```bash
-   python manage.py createsuperuser
-   ```
-
 ## WSGI Server (Gunicorn)
 
 **Run Gunicorn:**
@@ -297,14 +292,8 @@ Docker provides the easiest way to deploy TutorFlow in production.
    docker-compose exec web python manage.py collectstatic --noinput
    ```
 
-5. **Create superuser:**
-   ```bash
-   docker-compose exec web python manage.py createsuperuser
-   ```
-
-6. **Access application:**
+5. **Access application:**
    - Application: `http://localhost:8000`
-   - Admin: `http://localhost:8000/admin/`
 
 ### Docker Services
 
