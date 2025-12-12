@@ -97,7 +97,26 @@ class Command(BaseCommand):
                 pk = item["pk"]
                 
                 if model_name == "auth.user":
-                    # User is already handled above or will be created by fixture
+                    # Create user manually
+                    user, created = User.objects.get_or_create(
+                        id=pk,
+                        defaults={
+                            "username": fields["username"],
+                            "email": fields.get("email", ""),
+                            "first_name": fields.get("first_name", ""),
+                            "last_name": fields.get("last_name", ""),
+                            "is_superuser": fields.get("is_superuser", False),
+                            "is_staff": fields.get("is_staff", False),
+                            "is_active": fields.get("is_active", True),
+                        }
+                    )
+                    if not created:
+                        # Update existing user
+                        for key, value in fields.items():
+                            if key not in ["password", "created_at", "updated_at", "last_login", "date_joined"]:
+                                setattr(user, key, value)
+                        user.save()
+                    # Password will be set later
                     continue
                 elif model_name == "students.student":
                     # Get or create student
