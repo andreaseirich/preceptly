@@ -49,9 +49,10 @@
                                  data-start-hour="{{ lesson.start_time.hour }}"
                                  data-start-minute="{{ lesson.start_time.minute }}"
                                  data-duration="{{ lesson.duration_minutes }}"
+                                 data-travel-before="{{ lesson.travel_time_before_minutes }}"
+                                 data-travel-after="{{ lesson.travel_time_after_minutes }}"
+                                 data-total-time="{{ lesson.total_time_minutes }}"
                                  style="position: absolute; 
-                                        top: {{ lesson.start_time.minute }}px; 
-                                        height: {{ lesson.duration_minutes }}px; 
                                         left: 0; 
                                         right: 0; 
                                         background: {% if lesson.status == 'paid' %}#2e7d32{% elif lesson.status == 'taught' %}#607d8b{% else %}#2196f3{% endif %}; 
@@ -68,7 +69,12 @@
                                  onmouseover="showLessonPreview(this, event); this.style.transform='scale(1.02)'; this.style.zIndex='20';"
                                  onmouseout="hideLessonPreview(); this.style.transform='scale(1)'; this.style.zIndex='10';"
                                  onclick="event.stopPropagation(); window.location.href='{% url 'lesson_plans:lesson_plan' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
-                                 title="{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} Min.) - {% trans 'Click to view lesson plan' %}">
+                                 title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %} - {% trans 'Click to view lesson plan' %}">
+                                {% if lesson.travel_time_before_minutes > 0 %}
+                                <div style="background: rgba(255,255,255,0.15); padding: 1px 4px; margin: -2px -4px 2px -4px; font-size: 0.7em; border-radius: 3px 3px 0 0;">
+                                    🚗 {{ lesson.travel_time_before_minutes }} {% trans "Min." %}
+                                </div>
+                                {% endif %}
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                     <div style="flex: 1;">
                                         <span style="font-size: 1.1em; margin-right: 4px;">📚</span> <strong>{{ lesson.contract.student.first_name }}</strong>
@@ -85,6 +91,11 @@
                                         ✏️
                                     </a>
                                 </div>
+                                {% if lesson.travel_time_after_minutes > 0 %}
+                                <div style="background: rgba(255,255,255,0.15); padding: 1px 4px; margin: 2px -4px -2px -4px; font-size: 0.7em; border-radius: 0 0 3px 3px;">
+                                    🚗 {{ lesson.travel_time_after_minutes }} {% trans "Min." %}
+                                </div>
+                                {% endif %}
                             </div>
                             {% endif %}
                         {% endfor %}
@@ -299,5 +310,22 @@ function hideBlockedTimePreview() {
         previewTooltip = null;
     }
 }
+
+// Berechne Position und Höhe der Lesson-Blöcke unter Berücksichtigung der Wegzeit
+document.addEventListener('DOMContentLoaded', function() {
+    const lessonBlocks = document.querySelectorAll('.lesson-block[data-total-time]');
+    lessonBlocks.forEach(function(block) {
+        const startMinute = parseInt(block.dataset.startMinute) || 0;
+        const travelBefore = parseInt(block.dataset.travelBefore) || 0;
+        const totalTime = parseInt(block.dataset.totalTime) || parseInt(block.dataset.duration) || 0;
+        
+        // Position: Start-Minute minus Wegzeit davor
+        const topPosition = Math.max(0, startMinute - travelBefore);
+        block.style.top = topPosition + 'px';
+        
+        // Höhe: Gesamtzeit (Wegzeit davor + Dauer + Wegzeit danach)
+        block.style.height = totalTime + 'px';
+    });
+});
 </script>
 {% endblock %}

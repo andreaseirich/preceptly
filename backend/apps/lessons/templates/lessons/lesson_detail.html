@@ -21,7 +21,17 @@
         </tr>
         <tr>
             <td style="padding: 8px; font-weight: bold;">{% trans "Time:" %}</td>
-            <td style="padding: 8px;">{% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}</td>
+            <td style="padding: 8px;">
+                {% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}
+                {% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}
+                <br><small style="color: #666;">
+                    {% if lesson.travel_time_before_minutes > 0 %}🚗 {% trans "Before:" %} {{ lesson.travel_time_before_minutes }} {% trans "Min." %}{% endif %}
+                    {% if lesson.travel_time_before_minutes > 0 and lesson.travel_time_after_minutes > 0 %} | {% endif %}
+                    {% if lesson.travel_time_after_minutes > 0 %}🚗 {% trans "After:" %} {{ lesson.travel_time_after_minutes }} {% trans "Min." %}{% endif %}
+                    <br>{% trans "Total time:" %} {{ lesson.total_time_minutes }} {% trans "Min." %}
+                </small>
+                {% endif %}
+            </td>
         </tr>
         <tr>
             <td style="padding: 8px; font-weight: bold;">{% trans "Student:" %}</td>
@@ -33,14 +43,6 @@
             <td style="padding: 8px; font-weight: bold;">{% trans "Status:" %}</td>
             <td style="padding: 8px;">{{ lesson.get_status_display }}</td>
         </tr>
-        {% if lesson.travel_time_before_minutes or lesson.travel_time_after_minutes %}
-        <tr>
-            <td style="padding: 8px; font-weight: bold;">{% trans "Travel Times:" %}</td>
-            <td style="padding: 8px;">
-                {% blocktrans with before=lesson.travel_time_before_minutes after=lesson.travel_time_after_minutes %}Before: {{ before }} Min. | After: {{ after }} Min.{% endblocktrans %}
-            </td>
-        </tr>
-        {% endif %}
         {% if lesson.notes %}
         <tr>
             <td style="padding: 8px; font-weight: bold;">{% trans "Notes:" %}</td>

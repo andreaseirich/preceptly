@@ -13,6 +13,8 @@
         <tr>
             <th>{% trans "Date" %}</th>
             <th>{% trans "Time" %}</th>
+            <th>{% trans "Duration" %}</th>
+            <th>{% trans "Travel Time" %}</th>
             <th>{% trans "Student" %}</th>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Conflicts" %}</th>
@@ -23,7 +25,18 @@
         {% for lesson in lessons %}
         <tr>
             <td>{{ lesson.date }}</td>
-            <td>{{ lesson.start_time }}</td>
+            <td>{{ lesson.start_time|time:"H:i" }}</td>
+            <td>{{ lesson.duration_minutes }} {% trans "Min." %}</td>
+            <td>
+                {% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}
+                    {% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }}{% endif %}
+                    {% if lesson.travel_time_before_minutes > 0 and lesson.travel_time_after_minutes > 0 %} / {% endif %}
+                    {% if lesson.travel_time_after_minutes > 0 %}🚗 {{ lesson.travel_time_after_minutes }}{% endif %}
+                    {% trans "Min." %}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
             <td>{{ lesson.contract.student }}</td>
             <td>{{ lesson.get_status_display }}</td>
             <td>
@@ -39,7 +52,7 @@
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6">{% trans "No lessons available." %}</td></tr>
+        <tr><td colspan="8">{% trans "No lessons available." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>
