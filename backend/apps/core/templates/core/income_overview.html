@@ -8,76 +8,16 @@
 <h1>{% trans "Income Overview" %}</h1>
 
 {% if view_type == 'month' %}
-<h2>{{ month }}/{{ year }}</h2>
+<h2>{% trans "Monthly Overview" %}: {{ month|stringformat:"02d" }}/{{ year }}</h2>
 
-{% if planned_vs_actual %}
-<h3>{% trans "Planned vs. Actual" %}</h3>
-<table>
-    <thead>
-        <tr>
-            <th>{% trans "Category" %}</th>
-            <th>{% trans "Planned" %}</th>
-            <th>{% trans "Actual" %}</th>
-            <th>{% trans "Difference" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{% trans "Units" %}</td>
-            <td>{{ planned_vs_actual.planned_units }}</td>
-            <td>{{ planned_vs_actual.actual_units }}</td>
-            <td>
-                {% if planned_vs_actual.difference_units > 0 %}
-                <span style="color: #28a745;">+{{ planned_vs_actual.difference_units }}</span>
-                {% elif planned_vs_actual.difference_units < 0 %}
-                <span style="color: #dc3545;">{{ planned_vs_actual.difference_units }}</span>
-                {% else %}
-                <span>0</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td>{% trans "Income" %}</td>
-            <td>{{ planned_vs_actual.planned_amount|euro }}</td>
-            <td>{{ planned_vs_actual.actual_amount|euro }}</td>
-            <td>
-                {% if planned_vs_actual.difference_amount > 0 %}
-                <span style="color: #28a745;">+{{ planned_vs_actual.difference_amount|euro }}</span>
-                {% elif planned_vs_actual.difference_amount < 0 %}
-                <span style="color: #dc3545;">{{ planned_vs_actual.difference_amount|euro }}</span>
-                {% else %}
-                <span>{% if LANGUAGE_CODE == 'de' %}0,00 €{% else %}0.00 €{% endif %}</span>
-                {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
-{% endif %}
+<div class="btn-group" style="margin-bottom: 20px;">
+    <a href="{% url 'core:income' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-secondary">← {% trans "Previous Month" %}</a>
+    <a href="{% url 'core:income' %}?year={{ year }}" class="btn btn-secondary">{% trans "Year View" %}</a>
+    <a href="{% url 'core:income' %}?year={{ next_year }}&month={{ next_month }}" class="btn btn-secondary">{% trans "Next Month" %} →</a>
+</div>
 
-{% if billing_status %}
-<h3>{% trans "Billing Status" %}</h3>
-<table>
-    <thead>
-        <tr>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Number of Lessons" %}</th>
-            <th>{% trans "Income" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><strong>{% trans "Invoiced" %}</strong></td>
-            <td>{{ billing_status.invoiced.lesson_count }}</td>
-            <td>{{ billing_status.invoiced.income|euro }}</td>
-        </tr>
-        <tr>
-            <td><strong>{% trans "Not Invoiced" %}</strong></td>
-            <td>{{ billing_status.not_invoiced.lesson_count }}</td>
-            <td>{{ billing_status.not_invoiced.income|euro }}</td>
-        </tr>
-    </tbody>
-</table>
-{% endif %}
+<h3>{% trans "Summary" %}</h3>
+<p><strong>{% trans "Total Income:" %}</strong> {{ monthly_income.total_income|euro }} {% blocktrans count counter=monthly_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
 
 <h3>{% trans "Income by Status" %}</h3>
 <table>
@@ -99,30 +39,50 @@
     </tbody>
 </table>
 
-<h3>{% trans "Details" %}</h3>
-<p><strong>{% trans "Paid:" %}</strong> {{ monthly_income.total_income|euro }} {% blocktrans count counter=monthly_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
-
 {% else %}
-<h2>{{ year }}</h2>
+<h2>{% trans "Year Overview" %}: {{ year }}</h2>
 
-<h3>{% trans "Year Overview" %}</h3>
+<div class="btn-group" style="margin-bottom: 20px;">
+    <a href="{% url 'core:income' %}?year={{ year|add:'-1' }}" class="btn btn-secondary">← {% trans "Previous Year" %}</a>
+    <a href="{% url 'core:income' %}?year={{ year|add:'1' }}" class="btn btn-secondary">{% trans "Next Year" %} →</a>
+</div>
+
+<h3>{% trans "Year Summary" %}</h3>
 <p><strong>{% trans "Total:" %}</strong> {{ yearly_income.total_income|euro }} {% blocktrans count counter=yearly_income.total_lessons %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
 
 <h3>{% trans "Monthly Breakdown" %}</h3>
-<table>
+<table class="table">
     <thead>
         <tr>
             <th>{% trans "Month" %}</th>
             <th>{% trans "Lessons" %}</th>
             <th>{% trans "Income" %}</th>
+            <th>{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for month_data in yearly_income.monthly_breakdown %}
         <tr>
-            <td>{{ month_data.month }}/{{ month_data.year }}</td>
+            <td>
+                {% if month_data.month == 1 %}{% trans "January" %}
+                {% elif month_data.month == 2 %}{% trans "February" %}
+                {% elif month_data.month == 3 %}{% trans "March" %}
+                {% elif month_data.month == 4 %}{% trans "April" %}
+                {% elif month_data.month == 5 %}{% trans "May" %}
+                {% elif month_data.month == 6 %}{% trans "June" %}
+                {% elif month_data.month == 7 %}{% trans "July" %}
+                {% elif month_data.month == 8 %}{% trans "August" %}
+                {% elif month_data.month == 9 %}{% trans "September" %}
+                {% elif month_data.month == 10 %}{% trans "October" %}
+                {% elif month_data.month == 11 %}{% trans "November" %}
+                {% elif month_data.month == 12 %}{% trans "December" %}
+                {% endif %} {{ month_data.year }}
+            </td>
             <td>{{ month_data.lesson_count }}</td>
             <td>{{ month_data.total_income|euro }}</td>
+            <td>
+                <a href="{% url 'core:income' %}?year={{ month_data.year }}&month={{ month_data.month }}" class="btn btn-sm btn-primary">{% trans "View Details" %}</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -148,12 +108,4 @@
     </tbody>
 </table>
 {% endif %}
-
-<div class="btn-group">
-    <a href="{% url 'core:income' %}?year={{ year|add:'-1' }}" class="btn">{% trans "Previous Year" %}</a>
-    <a href="{% url 'core:income' %}?year={{ year|add:'1' }}" class="btn">{% trans "Next Year" %}</a>
-    {% if view_type == 'month' %}
-    <a href="{% url 'core:income' %}?year={{ year }}" class="btn">{% trans "Year View" %}</a>
-    {% endif %}
-</div>
 {% endblock %}

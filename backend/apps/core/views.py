@@ -79,17 +79,44 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
         now = timezone.now()
 
         # Year and month from URL parameters or current date
+        # Default to current month view if no month specified
         year = int(self.request.GET.get("year", now.year))
-        month = (
-            int(self.request.GET.get("month", now.month)) if "month" in self.request.GET else None
-        )
+        if "month" in self.request.GET:
+            month = int(self.request.GET.get("month"))
+        elif "year" in self.request.GET:
+            # If only year is specified, show year view
+            month = None
+        else:
+            # Default to current month
+            month = now.month
+
+        # Calculate previous and next month/year for navigation
+        if month:
+            # Previous month
+            if month == 1:
+                prev_year = year - 1
+                prev_month = 12
+            else:
+                prev_year = year
+                prev_month = month - 1
+            
+            # Next month
+            if month == 12:
+                next_year = year + 1
+                next_month = 1
+            else:
+                next_year = year
+                next_month = month + 1
+        else:
+            prev_year = year - 1
+            prev_month = 12
+            next_year = year + 1
+            next_month = 1
 
         if month:
             # Monthly view
             monthly_income = IncomeSelector.get_monthly_income(year, month, status="paid")
             income_by_status = IncomeSelector.get_income_by_status(year=year, month=month)
-            planned_vs_actual = IncomeSelector.get_monthly_planned_vs_actual(year, month)
-            billing_status = IncomeSelector.get_billing_status(year=year, month=month)
             context.update(
                 {
                     "view_type": "month",
@@ -97,22 +124,26 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
                     "month": month,
                     "monthly_income": monthly_income,
                     "income_by_status": income_by_status,
-                    "planned_vs_actual": planned_vs_actual,
-                    "billing_status": billing_status,
+                    "prev_year": prev_year,
+                    "prev_month": prev_month,
+                    "next_year": next_year,
+                    "next_month": next_month,
                 }
             )
         else:
             # Yearly view
             yearly_income = IncomeSelector.get_yearly_income(year, status="paid")
             income_by_status = IncomeSelector.get_income_by_status(year=year)
-            billing_status = IncomeSelector.get_billing_status(year=year)
             context.update(
                 {
                     "view_type": "year",
                     "year": year,
                     "yearly_income": yearly_income,
                     "income_by_status": income_by_status,
-                    "billing_status": billing_status,
+                    "prev_year": prev_year,
+                    "prev_month": prev_month,
+                    "next_year": next_year,
+                    "next_month": next_month,
                 }
             )
 
