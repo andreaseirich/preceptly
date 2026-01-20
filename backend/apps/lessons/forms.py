@@ -10,6 +10,17 @@ from django.utils.translation import gettext_lazy as _
 class LessonForm(forms.ModelForm):
     """Form für Lesson-Erstellung und -Bearbeitung."""
 
+    # Option für Bearbeitung: nur diese Stunde oder ganze Serie
+    edit_scope = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("single", _("Edit only this lesson")),
+            ("series", _("Edit entire series")),
+        ],
+        label=_("Edit scope"),
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+    )
+
     # Recurrence fields (only shown when creating, not editing)
     is_recurring = forms.BooleanField(
         required=False,
@@ -82,4 +93,27 @@ class LessonForm(forms.ModelForm):
             self.fields["is_recurring"].widget = forms.HiddenInput()
             self.fields["recurrence_type"].widget = forms.HiddenInput()
             self.fields["recurrence_end_date"].widget = forms.HiddenInput()
-            self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
+            
+            # Prüfe, ob diese Lesson zu einer Serie gehört
+            from apps.lessons.recurring_utils import find_matching_recurring_lesson
+            
+            matching_recurring = find_matching_recurring_lesson(self.instance)
+            if matching_recurring:
+                # Zeige Option für Bearbeitungsscope
+                self.fields["edit_scope"].initial = "single"
+                # Wenn Serie bearbeitet wird, zeige Wochentage-Felder
+                # Initialisiere mit aktuellen Wochentagen der Serie
+                active_weekdays = matching_recurring.get_active_weekdays()
+                self.fields["recurrence_weekdays"].initial = [str(wd) for wd in active_weekdays]
+                # Widget immer sichtbar machen - wird per JavaScript gesteuert
+                # WICHTIG: Kein HiddenInput, damit Checkboxes gerendert werden
+                self.fields["recurrence_weekdays"].widget = forms.CheckboxSelectMultiple(
+                    attrs={"class": "form-check-input"}
+                )
+            else:
+                # Verstecke edit_scope und recurrence_weekdays, wenn keine Serie gefunden
+                self.fields["edit_scope"].widget = forms.HiddenInput()
+                self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
+        else:
+            # Beim Erstellen: edit_scope verstecken
+            self.fields["edit_scope"].widget = forms.HiddenInput()

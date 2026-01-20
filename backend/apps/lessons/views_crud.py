@@ -211,34 +211,156 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
     form_class = LessonForm
     template_name = "lessons/lesson_form.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.lessons.recurring_utils import find_matching_recurring_lesson
+        
+        # Prüfe, ob diese Lesson zu einer Serie gehört
+        matching_recurring = find_matching_recurring_lesson(self.object)
+        context["matching_recurring"] = matching_recurring
+        
+        return context
+
     def get_success_url(self):
-        """Redirect back to week view."""
+        """Redirect back to calendar view."""
         lesson = self.object
         # Use year/month/day from request if available, otherwise from lesson date
         year = int(self.request.GET.get("year", lesson.date.year))
         month = int(self.request.GET.get("month", lesson.date.month))
         day = self.request.GET.get("day", lesson.date.day)
-        return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
+        return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
+        from apps.lessons.recurring_utils import find_matching_recurring_lesson
 
-        lesson = form.save()
+        edit_scope = form.cleaned_data.get("edit_scope", "single")
+        matching_recurring = find_matching_recurring_lesson(self.object)
 
-        # Automatic status setting
-        LessonStatusService.update_status_for_lesson(lesson)
-
-        # Recalculate conflicts for this lesson and affected lessons
-        recalculate_conflicts_for_affected_lessons(lesson)
-
-        conflicts = LessonConflictService.check_conflicts(lesson)
-        if conflicts:
-            messages.warning(
-                self.request,
-                _("Lesson updated, but {count} conflict(s) detected!").format(count=len(conflicts)),
-            )
+        if edit_scope == "series" and matching_recurring:
+            # Bearbeite die ganze Serie (RecurringLesson)
+            recurring = matching_recurring
+            
+            # WICHTIG: Speichere die ursprüngliche start_time BEVOR wir sie ändern!
+            original_start_time = recurring.start_time
+            
+            # WICHTIG: Finde alle Lessons dieser Serie BEVOR wir die RecurringLesson ändern!
+            # (Sonst finden wir sie nicht mehr, da sie noch die alte start_time haben)
+            from apps.lessons.recurring_utils import get_all_lessons_for_recurring
+            
+            all_lessons = get_all_lessons_for_recurring(recurring, original_start_time=original_start_time)
+            
+            # Prüfe, ob sich die Wochentage geändert haben
+            new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
+            new_weekdays_set = set([int(wd) for wd in new_weekdays])
+            old_weekdays_set = set(recurring.get_active_weekdays())
+            weekdays_changed = new_weekdays_set != old_weekdays_set
+            
+            # Aktualisiere RecurringLesson mit den neuen Werten
+            recurring.start_time = form.cleaned_data["start_time"]
+            recurring.duration_minutes = form.cleaned_data["duration_minutes"]
+            recurring.travel_time_before_minutes = form.cleaned_data["travel_time_before_minutes"]
+            recurring.travel_time_after_minutes = form.cleaned_data["travel_time_after_minutes"]
+            recurring.notes = form.cleaned_data["notes"]
+            
+            # Aktualisiere Wochentage
+            if new_weekdays:
+                recurring.monday = "0" in new_weekdays
+                recurring.tuesday = "1" in new_weekdays
+                recurring.wednesday = "2" in new_weekdays
+                recurring.thursday = "3" in new_weekdays
+                recurring.friday = "4" in new_weekdays
+                recurring.saturday = "5" in new_weekdays
+                recurring.sunday = "6" in new_weekdays
+            
+            recurring.save()
+            
+            if weekdays_changed:
+                # Wenn sich die Wochentage geändert haben:
+                # 1. Lösche alle alten Lessons, die nicht mehr zu den neuen Wochentagen passen
+                # 2. Generiere neue Lessons für die neuen Wochentage
+                
+                deleted_count = 0
+                for lesson in all_lessons:
+                    # Prüfe, ob diese Lesson zu den neuen Wochentagen passt
+                    lesson_weekday = lesson.date.weekday()
+                    if lesson_weekday not in new_weekdays_set:
+                        # Diese Lesson gehört nicht mehr zu den neuen Wochentagen -> löschen
+                        lesson.delete()
+                        deleted_count += 1
+                    else:
+                        # Diese Lesson passt noch -> aktualisieren
+                        lesson.start_time = recurring.start_time
+                        lesson.duration_minutes = recurring.duration_minutes
+                        lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
+                        lesson.travel_time_after_minutes = recurring.travel_time_after_minutes
+                        lesson.notes = recurring.notes
+                        LessonStatusService.update_status_for_lesson(lesson)
+                        lesson.save()
+                        recalculate_conflicts_for_affected_lessons(lesson)
+                
+                # Generiere neue Lessons für die neuen Wochentage
+                result = RecurringLessonService.generate_lessons(
+                    recurring, check_conflicts=True, dry_run=False
+                )
+                created_count = result.get("created", 0)
+                
+                if result.get("conflicts"):
+                    messages.warning(
+                        self.request,
+                        _("{count} conflict(s) detected in generated lessons.").format(
+                            count=len(result.get("conflicts", []))
+                        ),
+                    )
+                
+                messages.success(
+                    self.request,
+                    _("Series updated. {deleted} lesson(s) deleted, {created} new lesson(s) created, {updated} lesson(s) updated.").format(
+                        deleted=deleted_count,
+                        created=created_count,
+                        updated=len(all_lessons) - deleted_count
+                    ),
+                )
+            else:
+                # Wochentage haben sich nicht geändert -> nur bestehende Lessons aktualisieren
+                updated_count = 0
+                for lesson in all_lessons:
+                    # Aktualisiere diese Lesson mit den neuen Werten aus der RecurringLesson
+                    lesson.start_time = recurring.start_time
+                    lesson.duration_minutes = recurring.duration_minutes
+                    lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
+                    lesson.travel_time_after_minutes = recurring.travel_time_after_minutes
+                    lesson.notes = recurring.notes
+                    LessonStatusService.update_status_for_lesson(lesson)
+                    lesson.save()
+                    updated_count += 1
+                    
+                    # Recalculate conflicts
+                    recalculate_conflicts_for_affected_lessons(lesson)
+                
+                messages.success(
+                    self.request,
+                    _("Series updated. {count} lesson(s) updated.").format(count=updated_count),
+                )
         else:
-            messages.success(self.request, _("Lesson successfully updated."))
+            # Bearbeite nur diese eine Stunde
+            lesson = form.save()
+
+            # Automatic status setting
+            LessonStatusService.update_status_for_lesson(lesson)
+
+            # Recalculate conflicts for this lesson and affected lessons
+            recalculate_conflicts_for_affected_lessons(lesson)
+
+            conflicts = LessonConflictService.check_conflicts(lesson)
+            if conflicts:
+                messages.warning(
+                    self.request,
+                    _("Lesson updated, but {count} conflict(s) detected!").format(count=len(conflicts)),
+                )
+            else:
+                messages.success(self.request, _("Lesson successfully updated."))
+        
         return super().form_valid(form)
 
 

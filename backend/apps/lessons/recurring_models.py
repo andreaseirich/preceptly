@@ -86,8 +86,8 @@ class RecurringLesson(models.Model):
 
     def get_active_weekdays_display(self):
         """Returns a human-readable representation of active weekdays."""
-        from django.utils.translation import gettext_lazy as _
+        from django.utils.translation import gettext
 
-        weekday_names = [_("Mo"), _("Tu"), _("We"), _("Th"), _("Fr"), _("Sa"), _("Su")]
+        weekday_names = [gettext("Mo"), gettext("Tu"), gettext("We"), gettext("Th"), gettext("Fr"), gettext("Sa"), gettext("Su")]
         active = [weekday_names[i] for i in self.get_active_weekdays()]
-        return ", ".join(active) if active else _("None")
+        return ", ".join(active) if active else gettext("None")
