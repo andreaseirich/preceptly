@@ -112,5 +112,29 @@ function loadLessons() {
     
     window.location.href = url.toString();
 }
+
+// Stelle sicher, dass Datumsfelder die Werte aus GET-Parametern übernehmen
+document.addEventListener('DOMContentLoaded', function() {
+    const periodStartField = document.getElementById('{{ form.period_start.id_for_label }}');
+    const periodEndField = document.getElementById('{{ form.period_end.id_for_label }}');
+    const contractField = document.getElementById('{{ form.contract.id_for_label }}');
+    
+    // Lese Werte aus URL-Parametern
+    const urlParams = new URLSearchParams(window.location.search);
+    const periodStartParam = urlParams.get('period_start');
+    const periodEndParam = urlParams.get('period_end');
+    const contractParam = urlParams.get('contract');
+    
+    // Setze Werte in die Felder, falls vorhanden
+    if (periodStartParam && periodStartField) {
+        periodStartField.value = periodStartParam;
+    }
+    if (periodEndParam && periodEndField) {
+        periodEndField.value = periodEndParam;
+    }
+    if (contractParam && contractField) {
+        contractField.value = contractParam;
+    }
+});
 </script>
 {% endblock %}

@@ -14,10 +14,11 @@
         nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 3px; transition: background 0.2s; white-space: nowrap; }
         nav a:hover { background: #34495e; }
         nav a.active { background: #3498db; }
-        nav .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        nav .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         nav .nav-right form { margin: 0; }
-        nav .nav-right button { background: #34495e; color: white; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
-        nav .nav-right button:hover { background: #455a64; }
+        nav .nav-right button { background: transparent; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 18px; transition: background 0.2s; min-width: 36px; }
+        nav .nav-right button:hover { background: rgba(255,255,255,0.1); }
+        nav .nav-right select { font-size: 14px; }
         .messages { margin-bottom: 20px; }
         .message { padding: 12px 15px; margin-bottom: 10px; border-radius: 4px; border-left: 4px solid; }
         .message.success { background: #d4edda; color: #155724; border-color: #28a745; }
@@ -57,7 +58,7 @@
                 <a href="{% url 'core:dashboard' %}">📊 {% trans "Dashboard" %}</a>
                 <a href="{% url 'students:list' %}">👥 {% trans "Students" %}</a>
                 <a href="{% url 'contracts:list' %}">📄 {% trans "Contracts" %}</a>
-                <a href="{% url 'lessons:week' %}">📅 {% trans "Calendar" %}</a>
+                <a href="{% url 'lessons:calendar' %}">📅 {% trans "Calendar" %}</a>
                 <a href="{% url 'billing:invoice_list' %}">🧾 {% trans "Invoices" %}</a>
                 <a href="{% url 'core:income' %}">💰 {% trans "Income" %}</a>
             </div>
@@ -65,18 +66,18 @@
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'core:logout' %}" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" style="background: transparent; border: none; color: white; padding: 8px 15px; border-radius: 3px; cursor: pointer; font-size: 14px; transition: background 0.2s;">🚪 {% trans "Logout" %} ({{ user.username }})</button>
+                    <button type="submit" title="{% trans 'Logout' %} ({{ user.username }})" style="background: transparent; border: none; color: white; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 18px; transition: background 0.2s; min-width: 36px;">🚪</button>
                 </form>
                 {% else %}
-                <a href="{% url 'core:login' %}">🔐 {% trans "Login" %}</a>
+                <a href="{% url 'core:login' %}" title="{% trans 'Login' %}">🔐</a>
                 {% endif %}
-                <form action="{% url 'set_language' %}" method="post" style="display: inline-block;">
+                <form action="{% url 'set_language' %}" method="post" style="display: inline-block; margin: 0;">
                     {% csrf_token %}
-                    <select name="language" onchange="this.form.submit()" style="background: #34495e; color: white; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer;">
-                        {% get_current_language as LANGUAGE_CODE %}
-                        {% get_available_languages as LANGUAGES %}
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    <select name="language" onchange="this.form.submit()" title="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
                         {% for lang_code, lang_name in LANGUAGES %}
-                        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{{ lang_name }}</option>
+                        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{% if lang_code == 'de' %}DE{% elif lang_code == 'en' %}EN{% else %}{{ lang_code|upper }}{% endif %}</option>
                         {% endfor %}
                     </select>
                 </form>
@@ -95,6 +96,90 @@
         
         {% block content %}{% endblock %}
     </div>
+    
+    <script>
+    // Allgemeine Funktion zum Befüllen von Datumsfeldern aus GET-Parametern
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Finde alle Datumsfelder (type="date")
+        const dateFields = document.querySelectorAll('input[type="date"]');
+        dateFields.forEach(function(field) {
+            // Wenn das Feld leer ist, versuche, den Wert aus GET-Parametern zu setzen
+            if (!field.value) {
+                const fieldName = field.name || field.id;
+                // Versuche verschiedene Parameternamen
+                const possibleParams = [
+                    fieldName,
+                    fieldName.replace('_', '_'),
+                    'date',
+                    'period_start',
+                    'period_end',
+                    'start_date',
+                    'end_date',
+                ];
+                
+                for (const param of possibleParams) {
+                    const value = urlParams.get(param);
+                    if (value) {
+                        // Konvertiere verschiedene Datumsformate zu YYYY-MM-DD
+                        try {
+                            const date = new Date(value);
+                            if (!isNaN(date.getTime())) {
+                                const formattedDate = date.toISOString().split('T')[0];
+                                field.value = formattedDate;
+                                break;
+                            }
+                        } catch (e) {
+                            // Wenn es bereits im richtigen Format ist, verwende es direkt
+                            if (value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                field.value = value;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Finde alle datetime-local Felder
+        const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+        datetimeFields.forEach(function(field) {
+            if (!field.value) {
+                const fieldName = field.name || field.id;
+                const possibleParams = [
+                    fieldName,
+                    'start_datetime',
+                    'end_datetime',
+                    'start',
+                    'end',
+                ];
+                
+                for (const param of possibleParams) {
+                    const value = urlParams.get(param);
+                    if (value) {
+                        try {
+                            // Konvertiere ISO-Format zu datetime-local Format
+                            const date = new Date(value.replace('Z', '+00:00'));
+                            if (!isNaN(date.getTime())) {
+                                // Konvertiere zu datetime-local Format (YYYY-MM-DDTHH:mm)
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const hours = String(date.getHours()).padStart(2, '0');
+                                const minutes = String(date.getMinutes()).padStart(2, '0');
+                                field.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                                break;
+                            }
+                        } catch (e) {
+                            // Ignoriere Fehler
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
 </body>
 </html>
 
