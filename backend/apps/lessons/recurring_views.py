@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 
 class RecurringLessonListView(LoginRequiredMixin, ListView):
@@ -170,3 +170,96 @@ def generate_lessons_from_recurring(request, pk):
         return redirect(calendar_url)
 
     return redirect("lessons:recurring_detail", pk=pk)
+
+
+class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
+    """Bulk-Edit-Ansicht für mehrere Serientermine."""
+
+    template_name = "lessons/recurringlesson_bulk_edit.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["recurring_lessons"] = RecurringLesson.objects.all().order_by("contract__student", "start_date")
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Verarbeitet Bulk-Edit-Aktionen."""
+        recurring_ids = request.POST.getlist("recurring_ids")
+        action = request.POST.get("action")
+
+        if not recurring_ids:
+            messages.error(request, _("Please select at least one recurring lesson."))
+            return redirect("lessons:recurring_bulk_edit")
+
+        recurring_lessons = RecurringLesson.objects.filter(pk__in=recurring_ids)
+
+        if action == "delete":
+            count = recurring_lessons.count()
+            recurring_lessons.delete()
+            messages.success(
+                request,
+                ngettext(
+                    "{count} recurring lesson successfully deleted.",
+                    "{count} recurring lessons successfully deleted.",
+                    count,
+                ).format(count=count),
+            )
+        elif action == "activate":
+            count = recurring_lessons.update(is_active=True)
+            messages.success(
+                request,
+                ngettext(
+                    "{count} recurring lesson activated.",
+                    "{count} recurring lessons activated.",
+                    count,
+                ).format(count=count),
+            )
+        elif action == "deactivate":
+            count = recurring_lessons.update(is_active=False)
+            messages.success(
+                request,
+                ngettext(
+                    "{count} recurring lesson deactivated.",
+                    "{count} recurring lessons deactivated.",
+                    count,
+                ).format(count=count),
+            )
+        elif action == "update_dates":
+            new_start_date = request.POST.get("new_start_date")
+            new_end_date = request.POST.get("new_end_date") or None
+
+            if not new_start_date:
+                messages.error(request, _("Please provide a new start date."))
+                return redirect("lessons:recurring_bulk_edit")
+
+            from datetime import datetime
+            try:
+                start_date_obj = datetime.strptime(new_start_date, "%Y-%m-%d").date()
+                end_date_obj = None
+                if new_end_date:
+                    end_date_obj = datetime.strptime(new_end_date, "%Y-%m-%d").date()
+            except ValueError:
+                messages.error(request, _("Invalid date format."))
+                return redirect("lessons:recurring_bulk_edit")
+
+            count = 0
+            for recurring in recurring_lessons:
+                recurring.start_date = start_date_obj
+                if new_end_date:
+                    recurring.end_date = end_date_obj
+                recurring.save()
+                count += 1
+
+            messages.success(
+                request,
+                ngettext(
+                    "{count} recurring lesson updated.",
+                    "{count} recurring lessons updated.",
+                    count,
+                ).format(count=count),
+            )
+        else:
+            messages.error(request, _("Invalid action."))
+            return redirect("lessons:recurring_bulk_edit")
+
+        return redirect("lessons:recurring_list")

@@ -44,4 +44,9 @@ urlpatterns = [
         recurring_views.generate_lessons_from_recurring,
         name="recurring_generate",
     ),
+    path(
+        "recurring/bulk-edit/",
+        recurring_views.RecurringLessonBulkEditView.as_view(),
+        name="recurring_bulk_edit",
+    ),
 ]

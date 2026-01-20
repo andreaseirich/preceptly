@@ -1,0 +1,106 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Bulk Edit Recurring Lessons" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Bulk Edit Recurring Lessons" %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div style="margin-bottom: 20px;">
+        <label>
+            <input type="checkbox" id="select-all" onchange="toggleAll(this)">
+            <strong>{% trans "Select All" %}</strong>
+        </label>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>{% trans "Select" %}</th>
+                <th>{% trans "Student" %}</th>
+                <th>{% trans "Weekdays" %}</th>
+                <th>{% trans "Time" %}</th>
+                <th>{% trans "Start Date" %}</th>
+                <th>{% trans "Status" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recurring in recurring_lessons %}
+            <tr>
+                <td>
+                    <input type="checkbox" name="recurring_ids" value="{{ recurring.pk }}" class="recurring-checkbox">
+                </td>
+                <td>{{ recurring.contract.student }}</td>
+                <td>{{ recurring.get_active_weekdays_display }}</td>
+                <td>{{ recurring.start_time }}</td>
+                <td>{{ recurring.start_date }}</td>
+                <td>{% if recurring.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">{% trans "No recurring lessons available." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <h3>{% trans "Actions" %}</h3>
+        
+        <div style="margin-bottom: 15px;">
+            <label>
+                <input type="radio" name="action" value="delete" required>
+                <strong>{% trans "Delete selected recurring lessons" %}</strong>
+            </label>
+            <p style="margin-left: 25px; color: #666; font-size: 0.9em;">
+                {% trans "Note: Already generated lessons will not be deleted." %}
+            </p>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>
+                <input type="radio" name="action" value="activate" required>
+                <strong>{% trans "Activate selected recurring lessons" %}</strong>
+            </label>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>
+                <input type="radio" name="action" value="deactivate" required>
+                <strong>{% trans "Deactivate selected recurring lessons" %}</strong>
+            </label>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>
+                <input type="radio" name="action" value="update_dates" required>
+                <strong>{% trans "Update dates" %}</strong>
+            </label>
+            <div style="margin-left: 25px; margin-top: 10px;">
+                <label>
+                    {% trans "New start date:" %}
+                    <input type="date" name="new_start_date" style="margin-left: 10px; padding: 5px;">
+                </label>
+                <br>
+                <label style="margin-top: 10px;">
+                    {% trans "New end date (optional):" %}
+                    <input type="date" name="new_end_date" style="margin-left: 10px; padding: 5px;">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <button type="submit" class="btn btn-primary">{% trans "Apply Changes" %}</button>
+        <a href="{% url 'lessons:recurring_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+
+<script>
+function toggleAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.recurring-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+</script>
+{% endblock %}
