@@ -344,22 +344,22 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                 )
         else:
             # Bearbeite nur diese eine Stunde
-            lesson = form.save()
+        lesson = form.save()
 
-            # Automatic status setting
-            LessonStatusService.update_status_for_lesson(lesson)
+        # Automatic status setting
+        LessonStatusService.update_status_for_lesson(lesson)
 
-            # Recalculate conflicts for this lesson and affected lessons
-            recalculate_conflicts_for_affected_lessons(lesson)
+        # Recalculate conflicts for this lesson and affected lessons
+        recalculate_conflicts_for_affected_lessons(lesson)
 
-            conflicts = LessonConflictService.check_conflicts(lesson)
-            if conflicts:
-                messages.warning(
-                    self.request,
-                    _("Lesson updated, but {count} conflict(s) detected!").format(count=len(conflicts)),
-                )
-            else:
-                messages.success(self.request, _("Lesson successfully updated."))
+        conflicts = LessonConflictService.check_conflicts(lesson)
+        if conflicts:
+            messages.warning(
+                self.request,
+                _("Lesson updated, but {count} conflict(s) detected!").format(count=len(conflicts)),
+            )
+        else:
+            messages.success(self.request, _("Lesson successfully updated."))
         
         return super().form_valid(form)
 

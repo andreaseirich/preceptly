@@ -155,14 +155,14 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             year_param = self.request.GET.get("year")
             month_param = self.request.GET.get("month")
 
-            if year_param and month_param:
-                year = int(year_param)
-                month = int(month_param)
-            else:
+        if year_param and month_param:
+            year = int(year_param)
+            month = int(month_param)
+        else:
                 # Fallback: current date
-                now = timezone.now()
-                year = now.year
-                month = now.month
+            now = timezone.now()
+            year = now.year
+            month = now.month
 
         # Load calendar data
         calendar_data = CalendarService.get_calendar_data(year, month)
