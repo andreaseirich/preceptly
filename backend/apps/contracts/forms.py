@@ -4,10 +4,18 @@ Forms für Contract-Model.
 
 from apps.contracts.models import Contract
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 
 class ContractForm(forms.ModelForm):
     """Form für Contract-Erstellung und -Bearbeitung."""
+
+    has_monthly_planning_limit = forms.BooleanField(
+        required=False,
+        initial=True,
+        label=_("Monthly planning with planned units"),
+        help_text=_("If checked, you must enter planned units for each month. If unchecked, no maximum number of units is planned."),
+    )
 
     class Meta:
         model = Contract
@@ -19,6 +27,7 @@ class ContractForm(forms.ModelForm):
             "start_date",
             "end_date",
             "is_active",
+            "has_monthly_planning_limit",
             "notes",
         ]
         widgets = {
@@ -29,5 +38,6 @@ class ContractForm(forms.ModelForm):
             "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "end_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "has_monthly_planning_limit": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }

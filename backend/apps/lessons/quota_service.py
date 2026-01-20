@@ -35,6 +35,10 @@ class ContractQuotaService:
         """
         contract = lesson.contract
 
+        # Wenn has_monthly_planning_limit deaktiviert ist, gibt es keine Quota-Prüfung
+        if not contract.has_monthly_planning_limit:
+            return None
+
         # Bestimme den Monat der Lesson
         lesson_year = lesson.date.year
         lesson_month = lesson.date.month

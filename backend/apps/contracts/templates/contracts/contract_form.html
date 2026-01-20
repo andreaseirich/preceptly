@@ -41,6 +41,8 @@
             {% endfor %}
         </tbody>
     </table>
+    {% elif form.has_monthly_planning_limit.value == False %}
+    <p class="text-muted">{% trans "No monthly planning required. This contract has no maximum number of units planned." %}</p>
     {% endif %}
     
     <div class="btn-group">

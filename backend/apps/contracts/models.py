@@ -32,6 +32,10 @@ class Contract(models.Model):
         null=True, blank=True, help_text=_("Contract end date (optional, empty = unlimited)")
     )
     is_active = models.BooleanField(default=True, help_text=_("Is the contract active?"))
+    has_monthly_planning_limit = models.BooleanField(
+        default=True,
+        help_text=_("If checked, monthly planning with planned units is required. If unchecked, no maximum number of units is planned."),
+    )
     notes = models.TextField(
         blank=True, null=True, help_text=_("Additional notes about the contract")
     )
