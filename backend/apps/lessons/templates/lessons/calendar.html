@@ -6,9 +6,26 @@
 {% block content %}
 <h1>{% blocktrans with month=month_label year=year %}Calendar {{ month }} {{ year }}{% endblocktrans %}</h1>
 
-<div class="btn-group">
+<div class="btn-group" style="margin-bottom: 20px;">
     <a href="{% url 'lessons:calendar' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← {% trans "Previous Month" %}</a>
+    <a href="{% url 'lessons:week' %}?year={{ year }}&month={{ month }}&day=1" class="btn">{% trans "Week View" %}</a>
     <a href="{% url 'lessons:calendar' %}?year={{ next_year }}&month={{ next_month }}" class="btn">{% trans "Next Month" %} →</a>
+</div>
+
+<div style="margin-bottom: 20px;">
+    <form method="get" action="{% url 'lessons:calendar' %}" style="display: inline-block;">
+        <label for="date-select">{% trans "Jump to date:" %}</label>
+        <input type="date" id="date-select" name="date" value="{{ year }}-{{ month|stringformat:'02d' }}-01" 
+               onchange="this.form.submit()" style="margin-left: 10px; padding: 5px;">
+    </form>
+    <script>
+        document.getElementById('date-select').addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth() + 1;
+            window.location.href = '{% url "lessons:calendar" %}?year=' + year + '&month=' + month;
+        });
+    </script>
 </div>
 
 <p style="margin-top: 10px; color: #495057; font-size: 0.9em;">
@@ -51,9 +68,11 @@
                     <div style="display: block; background: {% if lesson.date < today %}#f5f5f5{% else %}#e3f2fd{% endif %}; padding: 3px; margin-bottom: 2px; font-size: 0.85em; border-left: 3px solid {% if lesson.id in conflicts_by_lesson %}#dc3545{% else %}#2196f3{% endif %}; {% if lesson.date < today %}opacity: 0.7;{% endif %}">
                         <a href="{% url 'lessons:detail' lesson.pk %}" 
                            style="text-decoration: none; color: #333; display: block;"
-                           title="{% trans 'View lesson' %}">
+                           title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %}">
+                            {% if lesson.travel_time_before_minutes > 0 %}<span style="font-size: 0.8em;">🚗</span>{% endif %}
                             <strong>{{ lesson.start_time|time:"H:i" }}</strong> 
                             {{ lesson.contract.student.first_name }}
+                            <small style="opacity: 0.8;">({{ lesson.duration_minutes }}{% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}+{{ lesson.travel_time_before_minutes|add:lesson.travel_time_after_minutes }}{% endif %} {% trans "Min." %})</small>
                             {% if lesson.id in conflicts_by_lesson %}
                             <a href="{% url 'lessons:conflicts' lesson.pk %}" 
                                style="color: #dc3545; text-decoration: none; margin-left: 5px;"

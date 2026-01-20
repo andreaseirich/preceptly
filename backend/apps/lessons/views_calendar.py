@@ -2,8 +2,10 @@
 Calendar views for lessons (Week, Month, Calendar redirect).
 """
 
-from datetime import timedelta
+from calendar import monthcalendar, month_name
+from datetime import date, timedelta
 
+from apps.lessons.calendar_service import CalendarService
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
@@ -12,6 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.generic import ListView, TemplateView
 
 
@@ -126,24 +129,106 @@ class LessonMonthView(LoginRequiredMixin, ListView):
 
 
 class CalendarView(LoginRequiredMixin, TemplateView):
-    """Redirect to week view - legacy calendar view."""
+    """Month calendar view with date navigation."""
 
-    def get(self, request, *args, **kwargs):
-        """Redirect to week view with appropriate parameters."""
-        year_param = request.GET.get("year")
-        month_param = request.GET.get("month")
-        day_param = request.GET.get("day")
+    template_name = "lessons/calendar.html"
 
-        if year_param and month_param:
-            year = int(year_param)
-            month = int(month_param)
-            day = int(day_param) if day_param else 1
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Automatic status update for past lessons
+        LessonStatusUpdater.update_past_lessons_to_taught()
+
+        # Year and month from URL parameters (fallback: current date)
+        # Support both ?year=X&month=Y and ?date=YYYY-MM-DD
+        date_param = self.request.GET.get("date")
+        if date_param:
+            try:
+                date_obj = date.fromisoformat(date_param)
+                year = date_obj.year
+                month = date_obj.month
+            except (ValueError, TypeError):
+                now = timezone.now()
+                year = now.year
+                month = now.month
         else:
-            # Fallback to today
-            now = timezone.now()
-            year = now.year
-            month = now.month
-            day = now.day
+            year_param = self.request.GET.get("year")
+            month_param = self.request.GET.get("month")
 
-        url = reverse("lessons:week") + f"?year={year}&month={month}&day={day}"
-        return HttpResponseRedirect(url)
+            if year_param and month_param:
+                year = int(year_param)
+                month = int(month_param)
+            else:
+                # Fallback: current date
+                now = timezone.now()
+                year = now.year
+                month = now.month
+
+        # Load calendar data
+        calendar_data = CalendarService.get_calendar_data(year, month)
+
+        # Calculate previous and next month
+        if month == 1:
+            prev_year = year - 1
+            prev_month = 12
+        else:
+            prev_year = year
+            prev_month = month - 1
+
+        if month == 12:
+            next_year = year + 1
+            next_month = 1
+        else:
+            next_year = year
+            next_month = month + 1
+
+        # Generate calendar weeks
+        cal = monthcalendar(year, month)
+        weeks = []
+        today = timezone.localdate()
+
+        for week in cal:
+            week_days = []
+            for day in week:
+                if day == 0:
+                    week_days.append(None)
+                else:
+                    day_date = date(year, month, day)
+                    week_days.append(
+                        {
+                            "date": day_date,
+                            "is_current_month": True,
+                            "lessons": calendar_data["lessons_by_date"].get(day_date, []),
+                            "blocked_times": calendar_data["blocked_times_by_date"].get(day_date, []),
+                        }
+                    )
+            weeks.append(week_days)
+
+        # Weekday names (will be translated in template)
+        weekday_names = [
+            _("Monday"),
+            _("Tuesday"),
+            _("Wednesday"),
+            _("Thursday"),
+            _("Friday"),
+            _("Saturday"),
+            _("Sunday"),
+        ]
+
+        context.update(
+            {
+                "year": year,
+                "month": month,
+                "month_label": month_name[month],
+                "weeks": weeks,
+                "weekday_names": weekday_names,
+                "conflicts_by_lesson": calendar_data["conflicts_by_lesson"],
+                "prev_year": prev_year,
+                "prev_month": prev_month,
+                "next_year": next_year,
+                "next_month": next_month,
+                "today": today,
+            }
+        )
+
+        return context
