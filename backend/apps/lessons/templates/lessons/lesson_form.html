@@ -22,14 +22,23 @@
                 {{ choice.tag }}
                 <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
             </label>
+            {% empty %}
+            <p style="color: red;">WARNING: edit_scope field is empty! Field widget: {{ form.edit_scope.widget }}</p>
             {% endfor %}
         </div>
+        {# Debug: Zeige Feld-Info #}
+        {% if form.edit_scope %}
+        <p style="font-size: 0.8em; color: #666;">Debug: edit_scope field exists, widget: {{ form.edit_scope.widget|safe }}</p>
+        {% else %}
+        <p style="color: red;">ERROR: edit_scope field does not exist in form!</p>
+        {% endif %}
     </div>
 </div>
 {% endif %}
 
 <form method="post">
     {% csrf_token %}
+    <input type="hidden" name="edit_scope" id="edit_scope_hidden" value="single">
     
     <div style="margin-bottom: 20px;">
         <h3>{% trans "Lesson Details" %}</h3>
@@ -106,69 +115,69 @@
     </div>
     {% endif %}
     
+    {% if object and matching_recurring %}
+    <div id="series-info" style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107; display: none;">
+        <h3>{% trans "Series Settings" %}</h3>
+        <p><em>{% trans "When editing the entire series, changes to the following fields will be applied to all lessons in the series:" %}</em></p>
+        
+        <div style="margin-top: 15px;">
+            <p><strong>{% trans "Current series configuration:" %}</strong></p>
+            <ul>
+                <li>{% trans "Recurrence type" %}: {{ matching_recurring.get_recurrence_type_display }}</li>
+                <li>{% trans "Weekdays" %}: {{ matching_recurring.get_active_weekdays_display }}</li>
+                <li>{% trans "Series period" %}: {{ matching_recurring.start_date }} {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</li>
+            </ul>
+        </div>
+        
+        <div id="series-weekdays-section" style="margin-top: 15px; display: none;">
+            <p>
+                <label><strong>{% trans "Change weekdays:" %}</strong></label>
+                <div id="series-weekdays-container" style="display: none; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                    {# Erstelle Checkboxes immer manuell basierend auf matching_recurring #}
+                    {% if matching_recurring %}
+                        {% with active_weekdays=matching_recurring.get_active_weekdays %}
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="0" {% if 0 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-0">
+                            <span>{% trans "Monday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="1" {% if 1 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-1">
+                            <span>{% trans "Tuesday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="2" {% if 2 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-2">
+                            <span>{% trans "Wednesday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="3" {% if 3 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-3">
+                            <span>{% trans "Thursday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="4" {% if 4 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-4">
+                            <span>{% trans "Friday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="5" {% if 5 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-5">
+                            <span>{% trans "Saturday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="6" {% if 6 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-6">
+                            <span>{% trans "Sunday" %}</span>
+                        </label>
+                        {% endwith %}
+                    {% endif %}
+                </div>
+                <small style="display: block; color: #666; margin-top: 10px;">{% trans "Select the weekdays for this series. Lessons on deselected weekdays will be deleted, and new lessons will be created for newly selected weekdays." %}</small>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="btn-group">
         <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
         <a href="{% url 'lessons:calendar' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
-
-{% if object and matching_recurring %}
-<div id="series-info" style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107; display: none;">
-    <h3>{% trans "Series Settings" %}</h3>
-    <p><em>{% trans "When editing the entire series, changes to the following fields will be applied to all lessons in the series:" %}</em></p>
-    
-    <div style="margin-top: 15px;">
-        <p><strong>{% trans "Current series configuration:" %}</strong></p>
-        <ul>
-            <li>{% trans "Recurrence type" %}: {{ matching_recurring.get_recurrence_type_display }}</li>
-            <li>{% trans "Weekdays" %}: {{ matching_recurring.get_active_weekdays_display }}</li>
-            <li>{% trans "Series period" %}: {{ matching_recurring.start_date }} {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</li>
-        </ul>
-    </div>
-    
-    <div id="series-weekdays-section" style="margin-top: 15px; display: none;">
-        <p>
-            <label><strong>{% trans "Change weekdays:" %}</strong></label>
-            <div id="series-weekdays-container" style="display: none; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                {# Erstelle Checkboxes immer manuell basierend auf matching_recurring #}
-                {% if matching_recurring %}
-                    {% with active_weekdays=matching_recurring.get_active_weekdays %}
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="0" {% if 0 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-0">
-                        <span>{% trans "Monday" %}</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="1" {% if 1 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-1">
-                        <span>{% trans "Tuesday" %}</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="2" {% if 2 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-2">
-                        <span>{% trans "Wednesday" %}</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="3" {% if 3 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-3">
-                        <span>{% trans "Thursday" %}</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="4" {% if 4 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-4">
-                        <span>{% trans "Friday" %}</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="5" {% if 5 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-5">
-                        <span>{% trans "Saturday" %}</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
-                        <input type="checkbox" name="recurrence_weekdays" value="6" {% if 6 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-6">
-                        <span>{% trans "Sunday" %}</span>
-                    </label>
-                    {% endwith %}
-                {% endif %}
-            </div>
-            <small style="display: block; color: #666; margin-top: 10px;">{% trans "Select the weekdays for this series. Lessons on deselected weekdays will be deleted, and new lessons will be created for newly selected weekdays." %}</small>
-        </p>
-    </div>
-</div>
-{% endif %}
 
 <script>
 function toggleRecurrenceFields() {
@@ -292,6 +301,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleEditScopeChange() {
         const isSeries = this.value === 'series';
+        const hiddenField = document.getElementById('edit_scope_hidden');
+        if (hiddenField) {
+            hiddenField.value = this.value;
+        }
         toggleSeriesInfo(isSeries);
         // Debug: Log für Entwicklung
         if (isSeries) {

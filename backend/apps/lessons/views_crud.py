@@ -90,23 +90,106 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
+        from apps.lessons.recurring_models import RecurringLesson
+        from apps.lessons.recurring_service import RecurringLessonService
+        from django.utils.translation import ngettext
 
-        lesson = form.save()
+        # Prüfe, ob eine Serientermin erstellt werden soll
+        is_recurring = form.cleaned_data.get("is_recurring", False)
 
-        # Automatic status setting
-        LessonStatusService.update_status_for_lesson(lesson)
-
-        # Recalculate conflicts for this lesson and affected lessons
-        recalculate_conflicts_for_affected_lessons(lesson)
-
-        conflicts = LessonConflictService.check_conflicts(lesson)
-        if conflicts:
-            messages.warning(
-                self.request,
-                _("Lesson created, but {count} conflict(s) detected!").format(count=len(conflicts)),
+        if is_recurring:
+            # Erstelle eine RecurringLesson statt einer einzelnen Lesson
+            lesson = form.save(commit=False)  # Noch nicht speichern
+            
+            # Erstelle RecurringLesson
+            recurring_lesson = RecurringLesson(
+                contract=lesson.contract,
+                start_date=lesson.date,
+                end_date=form.cleaned_data.get("recurrence_end_date"),
+                start_time=lesson.start_time,
+                duration_minutes=lesson.duration_minutes,
+                travel_time_before_minutes=lesson.travel_time_before_minutes,
+                travel_time_after_minutes=lesson.travel_time_after_minutes,
+                recurrence_type=form.cleaned_data.get("recurrence_type", "weekly"),
+                notes=lesson.notes,
+                is_active=True,
             )
+            
+            # Setze Wochentage basierend auf recurrence_weekdays
+            weekdays = form.cleaned_data.get("recurrence_weekdays", [])
+            recurring_lesson.monday = "0" in weekdays
+            recurring_lesson.tuesday = "1" in weekdays
+            recurring_lesson.wednesday = "2" in weekdays
+            recurring_lesson.thursday = "3" in weekdays
+            recurring_lesson.friday = "4" in weekdays
+            recurring_lesson.saturday = "5" in weekdays
+            recurring_lesson.sunday = "6" in weekdays
+            
+            recurring_lesson.save()
+            
+            # Generiere Lessons aus der RecurringLesson
+            result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
+            
+            if result["created"] > 0:
+                messages.success(
+                    self.request,
+                    ngettext(
+                        "Recurring lesson series created and {count} lesson generated.",
+                        "Recurring lesson series created and {count} lessons generated.",
+                        result["created"],
+                    ).format(count=result["created"]),
+                )
+            else:
+                messages.info(
+                    self.request,
+                    _("Recurring lesson series created, but no new lessons were generated (they may already exist)."),
+                )
+
+            if result["conflicts"]:
+                conflict_count = len(result["conflicts"])
+                messages.warning(
+                    self.request,
+                    ngettext(
+                        "{count} lesson with conflicts detected.",
+                        "{count} lessons with conflicts detected.",
+                        conflict_count,
+                    ).format(count=conflict_count),
+                )
+            
+            # Setze self.object für die Weiterleitung
+            # Verwende die erste erstellte Lesson oder die erste gefundene Lesson
+            if result.get("created", 0) > 0:
+                # Finde die erste erstellte Lesson
+                from apps.lessons.models import Lesson
+                first_lesson = Lesson.objects.filter(
+                    contract=recurring_lesson.contract,
+                    date__gte=recurring_lesson.start_date,
+                    start_time=recurring_lesson.start_time,
+                ).order_by("date").first()
+                self.object = first_lesson
+            else:
+                # Falls keine Lesson erstellt wurde, verwende die ursprüngliche Lesson
+                lesson.save()
+                LessonStatusService.update_status_for_lesson(lesson)
+                self.object = lesson
         else:
-            messages.success(self.request, _("Lesson successfully created."))
+            # Normale einzelne Lesson erstellen
+            lesson = form.save()
+
+            # Automatic status setting
+            LessonStatusService.update_status_for_lesson(lesson)
+
+            # Recalculate conflicts for this lesson and affected lessons
+            recalculate_conflicts_for_affected_lessons(lesson)
+
+            conflicts = LessonConflictService.check_conflicts(lesson)
+            if conflicts:
+                messages.warning(
+                    self.request,
+                    _("Lesson created, but {count} conflict(s) detected!").format(count=len(conflicts)),
+                )
+            else:
+                messages.success(self.request, _("Lesson successfully created."))
 
         return super().form_valid(form)
 
@@ -141,8 +224,13 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
         from apps.lessons.recurring_utils import find_matching_recurring_lesson
 
+        # WICHTIG: Hole die ursprüngliche Lesson-Instanz aus der Datenbank,
+        # bevor wir nach der RecurringLesson suchen (self.object hat bereits die geänderten Werte)
+        original_lesson = Lesson.objects.get(pk=self.object.pk)
+
         edit_scope = form.cleaned_data.get("edit_scope", "single")
-        matching_recurring = find_matching_recurring_lesson(self.object)
+        # WICHTIG: Verwende original_lesson statt self.object, um die RecurringLesson zu finden
+        matching_recurring = find_matching_recurring_lesson(original_lesson)
 
         if edit_scope == "series" and matching_recurring:
             # Bearbeite die ganze Serie (RecurringLesson)
