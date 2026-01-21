@@ -25,7 +25,8 @@ def find_matching_recurring_lesson(lesson: Lesson) -> RecurringLesson | None:
     
     for recurring in recurring_lessons:
         # Prüfe, ob das Datum der Lesson zum Muster passt
-        if _date_matches_recurring_pattern(lesson.date, recurring):
+        matches = _date_matches_recurring_pattern(lesson.date, recurring)
+        if matches:
             return recurring
     
     return None

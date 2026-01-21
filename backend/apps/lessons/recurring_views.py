@@ -58,6 +58,7 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         """Nach Erstellen: Generiere Lessons und weiter zum Kalender."""
         recurring_lesson = self.object
+        
         # Generiere Lessons automatisch
         result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 

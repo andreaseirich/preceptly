@@ -76,6 +76,7 @@ class RecurringLessonService:
     ) -> dict:
         """Generiert wöchentliche Lessons."""
         active_weekdays = recurring_lesson.get_active_weekdays()
+        
         if not active_weekdays:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
 
@@ -84,11 +85,13 @@ class RecurringLessonService:
         skipped = 0
         conflicts = []
         preview = []
+        dates_checked = []
 
         while current_date <= end_date:
             weekday = current_date.weekday()  # 0=Montag, 6=Sonntag
 
             if weekday in active_weekdays:
+                dates_checked.append(str(current_date))
                 result = RecurringLessonService._create_lesson_if_not_exists(
                     recurring_lesson, current_date, check_conflicts, dry_run
                 )
