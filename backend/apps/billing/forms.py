@@ -18,11 +18,11 @@ class InvoiceCreateForm(forms.Form):
     """
 
     period_start = forms.DateField(
-        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
         help_text=_("Start of the billing period"),
     )
     period_end = forms.DateField(
-        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
         help_text=_("End of the billing period"),
     )
     contract = forms.ModelChoiceField(

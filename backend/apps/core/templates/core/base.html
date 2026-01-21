@@ -102,9 +102,52 @@
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         
+        // Hilfsfunktion zum Formatieren von Datumswerten
+        function formatDateForInput(value) {
+            if (!value) return null;
+            
+            // Wenn bereits im richtigen Format (YYYY-MM-DD), verwende es direkt
+            if (value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return value;
+            }
+            
+            // Versuche, verschiedene Datumsformate zu parsen
+            try {
+                // Django rendert manchmal Datumswerte im Format "DD.MM.YYYY" oder "DD/MM/YYYY"
+                if (value.match(/^\d{1,2}[.\/]\d{1,2}[.\/]\d{4}$/)) {
+                    const parts = value.split(/[.\/]/);
+                    const day = parts[0].padStart(2, '0');
+                    const month = parts[1].padStart(2, '0');
+                    const year = parts[2];
+                    return `${year}-${month}-${day}`;
+                }
+                
+                // Versuche, als Date zu parsen
+                const date = new Date(value);
+                if (!isNaN(date.getTime())) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                }
+            } catch (e) {
+                // Ignoriere Fehler
+            }
+            
+            return null;
+        }
+        
         // Finde alle Datumsfelder (type="date")
         const dateFields = document.querySelectorAll('input[type="date"]');
         dateFields.forEach(function(field) {
+            // Wenn das Feld einen Wert hat, aber nicht im richtigen Format, korrigiere es
+            if (field.value && !field.value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const formatted = formatDateForInput(field.value);
+                if (formatted) {
+                    field.value = formatted;
+                }
+            }
+            
             // Wenn das Feld leer ist, versuche, den Wert aus GET-Parametern zu setzen
             if (!field.value) {
                 const fieldName = field.name || field.id;
@@ -122,22 +165,49 @@
                 for (const param of possibleParams) {
                     const value = urlParams.get(param);
                     if (value) {
-                        // Konvertiere verschiedene Datumsformate zu YYYY-MM-DD
-                        try {
-                            const date = new Date(value);
-                            if (!isNaN(date.getTime())) {
-                                const formattedDate = date.toISOString().split('T')[0];
-                                field.value = formattedDate;
-                                break;
-                            }
-                        } catch (e) {
-                            // Wenn es bereits im richtigen Format ist, verwende es direkt
-                            if (value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                                field.value = value;
-                                break;
-                            }
+                        const formatted = formatDateForInput(value);
+                        if (formatted) {
+                            field.value = formatted;
+                            break;
                         }
                     }
+                }
+            }
+        });
+        
+        // Hilfsfunktion zum Formatieren von Zeitwerten
+        function formatTimeForInput(value) {
+            if (!value) return null;
+            
+            // Wenn bereits im richtigen Format (HH:MM), verwende es direkt
+            if (value.match(/^\d{2}:\d{2}$/)) {
+                return value;
+            }
+            
+            // Versuche, verschiedene Zeitformate zu parsen
+            try {
+                // Django rendert manchmal Zeitwerte im Format "HH:MM:SS"
+                if (value.match(/^\d{1,2}:\d{2}(:\d{2})?$/)) {
+                    const parts = value.split(':');
+                    const hours = parts[0].padStart(2, '0');
+                    const minutes = parts[1].padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                }
+            } catch (e) {
+                // Ignoriere Fehler
+            }
+            
+            return null;
+        }
+        
+        // Finde alle Zeitfelder (type="time")
+        const timeFields = document.querySelectorAll('input[type="time"]');
+        timeFields.forEach(function(field) {
+            // Wenn das Feld einen Wert hat, aber nicht im richtigen Format, korrigiere es
+            if (field.value && !field.value.match(/^\d{2}:\d{2}$/)) {
+                const formatted = formatTimeForInput(field.value);
+                if (formatted) {
+                    field.value = formatted;
                 }
             }
         });

@@ -33,9 +33,9 @@ class RecurringLessonForm(forms.ModelForm):
         ]
         widgets = {
             "contract": forms.Select(attrs={"class": "form-control"}),
-            "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "end_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "start_time": forms.TimeInput(attrs={"class": "form-control", "type": "time"}),
+            "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
+            "end_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
+            "start_time": forms.TimeInput(attrs={"class": "form-control", "type": "time"}, format="%H:%M"),
             "duration_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "travel_time_before_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "travel_time_after_minutes": forms.NumberInput(attrs={"class": "form-control"}),
