@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2026-01-21
+
+### Added
+- **Recurring lesson creation from lesson form**: When creating a lesson, users can now select "Repeat this lesson" to create a recurring series directly from the lesson creation form
+  - LessonCreateView now creates a RecurringLesson when `is_recurring` is checked
+  - Automatically generates all lessons for the series based on selected weekdays
+  - Form validation ensures recurrence_type and weekdays are selected when creating a series
+- **Series editing with weekday selection**: When editing a lesson that belongs to a series, users can now change which weekdays are included
+  - Selecting "Edit entire series" shows weekday checkboxes
+  - Only lessons on selected weekdays are updated; lessons on deselected weekdays are deleted
+  - New lessons are automatically created for newly selected weekdays
+- **Management commands for lesson deletion**:
+  - `delete_all_lessons_for_anita`: Deletes all lessons for Anita
+  - `delete_lessons_for_anita_tuesdays`: Deletes lessons for Anita on Tuesdays from a specific date
+  - `delete_future_lessons_for_chris`: Deletes all future lessons for Chris
+- **Travel time display in calendar**: Travel time is now visible in the calendar and lesson overview
+  - Week view shows travel time before and after lessons visually
+  - Lesson list includes a "Travel Time" column
+  - Lesson detail view shows total time including travel time
+
+### Changed
+- **Date/time input formatting**: All date and time input fields now use proper HTML5 format attributes
+  - DateInput widgets use `format="%Y-%m-%d"` for correct HTML5 date rendering
+  - TimeInput widgets use `format="%H:%M"` for correct HTML5 time rendering
+  - DateTimeInput widgets use `format="%Y-%m-%dT%H:%M"` for datetime-local inputs
+  - JavaScript in base.html ensures proper formatting even when values are pre-filled from URL parameters
+- **Navigation bar improvements**: Made navigation bar more compact
+  - Logout button shows only icon (🚪) with tooltip
+  - Language selector shows only "DE" or "EN" instead of full names
+  - Reduced padding for better space utilization
+- **Series editing workflow**: Improved series editing experience
+  - Edit scope selection (single lesson vs. entire series) is now properly submitted with the form
+  - Hidden input field ensures edit_scope value is always sent, even when radio buttons are outside the form
+  - JavaScript updates hidden field when radio selection changes
+
+### Fixed
+- **Series creation**: Fixed issue where creating a recurring lesson from the lesson form only created a single lesson
+  - LessonCreateView now properly creates RecurringLesson and generates all lessons
+  - First lesson is no longer duplicated
+- **Series editing**: Fixed issue where editing a series only updated the selected lesson
+  - Edit scope is now correctly read from form data
+  - Matching RecurringLesson is found using original lesson instance before form changes
+  - Weekday changes are properly applied: deselected weekdays are removed, selected weekdays are updated
+- **Date form pre-filling**: Fixed issue where date forms were not pre-filled when creating lessons from calendar or generating invoices
+  - JavaScript in base.html now formats and fills date/datetime-local fields from URL parameters
+  - Existing field values are reformatted to correct HTML5 format if needed
+
 ## [0.10.1] - 2025-12-09
 
 ### Changed
