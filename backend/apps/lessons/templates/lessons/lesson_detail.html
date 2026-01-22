@@ -7,7 +7,7 @@
 <h1>{% trans "Lesson" %}</h1>
 
 <div style="margin-bottom: 20px;">
-    <a href="{% url 'lessons:week' %}?year={{ lesson.date.year }}&month={{ lesson.date.month }}&day={{ lesson.date.day }}" class="btn">← {% trans "Back to Calendar" %}</a>
+    <a href="{% if last_calendar_view == 'week' %}{% url 'lessons:week' %}?year={{ lesson.date.year }}&month={{ lesson.date.month }}&day={{ lesson.date.day }}{% else %}{% url 'lessons:calendar' %}?year={{ lesson.date.year }}&month={{ lesson.date.month }}{% endif %}" class="btn">← {% trans "Back to Calendar" %}</a>
     <a href="{% url 'lessons:update' lesson.pk %}" class="btn btn-primary">✏️ {% trans "Edit" %}</a>
     <a href="{% url 'lessons:delete' lesson.pk %}" class="btn btn-danger">🗑️ {% trans "Delete" %}</a>
 </div>

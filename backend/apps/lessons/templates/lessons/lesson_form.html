@@ -329,11 +329,57 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Stelle sicher, dass Datumsfelder die initialen Werte anzeigen
     function initializeDateFields() {
-        // Datumsfeld für Lesson
+        const urlParams = new URLSearchParams(window.location.search);
         const dateField = document.getElementById('{{ form.date.id_for_label }}');
+        const timeField = document.getElementById('{{ form.start_time.id_for_label }}');
+        
+        // Support für start Parameter (ISO datetime format: YYYY-MM-DDTHH:MM)
+        const startParam = urlParams.get('start');
+        if (startParam) {
+            try {
+                // Parse ISO format: YYYY-MM-DDTHH:MM (treat as local time, not UTC)
+                // If format is YYYY-MM-DDTHH:MM, parse it directly to avoid timezone conversion
+                if (startParam.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+                    // Parse as local time explicitly
+                    const [datePart, timePart] = startParam.split('T');
+                    const [year, month, day] = datePart.split('-').map(Number);
+                    const [hours, minutes] = timePart.split(':').map(Number);
+                    
+                    // Setze Datum
+                    if (dateField) {
+                        dateField.value = datePart;
+                    }
+                    // Setze Zeit
+                    if (timeField) {
+                        timeField.value = timePart;
+                    }
+                } else {
+                    // Fallback: use Date constructor (for other formats)
+                    const startDate = new Date(startParam);
+                    if (!isNaN(startDate.getTime())) {
+                        // Setze Datum
+                        if (dateField) {
+                            const year = startDate.getFullYear();
+                            const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(startDate.getDate()).padStart(2, '0');
+                            dateField.value = `${year}-${month}-${day}`;
+                        }
+                        // Setze Zeit
+                        if (timeField) {
+                            const hours = String(startDate.getHours()).padStart(2, '0');
+                            const minutes = String(startDate.getMinutes()).padStart(2, '0');
+                            timeField.value = `${hours}:${minutes}`;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to parse start parameter:', e);
+            }
+        }
+        
+        // Fallback: Datumsfeld für Lesson (wenn noch nicht gesetzt)
         if (dateField && !dateField.value) {
             // Versuche, das Datum aus GET-Parametern zu lesen
-            const urlParams = new URLSearchParams(window.location.search);
             const dateParam = urlParams.get('date');
             if (dateParam) {
                 // Konvertiere YYYY-MM-DD Format
@@ -347,6 +393,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     const formattedDate = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
                     dateField.value = formattedDate;
                 }
+            }
+        }
+        
+        // Fallback: Zeitfeld (wenn noch nicht gesetzt)
+        if (timeField && !timeField.value) {
+            const timeParam = urlParams.get('time');
+            if (timeParam) {
+                timeField.value = timeParam;
             }
         }
         

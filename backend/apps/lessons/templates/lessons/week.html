@@ -9,7 +9,25 @@
 
 <div class="btn-group">
     <a href="{% url 'lessons:week' %}?year={{ prev_week.year }}&month={{ prev_week.month }}&day={{ prev_week.day }}" class="btn">← {% trans "Previous Week" %}</a>
+    <a href="{% url 'lessons:calendar' %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">📅 {% trans "Month View" %}</a>
     <a href="{% url 'lessons:week' %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn">{% trans "Next Week" %} →</a>
+</div>
+
+<div style="margin-bottom: 20px; margin-top: 10px;">
+    <form method="get" action="{% url 'lessons:week' %}" style="display: inline-block;">
+        <label for="date-select">{% trans "Jump to date:" %}</label>
+        <input type="date" id="date-select" name="date" value="{{ week_start|date:'Y-m-d' }}" 
+               onchange="this.form.submit()" style="margin-left: 10px; padding: 5px;">
+    </form>
+    <script>
+        document.getElementById('date-select').addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth() + 1;
+            const day = selectedDate.getDate();
+            window.location.href = '{% url "lessons:week" %}?year=' + year + '&month=' + month + '&day=' + day;
+        });
+    </script>
 </div>
 
 <p style="margin-top: 10px; color: #495057; font-size: 0.9em;">
@@ -31,7 +49,7 @@
         </thead>
         <tbody>
             {% for hour in hours %}
-            <tr data-hour="{{ hour }}" style="height: 60px;">
+            <tr data-hour="{{ hour }}" style="height: 60px; position: relative;">
                 <td style="border: 1px solid #ddd; padding: 4px; text-align: center; background: #f9f9f9; font-size: 0.85em;">
                     {{ hour }}:00
                 </td>
@@ -39,10 +57,11 @@
                 <td class="time-slot" 
                     data-date="{{ weekday.date|date:'Y-m-d' }}" 
                     data-hour="{{ hour }}"
-                    style="border: 1px solid #ddd; padding: 0; position: relative; vertical-align: top; cursor: pointer;"
+                    style="border: 1px solid #ddd; padding: 0; position: relative; vertical-align: top; cursor: pointer; overflow: visible;"
                     onclick="openCreateFromSlot(this)">
-                    <div class="slot-content" style="position: relative; height: 100%; width: 100%;">
+                    <div class="slot-content" style="position: relative; height: 100%; width: 100%; overflow: visible; min-height: 60px;">
                         {% for lesson in weekday.lessons %}
+                            {% comment %}Render block in the hour row where lesson starts{% endcomment %}
                             {% if lesson.start_time.hour|add:0 == hour|add:0 %}
                             <div class="lesson-block {% if lesson.id in conflicts_by_lesson %}has-conflict{% endif %}" 
                                  data-lesson-id="{{ lesson.id }}"
@@ -52,6 +71,8 @@
                                  data-travel-before="{{ lesson.travel_time_before_minutes }}"
                                  data-travel-after="{{ lesson.travel_time_after_minutes }}"
                                  data-total-time="{{ lesson.total_time_minutes }}"
+                                 data-render-hour="{{ hour }}"
+                                 data-lesson-date="{{ weekday.date|date:'Y-m-d' }}"
                                  style="position: absolute; 
                                         left: 0; 
                                         right: 0; 
@@ -191,8 +212,19 @@ function showCreateDialog(startDateTime, endDateTime, date) {
     const overlay = document.getElementById('dialog-overlay');
     const timeInfo = document.getElementById('dialog-time-info');
     
-    const startStr = startDateTime.toISOString().slice(0, 16);
-    const endStr = endDateTime.toISOString().slice(0, 16);
+    // Format datetime as YYYY-MM-DDTHH:MM in local time (not UTC)
+    // This avoids timezone conversion issues
+    function formatLocalDateTime(dt) {
+        const year = dt.getFullYear();
+        const month = String(dt.getMonth() + 1).padStart(2, '0');
+        const day = String(dt.getDate()).padStart(2, '0');
+        const hours = String(dt.getHours()).padStart(2, '0');
+        const minutes = String(dt.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    const startStr = formatLocalDateTime(startDateTime);
+    const endStr = formatLocalDateTime(endDateTime);
     
     const locale = 'en-US';
     timeInfo.textContent = `From: ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} to ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} on ${new Date(date).toLocaleDateString(locale)}`;
@@ -314,17 +346,119 @@ function hideBlockedTimePreview() {
 // Berechne Position und Höhe der Lesson-Blöcke unter Berücksichtigung der Wegzeit
 document.addEventListener('DOMContentLoaded', function() {
     const lessonBlocks = document.querySelectorAll('.lesson-block[data-total-time]');
+    const blocksToMove = []; // Collect blocks that need to be moved
+    
+    // First pass: identify blocks that need to be moved
     lessonBlocks.forEach(function(block) {
+        const startHour = parseInt(block.dataset.startHour) || 0;
+        const startMinute = parseInt(block.dataset.startMinute) || 0;
+        const travelBefore = parseInt(block.dataset.travelBefore) || 0;
+        const renderHour = parseInt(block.dataset.renderHour) || startHour;
+        
+        // Berechne die tatsächliche Startzeit in Minuten (Startzeit minus Hinweg)
+        const actualStartMinutes = (startHour * 60 + startMinute) - travelBefore;
+        const actualStartHour = Math.floor(actualStartMinutes / 60);
+        const actualStartMinute = actualStartMinutes % 60;
+        
+        if (actualStartHour !== renderHour) {
+            blocksToMove.push({
+                block: block,
+                actualStartHour: actualStartHour,
+                actualStartMinute: actualStartMinute,
+                renderHour: renderHour
+            });
+        }
+    });
+    
+    // Second pass: move blocks to correct rows
+    blocksToMove.forEach(function(item) {
+        const block = item.block;
+        const actualStartHour = item.actualStartHour;
+        const actualStartMinute = item.actualStartMinute;
+        const renderHour = item.renderHour;
+        const lessonId = block.dataset.lessonId;
+        const lessonDate = block.dataset.lessonDate;
+        const totalTime = parseInt(block.dataset.totalTime) || parseInt(block.dataset.duration) || 0;
+        
+        // Finde die richtige Zeile
+        const currentRow = block.closest('tr');
+        let targetRow = null;
+        
+        if (actualStartHour < renderHour) {
+            // Block sollte in der vorherigen Zeile sein - suche rückwärts
+            let row = currentRow.previousElementSibling;
+            while (row) {
+                const rowHour = parseInt(row.dataset.hour);
+                if (rowHour === actualStartHour) {
+                    targetRow = row;
+                    break;
+                }
+                if (rowHour < actualStartHour) {
+                    break; // Zu weit zurück
+                }
+                row = row.previousElementSibling;
+            }
+        } else {
+            // Block sollte in der nächsten Zeile sein (selten)
+            let row = currentRow.nextElementSibling;
+            while (row) {
+                const rowHour = parseInt(row.dataset.hour);
+                if (rowHour === actualStartHour) {
+                    targetRow = row;
+                    break;
+                }
+                if (rowHour > actualStartHour) {
+                    break; // Zu weit voraus
+                }
+                row = row.nextElementSibling;
+            }
+        }
+        
+        if (targetRow) {
+            // Finde den entsprechenden Time-Slot in der Ziel-Zeile
+            const timeSlot = targetRow.querySelector(`td.time-slot[data-date="${lessonDate}"]`);
+            if (timeSlot) {
+                const slotContent = timeSlot.querySelector('.slot-content');
+                if (slotContent && !slotContent.querySelector(`.lesson-block[data-lesson-id="${lessonId}"]`)) {
+                    // Verschiebe den Block in die richtige Zeile
+                    block.remove();
+                    block.dataset.renderHour = actualStartHour.toString();
+                    block.style.top = actualStartMinute + 'px';
+                    block.style.height = totalTime + 'px';
+                    slotContent.appendChild(block);
+                    return; // Block wurde verschoben
+                }
+            }
+        }
+    });
+    
+    // Third pass: position all blocks (including moved ones)
+    document.querySelectorAll('.lesson-block[data-total-time]').forEach(function(block) {
+        const startHour = parseInt(block.dataset.startHour) || 0;
         const startMinute = parseInt(block.dataset.startMinute) || 0;
         const travelBefore = parseInt(block.dataset.travelBefore) || 0;
         const totalTime = parseInt(block.dataset.totalTime) || parseInt(block.dataset.duration) || 0;
+        const renderHour = parseInt(block.dataset.renderHour) || startHour;
         
-        // Position: Start-Minute minus Wegzeit davor
-        const topPosition = Math.max(0, startMinute - travelBefore);
-        block.style.top = topPosition + 'px';
+        // Berechne die tatsächliche Startzeit in Minuten (Startzeit minus Hinweg)
+        const actualStartMinutes = (startHour * 60 + startMinute) - travelBefore;
+        const actualStartHour = Math.floor(actualStartMinutes / 60);
+        const actualStartMinute = actualStartMinutes % 60;
         
-        // Höhe: Gesamtzeit (Wegzeit davor + Dauer + Wegzeit danach)
-        block.style.height = totalTime + 'px';
+        // Position: relativ zur Zeile, in der der Block jetzt ist
+        if (actualStartHour === renderHour) {
+            block.style.top = actualStartMinute + 'px';
+            block.style.height = totalTime + 'px';
+        } else {
+            // Block ist noch in der falschen Zeile - positioniere relativ zur aktuellen Zeile
+            if (actualStartHour < renderHour) {
+                // Block sollte in vorheriger Stunde sein, positioniere negativ
+                block.style.top = (actualStartMinute - 60) + 'px';
+            } else {
+                block.style.top = actualStartMinute + 'px';
+            }
+            block.style.height = totalTime + 'px';
+        }
     });
 });
 </script>

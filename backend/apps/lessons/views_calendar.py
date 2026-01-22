@@ -29,12 +29,28 @@ class WeekView(LoginRequiredMixin, TemplateView):
         # Automatic status update for past lessons
         LessonStatusUpdater.update_past_lessons_to_taught()
 
+        # Store this view as the last used calendar view in session
+        self.request.session['last_calendar_view'] = 'week'
+
         # Year, month and day from URL parameters (fallback: current date)
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")
         day_param = self.request.GET.get("day")
+        date_param = self.request.GET.get("date")
 
-        if year_param and month_param and day_param:
+        if date_param:
+            try:
+                date_obj = date.fromisoformat(date_param)
+                year = date_obj.year
+                month = date_obj.month
+                day = date_obj.day
+            except (ValueError, TypeError):
+                # Fallback: current date
+                now = timezone.now()
+                year = now.year
+                month = now.month
+                day = now.day
+        elif year_param and month_param and day_param:
             year = int(year_param)
             month = int(month_param)
             day = int(day_param)
@@ -138,6 +154,9 @@ class CalendarView(LoginRequiredMixin, TemplateView):
 
         # Automatic status update for past lessons
         LessonStatusUpdater.update_past_lessons_to_taught()
+
+        # Store this view as the last used calendar view in session
+        self.request.session['last_calendar_view'] = 'calendar'
 
         # Year and month from URL parameters (fallback: current date)
         # Support both ?year=X&month=Y and ?date=YYYY-MM-DD

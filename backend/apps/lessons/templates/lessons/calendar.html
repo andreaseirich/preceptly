@@ -12,21 +12,6 @@
     <a href="{% url 'lessons:calendar' %}?year={{ next_year }}&month={{ next_month }}" class="btn">{% trans "Next Month" %} →</a>
 </div>
 
-<div style="margin-bottom: 20px;">
-    <form method="get" action="{% url 'lessons:calendar' %}" style="display: inline-block;">
-        <label for="date-select">{% trans "Jump to date:" %}</label>
-        <input type="date" id="date-select" name="date" value="{{ year }}-{{ month|stringformat:'02d' }}-01" 
-               onchange="this.form.submit()" style="margin-left: 10px; padding: 5px;">
-    </form>
-    <script>
-        document.getElementById('date-select').addEventListener('change', function() {
-            const selectedDate = new Date(this.value);
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth() + 1;
-            window.location.href = '{% url "lessons:calendar" %}?year=' + year + '&month=' + month;
-        });
-    </script>
-</div>
 
 <p style="margin-top: 10px; color: #495057; font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Click on a day to create a new lesson. Click on an existing lesson to edit it." %}

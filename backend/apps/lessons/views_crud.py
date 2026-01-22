@@ -45,6 +45,12 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
     template_name = "lessons/lesson_detail.html"
     context_object_name = "lesson"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add last calendar view to context for template
+        context['last_calendar_view'] = self.request.session.get('last_calendar_view', 'week')
+        return context
+
 
 class LessonCreateView(LoginRequiredMixin, CreateView):
     """Create a new lesson."""
@@ -54,37 +60,91 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
     template_name = "lessons/lesson_form.html"
 
     def get_success_url(self):
-        """Redirect back to calendar view."""
+        """Redirect back to last used calendar view."""
         lesson = self.object
         # Use year/month/day from request if available, otherwise from lesson date
         year = int(self.request.GET.get("year", lesson.date.year))
         month = int(self.request.GET.get("month", lesson.date.month))
-        day = self.request.GET.get("day", lesson.date.day)
-        return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
+        day = int(self.request.GET.get("day", lesson.date.day))
+        
+        # Get last used calendar view from session (default: week)
+        last_view = self.request.session.get('last_calendar_view', 'week')
+        
+        if last_view == 'week':
+            return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
+        else:
+            return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def get_initial(self):
         """Pre-fill form with date/time from request parameters."""
         initial = super().get_initial()
         
-        # Get date from request
-        date_str = self.request.GET.get("date")
-        if date_str:
+        # Support for start/end parameters from week view (ISO datetime format: YYYY-MM-DDTHH:MM)
+        start_str = self.request.GET.get("start")
+        end_str = self.request.GET.get("end")
+        
+        if start_str:
             try:
-                from datetime import datetime
-                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-                initial["date"] = date_obj
-            except ValueError:
+                from datetime import datetime, timedelta
+                # Parse ISO format: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS
+                if 'T' in start_str:
+                    # ISO datetime format
+                    if len(start_str) == 16:  # YYYY-MM-DDTHH:MM
+                        start_dt = datetime.strptime(start_str, "%Y-%m-%dT%H:%M")
+                    else:  # YYYY-MM-DDTHH:MM:SS or with timezone
+                        start_dt = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
+                        if start_dt.tzinfo:
+                            from django.utils import timezone
+                            start_dt = timezone.make_naive(start_dt)
+                    initial["date"] = start_dt.date()
+                    initial["start_time"] = start_dt.time()
+                    
+                    # Calculate duration from end parameter if provided
+                    if end_str:
+                        try:
+                            if len(end_str) == 16:  # YYYY-MM-DDTHH:MM
+                                end_dt = datetime.strptime(end_str, "%Y-%m-%dT%H:%M")
+                            else:  # YYYY-MM-DDTHH:MM:SS or with timezone
+                                end_dt = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
+                                if end_dt.tzinfo:
+                                    from django.utils import timezone
+                                    end_dt = timezone.make_naive(end_dt)
+                            
+                            # Calculate duration in minutes
+                            duration = end_dt - start_dt
+                            duration_minutes = int(duration.total_seconds() / 60)
+                            if duration_minutes > 0:
+                                initial["duration_minutes"] = duration_minutes
+                        except (ValueError, TypeError):
+                            pass
+                else:
+                    # Fallback: treat as date only
+                    date_obj = datetime.strptime(start_str, "%Y-%m-%d").date()
+                    initial["date"] = date_obj
+            except (ValueError, TypeError):
                 pass
         
-        # Get time from request
-        time_str = self.request.GET.get("time")
-        if time_str:
-            try:
-                from datetime import datetime
-                time_obj = datetime.strptime(time_str, "%H:%M").time()
-                initial["start_time"] = time_obj
-            except ValueError:
-                pass
+        # Fallback: Get date from request (for backward compatibility)
+        if "date" not in initial:
+            date_str = self.request.GET.get("date")
+            if date_str:
+                try:
+                    from datetime import datetime
+                    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    initial["date"] = date_obj
+                except ValueError:
+                    pass
+        
+        # Fallback: Get time from request (for backward compatibility)
+        if "start_time" not in initial:
+            time_str = self.request.GET.get("time")
+            if time_str:
+                try:
+                    from datetime import datetime
+                    time_obj = datetime.strptime(time_str, "%H:%M").time()
+                    initial["start_time"] = time_obj
+                except ValueError:
+                    pass
         
         return initial
 
@@ -212,13 +272,20 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        """Redirect back to calendar view."""
+        """Redirect back to last used calendar view."""
         lesson = self.object
         # Use year/month/day from request if available, otherwise from lesson date
         year = int(self.request.GET.get("year", lesson.date.year))
         month = int(self.request.GET.get("month", lesson.date.month))
-        day = self.request.GET.get("day", lesson.date.day)
-        return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
+        day = int(self.request.GET.get("day", lesson.date.day))
+        
+        # Get last used calendar view from session (default: week)
+        last_view = self.request.session.get('last_calendar_view', 'week')
+        
+        if last_view == 'week':
+            return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
+        else:
+            return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
@@ -366,12 +433,26 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "lessons/lesson_confirm_delete.html"
 
     def get_success_url(self):
-        """Redirect back to calendar view."""
+        """Redirect back to last used calendar view."""
         # Use year/month/day from request if available
         year = self.request.GET.get("year")
         month = self.request.GET.get("month")
+        day = self.request.GET.get("day")
+        
+        # Get last used calendar view from session (default: week)
+        last_view = self.request.session.get('last_calendar_view', 'week')
+        
         if year and month:
-            return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
+            if last_view == 'week' and day:
+                return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
+            elif last_view == 'week':
+                # If no day provided, use current day
+                from django.utils import timezone
+                now = timezone.now()
+                day = now.day
+                return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
+            else:
+                return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
         return reverse_lazy("lessons:list")
 
     def delete(self, request, *args, **kwargs):
