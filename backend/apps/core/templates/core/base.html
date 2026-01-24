@@ -73,8 +73,8 @@
                 {% endif %}
                 <form action="{% url 'set_language' %}" method="post" style="display: inline-block; margin: 0;">
                     {% csrf_token %}
-                    {% get_current_language as LANGUAGE_CODE %}
-                    {% get_available_languages as LANGUAGES %}
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
                     <select name="language" onchange="this.form.submit()" title="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
                         {% for lang_code, lang_name in LANGUAGES %}
                         <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{% if lang_code == 'de' %}DE{% elif lang_code == 'en' %}EN{% else %}{{ lang_code|upper }}{% endif %}</option>

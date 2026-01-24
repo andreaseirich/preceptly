@@ -114,7 +114,7 @@ class LessonForm(forms.ModelForm):
             else:
                 # Verstecke edit_scope und recurrence_weekdays, wenn keine Serie gefunden
                 self.fields["edit_scope"].widget = forms.HiddenInput()
-                self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
+            self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
         else:
             # Beim Erstellen: edit_scope verstecken
             self.fields["edit_scope"].widget = forms.HiddenInput()

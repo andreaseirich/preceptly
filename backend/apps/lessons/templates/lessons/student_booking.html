@@ -1,0 +1,399 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'de' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Book Lesson" %} - {{ student.full_name }}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f5f5f5; 
+            color: #2c3e50; 
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        h1 { color: #2c3e50; margin-top: 0; }
+        h2 { color: #34495e; margin-top: 30px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .btn { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            background: #007bff; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 14px; 
+            transition: background 0.2s; 
+        }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-group { margin: 20px 0; }
+        .btn-group .btn { margin-right: 10px; }
+        .message { 
+            padding: 12px 15px; 
+            margin-bottom: 10px; 
+            border-radius: 4px; 
+            border-left: 4px solid; 
+        }
+        .message.success { background: #d4edda; color: #155724; border-color: #28a745; }
+        .message.error { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+        .working-hours-config { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 4px; 
+            margin-bottom: 30px; 
+        }
+        .day-config { 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            background: white; 
+            border-radius: 4px; 
+            border: 1px solid #ddd; 
+        }
+        .day-config h3 { margin-top: 0; color: #34495e; }
+        .time-range { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+        }
+        .time-range input[type="time"] { 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+        }
+        .time-range button { 
+            padding: 8px 15px; 
+            background: #dc3545; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        .add-time-range { 
+            margin-top: 10px; 
+            padding: 8px 15px; 
+            background: #6c757d; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        .week-calendar { 
+            margin-top: 30px; 
+        }
+        .day-column { 
+            margin-bottom: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            padding: 15px; 
+            background: white; 
+        }
+        .day-header { 
+            font-weight: bold; 
+            font-size: 1.1em; 
+            margin-bottom: 15px; 
+            color: #2c3e50; 
+        }
+        .time-slots { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+            gap: 10px; 
+        }
+        .time-slot { 
+            padding: 10px; 
+            border: 2px solid #007bff; 
+            border-radius: 4px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            background: white; 
+        }
+        .time-slot:hover { 
+            background: #e3f2fd; 
+            transform: scale(1.05); 
+        }
+        .time-slot.occupied { 
+            background: #f8d7da; 
+            border-color: #dc3545; 
+            cursor: not-allowed; 
+            opacity: 0.6; 
+        }
+        .time-slot.occupied:hover { 
+            background: #f8d7da; 
+            transform: none; 
+        }
+        .time-slot.booked { 
+            background: #d4edda; 
+            border-color: #28a745; 
+        }
+        .time-slot-label { 
+            font-weight: bold; 
+            color: #2c3e50; 
+        }
+        .occupied-label { 
+            color: #dc3545; 
+            font-size: 0.9em; 
+        }
+        .loading { 
+            text-align: center; 
+            padding: 20px; 
+            color: #6c757d; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{% trans "Book Lesson" %} - {{ student.full_name }}</h1>
+        
+        <div id="messages"></div>
+        
+        <div class="btn-group">
+            <button class="btn" onclick="previousWeek()">← {% trans "Previous Week" %}</button>
+            <button class="btn" onclick="nextWeek()">{% trans "Next Week" %} →</button>
+            <button class="btn btn-secondary" onclick="toggleWorkingHoursConfig()">
+                {% trans "Configure Working Hours" %}
+            </button>
+        </div>
+        
+        <div id="working-hours-config" class="working-hours-config" style="display: none;">
+            <h2>{% trans "Working Hours Configuration" %}</h2>
+            <p>{% trans "Set your working hours for each day. Students can only book during these times." %}</p>
+            
+            <div id="working-hours-form">
+                {% for weekday in week_data.days %}
+                <div class="day-config" data-weekday="{{ weekday.weekday }}">
+                    <h3>{{ weekday.weekday_display }}</h3>
+                    <div class="time-ranges" id="ranges-{{ weekday.weekday }}">
+                        {% if weekday.working_hours %}
+                            {% for range in weekday.working_hours %}
+                            <div class="time-range">
+                                <input type="time" value="{{ range.start }}" class="start-time">
+                                <span>-</span>
+                                <input type="time" value="{{ range.end }}" class="end-time">
+                                <button onclick="removeTimeRange(this)">{% trans "Remove" %}</button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button class="add-time-range" onclick="addTimeRange('{{ weekday.weekday }}')">
+                        + {% trans "Add Time Range" %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button class="btn btn-success" onclick="saveWorkingHours()">
+                {% trans "Save Working Hours" %}
+            </button>
+        </div>
+        
+        <div class="week-calendar">
+            <h2>{% trans "Available Time Slots" %}</h2>
+            <p>{% trans "Click on an available time slot to book a lesson." %}</p>
+            
+            {% for day in week_data.days %}
+            <div class="day-column">
+                <div class="day-header">
+                    {{ day.weekday_display }}, {{ day.date|date:"d.m.Y" }}
+                </div>
+                
+                {% if day.working_hours %}
+                    <div class="time-slots">
+                        {% for slot in day.available_slots %}
+                        <div class="time-slot" 
+                             data-date="{{ day.date|date:'Y-m-d' }}" 
+                             data-start="{{ slot.0|time:'H:i' }}" 
+                             data-end="{{ slot.1|time:'H:i' }}"
+                             onclick="bookSlot(this)">
+                            <div class="time-slot-label">
+                                {{ slot.0|time:'H:i' }} - {{ slot.1|time:'H:i' }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% for occupied in day.occupied_slots %}
+                        <div class="time-slot occupied">
+                            <div class="time-slot-label">
+                                {{ occupied.0|time:'H:i' }} - {{ occupied.1|time:'H:i' }}
+                            </div>
+                            <div class="occupied-label">{% trans "Occupied" %}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #6c757d;">{% trans "No working hours configured for this day." %}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+        const token = '{{ contract.booking_token }}';
+        const currentYear = {{ current_date.year }};
+        const currentMonth = {{ current_date.month }};
+        const currentDay = {{ current_date.day }};
+        const contractDuration = {{ contract.unit_duration_minutes }};
+        
+        function showMessage(message, type = 'success') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+        
+        function toggleWorkingHoursConfig() {
+            const config = document.getElementById('working-hours-config');
+            config.style.display = config.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function addTimeRange(weekday) {
+            const container = document.getElementById(`ranges-${weekday}`);
+            const timeRange = document.createElement('div');
+            timeRange.className = 'time-range';
+            timeRange.innerHTML = `
+                <input type="time" value="09:00" class="start-time">
+                <span>-</span>
+                <input type="time" value="17:00" class="end-time">
+                <button onclick="removeTimeRange(this)">{% trans "Remove" %}</button>
+            `;
+            container.appendChild(timeRange);
+        }
+        
+        function removeTimeRange(button) {
+            button.parentElement.remove();
+        }
+        
+        function saveWorkingHours() {
+            const workingHours = {};
+            const dayConfigs = document.querySelectorAll('.day-config');
+            
+            dayConfigs.forEach(dayConfig => {
+                const weekday = dayConfig.dataset.weekday;
+                const ranges = dayConfig.querySelectorAll('.time-range');
+                const hours = [];
+                
+                ranges.forEach(range => {
+                    const start = range.querySelector('.start-time').value;
+                    const end = range.querySelector('.end-time').value;
+                    if (start && end) {
+                        hours.push({ start, end });
+                    }
+                });
+                
+                if (hours.length > 0) {
+                    workingHours[weekday] = hours;
+                }
+            });
+            
+            fetch(`/lessons/booking/${token}/api/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    action: 'update_working_hours',
+                    working_hours: workingHours
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('{% trans "Error saving working hours." %}', 'error');
+            });
+        }
+        
+        function bookSlot(element) {
+            if (element.classList.contains('occupied')) {
+                return;
+            }
+            
+            const date = element.dataset.date;
+            const startTime = element.dataset.start;
+            
+            if (!confirm(`{% trans "Book lesson on" %} ${date} {% trans "at" %} ${startTime}?`)) {
+                return;
+            }
+            
+            fetch(`/lessons/booking/${token}/api/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    action: 'book_slot',
+                    date: date,
+                    start_time: startTime,
+                    duration_minutes: contractDuration
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message);
+                    element.classList.add('booked');
+                    element.onclick = null;
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('{% trans "Error booking lesson." %}', 'error');
+            });
+        }
+        
+        function previousWeek() {
+            const date = new Date(currentYear, currentMonth - 1, currentDay);
+            date.setDate(date.getDate() - 7);
+            window.location.href = `?year=${date.getFullYear()}&month=${date.getMonth() + 1}&day=${date.getDate()}`;
+        }
+        
+        function nextWeek() {
+            const date = new Date(currentYear, currentMonth - 1, currentDay);
+            date.setDate(date.getDate() + 7);
+            window.location.href = `?year=${date.getFullYear()}&month=${date.getMonth() + 1}&day=${date.getDate()}`;
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

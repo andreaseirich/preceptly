@@ -7,6 +7,39 @@
 <h1>{% trans "Delete Lesson" %}</h1>
 <p>{% blocktrans with student=object.contract.student date=object.date time=object.start_time %}Are you sure you want to delete the lesson for "{{ student }}" on {{ date }} at {{ time }}?{% endblocktrans %}</p>
 
+{% if matching_recurring %}
+<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #856404;">⚠️ {% trans "This lesson is part of a series" %}</h3>
+    <p>
+        <strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
+        ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})
+    </p>
+    <p>
+        <strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }} 
+        {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}
+    </p>
+    <p>
+        <strong>{% trans "Total lessons in series:" %}</strong> {{ series_lessons_count }}
+    </p>
+    
+    <div style="margin-top: 15px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+            <strong>{% trans "What do you want to delete?" %}</strong>
+        </label>
+        <div style="margin-top: 10px;">
+            <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                <input type="radio" name="delete_series" value="false" checked style="margin-right: 8px;">
+                <span>{% trans "Only this lesson" %} ({{ object.date|date:"d.m.Y" }} {{ object.start_time|time:"H:i" }})</span>
+            </label>
+            <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                <input type="radio" name="delete_series" value="true" style="margin-right: 8px;">
+                <span>{% trans "Entire series" %} ({% blocktrans count count=series_lessons_count %}{{ count }} lesson{% plural %}{{ count }} lessons{% endblocktrans %})</span>
+            </label>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
     <div class="btn-group">

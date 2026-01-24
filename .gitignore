@@ -75,5 +75,7 @@ docs/UX.md
 README_DATABASE.md
 docs/VIDEO_SCRIPT.md
 
-# CI/CD configuration (internal)
-.github/
+# Internal management commands with personal names (not for jury/recruiters)
+backend/apps/lessons/management/commands/delete_*_for_anita*.py
+backend/apps/lessons/management/commands/delete_*_for_chris*.py
+backend/apps/billing/management/commands/update_invoice_payers.py

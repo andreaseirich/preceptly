@@ -1,3 +1,6 @@
+import json
+import secrets
+
 from decimal import Decimal
 
 from apps.students.models import Student
@@ -39,6 +42,18 @@ class Contract(models.Model):
     notes = models.TextField(
         blank=True, null=True, help_text=_("Additional notes about the contract")
     )
+    booking_token = models.CharField(
+        max_length=64,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=_("Token for external booking link (auto-generated if empty)"),
+    )
+    working_hours = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=_("Working hours for booking page (format: {'monday': [{'start': '09:00', 'end': '17:00'}], ...})"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,6 +61,12 @@ class Contract(models.Model):
         ordering = ["-start_date", "student"]
         verbose_name = _("Contract")
         verbose_name_plural = _("Contracts")
+
+    def save(self, *args, **kwargs):
+        """Generate booking token if not set."""
+        if not self.booking_token:
+            self.booking_token = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         from django.utils.translation import gettext as _

@@ -2,7 +2,7 @@
 URL-Konfiguration für Lesson-App.
 """
 
-from apps.lessons import recurring_views, views
+from apps.lessons import recurring_views, views, views_booking
 from django.urls import path
 
 app_name = "lessons"
@@ -48,5 +48,16 @@ urlpatterns = [
         "recurring/bulk-edit/",
         recurring_views.RecurringLessonBulkEditView.as_view(),
         name="recurring_bulk_edit",
+    ),
+    # Öffentliche Schüler-Buchungsseite
+    path(
+        "booking/<str:token>/",
+        views_booking.StudentBookingView.as_view(),
+        name="student_booking",
+    ),
+    path(
+        "booking/<str:token>/api/",
+        views_booking.student_booking_api,
+        name="student_booking_api",
     ),
 ]

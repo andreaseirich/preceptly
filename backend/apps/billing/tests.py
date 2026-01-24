@@ -219,3 +219,47 @@ class InvoiceServiceTest(TestCase):
 
         self.assertEqual(invoice.payer_name, self.student.full_name)
         self.assertEqual(invoice.payer_address, "")
+
+    def test_create_invoice_with_institute_as_payer(self):
+        """InvoiceService should use institute as payer if available, otherwise student."""
+        period_start = date(2025, 3, 1)
+        period_end = date(2025, 3, 31)
+
+        # Contract ohne Institut - sollte Schüler als Zahler verwenden
+        Lesson.objects.create(
+            contract=self.contract,
+            date=period_start,
+            start_time=time(9, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        invoice1 = InvoiceService.create_invoice_from_lessons(period_start, period_end, self.contract)
+        self.assertEqual(invoice1.payer_name, self.student.full_name)
+
+        # Contract mit Institut - sollte Institut als Zahler verwenden
+        student2 = Student.objects.create(
+            first_name="Anna", last_name="Schmidt", email="anna@example.com"
+        )
+        contract_with_institute = Contract.objects.create(
+            student=student2,
+            institute="Nachhilfe-Institut ABC",
+            hourly_rate=Decimal("30.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
+            end_date=date(2025, 12, 31),
+            is_active=True,
+        )
+
+        Lesson.objects.create(
+            contract=contract_with_institute,
+            date=period_start,
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+
+        invoice2 = InvoiceService.create_invoice_from_lessons(
+            period_start, period_end, contract_with_institute
+        )
+        self.assertEqual(invoice2.payer_name, "Nachhilfe-Institut ABC")
+        self.assertEqual(invoice2.payer_address, "")

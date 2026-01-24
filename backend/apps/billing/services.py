@@ -74,11 +74,20 @@ class InvoiceService:
                 raise ValueError(_("No billable lessons found in the specified period."))
 
             if contract:
-                payer_name = contract.student.full_name
+                # Verwende Nachhilfeinstitut als Zahler, falls vorhanden, sonst Schüler
+                if contract.institute:
+                    payer_name = contract.institute
+                else:
+                    payer_name = contract.student.full_name
                 payer_address = ""
             else:
                 first_lesson = lessons.first()
-                payer_name = first_lesson.contract.student.full_name
+                first_contract = first_lesson.contract
+                # Verwende Nachhilfeinstitut als Zahler, falls vorhanden, sonst Schüler
+                if first_contract.institute:
+                    payer_name = first_contract.institute
+                else:
+                    payer_name = first_contract.student.full_name
                 payer_address = ""
 
             invoice = Invoice.objects.create(

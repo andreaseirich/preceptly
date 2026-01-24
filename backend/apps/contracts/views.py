@@ -113,7 +113,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
                     if (plan.year, plan.month) not in valid_months:
                         plan.delete()
 
-                    context["formset"] = ContractMonthlyPlanFormSet(instance=self.object)
+                context["formset"] = ContractMonthlyPlanFormSet(instance=self.object)
             else:
                 # Wenn has_monthly_planning_limit deaktiviert ist, lösche alle vorhandenen Pläne
                 if not self.object.has_monthly_planning_limit:

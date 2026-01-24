@@ -432,6 +432,23 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
     model = Lesson
     template_name = "lessons/lesson_confirm_delete.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.lessons.recurring_utils import find_matching_recurring_lesson, get_all_lessons_for_recurring
+        
+        lesson = self.get_object()
+        # Prüfe, ob diese Lesson zu einer Serie gehört
+        matching_recurring = find_matching_recurring_lesson(lesson)
+        context["matching_recurring"] = matching_recurring
+        
+        if matching_recurring:
+            # Finde alle Lessons dieser Serie
+            all_lessons = get_all_lessons_for_recurring(matching_recurring)
+            context["series_lessons_count"] = len(all_lessons)
+            context["series_lessons"] = all_lessons
+        
+        return context
+
     def get_success_url(self):
         """Redirect back to last used calendar view."""
         # Use year/month/day from request if available
@@ -457,12 +474,63 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
+        from apps.lessons.recurring_utils import find_matching_recurring_lesson, get_all_lessons_for_recurring
+        from apps.lessons.recurring_models import RecurringLesson
+        from django.utils.translation import ngettext
+        from django.http import HttpResponseRedirect
 
         lesson = self.get_object()
         lesson_date = lesson.date
         
-        messages.success(self.request, _("Lesson successfully deleted."))
-        result = super().delete(request, *args, **kwargs)
+        # Prüfe, ob diese Lesson zu einer Serie gehört
+        matching_recurring = find_matching_recurring_lesson(lesson)
+        
+        # Prüfe, ob der Benutzer die gesamte Serie löschen möchte
+        delete_series = request.POST.get("delete_series", "false") == "true"
+        
+        if delete_series and matching_recurring:
+            # Lösche die gesamte Serie
+            # Verwende eine einfache und robuste Methode: Finde ALLE Lessons im Zeitraum
+            # mit gleichem Contract und gleicher start_time, unabhängig vom Muster
+            # (da Lessons manuell bearbeitet worden sein könnten)
+            start_date = matching_recurring.start_date
+            end_date = matching_recurring.end_date
+            if not end_date and matching_recurring.contract.end_date:
+                end_date = matching_recurring.contract.end_date
+            
+            # Finde alle Lessons im Zeitraum mit gleichem Contract und gleicher start_time
+            # Das ist die sicherste Methode, um wirklich alle Lessons zu finden
+            all_lessons_query = Lesson.objects.filter(
+                contract=matching_recurring.contract,
+                start_time=matching_recurring.start_time,
+                date__gte=start_date,
+            )
+            if end_date:
+                all_lessons_query = all_lessons_query.filter(date__lte=end_date)
+            
+            # Hole alle IDs
+            all_lesson_ids = list(all_lessons_query.values_list('id', flat=True))
+            deleted_count = len(all_lesson_ids)
+            
+            # Lösche alle Lessons der Serie direkt über die IDs (effizienter und sicherer)
+            if all_lesson_ids:
+                Lesson.objects.filter(id__in=all_lesson_ids).delete()
+            
+            # Lösche die RecurringLesson
+            matching_recurring.delete()
+            
+            messages.success(
+                request,
+                ngettext(
+                    "Series deleted. {count} lesson deleted.",
+                    "Series deleted. {count} lessons deleted.",
+                    deleted_count,
+                ).format(count=deleted_count),
+            )
+        else:
+            # Lösche nur diese eine Lesson
+            lesson.delete()
+            messages.success(self.request, _("Lesson successfully deleted."))
         
         # Recalculate conflicts for affected lessons on the same date
         # (We need to create a temporary lesson object with the date to check conflicts)
@@ -470,4 +538,4 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         temp_lesson = Lesson(date=lesson_date)
         recalculate_conflicts_for_affected_lessons(temp_lesson)
         
-        return result
+        return HttpResponseRedirect(self.get_success_url())
