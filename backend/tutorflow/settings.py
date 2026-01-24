@@ -328,7 +328,81 @@ WSGI_APPLICATION = "tutorflow.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASE_URL = env("DATABASE_URL")
+# #region agent log
+try:
+    with open(DEBUG_LOG_PATH, "a") as f:
+        import json
+
+        f.write(
+            json.dumps(
+                {
+                    "sessionId": "debug-session",
+                    "runId": "run1",
+                    "hypothesisId": "G",
+                    "location": "settings.py:330",
+                    "message": "DATABASE_URL check",
+                    "data": {
+                        "DATABASE_URL_set": bool(DATABASE_URL),
+                        "DATABASE_URL_preview": (
+                            DATABASE_URL[:50] + "..." if DATABASE_URL and len(DATABASE_URL) > 50 else DATABASE_URL
+                        ),
+                    },
+                    "timestamp": int(__import__("time").time() * 1000),
+                }
+            )
+            + "\n"
+        )
+except:  # noqa: E722
+    pass
+# #endregion
 if DATABASE_URL:
+    # #region agent log
+    try:
+        parsed_db = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
+        with open(DEBUG_LOG_PATH, "a") as f:
+            import json
+
+            f.write(
+                json.dumps(
+                    {
+                        "sessionId": "debug-session",
+                        "runId": "run1",
+                        "hypothesisId": "H",
+                        "location": "settings.py:355",
+                        "message": "Parsed DATABASE_URL",
+                        "data": {
+                            "db_name": parsed_db.get("NAME"),
+                            "db_user": parsed_db.get("USER"),
+                            "db_host": parsed_db.get("HOST"),
+                            "db_port": parsed_db.get("PORT"),
+                        },
+                        "timestamp": int(__import__("time").time() * 1000),
+                    }
+                )
+                + "\n"
+            )
+    except Exception as e:
+        try:
+            with open(DEBUG_LOG_PATH, "a") as f:
+                import json
+
+                f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "debug-session",
+                            "runId": "run1",
+                            "hypothesisId": "H",
+                            "location": "settings.py:355",
+                            "message": "Failed to parse DATABASE_URL",
+                            "data": {"error": str(e)},
+                            "timestamp": int(__import__("time").time() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except:  # noqa: E722
+            pass
+    # #endregion
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
     }
