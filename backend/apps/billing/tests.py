@@ -233,7 +233,9 @@ class InvoiceServiceTest(TestCase):
             duration_minutes=60,
             status="taught",
         )
-        invoice1 = InvoiceService.create_invoice_from_lessons(period_start, period_end, self.contract)
+        invoice1 = InvoiceService.create_invoice_from_lessons(
+            period_start, period_end, self.contract
+        )
         self.assertEqual(invoice1.payer_name, self.student.full_name)
 
         # Contract mit Institut - sollte Institut als Zahler verwenden

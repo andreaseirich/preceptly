@@ -79,8 +79,12 @@ class LessonForm(forms.ModelForm):
         ]
         widgets = {
             "contract": forms.Select(attrs={"class": "form-control"}),
-            "date": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
-            "start_time": forms.TimeInput(attrs={"class": "form-control", "type": "time"}, format="%H:%M"),
+            "date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
+            ),
+            "start_time": forms.TimeInput(
+                attrs={"class": "form-control", "type": "time"}, format="%H:%M"
+            ),
             "duration_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "travel_time_before_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "travel_time_after_minutes": forms.NumberInput(attrs={"class": "form-control"}),
@@ -94,10 +98,10 @@ class LessonForm(forms.ModelForm):
             self.fields["is_recurring"].widget = forms.HiddenInput()
             self.fields["recurrence_type"].widget = forms.HiddenInput()
             self.fields["recurrence_end_date"].widget = forms.HiddenInput()
-            
+
             # Prüfe, ob diese Lesson zu einer Serie gehört
             from apps.lessons.recurring_utils import find_matching_recurring_lesson
-            
+
             matching_recurring = find_matching_recurring_lesson(self.instance)
             if matching_recurring:
                 # Zeige Option für Bearbeitungsscope
@@ -118,21 +122,25 @@ class LessonForm(forms.ModelForm):
         else:
             # Beim Erstellen: edit_scope verstecken
             self.fields["edit_scope"].widget = forms.HiddenInput()
-    
+
     def clean(self):
         """Validiere Recurrence-Felder."""
         cleaned_data = super().clean()
-        
+
         is_recurring = cleaned_data.get("is_recurring", False)
-        
+
         if is_recurring:
             recurrence_type = cleaned_data.get("recurrence_type")
             recurrence_weekdays = cleaned_data.get("recurrence_weekdays", [])
-            
+
             if not recurrence_type:
-                raise forms.ValidationError(_("Please select a repeat pattern when creating a recurring lesson."))
-            
+                raise forms.ValidationError(
+                    _("Please select a repeat pattern when creating a recurring lesson.")
+                )
+
             if not recurrence_weekdays:
-                raise forms.ValidationError(_("Please select at least one weekday when creating a recurring lesson."))
-        
+                raise forms.ValidationError(
+                    _("Please select at least one weekday when creating a recurring lesson.")
+                )
+
         return cleaned_data

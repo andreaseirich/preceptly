@@ -91,7 +91,9 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
             # Prüfe den POST-Wert direkt
             has_limit = self.request.POST.get("has_monthly_planning_limit", "on") == "on"
             if has_limit:
-                context["formset"] = ContractMonthlyPlanFormSet(self.request.POST, instance=self.object)
+                context["formset"] = ContractMonthlyPlanFormSet(
+                    self.request.POST, instance=self.object
+                )
             else:
                 context["formset"] = None
         else:
@@ -135,7 +137,9 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
                 generate_monthly_plans_for_contract(self.object)
 
                 # Lösche Pläne außerhalb des neuen Zeitraums
-                valid_months = set(iter_contract_months(self.object.start_date, self.object.end_date))
+                valid_months = set(
+                    iter_contract_months(self.object.start_date, self.object.end_date)
+                )
                 for plan in ContractMonthlyPlan.objects.filter(contract=self.object):
                     if (plan.year, plan.month) not in valid_months:
                         plan.delete()
@@ -148,8 +152,12 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
                     messages.success(self.request, _("Contract successfully updated."))
                     return redirect(self.success_url)
                 else:
-                    messages.error(self.request, _("Please correct the errors in the monthly planning."))
-                    return self.render_to_response(self.get_context_data(form=form, formset=formset))
+                    messages.error(
+                        self.request, _("Please correct the errors in the monthly planning.")
+                    )
+                    return self.render_to_response(
+                        self.get_context_data(form=form, formset=formset)
+                    )
         else:
             # Wenn has_monthly_planning_limit deaktiviert ist, lösche alle vorhandenen Pläne
             ContractMonthlyPlan.objects.filter(contract=self.object).delete()

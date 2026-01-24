@@ -19,7 +19,7 @@ from django.views.generic import TemplateView
 import json
 
 
-@method_decorator(ensure_csrf_cookie, name='dispatch')
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class StudentBookingView(TemplateView):
     """Öffentliche Buchungsseite für Schüler."""
 
@@ -50,6 +50,7 @@ class StudentBookingView(TemplateView):
             # Da Contracts keine direkte User-Beziehung haben, nehmen wir den ersten UserProfile
             # In einer Multi-User-Umgebung müsste hier die Logik angepasst werden
             from apps.core.models import UserProfile
+
             try:
                 # Versuche den ersten UserProfile zu finden (für Single-User-Setup)
                 profile = UserProfile.objects.first()
@@ -171,9 +172,7 @@ class StudentBookingView(TemplateView):
                 )
 
         except json.JSONDecodeError:
-            return JsonResponse(
-                {"success": False, "message": _("Invalid JSON data.")}, status=400
-            )
+            return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
 
         return JsonResponse({"success": False, "message": _("Unknown action.")}, status=400)
 

@@ -30,7 +30,7 @@ class WeekView(LoginRequiredMixin, TemplateView):
         LessonStatusUpdater.update_past_lessons_to_taught()
 
         # Store this view as the last used calendar view in session
-        self.request.session['last_calendar_view'] = 'week'
+        self.request.session["last_calendar_view"] = "week"
 
         # Year, month and day from URL parameters (fallback: current date)
         year_param = self.request.GET.get("year")
@@ -156,7 +156,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         LessonStatusUpdater.update_past_lessons_to_taught()
 
         # Store this view as the last used calendar view in session
-        self.request.session['last_calendar_view'] = 'calendar'
+        self.request.session["last_calendar_view"] = "calendar"
 
         # Year and month from URL parameters (fallback: current date)
         # Support both ?year=X&month=Y and ?date=YYYY-MM-DD
@@ -178,7 +178,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             year = int(year_param)
             month = int(month_param)
         else:
-                # Fallback: current date
+            # Fallback: current date
             now = timezone.now()
             year = now.year
             month = now.month
@@ -218,7 +218,9 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                             "date": day_date,
                             "is_current_month": True,
                             "lessons": calendar_data["lessons_by_date"].get(day_date, []),
-                            "blocked_times": calendar_data["blocked_times_by_date"].get(day_date, []),
+                            "blocked_times": calendar_data["blocked_times_by_date"].get(
+                                day_date, []
+                            ),
                         }
                     )
             weeks.append(week_days)

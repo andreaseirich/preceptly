@@ -12,7 +12,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("Loading demo data...")
-        self.stdout.write(self.style.WARNING("This will delete all existing data and create fresh demo data."))
+        self.stdout.write(
+            self.style.WARNING("This will delete all existing data and create fresh demo data.")
+        )
 
         # First, clear all demo data
         self.stdout.write("\n1. Clearing existing demo data...")
@@ -20,9 +22,7 @@ class Command(BaseCommand):
             call_command("clear_demo_data", confirm=True, verbosity=0)
             self.stdout.write(self.style.SUCCESS("✓ Existing data cleared"))
         except Exception as e:
-            self.stdout.write(
-                self.style.WARNING(f"Note: clear_demo_data had issues: {e}")
-            )
+            self.stdout.write(self.style.WARNING(f"Note: clear_demo_data had issues: {e}"))
             # Continue anyway - seed_demo_data will handle clearing if needed
 
         # Then, seed new demo data
@@ -31,9 +31,7 @@ class Command(BaseCommand):
             call_command("seed_demo_data", clear=False, verbosity=1)
             self.stdout.write(self.style.SUCCESS("\n✓ Demo data generated successfully"))
         except Exception as e:
-            self.stdout.write(
-                self.style.ERROR(f"Error generating demo data: {e}")
-            )
+            self.stdout.write(self.style.ERROR(f"Error generating demo data: {e}"))
             raise
 
         self.stdout.write(self.style.SUCCESS("\n" + "=" * 50))

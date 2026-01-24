@@ -76,7 +76,7 @@ class RecurringLessonService:
     ) -> dict:
         """Generiert wöchentliche Lessons."""
         active_weekdays = recurring_lesson.get_active_weekdays()
-        
+
         if not active_weekdays:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
 

@@ -14,7 +14,9 @@ class ContractForm(forms.ModelForm):
         required=False,
         initial=True,
         label=_("Monthly planning with planned units"),
-        help_text=_("If checked, you must enter planned units for each month. If unchecked, no maximum number of units is planned."),
+        help_text=_(
+            "If checked, you must enter planned units for each month. If unchecked, no maximum number of units is planned."
+        ),
     )
 
     class Meta:
@@ -35,8 +37,12 @@ class ContractForm(forms.ModelForm):
             "institute": forms.TextInput(attrs={"class": "form-control"}),
             "hourly_rate": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "unit_duration_minutes": forms.NumberInput(attrs={"class": "form-control"}),
-            "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
-            "end_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
+            "start_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
+            ),
+            "end_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
+            ),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "has_monthly_planning_limit": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),

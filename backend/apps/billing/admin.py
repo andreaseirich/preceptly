@@ -29,7 +29,12 @@ class InvoiceAdmin(admin.ModelAdmin):
         "created_at",
     ]
     list_filter = ["status", "created_at", "period_start", "contract__institute"]
-    search_fields = ["payer_name", "payer_address", "contract__student__first_name", "contract__student__last_name"]
+    search_fields = [
+        "payer_name",
+        "payer_address",
+        "contract__student__first_name",
+        "contract__student__last_name",
+    ]
     date_hierarchy = "created_at"
     readonly_fields = ["created_at", "updated_at", "total_amount"]
     inlines = [InvoiceItemInline]
@@ -59,9 +64,22 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(InvoiceItem)
 class InvoiceItemAdmin(admin.ModelAdmin):
-    list_display = ["id", "invoice", "get_student_name", "description", "date", "duration_minutes", "amount"]
+    list_display = [
+        "id",
+        "invoice",
+        "get_student_name",
+        "description",
+        "date",
+        "duration_minutes",
+        "amount",
+    ]
     list_filter = ["date", "invoice__status", "invoice"]
-    search_fields = ["description", "invoice__payer_name", "lesson__contract__student__first_name", "lesson__contract__student__last_name"]
+    search_fields = [
+        "description",
+        "invoice__payer_name",
+        "lesson__contract__student__first_name",
+        "lesson__contract__student__last_name",
+    ]
     raw_id_fields = ["invoice", "lesson"]
     readonly_fields = ["invoice", "lesson", "description", "date", "duration_minutes", "amount"]
 

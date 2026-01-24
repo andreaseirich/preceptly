@@ -88,7 +88,7 @@ class BlockedTimeForm(forms.ModelForm):
             "is_recurring": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "recurring_pattern": forms.TextInput(attrs={"class": "form-control"}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Hide recurrence fields when editing (only show when creating)
@@ -96,10 +96,10 @@ class BlockedTimeForm(forms.ModelForm):
             self.fields["is_recurring"].widget = forms.HiddenInput()
             self.fields["recurrence_type"].widget = forms.HiddenInput()
             self.fields["recurrence_end_date"].widget = forms.HiddenInput()
-            
+
             # Prüfe, ob diese BlockedTime zu einer Serie gehört
             from apps.blocked_times.recurring_utils import find_matching_recurring_blocked_time
-            
+
             matching_recurring = find_matching_recurring_blocked_time(self.instance)
             if matching_recurring:
                 # Zeige Option für Bearbeitungsscope
@@ -119,21 +119,25 @@ class BlockedTimeForm(forms.ModelForm):
         else:
             # Beim Erstellen: edit_scope verstecken
             self.fields["edit_scope"].widget = forms.HiddenInput()
-    
+
     def clean(self):
         """Validiere Recurrence-Felder."""
         cleaned_data = super().clean()
-        
+
         is_recurring = cleaned_data.get("is_recurring", False)
-        
+
         if is_recurring:
             recurrence_type = cleaned_data.get("recurrence_type")
             recurrence_weekdays = cleaned_data.get("recurrence_weekdays", [])
-            
+
             if not recurrence_type:
-                raise forms.ValidationError(_("Please select a repeat pattern when creating a recurring blocked time."))
-            
+                raise forms.ValidationError(
+                    _("Please select a repeat pattern when creating a recurring blocked time.")
+                )
+
             if not recurrence_weekdays:
-                raise forms.ValidationError(_("Please select at least one weekday when creating a recurring blocked time."))
-        
+                raise forms.ValidationError(
+                    _("Please select at least one weekday when creating a recurring blocked time.")
+                )
+
         return cleaned_data

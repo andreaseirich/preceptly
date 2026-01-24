@@ -21,7 +21,9 @@ class UserProfile(models.Model):
     default_working_hours = models.JSONField(
         default=dict,
         blank=True,
-        help_text=_("Default working hours for booking pages (format: {'monday': [{'start': '09:00', 'end': '17:00'}], ...}). Used as fallback when contract has no working_hours."),
+        help_text=_(
+            "Default working hours for booking pages (format: {'monday': [{'start': '09:00', 'end': '17:00'}], ...}). Used as fallback when contract has no working_hours."
+        ),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

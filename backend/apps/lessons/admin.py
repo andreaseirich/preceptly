@@ -30,7 +30,10 @@ class LessonAdmin(admin.ModelAdmin):
         (_("Contract"), {"fields": ("contract",)}),
         (_("Schedule"), {"fields": ("date", "start_time", "duration_minutes")}),
         (_("Status"), {"fields": ("status",)}),
-        (_("Travel Times"), {"fields": ("travel_time_before_minutes", "travel_time_after_minutes")}),
+        (
+            _("Travel Times"),
+            {"fields": ("travel_time_before_minutes", "travel_time_after_minutes")},
+        ),
         (_("Conflicts"), {"fields": ("has_conflicts_display",)}),
         (_("Additional"), {"fields": ("notes",)}),
         (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
@@ -81,9 +84,26 @@ class RecurringLessonAdmin(admin.ModelAdmin):
     fieldsets = (
         (_("Contract"), {"fields": ("contract",)}),
         (_("Schedule"), {"fields": ("start_date", "end_date", "start_time", "duration_minutes")}),
-        (_("Recurrence"), {"fields": ("recurrence_type", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")}),
+        (
+            _("Recurrence"),
+            {
+                "fields": (
+                    "recurrence_type",
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday",
+                )
+            },
+        ),
         (_("Status"), {"fields": ("is_active",)}),
-        (_("Travel Times"), {"fields": ("travel_time_before_minutes", "travel_time_after_minutes")}),
+        (
+            _("Travel Times"),
+            {"fields": ("travel_time_before_minutes", "travel_time_after_minutes")},
+        ),
         (_("Additional"), {"fields": ("notes",)}),
         (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )

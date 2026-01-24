@@ -105,7 +105,7 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
             else:
                 prev_year = year
                 prev_month = month - 1
-            
+
             # Next month
             if month == 12:
                 next_year = year + 1
@@ -188,7 +188,12 @@ class SettingsView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         from apps.contracts.models import Contract
-        contracts = Contract.objects.filter(is_active=True).select_related("student").order_by("student__last_name", "student__first_name")
+
+        contracts = (
+            Contract.objects.filter(is_active=True)
+            .select_related("student")
+            .order_by("student__last_name", "student__first_name")
+        )
         context["profile"] = profile
         context["current_working_hours"] = profile.default_working_hours or {}
         context["contracts"] = contracts

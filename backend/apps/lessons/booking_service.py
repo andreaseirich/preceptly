@@ -33,15 +33,13 @@ class BookingService:
         occupied = defaultdict(list)
 
         # Lade alle Lessons im Zeitraum (auch von anderen Verträgen, da Wegzeiten relevant sind)
-        lessons = Lesson.objects.filter(
-            date__gte=start_date, date__lte=end_date
-        ).select_related("contract", "contract__student")
+        lessons = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
+            "contract", "contract__student"
+        )
 
         for lesson in lessons:
             start_datetime, end_datetime = LessonConflictService.calculate_time_block(lesson)
-            occupied[lesson.date].append(
-                (start_datetime.time(), end_datetime.time())
-            )
+            occupied[lesson.date].append((start_datetime.time(), end_datetime.time()))
 
         # Lade Blockzeiten im Zeitraum
         start_datetime = timezone.make_aware(datetime.combine(start_date, time.min))
@@ -173,12 +171,18 @@ class BookingService:
         week_end = week_start + timedelta(days=6)
 
         # Lade belegte Zeitslots
-        occupied_slots = BookingService.get_occupied_time_slots(
-            contract_id, week_start, week_end
-        )
+        occupied_slots = BookingService.get_occupied_time_slots(contract_id, week_start, week_end)
 
         # Wochentage-Namen
-        weekday_names = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        weekday_names = [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]
 
         days_data = []
         for i in range(7):

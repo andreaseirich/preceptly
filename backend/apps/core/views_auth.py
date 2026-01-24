@@ -19,4 +19,3 @@ class TutorFlowLogoutView(LogoutView):
     """Custom logout view for TutorFlow."""
 
     next_page = reverse_lazy("core:login")
-

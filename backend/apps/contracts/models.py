@@ -37,7 +37,9 @@ class Contract(models.Model):
     is_active = models.BooleanField(default=True, help_text=_("Is the contract active?"))
     has_monthly_planning_limit = models.BooleanField(
         default=True,
-        help_text=_("If checked, monthly planning with planned units is required. If unchecked, no maximum number of units is planned."),
+        help_text=_(
+            "If checked, monthly planning with planned units is required. If unchecked, no maximum number of units is planned."
+        ),
     )
     notes = models.TextField(
         blank=True, null=True, help_text=_("Additional notes about the contract")
@@ -52,7 +54,9 @@ class Contract(models.Model):
     working_hours = models.JSONField(
         default=dict,
         blank=True,
-        help_text=_("Working hours for booking page (format: {'monday': [{'start': '09:00', 'end': '17:00'}], ...})"),
+        help_text=_(
+            "Working hours for booking page (format: {'monday': [{'start': '09:00', 'end': '17:00'}], ...})"
+        ),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -12,7 +12,14 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 
 class RecurringLessonListView(LoginRequiredMixin, ListView):
@@ -58,7 +65,7 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         """Nach Erstellen: Generiere Lessons und weiter zum Kalender."""
         recurring_lesson = self.object
-        
+
         # Generiere Lessons automatisch
         result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 
@@ -180,7 +187,9 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["recurring_lessons"] = RecurringLesson.objects.all().order_by("contract__student", "start_date")
+        context["recurring_lessons"] = RecurringLesson.objects.all().order_by(
+            "contract__student", "start_date"
+        )
         return context
 
     def post(self, request, *args, **kwargs):
@@ -234,6 +243,7 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
                 return redirect("lessons:recurring_bulk_edit")
 
             from datetime import datetime
+
             try:
                 start_date_obj = datetime.strptime(new_start_date, "%Y-%m-%d").date()
                 end_date_obj = None
