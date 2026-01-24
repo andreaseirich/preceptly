@@ -18,9 +18,9 @@ cp .env.example .env
 - Health check: `curl http://127.0.0.1:8000/health/` → `{ "status": "ok" }`
 - Browser-free smoke test: `./scripts/smoke_demo.sh` (waits for `/health/`)
 
-**Demo-Logins**
+**Demo Logins**
 
-| Rolle            | Benutzername    | Passwort  |
+| Role             | Username        | Password  |
 | ---------------- | --------------- | --------- |
 | Premium (AI)     | `demo_premium`  | `demo123` |
 | Standard         | `demo_user`     | `demo123` |
@@ -54,9 +54,9 @@ TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 –
 - **🤖 AI-Powered Lesson Plans**: Premium feature for automatic generation of structured lesson plans using LLM APIs (OpenAI-compatible) with automatic retry on rate limits
 - **🌍 Full Internationalization**: Complete i18n/l10n support with English (default) and German, including proper date, number, and currency formatting
 
-### Feature Walkthrough in 2 Minuten
+### Feature Walkthrough in 2 Minutes
 
-1. **Dashboard** (`/`): Heute/kommende Lessons, Konflikt-Widget, Premium-Badge.
+1. **Dashboard** (`/`): Today/upcoming lessons, conflict widget, premium badge.
 2. **Week View** (`/lessons/week/`): Click-to-create lessons/blocked times, conflict badges, click a lesson → edit & AI lesson plan.
 3. **Income Overview** (`/income/`): Planned vs. actual revenue, monthly/yearly view.
 4. **Billing** (`/billing/invoices/`): Create invoices from taught lessons, review HTML documents.

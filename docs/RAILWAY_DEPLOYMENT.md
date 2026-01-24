@@ -1,178 +1,178 @@
 # Railway Deployment – TutorFlow
 
-## Übersicht
+## Overview
 
-Diese Anleitung erklärt, wie du TutorFlow auf Railway.app deployst. Railway ist die empfohlene Plattform für Django-Anwendungen, da sie einfach zu verwenden ist und automatische Deployments von GitHub unterstützt.
+This guide explains how to deploy TutorFlow on Railway.app. Railway is the recommended platform for Django applications as it's easy to use and supports automatic deployments from GitHub.
 
-## Warum Railway?
+## Why Railway?
 
-**Vorteile:**
-- Sehr einfach zu verwenden
-- Guter Django-Support
-- Automatische Deployments von GitHub
-- PostgreSQL-Datenbank inklusive
-- Kostenloser Tier verfügbar
-- Automatische SSL-Zertifikate
+**Advantages:**
+- Very easy to use
+- Great Django support
+- Automatic deployments from GitHub
+- PostgreSQL database included
+- Free tier available
+- Automatic SSL certificates
 
-## Schnellstart mit Railway
+## Quick Start with Railway
 
-### 1. Railway Account erstellen
+### 1. Create Railway Account
 
-1. Gehe zu https://railway.app
-2. Melde dich mit GitHub an
-3. Erlaube Railway den Zugriff auf deine Repositories
+1. Go to https://railway.app
+2. Sign in with GitHub
+3. Allow Railway access to your repositories
 
-### 2. Neues Projekt erstellen
+### 2. Create New Project
 
-1. Klicke auf "New Project"
-2. Wähle "Deploy from GitHub repo"
-3. Wähle dein `tutorflow` Repository
-4. Railway erkennt automatisch, dass es sich um ein Django-Projekt handelt
+1. Click on "New Project"
+2. Select "Deploy from GitHub repo"
+3. Choose your `tutorflow` repository
+4. Railway automatically detects that it's a Django project
 
-### 3. PostgreSQL-Datenbank hinzufügen
+### 3. Add PostgreSQL Database
 
-1. Klicke auf "New" → "Database" → "PostgreSQL"
-2. Railway erstellt automatisch eine PostgreSQL-Datenbank
-3. Die Datenbank-URL wird automatisch als Umgebungsvariable gesetzt
+1. Click on "New" → "Database" → "PostgreSQL"
+2. Railway automatically creates a PostgreSQL database
+3. The database URL is automatically set as an environment variable
 
-### 4. Umgebungsvariablen konfigurieren
+### 4. Configure Environment Variables
 
-Gehe zum "Variables" Tab und füge folgende Variablen hinzu:
+Go to the "Variables" tab and add the following variables:
 
 ```bash
-SECRET_KEY=<generiere-einen-starken-key>
+SECRET_KEY=<generate-a-strong-key>
 DEBUG=False
 ALLOWED_HOSTS=*.railway.app
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 ```
 
-**Wichtig:**
-- `SECRET_KEY`: Generiere einen starken Secret Key (z.B. mit `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`)
-- `DATABASE_URL`: Railway setzt diese Variable automatisch, wenn du `${{Postgres.DATABASE_URL}}` verwendest
-- `ALLOWED_HOSTS`: Erlaubt alle Railway-Subdomains. Für eine Custom Domain füge diese auch hinzu: `*.railway.app,deine-domain.com`
+**Important:**
+- `SECRET_KEY`: Generate a strong secret key (e.g., using `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`)
+- `DATABASE_URL`: Railway sets this variable automatically when you use `${{Postgres.DATABASE_URL}}`
+- `ALLOWED_HOSTS`: Allows all Railway subdomains. For a custom domain, also add it: `*.railway.app,your-domain.com`
 
-### 5. Build-Einstellungen (optional)
+### 5. Build Settings (optional)
 
-Railway erkennt Django automatisch und verwendet die `railway.json` Konfiguration. Falls du manuelle Einstellungen benötigst:
+Railway automatically detects Django and uses the `railway.json` configuration. If you need manual settings:
 
 - **Build Command**: `cd backend && pip install -r ../requirements.txt && python manage.py collectstatic --noinput`
 - **Start Command**: `cd backend && python manage.py migrate && gunicorn tutorflow.wsgi:application --bind 0.0.0.0:$PORT`
 
 ### 6. Deploy
 
-1. Railway deployt automatisch bei jedem Git-Push zu `main`
-2. Du erhältst eine URL wie `https://tutorflow-production.up.railway.app`
-3. Die Anwendung ist sofort verfügbar!
+1. Railway automatically deploys on every Git push to `main`
+2. You'll receive a URL like `https://tutorflow-production.up.railway.app`
+3. The application is immediately available!
 
-## Erste Schritte nach dem Deploy
+## First Steps After Deploy
 
-### Demo-Daten laden (optional)
+### Load Demo Data (optional)
 
-Falls du die Demo-Daten verwenden möchtest:
+If you want to use the demo data:
 
-1. Öffne die Railway Console
-2. Führe folgenden Befehl aus:
+1. Open the Railway Console
+2. Run the following command:
    ```bash
    cd backend && python manage.py loaddata fixtures/demo_data.json
    ```
 
-**Demo-Logins:**
+**Demo Logins:**
 - Premium User: `demo_premium` / `demo123`
 - Standard User: `demo_user` / `demo123`
 
-### Übersetzungen kompilieren
+### Compile Translations
 
 ```bash
 cd backend && python manage.py compilemessages
 ```
 
-## Custom Domain einrichten
+## Set Up Custom Domain
 
-1. Gehe zu deinem Projekt in Railway
-2. Klicke auf "Settings" → "Domains"
-3. Füge deine Domain hinzu
-4. Folge den DNS-Anweisungen
-5. Aktualisiere `ALLOWED_HOSTS` mit deiner Domain
+1. Go to your project in Railway
+2. Click on "Settings" → "Domains"
+3. Add your domain
+4. Follow the DNS instructions
+5. Update `ALLOWED_HOSTS` with your domain
 
-## Umgebungsvariablen für LLM (optional)
+## Environment Variables for LLM (optional)
 
-Falls du die Premium-Features (AI Lesson Plans) verwenden möchtest:
+If you want to use the Premium features (AI Lesson Plans):
 
 ```bash
-LLM_API_KEY=dein-api-key
+LLM_API_KEY=your-api-key
 LLM_API_BASE_URL=https://api.openai.com/v1
 LLM_MODEL_NAME=gpt-3.5-turbo
 MOCK_LLM=0
 ```
 
-Für Demos ohne echte API-Calls:
+For demos without real API calls:
 ```bash
 MOCK_LLM=1
 ```
 
-## Monitoring und Logs
+## Monitoring and Logs
 
-- **Logs**: Klicke auf "Deployments" → Wähle einen Deployment → "View Logs"
-- **Metrics**: Railway zeigt automatisch CPU, Memory und Network-Usage
-- **Health Check**: Die Anwendung hat einen `/health/` Endpoint
+- **Logs**: Click on "Deployments" → Select a deployment → "View Logs"
+- **Metrics**: Railway automatically displays CPU, Memory, and Network usage
+- **Health Check**: The application has a `/health/` endpoint
 
 ## Updates
 
-Railway deployt automatisch bei jedem Push zu `main`. Du kannst auch manuell deployen:
+Railway automatically deploys on every push to `main`. You can also deploy manually:
 
-1. Gehe zu "Deployments"
-2. Klicke auf "Redeploy" für den letzten Deployment
+1. Go to "Deployments"
+2. Click on "Redeploy" for the last deployment
 
-## Backup-Strategie
+## Backup Strategy
 
-Railway bietet automatische Backups für PostgreSQL-Datenbanken:
+Railway offers automatic backups for PostgreSQL databases:
 
-1. Gehe zu deiner Datenbank
-2. Klicke auf "Backups"
-3. Konfiguriere automatische Backups
+1. Go to your database
+2. Click on "Backups"
+3. Configure automatic backups
 
 ## Troubleshooting
 
-### Statische Dateien werden nicht angezeigt
+### Static Files Not Displaying
 
-Stelle sicher, dass `collectstatic` im Build-Prozess ausgeführt wird:
+Make sure `collectstatic` is executed in the build process:
 ```bash
 cd backend && python manage.py collectstatic --noinput
 ```
 
-### Datenbank-Migrationen schlagen fehl
+### Database Migrations Failing
 
-Führe Migrationen manuell aus:
+Run migrations manually:
 ```bash
 cd backend && python manage.py migrate
 ```
 
 ### 500 Errors
 
-Prüfe die Logs in Railway:
-1. Gehe zu "Deployments"
-2. Wähle den fehlgeschlagenen Deployment
-3. Klicke auf "View Logs"
+Check the logs in Railway:
+1. Go to "Deployments"
+2. Select the failed deployment
+3. Click on "View Logs"
 
-### Umgebungsvariablen werden nicht erkannt
+### Environment Variables Not Recognized
 
-Stelle sicher, dass alle Variablen im "Variables" Tab gesetzt sind und dass `${{Postgres.DATABASE_URL}}` für die Datenbank verwendet wird.
+Make sure all variables are set in the "Variables" tab and that `${{Postgres.DATABASE_URL}}` is used for the database.
 
-## Kosten
+## Pricing
 
-Railway bietet:
-- **Free Tier**: $5 Credits pro Monat (ausreichend für kleine Projekte)
-- **Pro Plan**: Ab $20/Monat für größere Projekte
+Railway offers:
+- **Free Tier**: $5 credits per month (sufficient for small projects)
+- **Pro Plan**: Starting at $20/month for larger projects
 
-## Weitere Ressourcen
+## Additional Resources
 
-- [Railway Dokumentation](https://docs.railway.app)
-- [Django auf Railway](https://docs.railway.app/guides/django)
-- [PostgreSQL auf Railway](https://docs.railway.app/databases/postgresql)
+- [Railway Documentation](https://docs.railway.app)
+- [Django on Railway](https://docs.railway.app/guides/django)
+- [PostgreSQL on Railway](https://docs.railway.app/databases/postgresql)
 
-## Hilfe
+## Help
 
-Falls du Probleme hast:
-1. Prüfe die Railway Logs
-2. Erstelle ein Issue im Repository
-3. Kontaktiere den Railway Support
+If you encounter problems:
+1. Check the Railway logs
+2. Create an issue in the repository
+3. Contact Railway support
