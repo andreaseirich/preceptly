@@ -124,7 +124,6 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
-
         from apps.blocked_times.recurring_models import RecurringBlockedTime
         from apps.blocked_times.recurring_service import RecurringBlockedTimeService
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
