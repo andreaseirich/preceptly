@@ -344,7 +344,9 @@ try:
                     "data": {
                         "DATABASE_URL_set": bool(DATABASE_URL),
                         "DATABASE_URL_preview": (
-                            DATABASE_URL[:50] + "..." if DATABASE_URL and len(DATABASE_URL) > 50 else DATABASE_URL
+                            DATABASE_URL[:50] + "..."
+                            if DATABASE_URL and len(DATABASE_URL) > 50
+                            else DATABASE_URL
                         ),
                     },
                     "timestamp": int(__import__("time").time() * 1000),
