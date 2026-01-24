@@ -57,6 +57,7 @@ class StudentBookingView(TemplateView):
                 if profile and profile.default_working_hours:
                     working_hours = profile.default_working_hours
             except (UserProfile.DoesNotExist, AttributeError):
+                # UserProfile not found or missing attribute - use empty working hours
                 pass
 
         # Wochendaten für Buchungsseite

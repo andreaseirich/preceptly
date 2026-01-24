@@ -119,12 +119,14 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                             if duration_minutes > 0:
                                 initial["duration_minutes"] = duration_minutes
                         except (ValueError, TypeError):
+                            # Invalid date/time format - skip duration calculation
                             pass
                 else:
                     # Fallback: treat as date only
                     date_obj = datetime.strptime(start_str, "%Y-%m-%d").date()
                     initial["date"] = date_obj
             except (ValueError, TypeError):
+                # Invalid date format - use default values
                 pass
 
         # Fallback: Get date from request (for backward compatibility)
@@ -137,6 +139,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
                     initial["date"] = date_obj
                 except ValueError:
+                    # Invalid date format - use default values
                     pass
 
         # Fallback: Get time from request (for backward compatibility)
@@ -149,6 +152,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                     time_obj = datetime.strptime(time_str, "%H:%M").time()
                     initial["start_time"] = time_obj
                 except ValueError:
+                    # Invalid time format - use default values
                     pass
 
         return initial

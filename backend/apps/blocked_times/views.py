@@ -85,6 +85,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     initial["start_datetime"] = start_dt
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
             except (ValueError, TypeError):
+                # Invalid date/time format - use default values
                 pass
 
         # Fallback: Get date from request (for backward compatibility)
@@ -103,6 +104,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     initial["start_datetime"] = start_dt
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
                 except ValueError:
+                    # Invalid date format - use default values
                     pass
 
         return initial

@@ -158,6 +158,12 @@ class CalendarView(LoginRequiredMixin, TemplateView):
 
         # Year and month from URL parameters (fallback: current date)
         # Support both ?year=X&month=Y and ?date=YYYY-MM-DD
+        # Initialize with current date as default
+        now = timezone.now()
+        year = now.year
+        month = now.month
+
+        # Try to parse date parameter
         date_param = self.request.GET.get("date")
         if date_param:
             try:
@@ -165,21 +171,19 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 year = date_obj.year
                 month = date_obj.month
             except (ValueError, TypeError):
-                now = timezone.now()
-                year = now.year
-                month = now.month
-        else:
-            year_param = self.request.GET.get("year")
-            month_param = self.request.GET.get("month")
+                # Invalid date format - keep default values
+                pass
 
+        # Override with year/month parameters if provided
+        year_param = self.request.GET.get("year")
+        month_param = self.request.GET.get("month")
         if year_param and month_param:
-            year = int(year_param)
-            month = int(month_param)
-        else:
-            # Fallback: current date
-            now = timezone.now()
-            year = now.year
-            month = now.month
+            try:
+                year = int(year_param)
+                month = int(month_param)
+            except (ValueError, TypeError):
+                # Invalid parameters - keep existing values
+                pass
 
         # Load calendar data
         calendar_data = CalendarService.get_calendar_data(year, month)
