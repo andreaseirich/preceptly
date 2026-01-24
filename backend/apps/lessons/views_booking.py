@@ -43,8 +43,20 @@ class StudentBookingView(TemplateView):
         except (ValueError, TypeError):
             target_date = timezone.now().date()
 
-        # Arbeitszeiten aus Contract
+        # Arbeitszeiten aus Contract, fallback auf default_working_hours
         working_hours = contract.working_hours or {}
+        if not working_hours:
+            # Fallback auf allgemeine Arbeitszeiten des Tutors
+            # Da Contracts keine direkte User-Beziehung haben, nehmen wir den ersten UserProfile
+            # In einer Multi-User-Umgebung müsste hier die Logik angepasst werden
+            from apps.core.models import UserProfile
+            try:
+                # Versuche den ersten UserProfile zu finden (für Single-User-Setup)
+                profile = UserProfile.objects.first()
+                if profile and profile.default_working_hours:
+                    working_hours = profile.default_working_hours
+            except (UserProfile.DoesNotExist, AttributeError):
+                pass
 
         # Wochendaten für Buchungsseite
         week_data = BookingService.get_week_booking_data(

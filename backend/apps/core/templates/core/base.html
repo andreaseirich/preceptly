@@ -61,6 +61,7 @@
                 <a href="{% url 'lessons:week' %}">📅 {% trans "Calendar" %}</a>
                 <a href="{% url 'billing:invoice_list' %}">🧾 {% trans "Invoices" %}</a>
                 <a href="{% url 'core:income' %}">💰 {% trans "Income" %}</a>
+                <a href="{% url 'core:settings' %}">⚙️ {% trans "Settings" %}</a>
             </div>
             <div class="nav-right">
                 {% if user.is_authenticated %}

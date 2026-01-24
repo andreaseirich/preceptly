@@ -15,4 +15,5 @@ urlpatterns = [
     path("logout/", TutorFlowLogoutView.as_view(), name="logout"),
     path("", views.DashboardView.as_view(), name="dashboard"),
     path("income/", views.IncomeOverviewView.as_view(), name="income"),
+    path("settings/", views.SettingsView.as_view(), name="settings"),
 ]

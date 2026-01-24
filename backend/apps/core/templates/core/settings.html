@@ -1,0 +1,219 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Settings" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Settings" %}</h1>
+
+<div class="btn-group">
+    <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">{% trans "Back to Dashboard" %}</a>
+</div>
+
+<h2>{% trans "Default Working Hours" %}</h2>
+<p>{% trans "Set your default working hours. These will be used for student booking pages when a contract doesn't have specific working hours configured." %}</p>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Monday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.monday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.monday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.monday_end }}
+                </div>
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Tuesday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.tuesday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.tuesday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.tuesday_end }}
+                </div>
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Wednesday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.wednesday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.wednesday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.wednesday_end }}
+                </div>
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Thursday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.thursday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.thursday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.thursday_end }}
+                </div>
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Friday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.friday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.friday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.friday_end }}
+                </div>
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Saturday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.saturday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.saturday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.saturday_end }}
+                </div>
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #f8f9fa;">
+            <h3 style="margin-top: 0; color: #34495e;">{% trans "Sunday" %}</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    {{ form.sunday_enabled }}
+                    <span>{% trans "Enabled" %}</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "Start time" %}</label>
+                    {{ form.sunday_start }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057;">{% trans "End time" %}</label>
+                    {{ form.sunday_end }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if form.non_field_errors %}
+    <div class="message error" style="margin-top: 20px;">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+    
+    <div class="btn-group" style="margin-top: 30px;">
+        <button type="submit" class="btn btn-success">{% trans "Save Working Hours" %}</button>
+        <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+
+<h2 style="margin-top: 40px;">{% trans "Booking Links" %}</h2>
+<p>{% trans "Individual booking links for each student contract:" %}</p>
+
+{% if contracts %}
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Student" %}</th>
+            <th>{% trans "Contract" %}</th>
+            <th>{% trans "Booking Link" %}</th>
+            <th>{% trans "Status" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contract in contracts %}
+        <tr>
+            <td><a href="{% url 'students:detail' contract.student.pk %}">{{ contract.student.full_name }}</a></td>
+            <td><a href="{% url 'contracts:detail' contract.pk %}">{{ contract }}</a></td>
+            <td>
+                {% if contract.booking_token and contract.is_active %}
+                <input type="text" 
+                       value="{{ request.scheme }}://{{ request.get_host }}{% url 'lessons:student_booking' contract.booking_token %}" 
+                       readonly 
+                       style="width: 100%; padding: 5px; font-family: monospace; font-size: 0.85em;"
+                       onclick="this.select();">
+                {% else %}
+                <span style="color: #6c757d;">{% trans "No booking link available" %}</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if contract.is_active %}
+                <span style="color: #28a745;">{% trans "Active" %}</span>
+                {% else %}
+                <span style="color: #495057;">{% trans "Inactive" %}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>{% trans "No contracts available. Create a contract first to generate booking links." %}</p>
+</div>
+{% endif %}
+
+{% endblock %}

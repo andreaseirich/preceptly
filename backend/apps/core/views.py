@@ -2,12 +2,18 @@
 Views for dashboard and income overview.
 """
 
+from apps.core.forms import WorkingHoursForm
+from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import TemplateView, FormView
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -147,4 +153,43 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
                 }
             )
 
+        return context
+
+
+class SettingsView(LoginRequiredMixin, FormView):
+    """Settings view for managing default working hours."""
+
+    form_class = WorkingHoursForm
+    template_name = "core/settings.html"
+    success_url = reverse_lazy("core:settings")
+
+    def get_initial(self):
+        """Load current working hours from user profile."""
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return {"initial_working_hours": profile.default_working_hours or {}}
+
+    def get_form_kwargs(self):
+        """Pass initial working hours to form."""
+        kwargs = super().get_form_kwargs()
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        kwargs["initial_working_hours"] = profile.default_working_hours or {}
+        return kwargs
+
+    def form_valid(self, form):
+        """Save working hours to user profile."""
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        profile.default_working_hours = form.cleaned_data["working_hours"]
+        profile.save()
+        messages.success(self.request, _("Default working hours updated successfully."))
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """Add profile and contracts to context."""
+        context = super().get_context_data(**kwargs)
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        from apps.contracts.models import Contract
+        contracts = Contract.objects.filter(is_active=True).select_related("student").order_by("student__last_name", "student__first_name")
+        context["profile"] = profile
+        context["current_working_hours"] = profile.default_working_hours or {}
+        context["contracts"] = contracts
         return context

@@ -7,6 +7,39 @@
 <h1>{% trans "Delete Blocked Time" %}</h1>
 <p>{% blocktrans with title=object.title datetime=object.start_datetime|date:"d.m.Y H:i" %}Are you sure you want to delete the blocked time "{{ title }}" ({{ datetime }})?{% endblocktrans %}</p>
 
+{% if matching_recurring %}
+<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #856404;">⚠️ {% trans "This blocked time is part of a series" %}</h3>
+    <p>
+        <strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
+        ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})
+    </p>
+    <p>
+        <strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }} 
+        {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}
+    </p>
+    <p>
+        <strong>{% trans "Total blocked times in series:" %}</strong> {{ series_blocked_times_count }}
+    </p>
+    
+    <div style="margin-top: 15px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+            <strong>{% trans "What do you want to delete?" %}</strong>
+        </label>
+        <div style="margin-top: 10px;">
+            <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                <input type="radio" name="delete_series" value="false" checked style="margin-right: 8px;">
+                <span>{% trans "Only this blocked time" %} ({{ object.start_datetime|date:"d.m.Y" }} {{ object.start_datetime|time:"H:i" }})</span>
+            </label>
+            <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                <input type="radio" name="delete_series" value="true" style="margin-right: 8px;">
+                <span>{% trans "Entire series" %} ({% blocktrans count count=series_blocked_times_count %}{{ count }} blocked time{% plural %}{{ count }} blocked times{% endblocktrans %})</span>
+            </label>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
     <div class="btn-group">
@@ -15,4 +48,3 @@
     </div>
 </form>
 {% endblock %}
-

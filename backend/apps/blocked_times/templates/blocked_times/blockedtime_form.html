@@ -6,14 +6,291 @@
 {% block content %}
 <h1>{% if object %}{% trans "Edit Blocked Time" %}{% else %}{% trans "New Blocked Time" %}{% endif %}</h1>
 
+{% if object and matching_recurring %}
+<div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px; border: 1px solid #2196f3;">
+    <h3>{% trans "This blocked time is part of a series" %}</h3>
+    <p><strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
+    ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})</p>
+    <p><strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }} 
+    {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</p>
+    
+    <div style="margin-top: 15px;">
+        <label><strong>{% trans "What do you want to edit?" %}</strong></label>
+        <div style="margin-top: 10px;">
+            {% for choice in form.edit_scope %}
+            <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+                {{ choice.tag }}
+                <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
+            </label>
+            {% empty %}
+            <p style="color: red;">WARNING: edit_scope field is empty!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <input type="hidden" name="edit_scope" id="edit_scope_hidden" value="single">
+    
+    <div style="margin-bottom: 20px;">
+        <h3>{% trans "Blocked Time Details" %}</h3>
+        <p>
+            <label for="{{ form.title.id_for_label }}">{% trans "Title:" %}</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.title.errors }}</div>
+            {% endif %}
+        </p>
+        <p>
+            <label for="{{ form.description.id_for_label }}">{% trans "Description:" %}</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.description.errors }}</div>
+            {% endif %}
+        </p>
+        <p>
+            <label for="{{ form.start_datetime.id_for_label }}">{% trans "Start Date & Time:" %}</label>
+            {{ form.start_datetime }}
+            {% if form.start_datetime.errors %}
+            <div style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.start_datetime.errors }}</div>
+            {% endif %}
+        </p>
+        <p>
+            <label for="{{ form.end_datetime.id_for_label }}">{% trans "End Date & Time:" %}</label>
+            {{ form.end_datetime }}
+            {% if form.end_datetime.errors %}
+            <div style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.end_datetime.errors }}</div>
+            {% endif %}
+        </p>
+    </div>
+    
+    {% if not object %}
+    <div id="recurrence-section" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; border: 1px solid #ddd;">
+        <h3>{% trans "Recurrence (Optional)" %}</h3>
+        <p>
+            <label for="{{ form.is_recurring.id_for_label }}" style="display: flex; align-items: center; gap: 8px;">
+                {{ form.is_recurring }}
+                <strong>{% trans "Repeat this blocked time" %}</strong>
+            </label>
+            {% if form.is_recurring.help_text %}
+            <small style="display: block; margin-left: 28px; color: #666;">{{ form.is_recurring.help_text }}</small>
+            {% endif %}
+        </p>
+        
+        <div id="recurrence-fields" style="display: none; margin-top: 15px; margin-left: 28px;">
+            <p>
+                <label for="{{ form.recurrence_type.id_for_label }}">{% trans "Repeat pattern:" %}</label>
+                {{ form.recurrence_type }}
+            </p>
+            <p>
+                <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans "End date (optional):" %}</label>
+                {{ form.recurrence_end_date }}
+                {% if form.recurrence_end_date.help_text %}
+                <small style="display: block; color: #666;">{{ form.recurrence_end_date.help_text }}</small>
+                {% endif %}
+            </p>
+            <p>
+                <label>{% trans "Weekdays:" %}</label>
+                <div id="weekdays-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
+                    {% for choice in form.recurrence_weekdays %}
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        {{ choice.tag }}
+                        <span>{{ choice.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.recurrence_weekdays.help_text %}
+                <small style="display: block; color: #666;">{{ form.recurrence_weekdays.help_text }}</small>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if object and matching_recurring %}
+    <div id="series-info" style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107; display: none;">
+        <h3>{% trans "Series Settings" %}</h3>
+        <p><em>{% trans "When editing the entire series, changes to the following fields will be applied to all blocked times in the series:" %}</em></p>
+        
+        <div style="margin-top: 15px;">
+            <p><strong>{% trans "Current series configuration:" %}</strong></p>
+            <ul>
+                <li>{% trans "Recurrence type" %}: {{ matching_recurring.get_recurrence_type_display }}</li>
+                <li>{% trans "Weekdays" %}: {{ matching_recurring.get_active_weekdays_display }}</li>
+                <li>{% trans "Series period" %}: {{ matching_recurring.start_date }} {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</li>
+            </ul>
+        </div>
+        
+        <div id="series-weekdays-section" style="margin-top: 15px; display: none;">
+            <p>
+                <label><strong>{% trans "Change weekdays:" %}</strong></label>
+                <div id="series-weekdays-container" style="display: none; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                    {% if matching_recurring %}
+                        {% with active_weekdays=matching_recurring.get_active_weekdays %}
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="0" {% if 0 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-0">
+                            <span>{% trans "Monday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="1" {% if 1 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-1">
+                            <span>{% trans "Tuesday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="2" {% if 2 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-2">
+                            <span>{% trans "Wednesday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="3" {% if 3 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-3">
+                            <span>{% trans "Thursday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="4" {% if 4 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-4">
+                            <span>{% trans "Friday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="5" {% if 5 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-5">
+                            <span>{% trans "Saturday" %}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
+                            <input type="checkbox" name="recurrence_weekdays" value="6" {% if 6 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-6">
+                            <span>{% trans "Sunday" %}</span>
+                        </label>
+                        {% endwith %}
+                    {% endif %}
+                </div>
+                <small style="display: block; color: #666; margin-top: 10px;">{% trans "Select the weekdays for this series. Blocked times on deselected weekdays will be deleted, and new blocked times will be created for newly selected weekdays." %}</small>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if form.non_field_errors %}
+    <div class="message error" style="margin-bottom: 20px;">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
     
     <div class="btn-group">
         <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
         <a href="{% url 'lessons:week' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
-{% endblock %}
 
+<script>
+function toggleRecurrenceFields() {
+    const isRecurring = document.getElementById('{{ form.is_recurring.id_for_label }}');
+    const recurrenceFields = document.getElementById('recurrence-fields');
+    const weekdaysContainer = document.getElementById('weekdays-container');
+    if (isRecurring && recurrenceFields) {
+        if (isRecurring.checked) {
+            recurrenceFields.style.display = 'block';
+            // Show recurrence fields
+            const recurrenceType = document.getElementById('{{ form.recurrence_type.id_for_label }}');
+            const recurrenceEndDate = document.getElementById('{{ form.recurrence_end_date.id_for_label }}');
+            if (recurrenceType) recurrenceType.style.display = 'block';
+            if (recurrenceEndDate) recurrenceEndDate.style.display = 'block';
+            // Show weekdays checkboxes
+            if (weekdaysContainer) {
+                weekdaysContainer.style.display = 'flex';
+                const checkboxes = weekdaysContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.style.display = 'inline-block';
+                    checkbox.disabled = false;
+                    checkbox.style.pointerEvents = 'auto';
+                });
+            }
+        } else {
+            recurrenceFields.style.display = 'none';
+        }
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleRecurrenceFields();
+    
+    // Update hidden edit_scope field when radio buttons change
+    const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
+    const editScopeHidden = document.getElementById('edit_scope_hidden');
+    if (editScopeRadios.length > 0 && editScopeHidden) {
+        editScopeRadios.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                editScopeHidden.value = this.value;
+            });
+        });
+    }
+    
+    // Show/hide series info based on edit_scope
+    {% if object and matching_recurring %}
+    function toggleSeriesInfo(show) {
+        const seriesInfo = document.getElementById('series-info');
+        const seriesWeekdaysSection = document.getElementById('series-weekdays-section');
+        const seriesWeekdaysContainer = document.getElementById('series-weekdays-container');
+        
+        if (show) {
+            if (seriesInfo) seriesInfo.style.display = 'block';
+            if (seriesWeekdaysSection) seriesWeekdaysSection.style.display = 'block';
+            if (seriesWeekdaysContainer) {
+                seriesWeekdaysContainer.style.display = 'flex';
+                const checkboxes = seriesWeekdaysContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.style.display = 'inline-block';
+                    checkbox.disabled = false;
+                    checkbox.style.pointerEvents = 'auto';
+                });
+            }
+        } else {
+            if (seriesInfo) seriesInfo.style.display = 'none';
+            if (seriesWeekdaysSection) seriesWeekdaysSection.style.display = 'none';
+            if (seriesWeekdaysContainer) seriesWeekdaysContainer.style.display = 'none';
+        }
+    }
+    
+    // Listen to edit_scope changes
+    editScopeRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            toggleSeriesInfo(this.value === 'series');
+        });
+    });
+    
+    // Initialize based on current selection
+    const selectedScope = document.querySelector('input[name="edit_scope"]:checked');
+    if (selectedScope) {
+        toggleSeriesInfo(selectedScope.value === 'series');
+    }
+    {% endif %}
+    
+    // Format datetime-local fields
+    const startField = document.getElementById('{{ form.start_datetime.id_for_label }}');
+    const endField = document.getElementById('{{ form.end_datetime.id_for_label }}');
+    
+    if (startField && startField.value) {
+        const value = startField.value;
+        if (value && !value.includes('T')) {
+            try {
+                const dt = new Date(value);
+                const formatted = dt.toISOString().slice(0, 16);
+                startField.value = formatted;
+            } catch (e) {
+                // Ignore
+            }
+        }
+    }
+    
+    if (endField && endField.value) {
+        const value = endField.value;
+        if (value && !value.includes('T')) {
+            try {
+                const dt = new Date(value);
+                const formatted = dt.toISOString().slice(0, 16);
+                endField.value = formatted;
+            } catch (e) {
+                // Ignore
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
