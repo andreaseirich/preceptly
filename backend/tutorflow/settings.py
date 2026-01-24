@@ -59,7 +59,8 @@ if not SECRET_KEY:
             "SECRET_KEY must be set as an environment variable. "
             "For production, set SECRET_KEY in your environment variables. "
             "You can generate one using: "
-            "python -c \"from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())\""
+            'python -c "from django.core.management.utils import '
+            'get_random_secret_key; print(get_random_secret_key())"'
         )
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
@@ -70,7 +71,8 @@ if not DEBUG and (not ALLOWED_HOSTS or ALLOWED_HOSTS == ["*"]):
     raise RuntimeError(
         "ALLOWED_HOSTS must be set for production. "
         "Set ALLOWED_HOSTS environment variable with your domain(s), e.g., "
-        "ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com or ALLOWED_HOSTS=*.railway.app"
+        "ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com or "
+        "ALLOWED_HOSTS=*.railway.app",
     )
 
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", default=[])
