@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.management.utils import get_random_secret_key
 
 
 def env(name: str, default=None):
@@ -57,8 +58,6 @@ if not SECRET_KEY:
     else:
         # Auto-generate SECRET_KEY if not set (fallback for deployment)
         # WARNING: This should be set explicitly in production for security
-        from django.core.management.utils import get_random_secret_key
-
         SECRET_KEY = get_random_secret_key()
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
