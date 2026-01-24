@@ -11,11 +11,12 @@ Usage:
     python manage.py replace_demo_users --username your_username --email your_email [--password your_password] [--premium]
 """
 
+from getpass import getpass
+
 from apps.core.models import UserProfile
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from getpass import getpass
 
 
 class Command(BaseCommand):
@@ -122,7 +123,7 @@ class Command(BaseCommand):
             self.stdout.write(f"  1. Create user: {username} ({email})")
             self.stdout.write(f"  2. Create UserProfile with premium={is_premium}")
             if demo_premium_profile and demo_premium_profile.default_working_hours:
-                self.stdout.write(f"  3. Copy default_working_hours from demo_premium")
+                self.stdout.write("  3. Copy default_working_hours from demo_premium")
             self.stdout.write(f"  4. Delete {demo_users.count()} demo user(s)")
             return
 
@@ -156,7 +157,7 @@ class Command(BaseCommand):
         if demo_premium_profile and demo_premium_profile.default_working_hours:
             profile_data["default_working_hours"] = demo_premium_profile.default_working_hours
 
-        new_profile = UserProfile.objects.create(user=new_user, **profile_data)
+        UserProfile.objects.create(user=new_user, **profile_data)
         self.stdout.write(self.style.SUCCESS(f"✓ UserProfile created (Premium: {is_premium})"))
 
         if demo_premium_profile and demo_premium_profile.default_working_hours:

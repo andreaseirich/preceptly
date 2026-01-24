@@ -1,6 +1,4 @@
-import json
 import secrets
-
 from decimal import Decimal
 
 from apps.students.models import Student

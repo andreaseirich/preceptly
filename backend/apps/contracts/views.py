@@ -9,8 +9,8 @@ from apps.contracts.formsets import (
     iter_contract_months,
 )
 from apps.contracts.models import Contract, ContractMonthlyPlan
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _

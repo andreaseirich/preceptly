@@ -2,9 +2,10 @@
 Utility functions for finding recurring blocked times that match a blocked time.
 """
 
+from datetime import date
+
 from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
-from datetime import date
 
 
 def find_matching_recurring_blocked_time(blocked_time: BlockedTime) -> RecurringBlockedTime | None:
@@ -65,7 +66,7 @@ def get_all_blocked_times_for_recurring(
     all_blocked_times = all_blocked_times.filter(start_datetime__time=start_time_to_match)
 
     # Filtere nach Wochentag (basierend auf active weekdays)
-    active_weekdays = recurring.get_active_weekdays()
+    recurring.get_active_weekdays()
     matching_blocked_times = []
 
     for blocked_time in all_blocked_times:

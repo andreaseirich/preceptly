@@ -7,8 +7,8 @@ from apps.lessons.models import Lesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.services import LessonConflictService
 from apps.lessons.status_service import LessonStatusService
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -85,7 +85,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
 
         if start_str:
             try:
-                from datetime import datetime, timedelta
+                from datetime import datetime
 
                 # Parse ISO format: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS
                 if "T" in start_str:
@@ -154,9 +154,9 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         return initial
 
     def form_valid(self, form):
-        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
         from apps.lessons.recurring_models import RecurringLesson
         from apps.lessons.recurring_service import RecurringLessonService
+        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
         from django.utils.translation import ngettext
 
         # Prüfe, ob eine Serientermin erstellt werden soll
@@ -302,8 +302,8 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
-        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
         from apps.lessons.recurring_utils import find_matching_recurring_lesson
+        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
 
         # WICHTIG: Hole die ursprüngliche Lesson-Instanz aus der Datenbank,
         # bevor wir nach der RecurringLesson suchen (self.object hat bereits die geänderten Werte)
@@ -330,7 +330,7 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
 
             # Prüfe, ob sich die Wochentage geändert haben
             new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
-            new_weekdays_set = set([int(wd) for wd in new_weekdays])
+            new_weekdays_set = {int(wd) for wd in new_weekdays}
             old_weekdays_set = set(recurring.get_active_weekdays())
             weekdays_changed = new_weekdays_set != old_weekdays_set
 
@@ -497,14 +497,13 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy("lessons:list")
 
     def delete(self, request, *args, **kwargs):
-        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
+        from apps.lessons.models import Lesson
         from apps.lessons.recurring_utils import (
             find_matching_recurring_lesson,
-            get_all_lessons_for_recurring,
         )
-        from apps.lessons.recurring_models import RecurringLesson
-        from django.utils.translation import ngettext
+        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
         from django.http import HttpResponseRedirect
+        from django.utils.translation import ngettext
 
         lesson = self.get_object()
         lesson_date = lesson.date

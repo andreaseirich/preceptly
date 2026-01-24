@@ -7,13 +7,12 @@ from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView, TemplateView
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

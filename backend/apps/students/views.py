@@ -4,8 +4,8 @@ Views for student CRUD operations.
 
 from apps.students.forms import StudentForm
 from apps.students.models import Student
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView

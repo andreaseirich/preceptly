@@ -4,7 +4,6 @@ Authentication views for login and logout.
 
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 
 
 class TutorFlowLoginView(LoginView):

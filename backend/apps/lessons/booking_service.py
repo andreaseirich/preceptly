@@ -4,7 +4,7 @@ Service für Schüler-Buchungsseite - Berechnung verfügbarer/belegter Zeiten.
 
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 from apps.blocked_times.models import BlockedTime
 from apps.lessons.conflict_service import LessonConflictService

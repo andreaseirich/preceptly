@@ -2,6 +2,7 @@
 Views für öffentliche Schüler-Buchungsseite.
 """
 
+import json
 from datetime import date, datetime
 
 from apps.contracts.models import Contract
@@ -9,14 +10,13 @@ from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson
 from django.contrib import messages
 from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
-import json
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -31,8 +31,8 @@ class StudentBookingView(TemplateView):
 
         try:
             contract = Contract.objects.get(booking_token=token, is_active=True)
-        except Contract.DoesNotExist:
-            raise Http404(_("Booking link not found or contract is inactive."))
+        except Contract.DoesNotExist as err:
+            raise Http404(_("Booking link not found or contract is inactive.")) from err
 
         # Aktuelles Datum oder aus GET-Parameter
         try:

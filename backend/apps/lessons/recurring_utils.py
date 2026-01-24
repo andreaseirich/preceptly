@@ -2,9 +2,10 @@
 Utility functions for finding recurring lessons that match a lesson.
 """
 
+from datetime import date
+
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
-from datetime import date
 
 
 def find_matching_recurring_lesson(lesson: Lesson) -> RecurringLesson | None:
@@ -64,7 +65,7 @@ def get_all_lessons_for_recurring(
     all_lessons = all_lessons.filter(start_time=start_time_to_match)
 
     # Filtere nach Wochentag (basierend auf active weekdays)
-    active_weekdays = recurring.get_active_weekdays()
+    recurring.get_active_weekdays()
     matching_lessons = []
 
     for lesson in all_lessons:

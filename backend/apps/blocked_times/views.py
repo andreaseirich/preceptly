@@ -4,8 +4,8 @@ Views für BlockedTime-CRUD-Operationen.
 
 from apps.blocked_times.forms import BlockedTimeForm
 from apps.blocked_times.models import BlockedTime
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
@@ -36,6 +36,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
         if start_str:
             try:
                 from datetime import datetime, timedelta
+
                 from django.utils import timezone
 
                 # Parse ISO format: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS
@@ -92,6 +93,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             if date_str:
                 try:
                     from datetime import datetime
+
                     from django.utils import timezone
 
                     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -122,12 +124,12 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
+
         from apps.blocked_times.recurring_models import RecurringBlockedTime
         from apps.blocked_times.recurring_service import RecurringBlockedTimeService
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
-        from django.utils.translation import gettext_lazy as _, ngettext
-        from datetime import datetime
-        from django.utils import timezone
+        from django.utils.translation import gettext_lazy as _
+        from django.utils.translation import ngettext
 
         # Prüfe, ob eine Serientermin erstellt werden soll
         is_recurring = form.cleaned_data.get("is_recurring", False)
@@ -283,7 +285,6 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
-        from apps.blocked_times.recurring_models import RecurringBlockedTime
         from apps.blocked_times.recurring_service import RecurringBlockedTimeService
         from apps.blocked_times.recurring_utils import (
             find_matching_recurring_blocked_time,
@@ -314,7 +315,7 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
 
             # Prüfe, ob sich die Wochentage geändert haben
             new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
-            new_weekdays_set = set([int(wd) for wd in new_weekdays])
+            new_weekdays_set = {int(wd) for wd in new_weekdays}
             old_weekdays_set = set(recurring.get_active_weekdays())
             weekdays_changed = new_weekdays_set != old_weekdays_set
 
@@ -476,14 +477,13 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy("lessons:week")
 
     def delete(self, request, *args, **kwargs):
-        from apps.blocked_times.recurring_models import RecurringBlockedTime
         from apps.blocked_times.recurring_utils import find_matching_recurring_blocked_time
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
-        from django.utils.translation import gettext_lazy as _, ngettext
         from django.http import HttpResponseRedirect
+        from django.utils.translation import gettext_lazy as _
+        from django.utils.translation import ngettext
 
         blocked_time = self.get_object()
-        blocked_time_date = blocked_time.start_datetime.date()
 
         # Prüfe, ob diese BlockedTime zu einer Serie gehört
         matching_recurring = find_matching_recurring_blocked_time(blocked_time)
