@@ -63,12 +63,14 @@ if not SECRET_KEY:
         except Exception:
             # Fallback: Generate a simple secret key if get_random_secret_key fails
             import secrets
+
             SECRET_KEY = secrets.token_urlsafe(50)
 
 # Final check: Ensure SECRET_KEY is always set
 if not SECRET_KEY:
     # Emergency fallback - should never happen, but ensures app doesn't crash
     import secrets
+
     SECRET_KEY = secrets.token_urlsafe(50)
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
