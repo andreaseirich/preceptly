@@ -30,6 +30,7 @@ EXPOSE 8000
 
 # Entrypoint will run migrations/collectstatic (if applicable) and start gunicorn
 # Use exec form to ensure Railway uses this instead of any startCommand
+# Note: Railway may override this if a startCommand is set in the UI
 ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]
-CMD []
+CMD ["/bin/bash", "/app/scripts/entrypoint.sh"]
 

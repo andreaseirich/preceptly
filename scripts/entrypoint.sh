@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/../backend"
-
+# WORKDIR is already set to /app/backend in Dockerfile, so no need to cd
 python manage.py migrate --noinput
 
 if [ "${DEBUG:-True}" != "True" ] && [ "${DEBUG:-True}" != "true" ]; then
