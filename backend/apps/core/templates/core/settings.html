@@ -170,50 +170,19 @@
     </div>
 </form>
 
-<h2 style="margin-top: 40px;">{% trans "Booking Links" %}</h2>
-<p>{% trans "Individual booking links for each student contract:" %}</p>
+<h2 style="margin-top: 40px;">{% trans "Booking Link" %}</h2>
+<p>{% trans "Use this link for all students. Students will enter their name and can book lessons." %}</p>
 
-{% if contracts %}
-<table>
-    <thead>
-        <tr>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Contract" %}</th>
-            <th>{% trans "Booking Link" %}</th>
-            <th>{% trans "Status" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for contract in contracts %}
-        <tr>
-            <td><a href="{% url 'students:detail' contract.student.pk %}">{{ contract.student.full_name }}</a></td>
-            <td><a href="{% url 'contracts:detail' contract.pk %}">{{ contract }}</a></td>
-            <td>
-                {% if contract.booking_token and contract.is_active %}
-                <input type="text" 
-                       value="{{ request.scheme }}://{{ request.get_host }}{% url 'lessons:student_booking' contract.booking_token %}" 
-                       readonly 
-                       style="width: 100%; padding: 5px; font-family: monospace; font-size: 0.85em;"
-                       onclick="this.select();">
-                {% else %}
-                <span style="color: #6c757d;">{% trans "No booking link available" %}</span>
-                {% endif %}
-            </td>
-            <td>
-                {% if contract.is_active %}
-                <span style="color: #28a745;">{% trans "Active" %}</span>
-                {% else %}
-                <span style="color: #495057;">{% trans "Inactive" %}</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<div class="empty-state">
-    <p>{% trans "No contracts available. Create a contract first to generate booking links." %}</p>
+<div style="margin-top: 20px;">
+    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{% trans "Public Booking Link" %}</label>
+    <input type="text" 
+           value="{{ request.scheme }}://{{ request.get_host }}{% url 'lessons:public_booking' %}" 
+           readonly 
+           style="width: 100%; padding: 10px; font-family: monospace; font-size: 0.9em; border: 1px solid #ddd; border-radius: 4px;"
+           onclick="this.select();">
+    <p style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
+        {% trans "Share this link with all students. They can enter their name and book lessons." %}
+    </p>
 </div>
-{% endif %}
 
 {% endblock %}

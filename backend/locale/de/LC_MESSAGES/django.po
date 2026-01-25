@@ -3098,6 +3098,22 @@ msgstr "Fehler bei der Suche nach Schüler."
 msgid "Error creating student."
 msgstr "Fehler beim Erstellen des Schülers."
 
+#: apps/core/templates/core/settings.html
+msgid "Booking Link"
+msgstr "Buchungslink"
+
+#: apps/core/templates/core/settings.html
+msgid "Use this link for all students. Students will enter their name and can book lessons."
+msgstr "Verwenden Sie diesen Link für alle Schüler. Schüler geben ihren Namen ein und können Stunden buchen."
+
+#: apps/core/templates/core/settings.html
+msgid "Public Booking Link"
+msgstr "Öffentlicher Buchungslink"
+
+#: apps/core/templates/core/settings.html
+msgid "Share this link with all students. They can enter their name and book lessons."
+msgstr "Teilen Sie diesen Link mit allen Schülern. Sie können ihren Namen eingeben und Stunden buchen."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 

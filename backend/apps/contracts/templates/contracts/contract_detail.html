@@ -22,20 +22,6 @@
         <tr><th>{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
         <tr><th>{% trans "Status" %}</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     {% if contract.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ contract.notes }}</td></tr>{% endif %}
-    {% if contract.booking_token %}
-    <tr><th>{% trans "Student Booking Link" %}</th>
-        <td>
-            <input type="text" 
-                   value="{{ request.scheme }}://{{ request.get_host }}{% url 'lessons:student_booking' contract.booking_token %}" 
-                   readonly 
-                   style="width: 100%; padding: 5px; font-family: monospace; font-size: 0.9em;"
-                   onclick="this.select();">
-            <p style="margin-top: 5px; font-size: 0.9em; color: #6c757d;">
-                {% trans "Share this link with the student so they can book their own lessons." %}
-            </p>
-        </td>
-    </tr>
-    {% endif %}
     <tr><th>{% trans "Created" %}</th><td>{{ contract.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
     <tr><th>{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
