@@ -8,11 +8,9 @@ from decimal import Decimal
 
 from apps.contracts.models import Contract
 from apps.lessons.booking_service import BookingService
-from apps.lessons.forms import MultipleLessonDocumentForm
 from apps.lessons.models import Lesson, LessonDocument
 from apps.students.models import Student
 from apps.students.services import StudentSearchService
-from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -135,7 +133,6 @@ def create_student_api(request):
         school = data.get("school", "").strip()
         grade = data.get("grade", "").strip()
         subjects = data.get("subjects", "").strip()
-        institute = data.get("institute", "").strip()
 
         if not first_name or not last_name:
             return JsonResponse(
@@ -380,7 +377,7 @@ def book_lesson_api(request):
             }
         )
 
-    except (json.JSONDecodeError, ValueError) as e:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"success": False, "message": _("Invalid data format.")}, status=400)
     except Exception as e:
         return JsonResponse(
