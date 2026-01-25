@@ -30,17 +30,17 @@
     </script>
 </div>
 
-<p style="margin-top: 10px; color: #495057; font-size: 0.9em;">
+<p class="calendar-note" style="margin-top: 10px; color: #495057; font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Lessons and blocked times can be created by clicking in a time block; drag-to-create is not implemented." %}
 </p>
 
-<div id="week-calendar" style="margin-top: 20px; position: relative; overflow-x: auto;">
+<div id="week-calendar" class="week-calendar" style="margin-top: 20px; position: relative; overflow-x: auto;">
     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
         <thead>
             <tr>
-                <th style="width: 80px; border: 1px solid #ddd; padding: 8px; background: #f5f5f5; text-align: center;">{% trans "Time" %}</th>
+                <th class="time-label" style="width: 80px; border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">{% trans "Time" %}</th>
                 {% for weekday in weekdays %}
-                <th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5; text-align: center; {% if weekday.date == today %}background: #e3f2fd;{% endif %}">
+                <th class="{% if weekday.date == today %}today-header{% endif %}" style="border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; {% if weekday.date == today %}background: rgba(33, 150, 243, 0.15);{% endif %} color: var(--text-primary);">
                     {{ weekday.name_short }}<br>
                     <small style="font-weight: normal;">{{ weekday.date.day }}.{{ weekday.date.month }}.</small>
                 </th>
@@ -50,14 +50,14 @@
         <tbody>
             {% for hour in hours %}
             <tr data-hour="{{ hour }}" style="height: 60px; position: relative;">
-                <td style="border: 1px solid #ddd; padding: 4px; text-align: center; background: #f9f9f9; font-size: 0.85em;">
+                <td class="time-label" style="border: 1px solid var(--border-color); padding: 4px; text-align: center; background: rgba(255,255,255,0.03); font-size: 0.85em; color: var(--text-primary);">
                     {{ hour }}:00
                 </td>
                 {% for weekday in weekdays %}
                 <td class="time-slot" 
                     data-date="{{ weekday.date|date:'Y-m-d' }}" 
                     data-hour="{{ hour }}"
-                    style="border: 1px solid #ddd; padding: 0; position: relative; vertical-align: top; cursor: pointer; overflow: visible;"
+                    style="border: 1px solid var(--border-color); padding: 0; position: relative; vertical-align: top; cursor: pointer; overflow: visible; background: var(--bg-secondary);"
                     onclick="openCreateFromSlot(this)">
                     <div class="slot-content" style="position: relative; height: 100%; width: 100%; overflow: visible; min-height: 60px;">
                         {% for lesson in weekday.lessons %}
@@ -166,9 +166,9 @@
 </div>
 
 <!-- Dialog for appointment creation -->
-<div id="create-dialog" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; min-width: 400px;">
-    <h3 style="margin-top: 0;">{% trans "Create New Appointment" %}</h3>
-    <p id="dialog-time-info" style="margin-bottom: 15px; color: #2c3e50;"></p>
+<div id="create-dialog" class="create-dialog" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-secondary); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px var(--shadow); z-index: 1000; min-width: 400px; color: var(--text-primary); border: 1px solid var(--border-color);">
+    <h3 style="margin-top: 0; color: var(--text-primary);">{% trans "Create New Appointment" %}</h3>
+    <p id="dialog-time-info" style="margin-bottom: 15px; color: var(--text-secondary);"></p>
     <div style="margin-bottom: 15px;">
         <label>
             <input type="radio" name="event-type" value="lesson" checked> {% trans "Tutoring Lesson" %}
@@ -183,18 +183,24 @@
     </div>
 </div>
 
-<div id="dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+<div id="dialog-overlay" class="create-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
 
 <style>
 .time-slot:hover {
-    background: #f0f0f0;
+    background: rgba(255,255,255,0.05);
+}
+[data-theme="dark"] .time-slot:hover {
+    background: rgba(255,255,255,0.08);
 }
 .time-slot.dragging {
-    background: #e3f2fd;
+    background: rgba(33, 150, 243, 0.2);
 }
 .lesson-block.has-conflict {
     border: 2px solid #dc3545 !important;
     box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+}
+[data-theme="dark"] .create-dialog-overlay {
+    background: rgba(0,0,0,0.7);
 }
 </style>
 

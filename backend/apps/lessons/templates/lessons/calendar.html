@@ -13,15 +13,15 @@
 </div>
 
 
-<p style="margin-top: 10px; color: #495057; font-size: 0.9em;">
+<p class="calendar-note" style="margin-top: 10px; color: #495057; font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Click on a day to create a new lesson. Click on an existing lesson to edit it." %}
 </p>
 
-<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+<table class="calendar-table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
     <thead>
         <tr>
             {% for weekday in weekday_names %}
-            <th style="border: 1px solid #ddd; padding: 10px; background: #f5f5f5; text-align: center;">{{ weekday }}</th>
+            <th style="border: 1px solid var(--border-color); padding: 10px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">{{ weekday }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -29,7 +29,7 @@
         {% for week in weeks %}
         <tr>
             {% for day in week %}
-            <td style="border: 1px solid #ddd; padding: 8px; vertical-align: top; {% if not day.is_current_month %}background: #f9f9f9; color: #999;{% endif %} min-height: 100px; width: 14.28%; position: relative;">
+            <td class="{% if not day.is_current_month %}not-current-month{% endif %}" style="border: 1px solid var(--border-color); padding: 8px; vertical-align: top; {% if not day.is_current_month %}background: rgba(255,255,255,0.03); color: var(--text-secondary);{% endif %} min-height: 100px; width: 14.28%; position: relative;">
                 <div style="font-weight: bold; margin-bottom: 5px;">
                     {% if day.is_current_month %}
                     <a href="{% url 'lessons:create' %}?date={{ day.date|date:'Y-m-d' }}&year={{ year }}&month={{ month }}" 
@@ -50,9 +50,10 @@
                 {% if day.lessons %}
                 <div style="margin-bottom: 5px;">
                     {% for lesson in day.lessons %}
-                    <div style="display: block; background: {% if lesson.date < today %}#f5f5f5{% else %}#e3f2fd{% endif %}; padding: 3px; margin-bottom: 2px; font-size: 0.85em; border-left: 3px solid {% if lesson.id in conflicts_by_lesson %}#dc3545{% else %}#2196f3{% endif %}; {% if lesson.date < today %}opacity: 0.7;{% endif %}">
+                    <div class="{% if lesson.date < today %}lesson-past{% else %}lesson-future{% endif %}" style="display: block; background: {% if lesson.date < today %}rgba(255,255,255,0.05){% else %}rgba(33, 150, 243, 0.2){% endif %}; padding: 3px; margin-bottom: 2px; font-size: 0.85em; border-left: 3px solid {% if lesson.id in conflicts_by_lesson %}#dc3545{% else %}#2196f3{% endif %}; {% if lesson.date < today %}opacity: 0.7;{% endif %}">
                         <a href="{% url 'lessons:detail' lesson.pk %}" 
-                           style="text-decoration: none; color: #333; display: block;"
+                           class="lesson-link"
+                           style="text-decoration: none; color: var(--text-primary); display: block;"
                            title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %}">
                             {% if lesson.travel_time_before_minutes > 0 %}<span style="font-size: 0.8em;">🚗</span>{% endif %}
                             <strong>{{ lesson.start_time|time:"H:i" }}</strong> 
@@ -72,7 +73,7 @@
                 {% if day.blocked_times %}
                 <div>
                     {% for blocked_time in day.blocked_times %}
-                    <div style="background: #fff3cd; padding: 3px; margin-bottom: 2px; font-size: 0.85em; color: #856404; border-left: 3px solid #ffc107;">
+                    <div class="blocked-time" style="background: rgba(255, 193, 7, 0.2); padding: 3px; margin-bottom: 2px; font-size: 0.85em; color: #856404; border-left: 3px solid #ffc107;">
                         <a href="{% url 'blocked_times:detail' blocked_time.pk %}?year={{ year }}&month={{ month }}" 
                            style="text-decoration: none; color: #856404; display: block;"
                            title="{% trans 'View/edit blocked time' %}">
@@ -89,11 +90,11 @@
     </tbody>
 </table>
 
-<div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+<div class="calendar-legend" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 5px;">
     <strong>{% trans "Legend:" %}</strong>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: #e3f2fd; border-left: 3px solid #2196f3;">{% trans "Lesson (clickable to edit)" %}</span>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: #e3f2fd; border-left: 3px solid #dc3545;">⚠ {% trans "Conflict" %}</span>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: #fff3cd; border-left: 3px solid #ffc107;">🚫 {% trans "Blocked Time (clickable to edit)" %}</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33, 150, 243, 0.2); border-left: 3px solid #2196f3; color: var(--text-primary);">{% trans "Lesson (clickable to edit)" %}</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33, 150, 243, 0.2); border-left: 3px solid #dc3545; color: var(--text-primary);">⚠ {% trans "Conflict" %}</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(255, 193, 7, 0.2); border-left: 3px solid #ffc107; color: #856404;">🚫 {% trans "Blocked Time (clickable to edit)" %}</span>
     <span style="display: inline-block; margin-left: 10px; color: #007bff; border-bottom: 1px dashed #007bff;">{% trans "Days (clickable to create)" %}</span>
 </div>
 {% endblock %}

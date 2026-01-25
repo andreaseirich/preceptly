@@ -240,6 +240,79 @@
             nav { padding-top: max(15px, env(safe-area-inset-top)); }
             .container { padding-bottom: max(30px, env(safe-area-inset-bottom)); }
         }
+        
+        /* Calendar Dark Mode Styles */
+        [data-theme="dark"] .calendar-table th {
+            background: var(--table-header-bg);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        [data-theme="dark"] .calendar-table td {
+            border-color: var(--border-color);
+            background: var(--bg-secondary);
+        }
+        [data-theme="dark"] .calendar-table td:not(.current-month) {
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+        }
+        [data-theme="dark"] .calendar-note {
+            color: var(--text-secondary);
+        }
+        [data-theme="dark"] .calendar-legend {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        [data-theme="dark"] .lesson-past {
+            background: rgba(255,255,255,0.05) !important;
+            color: var(--text-secondary) !important;
+        }
+        [data-theme="dark"] .lesson-future {
+            background: rgba(33, 150, 243, 0.2) !important;
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] .lesson-link {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] .blocked-time {
+            background: rgba(255, 193, 7, 0.2) !important;
+            color: #ffd54f !important;
+            border-left-color: #ffc107 !important;
+        }
+        [data-theme="dark"] .blocked-time a {
+            color: #ffd54f !important;
+        }
+        [data-theme="dark"] .week-calendar th {
+            background: var(--table-header-bg);
+            border-color: var(--border-color);
+        }
+        [data-theme="dark"] .week-calendar td {
+            border-color: var(--border-color);
+            background: var(--bg-secondary);
+        }
+        [data-theme="dark"] .week-calendar .time-slot {
+            background: var(--bg-secondary);
+        }
+        [data-theme="dark"] .week-calendar .time-slot:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        [data-theme="dark"] .week-calendar .time-label {
+            background: rgba(255,255,255,0.03);
+            border-color: var(--border-color);
+        }
+        [data-theme="dark"] .week-calendar .today-header {
+            background: rgba(33, 150, 243, 0.15) !important;
+        }
+        [data-theme="dark"] .create-dialog {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        [data-theme="dark"] .create-dialog-overlay {
+            background: rgba(0,0,0,0.7);
+        }
+        [data-theme="dark"] .preview-tooltip {
+            background: var(--bg-nav);
+            color: var(--text-nav);
+        }
     </style>
 </head>
 <body>
