@@ -1,12 +1,11 @@
 """
-Service für automatische Status-Setzung von Lessons basierend auf Datum/Zeit.
+Service for automatically updating lesson statuses based on date/time.
 """
 
-import json
 from datetime import datetime, timedelta
 
 from apps.lessons.models import Lesson
-from django.db import connection, transaction
+from django.db import transaction
 from django.utils import timezone
 
 
