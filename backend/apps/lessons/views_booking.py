@@ -130,19 +130,26 @@ class StudentBookingView(TemplateView):
 
                 if start_minutes % 30 != 0:
                     return JsonResponse(
-                        {"success": False, "message": _("Start time must be on a 30-minute interval.")},
+                        {
+                            "success": False,
+                            "message": _("Start time must be on a 30-minute interval."),
+                        },
                         status=400,
                     )
                 if end_minutes % 30 != 0:
                     return JsonResponse(
-                        {"success": False, "message": _("End time must be on a 30-minute interval.")},
+                        {
+                            "success": False,
+                            "message": _("End time must be on a 30-minute interval."),
+                        },
                         status=400,
                     )
 
                 # Validierung: Prüfe, dass Endzeit nach Startzeit liegt
                 if end_time_obj <= start_time_obj:
                     return JsonResponse(
-                        {"success": False, "message": _("End time must be after start time.")}, status=400
+                        {"success": False, "message": _("End time must be after start time.")},
+                        status=400,
                     )
 
                 # Validierung: Prüfe, dass der Zeitraum aus ganzen 30-Minuten-Blöcken besteht
