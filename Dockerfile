@@ -29,5 +29,7 @@ WORKDIR /app/backend
 EXPOSE 8000
 
 # Entrypoint will run migrations/collectstatic (if applicable) and start gunicorn
-ENTRYPOINT ["/app/scripts/entrypoint.sh"]
+# Use exec form to ensure Railway uses this instead of any startCommand
+ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]
+CMD []
 
