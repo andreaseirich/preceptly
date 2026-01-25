@@ -188,15 +188,25 @@ class LessonDocumentForm(forms.ModelForm):
         return file
 
 
+class MultipleFileInput(forms.FileInput):
+    """Custom FileInput Widget that supports multiple file uploads."""
+
+    def __init__(self, attrs=None):
+        super().__init__(attrs)
+        if attrs is None:
+            attrs = {}
+        attrs["multiple"] = True
+        self.attrs = attrs
+
+
 class MultipleLessonDocumentForm(forms.Form):
     """Form für mehrere Dokumente auf einmal."""
 
     files = forms.FileField(
-        widget=forms.FileInput(
+        widget=MultipleFileInput(
             attrs={
                 "class": "form-control",
                 "accept": ".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png",
-                "multiple": True,
             }
         ),
         help_text=_("You can upload multiple files at once"),
