@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
 Script to generate PWA icons from SVG source.
-Requires: pip install Pillow cairosvg
+Requires: pip install cairosvg
 """
 
-import os
 from pathlib import Path
 
 try:
-    from PIL import Image
     import cairosvg
 except ImportError:
     print("Error: Please install required packages:")
-    print("  pip install Pillow cairosvg")
+    print("  pip install cairosvg")
     exit(1)
 
 # Icon sizes needed for PWA
