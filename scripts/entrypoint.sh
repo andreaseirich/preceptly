@@ -9,4 +9,4 @@ if [ "${DEBUG:-True}" != "True" ] && [ "${DEBUG:-True}" != "true" ]; then
   python manage.py collectstatic --noinput
 fi
 
-exec gunicorn tutorflow.wsgi:application --bind 0.0.0.0:8000 --workers 4
+exec gunicorn tutorflow.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4
