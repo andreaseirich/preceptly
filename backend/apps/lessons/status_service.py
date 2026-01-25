@@ -104,7 +104,7 @@ class LessonStatusUpdater:
                     )
                     + "\n"
                 )
-        except:
+        except Exception:
             pass
         # #endregion
 
@@ -130,7 +130,7 @@ class LessonStatusUpdater:
                         )
                         + "\n"
                     )
-            except:
+            except Exception:
                 pass
             # #endregion
 
@@ -160,7 +160,7 @@ class LessonStatusUpdater:
                         )
                         + "\n"
                     )
-            except:
+            except Exception:
                 pass
             # #endregion
             for lesson in lessons:
@@ -198,7 +198,7 @@ class LessonStatusUpdater:
                     )
                     + "\n"
                 )
-        except:
+        except Exception:
             pass
         # #endregion
 

@@ -23,6 +23,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         # #region agent log
         import json
+
         from django.db import connection
         from django.utils import timezone
 
@@ -45,7 +46,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     )
                     + "\n"
                 )
-        except:
+        except Exception:
             pass
         # #endregion
         context = super().get_context_data(**kwargs)
