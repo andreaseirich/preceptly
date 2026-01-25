@@ -86,3 +86,6 @@ backend/apps/*/management/commands/delete_*_for_*.py
 backend/apps/billing/management/commands/update_invoice_payers.py
 
 cursor_master_prompt.txt # Not for jury/recruiters
+.gitignore # Not for jury/recruitersdb_export.json
+
+scripts/export_to_railway.sh # Not for jury/recruiters
