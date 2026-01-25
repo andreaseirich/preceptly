@@ -277,18 +277,20 @@ function showLessonPreview(element, event) {
     const studentName = element.querySelector('strong').textContent.trim();
     const timeInfo = element.querySelector('small').textContent.trim();
     const hasConflict = element.classList.contains('has-conflict');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
     previewTooltip = document.createElement('div');
+    previewTooltip.className = 'preview-tooltip';
     previewTooltip.style.cssText = `
         position: absolute;
-        background: #2c3e50;
+        background: ${isDark ? '#1e1e1e' : '#2c3e50'};
         color: white;
         padding: 8px 12px;
         border-radius: 4px;
         font-size: 0.85em;
         z-index: 1000;
         pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 8px ${isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.3)'};
         max-width: 250px;
         white-space: nowrap;
     `;
@@ -316,18 +318,20 @@ function showBlockedTimePreview(element, event) {
     
     const title = element.querySelector('strong').textContent.trim();
     const timeInfo = element.querySelector('small').textContent.trim();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
     previewTooltip = document.createElement('div');
+    previewTooltip.className = 'preview-tooltip';
     previewTooltip.style.cssText = `
         position: absolute;
-        background: #2c3e50;
+        background: ${isDark ? '#1e1e1e' : '#2c3e50'};
         color: white;
         padding: 8px 12px;
         border-radius: 4px;
         font-size: 0.85em;
         z-index: 1000;
         pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 8px ${isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.3)'};
         max-width: 250px;
         white-space: nowrap;
     `;
