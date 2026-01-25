@@ -8,6 +8,8 @@ from datetime import date, datetime
 from apps.contracts.models import Contract
 from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson
+from apps.lessons.recurring_models import RecurringLesson
+from apps.lessons.recurring_service import RecurringLessonService
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
@@ -166,6 +168,23 @@ class StudentBookingView(TemplateView):
                 # Berechne duration_minutes aus Start- und Endzeit
                 duration_minutes = duration_total
 
+                # Validierung: Prüfe, dass Termin nicht in der Vergangenheit liegt
+                # und mindestens 30 Minuten in der Zukunft liegt
+                booking_datetime = timezone.make_aware(
+                    datetime.combine(booking_date_obj, start_time_obj)
+                )
+                min_booking_datetime = timezone.now() + timedelta(minutes=30)
+                if booking_datetime < min_booking_datetime:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _(
+                                "Bookings must be at least 30 minutes in advance. Past time slots cannot be booked."
+                            ),
+                        },
+                        status=400,
+                    )
+
                 # Prüfe Verfügbarkeit
                 week_data = BookingService.get_week_booking_data(
                     contract.id,
@@ -215,6 +234,151 @@ class StudentBookingView(TemplateView):
                         "success": True,
                         "message": _("Lesson successfully booked."),
                         "lesson_id": lesson.id,
+                    }
+                )
+
+            elif action == "book_recurring_slot":
+                # Buche einen Serientermin
+                booking_date = data.get("date")
+                start_time = data.get("start_time")
+                end_time = data.get("end_time")
+                recurrence_type = data.get("recurrence_type", "weekly")
+                weekdays = data.get("weekdays", [])  # Liste von Wochentagen [0,1,2,...] (0=Montag)
+                end_date = data.get("end_date")  # Optional: Enddatum der Serie
+
+                try:
+                    booking_date_obj = datetime.strptime(booking_date, "%Y-%m-%d").date()
+                    start_time_obj = datetime.strptime(start_time, "%H:%M").time()
+                except ValueError:
+                    return JsonResponse(
+                        {"success": False, "message": _("Invalid date or time format.")}, status=400
+                    )
+
+                # Berechne Endzeit
+                if end_time:
+                    try:
+                        end_time_obj = datetime.strptime(end_time, "%H:%M").time()
+                    except ValueError:
+                        return JsonResponse(
+                            {"success": False, "message": _("Invalid end time format.")}, status=400
+                        )
+                else:
+                    # Fallback: verwende contract.unit_duration_minutes
+                    end_time_obj = (
+                        datetime.combine(booking_date_obj, start_time_obj)
+                        + timedelta(minutes=contract.unit_duration_minutes)
+                    ).time()
+
+                # Validierung: Prüfe, dass Start- und Endzeit auf 30-Minuten-Intervallen liegen
+                start_minutes = start_time_obj.hour * 60 + start_time_obj.minute
+                end_minutes = end_time_obj.hour * 60 + end_time_obj.minute
+
+                if start_minutes % 30 != 0:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _("Start time must be on a 30-minute interval."),
+                        },
+                        status=400,
+                    )
+                if end_minutes % 30 != 0:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _("End time must be on a 30-minute interval."),
+                        },
+                        status=400,
+                    )
+
+                # Validierung: Prüfe, dass Endzeit nach Startzeit liegt
+                if end_time_obj <= start_time_obj:
+                    return JsonResponse(
+                        {"success": False, "message": _("End time must be after start time.")},
+                        status=400,
+                    )
+
+                # Validierung: Prüfe, dass der Zeitraum aus ganzen 30-Minuten-Blöcken besteht
+                duration_total = end_minutes - start_minutes
+                if duration_total % 30 != 0:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _("Duration must be a multiple of 30 minutes."),
+                        },
+                        status=400,
+                    )
+
+                # Validierung: Prüfe, dass mindestens ein Wochentag ausgewählt ist
+                if not weekdays or len(weekdays) == 0:
+                    return JsonResponse(
+                        {"success": False, "message": _("At least one weekday must be selected.")},
+                        status=400,
+                    )
+
+                # Validierung: Prüfe, dass Startdatum nicht in der Vergangenheit liegt
+                # und mindestens 30 Minuten in der Zukunft liegt
+                booking_datetime = timezone.make_aware(
+                    datetime.combine(booking_date_obj, start_time_obj)
+                )
+                min_booking_datetime = timezone.now() + timedelta(minutes=30)
+                if booking_datetime < min_booking_datetime:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _(
+                                "Bookings must be at least 30 minutes in advance. Past time slots cannot be booked."
+                            ),
+                        },
+                        status=400,
+                    )
+
+                # Parse Enddatum falls vorhanden
+                end_date_obj = None
+                if end_date:
+                    try:
+                        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+                    except ValueError:
+                        return JsonResponse(
+                            {"success": False, "message": _("Invalid end date format.")}, status=400
+                        )
+
+                # Erstelle RecurringLesson
+                recurring_lesson = RecurringLesson(
+                    contract=contract,
+                    start_date=booking_date_obj,
+                    end_date=end_date_obj,
+                    start_time=start_time_obj,
+                    duration_minutes=duration_total,
+                    travel_time_before_minutes=0,
+                    travel_time_after_minutes=0,
+                    recurrence_type=recurrence_type,
+                    is_active=True,
+                )
+
+                # Setze Wochentage
+                recurring_lesson.monday = 0 in weekdays
+                recurring_lesson.tuesday = 1 in weekdays
+                recurring_lesson.wednesday = 2 in weekdays
+                recurring_lesson.thursday = 3 in weekdays
+                recurring_lesson.friday = 4 in weekdays
+                recurring_lesson.saturday = 5 in weekdays
+                recurring_lesson.sunday = 6 in weekdays
+
+                recurring_lesson.save()
+
+                # Generiere Lessons aus der RecurringLesson
+                result = RecurringLessonService.generate_lessons(
+                    recurring_lesson, check_conflicts=True
+                )
+
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "message": _(
+                            "Recurring lesson series successfully created. {count} lesson(s) generated."
+                        ).format(count=result["created"]),
+                        "recurring_lesson_id": recurring_lesson.id,
+                        "lessons_created": result["created"],
                     }
                 )
 

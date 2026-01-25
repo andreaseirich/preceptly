@@ -117,6 +117,8 @@ class BookingService:
             Liste von (start_time, end_time) Tupeln
         """
         available = []
+        now = timezone.now()
+        min_booking_datetime = now + timedelta(minutes=30)  # Mindestens 30 Minuten Vorlaufzeit
 
         for work_period in working_hours:
             start_str = work_period.get("start", "00:00")
@@ -135,6 +137,12 @@ class BookingService:
             while current + timedelta(minutes=slot_duration_minutes) <= period_end_dt:
                 slot_start = current.time()
                 slot_end = (current + timedelta(minutes=slot_duration_minutes)).time()
+
+                # Prüfe, ob Slot in der Vergangenheit liegt oder weniger als 30 Minuten in der Zukunft
+                slot_datetime = timezone.make_aware(datetime.combine(target_date, slot_start))
+                if slot_datetime < min_booking_datetime:
+                    current += timedelta(minutes=slot_duration_minutes)
+                    continue
 
                 if BookingService.is_time_slot_available(
                     target_date, slot_start, slot_end, occupied_slots
@@ -213,3 +221,132 @@ class BookingService:
             "week_end": week_end,
             "days": days_data,
         }
+
+    @staticmethod
+    def get_public_booking_data(year: int, month: int, day: int) -> Dict:
+        """
+        Gibt Daten für die öffentliche Buchungsseite einer Woche zurück (ohne Contract-Token).
+
+        Args:
+            year: Jahr
+            month: Monat
+            day: Tag
+
+        Returns:
+            Dict mit:
+            - 'week_start': date
+            - 'week_end': date
+            - 'days': List[Dict] mit Daten für jeden Tag
+        """
+        from apps.core.models import UserProfile
+
+        target_date = date(year, month, day)
+        days_since_monday = target_date.weekday()
+        week_start = target_date - timedelta(days=days_since_monday)
+        week_end = week_start + timedelta(days=6)
+
+        # Verwende Standard-Arbeitszeiten aus UserProfile (erster Eintrag)
+        working_hours = {}
+        try:
+            profile = UserProfile.objects.first()
+            if profile and profile.default_working_hours:
+                working_hours = profile.default_working_hours
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
+
+        # Lade belegte Zeitslots (für alle Contracts, da kein spezifischer Contract)
+        # Verwende eine Methode, die alle belegten Slots zurückgibt
+        occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end)
+
+        # Wochentage-Namen
+        weekday_names = [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]
+
+        days_data = []
+        for i in range(7):
+            current_date = week_start + timedelta(days=i)
+            weekday_name = weekday_names[i]
+
+            # Arbeitszeiten für diesen Wochentag
+            day_working_hours = working_hours.get(weekday_name, [])
+
+            # Verfügbare Slots
+            available_slots = BookingService.get_available_time_slots(
+                current_date, day_working_hours, occupied_slots
+            )
+
+            days_data.append(
+                {
+                    "date": current_date,
+                    "weekday": weekday_name,
+                    "weekday_display": current_date.strftime("%A"),
+                    "working_hours": day_working_hours,
+                    "available_slots": available_slots,
+                    "occupied_slots": occupied_slots.get(current_date, []),
+                }
+            )
+
+        return {
+            "week_start": week_start,
+            "week_end": week_end,
+            "days": days_data,
+        }
+
+    @staticmethod
+    def get_all_occupied_time_slots(
+        start_date: date, end_date: date
+    ) -> Dict[date, List[Tuple[time, time]]]:
+        """
+        Gibt alle belegten Zeitslots zurück (für alle Contracts).
+
+        Args:
+            start_date: Startdatum
+            end_date: Enddatum
+
+        Returns:
+            Dict[date, List[Tuple[start_time, end_time]]] - belegte Zeitslots pro Tag
+        """
+        occupied = defaultdict(list)
+
+        # Lade alle Lessons im Zeitraum
+        lessons = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
+            "contract", "contract__student"
+        )
+
+        for lesson in lessons:
+            start_datetime, end_datetime = LessonConflictService.calculate_time_block(lesson)
+            occupied[lesson.date].append((start_datetime.time(), end_datetime.time()))
+
+        # Lade Blockzeiten im Zeitraum
+        start_datetime = timezone.make_aware(datetime.combine(start_date, time.min))
+        end_datetime = timezone.make_aware(datetime.combine(end_date, time.max))
+        blocked_times = BlockedTime.objects.filter(
+            start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
+        ).order_by("start_datetime")
+
+        for blocked_time in blocked_times:
+            current_date = blocked_time.start_datetime.date()
+            end_date_bt = blocked_time.end_datetime.date()
+
+            while current_date <= end_date_bt and current_date <= end_date:
+                if current_date >= start_date:
+                    occupied[current_date].append(
+                        (
+                            blocked_time.start_datetime.time(),
+                            blocked_time.end_datetime.time(),
+                        )
+                    )
+                current_date += timedelta(days=1)
+
+        # Sortiere Zeitslots pro Tag
+        for day in occupied:
+            occupied[day].sort()
+
+        return dict(occupied)

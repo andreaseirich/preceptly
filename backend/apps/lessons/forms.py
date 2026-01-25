@@ -2,7 +2,7 @@
 Forms für Lesson-Model.
 """
 
-from apps.lessons.models import Lesson
+from apps.lessons.models import Lesson, LessonDocument
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -144,3 +144,85 @@ class LessonForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+
+class LessonDocumentForm(forms.ModelForm):
+    """Form für LessonDocument-Upload."""
+
+    class Meta:
+        model = LessonDocument
+        fields = ["file", "name"]
+        widgets = {
+            "file": forms.FileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": ".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png",
+                }
+            ),
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": _("Optional: Document name")}
+            ),
+        }
+
+    def clean_file(self):
+        """Validiere Datei-Größe und -Typ."""
+        file = self.cleaned_data.get("file")
+        if file:
+            # Maximale Dateigröße: 10 MB
+            max_size = 10 * 1024 * 1024  # 10 MB
+            if file.size > max_size:
+                raise forms.ValidationError(
+                    _("File size must be less than 10 MB. Current size: {size} MB").format(
+                        size=round(file.size / (1024 * 1024), 2)
+                    )
+                )
+
+            # Erlaubte Dateitypen
+            allowed_extensions = [".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png"]
+            file_extension = file.name.lower().split(".")[-1] if "." in file.name else ""
+            if file_extension and f".{file_extension}" not in allowed_extensions:
+                raise forms.ValidationError(
+                    _("File type not allowed. Allowed types: PDF, DOC, DOCX, TXT, JPG, PNG")
+                )
+
+        return file
+
+
+class MultipleLessonDocumentForm(forms.Form):
+    """Form für mehrere Dokumente auf einmal."""
+
+    files = forms.FileField(
+        widget=forms.FileInput(
+            attrs={
+                "class": "form-control",
+                "accept": ".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png",
+                "multiple": True,
+            }
+        ),
+        help_text=_("You can upload multiple files at once"),
+    )
+
+    def clean_files(self):
+        """Validiere Dateien."""
+        files = self.files.getlist("files")
+        if not files:
+            raise forms.ValidationError(_("Please select at least one file."))
+
+        max_size = 10 * 1024 * 1024  # 10 MB
+        allowed_extensions = [".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png"]
+
+        for file in files:
+            if file.size > max_size:
+                raise forms.ValidationError(
+                    _("File '{name}' is too large. Maximum size: 10 MB").format(name=file.name)
+                )
+
+            file_extension = file.name.lower().split(".")[-1] if "." in file.name else ""
+            if file_extension and f".{file_extension}" not in allowed_extensions:
+                raise forms.ValidationError(
+                    _(
+                        "File '{name}' has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, JPG, PNG"
+                    ).format(name=file.name)
+                )
+
+        return files

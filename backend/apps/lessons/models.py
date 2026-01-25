@@ -82,3 +82,33 @@ class Lesson(models.Model):
     def save(self, *args, **kwargs):
         self.invalidate_conflict_cache()
         super().save(*args, **kwargs)
+
+
+class LessonDocument(models.Model):
+    """Document uploaded for a lesson."""
+
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name="documents",
+        help_text=_("Associated lesson"),
+    )
+    file = models.FileField(
+        upload_to="lesson_documents/",
+        help_text=_("Document file"),
+    )
+    name = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_("Optional name/description for the document"),
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True, help_text=_("Upload timestamp"))
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = _("Lesson Document")
+        verbose_name_plural = _("Lesson Documents")
+
+    def __str__(self):
+        return f"{self.lesson} - {self.name or self.file.name}"

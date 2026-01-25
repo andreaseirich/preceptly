@@ -2908,6 +2908,196 @@ msgstr "Dauer muss ein Vielfaches von 30 Minuten sein."
 msgid "Invalid end time format."
 msgstr "Ungültiges Endzeit-Format."
 
+#: apps/lessons/views_booking.py
+msgid "Bookings must be at least 30 minutes in advance. Past time slots cannot be booked."
+msgstr "Buchungen müssen mindestens 30 Minuten im Voraus erfolgen. Vergangene Zeitslots können nicht gebucht werden."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Book Recurring Lesson"
+msgstr "Serientermin buchen"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Start Date:"
+msgstr "Startdatum:"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "End Time:"
+msgstr "Endzeit:"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Recurrence Type:"
+msgstr "Wiederholungstyp:"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "End Date (optional):"
+msgstr "Enddatum (optional):"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Please fill in all required fields."
+msgstr "Bitte füllen Sie alle erforderlichen Felder aus."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Please select at least one weekday."
+msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Error booking recurring lesson."
+msgstr "Fehler beim Buchen des Serientermins."
+
+
+#: apps/lessons/views_booking.py
+msgid "Invalid end date format."
+msgstr "Ungültiges Enddatum-Format."
+
+#: apps/lessons/views_booking.py
+msgid "Recurring lesson series successfully created. {count} lesson(s) generated."
+msgstr "Serientermin-Serie erfolgreich erstellt. {count} Stunde(n) generiert."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Enter your name"
+msgstr "Geben Sie Ihren Namen ein"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Full Name"
+msgstr "Vollständiger Name"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "e.g., Max Mustermann"
+msgstr "z.B. Max Mustermann"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Continue"
+msgstr "Weiter"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "No student found with this name."
+msgstr "Kein Schüler mit diesem Namen gefunden."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Similar names found"
+msgstr "Ähnliche Namen gefunden"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Did you mean one of these?"
+msgstr "Meinten Sie einen davon?"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "similar"
+msgstr "ähnlich"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Create new student"
+msgstr "Neuen Schüler erstellen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Create New Student"
+msgstr "Neuen Schüler erstellen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "e.g., Math, German"
+msgstr "z.B. Mathe, Deutsch"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Leave empty if no institute"
+msgstr "Leer lassen, wenn kein Institut"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Subject"
+msgstr "Fach"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "e.g., Math"
+msgstr "z.B. Mathe"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Additional notes for the lesson..."
+msgstr "Zusätzliche Notizen zur Stunde..."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Upload Documents"
+msgstr "Dokumente hochladen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "You can upload multiple files (PDF, DOC, DOCX, TXT, JPG, PNG, max 10 MB each)"
+msgstr "Sie können mehrere Dateien hochladen (PDF, DOC, DOCX, TXT, JPG, PNG, max. 10 MB pro Datei)"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Select Time Slot"
+msgstr "Zeitslot auswählen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Continue to Confirm"
+msgstr "Weiter zur Bestätigung"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Confirm Booking"
+msgstr "Buchung bestätigen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Confirm and Book"
+msgstr "Bestätigen und buchen"
+
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Documents"
+msgstr "Dokumente"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "file(s)"
+msgstr "Datei(en)"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Please complete all steps."
+msgstr "Bitte vervollständigen Sie alle Schritte."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Data"
+msgstr "Daten"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Time Slot"
+msgstr "Zeitslot"
+
+#: apps/lessons/views_public_booking.py
+msgid "Please enter a name."
+msgstr "Bitte geben Sie einen Namen ein."
+
+#: apps/lessons/views_public_booking.py
+msgid "First name and last name are required."
+msgstr "Vorname und Nachname sind erforderlich."
+
+#: apps/lessons/views_public_booking.py
+msgid "Student created successfully."
+msgstr "Schüler erfolgreich erstellt."
+
+#: apps/lessons/views_public_booking.py
+msgid "Student ID is required."
+msgstr "Schüler-ID ist erforderlich."
+
+#: apps/lessons/views_public_booking.py
+msgid "Student not found."
+msgstr "Schüler nicht gefunden."
+
+#: apps/lessons/views_public_booking.py
+msgid "Date and start time are required."
+msgstr "Datum und Startzeit sind erforderlich."
+
+#: apps/lessons/views_public_booking.py
+msgid "An error occurred: {error}"
+msgstr "Ein Fehler ist aufgetreten: {error}"
+
+#: apps/lessons/views_public_booking.py
+msgid "Please enter your name."
+msgstr "Bitte geben Sie Ihren Namen ein."
+
+#: apps/lessons/views_public_booking.py
+msgid "Error searching for student."
+msgstr "Fehler bei der Suche nach Schüler."
+
+#: apps/lessons/views_public_booking.py
+msgid "Error creating student."
+msgstr "Fehler beim Erstellen des Schülers."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 
