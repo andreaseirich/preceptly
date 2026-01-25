@@ -43,12 +43,6 @@ def env_list(name: str, default=None):
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Debug log path - works both locally and on Railway
-DEBUG_LOG_PATH = Path(__file__).resolve().parent.parent.parent / ".cursor" / "debug.log"
-if not DEBUG_LOG_PATH.parent.exists():
-    # On Railway, use /app path
-    DEBUG_LOG_PATH = Path("/app/.cursor/debug.log")
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -57,206 +51,25 @@ if not DEBUG_LOG_PATH.parent.exists():
 DEBUG = env_bool("DEBUG", default=False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# #region agent log
-try:
-    DEBUG_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(DEBUG_LOG_PATH, "a") as f:
-        import json
-
-        f.write(
-            json.dumps(
-                {
-                    "sessionId": "debug-session",
-                    "runId": "run1",
-                    "hypothesisId": "A",
-                    "location": "settings.py:60",
-                    "message": "SECRET_KEY check start",
-                    "data": {
-                        "DEBUG": DEBUG,
-                        "SECRET_KEY_set": bool(env("SECRET_KEY")),
-                        "code_version": "new",
-                    },
-                    "timestamp": int(__import__("time").time() * 1000),
-                }
-            )
-            + "\n"
-        )
-except:  # noqa: E722
-    pass
-# #endregion
 SECRET_KEY = env("SECRET_KEY")
-# #region agent log
-try:
-    with open(DEBUG_LOG_PATH, "a") as f:
-        import json
-
-        f.write(
-            json.dumps(
-                {
-                    "sessionId": "debug-session",
-                    "runId": "run1",
-                    "hypothesisId": "A",
-                    "location": "settings.py:63",
-                    "message": "After env(SECRET_KEY)",
-                    "data": {"SECRET_KEY": bool(SECRET_KEY), "DEBUG": DEBUG},
-                    "timestamp": int(__import__("time").time() * 1000),
-                }
-            )
-            + "\n"
-        )
-except:  # noqa: E722
-    pass
-# #endregion
 if not SECRET_KEY:
-    # #region agent log
-    try:
-        with open(DEBUG_LOG_PATH, "a") as f:
-            import json
-
-            f.write(
-                json.dumps(
-                    {
-                        "sessionId": "debug-session",
-                        "runId": "run1",
-                        "hypothesisId": "B",
-                        "location": "settings.py:66",
-                        "message": "SECRET_KEY not set, entering if block",
-                        "data": {"DEBUG": DEBUG},
-                        "timestamp": int(__import__("time").time() * 1000),
-                    }
-                )
-                + "\n"
-            )
-    except:  # noqa: E722
-        pass
-    # #endregion
     if DEBUG:
         SECRET_KEY = "dev-insecure-secret-key"
-        # #region agent log
-        try:
-            with open(DEBUG_LOG_PATH, "a") as f:
-                import json
-
-                f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "debug-session",
-                            "runId": "run1",
-                            "hypothesisId": "C",
-                            "location": "settings.py:70",
-                            "message": "Using dev key",
-                            "data": {},
-                            "timestamp": int(__import__("time").time() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except:  # noqa: E722
-            pass
-        # #endregion
     else:
-        # #region agent log
-        try:
-            with open(DEBUG_LOG_PATH, "a") as f:
-                import json
-
-                f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "debug-session",
-                            "runId": "run1",
-                            "hypothesisId": "D",
-                            "location": "settings.py:74",
-                            "message": "Production mode, attempting auto-generate",
-                            "data": {
-                                "get_random_secret_key_available": hasattr(
-                                    __import__(
-                                        "django.core.management.utils",
-                                        fromlist=["get_random_secret_key"],
-                                    ),
-                                    "get_random_secret_key",
-                                )
-                            },
-                            "timestamp": int(__import__("time").time() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except Exception as e:
-            try:
-                with open(DEBUG_LOG_PATH, "a") as f:
-                    import json
-
-                    f.write(
-                        json.dumps(
-                            {
-                                "sessionId": "debug-session",
-                                "runId": "run1",
-                                "hypothesisId": "D",
-                                "location": "settings.py:74",
-                                "message": "Log error",
-                                "data": {"error": str(e)},
-                                "timestamp": int(__import__("time").time() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except:  # noqa: E722
-                pass
-        # #endregion
         # Auto-generate SECRET_KEY if not set (fallback for deployment)
         # WARNING: This should be set explicitly in production for security
         try:
             SECRET_KEY = get_random_secret_key()
-            # #region agent log
-            try:
-                with open(DEBUG_LOG_PATH, "a") as f:
-                    import json
+        except Exception:
+            # Fallback: Generate a simple secret key if get_random_secret_key fails
+            import secrets
+            SECRET_KEY = secrets.token_urlsafe(50)
 
-                    f.write(
-                        json.dumps(
-                            {
-                                "sessionId": "debug-session",
-                                "runId": "run1",
-                                "hypothesisId": "E",
-                                "location": "settings.py:84",
-                                "message": "Successfully generated SECRET_KEY",
-                                "data": {"SECRET_KEY_length": len(SECRET_KEY)},
-                                "timestamp": int(__import__("time").time() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except:  # noqa: E722
-                pass
-            # #endregion
-        except Exception as e:
-            # #region agent log
-            try:
-                with open(DEBUG_LOG_PATH, "a") as f:
-                    import json
-
-                    f.write(
-                        json.dumps(
-                            {
-                                "sessionId": "debug-session",
-                                "runId": "run1",
-                                "hypothesisId": "F",
-                                "location": "settings.py:90",
-                                "message": "Failed to generate SECRET_KEY",
-                                "data": {
-                                    "error": str(e),
-                                    "error_type": type(e).__name__,
-                                },
-                                "timestamp": int(__import__("time").time() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except:  # noqa: E722
-                pass
-            # #endregion
-            raise
+# Final check: Ensure SECRET_KEY is always set
+if not SECRET_KEY:
+    # Emergency fallback - should never happen, but ensures app doesn't crash
+    import secrets
+    SECRET_KEY = secrets.token_urlsafe(50)
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 if not ALLOWED_HOSTS:
@@ -328,83 +141,7 @@ WSGI_APPLICATION = "tutorflow.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASE_URL = env("DATABASE_URL")
-# #region agent log
-try:
-    with open(DEBUG_LOG_PATH, "a") as f:
-        import json
-
-        f.write(
-            json.dumps(
-                {
-                    "sessionId": "debug-session",
-                    "runId": "run1",
-                    "hypothesisId": "G",
-                    "location": "settings.py:330",
-                    "message": "DATABASE_URL check",
-                    "data": {
-                        "DATABASE_URL_set": bool(DATABASE_URL),
-                        "DATABASE_URL_preview": (
-                            DATABASE_URL[:50] + "..."
-                            if DATABASE_URL and len(DATABASE_URL) > 50
-                            else DATABASE_URL
-                        ),
-                    },
-                    "timestamp": int(__import__("time").time() * 1000),
-                }
-            )
-            + "\n"
-        )
-except:  # noqa: E722
-    pass
-# #endregion
 if DATABASE_URL:
-    # #region agent log
-    try:
-        parsed_db = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
-        with open(DEBUG_LOG_PATH, "a") as f:
-            import json
-
-            f.write(
-                json.dumps(
-                    {
-                        "sessionId": "debug-session",
-                        "runId": "run1",
-                        "hypothesisId": "H",
-                        "location": "settings.py:355",
-                        "message": "Parsed DATABASE_URL",
-                        "data": {
-                            "db_name": parsed_db.get("NAME"),
-                            "db_user": parsed_db.get("USER"),
-                            "db_host": parsed_db.get("HOST"),
-                            "db_port": parsed_db.get("PORT"),
-                        },
-                        "timestamp": int(__import__("time").time() * 1000),
-                    }
-                )
-                + "\n"
-            )
-    except Exception as e:
-        try:
-            with open(DEBUG_LOG_PATH, "a") as f:
-                import json
-
-                f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "debug-session",
-                            "runId": "run1",
-                            "hypothesisId": "H",
-                            "location": "settings.py:355",
-                            "message": "Failed to parse DATABASE_URL",
-                            "data": {"error": str(e)},
-                            "timestamp": int(__import__("time").time() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except:  # noqa: E722
-            pass
-    # #endregion
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
     }
