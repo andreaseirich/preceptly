@@ -92,17 +92,11 @@ class StudentBookingView(TemplateView):
             data = json.loads(request.body)
             action = data.get("action")
 
-            if action == "update_working_hours":
-                # Aktualisiere Arbeitszeiten
-                working_hours = data.get("working_hours", {})
-                contract.working_hours = working_hours
-                contract.save(update_fields=["working_hours"])
-                return JsonResponse({"success": True, "message": _("Working hours updated.")})
-
-            elif action == "book_slot":
+            if action == "book_slot":
                 # Buche einen Zeitslot
                 booking_date = data.get("date")
                 start_time = data.get("start_time")
+                end_time = data.get("end_time")  # Optional: falls gesetzt, wird dies verwendet
                 duration_minutes = data.get("duration_minutes", contract.unit_duration_minutes)
 
                 try:
@@ -112,6 +106,58 @@ class StudentBookingView(TemplateView):
                     return JsonResponse(
                         {"success": False, "message": _("Invalid date or time format.")}, status=400
                     )
+
+                # Berechne Endzeit
+                from datetime import timedelta
+
+                if end_time:
+                    try:
+                        end_time_obj = datetime.strptime(end_time, "%H:%M").time()
+                    except ValueError:
+                        return JsonResponse(
+                            {"success": False, "message": _("Invalid end time format.")}, status=400
+                        )
+                else:
+                    # Fallback: verwende duration_minutes
+                    end_time_obj = (
+                        datetime.combine(booking_date_obj, start_time_obj)
+                        + timedelta(minutes=duration_minutes)
+                    ).time()
+
+                # Validierung: Prüfe, dass Start- und Endzeit auf 30-Minuten-Intervallen liegen
+                start_minutes = start_time_obj.hour * 60 + start_time_obj.minute
+                end_minutes = end_time_obj.hour * 60 + end_time_obj.minute
+
+                if start_minutes % 30 != 0:
+                    return JsonResponse(
+                        {"success": False, "message": _("Start time must be on a 30-minute interval.")},
+                        status=400,
+                    )
+                if end_minutes % 30 != 0:
+                    return JsonResponse(
+                        {"success": False, "message": _("End time must be on a 30-minute interval.")},
+                        status=400,
+                    )
+
+                # Validierung: Prüfe, dass Endzeit nach Startzeit liegt
+                if end_time_obj <= start_time_obj:
+                    return JsonResponse(
+                        {"success": False, "message": _("End time must be after start time.")}, status=400
+                    )
+
+                # Validierung: Prüfe, dass der Zeitraum aus ganzen 30-Minuten-Blöcken besteht
+                duration_total = end_minutes - start_minutes
+                if duration_total % 30 != 0:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _("Duration must be a multiple of 30 minutes."),
+                        },
+                        status=400,
+                    )
+
+                # Berechne duration_minutes aus Start- und Endzeit
+                duration_minutes = duration_total
 
                 # Prüfe Verfügbarkeit
                 week_data = BookingService.get_week_booking_data(
@@ -135,13 +181,6 @@ class StudentBookingView(TemplateView):
                     )
 
                 # Prüfe ob Slot verfügbar ist
-                from datetime import timedelta
-
-                end_time_obj = (
-                    datetime.combine(booking_date_obj, start_time_obj)
-                    + timedelta(minutes=duration_minutes)
-                ).time()
-
                 occupied_slots = BookingService.get_occupied_time_slots(
                     contract.id, booking_date_obj, booking_date_obj
                 )

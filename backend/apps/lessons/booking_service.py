@@ -102,7 +102,7 @@ class BookingService:
         target_date: date,
         working_hours: List[Dict[str, str]],
         occupied_slots: Dict[date, List[Tuple[time, time]]],
-        slot_duration_minutes: int = 60,
+        slot_duration_minutes: int = 30,
     ) -> List[Tuple[time, time]]:
         """
         Gibt verfügbare Zeitslots für einen Tag zurück.

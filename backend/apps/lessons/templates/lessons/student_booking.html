@@ -141,6 +141,14 @@
             background: #d4edda; 
             border-color: #28a745; 
         }
+        .time-slot.selected { 
+            background: #fff3cd; 
+            border-color: #ffc107; 
+            border-width: 3px; 
+        }
+        .time-slot.selected:hover { 
+            background: #ffe69c; 
+        }
         .time-slot-label { 
             font-weight: bold; 
             color: #2c3e50; 
@@ -165,46 +173,16 @@
         <div class="btn-group">
             <button class="btn" onclick="previousWeek()">← {% trans "Previous Week" %}</button>
             <button class="btn" onclick="nextWeek()">{% trans "Next Week" %} →</button>
-            <button class="btn btn-secondary" onclick="toggleWorkingHoursConfig()">
-                {% trans "Configure Working Hours" %}
-            </button>
-        </div>
-        
-        <div id="working-hours-config" class="working-hours-config" style="display: none;">
-            <h2>{% trans "Working Hours Configuration" %}</h2>
-            <p>{% trans "Set your working hours for each day. Students can only book during these times." %}</p>
-            
-            <div id="working-hours-form">
-                {% for weekday in week_data.days %}
-                <div class="day-config" data-weekday="{{ weekday.weekday }}">
-                    <h3>{{ weekday.weekday_display }}</h3>
-                    <div class="time-ranges" id="ranges-{{ weekday.weekday }}">
-                        {% if weekday.working_hours %}
-                            {% for range in weekday.working_hours %}
-                            <div class="time-range">
-                                <input type="time" value="{{ range.start }}" class="start-time">
-                                <span>-</span>
-                                <input type="time" value="{{ range.end }}" class="end-time">
-                                <button onclick="removeTimeRange(this)">{% trans "Remove" %}</button>
-                            </div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                    <button class="add-time-range" onclick="addTimeRange('{{ weekday.weekday }}')">
-                        + {% trans "Add Time Range" %}
-                    </button>
-                </div>
-                {% endfor %}
-            </div>
-            
-            <button class="btn btn-success" onclick="saveWorkingHours()">
-                {% trans "Save Working Hours" %}
-            </button>
         </div>
         
         <div class="week-calendar">
             <h2>{% trans "Available Time Slots" %}</h2>
-            <p>{% trans "Click on an available time slot to book a lesson." %}</p>
+            <p>{% trans "Click on available time slots to select them. You can select multiple consecutive slots (e.g., 13:30 and 14:30 = booking from 13:30 to 14:30)." %}</p>
+            <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: #fff3cd; border-radius: 4px; display: none;">
+                <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
+                <button class="btn btn-success" onclick="confirmBooking()" style="margin-left: 15px;">{% trans "Book Selected Slots" %}</button>
+                <button class="btn btn-secondary" onclick="clearSelection()" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
+            </div>
             
             {% for day in week_data.days %}
             <div class="day-column">
@@ -219,9 +197,9 @@
                              data-date="{{ day.date|date:'Y-m-d' }}" 
                              data-start="{{ slot.0|time:'H:i' }}" 
                              data-end="{{ slot.1|time:'H:i' }}"
-                             onclick="bookSlot(this)">
+                             onclick="toggleSlot(this)">
                             <div class="time-slot-label">
-                                {{ slot.0|time:'H:i' }} - {{ slot.1|time:'H:i' }}
+                                {{ slot.0|time:'H:i' }}
                             </div>
                         </div>
                         {% endfor %}
@@ -259,84 +237,128 @@
             setTimeout(() => messageDiv.remove(), 5000);
         }
         
-        function toggleWorkingHoursConfig() {
-            const config = document.getElementById('working-hours-config');
-            config.style.display = config.style.display === 'none' ? 'block' : 'none';
-        }
+        let selectedSlots = [];
+        let currentDate = null;
         
-        function addTimeRange(weekday) {
-            const container = document.getElementById(`ranges-${weekday}`);
-            const timeRange = document.createElement('div');
-            timeRange.className = 'time-range';
-            timeRange.innerHTML = `
-                <input type="time" value="09:00" class="start-time">
-                <span>-</span>
-                <input type="time" value="17:00" class="end-time">
-                <button onclick="removeTimeRange(this)">{% trans "Remove" %}</button>
-            `;
-            container.appendChild(timeRange);
-        }
-        
-        function removeTimeRange(button) {
-            button.parentElement.remove();
-        }
-        
-        function saveWorkingHours() {
-            const workingHours = {};
-            const dayConfigs = document.querySelectorAll('.day-config');
-            
-            dayConfigs.forEach(dayConfig => {
-                const weekday = dayConfig.dataset.weekday;
-                const ranges = dayConfig.querySelectorAll('.time-range');
-                const hours = [];
-                
-                ranges.forEach(range => {
-                    const start = range.querySelector('.start-time').value;
-                    const end = range.querySelector('.end-time').value;
-                    if (start && end) {
-                        hours.push({ start, end });
-                    }
-                });
-                
-                if (hours.length > 0) {
-                    workingHours[weekday] = hours;
-                }
-            });
-            
-            fetch(`/lessons/booking/${token}/api/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    action: 'update_working_hours',
-                    working_hours: workingHours
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage(data.message);
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showMessage(data.message, 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('{% trans "Error saving working hours." %}', 'error');
-            });
-        }
-        
-        function bookSlot(element) {
-            if (element.classList.contains('occupied')) {
+        function toggleSlot(element) {
+            if (element.classList.contains('occupied') || element.classList.contains('booked')) {
                 return;
             }
             
             const date = element.dataset.date;
             const startTime = element.dataset.start;
+            const endTime = element.dataset.end;
             
-            if (!confirm(`{% trans "Book lesson on" %} ${date} {% trans "at" %} ${startTime}?`)) {
+            // Wenn ein neuer Tag ausgewählt wird, leere die Auswahl
+            if (currentDate && currentDate !== date) {
+                clearSelection();
+            }
+            currentDate = date;
+            
+            const slotKey = `${date}_${startTime}`;
+            const slotIndex = selectedSlots.findIndex(s => s.key === slotKey);
+            
+            if (slotIndex >= 0) {
+                // Slot bereits ausgewählt - entferne ihn
+                selectedSlots.splice(slotIndex, 1);
+                element.classList.remove('selected');
+            } else {
+                // Prüfe, ob der Slot aufeinanderfolgend ist
+                if (selectedSlots.length > 0) {
+                    const sortedSlots = [...selectedSlots, { key: slotKey, date, startTime, endTime }]
+                        .sort((a, b) => {
+                            if (a.date !== b.date) return a.date.localeCompare(b.date);
+                            return a.startTime.localeCompare(b.startTime);
+                        });
+                    
+                    // Prüfe, ob alle Slots aufeinanderfolgend sind
+                    let isConsecutive = true;
+                    for (let i = 1; i < sortedSlots.length; i++) {
+                        const prevEnd = sortedSlots[i - 1].endTime;
+                        const currStart = sortedSlots[i].startTime;
+                        if (prevEnd !== currStart) {
+                            isConsecutive = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!isConsecutive) {
+                        showMessage('{% trans "Please select consecutive time slots only." %}', 'error');
+                        return;
+                    }
+                }
+                
+                // Füge Slot hinzu
+                selectedSlots.push({ key: slotKey, date, startTime, endTime });
+                element.classList.add('selected');
+            }
+            
+            updateSelectionInfo();
+        }
+        
+        function updateSelectionInfo() {
+            const infoDiv = document.getElementById('selected-slots-info');
+            const rangeSpan = document.getElementById('selected-range');
+            
+            if (selectedSlots.length === 0) {
+                infoDiv.style.display = 'none';
+                return;
+            }
+            
+            // Sortiere Slots nach Zeit
+            const sortedSlots = [...selectedSlots].sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.startTime.localeCompare(b.startTime);
+            });
+            
+            const firstSlot = sortedSlots[0];
+            const lastSlot = sortedSlots[sortedSlots.length - 1];
+            
+            const startDateTime = `${firstSlot.date} ${firstSlot.startTime}`;
+            const endDateTime = `${lastSlot.date} ${lastSlot.endTime}`;
+            
+            rangeSpan.textContent = `${startDateTime} - ${endDateTime}`;
+            infoDiv.style.display = 'block';
+        }
+        
+        function clearSelection() {
+            selectedSlots.forEach(slot => {
+                const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
+                if (element) {
+                    element.classList.remove('selected');
+                }
+            });
+            selectedSlots = [];
+            currentDate = null;
+            updateSelectionInfo();
+        }
+        
+        function confirmBooking() {
+            if (selectedSlots.length === 0) {
+                showMessage('{% trans "Please select at least one time slot." %}', 'error');
+                return;
+            }
+            
+            // Sortiere Slots nach Zeit
+            const sortedSlots = [...selectedSlots].sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.startTime.localeCompare(b.startTime);
+            });
+            
+            const firstSlot = sortedSlots[0];
+            const lastSlot = sortedSlots[sortedSlots.length - 1];
+            
+            // Prüfe, ob alle Slots am selben Tag sind
+            if (firstSlot.date !== lastSlot.date) {
+                showMessage('{% trans "All selected slots must be on the same day." %}', 'error');
+                return;
+            }
+            
+            const startTime = firstSlot.startTime;
+            const endTime = lastSlot.endTime;
+            const date = firstSlot.date;
+            
+            if (!confirm(`{% trans "Book lesson on" %} ${date} {% trans "from" %} ${startTime} {% trans "to" %} ${endTime}?`)) {
                 return;
             }
             
@@ -350,15 +372,25 @@
                     action: 'book_slot',
                     date: date,
                     start_time: startTime,
-                    duration_minutes: contractDuration
+                    end_time: endTime
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     showMessage(data.message);
-                    element.classList.add('booked');
-                    element.onclick = null;
+                    // Markiere alle ausgewählten Slots als gebucht
+                    selectedSlots.forEach(slot => {
+                        const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
+                        if (element) {
+                            element.classList.remove('selected');
+                            element.classList.add('booked');
+                            element.onclick = null;
+                        }
+                    });
+                    clearSelection();
+                    // Seite neu laden nach kurzer Verzögerung
+                    setTimeout(() => location.reload(), 1500);
                 } else {
                     showMessage(data.message, 'error');
                 }

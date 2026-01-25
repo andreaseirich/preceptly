@@ -2824,6 +2824,90 @@ msgstr "Schüler erfolgreich aktualisiert."
 msgid "Student successfully deleted."
 msgstr "Schüler erfolgreich gelöscht."
 
+#: apps/lessons/templates/lessons/student_booking.html:7
+msgid "Book Lesson"
+msgstr "Stunde buchen"
+
+#: apps/lessons/templates/lessons/student_booking.html:206
+msgid "Available Time Slots"
+msgstr "Verfügbare Zeitslots"
+
+#: apps/lessons/templates/lessons/student_booking.html:207
+msgid "Click on available time slots to select them. You can select multiple consecutive slots (e.g., 13:30 and 14:30 = booking from 13:30 to 14:30)."
+msgstr "Klicken Sie auf verfügbare Zeitslots, um sie auszuwählen. Sie können mehrere aufeinanderfolgende Slots auswählen (z.B. 13:30 und 14:30 = Buchung von 13:30 bis 14:30)."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Selected:"
+msgstr "Ausgewählt:"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Book Selected Slots"
+msgstr "Ausgewählte Slots buchen"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Clear Selection"
+msgstr "Auswahl löschen"
+
+#: apps/lessons/templates/lessons/student_booking.html:234
+msgid "Occupied"
+msgstr "Belegt"
+
+#: apps/lessons/templates/lessons/student_booking.html:239
+msgid "No working hours configured for this day."
+msgstr "Keine Arbeitszeiten für diesen Tag konfiguriert."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Book lesson on"
+msgstr "Stunde buchen am"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "from"
+msgstr "von"
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Error booking lesson."
+msgstr "Fehler beim Buchen der Stunde."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Please select consecutive time slots only."
+msgstr "Bitte wählen Sie nur aufeinanderfolgende Zeitslots aus."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "Please select at least one time slot."
+msgstr "Bitte wählen Sie mindestens einen Zeitslot aus."
+
+#: apps/lessons/templates/lessons/student_booking.html
+msgid "All selected slots must be on the same day."
+msgstr "Alle ausgewählten Slots müssen am selben Tag sein."
+
+#: apps/lessons/views_booking.py:170
+msgid "Lesson successfully booked."
+msgstr "Stunde erfolgreich gebucht."
+
+#: apps/lessons/views_booking.py:153
+msgid "Time slot is already booked."
+msgstr "Zeitslot ist bereits gebucht."
+
+#: apps/lessons/views_booking.py
+msgid "Start time must be on a 30-minute interval."
+msgstr "Startzeit muss auf einem 30-Minuten-Intervall liegen."
+
+#: apps/lessons/views_booking.py
+msgid "End time must be on a 30-minute interval."
+msgstr "Endzeit muss auf einem 30-Minuten-Intervall liegen."
+
+#: apps/lessons/views_booking.py
+msgid "End time must be after start time."
+msgstr "Endzeit muss nach der Startzeit liegen."
+
+#: apps/lessons/views_booking.py
+msgid "Duration must be a multiple of 30 minutes."
+msgstr "Dauer muss ein Vielfaches von 30 Minuten sein."
+
+#: apps/lessons/views_booking.py
+msgid "Invalid end time format."
+msgstr "Ungültiges Endzeit-Format."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 
