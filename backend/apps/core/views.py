@@ -25,10 +25,28 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         import json
         from django.db import connection
         from django.utils import timezone
+
         try:
             with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C","location":"views.py:23","message":"Before update_past_lessons_to_taught call","data":{"in_atomic_block":connection.in_atomic_block,"autocommit":connection.get_autocommit()},"timestamp":int(timezone.now().timestamp()*1000)})+"\n")
-        except: pass
+                f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "debug-session",
+                            "runId": "run1",
+                            "hypothesisId": "C",
+                            "location": "views.py:23",
+                            "message": "Before update_past_lessons_to_taught call",
+                            "data": {
+                                "in_atomic_block": connection.in_atomic_block,
+                                "autocommit": connection.get_autocommit(),
+                            },
+                            "timestamp": int(timezone.now().timestamp() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except:
+            pass
         # #endregion
         context = super().get_context_data(**kwargs)
 

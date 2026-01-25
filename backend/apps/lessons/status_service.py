@@ -87,8 +87,25 @@ class LessonStatusUpdater:
         # #region agent log
         try:
             with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"post-fix","hypothesisId":"A","location":"status_service.py:84","message":"Function entry","data":{"now":str(now),"in_atomic_block":connection.in_atomic_block},"timestamp":int(timezone.now().timestamp()*1000)})+"\n")
-        except: pass
+                f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "debug-session",
+                            "runId": "post-fix",
+                            "hypothesisId": "A",
+                            "location": "status_service.py:84",
+                            "message": "Function entry",
+                            "data": {
+                                "now": str(now),
+                                "in_atomic_block": connection.in_atomic_block,
+                            },
+                            "timestamp": int(timezone.now().timestamp() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except:
+            pass
         # #endregion
 
         # Wrappe die gesamte Operation in eine Transaktion, da select_for_update() eine Transaktion benötigt
@@ -96,8 +113,25 @@ class LessonStatusUpdater:
             # #region agent log
             try:
                 with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                    f.write(json.dumps({"sessionId":"debug-session","runId":"post-fix","hypothesisId":"A","location":"status_service.py:90","message":"Inside transaction atomic block","data":{"in_atomic_block":connection.in_atomic_block,"autocommit":connection.get_autocommit()},"timestamp":int(timezone.now().timestamp()*1000)})+"\n")
-            except: pass
+                    f.write(
+                        json.dumps(
+                            {
+                                "sessionId": "debug-session",
+                                "runId": "post-fix",
+                                "hypothesisId": "A",
+                                "location": "status_service.py:90",
+                                "message": "Inside transaction atomic block",
+                                "data": {
+                                    "in_atomic_block": connection.in_atomic_block,
+                                    "autocommit": connection.get_autocommit(),
+                                },
+                                "timestamp": int(timezone.now().timestamp() * 1000),
+                            }
+                        )
+                        + "\n"
+                    )
+            except:
+                pass
             # #endregion
 
             # Lade alle Lessons mit Status 'planned'
@@ -109,12 +143,31 @@ class LessonStatusUpdater:
             # #region agent log
             try:
                 with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                    f.write(json.dumps({"sessionId":"debug-session","runId":"post-fix","hypothesisId":"B","location":"status_service.py:97","message":"Before iteration","data":{"in_atomic_block":connection.in_atomic_block,"autocommit":connection.get_autocommit()},"timestamp":int(timezone.now().timestamp()*1000)})+"\n")
-            except: pass
+                    f.write(
+                        json.dumps(
+                            {
+                                "sessionId": "debug-session",
+                                "runId": "post-fix",
+                                "hypothesisId": "B",
+                                "location": "status_service.py:97",
+                                "message": "Before iteration",
+                                "data": {
+                                    "in_atomic_block": connection.in_atomic_block,
+                                    "autocommit": connection.get_autocommit(),
+                                },
+                                "timestamp": int(timezone.now().timestamp() * 1000),
+                            }
+                        )
+                        + "\n"
+                    )
+            except:
+                pass
             # #endregion
             for lesson in lessons:
                 # Berechne end_datetime (nur Lesson-Dauer, ohne Fahrtzeiten)
-                start_datetime = timezone.make_aware(datetime.combine(lesson.date, lesson.start_time))
+                start_datetime = timezone.make_aware(
+                    datetime.combine(lesson.date, lesson.start_time)
+                )
                 end_datetime = start_datetime + timedelta(minutes=lesson.duration_minutes)
 
                 # Wenn Endzeit in der Vergangenheit liegt, markiere zum Update
@@ -131,8 +184,22 @@ class LessonStatusUpdater:
         # #region agent log
         try:
             with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"post-fix","hypothesisId":"A","location":"status_service.py:114","message":"Function exit","data":{"updated_count":len(updated_lessons)},"timestamp":int(timezone.now().timestamp()*1000)})+"\n")
-        except: pass
+                f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "debug-session",
+                            "runId": "post-fix",
+                            "hypothesisId": "A",
+                            "location": "status_service.py:114",
+                            "message": "Function exit",
+                            "data": {"updated_count": len(updated_lessons)},
+                            "timestamp": int(timezone.now().timestamp() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except:
+            pass
         # #endregion
 
         return len(updated_lessons)
