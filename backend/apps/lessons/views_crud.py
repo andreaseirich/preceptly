@@ -163,14 +163,14 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
         from django.utils.translation import ngettext
 
-        # Prüfe, ob eine Serientermin erstellt werden soll
+        # Check if a recurring lesson should be created
         is_recurring = form.cleaned_data.get("is_recurring", False)
 
         if is_recurring:
-            # Erstelle eine RecurringLesson statt einer einzelnen Lesson
-            lesson = form.save(commit=False)  # Noch nicht speichern
+            # Create a RecurringLesson instead of a single lesson
+            lesson = form.save(commit=False)  # Don't save yet
 
-            # Erstelle RecurringLesson
+            # Create RecurringLesson
             recurring_lesson = RecurringLesson(
                 contract=lesson.contract,
                 start_date=lesson.date,
@@ -184,7 +184,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 is_active=True,
             )
 
-            # Setze Wochentage basierend auf recurrence_weekdays
+            # Set weekdays based on recurrence_weekdays
             weekdays = form.cleaned_data.get("recurrence_weekdays", [])
             recurring_lesson.monday = "0" in weekdays
             recurring_lesson.tuesday = "1" in weekdays
@@ -196,7 +196,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
 
             recurring_lesson.save()
 
-            # Generiere Lessons aus der RecurringLesson
+            # Generate lessons from RecurringLesson
             result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 
             if result["created"] > 0:
@@ -227,10 +227,10 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                     ).format(count=conflict_count),
                 )
 
-            # Setze self.object für die Weiterleitung
-            # Verwende die erste erstellte Lesson oder die erste gefundene Lesson
+            # Set self.object for redirection
+            # Use the first created lesson or the first found lesson
             if result.get("created", 0) > 0:
-                # Finde die erste erstellte Lesson
+                # Find the first created lesson
                 from apps.lessons.models import Lesson
 
                 first_lesson = (
@@ -244,12 +244,12 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 )
                 self.object = first_lesson
             else:
-                # Falls keine Lesson erstellt wurde, verwende die ursprüngliche Lesson
+                # If no lesson was created, use the original lesson
                 lesson.save()
                 LessonStatusService.update_status_for_lesson(lesson)
                 self.object = lesson
         else:
-            # Normale einzelne Lesson erstellen
+            # Create normal single lesson
             lesson = form.save()
 
             # Automatic status setting
