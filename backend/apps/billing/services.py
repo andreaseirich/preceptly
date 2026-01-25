@@ -74,7 +74,7 @@ class InvoiceService:
                 raise ValueError(_("No billable lessons found in the specified period."))
 
             if contract:
-                # Verwende Nachhilfeinstitut als Zahler, falls vorhanden, sonst Schüler
+                # Use tutoring institute as payer if available, otherwise student
                 if contract.institute:
                     payer_name = contract.institute
                 else:
@@ -83,7 +83,7 @@ class InvoiceService:
             else:
                 first_lesson = lessons.first()
                 first_contract = first_lesson.contract
-                # Verwende Nachhilfeinstitut als Zahler, falls vorhanden, sonst Schüler
+                # Use tutoring institute as payer if available, otherwise student
                 if first_contract.institute:
                     payer_name = first_contract.institute
                 else:
@@ -134,19 +134,19 @@ class InvoiceService:
     @staticmethod
     def delete_invoice(invoice: Invoice):
         """
-        Löscht eine Rechnung und setzt Lessons zurück auf TAUGHT.
+        Deletes an invoice and resets lessons to TAUGHT.
 
-        Die Logik zur Rückstellung der Lesson-Status ist in der delete()-Methode
-        des Invoice Models implementiert, sodass sie immer ausgeführt wird,
-        auch wenn invoice.delete() direkt aufgerufen wird.
+        The logic for resetting lesson status is implemented in the delete() method
+        of the Invoice model, so it is always executed,
+        even if invoice.delete() is called directly.
 
         Args:
-            invoice: Die zu löschende Invoice
+            invoice: The invoice to delete
 
         Returns:
-            Anzahl der zurückgesetzten Lessons
+            Number of reset lessons
         """
-        # Die delete()-Methode des Invoice Models setzt automatisch alle
-        # Lessons auf TAUGHT zurück und gibt die Anzahl zurück
+        # The delete() method of the Invoice model automatically resets all
+        # lessons to TAUGHT and returns the count
         reset_count = invoice.delete()
         return reset_count

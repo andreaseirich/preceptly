@@ -297,7 +297,7 @@
             const startTime = element.dataset.start;
             const endTime = element.dataset.end;
             
-            // Wenn ein neuer Tag ausgewählt wird, leere die Auswahl
+            // If a new day is selected, clear the selection
             if (currentDate && currentDate !== date) {
                 clearSelection();
             }
@@ -307,11 +307,11 @@
             const slotIndex = selectedSlots.findIndex(s => s.key === slotKey);
             
             if (slotIndex >= 0) {
-                // Slot bereits ausgewählt - entferne ihn
+                // Slot already selected - remove it
                 selectedSlots.splice(slotIndex, 1);
                 element.classList.remove('selected');
             } else {
-                // Prüfe, ob der Slot aufeinanderfolgend ist
+                // Check if the slot is consecutive
                 if (selectedSlots.length > 0) {
                     const sortedSlots = [...selectedSlots, { key: slotKey, date, startTime, endTime }]
                         .sort((a, b) => {
@@ -319,7 +319,7 @@
                             return a.startTime.localeCompare(b.startTime);
                         });
                     
-                    // Prüfe, ob alle Slots aufeinanderfolgend sind
+                    // Check if all slots are consecutive
                     let isConsecutive = true;
                     for (let i = 1; i < sortedSlots.length; i++) {
                         const prevEnd = sortedSlots[i - 1].endTime;
@@ -336,7 +336,7 @@
                     }
                 }
                 
-                // Füge Slot hinzu
+                // Add slot
                 selectedSlots.push({ key: slotKey, date, startTime, endTime });
                 element.classList.add('selected');
             }
@@ -396,7 +396,7 @@
             const firstSlot = sortedSlots[0];
             const lastSlot = sortedSlots[sortedSlots.length - 1];
             
-            // Prüfe, ob alle Slots am selben Tag sind
+            // Check if all slots are on the same day
             if (firstSlot.date !== lastSlot.date) {
                 showMessage('{% trans "All selected slots must be on the same day." %}', 'error');
                 return;
@@ -427,7 +427,7 @@
             .then(data => {
                 if (data.success) {
                     showMessage(data.message);
-                    // Markiere alle ausgewählten Slots als gebucht
+                    // Mark all selected slots as booked
                     selectedSlots.forEach(slot => {
                         const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
                         if (element) {
@@ -437,7 +437,7 @@
                         }
                     });
                     clearSelection();
-                    // Seite neu laden nach kurzer Verzögerung
+                    // Reload page after short delay
                     setTimeout(() => location.reload(), 1500);
                 } else {
                     showMessage(data.message, 'error');
@@ -494,7 +494,7 @@
             const recurrenceType = document.getElementById('recurring-type').value;
             const endDate = document.getElementById('recurring-end-date').value || null;
             
-            // Sammle ausgewählte Wochentage
+            // Collect selected weekdays
             const weekdays = [];
             document.querySelectorAll('.weekday-checkbox:checked').forEach(checkbox => {
                 weekdays.push(parseInt(checkbox.value));

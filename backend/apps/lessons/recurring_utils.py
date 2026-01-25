@@ -10,14 +10,14 @@ from apps.lessons.recurring_models import RecurringLesson
 
 def find_matching_recurring_lesson(lesson: Lesson) -> RecurringLesson | None:
     """
-    Findet die RecurringLesson, zu der eine Lesson gehört.
+    Finds the RecurringLesson that a lesson belongs to.
 
-    Eine Lesson gehört zu einer RecurringLesson, wenn:
-    - Gleicher Contract
-    - Gleiche Startzeit
-    - Das Datum der Lesson passt zum Wiederholungsmuster der RecurringLesson
+    A lesson belongs to a RecurringLesson if:
+    - Same contract
+    - Same start time
+    - The lesson's date matches the RecurringLesson's recurrence pattern
     """
-    # Suche nach RecurringLessons mit gleichem Contract und Startzeit
+    # Search for RecurringLessons with the same contract and start time
     recurring_lessons = RecurringLesson.objects.filter(
         contract=lesson.contract,
         start_time=lesson.start_time,
@@ -25,7 +25,7 @@ def find_matching_recurring_lesson(lesson: Lesson) -> RecurringLesson | None:
     )
 
     for recurring in recurring_lessons:
-        # Prüfe, ob das Datum der Lesson zum Muster passt
+        # Check if the lesson's date matches the pattern
         matches = _date_matches_recurring_pattern(lesson.date, recurring)
         if matches:
             return recurring
@@ -37,34 +37,34 @@ def get_all_lessons_for_recurring(
     recurring: RecurringLesson, original_start_time=None
 ) -> list[Lesson]:
     """
-    Findet alle Lessons, die zu einer RecurringLesson gehören.
+    Finds all lessons that belong to a RecurringLesson.
 
-    Diese Funktion findet Lessons basierend auf dem Wiederholungsmuster.
-    Wenn original_start_time angegeben ist, wird nach dieser Zeit gefiltert
-    (nützlich, wenn die RecurringLesson gerade aktualisiert wird).
+    This function finds lessons based on the recurrence pattern.
+    If original_start_time is provided, it filters by that time
+    (useful when the RecurringLesson is being updated).
     """
-    # Hole alle Lessons für diesen Contract im Zeitraum der Serie
+    # Get all lessons for this contract in the series period
     all_lessons = Lesson.objects.filter(contract=recurring.contract)
 
-    # Bestimme den Zeitraum
+    # Determine the period
     start_date = recurring.start_date
     end_date = recurring.end_date
     if not end_date and recurring.contract.end_date:
         end_date = recurring.contract.end_date
 
-    # Filtere nach Datum
+    # Filter by date
     if end_date:
         all_lessons = all_lessons.filter(date__gte=start_date, date__lte=end_date)
     else:
         all_lessons = all_lessons.filter(date__gte=start_date)
 
-    # Filtere nach start_time (wenn original_start_time angegeben, verwende diese, sonst die aktuelle)
+    # Filter by start_time (if original_start_time is provided, use that, otherwise use current)
     start_time_to_match = (
         original_start_time if original_start_time is not None else recurring.start_time
     )
     all_lessons = all_lessons.filter(start_time=start_time_to_match)
 
-    # Filtere nach Wochentag (basierend auf active weekdays)
+    # Filter by weekday (based on active weekdays)
     recurring.get_active_weekdays()
     matching_lessons = []
 
@@ -76,33 +76,33 @@ def get_all_lessons_for_recurring(
 
 
 def _date_matches_recurring_pattern(lesson_date: date, recurring: RecurringLesson) -> bool:
-    """Prüft, ob ein Datum zum Wiederholungsmuster einer RecurringLesson passt."""
-    # Prüfe, ob das Datum im Zeitraum liegt
+    """Checks if a date matches the recurrence pattern of a RecurringLesson."""
+    # Check if the date is within the period
     if lesson_date < recurring.start_date:
         return False
 
     if recurring.end_date and lesson_date > recurring.end_date:
         return False
 
-    # Prüfe, ob der Wochentag aktiv ist
+    # Check if the weekday is active
     weekday = lesson_date.weekday()  # 0=Monday, 6=Sunday
     active_weekdays = recurring.get_active_weekdays()
 
     if weekday not in active_weekdays:
         return False
 
-    # Prüfe basierend auf recurrence_type
+    # Check based on recurrence_type
     if recurring.recurrence_type == "weekly":
-        # Jede Woche - bereits geprüft durch Wochentag
+        # Every week - already checked by weekday
         return True
 
     elif recurring.recurrence_type == "biweekly":
-        # Alle 2 Wochen
+        # Every 2 weeks
         weeks_since_start = (lesson_date - recurring.start_date).days // 7
         return weeks_since_start % 2 == 0
 
     elif recurring.recurrence_type == "monthly":
-        # Monatlich - gleicher Kalendertag
+        # Monthly - same calendar day
         return lesson_date.day == recurring.start_date.day
 
     return False

@@ -38,7 +38,7 @@ class PublicBookingView(TemplateView):
         except (ValueError, TypeError):
             target_date = timezone.now().date()
 
-        # Wochendaten für Buchungsseite (ohne Contract)
+        # Week data for booking page (without contract)
         week_data = BookingService.get_public_booking_data(
             target_date.year, target_date.month, target_date.day
         )
@@ -66,7 +66,7 @@ def search_student_api(request):
                 {"success": False, "message": _("Please enter a name.")}, status=400
             )
 
-        # Suche nach exaktem Match
+        # Search for exact match
         exact_match = StudentSearchService.find_exact_match(name)
         if exact_match:
             return JsonResponse(
@@ -82,7 +82,7 @@ def search_student_api(request):
                 }
             )
 
-        # Suche nach ähnlichen Namen
+        # Search for similar names
         similar_students = StudentSearchService.search_by_name(name, threshold=0.7)
 
         if similar_students:
@@ -140,7 +140,7 @@ def create_student_api(request):
                 status=400,
             )
 
-        # Erstelle neuen Schüler
+        # Create new student
         student = Student.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -178,7 +178,7 @@ def create_student_api(request):
 def book_lesson_api(request):
     """API-Endpoint für Buchung."""
     try:
-        # Verwende request.POST für FormData, nicht JSON
+        # Use request.POST for FormData, not JSON
         if request.content_type and "application/json" in request.content_type:
             data = json.loads(request.body)
         else:
@@ -227,7 +227,7 @@ def book_lesson_api(request):
                 {"success": False, "message": _("Invalid date or time format.")}, status=400
             )
 
-        # Berechne Endzeit
+        # Calculate end time
         if end_time:
             try:
                 end_time_obj = datetime.strptime(end_time, "%H:%M").time()
@@ -236,12 +236,12 @@ def book_lesson_api(request):
                     {"success": False, "message": _("Invalid end time format.")}, status=400
                 )
         else:
-            # Fallback: 60 Minuten
+            # Fallback: 60 minutes
             end_time_obj = (
                 datetime.combine(booking_date_obj, start_time_obj) + timedelta(minutes=60)
             ).time()
 
-        # Validierung: Prüfe, dass Start- und Endzeit auf 30-Minuten-Intervallen liegen
+        # Validation: Check that start and end times are on 30-minute intervals
         start_minutes = start_time_obj.hour * 60 + start_time_obj.minute
         end_minutes = end_time_obj.hour * 60 + end_time_obj.minute
 
@@ -262,13 +262,13 @@ def book_lesson_api(request):
                 status=400,
             )
 
-        # Validierung: Prüfe, dass Endzeit nach Startzeit liegt
+        # Validation: Check that end time is after start time
         if end_time_obj <= start_time_obj:
             return JsonResponse(
                 {"success": False, "message": _("End time must be after start time.")}, status=400
             )
 
-        # Validierung: Prüfe, dass der Zeitraum aus ganzen 30-Minuten-Blöcken besteht
+        # Validation: Check that the time period consists of whole 30-minute blocks
         duration_total = end_minutes - start_minutes
         if duration_total % 30 != 0:
             return JsonResponse(
@@ -279,8 +279,8 @@ def book_lesson_api(request):
                 status=400,
             )
 
-        # Validierung: Prüfe, dass Termin nicht in der Vergangenheit liegt
-        # und mindestens 30 Minuten in der Zukunft liegt
+        # Validation: Check that appointment is not in the past
+        # and is at least 30 minutes in the future
         booking_datetime = timezone.make_aware(datetime.combine(booking_date_obj, start_time_obj))
         min_booking_datetime = timezone.now() + timedelta(minutes=30)
         if booking_datetime < min_booking_datetime:
@@ -294,12 +294,12 @@ def book_lesson_api(request):
                 status=400,
             )
 
-        # Prüfe Verfügbarkeit
+        # Check availability
         week_data = BookingService.get_public_booking_data(
             booking_date_obj.year, booking_date_obj.month, booking_date_obj.day
         )
 
-        # Finde den Tag in week_data
+        # Find the day in week_data
         target_day = None
         for day_data in week_data["days"]:
             if day_data["date"] == booking_date_obj:
@@ -309,7 +309,7 @@ def book_lesson_api(request):
         if not target_day:
             return JsonResponse({"success": False, "message": _("Date not found.")}, status=400)
 
-        # Prüfe ob Slot verfügbar ist
+        # Check if slot is available
         occupied_slots = BookingService.get_all_occupied_time_slots(
             booking_date_obj, booking_date_obj
         )
@@ -321,22 +321,22 @@ def book_lesson_api(request):
                 {"success": False, "message": _("Time slot is already booked.")}, status=400
             )
 
-        # Finde oder erstelle Contract für diesen Schüler
-        # Suche nach aktivem Contract, falls vorhanden
+        # Find or create contract for this student
+        # Search for active contract if available
         contract = Contract.objects.filter(student=student, is_active=True).first()
 
         if not contract:
-            # Erstelle neuen Contract mit hourly_rate=0.00 (wird später vom Tutor festgelegt)
+            # Create new contract with hourly_rate=0.00 (to be set later by tutor)
             contract = Contract.objects.create(
                 student=student,
                 institute=institute if institute else None,
-                hourly_rate=Decimal("0.00"),  # Preis wird später vom Tutor festgelegt
-                unit_duration_minutes=60,  # Standard
+                hourly_rate=Decimal("0.00"),  # Price will be set later by tutor
+                unit_duration_minutes=60,  # Default
                 start_date=timezone.now().date(),
                 is_active=True,
             )
 
-        # Erstelle Lesson
+        # Create lesson
         lesson = Lesson.objects.create(
             contract=contract,
             date=booking_date_obj,
@@ -348,21 +348,21 @@ def book_lesson_api(request):
             notes=f"{_('Subject')}: {subject}\n{notes}" if subject or notes else notes,
         )
 
-        # Verarbeite Dokumenten-Upload (falls vorhanden)
+        # Process document upload (if present)
         uploaded_documents = []
         if request.FILES:
             files = request.FILES.getlist("files")
             for file in files:
-                # Validiere Datei-Größe (max 10 MB)
+                # Validate file size (max 10 MB)
                 max_size = 10 * 1024 * 1024  # 10 MB
                 if file.size > max_size:
-                    continue  # Überspringe zu große Dateien
+                    continue  # Skip files that are too large
 
-                # Erlaubte Dateitypen
+                # Allowed file types
                 allowed_extensions = [".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png"]
                 file_extension = file.name.lower().split(".")[-1] if "." in file.name else ""
                 if file_extension and f".{file_extension}" not in allowed_extensions:
-                    continue  # Überspringe nicht erlaubte Dateitypen
+                    continue  # Skip disallowed file types
 
                 document = LessonDocument.objects.create(lesson=lesson, file=file, name=file.name)
                 uploaded_documents.append(document.id)

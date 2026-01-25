@@ -35,38 +35,38 @@ class ContractQuotaService:
         """
         contract = lesson.contract
 
-        # Wenn has_monthly_planning_limit deaktiviert ist, gibt es keine Quota-Prüfung
+        # If has_monthly_planning_limit is disabled, there is no quota check
         if not contract.has_monthly_planning_limit:
             return None
 
-        # Bestimme den Monat der Lesson
+        # Determine the month of the lesson
         lesson_year = lesson.date.year
         lesson_month = lesson.date.month
 
-        # Hole alle ContractMonthlyPlan-Einträge von Vertragsbeginn bis einschließlich Monat der Lesson
-        # Sortiere nach Jahr und Monat
+        # Get all ContractMonthlyPlan entries from contract start to including lesson month
+        # Sort by year and month
         monthly_plans = ContractMonthlyPlan.objects.filter(
             contract=contract, year__lte=lesson_year
         ).order_by("year", "month")
 
-        # Filtere: Nur Pläne bis einschließlich Monat der Lesson
+        # Filter: Only plans up to and including the lesson month
         relevant_plans = []
         for plan in monthly_plans:
             if plan.year < lesson_year or (plan.year == lesson_year and plan.month <= lesson_month):
                 relevant_plans.append(plan)
 
-        # Berechne geplante Gesamteinheiten bis einschließlich dieses Monats
+        # Calculate planned total units up to and including this month
         planned_total = sum(plan.planned_units for plan in relevant_plans)
 
-        # Berechne tatsächliche Lessons von Vertragsbeginn bis Monatsende dieses Monats
-        # Verwende das Ende des Monats der Lesson
+        # Calculate actual lessons from contract start to end of this month
+        # Use the end of the lesson month
         from calendar import monthrange
 
         last_day_of_month = monthrange(lesson_year, lesson_month)[1]
         month_end = date(lesson_year, lesson_month, last_day_of_month)
 
-        # Hole alle Lessons dieses Contracts mit Datum <= Monatsende
-        # Status: PLANNED, TAUGHT, PAID (keine CANCELLED)
+        # Get all lessons of this contract with date <= month end
+        # Status: PLANNED, TAUGHT, PAID (no CANCELLED)
         lessons_query = Lesson.objects.filter(
             contract=contract, date__lte=month_end, status__in=["planned", "taught", "paid"]
         )
@@ -76,7 +76,7 @@ class ContractQuotaService:
 
         actual_lessons = lessons_query.count()
 
-        # Prüfe: actual_lessons + 1 (die neue Lesson) > planned_total
+        # Check: actual_lessons + 1 (the new lesson) > planned_total
         if actual_lessons + 1 > planned_total:
             return {
                 "type": "quota",

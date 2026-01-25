@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class LLMClientError(Exception):
-    """Basis-Exception für LLM-Client-Fehler."""
+    """Base exception for LLM client errors."""
 
     pass
 

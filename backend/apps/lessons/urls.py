@@ -1,5 +1,5 @@
 """
-URL-Konfiguration für Lesson-App.
+URL configuration for Lesson app.
 """
 
 from apps.lessons import recurring_views, views, views_booking, views_public_booking
@@ -49,7 +49,7 @@ urlpatterns = [
         recurring_views.RecurringLessonBulkEditView.as_view(),
         name="recurring_bulk_edit",
     ),
-    # Öffentliche Schüler-Buchungsseite
+    # Public student booking page
     path(
         "booking/<str:token>/",
         views_booking.StudentBookingView.as_view(),
@@ -60,7 +60,7 @@ urlpatterns = [
         views_booking.student_booking_api,
         name="student_booking_api",
     ),
-    # Öffentliche Buchungsseite (ohne Token)
+    # Public booking page (without token)
     path(
         "public-booking/",
         views_public_booking.PublicBookingView.as_view(),

@@ -326,12 +326,12 @@
         }
         
         function goToStep(stepNumber) {
-            // Verstecke alle Steps
+            // Hide all steps
             document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
             
-            // Zeige gewählten Step
+            // Show selected step
             if (stepNumber === 2) {
-                // Entscheide zwischen 2a und 2b
+                // Decide between 2a and 2b
                 if (currentStudent) {
                     document.getElementById('step-2b').classList.add('active');
                 } else {
@@ -351,12 +351,12 @@
                 }
             });
             
-            // Spezielle Logik für Step 4
+            // Special logic for Step 4
             if (stepNumber === 4) {
                 updateBookingSummary();
             }
             
-            // Spezielle Logik für Step 3
+            // Special logic for Step 3
             if (stepNumber === 3) {
                 updateContinueButton();
             }
@@ -381,15 +381,15 @@
             .then(data => {
                 if (data.success) {
                     if (data.exact_match) {
-                        // Exakter Match gefunden
+                        // Exact match found
                         currentStudent = data.student;
                         document.getElementById('student-name-display').textContent = data.student.full_name;
                         goToStep(2);
                     } else if (data.similar_students && data.similar_students.length > 0) {
-                        // Ähnliche Namen gefunden
+                        // Similar names found
                         showSimilarStudents(data.similar_students, name);
                     } else {
-                        // Kein Match gefunden
+                        // No match found
                         goToStep(2);
                     }
                 } else {
@@ -659,7 +659,7 @@
                 if (data.success) {
                     showMessage(data.message, 'success');
                     setTimeout(() => {
-                        // Reset und zurück zu Schritt 1
+                        // Reset and return to step 1
                         currentStudent = null;
                         selectedSlots = [];
                         document.getElementById('student-name').value = '';

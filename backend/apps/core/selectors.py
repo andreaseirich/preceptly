@@ -57,13 +57,13 @@ class IncomeSelector:
         Returns:
             Betrag als Decimal
         """
-        # Prüfe, ob Lesson in einer Rechnung ist
+        # Check if lesson is in an invoice
         invoice_item = InvoiceItem.objects.filter(lesson=lesson).first()
         if invoice_item:
-            # Verwende Betrag aus InvoiceItem (Single Source of Truth)
+            # Use amount from InvoiceItem (Single Source of Truth)
             return invoice_item.amount
         else:
-            # Berechne Betrag mit gleicher Logik wie InvoiceService
+            # Calculate amount with same logic as InvoiceService
             return IncomeSelector._calculate_lesson_amount(lesson)
 
     @staticmethod
@@ -94,7 +94,7 @@ class IncomeSelector:
         contract_details = {}
 
         for lesson in lessons:
-            # Verwende zentrale Berechnungsmethode (gleiche Logik wie InvoiceService)
+            # Use central calculation method (same logic as InvoiceService)
             lesson_income = IncomeSelector._get_lesson_amount(lesson)
             total_income += lesson_income
             lesson_count += 1
@@ -139,7 +139,7 @@ class IncomeSelector:
             hourly_rate = plan.contract.hourly_rate
             planned_amount += hourly_rate * Decimal(plan.planned_units)
 
-        # Tatsächliche Einheiten aus Lessons
+        # Actual units from lessons
         start_date = date(year, month, 1)
         if month == 12:
             end_date = date(year + 1, 1, 1)
@@ -154,7 +154,7 @@ class IncomeSelector:
         actual_amount = Decimal("0.00")
 
         for lesson in lessons:
-            # Verwende zentrale Berechnungsmethode (gleiche Logik wie InvoiceService)
+            # Use central calculation method (same logic as InvoiceService)
             actual_amount += IncomeSelector._calculate_lesson_amount(lesson)
 
         return {
@@ -229,7 +229,7 @@ class IncomeSelector:
             lesson_count = status_lessons.count()
 
             for lesson in status_lessons:
-                # Verwende zentrale Berechnungsmethode (gleiche Logik wie InvoiceService)
+                # Use central calculation method (same logic as InvoiceService)
                 total_income += IncomeSelector._get_lesson_amount(lesson)
 
             status_breakdown[status_code] = {
@@ -255,7 +255,7 @@ class IncomeSelector:
         Returns:
             Dict mit 'invoiced' und 'not_invoiced' Informationen
         """
-        # Basis-Query für Zeitraum
+        # Base query for period
         query = Q()
         if year and month:
             start_date = date(year, month, 1)
@@ -267,7 +267,7 @@ class IncomeSelector:
         elif year:
             query &= Q(date__year=year)
 
-        # Lessons mit InvoiceItem (abgerechnet) - unabhängig vom Status
+        # Lessons with InvoiceItem (invoiced) - regardless of status
         invoiced_lesson_ids = InvoiceItem.objects.filter(lesson__isnull=False).values_list(
             "lesson_id", flat=True
         )
@@ -275,25 +275,25 @@ class IncomeSelector:
             query & Q(id__in=invoiced_lesson_ids)
         ).select_related("contract")
 
-        # Lessons ohne InvoiceItem mit Status TAUGHT (nicht abgerechnet, aber unterrichtet)
+        # Lessons without InvoiceItem with status TAUGHT (not invoiced, but taught)
         not_invoiced_lessons = (
             Lesson.objects.filter(query & Q(status="taught"))
             .exclude(id__in=invoiced_lesson_ids)
             .select_related("contract")
         )
 
-        # Berechne Einnahmen
-        # Für abgerechnete Lessons: Beträge aus InvoiceItems (Single Source of Truth)
+        # Calculate income
+        # For invoiced lessons: amounts from InvoiceItems (Single Source of Truth)
         invoiced_income = Decimal("0.00")
         for lesson in invoiced_lessons:
             invoice_item = InvoiceItem.objects.filter(lesson=lesson).first()
             if invoice_item:
                 invoiced_income += invoice_item.amount
             else:
-                # Fallback: Berechne mit gleicher Logik
+                # Fallback: calculate with same logic
                 invoiced_income += IncomeSelector._calculate_lesson_amount(lesson)
 
-        # Für nicht abgerechnete Lessons: Berechne mit gleicher Logik wie InvoiceService
+        # For not invoiced lessons: calculate with same logic as InvoiceService
         not_invoiced_income = Decimal("0.00")
         for lesson in not_invoiced_lessons:
             not_invoiced_income += IncomeSelector._calculate_lesson_amount(lesson)

@@ -45,16 +45,16 @@ class StudentBookingView(TemplateView):
         except (ValueError, TypeError):
             target_date = timezone.now().date()
 
-        # Arbeitszeiten aus Contract, fallback auf default_working_hours
+        # Working hours from contract, fallback to default_working_hours
         working_hours = contract.working_hours or {}
         if not working_hours:
-            # Fallback auf allgemeine Arbeitszeiten des Tutors
-            # Da Contracts keine direkte User-Beziehung haben, nehmen wir den ersten UserProfile
-            # In einer Multi-User-Umgebung müsste hier die Logik angepasst werden
+            # Fallback to general tutor working hours
+            # Since contracts don't have a direct user relationship, we take the first UserProfile
+            # In a multi-user environment, this logic would need to be adjusted
             from apps.core.models import UserProfile
 
             try:
-                # Versuche den ersten UserProfile zu finden (für Single-User-Setup)
+                # Try to find the first UserProfile (for single-user setup)
                 profile = UserProfile.objects.first()
                 if profile and profile.default_working_hours:
                     working_hours = profile.default_working_hours
@@ -62,7 +62,7 @@ class StudentBookingView(TemplateView):
                 # UserProfile not found or missing attribute - use empty working hours
                 pass
 
-        # Wochendaten für Buchungsseite
+        # Week data for booking page
         week_data = BookingService.get_week_booking_data(
             contract.id, target_date.year, target_date.month, target_date.day, working_hours
         )
@@ -89,16 +89,16 @@ class StudentBookingView(TemplateView):
             messages.error(request, _("Booking link not found or contract is inactive."))
             return redirect("lessons:student_booking", token=token)
 
-        # Parse JSON-Daten
+        # Parse JSON data
         try:
             data = json.loads(request.body)
             action = data.get("action")
 
             if action == "book_slot":
-                # Buche einen Zeitslot
+                # Book a time slot
                 booking_date = data.get("date")
                 start_time = data.get("start_time")
-                end_time = data.get("end_time")  # Optional: falls gesetzt, wird dies verwendet
+                end_time = data.get("end_time")  # Optional: if set, this will be used
                 duration_minutes = data.get("duration_minutes", contract.unit_duration_minutes)
 
                 try:
@@ -109,7 +109,7 @@ class StudentBookingView(TemplateView):
                         {"success": False, "message": _("Invalid date or time format.")}, status=400
                     )
 
-                # Berechne Endzeit
+                # Calculate end time
                 from datetime import timedelta
 
                 if end_time:
@@ -120,13 +120,13 @@ class StudentBookingView(TemplateView):
                             {"success": False, "message": _("Invalid end time format.")}, status=400
                         )
                 else:
-                    # Fallback: verwende duration_minutes
+                    # Fallback: use duration_minutes
                     end_time_obj = (
                         datetime.combine(booking_date_obj, start_time_obj)
                         + timedelta(minutes=duration_minutes)
                     ).time()
 
-                # Validierung: Prüfe, dass Start- und Endzeit auf 30-Minuten-Intervallen liegen
+                # Validation: Check that start and end times are on 30-minute intervals
                 start_minutes = start_time_obj.hour * 60 + start_time_obj.minute
                 end_minutes = end_time_obj.hour * 60 + end_time_obj.minute
 
@@ -147,14 +147,14 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Validierung: Prüfe, dass Endzeit nach Startzeit liegt
+                # Validation: Check that end time is after start time
                 if end_time_obj <= start_time_obj:
                     return JsonResponse(
                         {"success": False, "message": _("End time must be after start time.")},
                         status=400,
                     )
 
-                # Validierung: Prüfe, dass der Zeitraum aus ganzen 30-Minuten-Blöcken besteht
+                # Validation: Check that the time period consists of whole 30-minute blocks
                 duration_total = end_minutes - start_minutes
                 if duration_total % 30 != 0:
                     return JsonResponse(
@@ -165,11 +165,11 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Berechne duration_minutes aus Start- und Endzeit
+                # Calculate duration_minutes from start and end time
                 duration_minutes = duration_total
 
-                # Validierung: Prüfe, dass Termin nicht in der Vergangenheit liegt
-                # und mindestens 30 Minuten in der Zukunft liegt
+                # Validation: Check that appointment is not in the past
+                # and is at least 30 minutes in the future
                 booking_datetime = timezone.make_aware(
                     datetime.combine(booking_date_obj, start_time_obj)
                 )
@@ -185,7 +185,7 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Prüfe Verfügbarkeit
+                # Check availability
                 week_data = BookingService.get_week_booking_data(
                     contract.id,
                     booking_date_obj.year,
@@ -194,7 +194,7 @@ class StudentBookingView(TemplateView):
                     contract.working_hours or {},
                 )
 
-                # Finde den Tag in week_data
+                # Find the day in week_data
                 target_day = None
                 for day_data in week_data["days"]:
                     if day_data["date"] == booking_date_obj:
@@ -206,7 +206,7 @@ class StudentBookingView(TemplateView):
                         {"success": False, "message": _("Date not found.")}, status=400
                     )
 
-                # Prüfe ob Slot verfügbar ist
+                # Check if slot is available
                 occupied_slots = BookingService.get_occupied_time_slots(
                     contract.id, booking_date_obj, booking_date_obj
                 )
@@ -218,7 +218,7 @@ class StudentBookingView(TemplateView):
                         {"success": False, "message": _("Time slot is already booked.")}, status=400
                     )
 
-                # Erstelle Lesson
+                # Create lesson
                 lesson = Lesson.objects.create(
                     contract=contract,
                     date=booking_date_obj,
@@ -238,13 +238,13 @@ class StudentBookingView(TemplateView):
                 )
 
             elif action == "book_recurring_slot":
-                # Buche einen Serientermin
+                # Book a recurring lesson
                 booking_date = data.get("date")
                 start_time = data.get("start_time")
                 end_time = data.get("end_time")
                 recurrence_type = data.get("recurrence_type", "weekly")
-                weekdays = data.get("weekdays", [])  # Liste von Wochentagen [0,1,2,...] (0=Montag)
-                end_date = data.get("end_date")  # Optional: Enddatum der Serie
+                weekdays = data.get("weekdays", [])  # List of weekdays [0,1,2,...] (0=Monday)
+                end_date = data.get("end_date")  # Optional: end date of series
 
                 try:
                     booking_date_obj = datetime.strptime(booking_date, "%Y-%m-%d").date()
@@ -254,7 +254,7 @@ class StudentBookingView(TemplateView):
                         {"success": False, "message": _("Invalid date or time format.")}, status=400
                     )
 
-                # Berechne Endzeit
+                # Calculate end time
                 if end_time:
                     try:
                         end_time_obj = datetime.strptime(end_time, "%H:%M").time()
@@ -263,13 +263,13 @@ class StudentBookingView(TemplateView):
                             {"success": False, "message": _("Invalid end time format.")}, status=400
                         )
                 else:
-                    # Fallback: verwende contract.unit_duration_minutes
+                    # Fallback: use contract.unit_duration_minutes
                     end_time_obj = (
                         datetime.combine(booking_date_obj, start_time_obj)
                         + timedelta(minutes=contract.unit_duration_minutes)
                     ).time()
 
-                # Validierung: Prüfe, dass Start- und Endzeit auf 30-Minuten-Intervallen liegen
+                # Validation: Check that start and end times are on 30-minute intervals
                 start_minutes = start_time_obj.hour * 60 + start_time_obj.minute
                 end_minutes = end_time_obj.hour * 60 + end_time_obj.minute
 
@@ -290,14 +290,14 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Validierung: Prüfe, dass Endzeit nach Startzeit liegt
+                # Validation: Check that end time is after start time
                 if end_time_obj <= start_time_obj:
                     return JsonResponse(
                         {"success": False, "message": _("End time must be after start time.")},
                         status=400,
                     )
 
-                # Validierung: Prüfe, dass der Zeitraum aus ganzen 30-Minuten-Blöcken besteht
+                # Validation: Check that the time period consists of whole 30-minute blocks
                 duration_total = end_minutes - start_minutes
                 if duration_total % 30 != 0:
                     return JsonResponse(
@@ -308,15 +308,15 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Validierung: Prüfe, dass mindestens ein Wochentag ausgewählt ist
+                # Validation: Check that at least one weekday is selected
                 if not weekdays or len(weekdays) == 0:
                     return JsonResponse(
                         {"success": False, "message": _("At least one weekday must be selected.")},
                         status=400,
                     )
 
-                # Validierung: Prüfe, dass Startdatum nicht in der Vergangenheit liegt
-                # und mindestens 30 Minuten in der Zukunft liegt
+                # Validation: Check that start date is not in the past
+                # and is at least 30 minutes in the future
                 booking_datetime = timezone.make_aware(
                     datetime.combine(booking_date_obj, start_time_obj)
                 )
@@ -332,7 +332,7 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Parse Enddatum falls vorhanden
+                # Parse end date if present
                 end_date_obj = None
                 if end_date:
                     try:
@@ -342,7 +342,7 @@ class StudentBookingView(TemplateView):
                             {"success": False, "message": _("Invalid end date format.")}, status=400
                         )
 
-                # Erstelle RecurringLesson
+                # Create RecurringLesson
                 recurring_lesson = RecurringLesson(
                     contract=contract,
                     start_date=booking_date_obj,
@@ -355,7 +355,7 @@ class StudentBookingView(TemplateView):
                     is_active=True,
                 )
 
-                # Setze Wochentage
+                # Set weekdays
                 recurring_lesson.monday = 0 in weekdays
                 recurring_lesson.tuesday = 1 in weekdays
                 recurring_lesson.wednesday = 2 in weekdays
@@ -366,7 +366,7 @@ class StudentBookingView(TemplateView):
 
                 recurring_lesson.save()
 
-                # Generiere Lessons aus der RecurringLesson
+                # Generate lessons from RecurringLesson
                 result = RecurringLessonService.generate_lessons(
                     recurring_lesson, check_conflicts=True
                 )

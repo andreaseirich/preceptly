@@ -44,12 +44,12 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
     model = None  # Kein Model, da wir ein normales Form verwenden
 
     def get_form_kwargs(self):
-        """Entfernt 'instance' aus kwargs, da InvoiceCreateForm kein ModelForm ist."""
+        """Removes 'instance' from kwargs, as InvoiceCreateForm is not a ModelForm."""
         kwargs = super().get_form_kwargs()
-        # Entferne 'instance', falls vorhanden (wird von CreateView hinzugefügt)
+        # Remove 'instance' if present (added by CreateView)
         kwargs.pop("instance", None)
 
-        # Wenn GET-Parameter vorhanden sind (z.B. nach Vorschau), setze initial values
+        # If GET parameters are present (e.g., after preview), set initial values
         if self.request.method == "GET":
             initial = kwargs.get("initial", {})
             period_start = self.request.GET.get("period_start")
@@ -88,7 +88,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Lade Lessons für Vorschau, falls Zeitraum vorhanden
+        # Load lessons for preview if period is present
         period_start = self.request.GET.get("period_start")
         period_end = self.request.GET.get("period_end")
         contract_id = self.request.GET.get("contract")
@@ -121,7 +121,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         contract = form.cleaned_data.get("contract")
 
         try:
-            # Erstelle Rechnung automatisch mit allen verfügbaren Lessons im Zeitraum
+            # Create invoice automatically with all available lessons in the period
             invoice = InvoiceService.create_invoice_from_lessons(period_start, period_end, contract)
             lesson_count = invoice.items.count()
             messages.success(
@@ -191,12 +191,12 @@ def serve_invoice_document(request, pk):
     if not invoice.document:
         raise Http404(_("Invoice document not found."))
 
-    # Prüfe, ob Datei existiert
+    # Check if file exists
     file_path = invoice.document.path
     if not os.path.exists(file_path):
         raise Http404(_("Invoice document file not found."))
 
-    # Serviere die Datei
+    # Serve the file
     return FileResponse(
         open(file_path, "rb"), content_type="text/html", filename=os.path.basename(file_path)
     )

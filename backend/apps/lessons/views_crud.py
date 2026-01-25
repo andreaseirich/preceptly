@@ -283,7 +283,7 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         from apps.lessons.recurring_utils import find_matching_recurring_lesson
 
-        # Prüfe, ob diese Lesson zu einer Serie gehört
+        # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(self.object)
         context["matching_recurring"] = matching_recurring
 
@@ -309,43 +309,43 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         from apps.lessons.recurring_utils import find_matching_recurring_lesson
         from apps.lessons.services import recalculate_conflicts_for_affected_lessons
 
-        # WICHTIG: Hole die ursprüngliche Lesson-Instanz aus der Datenbank,
-        # bevor wir nach der RecurringLesson suchen (self.object hat bereits die geänderten Werte)
+        # IMPORTANT: Get the original lesson instance from the database,
+        # before we search for RecurringLesson (self.object already has the changed values)
         original_lesson = Lesson.objects.get(pk=self.object.pk)
 
         edit_scope = form.cleaned_data.get("edit_scope", "single")
-        # WICHTIG: Verwende original_lesson statt self.object, um die RecurringLesson zu finden
+        # IMPORTANT: Use original_lesson instead of self.object to find RecurringLesson
         matching_recurring = find_matching_recurring_lesson(original_lesson)
 
         if edit_scope == "series" and matching_recurring:
-            # Bearbeite die ganze Serie (RecurringLesson)
+            # Edit the entire series (RecurringLesson)
             recurring = matching_recurring
 
-            # WICHTIG: Speichere die ursprüngliche start_time BEVOR wir sie ändern!
+            # IMPORTANT: Save the original start_time BEFORE we change it!
             original_start_time = recurring.start_time
 
-            # WICHTIG: Finde alle Lessons dieser Serie BEVOR wir die RecurringLesson ändern!
-            # (Sonst finden wir sie nicht mehr, da sie noch die alte start_time haben)
+            # IMPORTANT: Find all lessons of this series BEFORE we change RecurringLesson!
+            # (Otherwise we won't find them anymore, as they still have the old start_time)
             from apps.lessons.recurring_utils import get_all_lessons_for_recurring
 
             all_lessons = get_all_lessons_for_recurring(
                 recurring, original_start_time=original_start_time
             )
 
-            # Prüfe, ob sich die Wochentage geändert haben
+            # Check if weekdays have changed
             new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
             new_weekdays_set = {int(wd) for wd in new_weekdays}
             old_weekdays_set = set(recurring.get_active_weekdays())
             weekdays_changed = new_weekdays_set != old_weekdays_set
 
-            # Aktualisiere RecurringLesson mit den neuen Werten
+            # Update RecurringLesson with new values
             recurring.start_time = form.cleaned_data["start_time"]
             recurring.duration_minutes = form.cleaned_data["duration_minutes"]
             recurring.travel_time_before_minutes = form.cleaned_data["travel_time_before_minutes"]
             recurring.travel_time_after_minutes = form.cleaned_data["travel_time_after_minutes"]
             recurring.notes = form.cleaned_data["notes"]
 
-            # Aktualisiere Wochentage
+            # Update weekdays
             if new_weekdays:
                 recurring.monday = "0" in new_weekdays
                 recurring.tuesday = "1" in new_weekdays
@@ -358,20 +358,20 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
             recurring.save()
 
             if weekdays_changed:
-                # Wenn sich die Wochentage geändert haben:
-                # 1. Lösche alle alten Lessons, die nicht mehr zu den neuen Wochentagen passen
-                # 2. Generiere neue Lessons für die neuen Wochentage
+                # If weekdays have changed:
+                # 1. Delete all old lessons that no longer match the new weekdays
+                # 2. Generate new lessons for the new weekdays
 
                 deleted_count = 0
                 for lesson in all_lessons:
-                    # Prüfe, ob diese Lesson zu den neuen Wochentagen passt
+                    # Check if this lesson matches the new weekdays
                     lesson_weekday = lesson.date.weekday()
                     if lesson_weekday not in new_weekdays_set:
-                        # Diese Lesson gehört nicht mehr zu den neuen Wochentagen -> löschen
+                        # This lesson no longer belongs to the new weekdays -> delete
                         lesson.delete()
                         deleted_count += 1
                     else:
-                        # Diese Lesson passt noch -> aktualisieren
+                        # This lesson still matches -> update
                         lesson.start_time = recurring.start_time
                         lesson.duration_minutes = recurring.duration_minutes
                         lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
@@ -381,7 +381,7 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                         lesson.save()
                         recalculate_conflicts_for_affected_lessons(lesson)
 
-                # Generiere neue Lessons für die neuen Wochentage
+                # Generate new lessons for the new weekdays
                 result = RecurringLessonService.generate_lessons(
                     recurring, check_conflicts=True, dry_run=False
                 )
@@ -406,10 +406,10 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                     ),
                 )
             else:
-                # Wochentage haben sich nicht geändert -> nur bestehende Lessons aktualisieren
+                # Weekdays have not changed -> only update existing lessons
                 updated_count = 0
                 for lesson in all_lessons:
-                    # Aktualisiere diese Lesson mit den neuen Werten aus der RecurringLesson
+                    # Update this lesson with new values from RecurringLesson
                     lesson.start_time = recurring.start_time
                     lesson.duration_minutes = recurring.duration_minutes
                     lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
@@ -427,7 +427,7 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                     _("Series updated. {count} lesson(s) updated.").format(count=updated_count),
                 )
         else:
-            # Bearbeite nur diese eine Stunde
+            # Edit only this one lesson
             lesson = form.save()
 
             # Automatic status setting
@@ -464,12 +464,12 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         )
 
         lesson = self.get_object()
-        # Prüfe, ob diese Lesson zu einer Serie gehört
+        # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(lesson)
         context["matching_recurring"] = matching_recurring
 
         if matching_recurring:
-            # Finde alle Lessons dieser Serie
+            # Find all lessons of this series
             all_lessons = get_all_lessons_for_recurring(matching_recurring)
             context["series_lessons_count"] = len(all_lessons)
             context["series_lessons"] = all_lessons
@@ -512,24 +512,24 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         lesson = self.get_object()
         lesson_date = lesson.date
 
-        # Prüfe, ob diese Lesson zu einer Serie gehört
+        # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(lesson)
 
-        # Prüfe, ob der Benutzer die gesamte Serie löschen möchte
+        # Check if user wants to delete the entire series
         delete_series = request.POST.get("delete_series", "false") == "true"
 
         if delete_series and matching_recurring:
-            # Lösche die gesamte Serie
-            # Verwende eine einfache und robuste Methode: Finde ALLE Lessons im Zeitraum
-            # mit gleichem Contract und gleicher start_time, unabhängig vom Muster
-            # (da Lessons manuell bearbeitet worden sein könnten)
+            # Delete the entire series
+            # Use a simple and robust method: Find ALL lessons in the period
+            # with the same contract and same start_time, regardless of pattern
+            # (as lessons may have been manually edited)
             start_date = matching_recurring.start_date
             end_date = matching_recurring.end_date
             if not end_date and matching_recurring.contract.end_date:
                 end_date = matching_recurring.contract.end_date
 
-            # Finde alle Lessons im Zeitraum mit gleichem Contract und gleicher start_time
-            # Das ist die sicherste Methode, um wirklich alle Lessons zu finden
+            # Find all lessons in the period with the same contract and same start_time
+            # This is the safest method to find all lessons
             all_lessons_query = Lesson.objects.filter(
                 contract=matching_recurring.contract,
                 start_time=matching_recurring.start_time,
@@ -538,15 +538,15 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
             if end_date:
                 all_lessons_query = all_lessons_query.filter(date__lte=end_date)
 
-            # Hole alle IDs
+            # Get all IDs
             all_lesson_ids = list(all_lessons_query.values_list("id", flat=True))
             deleted_count = len(all_lesson_ids)
 
-            # Lösche alle Lessons der Serie direkt über die IDs (effizienter und sicherer)
+            # Delete all lessons of the series directly via IDs (more efficient and safer)
             if all_lesson_ids:
                 Lesson.objects.filter(id__in=all_lesson_ids).delete()
 
-            # Lösche die RecurringLesson
+            # Delete the RecurringLesson
             matching_recurring.delete()
 
             messages.success(
@@ -558,7 +558,7 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
                 ).format(count=deleted_count),
             )
         else:
-            # Lösche nur diese eine Lesson
+            # Delete only this one lesson
             lesson.delete()
             messages.success(self.request, _("Lesson successfully deleted."))
 

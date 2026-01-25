@@ -44,28 +44,28 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Formset nur anzeigen, wenn has_monthly_planning_limit aktiviert ist
+        # Only show formset if has_monthly_planning_limit is enabled
         if self.request.POST:
-            # Prüfe den POST-Wert direkt
+            # Check POST value directly
             has_limit = self.request.POST.get("has_monthly_planning_limit", "on") == "on"
             if has_limit:
                 context["formset"] = ContractMonthlyPlanFormSet(self.request.POST)
             else:
                 context["formset"] = None
         else:
-            # Initial: Formset ist leer, wird nach Speichern des Contracts gefüllt
-            # Standardmäßig ist has_monthly_planning_limit aktiviert
+            # Initial: formset is empty, will be filled after saving the contract
+            # By default, has_monthly_planning_limit is enabled
             context["formset"] = ContractMonthlyPlanFormSet()
         return context
 
     def form_valid(self, form):
-        # Speichere Contract zuerst
+        # Save contract first
         self.object = form.save()
 
-        # Nur monatliche Pläne generieren, wenn has_monthly_planning_limit aktiviert ist
+        # Only generate monthly plans if has_monthly_planning_limit is enabled
         if self.object.has_monthly_planning_limit and self.object.start_date:
             generate_monthly_plans_for_contract(self.object)
-            # Weiterleitung zur Update-View, um monatliche Planung zu bearbeiten
+            # Redirect to update view to edit monthly planning
             messages.success(
                 self.request,
                 _("Contract created. Please enter the planned units per month."),
@@ -86,9 +86,9 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Formset nur anzeigen, wenn has_monthly_planning_limit aktiviert ist
+        # Only show formset if has_monthly_planning_limit is enabled
         if self.request.POST:
-            # Prüfe den POST-Wert direkt
+            # Check POST value directly
             has_limit = self.request.POST.get("has_monthly_planning_limit", "on") == "on"
             if has_limit:
                 context["formset"] = ContractMonthlyPlanFormSet(
@@ -97,12 +97,12 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
             else:
                 context["formset"] = None
         else:
-            # Lade vorhandene Pläne oder generiere neue, nur wenn has_monthly_planning_limit aktiviert ist
+            # Load existing plans or generate new ones, only if has_monthly_planning_limit is enabled
             if self.object.has_monthly_planning_limit and self.object.start_date:
-                # Stelle sicher, dass alle Monate im Zeitraum abgedeckt sind
+                # Ensure all months in the period are covered
                 generate_monthly_plans_for_contract(self.object)
 
-                # Lösche Pläne außerhalb des Vertragszeitraums
+                # Delete plans outside the contract period
                 valid_months = set(
                     iter_contract_months(self.object.start_date, self.object.end_date)
                 )
@@ -110,14 +110,14 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
                     year__in=[year for year, _ in valid_months]
                 )
 
-                # Filtere präzise: Nur Pläne, deren (year, month) nicht in valid_months ist
+                # Filter precisely: Only plans whose (year, month) is not in valid_months
                 for plan in ContractMonthlyPlan.objects.filter(contract=self.object):
                     if (plan.year, plan.month) not in valid_months:
                         plan.delete()
 
                 context["formset"] = ContractMonthlyPlanFormSet(instance=self.object)
             else:
-                # Wenn has_monthly_planning_limit deaktiviert ist, lösche alle vorhandenen Pläne
+                # If has_monthly_planning_limit is disabled, delete all existing plans
                 if not self.object.has_monthly_planning_limit:
                     ContractMonthlyPlan.objects.filter(contract=self.object).delete()
                 context["formset"] = None
@@ -127,16 +127,16 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         context = self.get_context_data()
         formset = context["formset"]
 
-        # Speichere Contract
+        # Save contract
         self.object = form.save()
 
-        # Nur monatliche Pläne verwalten, wenn has_monthly_planning_limit aktiviert ist
+        # Only manage monthly plans if has_monthly_planning_limit is enabled
         if self.object.has_monthly_planning_limit:
-            # Wenn Zeitraum geändert wurde, generiere neue Pläne
+            # If period was changed, generate new plans
             if self.object.start_date:
                 generate_monthly_plans_for_contract(self.object)
 
-                # Lösche Pläne außerhalb des neuen Zeitraums
+                # Delete plans outside the new period
                 valid_months = set(
                     iter_contract_months(self.object.start_date, self.object.end_date)
                 )
@@ -144,7 +144,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
                     if (plan.year, plan.month) not in valid_months:
                         plan.delete()
 
-            # Formset aktualisieren und speichern
+            # Update and save formset
             if formset:
                 formset.instance = self.object
                 if formset.is_valid():
@@ -159,7 +159,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
                         self.get_context_data(form=form, formset=formset)
                     )
         else:
-            # Wenn has_monthly_planning_limit deaktiviert ist, lösche alle vorhandenen Pläne
+            # If has_monthly_planning_limit is disabled, delete all existing plans
             ContractMonthlyPlan.objects.filter(contract=self.object).delete()
 
         messages.success(self.request, _("Contract successfully updated."))

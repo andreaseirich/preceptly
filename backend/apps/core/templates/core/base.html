@@ -449,10 +449,10 @@
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('{% url "core:service_worker" %}')
                     .then(function(registration) {
-                        console.log('ServiceWorker registration successful:', registration.scope);
+                        // Service worker registered successfully
                     })
                     .catch(function(error) {
-                        console.log('ServiceWorker registration failed:', error);
+                        // Service worker registration failed
                     });
             });
         }
@@ -465,10 +465,10 @@
             // Optional: Show install button
         });
         
-        // Allgemeine Funktion zum Befüllen von Datumsfeldern aus GET-Parametern
+        // General function to populate date fields from GET parameters
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Hilfsfunktion zum Formatieren von Datumswerten
+        // Helper function to format date values
         function formatDateForInput(value) {
             if (!value) return null;
             

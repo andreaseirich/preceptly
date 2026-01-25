@@ -32,7 +32,7 @@ class BookingService:
         """
         occupied = defaultdict(list)
 
-        # Lade alle Lessons im Zeitraum (auch von anderen Verträgen, da Wegzeiten relevant sind)
+        # Load all lessons in the period (including from other contracts, as travel times are relevant)
         lessons = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
             "contract", "contract__student"
         )
@@ -91,7 +91,7 @@ class BookingService:
             return True
 
         for occupied_start, occupied_end in occupied_slots[target_date]:
-            # Prüfe auf Überlappung
+            # Check for overlap
             if not (end_time <= occupied_start or start_time >= occupied_end):
                 return False
 
@@ -118,7 +118,7 @@ class BookingService:
         """
         available = []
         now = timezone.now()
-        min_booking_datetime = now + timedelta(minutes=30)  # Mindestens 30 Minuten Vorlaufzeit
+        min_booking_datetime = now + timedelta(minutes=30)  # At least 30 minutes advance notice
 
         for work_period in working_hours:
             start_str = work_period.get("start", "00:00")
@@ -130,7 +130,7 @@ class BookingService:
             except ValueError:
                 continue
 
-            # Generiere Slots innerhalb der Arbeitszeit
+            # Generate slots within working hours
             current = datetime.combine(target_date, period_start)
             period_end_dt = datetime.combine(target_date, period_end)
 
@@ -138,7 +138,7 @@ class BookingService:
                 slot_start = current.time()
                 slot_end = (current + timedelta(minutes=slot_duration_minutes)).time()
 
-                # Prüfe, ob Slot in der Vergangenheit liegt oder weniger als 30 Minuten in der Zukunft
+                # Check if slot is in the past or less than 30 minutes in the future
                 slot_datetime = timezone.make_aware(datetime.combine(target_date, slot_start))
                 if slot_datetime < min_booking_datetime:
                     current += timedelta(minutes=slot_duration_minutes)
@@ -178,10 +178,10 @@ class BookingService:
         week_start = target_date - timedelta(days=days_since_monday)
         week_end = week_start + timedelta(days=6)
 
-        # Lade belegte Zeitslots
+        # Load occupied time slots
         occupied_slots = BookingService.get_occupied_time_slots(contract_id, week_start, week_end)
 
-        # Wochentage-Namen
+        # Weekday names
         weekday_names = [
             "monday",
             "tuesday",
@@ -197,10 +197,10 @@ class BookingService:
             current_date = week_start + timedelta(days=i)
             weekday_name = weekday_names[i]
 
-            # Arbeitszeiten für diesen Wochentag
+            # Working hours for this weekday
             day_working_hours = working_hours.get(weekday_name, [])
 
-            # Verfügbare Slots
+            # Available slots
             available_slots = BookingService.get_available_time_slots(
                 current_date, day_working_hours, occupied_slots
             )
@@ -245,7 +245,7 @@ class BookingService:
         week_start = target_date - timedelta(days=days_since_monday)
         week_end = week_start + timedelta(days=6)
 
-        # Verwende Standard-Arbeitszeiten aus UserProfile (erster Eintrag)
+        # Use default working hours from UserProfile (first entry)
         working_hours = {}
         try:
             profile = UserProfile.objects.first()
@@ -254,11 +254,11 @@ class BookingService:
         except (UserProfile.DoesNotExist, AttributeError):
             pass
 
-        # Lade belegte Zeitslots (für alle Contracts, da kein spezifischer Contract)
-        # Verwende eine Methode, die alle belegten Slots zurückgibt
+        # Load occupied time slots (for all contracts, as there is no specific contract)
+        # Use a method that returns all occupied slots
         occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end)
 
-        # Wochentage-Namen
+        # Weekday names
         weekday_names = [
             "monday",
             "tuesday",
@@ -274,10 +274,10 @@ class BookingService:
             current_date = week_start + timedelta(days=i)
             weekday_name = weekday_names[i]
 
-            # Arbeitszeiten für diesen Wochentag
+            # Working hours for this weekday
             day_working_hours = working_hours.get(weekday_name, [])
 
-            # Verfügbare Slots
+            # Available slots
             available_slots = BookingService.get_available_time_slots(
                 current_date, day_working_hours, occupied_slots
             )
@@ -315,7 +315,7 @@ class BookingService:
         """
         occupied = defaultdict(list)
 
-        # Lade alle Lessons im Zeitraum
+        # Load all lessons in the period
         lessons = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
             "contract", "contract__student"
         )
@@ -324,7 +324,7 @@ class BookingService:
             start_datetime, end_datetime = LessonConflictService.calculate_time_block(lesson)
             occupied[lesson.date].append((start_datetime.time(), end_datetime.time()))
 
-        # Lade Blockzeiten im Zeitraum
+        # Load blocked times in the period
         start_datetime = timezone.make_aware(datetime.combine(start_date, time.min))
         end_datetime = timezone.make_aware(datetime.combine(end_date, time.max))
         blocked_times = BlockedTime.objects.filter(
@@ -345,7 +345,7 @@ class BookingService:
                     )
                 current_date += timedelta(days=1)
 
-        # Sortiere Zeitslots pro Tag
+        # Sort time slots per day
         for day in occupied:
             occupied[day].sort()
 

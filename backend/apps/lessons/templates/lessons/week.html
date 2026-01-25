@@ -353,7 +353,7 @@ function hideBlockedTimePreview() {
     }
 }
 
-// Berechne Position und Höhe der Lesson-Blöcke unter Berücksichtigung der Wegzeit
+// Calculate position and height of lesson blocks considering travel time
 document.addEventListener('DOMContentLoaded', function() {
     const lessonBlocks = document.querySelectorAll('.lesson-block[data-total-time]');
     const blocksToMove = []; // Collect blocks that need to be moved
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const travelBefore = parseInt(block.dataset.travelBefore) || 0;
         const renderHour = parseInt(block.dataset.renderHour) || startHour;
         
-        // Berechne die tatsächliche Startzeit in Minuten (Startzeit minus Hinweg)
+        // Calculate actual start time in minutes (start time minus travel time before)
         const actualStartMinutes = (startHour * 60 + startMinute) - travelBefore;
         const actualStartHour = Math.floor(actualStartMinutes / 60);
         const actualStartMinute = actualStartMinutes % 60;
@@ -390,12 +390,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const lessonDate = block.dataset.lessonDate;
         const totalTime = parseInt(block.dataset.totalTime) || parseInt(block.dataset.duration) || 0;
         
-        // Finde die richtige Zeile
+        // Find the correct row
         const currentRow = block.closest('tr');
         let targetRow = null;
         
         if (actualStartHour < renderHour) {
-            // Block sollte in der vorherigen Zeile sein - suche rückwärts
+            // Block should be in previous row - search backwards
             let row = currentRow.previousElementSibling;
             while (row) {
                 const rowHour = parseInt(row.dataset.hour);
@@ -404,12 +404,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 }
                 if (rowHour < actualStartHour) {
-                    break; // Zu weit zurück
+                    break; // Too far back
                 }
                 row = row.previousElementSibling;
             }
         } else {
-            // Block sollte in der nächsten Zeile sein (selten)
+            // Block should be in next row (rare)
             let row = currentRow.nextElementSibling;
             while (row) {
                 const rowHour = parseInt(row.dataset.hour);
@@ -418,25 +418,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 }
                 if (rowHour > actualStartHour) {
-                    break; // Zu weit voraus
+                    break; // Too far ahead
                 }
                 row = row.nextElementSibling;
             }
         }
         
         if (targetRow) {
-            // Finde den entsprechenden Time-Slot in der Ziel-Zeile
+            // Find the corresponding time slot in the target row
             const timeSlot = targetRow.querySelector(`td.time-slot[data-date="${lessonDate}"]`);
             if (timeSlot) {
                 const slotContent = timeSlot.querySelector('.slot-content');
                 if (slotContent && !slotContent.querySelector(`.lesson-block[data-lesson-id="${lessonId}"]`)) {
-                    // Verschiebe den Block in die richtige Zeile
+                    // Move block to the correct row
                     block.remove();
                     block.dataset.renderHour = actualStartHour.toString();
                     block.style.top = actualStartMinute + 'px';
                     block.style.height = totalTime + 'px';
                     slotContent.appendChild(block);
-                    return; // Block wurde verschoben
+                    return; // Block was moved
                 }
             }
         }
@@ -450,19 +450,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalTime = parseInt(block.dataset.totalTime) || parseInt(block.dataset.duration) || 0;
         const renderHour = parseInt(block.dataset.renderHour) || startHour;
         
-        // Berechne die tatsächliche Startzeit in Minuten (Startzeit minus Hinweg)
+        // Calculate actual start time in minutes (start time minus travel time before)
         const actualStartMinutes = (startHour * 60 + startMinute) - travelBefore;
         const actualStartHour = Math.floor(actualStartMinutes / 60);
         const actualStartMinute = actualStartMinutes % 60;
         
-        // Position: relativ zur Zeile, in der der Block jetzt ist
+        // Position: relative to the row where the block currently is
         if (actualStartHour === renderHour) {
             block.style.top = actualStartMinute + 'px';
             block.style.height = totalTime + 'px';
         } else {
-            // Block ist noch in der falschen Zeile - positioniere relativ zur aktuellen Zeile
+            // Block is still in wrong row - position relative to current row
             if (actualStartHour < renderHour) {
-                // Block sollte in vorheriger Stunde sein, positioniere negativ
+                // Block should be in previous hour, position negatively
                 block.style.top = (actualStartMinute - 60) + 'px';
             } else {
                 block.style.top = actualStartMinute + 'px';

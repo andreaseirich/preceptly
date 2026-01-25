@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class LessonPlanGenerationError(Exception):
-    """Exception für Fehler bei der LessonPlan-Generierung."""
+    """Exception for errors in lesson plan generation."""
 
     pass
 

@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 class LessonForm(forms.ModelForm):
     """Form für Lesson-Erstellung und -Bearbeitung."""
 
-    # Option für Bearbeitung: nur diese Stunde oder ganze Serie
+    # Option for editing: only this lesson or entire series
     edit_scope = forms.ChoiceField(
         required=False,
         initial="single",
@@ -99,28 +99,28 @@ class LessonForm(forms.ModelForm):
             self.fields["recurrence_type"].widget = forms.HiddenInput()
             self.fields["recurrence_end_date"].widget = forms.HiddenInput()
 
-            # Prüfe, ob diese Lesson zu einer Serie gehört
+            # Check if this lesson belongs to a series
             from apps.lessons.recurring_utils import find_matching_recurring_lesson
 
             matching_recurring = find_matching_recurring_lesson(self.instance)
             if matching_recurring:
-                # Zeige Option für Bearbeitungsscope
+                # Show option for edit scope
                 self.fields["edit_scope"].initial = "single"
-                # Wenn Serie bearbeitet wird, zeige Wochentage-Felder
-                # Initialisiere mit aktuellen Wochentagen der Serie
+                # When editing series, show weekday fields
+                # Initialize with current weekdays of the series
                 active_weekdays = matching_recurring.get_active_weekdays()
                 self.fields["recurrence_weekdays"].initial = [str(wd) for wd in active_weekdays]
-                # Widget immer sichtbar machen - wird per JavaScript gesteuert
-                # WICHTIG: Kein HiddenInput, damit Checkboxes gerendert werden
+                # Always make widget visible - controlled by JavaScript
+                # IMPORTANT: No HiddenInput, so checkboxes are rendered
                 self.fields["recurrence_weekdays"].widget = forms.CheckboxSelectMultiple(
                     attrs={"class": "form-check-input"}
                 )
             else:
-                # Verstecke edit_scope und recurrence_weekdays, wenn keine Serie gefunden
+                # Hide edit_scope and recurrence_weekdays if no series found
                 self.fields["edit_scope"].widget = forms.HiddenInput()
             self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
         else:
-            # Beim Erstellen: edit_scope verstecken
+            # When creating: hide edit_scope
             self.fields["edit_scope"].widget = forms.HiddenInput()
 
     def clean(self):
@@ -165,10 +165,10 @@ class LessonDocumentForm(forms.ModelForm):
         }
 
     def clean_file(self):
-        """Validiere Datei-Größe und -Typ."""
+        """Validate file size and type."""
         file = self.cleaned_data.get("file")
         if file:
-            # Maximale Dateigröße: 10 MB
+            # Maximum file size: 10 MB
             max_size = 10 * 1024 * 1024  # 10 MB
             if file.size > max_size:
                 raise forms.ValidationError(
@@ -177,7 +177,7 @@ class LessonDocumentForm(forms.ModelForm):
                     )
                 )
 
-            # Erlaubte Dateitypen
+            # Allowed file types
             allowed_extensions = [".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png"]
             file_extension = file.name.lower().split(".")[-1] if "." in file.name else ""
             if file_extension and f".{file_extension}" not in allowed_extensions:

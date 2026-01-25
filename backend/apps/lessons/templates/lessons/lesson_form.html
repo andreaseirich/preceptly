@@ -22,16 +22,8 @@
                 {{ choice.tag }}
                 <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
             </label>
-            {% empty %}
-            <p style="color: red;">WARNING: edit_scope field is empty! Field widget: {{ form.edit_scope.widget }}</p>
             {% endfor %}
         </div>
-        {# Debug: Zeige Feld-Info #}
-        {% if form.edit_scope %}
-        <p style="font-size: 0.8em; color: #666;">Debug: edit_scope field exists, widget: {{ form.edit_scope.widget|safe }}</p>
-        {% else %}
-        <p style="color: red;">ERROR: edit_scope field does not exist in form!</p>
-        {% endif %}
     </div>
 </div>
 {% endif %}
@@ -213,7 +205,7 @@ function toggleRecurrenceFields() {
 document.addEventListener('DOMContentLoaded', function() {
     toggleRecurrenceFields();
     
-    // Funktion zum Anzeigen/Verstecken der Serien-Info
+    // Function to show/hide series info
     function toggleSeriesInfo(show) {
         const seriesInfo = document.getElementById('series-info');
         const seriesWeekdaysSection = document.getElementById('series-weekdays-section');
@@ -226,21 +218,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if (seriesWeekdaysSection) {
                 seriesWeekdaysSection.style.display = 'block';
             }
-            // Zeige Wochentage-Checkboxes
+            // Show weekday checkboxes
             if (seriesWeekdaysContainer) {
                 seriesWeekdaysContainer.style.display = 'flex';
-                // Stelle sicher, dass alle Checkboxes sichtbar und aktiviert sind
+                // Ensure all checkboxes are visible and enabled
                 const checkboxes = seriesWeekdaysContainer.querySelectorAll('input[type="checkbox"]');
-                console.log('Found', checkboxes.length, 'checkboxes in container');
                 if (checkboxes.length > 0) {
                     checkboxes.forEach(function(checkbox) {
-                        // Entferne alle versteckenden Styles und Attribute
+                        // Remove all hiding styles and attributes
                         checkbox.removeAttribute('hidden');
                         checkbox.style.display = '';
                         checkbox.style.visibility = '';
                         checkbox.style.opacity = '';
                         checkbox.classList.remove('hidden');
-                        // Setze explizit sichtbar
+                        // Set explicitly visible
                         checkbox.style.display = 'inline-block';
                         checkbox.style.visibility = 'visible';
                         checkbox.style.opacity = '1';
@@ -248,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         checkbox.readOnly = false;
                         checkbox.style.pointerEvents = 'auto';
                     });
-                    // Stelle sicher, dass Labels sichtbar sind
+                    // Ensure labels are visible
                     const labels = seriesWeekdaysContainer.querySelectorAll('label');
                     labels.forEach(function(label) {
                         label.removeAttribute('hidden');
@@ -260,11 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         label.style.visibility = 'visible';
                         label.style.opacity = '1';
                     });
-                } else {
-                    console.warn('No checkboxes found! Container HTML:', seriesWeekdaysContainer.innerHTML);
                 }
-            } else {
-                console.error('series-weekdays-container not found!');
             }
         } else {
             if (seriesInfo) {
@@ -276,22 +263,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Zeige/Verstecke Serien-Info basierend auf edit_scope
+    // Show/hide series info based on edit_scope
     function setupEditScopeToggle() {
         const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
         
         if (editScopeRadios.length > 0) {
             editScopeRadios.forEach(function(radio) {
-                // Entferne alte Event-Listener falls vorhanden
+                // Remove old event listeners if present
                 const newRadio = radio.cloneNode(true);
                 radio.parentNode.replaceChild(newRadio, radio);
                 
-                // Füge Event-Listener hinzu (sowohl change als auch click)
+                // Add event listeners (both change and click)
                 newRadio.addEventListener('change', handleEditScopeChange);
                 newRadio.addEventListener('click', handleEditScopeChange);
             });
             
-            // Initial state - prüfe sofort beim Laden
+            // Initial state - check immediately on load
             const checkedRadio = document.querySelector('input[name="edit_scope"]:checked');
             if (checkedRadio) {
                 handleEditScopeChange.call(checkedRadio);
@@ -306,34 +293,18 @@ document.addEventListener('DOMContentLoaded', function() {
             hiddenField.value = this.value;
         }
         toggleSeriesInfo(isSeries);
-        // Debug: Log für Entwicklung
-        if (isSeries) {
-            // Warte kurz, damit DOM aktualisiert wird
-            setTimeout(function() {
-                const container = document.getElementById('series-weekdays-container');
-                if (container) {
-                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-                    console.log('Series mode activated. Found', checkboxes.length, 'checkboxes');
-                    if (checkboxes.length === 0) {
-                        console.warn('No checkboxes found! Container HTML:', container.innerHTML);
-                    }
-                } else {
-                    console.error('series-weekdays-container not found!');
-                }
-            }, 100);
-        }
     }
     
-    // Initialisiere beim DOM-Load
+    // Initialize on DOM load
     setupEditScopeToggle();
     
-    // Stelle sicher, dass Datumsfelder die initialen Werte anzeigen
+    // Ensure date fields display initial values
     function initializeDateFields() {
         const urlParams = new URLSearchParams(window.location.search);
         const dateField = document.getElementById('{{ form.date.id_for_label }}');
         const timeField = document.getElementById('{{ form.start_time.id_for_label }}');
         
-        // Support für start Parameter (ISO datetime format: YYYY-MM-DDTHH:MM)
+        // Support for start parameter (ISO datetime format: YYYY-MM-DDTHH:MM)
         const startParam = urlParams.get('start');
         if (startParam) {
             try {
@@ -345,11 +316,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const [year, month, day] = datePart.split('-').map(Number);
                     const [hours, minutes] = timePart.split(':').map(Number);
                     
-                    // Setze Datum
+                    // Set date
                     if (dateField) {
                         dateField.value = datePart;
                     }
-                    // Setze Zeit
+                    // Set time
                     if (timeField) {
                         timeField.value = timePart;
                     }
@@ -357,14 +328,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Fallback: use Date constructor (for other formats)
                     const startDate = new Date(startParam);
                     if (!isNaN(startDate.getTime())) {
-                        // Setze Datum
+                        // Set date
                         if (dateField) {
                             const year = startDate.getFullYear();
                             const month = String(startDate.getMonth() + 1).padStart(2, '0');
                             const day = String(startDate.getDate()).padStart(2, '0');
                             dateField.value = `${year}-${month}-${day}`;
                         }
-                        // Setze Zeit
+                        // Set time
                         if (timeField) {
                             const hours = String(startDate.getHours()).padStart(2, '0');
                             const minutes = String(startDate.getMinutes()).padStart(2, '0');
@@ -373,19 +344,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch (e) {
-                console.warn('Failed to parse start parameter:', e);
+                // Failed to parse start parameter
             }
         }
         
-        // Fallback: Datumsfeld für Lesson (wenn noch nicht gesetzt)
+        // Fallback: date field for lesson (if not yet set)
         if (dateField && !dateField.value) {
-            // Versuche, das Datum aus GET-Parametern zu lesen
+            // Try to read date from GET parameters
             const dateParam = urlParams.get('date');
             if (dateParam) {
-                // Konvertiere YYYY-MM-DD Format
+                // Convert YYYY-MM-DD format
                 dateField.value = dateParam;
             } else {
-                // Versuche, aus year/month/day Parametern zu konstruieren
+                // Try to construct from year/month/day parameters
                 const year = urlParams.get('year');
                 const month = urlParams.get('month');
                 const day = urlParams.get('day') || '1';
@@ -396,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Fallback: Zeitfeld (wenn noch nicht gesetzt)
+        // Fallback: time field (if not yet set)
         if (timeField && !timeField.value) {
             const timeParam = urlParams.get('time');
             if (timeParam) {
@@ -407,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Recurrence end date
         const recurrenceEndDateField = document.getElementById('{{ form.recurrence_end_date.id_for_label }}');
         if (recurrenceEndDateField && !recurrenceEndDateField.value && dateField && dateField.value) {
-            // Setze End-Datum auf 1 Jahr nach Start-Datum als Standard
+            // Set end date to 1 year after start date as default
             const startDate = new Date(dateField.value);
             const endDate = new Date(startDate);
             endDate.setFullYear(endDate.getFullYear() + 1);
@@ -415,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Initialisiere Datumsfelder beim Laden
+    // Initialize date fields on load
     initializeDateFields();
 });
 </script>

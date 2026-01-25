@@ -132,14 +132,14 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
         from django.utils.translation import gettext_lazy as _
         from django.utils.translation import ngettext
 
-        # Prüfe, ob eine Serientermin erstellt werden soll
+        # Check if a recurring blocked time should be created
         is_recurring = form.cleaned_data.get("is_recurring", False)
 
         if is_recurring:
-            # Erstelle eine RecurringBlockedTime statt einer einzelnen BlockedTime
-            blocked_time = form.save(commit=False)  # Noch nicht speichern
+            # Create a RecurringBlockedTime instead of a single BlockedTime
+            blocked_time = form.save(commit=False)  # Don't save yet
 
-            # Erstelle RecurringBlockedTime
+            # Create RecurringBlockedTime
             recurring_blocked_time = RecurringBlockedTime(
                 title=blocked_time.title,
                 description=blocked_time.description,
@@ -151,7 +151,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 is_active=True,
             )
 
-            # Setze Wochentage basierend auf recurrence_weekdays
+            # Set weekdays based on recurrence_weekdays
             weekdays = form.cleaned_data.get("recurrence_weekdays", [])
             recurring_blocked_time.monday = "0" in weekdays
             recurring_blocked_time.tuesday = "1" in weekdays
@@ -163,7 +163,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
 
             recurring_blocked_time.save()
 
-            # Generiere BlockedTimes aus der RecurringBlockedTime
+            # Generate BlockedTimes from RecurringBlockedTime
             result = RecurringBlockedTimeService.generate_blocked_times(
                 recurring_blocked_time, check_conflicts=True
             )
@@ -196,10 +196,10 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     ).format(count=conflict_count),
                 )
 
-            # Setze self.object für die Weiterleitung
-            # Verwende die erste erstellte BlockedTime oder die erste gefundene BlockedTime
+            # Set self.object for redirection
+            # Use the first created BlockedTime or the first found BlockedTime
             if result.get("created", 0) > 0:
-                # Finde die erste erstellte BlockedTime
+                # Find the first created BlockedTime
                 first_blocked_time = (
                     BlockedTime.objects.filter(
                         title=recurring_blocked_time.title,
@@ -211,12 +211,12 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 )
                 self.object = first_blocked_time
             else:
-                # Falls keine BlockedTime erstellt wurde, verwende die ursprüngliche BlockedTime
+                # If no BlockedTime was created, use the original BlockedTime
                 blocked_time.save()
                 recalculate_conflicts_for_blocked_time(blocked_time)
                 self.object = blocked_time
         else:
-            # Normale einzelne BlockedTime erstellen
+            # Create normal single BlockedTime
             blocked_time = form.save()
 
             # Recalculate conflicts for affected lessons
@@ -226,7 +226,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             from apps.lessons.models import Lesson
             from apps.lessons.services import LessonConflictService
 
-            # Prüfe Konflikte mit Lessons
+            # Check conflicts with lessons
             conflicting_lessons = Lesson.objects.filter(
                 date=blocked_time.start_datetime.date()
             ).select_related("contract", "contract__student")
@@ -263,7 +263,7 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         from apps.blocked_times.recurring_utils import find_matching_recurring_blocked_time
 
-        # Prüfe, ob diese BlockedTime zu einer Serie gehört
+        # Check if this BlockedTime belongs to a series
         matching_recurring = find_matching_recurring_blocked_time(self.object)
         context["matching_recurring"] = matching_recurring
 
@@ -294,39 +294,39 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
         from django.utils.translation import gettext_lazy as _
 
-        # WICHTIG: Hole die ursprüngliche BlockedTime-Instanz aus der Datenbank,
-        # bevor wir nach der RecurringBlockedTime suchen
+        # IMPORTANT: Get the original BlockedTime instance from the database,
+        # before we search for RecurringBlockedTime
         original_blocked_time = BlockedTime.objects.get(pk=self.object.pk)
 
         edit_scope = form.cleaned_data.get("edit_scope", "single")
-        # WICHTIG: Verwende original_blocked_time statt self.object, um die RecurringBlockedTime zu finden
+        # IMPORTANT: Use original_blocked_time instead of self.object to find RecurringBlockedTime
         matching_recurring = find_matching_recurring_blocked_time(original_blocked_time)
 
         if edit_scope == "series" and matching_recurring:
-            # Bearbeite die ganze Serie (RecurringBlockedTime)
+            # Edit the entire series (RecurringBlockedTime)
             recurring = matching_recurring
 
-            # WICHTIG: Speichere die ursprüngliche start_time BEVOR wir sie ändern!
+            # IMPORTANT: Save the original start_time BEFORE we change it!
             original_start_time = recurring.start_time
 
-            # WICHTIG: Finde alle BlockedTimes dieser Serie BEVOR wir die RecurringBlockedTime ändern!
+            # IMPORTANT: Find all BlockedTimes of this series BEFORE we change RecurringBlockedTime!
             all_blocked_times = get_all_blocked_times_for_recurring(
                 recurring, original_start_time=original_start_time
             )
 
-            # Prüfe, ob sich die Wochentage geändert haben
+            # Check if weekdays have changed
             new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
             new_weekdays_set = {int(wd) for wd in new_weekdays}
             old_weekdays_set = set(recurring.get_active_weekdays())
             weekdays_changed = new_weekdays_set != old_weekdays_set
 
-            # Aktualisiere RecurringBlockedTime mit den neuen Werten
+            # Update RecurringBlockedTime with new values
             recurring.title = form.cleaned_data["title"]
             recurring.description = form.cleaned_data["description"]
             recurring.start_time = form.cleaned_data["start_datetime"].time()
             recurring.end_time = form.cleaned_data["end_datetime"].time()
 
-            # Aktualisiere Wochentage
+            # Update weekdays
             if new_weekdays:
                 recurring.monday = "0" in new_weekdays
                 recurring.tuesday = "1" in new_weekdays
@@ -339,23 +339,23 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
             recurring.save()
 
             if weekdays_changed:
-                # Wenn sich die Wochentage geändert haben:
-                # 1. Lösche alle alten BlockedTimes, die nicht mehr zu den neuen Wochentagen passen
-                # 2. Generiere neue BlockedTimes für die neuen Wochentage
+                # If weekdays have changed:
+                # 1. Delete all old BlockedTimes that no longer match the new weekdays
+                # 2. Generate new BlockedTimes for the new weekdays
 
                 deleted_count = 0
                 for blocked_time in all_blocked_times:
-                    # Prüfe, ob diese BlockedTime zu den neuen Wochentagen passt
+                    # Check if this BlockedTime matches the new weekdays
                     blocked_time_weekday = blocked_time.start_datetime.date().weekday()
                     if blocked_time_weekday not in new_weekdays_set:
-                        # Diese BlockedTime gehört nicht mehr zu den neuen Wochentagen -> löschen
+                        # This BlockedTime no longer belongs to the new weekdays -> delete
                         blocked_time.delete()
                         deleted_count += 1
                     else:
-                        # Diese BlockedTime passt noch -> aktualisieren
+                        # This BlockedTime still matches -> update
                         blocked_time.title = recurring.title
                         blocked_time.description = recurring.description
-                        # Behalte das Datum, aber aktualisiere die Zeit
+                        # Keep the date, but update the time
                         blocked_time.start_datetime = blocked_time.start_datetime.replace(
                             hour=recurring.start_time.hour, minute=recurring.start_time.minute
                         )
@@ -365,7 +365,7 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
                         blocked_time.save()
                         recalculate_conflicts_for_blocked_time(blocked_time)
 
-                # Generiere neue BlockedTimes für die neuen Wochentage
+                # Generate new BlockedTimes for the new weekdays
                 result = RecurringBlockedTimeService.generate_blocked_times(
                     recurring, check_conflicts=True, dry_run=False
                 )
@@ -390,13 +390,13 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
                     ),
                 )
             else:
-                # Wochentage haben sich nicht geändert -> nur bestehende BlockedTimes aktualisieren
+                # Weekdays have not changed -> only update existing BlockedTimes
                 updated_count = 0
                 for blocked_time in all_blocked_times:
-                    # Aktualisiere diese BlockedTime mit den neuen Werten aus der RecurringBlockedTime
+                    # Update this BlockedTime with new values from RecurringBlockedTime
                     blocked_time.title = recurring.title
                     blocked_time.description = recurring.description
-                    # Behalte das Datum, aber aktualisiere die Zeit
+                    # Keep the date, but update the time
                     blocked_time.start_datetime = blocked_time.start_datetime.replace(
                         hour=recurring.start_time.hour, minute=recurring.start_time.minute
                     )
@@ -414,10 +414,10 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
                     ),
                 )
 
-            # Setze self.object für die Weiterleitung
+            # Set self.object for redirection
             self.object = original_blocked_time
         else:
-            # Normale einzelne BlockedTime bearbeiten
+            # Edit normal single BlockedTime
             blocked_time = form.save()
 
             # Recalculate conflicts for affected lessons
@@ -441,12 +441,12 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
             get_all_blocked_times_for_recurring,
         )
 
-        # Prüfe, ob diese BlockedTime zu einer Serie gehört
+        # Check if this BlockedTime belongs to a series
         matching_recurring = find_matching_recurring_blocked_time(self.object)
         context["matching_recurring"] = matching_recurring
 
         if matching_recurring:
-            # Finde alle BlockedTimes dieser Serie
+            # Find all BlockedTimes of this series
             all_blocked_times = get_all_blocked_times_for_recurring(matching_recurring)
             context["series_blocked_times_count"] = len(all_blocked_times)
             context["series_blocked_times"] = all_blocked_times
@@ -486,18 +486,18 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
 
         blocked_time = self.get_object()
 
-        # Prüfe, ob diese BlockedTime zu einer Serie gehört
+        # Check if this BlockedTime belongs to a series
         matching_recurring = find_matching_recurring_blocked_time(blocked_time)
 
-        # Prüfe, ob der Benutzer die gesamte Serie löschen möchte
+        # Check if user wants to delete the entire series
         delete_series = request.POST.get("delete_series", "false") == "true"
 
         if delete_series and matching_recurring:
-            # Lösche die gesamte Serie
+            # Delete the entire series
             start_date = matching_recurring.start_date
             end_date = matching_recurring.end_date
 
-            # Finde alle BlockedTimes im Zeitraum mit gleichem Titel und gleicher Zeit
+            # Find all BlockedTimes in the period with the same title and same time
             all_blocked_times_query = BlockedTime.objects.filter(
                 title=matching_recurring.title,
                 start_datetime__time=matching_recurring.start_time,
@@ -508,15 +508,15 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
                     start_datetime__date__lte=end_date
                 )
 
-            # Hole alle IDs
+            # Get all IDs
             all_blocked_time_ids = list(all_blocked_times_query.values_list("id", flat=True))
             deleted_count = len(all_blocked_time_ids)
 
-            # Lösche alle BlockedTimes der Serie direkt über die IDs
+            # Delete all BlockedTimes of the series directly via IDs
             if all_blocked_time_ids:
                 BlockedTime.objects.filter(id__in=all_blocked_time_ids).delete()
 
-            # Lösche die RecurringBlockedTime
+            # Delete the RecurringBlockedTime
             matching_recurring.delete()
 
             messages.success(
@@ -528,7 +528,7 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
                 ).format(count=deleted_count),
             )
         else:
-            # Lösche nur diese eine BlockedTime
+            # Delete only this one BlockedTime
             # Recalculate conflicts before deleting (so we know which lessons to update)
             recalculate_conflicts_for_blocked_time(blocked_time)
 

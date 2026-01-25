@@ -36,29 +36,29 @@ class LessonStatusUpdater:
         """
         now = timezone.now()
 
-        # Berechne start_datetime und end_datetime
+        # Calculate start_datetime and end_datetime
         start_datetime = timezone.make_aware(datetime.combine(lesson.date, lesson.start_time))
         end_datetime = start_datetime + timedelta(minutes=lesson.duration_minutes)
 
-        # Status PAID oder CANCELLED nicht überschreiben
+        # Do not overwrite PAID or CANCELLED status
         if lesson.status in ["paid", "cancelled"]:
             return False
 
         status_changed = False
 
-        # Vergangene Lesson (end_datetime < jetzt) mit Status PLANNED oder leer → TAUGHT
+        # Past lesson (end_datetime < now) with PLANNED or empty status → TAUGHT
         if end_datetime < now and (
             lesson.status == "planned" or not lesson.status or lesson.status == ""
         ):
             lesson.status = "taught"
             status_changed = True
 
-        # Zukünftige Lesson (start_datetime >= jetzt) ohne Status → PLANNED
+        # Future lesson (start_datetime >= now) without status → PLANNED
         elif start_datetime >= now and (not lesson.status or lesson.status == ""):
             lesson.status = "planned"
             status_changed = True
 
-        # Speichern nur, wenn Lesson bereits gespeichert ist (hat PK)
+        # Save only if lesson is already saved (has PK)
         if status_changed and lesson.pk:
             lesson.save(update_fields=["status", "updated_at"])
 
@@ -84,126 +84,34 @@ class LessonStatusUpdater:
         if now is None:
             now = timezone.now()
 
-        # #region agent log
-        try:
-            with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "debug-session",
-                            "runId": "post-fix",
-                            "hypothesisId": "A",
-                            "location": "status_service.py:84",
-                            "message": "Function entry",
-                            "data": {
-                                "now": str(now),
-                                "in_atomic_block": connection.in_atomic_block,
-                            },
-                            "timestamp": int(timezone.now().timestamp() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except Exception:
-            pass
-        # #endregion
-
-        # Wrappe die gesamte Operation in eine Transaktion, da select_for_update() eine Transaktion benötigt
+        # Wrap the entire operation in a transaction, as select_for_update() requires a transaction
         with transaction.atomic():
-            # #region agent log
-            try:
-                with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                    f.write(
-                        json.dumps(
-                            {
-                                "sessionId": "debug-session",
-                                "runId": "post-fix",
-                                "hypothesisId": "A",
-                                "location": "status_service.py:90",
-                                "message": "Inside transaction atomic block",
-                                "data": {
-                                    "in_atomic_block": connection.in_atomic_block,
-                                    "autocommit": connection.get_autocommit(),
-                                },
-                                "timestamp": int(timezone.now().timestamp() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except Exception:
-                pass
-            # #endregion
-
-            # Lade alle Lessons mit Status 'planned'
-            # Verwende select_for_update für Thread-Safety (optional, aber sauber)
+            # Load all lessons with status 'planned'
+            # Use select_for_update for thread-safety (optional, but clean)
             lessons = Lesson.objects.filter(status="planned").select_for_update(skip_locked=True)
 
             updated_lessons = []
 
-            # #region agent log
-            try:
-                with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                    f.write(
-                        json.dumps(
-                            {
-                                "sessionId": "debug-session",
-                                "runId": "post-fix",
-                                "hypothesisId": "B",
-                                "location": "status_service.py:97",
-                                "message": "Before iteration",
-                                "data": {
-                                    "in_atomic_block": connection.in_atomic_block,
-                                    "autocommit": connection.get_autocommit(),
-                                },
-                                "timestamp": int(timezone.now().timestamp() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except Exception:
-                pass
-            # #endregion
             for lesson in lessons:
-                # Berechne end_datetime (nur Lesson-Dauer, ohne Fahrtzeiten)
+                # Calculate end_datetime (only lesson duration, without travel times)
                 start_datetime = timezone.make_aware(
                     datetime.combine(lesson.date, lesson.start_time)
                 )
                 end_datetime = start_datetime + timedelta(minutes=lesson.duration_minutes)
 
-                # Wenn Endzeit in der Vergangenheit liegt, markiere zum Update
+                # If end time is in the past, mark for update
                 if end_datetime < now:
                     lesson.status = "taught"
                     updated_lessons.append(lesson)
 
-            # Bulk-Update für Performance
+            # Bulk update for performance
             if updated_lessons:
                 Lesson.objects.bulk_update(
                     updated_lessons, fields=["status", "updated_at"], batch_size=100
                 )
 
-        # #region agent log
-        try:
-            with open("/Users/eirichandreas/Documents/tutorflow/.cursor/debug.log", "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "debug-session",
-                            "runId": "post-fix",
-                            "hypothesisId": "A",
-                            "location": "status_service.py:114",
-                            "message": "Function exit",
-                            "data": {"updated_count": len(updated_lessons)},
-                            "timestamp": int(timezone.now().timestamp() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except Exception:
-            pass
-        # #endregion
-
         return len(updated_lessons)
 
 
-# Alias für Rückwärtskompatibilität
+# Alias for backwards compatibility
 LessonStatusService = LessonStatusUpdater
