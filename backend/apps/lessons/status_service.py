@@ -66,19 +66,19 @@ class LessonStatusUpdater:
     @staticmethod
     def update_past_lessons_to_taught(now=None) -> int:
         """
-        Setzt alle Lessons mit Status 'planned' auf 'taught', deren Endzeit
-        in der Vergangenheit liegt.
+        Sets all lessons with status 'planned' to 'taught' whose end time
+        is in the past.
 
-        Regeln:
-        - Nur Lessons mit Status 'planned' werden aktualisiert
-        - Lessons mit Status 'paid' oder 'cancelled' werden NICHT verändert
-        - Endzeit = start_datetime + duration_minutes (ohne Fahrtzeiten)
+        Rules:
+        - Only lessons with status 'planned' are updated
+        - Lessons with status 'paid' or 'cancelled' are NOT changed
+        - End time = start_datetime + duration_minutes (without travel times)
 
         Args:
-            now: Optional datetime-Objekt (default: timezone.now(), Europe/Berlin)
+            now: Optional datetime object (default: timezone.now())
 
         Returns:
-            Anzahl der aktualisierten Lessons
+            Number of updated lessons
         """
         if now is None:
             now = timezone.now()
