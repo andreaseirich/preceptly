@@ -7,8 +7,6 @@ from typing import List
 
 from apps.lessons.models import Session
 from apps.lessons.recurring_models import RecurringSession
-from apps.lessons.services import SessionConflictService
-from apps.lessons.status_service import SessionStatusUpdater
 
 
 class RecurringSessionService:

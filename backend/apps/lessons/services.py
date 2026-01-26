@@ -7,13 +7,13 @@ backward compatibility with existing imports.
 
 # Re-export for backward compatibility
 from apps.lessons.conflict_service import (
+    LessonConflictService,
     SessionConflictService,
+    recalculate_conflicts_for_affected_lessons,
     recalculate_conflicts_for_affected_sessions,
     recalculate_conflicts_for_blocked_time,
-    LessonConflictService,
-    recalculate_conflicts_for_affected_lessons,
 )
-from apps.lessons.query_service import SessionQueryService, LessonQueryService
+from apps.lessons.query_service import LessonQueryService, SessionQueryService
 
 __all__ = [
     "SessionConflictService",
