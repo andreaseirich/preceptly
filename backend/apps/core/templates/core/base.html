@@ -338,7 +338,12 @@
                     <button type="submit" title="{% trans 'Logout' %} ({{ user.username }})" class="btn-logout">🚪</button>
                 </form>
                 {% else %}
+                {% if not user.is_authenticated %}
+                <a href="{% url 'core:landing' %}" title="{% trans 'Home' %}">🏠</a>
                 <a href="{% url 'core:login' %}" title="{% trans 'Login' %}">🔐</a>
+                {% else %}
+                <a href="{% url 'core:login' %}" title="{% trans 'Login' %}">🔐</a>
+                {% endif %}
                 {% endif %}
                 <form action="{% url 'set_language' %}" method="post" style="display: inline-block; margin: 0;">
                     {% csrf_token %}
