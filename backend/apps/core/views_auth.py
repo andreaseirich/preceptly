@@ -12,7 +12,7 @@ class TutorFlowLoginView(LoginView):
     template_name = "core/login.html"
     redirect_authenticated_user = True
     next_page = reverse_lazy("core:dashboard")
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add landing page link for non-authenticated users

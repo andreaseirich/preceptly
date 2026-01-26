@@ -29,14 +29,20 @@ class Command(BaseCommand):
                 )
             except User.DoesNotExist:
                 self.stdout.write(
-                    self.style.WARNING(f"⚠ User '{username}' does not exist. Run 'python manage.py load_demo_data' first.")
+                    self.style.WARNING(
+                        f"⚠ User '{username}' does not exist. Run 'python manage.py load_demo_data' first."
+                    )
                 )
 
         if updated_count == 0:
             self.stdout.write(
-                self.style.ERROR("No demo users found. Please run 'python manage.py load_demo_data' first.")
+                self.style.ERROR(
+                    "No demo users found. Please run 'python manage.py load_demo_data' first."
+                )
             )
         else:
             self.stdout.write(
-                self.style.SUCCESS(f"\n✓ Successfully reset passwords for {updated_count} demo user(s)")
+                self.style.SUCCESS(
+                    f"\n✓ Successfully reset passwords for {updated_count} demo user(s)"
+                )
             )
