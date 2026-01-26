@@ -52,7 +52,9 @@ class LessonPlanView(LoginRequiredMixin, TemplateView):
 
         # Conflicts
         context["conflicts"] = conflicts
-        context["conflict_lessons"] = conflict_sessions  # Keep 'conflict_lessons' for template compatibility
+        context["conflict_lessons"] = (
+            conflict_sessions  # Keep 'conflict_lessons' for template compatibility
+        )
         context["conflict_blocked_times"] = conflict_blocked_times
         context["quota_conflicts"] = quota_conflicts
         context["has_conflicts"] = len(conflicts) > 0

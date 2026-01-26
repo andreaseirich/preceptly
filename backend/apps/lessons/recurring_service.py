@@ -234,7 +234,10 @@ class RecurringSessionService:
 
     @staticmethod
     def _create_session_if_not_exists(
-        recurring_session: RecurringSession, session_date: date, check_conflicts: bool, dry_run: bool
+        recurring_session: RecurringSession,
+        session_date: date,
+        check_conflicts: bool,
+        dry_run: bool,
     ) -> dict:
         """Helper method: Creates a session if it doesn't exist yet."""
         # Check if a session already exists for this day
@@ -261,6 +264,7 @@ class RecurringSessionService:
 
         # Automatic status setting (before saving)
         from apps.lessons.status_service import SessionStatusUpdater
+
         SessionStatusUpdater.update_status_for_session(session)
 
         result = {"created": True, "skipped": False, "session": session, "conflicts": []}
@@ -273,6 +277,7 @@ class RecurringSessionService:
             # Check conflicts
             if check_conflicts:
                 from apps.lessons.services import SessionConflictService
+
                 session_conflicts = SessionConflictService.check_conflicts(session)
                 if session_conflicts:
                     result["conflicts"] = [

@@ -132,7 +132,9 @@ class SessionConflictService:
         if exclude_self and session.pk:
             query &= ~Q(pk=session.pk)
 
-        other_sessions = Session.objects.filter(query).select_related("contract", "contract__student")
+        other_sessions = Session.objects.filter(query).select_related(
+            "contract", "contract__student"
+        )
 
         for other_session in other_sessions:
             other_start, other_end = SessionConflictService.calculate_time_block(other_session)
