@@ -15,6 +15,12 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 
 
+class LandingPageView(TemplateView):
+    """Landing page with demo mode and public booking options."""
+
+    template_name = "core/landing.html"
+
+
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard with overview of today's lessons, conflicts, and income."""
 

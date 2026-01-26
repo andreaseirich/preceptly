@@ -369,36 +369,77 @@
                 return;
             }
             
-            fetch('{% url "lessons:public_booking_search_student" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({ name: name })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.exact_match) {
-                        // Exact match found
-                        currentStudent = data.student;
-                        document.getElementById('student-name-display').textContent = data.student.full_name;
-                        goToStep(2);
-                    } else if (data.similar_students && data.similar_students.length > 0) {
-                        // Similar names found
-                        showSimilarStudents(data.similar_students, name);
+            // Use centralized API helper if available, otherwise use fetch with proper error handling
+            if (typeof apiRequest === 'function') {
+                apiRequest('{% url "lessons:public_booking_search_student" %}', {
+                    method: 'POST',
+                    body: JSON.stringify({ name: name })
+                })
+                .then(data => {
+                    if (data.success) {
+                        if (data.exact_match) {
+                            // Exact match found
+                            currentStudent = data.student;
+                            document.getElementById('student-name-display').textContent = data.student.full_name;
+                            goToStep(2);
+                        } else if (data.similar_students && data.similar_students.length > 0) {
+                            // Similar names found
+                            showSimilarStudents(data.similar_students, name);
+                        } else {
+                            // No match found
+                            goToStep(2);
+                        }
                     } else {
-                        // No match found
-                        goToStep(2);
+                        showMessage(data.message || '{% trans "Error searching for student." %}', 'error');
                     }
-                } else {
-                    showMessage(data.message || '{% trans "Error searching for student." %}', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('{% trans "Error searching for student." %}', 'error');
-            });
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error searching for student. Please try again." %}', 'error');
+                });
+            } else {
+                // Fallback to fetch with improved error handling
+                fetch('{% url "lessons:public_booking_search_student" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ name: name })
+                })
+                .then(async response => {
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            }
+                        } catch (e) {
+                            errorMessage = response.statusText || '{% trans "Server error" %}';
+                        }
+                        throw new Error(errorMessage);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        if (data.exact_match) {
+                            currentStudent = data.student;
+                            document.getElementById('student-name-display').textContent = data.student.full_name;
+                            goToStep(2);
+                        } else if (data.similar_students && data.similar_students.length > 0) {
+                            showSimilarStudents(data.similar_students, name);
+                        } else {
+                            goToStep(2);
+                        }
+                    } else {
+                        showMessage(data.message || '{% trans "Error searching for student." %}', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error searching for student. Please try again." %}', 'error');
+                });
+            }
         }
         
         function showSimilarStudents(similarStudents, searchedName) {
@@ -419,22 +460,49 @@
         }
         
         function selectStudent(studentId, studentName) {
-            fetch('{% url "lessons:public_booking_search_student" %}', {
+            const url = '{% url "lessons:public_booking_search_student" %}';
+            const options = {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
                 body: JSON.stringify({ name: studentName })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.exact_match) {
-                    currentStudent = data.student;
-                    document.getElementById('student-name-display').textContent = data.student.full_name;
-                    goToStep(2);
-                }
-            });
+            };
+            
+            if (typeof apiRequest === 'function') {
+                apiRequest(url, options)
+                .then(data => {
+                    if (data.success && data.exact_match) {
+                        currentStudent = data.student;
+                        document.getElementById('student-name-display').textContent = data.student.full_name;
+                        goToStep(2);
+                    }
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error selecting student." %}', 'error');
+                });
+            } else {
+                fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(async response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.exact_match) {
+                        currentStudent = data.student;
+                        document.getElementById('student-name-display').textContent = data.student.full_name;
+                        goToStep(2);
+                    }
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error selecting student." %}', 'error');
+                });
+            }
         }
         
         function createStudent() {
@@ -454,27 +522,62 @@
                 return;
             }
             
-            fetch('{% url "lessons:public_booking_create_student" %}', {
+            const url = '{% url "lessons:public_booking_create_student" %}';
+            const options = {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
                 body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    currentStudent = data.student;
-                    document.getElementById('student-name-display').textContent = data.student.full_name;
-                    goToStep(2);
-                } else {
-                    showMessage(data.message || '{% trans "Error creating student." %}', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('{% trans "Error creating student." %}', 'error');
-            });
+            };
+            
+            if (typeof apiRequest === 'function') {
+                apiRequest(url, options)
+                .then(data => {
+                    if (data.success) {
+                        currentStudent = data.student;
+                        document.getElementById('student-name-display').textContent = data.student.full_name;
+                        goToStep(2);
+                    } else {
+                        showMessage(data.message || '{% trans "Error creating student." %}', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error creating student. Please try again." %}', 'error');
+                });
+            } else {
+                fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(async response => {
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            }
+                        } catch (e) {
+                            errorMessage = response.statusText || '{% trans "Server error" %}';
+                        }
+                        throw new Error(errorMessage);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        currentStudent = data.student;
+                        document.getElementById('student-name-display').textContent = data.student.full_name;
+                        goToStep(2);
+                    } else {
+                        showMessage(data.message || '{% trans "Error creating student." %}', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error creating student. Please try again." %}', 'error');
+                });
+            }
         }
         
         function toggleSlot(element) {
@@ -647,14 +750,32 @@
                 formData.append('files', files[i]);
             }
             
-            fetch('{% url "lessons:public_booking_book_lesson" %}', {
+            const url = '{% url "lessons:public_booking_book_lesson" %}';
+            const options = {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: formData
+            };
+            
+            // Note: apiRequest helper doesn't work with FormData, so use fetch directly with improved error handling
+            fetch(url, options)
+            .then(async response => {
+                if (!response.ok) {
+                    let errorMessage = `HTTP ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                    } catch (e) {
+                        errorMessage = response.statusText || '{% trans "Server error" %}';
+                    }
+                    throw new Error(errorMessage);
+                }
+                return response.json();
             })
-            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     showMessage(data.message, 'success');
@@ -673,7 +794,11 @@
                 }
             })
             .catch(error => {
-                showMessage('{% trans "Error booking lesson." %}', 'error');
+                if (error instanceof TypeError && error.message.includes('fetch')) {
+                    showMessage('{% trans "Network error: Please check your internet connection." %}', 'error');
+                } else {
+                    showMessage(error.message || '{% trans "Error booking lesson. Please try again." %}', 'error');
+                }
             });
         }
         

@@ -578,6 +578,50 @@
             }
         });
         
+        // Central API helper function with proper error handling
+        /**
+         * Makes an API request with comprehensive error handling
+         * @param {string} url - The API endpoint URL
+         * @param {Object} options - Fetch options (method, headers, body, etc.)
+         * @returns {Promise<Object>} - Parsed JSON response
+         */
+        async function apiRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        ...options.headers
+                    }
+                });
+                
+                // Check if response is ok (status 200-299)
+                if (!response.ok) {
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                    } catch (e) {
+                        // If response is not JSON, use status text
+                    }
+                    throw new Error(errorMessage);
+                }
+                
+                // Parse JSON response
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                // Handle network errors, JSON parse errors, etc.
+                if (error instanceof TypeError && error.message.includes('fetch')) {
+                    throw new Error('Network error: Please check your internet connection.');
+                }
+                throw error;
+            }
+        }
+        
         // Finde alle datetime-local Felder
         const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
         datetimeFields.forEach(function(field) {

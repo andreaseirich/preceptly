@@ -410,42 +410,89 @@
                 return;
             }
             
-            fetch(`/lessons/booking/${token}/api/`, {
+            const url = `/lessons/booking/${token}/api/`;
+            const options = {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
                 body: JSON.stringify({
                     action: 'book_slot',
                     date: date,
                     start_time: startTime,
                     end_time: endTime
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage(data.message);
-                    // Mark all selected slots as booked
-                    selectedSlots.forEach(slot => {
-                        const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
-                        if (element) {
-                            element.classList.remove('selected');
-                            element.classList.add('booked');
-                            element.onclick = null;
+            };
+            
+            if (typeof apiRequest === 'function') {
+                apiRequest(url, options)
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message);
+                        // Mark all selected slots as booked
+                        selectedSlots.forEach(slot => {
+                            const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
+                            if (element) {
+                                element.classList.remove('selected');
+                                element.classList.add('booked');
+                                element.onclick = null;
+                            }
+                        });
+                        clearSelection();
+                        // Reload page after short delay
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(error.message || '{% trans "Error booking lesson. Please try again." %}', 'error');
+                });
+            } else {
+                fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(async response => {
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            }
+                        } catch (e) {
+                            errorMessage = response.statusText || '{% trans "Server error" %}';
                         }
-                    });
-                    clearSelection();
-                    // Reload page after short delay
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showMessage(data.message, 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('{% trans "Error booking lesson." %}', 'error');
-            });
+                        throw new Error(errorMessage);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message);
+                        selectedSlots.forEach(slot => {
+                            const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
+                            if (element) {
+                                element.classList.remove('selected');
+                                element.classList.add('booked');
+                                element.onclick = null;
+                            }
+                        });
+                        clearSelection();
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    if (error instanceof TypeError && error.message.includes('fetch')) {
+                        showMessage('{% trans "Network error: Please check your internet connection." %}', 'error');
+                    } else {
+                        showMessage(error.message || '{% trans "Error booking lesson. Please try again." %}', 'error');
+                    }
+                });
+            }
         }
         
         function previousWeek() {

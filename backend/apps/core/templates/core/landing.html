@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Welcome to TutorFlow" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 50px auto; padding: 40px; text-align: center;">
+    <h1 style="color: var(--text-primary); margin-bottom: 20px;">{% trans "Welcome to TutorFlow" %}</h1>
+    <p style="font-size: 1.2em; color: var(--text-secondary); margin-bottom: 40px;">
+        {% trans "Your comprehensive tutoring management system" %}
+    </p>
+    
+    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px;">
+        <div style="flex: 1; min-width: 250px; padding: 30px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow);">
+            <h2 style="color: var(--text-primary); margin-bottom: 15px;">{% trans "Try Demo Mode" %}</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                {% trans "Explore TutorFlow with pre-loaded demo data. No registration required." %}
+            </p>
+            <a href="{% url 'core:login' %}" class="btn" style="display: inline-block; padding: 12px 24px; text-decoration: none;">
+                {% trans "Start Demo" %}
+            </a>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); font-size: 0.9em; color: var(--text-secondary);">
+                <p style="margin: 5px 0;"><strong>{% trans "Premium Demo" %}:</strong></p>
+                <p style="margin: 5px 0;"><code>demo_premium</code> / <code>demo123</code></p>
+                <p style="margin: 15px 0 5px 0;"><strong>{% trans "Standard Demo" %}:</strong></p>
+                <p style="margin: 5px 0;"><code>demo_user</code> / <code>demo123</code></p>
+            </div>
+        </div>
+        
+        <div style="flex: 1; min-width: 250px; padding: 30px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow);">
+            <h2 style="color: var(--text-primary); margin-bottom: 15px;">{% trans "Public Booking" %}</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                {% trans "Students can book sessions directly without login." %}
+            </p>
+            <a href="{% url 'lessons:public_booking' %}" class="btn" style="display: inline-block; padding: 12px 24px; text-decoration: none;">
+                {% trans "Book Session" %}
+            </a>
+        </div>
+    </div>
+    
+    <div style="margin-top: 50px; padding: 30px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow);">
+        <h2 style="color: var(--text-primary); margin-bottom: 20px;">{% trans "Features" %}</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: left;">
+            <div>
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">📅 {% trans "Scheduling" %}</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9em;">
+                    {% trans "Manage sessions with automatic conflict detection" %}
+                </p>
+            </div>
+            <div>
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">👥 {% trans "Students" %}</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9em;">
+                    {% trans "Organize students and contracts efficiently" %}
+                </p>
+            </div>
+            <div>
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">💰 {% trans "Billing" %}</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9em;">
+                    {% trans "Generate invoices and track income" %}
+                </p>
+            </div>
+            <div>
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">🤖 {% trans "AI Plans" %}</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9em;">
+                    {% trans "AI-powered lesson plan generation (Premium)" %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
