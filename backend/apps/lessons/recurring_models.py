@@ -1,5 +1,5 @@
 """
-Models for recurring lessons (series appointments).
+Models for recurring sessions (series appointments).
 """
 
 from apps.contracts.models import Contract
@@ -8,13 +8,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class RecurringLesson(models.Model):
-    """Recurring lesson - template for series appointments."""
+class RecurringSession(models.Model):
+    """Recurring session - template for series appointments."""
 
     contract = models.ForeignKey(
         Contract,
         on_delete=models.CASCADE,
-        related_name="recurring_lessons",
+        related_name="recurring_sessions",
         help_text=_("Associated contract"),
     )
     start_date = models.DateField(help_text=_("Series start date"))
@@ -58,8 +58,8 @@ class RecurringLesson(models.Model):
 
     class Meta:
         ordering = ["-start_date", "contract"]
-        verbose_name = _("Recurring Lesson")
-        verbose_name_plural = _("Recurring Lessons")
+        verbose_name = _("Recurring Session")
+        verbose_name_plural = _("Recurring Sessions")
 
     def __str__(self):
         weekdays = self.get_active_weekdays_display()
@@ -99,3 +99,7 @@ class RecurringLesson(models.Model):
         ]
         active = [weekday_names[i] for i in self.get_active_weekdays()]
         return ", ".join(active) if active else gettext("None")
+
+
+# Alias for backwards compatibility during migration
+RecurringLesson = RecurringSession

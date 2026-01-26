@@ -1,19 +1,19 @@
 """
-Prompt-Bau für LessonPlan-Generierung.
+Prompt building for lesson plan generation.
 """
 
 from typing import Any, Dict
 
-from apps.lessons.models import Lesson
+from apps.lessons.models import Session
 
 
-def build_lesson_plan_prompt(lesson: Lesson, context: Dict[str, Any]) -> tuple[str, str]:
+def build_lesson_plan_prompt(session: Session, context: Dict[str, Any]) -> tuple[str, str]:
     """
-    Baut System- und User-Prompt für die LessonPlan-Generierung.
+    Builds system and user prompts for lesson plan generation.
 
     Args:
-        lesson: Lesson-Objekt
-        context: Zusätzlicher Kontext (z. B. vorherige Lessons, Notizen)
+        session: Session object
+        context: Additional context (e.g., previous sessions, notes)
 
     Returns:
         Tuple (system_prompt, user_prompt)
@@ -56,9 +56,9 @@ Der Plan soll:
         [
             "",
             "**Unterrichtsstunde:**",
-            f"- Datum: {lesson_ctx.get('date', lesson.date)}",
-            f"- Dauer: {lesson_ctx.get('duration_minutes', lesson.duration_minutes)} Minuten",
-            f"- Status: {lesson_ctx.get('status', lesson.get_status_display())}",
+            f"- Datum: {lesson_ctx.get('date', session.date)}",
+            f"- Dauer: {lesson_ctx.get('duration_minutes', session.duration_minutes)} Minuten",
+            f"- Status: {lesson_ctx.get('status', session.get_status_display())}",
         ]
     )
 

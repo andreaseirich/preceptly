@@ -1,5 +1,5 @@
 """
-High-Level-Service für LessonPlan-Generierung.
+High-level service for lesson plan generation.
 """
 
 from typing import Any, Dict, Optional
@@ -8,7 +8,7 @@ from apps.ai.client import LLMClient, LLMClientError
 from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_student
 from apps.ai.utils_safety import sanitize_context
 from apps.lesson_plans.models import LessonPlan
-from apps.lessons.models import Lesson
+from apps.lessons.models import Session
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -20,41 +20,41 @@ class LessonPlanGenerationError(Exception):
 
 
 class LessonPlanService:
-    """Service für die Generierung von KI-Unterrichtsplänen."""
+    """Service for generating AI lesson plans."""
 
     def __init__(self, client: Optional[LLMClient] = None):
         """
-        Initialisiert den Service.
+        Initializes the service.
 
         Args:
-            client: Optional LLM-Client (für Tests/Mocking)
+            client: Optional LLM client (for tests/mocking)
         """
         self.client = client or LLMClient()
 
-    def gather_context(self, lesson: Lesson) -> Dict[str, Any]:
+    def gather_context(self, session: Session) -> Dict[str, Any]:
         """
-        Sammelt Kontext-Informationen für die Prompt-Generierung.
+        Gathers context information for prompt generation.
 
         Args:
-            lesson: Lesson-Objekt
+            session: Session object
 
         Returns:
-            Dict mit Kontext-Informationen
+            Dict with context information
         """
-        student = lesson.contract.student
+        student = session.contract.student
 
-        # Hole vorherige Lessons (max. 5, sortiert nach Datum)
-        previous_lessons = Lesson.objects.filter(
-            contract__student=student, date__lt=lesson.date
+        # Get previous sessions (max. 5, sorted by date)
+        previous_sessions = Session.objects.filter(
+            contract__student=student, date__lt=session.date
         ).order_by("-date")[:5]
 
-        previous_lessons_data = [
+        previous_sessions_data = [
             {
-                "date": prev_lesson.date.isoformat(),
-                "notes": prev_lesson.notes or "",
-                "status": prev_lesson.get_status_display(),
+                "date": prev_session.date.isoformat(),
+                "notes": prev_session.notes or "",
+                "status": prev_session.get_status_display(),
             }
-            for prev_lesson in previous_lessons
+            for prev_session in previous_sessions
         ]
 
         return {
@@ -71,36 +71,36 @@ class LessonPlanService:
                 "notes": student.notes or "",
             },
             "lesson": {
-                "date": lesson.date.isoformat(),
-                "duration_minutes": lesson.duration_minutes,
-                "status": lesson.get_status_display(),
-                "notes": lesson.notes or "",
+                "date": session.date.isoformat(),
+                "duration_minutes": session.duration_minutes,
+                "status": session.get_status_display(),
+                "notes": session.notes or "",
             },
-            "contract": {"unit_duration_minutes": lesson.contract.unit_duration_minutes},
-            "previous_lessons": previous_lessons_data,
+            "contract": {"unit_duration_minutes": session.contract.unit_duration_minutes},
+            "previous_lessons": previous_sessions_data,
         }
 
-    def generate_lesson_plan(self, lesson: Lesson) -> LessonPlan:
+    def generate_lesson_plan(self, session: Session) -> LessonPlan:
         """
-        Generiert einen KI-Unterrichtsplan für eine Lesson.
+        Generates an AI lesson plan for a session.
 
         Args:
-            lesson: Lesson-Objekt
+            session: Session object
 
         Returns:
-            LessonPlan-Objekt
+            LessonPlan object
 
         Raises:
-            LessonPlanGenerationError: Bei Fehlern bei der Generierung
+            LessonPlanGenerationError: On generation errors
         """
-        # Sammle Kontext und wende PII-Schutz an
-        raw_context = self.gather_context(lesson)
+        # Gather context and apply PII protection
+        raw_context = self.gather_context(session)
         safe_context = sanitize_context(raw_context)
 
-        # Baue Prompt
-        system_prompt, user_prompt = build_lesson_plan_prompt(lesson, safe_context)
+        # Build prompt
+        system_prompt, user_prompt = build_lesson_plan_prompt(session, safe_context)
 
-        # Rufe LLM auf
+        # Call LLM
         try:
             generated_content = self.client.generate_text(
                 prompt=user_prompt, system_prompt=system_prompt, max_tokens=1500, temperature=0.7
@@ -108,19 +108,19 @@ class LessonPlanService:
         except LLMClientError as e:
             raise LessonPlanGenerationError(_("LLM error: {error}").format(error=str(e))) from e
 
-        # Erstelle oder aktualisiere LessonPlan
-        student = lesson.contract.student
+        # Create or update LessonPlan
+        student = session.contract.student
         subject = extract_subject_from_student(student)
 
         lesson_plan, created = LessonPlan.objects.update_or_create(
-            lesson=lesson,
+            lesson=session,
             defaults={
                 "student": student,
-                "topic": _("Lesson plan for {date}").format(date=lesson.date),
+                "topic": _("Lesson plan for {date}").format(date=session.date),
                 "subject": subject,
                 "content": generated_content,
                 "grade_level": student.grade or "",
-                "duration_minutes": lesson.duration_minutes,
+                "duration_minutes": session.duration_minutes,
                 "llm_model": settings.LLM_MODEL_NAME,
             },
         )

@@ -1,86 +1,86 @@
 """
-Service für wiederholende Unterrichtsstunden (Recurring Lessons).
+Service for recurring sessions (series appointments).
 """
 
 from datetime import date, timedelta
 from typing import List
 
-from apps.lessons.models import Lesson
-from apps.lessons.recurring_models import RecurringLesson
-from apps.lessons.services import LessonConflictService
-from apps.lessons.status_service import LessonStatusService
+from apps.lessons.models import Session
+from apps.lessons.recurring_models import RecurringSession
+from apps.lessons.services import SessionConflictService
+from apps.lessons.status_service import SessionStatusUpdater
 
 
-class RecurringLessonService:
-    """Service für die Generierung von Lessons aus RecurringLesson-Vorlagen."""
+class RecurringSessionService:
+    """Service for generating sessions from RecurringSession templates."""
 
     @staticmethod
-    def generate_lessons(
-        recurring_lesson: RecurringLesson, check_conflicts: bool = True, dry_run: bool = False
+    def generate_sessions(
+        recurring_session: RecurringSession, check_conflicts: bool = True, dry_run: bool = False
     ) -> dict:
         """
-        Generiert Lessons für eine RecurringLesson über den Zeitraum [start_date, end_date].
+        Generates sessions for a RecurringSession over the period [start_date, end_date].
 
         Args:
-            recurring_lesson: Die RecurringLesson-Vorlage
-            check_conflicts: Ob Konflikte geprüft werden sollen
-            dry_run: Wenn True, werden keine Lessons gespeichert, nur Vorschau
+            recurring_session: The RecurringSession template
+            check_conflicts: Whether to check for conflicts
+            dry_run: If True, no sessions are saved, only preview
 
         Returns:
-            Dict mit:
-            - 'created': Anzahl erstellter Lessons
-            - 'skipped': Anzahl übersprungener (bereits vorhandene)
-            - 'conflicts': Liste von Konflikten (wenn check_conflicts=True)
-            - 'preview': Liste von Lesson-Instanzen (wenn dry_run=True)
+            Dict with:
+            - 'created': Number of created sessions
+            - 'skipped': Number of skipped (already existing)
+            - 'conflicts': List of conflicts (if check_conflicts=True)
+            - 'preview': List of Session instances (if dry_run=True)
         """
-        if not recurring_lesson.is_active:
+        if not recurring_session.is_active:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
 
         # Determine end date
-        end_date = recurring_lesson.end_date
+        end_date = recurring_session.end_date
         if not end_date:
             # If no end date, use contract end date or 1 year
-            if recurring_lesson.contract.end_date:
-                end_date = recurring_lesson.contract.end_date
+            if recurring_session.contract.end_date:
+                end_date = recurring_session.contract.end_date
             else:
                 end_date = date(
-                    recurring_lesson.start_date.year + 1,
-                    recurring_lesson.start_date.month,
-                    recurring_lesson.start_date.day,
+                    recurring_session.start_date.year + 1,
+                    recurring_session.start_date.month,
+                    recurring_session.start_date.day,
                 )
 
-        # Generate lessons based on recurrence_type
-        recurrence_type = recurring_lesson.recurrence_type
+        # Generate sessions based on recurrence_type
+        recurrence_type = recurring_session.recurrence_type
 
         if recurrence_type == "weekly":
-            return RecurringLessonService._generate_weekly_lessons(
-                recurring_lesson, end_date, check_conflicts, dry_run
+            return RecurringSessionService._generate_weekly_sessions(
+                recurring_session, end_date, check_conflicts, dry_run
             )
         elif recurrence_type == "biweekly":
-            return RecurringLessonService._generate_biweekly_lessons(
-                recurring_lesson, end_date, check_conflicts, dry_run
+            return RecurringSessionService._generate_biweekly_sessions(
+                recurring_session, end_date, check_conflicts, dry_run
             )
         elif recurrence_type == "monthly":
-            return RecurringLessonService._generate_monthly_lessons(
-                recurring_lesson, end_date, check_conflicts, dry_run
+            return RecurringSessionService._generate_monthly_sessions(
+                recurring_session, end_date, check_conflicts, dry_run
             )
         else:
             # Fallback to weekly for unknown types
-            return RecurringLessonService._generate_weekly_lessons(
-                recurring_lesson, end_date, check_conflicts, dry_run
+            return RecurringSessionService._generate_weekly_sessions(
+                recurring_session, end_date, check_conflicts, dry_run
             )
 
     @staticmethod
-    def _generate_weekly_lessons(
-        recurring_lesson: RecurringLesson, end_date: date, check_conflicts: bool, dry_run: bool
+    def _generate_weekly_sessions(
+        recurring_session: RecurringSession, end_date: date, check_conflicts: bool, dry_run: bool
     ) -> dict:
-        """Generiert wöchentliche Lessons."""
-        active_weekdays = recurring_lesson.get_active_weekdays()
+        """Generates weekly sessions."""
+        active_weekdays = recurring_session.get_active_weekdays()
 
         if not active_weekdays:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
 
-        current_date = recurring_lesson.start_date
+        current_date = recurring_session.start_date
         created = 0
         skipped = 0
         conflicts = []
@@ -88,18 +88,18 @@ class RecurringLessonService:
         dates_checked = []
 
         while current_date <= end_date:
-            weekday = current_date.weekday()  # 0=Montag, 6=Sonntag
+            weekday = current_date.weekday()  # 0=Monday, 6=Sunday
 
             if weekday in active_weekdays:
                 dates_checked.append(str(current_date))
-                result = RecurringLessonService._create_lesson_if_not_exists(
-                    recurring_lesson, current_date, check_conflicts, dry_run
+                result = RecurringSessionService._create_session_if_not_exists(
+                    recurring_session, current_date, check_conflicts, dry_run
                 )
                 if result["created"]:
                     created += 1
-                    if result.get("lesson"):
+                    if result.get("session"):
                         if dry_run:
-                            preview.append(result["lesson"])
+                            preview.append(result["session"])
                         if result.get("conflicts"):
                             conflicts.extend(result["conflicts"])
                 elif result["skipped"]:
@@ -115,15 +115,15 @@ class RecurringLessonService:
         }
 
     @staticmethod
-    def _generate_biweekly_lessons(
-        recurring_lesson: RecurringLesson, end_date: date, check_conflicts: bool, dry_run: bool
+    def _generate_biweekly_sessions(
+        recurring_session: RecurringSession, end_date: date, check_conflicts: bool, dry_run: bool
     ) -> dict:
-        """Generiert zweiwöchentliche Lessons (alle 2 Wochen)."""
-        active_weekdays = recurring_lesson.get_active_weekdays()
+        """Generates bi-weekly sessions (every 2 weeks)."""
+        active_weekdays = recurring_session.get_active_weekdays()
         if not active_weekdays:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
 
-        current_date = recurring_lesson.start_date
+        current_date = recurring_session.start_date
         created = 0
         skipped = 0
         conflicts = []
@@ -138,14 +138,14 @@ class RecurringLessonService:
             if weekday in active_weekdays:
                 # Only every 2nd week (even week number)
                 if week_count % 2 == 0:
-                    result = RecurringLessonService._create_lesson_if_not_exists(
-                        recurring_lesson, current_date, check_conflicts, dry_run
+                    result = RecurringSessionService._create_session_if_not_exists(
+                        recurring_session, current_date, check_conflicts, dry_run
                     )
                     if result["created"]:
                         created += 1
-                        if result.get("lesson"):
+                        if result.get("session"):
                             if dry_run:
-                                preview.append(result["lesson"])
+                                preview.append(result["session"])
                             if result.get("conflicts"):
                                 conflicts.extend(result["conflicts"])
                     elif result["skipped"]:
@@ -165,11 +165,11 @@ class RecurringLessonService:
         }
 
     @staticmethod
-    def _generate_monthly_lessons(
-        recurring_lesson: RecurringLesson, end_date: date, check_conflicts: bool, dry_run: bool
+    def _generate_monthly_sessions(
+        recurring_session: RecurringSession, end_date: date, check_conflicts: bool, dry_run: bool
     ) -> dict:
-        """Generiert monatliche Lessons (gleicher Kalendertag jeden Monat)."""
-        active_weekdays = recurring_lesson.get_active_weekdays()
+        """Generates monthly sessions (same calendar day every month)."""
+        active_weekdays = recurring_session.get_active_weekdays()
         if not active_weekdays:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
 
@@ -179,7 +179,7 @@ class RecurringLessonService:
         preview = []
 
         # Start with the start date
-        current_date = recurring_lesson.start_date
+        current_date = recurring_session.start_date
         start_day = current_date.day  # Day of month (e.g., 15th)
 
         from calendar import monthrange
@@ -195,14 +195,14 @@ class RecurringLessonService:
                 target_day = last_day_of_month
 
             if current_date.day == target_day and current_date.weekday() in active_weekdays:
-                result = RecurringLessonService._create_lesson_if_not_exists(
-                    recurring_lesson, current_date, check_conflicts, dry_run
+                result = RecurringSessionService._create_session_if_not_exists(
+                    recurring_session, current_date, check_conflicts, dry_run
                 )
                 if result["created"]:
                     created += 1
-                    if result.get("lesson"):
+                    if result.get("session"):
                         if dry_run:
-                            preview.append(result["lesson"])
+                            preview.append(result["session"])
                         if result.get("conflicts"):
                             conflicts.extend(result["conflicts"])
                 elif result["skipped"]:
@@ -235,64 +235,72 @@ class RecurringLessonService:
         }
 
     @staticmethod
-    def _create_lesson_if_not_exists(
-        recurring_lesson: RecurringLesson, lesson_date: date, check_conflicts: bool, dry_run: bool
+    def _create_session_if_not_exists(
+        recurring_session: RecurringSession, session_date: date, check_conflicts: bool, dry_run: bool
     ) -> dict:
-        """Helper method: Creates a lesson if it doesn't exist yet."""
-        # Check if a lesson already exists for this day
-        existing = Lesson.objects.filter(
-            contract=recurring_lesson.contract,
-            date=lesson_date,
-            start_time=recurring_lesson.start_time,
+        """Helper method: Creates a session if it doesn't exist yet."""
+        # Check if a session already exists for this day
+        existing = Session.objects.filter(
+            contract=recurring_session.contract,
+            date=session_date,
+            start_time=recurring_session.start_time,
         ).first()
 
         if existing:
             return {"created": False, "skipped": True}
 
-        # Create new lesson (without status - will be set automatically)
-        lesson = Lesson(
-            contract=recurring_lesson.contract,
-            date=lesson_date,
-            start_time=recurring_lesson.start_time,
-            duration_minutes=recurring_lesson.duration_minutes,
-            travel_time_before_minutes=recurring_lesson.travel_time_before_minutes,
-            travel_time_after_minutes=recurring_lesson.travel_time_after_minutes,
+        # Create new session (without status - will be set automatically)
+        session = Session(
+            contract=recurring_session.contract,
+            date=session_date,
+            start_time=recurring_session.start_time,
+            duration_minutes=recurring_session.duration_minutes,
+            travel_time_before_minutes=recurring_session.travel_time_before_minutes,
+            travel_time_after_minutes=recurring_session.travel_time_after_minutes,
             status="",  # Empty - will be set automatically
-            notes=recurring_lesson.notes,
+            notes=recurring_session.notes,
         )
 
         # Automatic status setting (before saving)
-        LessonStatusService.update_status_for_lesson(lesson)
+        from apps.lessons.status_service import SessionStatusUpdater
+        SessionStatusUpdater.update_status_for_session(session)
 
-        result = {"created": True, "skipped": False, "lesson": lesson, "conflicts": []}
+        result = {"created": True, "skipped": False, "session": session, "conflicts": []}
 
         if not dry_run:
-            lesson.save()
+            session.save()
             # Set status again after saving (if necessary)
-            LessonStatusService.update_status_for_lesson(lesson)
+            SessionStatusUpdater.update_status_for_session(session)
 
             # Check conflicts
             if check_conflicts:
-                lesson_conflicts = LessonConflictService.check_conflicts(lesson)
-                if lesson_conflicts:
+                from apps.lessons.services import SessionConflictService
+                session_conflicts = SessionConflictService.check_conflicts(session)
+                if session_conflicts:
                     result["conflicts"] = [
-                        {"lesson": lesson, "date": lesson_date, "conflicts": lesson_conflicts}
+                        {"session": session, "date": session_date, "conflicts": session_conflicts}
                     ]
 
         return result
 
     @staticmethod
-    def preview_lessons(recurring_lesson: RecurringLesson) -> List[Lesson]:
+    def preview_sessions(recurring_session: RecurringSession) -> List[Session]:
         """
-        Gibt eine Vorschau der zu erzeugenden Lessons zurück (ohne Speicherung).
+        Returns a preview of sessions to be generated (without saving).
 
         Args:
-            recurring_lesson: Die RecurringLesson-Vorlage
+            recurring_session: The RecurringSession template
 
         Returns:
-            Liste von Lesson-Instanzen (nicht gespeichert)
+            List of Session instances (not saved)
         """
-        result = RecurringLessonService.generate_lessons(
-            recurring_lesson, check_conflicts=False, dry_run=True
+        result = RecurringSessionService.generate_sessions(
+            recurring_session, check_conflicts=False, dry_run=True
         )
         return result.get("preview", [])
+
+
+# Aliases for backwards compatibility
+RecurringLessonService = RecurringSessionService
+# Alias for method name
+RecurringSessionService.preview_lessons = RecurringSessionService.preview_sessions

@@ -1,4 +1,4 @@
-from apps.lessons.models import Lesson
+from apps.lessons.models import Session
 from apps.students.models import Student
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -14,12 +14,12 @@ class LessonPlan(models.Model):
         help_text=_("Student for whom the plan was created"),
     )
     lesson = models.ForeignKey(
-        Lesson,
+        Session,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="lesson_plans",
-        help_text=_("Associated lesson (optional)"),
+        help_text=_("Associated session (optional)"),
     )
     topic = models.CharField(max_length=200, help_text=_("Topic of the lesson plan"))
     subject = models.CharField(max_length=100, help_text=_("Subject (e.g., 'Math', 'German')"))

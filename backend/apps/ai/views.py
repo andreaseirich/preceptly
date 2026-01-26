@@ -1,10 +1,10 @@
 """
-Views für AI-Funktionen (LessonPlan-Generierung).
+Views for AI functions (lesson plan generation).
 """
 
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.core.utils import is_premium_user
-from apps.lessons.models import Lesson
+from apps.lessons.models import Session
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
@@ -16,10 +16,10 @@ from django.views.decorators.http import require_POST
 @require_POST
 def generate_lesson_plan(request, lesson_id):
     """
-    Generiert einen KI-Unterrichtsplan für eine Lesson.
-    Nur für Premium-User verfügbar.
+    Generates an AI lesson plan for a session.
+    Only available for premium users.
     """
-    lesson = get_object_or_404(Lesson, pk=lesson_id)
+    session = get_object_or_404(Session, pk=lesson_id)
 
     # Premium-Check
     if not is_premium_user(request.user):
@@ -30,10 +30,10 @@ def generate_lesson_plan(request, lesson_id):
             return redirect(next_url)
         return redirect("lessons:detail", pk=lesson_id)
 
-    # Generiere LessonPlan
+    # Generate lesson plan
     try:
         service = LessonPlanService()
-        lesson_plan = service.generate_lesson_plan(lesson)
+        lesson_plan = service.generate_lesson_plan(session)
         messages.success(
             request,
             _("Lesson plan successfully generated! Model: {model}").format(
@@ -62,7 +62,7 @@ def generate_lesson_plan(request, lesson_id):
             ).format(error=str(e)),
         )
 
-    # Redirect to lesson plan view if 'next' parameter is provided, otherwise to lesson detail
+    # Redirect to lesson plan view if 'next' parameter is provided, otherwise to session detail
     next_url = request.POST.get("next") or request.GET.get("next")
     if next_url:
         return redirect(next_url)

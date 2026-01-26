@@ -1,21 +1,21 @@
 """
-Forms für Lesson-Model.
+Forms for Session model.
 """
 
-from apps.lessons.models import Lesson, LessonDocument
+from apps.lessons.models import Session, SessionDocument
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
 
-class LessonForm(forms.ModelForm):
-    """Form für Lesson-Erstellung und -Bearbeitung."""
+class SessionForm(forms.ModelForm):
+    """Form for session creation and editing."""
 
-    # Option for editing: only this lesson or entire series
+    # Option for editing: only this session or entire series
     edit_scope = forms.ChoiceField(
         required=False,
         initial="single",
         choices=[
-            ("single", _("Edit only this lesson")),
+            ("single", _("Edit only this session")),
             ("series", _("Edit entire series")),
         ],
         label=_("Edit scope"),
@@ -25,8 +25,8 @@ class LessonForm(forms.ModelForm):
     # Recurrence fields (only shown when creating, not editing)
     is_recurring = forms.BooleanField(
         required=False,
-        label=_("Repeat this lesson"),
-        help_text=_("Create a recurring series instead of a single lesson"),
+        label=_("Repeat this session"),
+        help_text=_("Create a recurring series instead of a single session"),
         widget=forms.CheckboxInput(
             attrs={"class": "form-check-input", "onchange": "toggleRecurrenceFields()"}
         ),
@@ -62,12 +62,12 @@ class LessonForm(forms.ModelForm):
             ("6", _("Sunday")),
         ],
         label=_("Weekdays"),
-        help_text=_("Select weekdays for the recurring lesson"),
+        help_text=_("Select weekdays for the recurring session"),
         widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
     )
 
     class Meta:
-        model = Lesson
+        model = Session
         fields = [
             "contract",
             "date",
@@ -99,10 +99,10 @@ class LessonForm(forms.ModelForm):
             self.fields["recurrence_type"].widget = forms.HiddenInput()
             self.fields["recurrence_end_date"].widget = forms.HiddenInput()
 
-            # Check if this lesson belongs to a series
-            from apps.lessons.recurring_utils import find_matching_recurring_lesson
+            # Check if this session belongs to a series
+            from apps.lessons.recurring_utils import find_matching_recurring_session
 
-            matching_recurring = find_matching_recurring_lesson(self.instance)
+            matching_recurring = find_matching_recurring_session(self.instance)
             if matching_recurring:
                 # Show option for edit scope
                 self.fields["edit_scope"].initial = "single"
@@ -135,22 +135,22 @@ class LessonForm(forms.ModelForm):
 
             if not recurrence_type:
                 raise forms.ValidationError(
-                    _("Please select a repeat pattern when creating a recurring lesson.")
+                    _("Please select a repeat pattern when creating a recurring session.")
                 )
 
             if not recurrence_weekdays:
                 raise forms.ValidationError(
-                    _("Please select at least one weekday when creating a recurring lesson.")
+                    _("Please select at least one weekday when creating a recurring session.")
                 )
 
         return cleaned_data
 
 
-class LessonDocumentForm(forms.ModelForm):
-    """Form für LessonDocument-Upload."""
+class SessionDocumentForm(forms.ModelForm):
+    """Form for session document upload."""
 
     class Meta:
-        model = LessonDocument
+        model = SessionDocument
         fields = ["file", "name"]
         widgets = {
             "file": forms.FileInput(
@@ -199,8 +199,8 @@ class MultipleFileInput(forms.FileInput):
         self.attrs = attrs
 
 
-class MultipleLessonDocumentForm(forms.Form):
-    """Form für mehrere Dokumente auf einmal."""
+class MultipleSessionDocumentForm(forms.Form):
+    """Form for multiple document uploads."""
 
     files = forms.FileField(
         widget=MultipleFileInput(
@@ -213,7 +213,7 @@ class MultipleLessonDocumentForm(forms.Form):
     )
 
     def clean_files(self):
-        """Validiere Dateien."""
+        """Validate files."""
         files = self.files.getlist("files")
         if not files:
             raise forms.ValidationError(_("Please select at least one file."))
@@ -236,3 +236,9 @@ class MultipleLessonDocumentForm(forms.Form):
                 )
 
         return files
+
+
+# Aliases for backwards compatibility
+LessonForm = SessionForm
+LessonDocumentForm = SessionDocumentForm
+MultipleLessonDocumentForm = MultipleSessionDocumentForm
