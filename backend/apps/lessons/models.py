@@ -93,6 +93,7 @@ class SessionDocument(models.Model):
         on_delete=models.CASCADE,
         related_name="documents",
         help_text=_("Associated session"),
+        db_column="lesson_id",  # Use existing database column name
     )
     file = models.FileField(
         upload_to="session_documents/",

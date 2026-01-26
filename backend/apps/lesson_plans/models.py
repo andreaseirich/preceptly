@@ -20,6 +20,7 @@ class LessonPlan(models.Model):
         blank=True,
         related_name="lesson_plans",
         help_text=_("Associated session (optional)"),
+        db_column="lesson_id",  # Use existing database column name
     )
     topic = models.CharField(max_length=200, help_text=_("Topic of the lesson plan"))
     subject = models.CharField(max_length=100, help_text=_("Subject (e.g., 'Math', 'German')"))
