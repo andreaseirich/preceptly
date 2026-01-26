@@ -46,7 +46,7 @@ All integrated into a single, coherent workflow that saves tutors hours every we
 ## Live Links
 
 - 🚀 **[Live Application](https://tutorflow-production.up.railway.app/)** – Deployed on Railway
-- 👨‍💻 **[Portfolio](https://your-portfolio-url.com)** – *[Update with your portfolio URL]*
+- 👨‍💻 **[Portfolio](https://andreaseirich.github.io/tutorflow.html)** – Project details and case study
 
 **Demo Credentials:**
 - Premium User: `demo_premium` / `demo123`
