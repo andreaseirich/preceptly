@@ -113,9 +113,13 @@ def search_student_api(request):
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
     except Exception as e:
+        # Log the error for debugging but don't expose details to user
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in search_student_api: {str(e)}", exc_info=True)
         return JsonResponse(
-            {"success": False, "message": _("An error occurred: {error}").format(error=str(e))},
-            status=500,
+            {"success": False, "message": _("An error occurred. Please try again.")}, status=500
         )
 
 
@@ -167,9 +171,13 @@ def create_student_api(request):
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
     except Exception as e:
+        # Log the error for debugging but don't expose details to user
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in search_student_api: {str(e)}", exc_info=True)
         return JsonResponse(
-            {"success": False, "message": _("An error occurred: {error}").format(error=str(e))},
-            status=500,
+            {"success": False, "message": _("An error occurred. Please try again.")}, status=500
         )
 
 
@@ -380,7 +388,11 @@ def book_lesson_api(request):
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({"success": False, "message": _("Invalid data format.")}, status=400)
     except Exception as e:
+        # Log the error for debugging but don't expose details to user
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in book_lesson_api: {str(e)}", exc_info=True)
         return JsonResponse(
-            {"success": False, "message": _("An error occurred: {error}").format(error=str(e))},
-            status=500,
+            {"success": False, "message": _("An error occurred. Please try again.")}, status=500
         )

@@ -251,8 +251,12 @@ class BookingService:
             profile = UserProfile.objects.first()
             if profile and profile.default_working_hours:
                 working_hours = profile.default_working_hours
-        except (UserProfile.DoesNotExist, AttributeError):
-            pass
+        except (UserProfile.DoesNotExist, AttributeError) as e:
+            # Log the error for debugging
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.debug(f"Could not load default working hours: {str(e)}")
 
         # Load occupied time slots (for all contracts, as there is no specific contract)
         # Use a method that returns all occupied slots
