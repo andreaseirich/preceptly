@@ -43,6 +43,7 @@ class Session(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "lessons_lesson"  # Keep old table name for database compatibility
         ordering = ["-date", "-start_time"]
         verbose_name = _("Session")
         verbose_name_plural = _("Sessions")
@@ -106,6 +107,7 @@ class SessionDocument(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True, help_text=_("Upload timestamp"))
 
     class Meta:
+        db_table = "lessons_lessondocument"  # Keep old table name for database compatibility
         ordering = ["-uploaded_at"]
         verbose_name = _("Session Document")
         verbose_name_plural = _("Session Documents")

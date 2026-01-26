@@ -57,6 +57,7 @@ class RecurringSession(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "lessons_recurringlesson"  # Keep old table name for database compatibility
         ordering = ["-start_date", "contract"]
         verbose_name = _("Recurring Session")
         verbose_name_plural = _("Recurring Sessions")
