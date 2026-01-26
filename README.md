@@ -92,9 +92,16 @@ Starts the server, loads deterministic fixtures, and enables `MOCK_LLM=1` so no 
 **Manual loading:**
 ```bash
 cd backend
-python manage.py loaddata fixtures/demo_data.json
+python manage.py load_demo_data
 python manage.py runserver
 ```
+
+**If demo credentials don't work:**
+```bash
+cd backend
+python manage.py reset_demo_passwords
+```
+This ensures that `demo_premium` and `demo_user` passwords are set to `demo123`.
 
 **Demo Data Includes:**
 - 3 students, 2 contracts with different quotas
