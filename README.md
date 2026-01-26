@@ -9,8 +9,17 @@
 
 **The productivity bridge for educators** – A comprehensive tutoring management system that eliminates administrative overhead and enables tutors to focus on teaching.
 
-![Demo GIF Placeholder](docs/images/dashboard.png)
-*Interactive demo showcasing TutorFlow's core features*
+### 🎥 Demo Video
+
+[![TutorFlow Demo](https://img.youtube.com/vi/YUsSuPgR1XQ/maxresdefault.jpg)](https://youtu.be/YUsSuPgR1XQ?si=P2ucdtZZjWFqePLB)
+
+*Watch the full demo: [YouTube](https://youtu.be/YUsSuPgR1XQ?si=P2ucdtZZjWFqePLB)*
+
+### 📸 Screenshots
+
+| Dashboard | Week Calendar | Conflicts & Blocked Times | Invoice Generation |
+|-----------|--------------|---------------------------|-------------------|
+| ![Dashboard](docs/images/dashboard.png) | ![Week Calendar](docs/images/week_calendar.png) | ![Conflicts](docs/images/conflicts_and_blocktimes.png) | ![Invoice](docs/images/invoice_example.png) |
 
 ---
 
