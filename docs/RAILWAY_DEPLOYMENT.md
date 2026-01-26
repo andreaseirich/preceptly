@@ -68,17 +68,34 @@ Railway automatically detects Django and uses the `railway.json` configuration. 
 
 ### Load Demo Data (optional)
 
-If you want to use the demo data:
+**IMPORTANT**: Management commands must be run **inside the Railway container**, not locally.
 
-1. Open the Railway Console
-2. Run the following command:
+**Option 1: Railway Web Console (Recommended)**
+1. Go to Railway Dashboard → Your Project → Web Service
+2. Click "Deployments" → Latest deployment
+3. Click "View Logs" or look for "Shell" option
+4. Run commands directly in the container:
    ```bash
-   cd backend && python manage.py loaddata fixtures/demo_data.json
+   python manage.py load_demo_data
+   python manage.py reset_demo_passwords
+   ```
+   Note: No `cd backend` needed - working directory is already `/app/backend` in container.
+
+**Option 2: Use Public DATABASE_URL (for local execution)**
+If you need to run commands locally, get the public DATABASE_URL from Railway:
+1. Railway Dashboard → PostgreSQL Service → "Variables" or "Connect" tab
+2. Copy the public DATABASE_URL (contains public hostname, not `postgres.railway.internal`)
+3. Temporarily export it:
+   ```bash
+   export DATABASE_URL="postgresql://user:pass@public-host.up.railway.app:5432/railway"
+   python manage.py load_demo_data
    ```
 
 **Demo Logins:**
 - Premium User: `demo_premium` / `demo123`
 - Standard User: `demo_user` / `demo123`
+
+See `docs/RAILWAY_MANAGEMENT_COMMANDS.md` for detailed instructions.
 
 ### Compile Translations
 
