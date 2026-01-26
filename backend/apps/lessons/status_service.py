@@ -115,3 +115,9 @@ class SessionStatusUpdater:
 # Aliases for backwards compatibility
 LessonStatusUpdater = SessionStatusUpdater
 LessonStatusService = SessionStatusUpdater
+
+# Add method aliases for backwards compatibility
+LessonStatusUpdater.update_past_lessons_to_taught = (
+    SessionStatusUpdater.update_past_sessions_to_taught
+)
+LessonStatusUpdater.update_status_for_lesson = SessionStatusUpdater.update_status_for_session

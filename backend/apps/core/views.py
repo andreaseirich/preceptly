@@ -6,7 +6,7 @@ from apps.core.forms import WorkingHoursForm
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.services import LessonConflictService, LessonQueryService
-from apps.lessons.status_service import LessonStatusUpdater
+from apps.lessons.status_service import SessionStatusUpdater
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -23,8 +23,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Automatic status update for past lessons
-        LessonStatusUpdater.update_past_lessons_to_taught()
+        # Automatic status update for past sessions
+        SessionStatusUpdater.update_past_sessions_to_taught()
 
         now = timezone.now()
 
@@ -78,8 +78,8 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Automatic status update for past lessons
-        LessonStatusUpdater.update_past_lessons_to_taught()
+        # Automatic status update for past sessions
+        SessionStatusUpdater.update_past_sessions_to_taught()
 
         now = timezone.now()
 
