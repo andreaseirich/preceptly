@@ -34,6 +34,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Error generating demo data: {e}"))
             raise
 
+        # Ensure demo passwords are set correctly
+        self.stdout.write("\n3. Ensuring demo passwords are set correctly...")
+        try:
+            call_command("reset_demo_passwords", verbosity=0)
+            self.stdout.write(self.style.SUCCESS("✓ Demo passwords verified"))
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f"Note: reset_demo_passwords had issues: {e}"))
+
         self.stdout.write(self.style.SUCCESS("\n" + "=" * 50))
         self.stdout.write(self.style.SUCCESS("Demo data loaded successfully!"))
         self.stdout.write(self.style.SUCCESS("=" * 50))
