@@ -72,3 +72,8 @@ class SessionQueryService:
 
 # Alias for backwards compatibility
 LessonQueryService = SessionQueryService
+
+# Add method aliases for backwards compatibility
+LessonQueryService.get_today_lessons = SessionQueryService.get_today_sessions
+LessonQueryService.get_upcoming_lessons = SessionQueryService.get_upcoming_sessions
+LessonQueryService.get_lessons_for_month = SessionQueryService.get_sessions_for_month

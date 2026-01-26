@@ -5,7 +5,7 @@ Views for dashboard and income overview.
 from apps.core.forms import WorkingHoursForm
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
-from apps.lessons.services import LessonConflictService, LessonQueryService
+from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -28,19 +28,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         now = timezone.now()
 
-        # Today's lessons
-        today_lessons = LessonQueryService.get_today_lessons()
-        for lesson in today_lessons:
-            lesson.conflicts = LessonConflictService.check_conflicts(lesson)
+        # Today's sessions
+        today_sessions = SessionQueryService.get_today_sessions()
+        for session in today_sessions:
+            session.conflicts = LessonConflictService.check_conflicts(session)
 
-        # Upcoming lessons
-        upcoming_lessons = LessonQueryService.get_upcoming_lessons(days=7)
-        for lesson in upcoming_lessons:
-            lesson.conflicts = LessonConflictService.check_conflicts(lesson)
+        # Upcoming sessions
+        upcoming_sessions = SessionQueryService.get_upcoming_sessions(days=7)
+        for session in upcoming_sessions:
+            session.conflicts = LessonConflictService.check_conflicts(session)
 
         # Count conflicts (convert both QuerySets to lists for combination)
-        all_lessons = list(today_lessons) + list(upcoming_lessons)
-        conflict_count = sum(1 for lesson in all_lessons if lesson.conflicts)
+        all_sessions = list(today_sessions) + list(upcoming_sessions)
+        conflict_count = sum(1 for session in all_sessions if session.conflicts)
 
         # Income for current month
         current_month_income = IncomeSelector.get_monthly_income(now.year, now.month, status="paid")
@@ -57,8 +57,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         context.update(
             {
-                "today_lessons": today_lessons,
-                "upcoming_lessons": upcoming_lessons,
+                "today_lessons": today_sessions,  # Keep 'today_lessons' for template compatibility
+                "upcoming_lessons": upcoming_sessions,  # Keep 'upcoming_lessons' for template compatibility
                 "conflict_count": conflict_count,
                 "current_month_income": current_month_income,
                 "income_by_status": income_by_status,
