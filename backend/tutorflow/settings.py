@@ -309,6 +309,7 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
         "EMAIL_USE_TLS and EMAIL_USE_SSL are both True. "
         "They are mutually exclusive. Disabling EMAIL_USE_SSL.",
         UserWarning,
+        stacklevel=2,
     )
     EMAIL_USE_SSL = False
 
