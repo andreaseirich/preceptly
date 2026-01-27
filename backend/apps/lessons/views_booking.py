@@ -236,14 +236,22 @@ class StudentBookingView(TemplateView):
 
                 logger = logging.getLogger(__name__)
                 logger.info(f"Lesson {lesson.id} created, attempting to send email notification")
-                print(f"[BOOKING] Lesson {lesson.id} created, attempting to send email notification", file=sys.stderr)
+                print(
+                    f"[BOOKING] Lesson {lesson.id} created, attempting to send email notification",
+                    file=sys.stderr,
+                )
                 try:
                     send_booking_notification(lesson)
                     logger.info(f"Email notification call completed for lesson {lesson.id}")
-                    print(f"[BOOKING] Email notification call completed for lesson {lesson.id}", file=sys.stderr)
+                    print(
+                        f"[BOOKING] Email notification call completed for lesson {lesson.id}",
+                        file=sys.stderr,
+                    )
                 except Exception as e:
                     # Don't fail the booking if email fails
-                    error_msg = f"Failed to send booking notification email for lesson {lesson.id}: {e}"
+                    error_msg = (
+                        f"Failed to send booking notification email for lesson {lesson.id}: {e}"
+                    )
                     logger.warning(error_msg, exc_info=True)
                     print(f"[BOOKING] WARNING: {error_msg}", file=sys.stderr)
 

@@ -27,12 +27,18 @@ def send_booking_notification(lesson: Lesson) -> bool:
     """
     logger.info(f"Attempting to send booking notification for lesson {lesson.id}")
     # Also print to stderr for better visibility
-    print(f"[EMAIL_SERVICE] Attempting to send booking notification for lesson {lesson.id}", file=__import__("sys").stderr)
+    print(
+        f"[EMAIL_SERVICE] Attempting to send booking notification for lesson {lesson.id}",
+        file=__import__("sys").stderr,
+    )
 
     # Get notification email address
     notification_email = getattr(settings, "NOTIFICATION_EMAIL", None)
     logger.debug(f"NOTIFICATION_EMAIL from settings: {notification_email}")
-    print(f"[EMAIL_SERVICE] NOTIFICATION_EMAIL from settings: {notification_email}", file=__import__("sys").stderr)
+    print(
+        f"[EMAIL_SERVICE] NOTIFICATION_EMAIL from settings: {notification_email}",
+        file=__import__("sys").stderr,
+    )
 
     if not notification_email:
         # Fallback: try to get email from first user
@@ -55,7 +61,10 @@ def send_booking_notification(lesson: Lesson) -> bool:
         return False
 
     logger.info(f"Sending booking notification email to {notification_email}")
-    print(f"[EMAIL_SERVICE] Sending booking notification email to {notification_email}", file=__import__("sys").stderr)
+    print(
+        f"[EMAIL_SERVICE] Sending booking notification email to {notification_email}",
+        file=__import__("sys").stderr,
+    )
 
     # Calculate end time
     from datetime import datetime

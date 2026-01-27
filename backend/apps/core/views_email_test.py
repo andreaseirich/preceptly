@@ -24,7 +24,7 @@ def is_superuser_or_debug(user):
 def test_email(request):
     """
     Test endpoint to send a test email and check email configuration.
-    
+
     GET: Returns email configuration (without sensitive data)
     POST: Sends a test email
     """
@@ -35,7 +35,7 @@ def test_email(request):
         email_host = getattr(settings, "EMAIL_HOST", "not set")
         email_port = getattr(settings, "EMAIL_PORT", "not set")
         default_from = getattr(settings, "DEFAULT_FROM_EMAIL", "not set")
-        
+
         return JsonResponse(
             {
                 "email_backend": email_backend,
@@ -50,15 +50,15 @@ def test_email(request):
                 else "not set",
             }
         )
-    
+
     # POST: Send test email
     logger.info("Test email endpoint called")
     notification_email = getattr(settings, "NOTIFICATION_EMAIL", None)
-    
+
     if not notification_email:
         # Fallback: try to get email from first user
         from django.contrib.auth.models import User
-        
+
         try:
             first_user = User.objects.filter(is_superuser=True).first()
             if not first_user:
@@ -68,18 +68,21 @@ def test_email(request):
                 logger.info(f"Using fallback email from user: {notification_email}")
         except Exception as e:
             logger.warning(f"Could not get user email: {e}", exc_info=True)
-    
+
     if not notification_email:
         logger.error("No notification email configured")
         return JsonResponse(
-            {"success": False, "error": "No notification email configured. Set NOTIFICATION_EMAIL environment variable."},
+            {
+                "success": False,
+                "error": "No notification email configured. Set NOTIFICATION_EMAIL environment variable.",
+            },
             status=400,
         )
-    
+
     email_backend = getattr(settings, "EMAIL_BACKEND", "not set")
     logger.info(f"Using email backend: {email_backend}")
     logger.info(f"Sending test email to: {notification_email}")
-    
+
     try:
         send_mail(
             subject="TutorFlow Test Email",
