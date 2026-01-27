@@ -119,10 +119,18 @@ def send_booking_notification(lesson: Lesson) -> bool:
     def send_email_thread():
         """Send email in a separate thread with timeout protection."""
         logger.info(f"Email thread started for lesson {lesson.id}")
-        print(f"[EMAIL_SERVICE] Email thread started for lesson {lesson.id}", file=sys.stdout, flush=True)
+        print(
+            f"[EMAIL_SERVICE] Email thread started for lesson {lesson.id}",
+            file=sys.stdout,
+            flush=True,
+        )
         try:
             logger.info(f"Calling send_mail for lesson {lesson.id}")
-            print(f"[EMAIL_SERVICE] Calling send_mail for lesson {lesson.id}", file=sys.stdout, flush=True)
+            print(
+                f"[EMAIL_SERVICE] Calling send_mail for lesson {lesson.id}",
+                file=sys.stdout,
+                flush=True,
+            )
             send_mail(
                 subject=subject,
                 message=plain_message,
@@ -132,24 +140,44 @@ def send_booking_notification(lesson: Lesson) -> bool:
                 fail_silently=False,
             )
             logger.info(f"send_mail completed successfully for lesson {lesson.id}")
-            print(f"[EMAIL_SERVICE] send_mail completed successfully for lesson {lesson.id}", file=sys.stdout, flush=True)
+            print(
+                f"[EMAIL_SERVICE] send_mail completed successfully for lesson {lesson.id}",
+                file=sys.stdout,
+                flush=True,
+            )
             email_sent[0] = True
         except Exception as e:
             logger.error(f"Exception in email thread for lesson {lesson.id}: {e}", exc_info=True)
-            print(f"[EMAIL_SERVICE] Exception in email thread for lesson {lesson.id}: {e}", file=sys.stdout, flush=True)
+            print(
+                f"[EMAIL_SERVICE] Exception in email thread for lesson {lesson.id}: {e}",
+                file=sys.stdout,
+                flush=True,
+            )
             email_error[0] = e
 
     try:
         # Start email sending in a thread
         logger.info(f"Starting email thread for lesson {lesson.id} with timeout {email_timeout}s")
-        print(f"[EMAIL_SERVICE] Starting email thread for lesson {lesson.id} with timeout {email_timeout}s", file=sys.stdout, flush=True)
+        print(
+            f"[EMAIL_SERVICE] Starting email thread for lesson {lesson.id} with timeout {email_timeout}s",
+            file=sys.stdout,
+            flush=True,
+        )
         email_thread = threading.Thread(target=send_email_thread, daemon=True)
         email_thread.start()
         logger.info(f"Email thread started, waiting for completion (timeout: {email_timeout}s)")
-        print(f"[EMAIL_SERVICE] Email thread started, waiting for completion (timeout: {email_timeout}s)", file=sys.stdout, flush=True)
+        print(
+            f"[EMAIL_SERVICE] Email thread started, waiting for completion (timeout: {email_timeout}s)",
+            file=sys.stdout,
+            flush=True,
+        )
         email_thread.join(timeout=email_timeout)
         logger.info(f"Email thread join completed. Thread alive: {email_thread.is_alive()}")
-        print(f"[EMAIL_SERVICE] Email thread join completed. Thread alive: {email_thread.is_alive()}", file=sys.stdout, flush=True)
+        print(
+            f"[EMAIL_SERVICE] Email thread join completed. Thread alive: {email_thread.is_alive()}",
+            file=sys.stdout,
+            flush=True,
+        )
 
         if email_thread.is_alive():
             # Thread is still running, timeout occurred
