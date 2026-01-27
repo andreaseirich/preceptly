@@ -7,6 +7,8 @@ from datetime import date, datetime, time, timedelta
 from typing import Dict, List, Tuple
 
 from apps.blocked_times.models import BlockedTime
+from apps.blocked_times.recurring_models import RecurringBlockedTime
+from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from apps.lessons.conflict_service import LessonConflictService
 from apps.lessons.models import Lesson
 from django.utils import timezone
@@ -48,17 +50,49 @@ class BookingService:
             start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
         ).order_by("start_datetime")
 
+        # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für den Zeitraum
+        recurring_blocked_times = RecurringBlockedTime.objects.filter(
+            start_date__lte=end_date, end_date__gte=start_date, is_active=True
+        ) | RecurringBlockedTime.objects.filter(
+            start_date__lte=end_date, end_date__isnull=True, is_active=True
+        )
+
+        # Füge Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten hinzu
+        for rbt in recurring_blocked_times:
+            generated_blocked_times_preview = RecurringBlockedTimeService.preview_blocked_times(rbt)
+            for bt_preview in generated_blocked_times_preview:
+                # Filter nur für den Zeitraum
+                if start_date <= bt_preview.start_datetime.date() <= end_date:
+                    blocked_times = list(blocked_times) + [bt_preview]
+
         for blocked_time in blocked_times:
             current_date = blocked_time.start_datetime.date()
             end_date_bt = blocked_time.end_datetime.date()
 
             while current_date <= end_date_bt and current_date <= end_date:
                 if current_date >= start_date:
+                    # Calculate the actual time range for this specific day
+                    if current_date == blocked_time.start_datetime.date():
+                        # First day: from start time to end of day or end time
+                        if current_date == end_date_bt:
+                            # Same day: use actual start and end time
+                            day_start_time = blocked_time.start_datetime.time()
+                            day_end_time = blocked_time.end_datetime.time()
+                        else:
+                            # Multi-day: from start time to end of day
+                            day_start_time = blocked_time.start_datetime.time()
+                            day_end_time = time.max
+                    elif current_date == end_date_bt:
+                        # Last day: from start of day to end time
+                        day_start_time = time.min
+                        day_end_time = blocked_time.end_datetime.time()
+                    else:
+                        # Middle days: full day
+                        day_start_time = time.min
+                        day_end_time = time.max
+                    
                     occupied[current_date].append(
-                        (
-                            blocked_time.start_datetime.time(),
-                            blocked_time.end_datetime.time(),
-                        )
+                        (day_start_time, day_end_time)
                     )
                 current_date += timedelta(days=1)
 
@@ -335,17 +369,49 @@ class BookingService:
             start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
         ).order_by("start_datetime")
 
+        # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für den Zeitraum
+        recurring_blocked_times = RecurringBlockedTime.objects.filter(
+            start_date__lte=end_date, end_date__gte=start_date, is_active=True
+        ) | RecurringBlockedTime.objects.filter(
+            start_date__lte=end_date, end_date__isnull=True, is_active=True
+        )
+
+        # Füge Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten hinzu
+        for rbt in recurring_blocked_times:
+            generated_blocked_times_preview = RecurringBlockedTimeService.preview_blocked_times(rbt)
+            for bt_preview in generated_blocked_times_preview:
+                # Filter nur für den Zeitraum
+                if start_date <= bt_preview.start_datetime.date() <= end_date:
+                    blocked_times = list(blocked_times) + [bt_preview]
+
         for blocked_time in blocked_times:
             current_date = blocked_time.start_datetime.date()
             end_date_bt = blocked_time.end_datetime.date()
 
             while current_date <= end_date_bt and current_date <= end_date:
                 if current_date >= start_date:
+                    # Calculate the actual time range for this specific day
+                    if current_date == blocked_time.start_datetime.date():
+                        # First day: from start time to end of day or end time
+                        if current_date == end_date_bt:
+                            # Same day: use actual start and end time
+                            day_start_time = blocked_time.start_datetime.time()
+                            day_end_time = blocked_time.end_datetime.time()
+                        else:
+                            # Multi-day: from start time to end of day
+                            day_start_time = blocked_time.start_datetime.time()
+                            day_end_time = time.max
+                    elif current_date == end_date_bt:
+                        # Last day: from start of day to end time
+                        day_start_time = time.min
+                        day_end_time = blocked_time.end_datetime.time()
+                    else:
+                        # Middle days: full day
+                        day_start_time = time.min
+                        day_end_time = time.max
+                    
                     occupied[current_date].append(
-                        (
-                            blocked_time.start_datetime.time(),
-                            blocked_time.end_datetime.time(),
-                        )
+                        (day_start_time, day_end_time)
                     )
                 current_date += timedelta(days=1)
 
