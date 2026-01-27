@@ -1,8 +1,55 @@
 # Generated manually to fix missing lessons_lesson table
+# This migration creates the lessons_lesson table if it doesn't exist
 
-from django.db import migrations, models
+from django.db import migrations, models, connection
 import django.core.validators
 import django.db.models.deletion
+
+
+def create_lessons_lesson_table_if_not_exists(apps, schema_editor):
+    """Create lessons_lesson table if it doesn't exist."""
+    with connection.cursor() as cursor:
+        # Check if table exists
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'lessons_lesson'
+            );
+        """)
+        table_exists = cursor.fetchone()[0]
+        
+        if not table_exists:
+            # Create the table manually
+            cursor.execute("""
+                CREATE TABLE lessons_lesson (
+                    id BIGSERIAL PRIMARY KEY,
+                    date DATE NOT NULL,
+                    start_time TIME NOT NULL,
+                    duration_minutes INTEGER NOT NULL CHECK (duration_minutes >= 1),
+                    status VARCHAR(20) NOT NULL DEFAULT 'planned',
+                    travel_time_before_minutes INTEGER NOT NULL DEFAULT 0,
+                    travel_time_after_minutes INTEGER NOT NULL DEFAULT 0,
+                    notes TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    contract_id BIGINT NOT NULL REFERENCES contracts_contract(id) ON DELETE CASCADE
+                );
+            """)
+            
+            # Create indexes
+            cursor.execute("""
+                CREATE INDEX lessons_les_date_e38248_idx ON lessons_lesson(date, start_time);
+            """)
+            cursor.execute("""
+                CREATE INDEX lessons_les_status_ff86f9_idx ON lessons_lesson(status);
+            """)
+
+
+def reverse_create_lessons_lesson_table(apps, schema_editor):
+    """Reverse migration - drop table if it exists."""
+    with connection.cursor() as cursor:
+        cursor.execute("DROP TABLE IF EXISTS lessons_lesson CASCADE;")
 
 
 class Migration(migrations.Migration):
@@ -13,35 +60,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Create Session model (which uses db_table="lessons_lesson")
-        migrations.CreateModel(
-            name='Session',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(help_text='Session date')),
-                ('start_time', models.TimeField(help_text='Start time')),
-                ('duration_minutes', models.PositiveIntegerField(help_text='Duration in minutes', validators=[django.core.validators.MinValueValidator(1)])),
-                ('status', models.CharField(choices=[('planned', 'Planned'), ('taught', 'Taught'), ('cancelled', 'Cancelled'), ('paid', 'Paid')], default='planned', help_text='Session status', max_length=20)),
-                ('travel_time_before_minutes', models.PositiveIntegerField(default=0, help_text='Travel time before in minutes')),
-                ('travel_time_after_minutes', models.PositiveIntegerField(default=0, help_text='Travel time after in minutes')),
-                ('notes', models.TextField(blank=True, help_text='Notes for the session', null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('contract', models.ForeignKey(help_text='Associated contract', on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='contracts.contract')),
-            ],
-            options={
-                'db_table': 'lessons_lesson',
-                'ordering': ['-date', '-start_time'],
-                'verbose_name': 'Session',
-                'verbose_name_plural': 'Sessions',
-            },
-        ),
-        migrations.AddIndex(
-            model_name='session',
-            index=models.Index(fields=['date', 'start_time'], name='lessons_les_date_e38248_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='session',
-            index=models.Index(fields=['status'], name='lessons_les_status_ff86f9_idx'),
+        migrations.RunPython(
+            create_lessons_lesson_table_if_not_exists,
+            reverse_create_lessons_lesson_table,
         ),
     ]
