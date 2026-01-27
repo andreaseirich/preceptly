@@ -122,17 +122,18 @@
                         {% endfor %}
                         {% for blocked_time in weekday.blocked_times %}
                             {% with start_hour=blocked_time.start_datetime|local_hour start_minute=blocked_time.start_datetime|local_minute end_hour=blocked_time.end_datetime|local_hour end_minute=blocked_time.end_datetime|local_minute %}
-                            {% if start_hour|add:0 == hour|add:0 %}
-                            {% with duration_minutes=blocked_time.end_datetime|timesince:blocked_time.start_datetime %}
+                            {% comment %}Zeige Blockzeit in allen betroffenen Stunden{% endcomment %}
+                            {% if hour|add:0 >= start_hour|add:0 and hour|add:0 <= end_hour|add:0 %}
                             <div class="blocked-time-block lesson-block" 
                                  data-blocked-time-id="{% if blocked_time.pk %}{{ blocked_time.pk }}{% else %}preview-{{ forloop.counter }}{% endif %}"
                                  data-start-hour="{{ start_hour }}"
                                  data-start-minute="{{ start_minute }}"
                                  data-end-hour="{{ end_hour }}"
                                  data-end-minute="{{ end_minute }}"
+                                 data-render-hour="{{ hour }}"
                                  style="position: absolute; 
-                                        top: {{ start_minute }}px; 
-                                        height: {% if start_hour == end_hour %}{{ end_minute|add:"-"|add:start_minute }}{% else %}60{% endif %}px; 
+                                        top: {% if hour == start_hour %}{{ start_minute }}{% else %}0{% endif %}px; 
+                                        height: {% if hour == start_hour and hour == end_hour %}{{ end_minute|add:"-"|add:start_minute }}{% elif hour == start_hour %}{{ 60|add:"-"|add:start_minute }}{% elif hour == end_hour %}{{ end_minute }}{% else %}60{% endif %}px; 
                                         left: 0; 
                                         right: 0; 
                                         background: #ff9800; 
@@ -149,10 +150,13 @@
                                  onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
                                  {% if blocked_time.pk %}onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"{% endif %}
                                  title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
+                                {% if hour == start_hour %}
                                 <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
                                 <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
+                                {% else %}
+                                <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong>
+                                {% endif %}
                             </div>
-                            {% endwith %}
                             {% endif %}
                             {% endwith %}
                         {% endfor %}
