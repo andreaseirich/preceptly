@@ -12,7 +12,6 @@ urlpatterns = [
     path("create/", views.BlockedTimeCreateView.as_view(), name="create"),
     path("<int:pk>/update/", views.BlockedTimeUpdateView.as_view(), name="update"),
     path("<int:pk>/delete/", views.BlockedTimeDeleteView.as_view(), name="delete"),
-    path("bulk-delete/", views.BlockedTimeBulkDeleteView.as_view(), name="bulk_delete"),
     # Recurring BlockedTime URLs
     path(
         "recurring/<int:pk>/",
