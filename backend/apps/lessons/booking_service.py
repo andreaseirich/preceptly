@@ -69,7 +69,7 @@ class BookingService:
             # Convert to local timezone for correct time extraction
             local_start_datetime = timezone.localtime(blocked_time.start_datetime)
             local_end_datetime = timezone.localtime(blocked_time.end_datetime)
-            
+
             current_date = local_start_datetime.date()
             end_date_bt = local_end_datetime.date()
 
@@ -390,7 +390,7 @@ class BookingService:
             # Convert to local timezone for correct time extraction
             local_start_datetime = timezone.localtime(blocked_time.start_datetime)
             local_end_datetime = timezone.localtime(blocked_time.end_datetime)
-            
+
             current_date = local_start_datetime.date()
             end_date_bt = local_end_datetime.date()
 
