@@ -4,6 +4,7 @@ Service for sending email notifications related to lessons.
 
 import logging
 import sys
+import threading
 from datetime import timedelta
 
 from apps.lessons.models import Lesson
@@ -109,21 +110,60 @@ def send_booking_notification(lesson: Lesson) -> bool:
         logger.warning(warning_msg)
         print(f"[EMAIL_SERVICE] WARNING: {warning_msg}", file=sys.stdout, flush=True)
 
+    # Send email with timeout to prevent worker timeout
+    email_timeout = 10  # 10 seconds timeout
+    email_sent = [False]
+    email_error = [None]
+
+    def send_email_thread():
+        """Send email in a separate thread with timeout protection."""
+        try:
+            send_mail(
+                subject=subject,
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[notification_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            email_sent[0] = True
+        except Exception as e:
+            email_error[0] = e
+
     try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[notification_email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        success_msg = f"Booking notification email sent successfully to {notification_email} for lesson {lesson.id}"
-        logger.info(success_msg)
-        print(f"[EMAIL_SERVICE] SUCCESS: {success_msg}", file=sys.stdout, flush=True)
-        return True
+        # Start email sending in a thread
+        email_thread = threading.Thread(target=send_email_thread, daemon=True)
+        email_thread.start()
+        email_thread.join(timeout=email_timeout)
+
+        if email_thread.is_alive():
+            # Thread is still running, timeout occurred
+            timeout_msg = f"Email sending timed out after {email_timeout} seconds for lesson {lesson.id}"
+            logger.warning(timeout_msg)
+            print(f"[EMAIL_SERVICE] WARNING: {timeout_msg}", file=sys.stdout, flush=True)
+            return False
+
+        if email_error[0]:
+            # Email sending failed
+            error_msg = f"Failed to send booking notification email to {notification_email} for lesson {lesson.id}: {email_error[0]}"
+            logger.error(error_msg, exc_info=True)
+            print(f"[EMAIL_SERVICE] ERROR: {error_msg}", file=sys.stdout, flush=True)
+            return False
+
+        if email_sent[0]:
+            success_msg = f"Booking notification email sent successfully to {notification_email} for lesson {lesson.id}"
+            logger.info(success_msg)
+            print(f"[EMAIL_SERVICE] SUCCESS: {success_msg}", file=sys.stdout, flush=True)
+            return True
+        else:
+            # Should not happen, but handle it
+            error_msg = f"Email sending completed but status unknown for lesson {lesson.id}"
+            logger.warning(error_msg)
+            print(f"[EMAIL_SERVICE] WARNING: {error_msg}", file=sys.stdout, flush=True)
+            return False
+
     except Exception as e:
-        error_msg = f"Failed to send booking notification email to {notification_email} for lesson {lesson.id}: {e}"
+        error_msg = f"Unexpected error while sending email for lesson {lesson.id}: {e}"
         logger.error(error_msg, exc_info=True)
         print(f"[EMAIL_SERVICE] ERROR: {error_msg}", file=sys.stdout, flush=True)
         return False
