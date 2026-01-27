@@ -47,9 +47,7 @@ def send_booking_notification(lesson: Lesson) -> bool:
     # Calculate end time
     from datetime import datetime
 
-    start_datetime = timezone.make_aware(
-        datetime.combine(lesson.date, lesson.start_time)
-    )
+    start_datetime = timezone.make_aware(datetime.combine(lesson.date, lesson.start_time))
     end_datetime = start_datetime + timedelta(minutes=lesson.duration_minutes)
     end_time = end_datetime.time()
 
@@ -64,12 +62,8 @@ def send_booking_notification(lesson: Lesson) -> bool:
         student=lesson.contract.student, date=lesson.date.strftime("%d.%m.%Y")
     )
 
-    html_message = render_to_string(
-        "lessons/email_booking_notification.html", context
-    )
-    plain_message = render_to_string(
-        "lessons/email_booking_notification.txt", context
-    )
+    html_message = render_to_string("lessons/email_booking_notification.html", context)
+    plain_message = render_to_string("lessons/email_booking_notification.txt", context)
 
     try:
         send_mail(
@@ -80,7 +74,9 @@ def send_booking_notification(lesson: Lesson) -> bool:
             html_message=html_message,
             fail_silently=False,
         )
-        logger.info(f"Booking notification email sent to {notification_email} for lesson {lesson.id}")
+        logger.info(
+            f"Booking notification email sent to {notification_email} for lesson {lesson.id}"
+        )
         return True
     except Exception as e:
         logger.error(f"Failed to send booking notification email: {e}", exc_info=True)
