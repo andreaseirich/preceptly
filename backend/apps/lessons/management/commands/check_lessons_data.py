@@ -15,8 +15,8 @@ class Command(BaseCommand):
             # Check if lessons_lesson table exists
             cursor.execute("""
                 SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
-                    WHERE table_schema = 'public' 
+                    SELECT FROM information_schema.tables
+                    WHERE table_schema = 'public'
                     AND table_name = 'lessons_lesson'
                 );
             """)
@@ -41,10 +41,10 @@ class Command(BaseCommand):
 
             # Check for backup tables
             cursor.execute("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND (table_name LIKE '%lesson%backup%' 
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND (table_name LIKE '%lesson%backup%'
                      OR table_name LIKE '%lesson%old%'
                      OR table_name = 'lessons_lesson_backup'
                      OR table_name = 'lessons_lesson_old');
@@ -58,9 +58,9 @@ class Command(BaseCommand):
 
             # Check all tables with 'lesson' in name
             cursor.execute("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name LIKE '%lesson%';
             """)
             all_lesson_tables = cursor.fetchall()
