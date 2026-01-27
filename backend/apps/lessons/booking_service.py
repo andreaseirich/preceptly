@@ -90,10 +90,8 @@ class BookingService:
                         # Middle days: full day
                         day_start_time = time.min
                         day_end_time = time.max
-                    
-                    occupied[current_date].append(
-                        (day_start_time, day_end_time)
-                    )
+
+                    occupied[current_date].append((day_start_time, day_end_time))
                 current_date += timedelta(days=1)
 
         # Sortiere Zeitslots pro Tag
@@ -409,10 +407,8 @@ class BookingService:
                         # Middle days: full day
                         day_start_time = time.min
                         day_end_time = time.max
-                    
-                    occupied[current_date].append(
-                        (day_start_time, day_end_time)
-                    )
+
+                    occupied[current_date].append((day_start_time, day_end_time))
                 current_date += timedelta(days=1)
 
         # Sort time slots per day
