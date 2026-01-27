@@ -1,9 +1,7 @@
 # Generated manually to fix missing lessons_lesson table
 # This migration creates the lessons_lesson table if it doesn't exist
 
-from django.db import migrations, models, connection
-import django.core.validators
-import django.db.models.deletion
+from django.db import migrations, connection
 
 
 def create_lessons_lesson_table_if_not_exists(apps, schema_editor):
