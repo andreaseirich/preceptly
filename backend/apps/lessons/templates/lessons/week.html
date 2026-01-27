@@ -89,7 +89,7 @@
                                         {% if lesson.id in conflicts_by_lesson %}border: 2px solid #dc3545;{% endif %}"
                                  onmouseover="showLessonPreview(this, event); this.style.transform='scale(1.02)'; this.style.zIndex='20';"
                                  onmouseout="hideLessonPreview(); this.style.transform='scale(1)'; this.style.zIndex='10';"
-                                 onclick="event.stopPropagation(); window.location.href='{% url 'lesson_plans:lesson_plan' lesson_id=lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
+                                 onclick="event.stopPropagation(); window.location.href='/lesson-plans/lessons/{{ lesson.pk }}/?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
                                  title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %} - {% trans 'Click to view lesson plan' %}">
                                 {% if lesson.travel_time_before_minutes > 0 %}
                                 <div style="background: rgba(255,255,255,0.15); padding: 1px 4px; margin: -2px -4px 2px -4px; font-size: 0.7em; border-radius: 3px 3px 0 0;">
