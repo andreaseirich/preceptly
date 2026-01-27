@@ -111,7 +111,8 @@ def send_booking_notification(lesson: Lesson) -> bool:
         print(f"[EMAIL_SERVICE] WARNING: {warning_msg}", file=sys.stdout, flush=True)
 
     # Send email with timeout to prevent worker timeout
-    email_timeout = 10  # 10 seconds timeout
+    # Increased timeout to 30 seconds for slow SMTP servers (e.g., iCloud)
+    email_timeout = 30  # 30 seconds timeout
     email_sent = [False]
     email_error = [None]
 
