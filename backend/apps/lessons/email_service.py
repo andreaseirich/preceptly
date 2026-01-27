@@ -138,7 +138,9 @@ def send_booking_notification(lesson: Lesson) -> bool:
 
         if email_thread.is_alive():
             # Thread is still running, timeout occurred
-            timeout_msg = f"Email sending timed out after {email_timeout} seconds for lesson {lesson.id}"
+            timeout_msg = (
+                f"Email sending timed out after {email_timeout} seconds for lesson {lesson.id}"
+            )
             logger.warning(timeout_msg)
             print(f"[EMAIL_SERVICE] WARNING: {timeout_msg}", file=sys.stdout, flush=True)
             return False
