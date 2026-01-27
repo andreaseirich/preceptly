@@ -255,7 +255,7 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-            "stream": sys.stdout,
+            "stream": sys.stderr,  # Use stderr for better visibility in Gunicorn logs
         },
         "file": {
             "class": "logging.FileHandler",
