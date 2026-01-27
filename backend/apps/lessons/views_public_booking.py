@@ -185,6 +185,13 @@ def create_student_api(request):
 @require_http_methods(["POST"])
 def book_lesson_api(request):
     """API-Endpoint für Buchung."""
+    import logging
+    import sys
+
+    logger = logging.getLogger(__name__)
+    logger.info("POST request received in book_lesson_api")
+    print("[PUBLIC_BOOKING] POST request received in book_lesson_api", file=sys.stdout, flush=True)
+
     try:
         # Use request.POST for FormData, not JSON
         if request.content_type and "application/json" in request.content_type:
@@ -193,6 +200,8 @@ def book_lesson_api(request):
             data = request.POST
 
         student_id = data.get("student_id")
+        logger.info(f"Student ID: {student_id}")
+        print(f"[PUBLIC_BOOKING] Student ID: {student_id}", file=sys.stdout, flush=True)
         booking_date = data.get("date")
         start_time = data.get("start_time")
         end_time = data.get("end_time")
@@ -345,6 +354,15 @@ def book_lesson_api(request):
             )
 
         # Create lesson
+        logger.info(
+            f"Creating lesson: student={student_id}, date={booking_date_obj}, start_time={start_time_obj}, duration={duration_total}"
+        )
+        print(
+            f"[PUBLIC_BOOKING] Creating lesson: student={student_id}, date={booking_date_obj}, start_time={start_time_obj}, duration={duration_total}",
+            file=sys.stdout,
+            flush=True,
+        )
+
         lesson = Lesson.objects.create(
             contract=contract,
             date=booking_date_obj,
@@ -355,6 +373,36 @@ def book_lesson_api(request):
             travel_time_after_minutes=0,
             notes=f"{_('Subject')}: {subject}\n{notes}" if subject or notes else notes,
         )
+
+        logger.info(f"Lesson created successfully with ID: {lesson.id}")
+        print(
+            f"[PUBLIC_BOOKING] Lesson created successfully with ID: {lesson.id}",
+            file=sys.stdout,
+            flush=True,
+        )
+
+        # Send email notification
+        logger.info(f"Lesson {lesson.id} created, attempting to send email notification")
+        print(
+            f"[PUBLIC_BOOKING] Lesson {lesson.id} created, attempting to send email notification",
+            file=sys.stdout,
+            flush=True,
+        )
+        try:
+            from apps.lessons.email_service import send_booking_notification
+
+            send_booking_notification(lesson)
+            logger.info(f"Email notification call completed for lesson {lesson.id}")
+            print(
+                f"[PUBLIC_BOOKING] Email notification call completed for lesson {lesson.id}",
+                file=sys.stdout,
+                flush=True,
+            )
+        except Exception as e:
+            # Don't fail the booking if email fails
+            error_msg = f"Failed to send booking notification email for lesson {lesson.id}: {e}"
+            logger.warning(error_msg, exc_info=True)
+            print(f"[PUBLIC_BOOKING] WARNING: {error_msg}", file=sys.stdout, flush=True)
 
         # Process document upload (if present)
         uploaded_documents = []
