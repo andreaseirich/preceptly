@@ -82,11 +82,32 @@ class StudentBookingView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         """Behandelt Buchungsanfragen."""
+        import logging
+        import sys
+
+        logger = logging.getLogger(__name__)
+        logger.info("POST request received in StudentBookingView")
+        print("[BOOKING] POST request received in StudentBookingView", file=sys.stdout, flush=True)
+
         token = self.kwargs.get("token")
+        logger.info(f"Booking token: {token}")
+        print(f"[BOOKING] Booking token: {token}", file=sys.stdout, flush=True)
 
         try:
             contract = Contract.objects.get(booking_token=token, is_active=True)
+            logger.info(f"Contract found: {contract.id} for student {contract.student}")
+            print(
+                f"[BOOKING] Contract found: {contract.id} for student {contract.student}",
+                file=sys.stdout,
+                flush=True,
+            )
         except Contract.DoesNotExist:
+            logger.warning(f"Contract not found or inactive for token: {token}")
+            print(
+                f"[BOOKING] WARNING: Contract not found or inactive for token: {token}",
+                file=sys.stdout,
+                flush=True,
+            )
             messages.error(request, _("Booking link not found or contract is inactive."))
             return redirect("lessons:student_booking", token=token)
 
@@ -94,8 +115,12 @@ class StudentBookingView(TemplateView):
         try:
             data = json.loads(request.body)
             action = data.get("action")
+            logger.info(f"Action received: {action}")
+            print(f"[BOOKING] Action received: {action}", file=sys.stdout, flush=True)
 
             if action == "book_slot":
+                logger.info("Processing book_slot action")
+                print("[BOOKING] Processing book_slot action", file=sys.stdout, flush=True)
                 # Book a time slot
                 booking_date = data.get("date")
                 start_time = data.get("start_time")
@@ -220,6 +245,15 @@ class StudentBookingView(TemplateView):
                     )
 
                 # Create lesson
+                logger.info(
+                    f"Creating lesson: date={booking_date_obj}, start_time={start_time_obj}, duration={duration_minutes}"
+                )
+                print(
+                    f"[BOOKING] Creating lesson: date={booking_date_obj}, start_time={start_time_obj}, duration={duration_minutes}",
+                    file=sys.stdout,
+                    flush=True,
+                )
+
                 lesson = Lesson.objects.create(
                     contract=contract,
                     date=booking_date_obj,
@@ -230,11 +264,14 @@ class StudentBookingView(TemplateView):
                     travel_time_after_minutes=0,
                 )
 
-                # Send email notification
-                import logging
-                import sys
+                logger.info(f"Lesson created successfully with ID: {lesson.id}")
+                print(
+                    f"[BOOKING] Lesson created successfully with ID: {lesson.id}",
+                    file=sys.stdout,
+                    flush=True,
+                )
 
-                logger = logging.getLogger(__name__)
+                # Send email notification
                 logger.info(f"Lesson {lesson.id} created, attempting to send email notification")
                 print(
                     f"[BOOKING] Lesson {lesson.id} created, attempting to send email notification",
