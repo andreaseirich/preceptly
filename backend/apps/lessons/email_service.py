@@ -25,8 +25,12 @@ def send_booking_notification(lesson: Lesson) -> bool:
     Returns:
         True if email was sent successfully, False otherwise
     """
+    logger.info(f"Attempting to send booking notification for lesson {lesson.id}")
+    
     # Get notification email address
     notification_email = getattr(settings, "NOTIFICATION_EMAIL", None)
+    logger.debug(f"NOTIFICATION_EMAIL from settings: {notification_email}")
+    
     if not notification_email:
         # Fallback: try to get email from first user
         from django.contrib.auth.models import User
@@ -37,12 +41,15 @@ def send_booking_notification(lesson: Lesson) -> bool:
                 first_user = User.objects.first()
             if first_user and first_user.email:
                 notification_email = first_user.email
+                logger.info(f"Using fallback email from user: {notification_email}")
         except Exception as e:
-            logger.warning(f"Could not get user email: {e}")
+            logger.warning(f"Could not get user email: {e}", exc_info=True)
 
     if not notification_email:
-        logger.warning("No notification email configured. Skipping email notification.")
+        logger.error("No notification email configured. Skipping email notification. Please set NOTIFICATION_EMAIL environment variable.")
         return False
+    
+    logger.info(f"Sending booking notification email to {notification_email}")
 
     # Calculate end time
     from datetime import datetime
@@ -65,6 +72,17 @@ def send_booking_notification(lesson: Lesson) -> bool:
     html_message = render_to_string("lessons/email_booking_notification.html", context)
     plain_message = render_to_string("lessons/email_booking_notification.txt", context)
 
+    # Log email backend configuration
+    email_backend = getattr(settings, "EMAIL_BACKEND", "not set")
+    logger.info(f"Using email backend: {email_backend}")
+    
+    if email_backend == "django.core.mail.backends.console.EmailBackend":
+        logger.warning(
+            "EMAIL_BACKEND is set to console backend. "
+            "Emails will only be printed to console, not actually sent. "
+            "Set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend' to send real emails."
+        )
+    
     try:
         send_mail(
             subject=subject,
@@ -75,9 +93,12 @@ def send_booking_notification(lesson: Lesson) -> bool:
             fail_silently=False,
         )
         logger.info(
-            f"Booking notification email sent to {notification_email} for lesson {lesson.id}"
+            f"Booking notification email sent successfully to {notification_email} for lesson {lesson.id}"
         )
         return True
     except Exception as e:
-        logger.error(f"Failed to send booking notification email: {e}", exc_info=True)
+        logger.error(
+            f"Failed to send booking notification email to {notification_email} for lesson {lesson.id}: {e}",
+            exc_info=True
+        )
         return False
