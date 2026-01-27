@@ -6,7 +6,11 @@ from apps.blocked_times.forms import BlockedTimeForm
 from apps.blocked_times.models import BlockedTime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
+from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 
@@ -536,3 +540,59 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
             messages.success(self.request, _("Blocked time successfully deleted."))
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+class BlockedTimeBulkDeleteView(LoginRequiredMixin, View):
+    """Bulk-Delete für mehrere Blockzeiten."""
+
+    def post(self, request, *args, **kwargs):
+        from apps.lessons.services import recalculate_conflicts_for_blocked_time
+
+        blocked_time_ids = request.POST.getlist("blocked_time_ids")
+
+        if not blocked_time_ids:
+            messages.error(request, _("Please select at least one blocked time to delete."))
+            return HttpResponseRedirect(self.get_success_url())
+
+        # Get blocked times
+        blocked_times = BlockedTime.objects.filter(pk__in=blocked_time_ids)
+
+        if not blocked_times.exists():
+            messages.error(request, _("No blocked times found to delete."))
+            return HttpResponseRedirect(self.get_success_url())
+
+        # Recalculate conflicts before deleting
+        for blocked_time in blocked_times:
+            recalculate_conflicts_for_blocked_time(blocked_time)
+
+        # Delete blocked times
+        count = blocked_times.count()
+        blocked_times.delete()
+
+        messages.success(
+            request,
+            ngettext(
+                "{count} blocked time successfully deleted.",
+                "{count} blocked times successfully deleted.",
+                count,
+            ).format(count=count),
+        )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        """Redirect back to week view."""
+        year = self.request.POST.get("year") or self.request.GET.get("year")
+        month = self.request.POST.get("month") or self.request.GET.get("month")
+        day = self.request.POST.get("day") or self.request.GET.get("day")
+
+        if year and month:
+            if day:
+                return reverse("lessons:week") + f"?year={year}&month={month}&day={day}"
+            else:
+                from django.utils import timezone
+
+                now = timezone.now()
+                day = now.day
+                return reverse("lessons:week") + f"?year={year}&month={month}&day={day}"
+        return reverse("lessons:week")

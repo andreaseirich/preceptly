@@ -13,6 +13,16 @@
     <a href="{% url 'lessons:week' %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn">{% trans "Next Week" %} →</a>
 </div>
 
+<div style="margin-top: 10px; margin-bottom: 10px;">
+    <label style="display: inline-flex; align-items: center; cursor: pointer;">
+        <input type="checkbox" id="select-all-blocked-times" style="margin-right: 5px;">
+        <span>{% trans "Select all blocked times" %}</span>
+    </label>
+    <button type="button" id="delete-selected-blocked-times" class="btn btn-danger" style="margin-left: 15px; display: none;" onclick="deleteSelectedBlockedTimes()">
+        🗑️ {% trans "Delete Selected" %}
+    </button>
+</div>
+
 <div style="margin-bottom: 20px; margin-top: 10px;">
     <form method="get" action="{% url 'lessons:week' %}" style="display: inline-block;">
         <label for="date-select">{% trans "Jump to date:" %}</label>
@@ -131,6 +141,7 @@
                                  data-end-hour="{{ end_hour }}"
                                  data-end-minute="{{ end_minute }}"
                                  data-render-hour="{{ hour }}"
+                                 {% if blocked_time.pk %}data-has-pk="true"{% endif %}
                                  style="position: absolute; 
                                         top: {% if hour == start_hour %}{{ start_minute }}{% else %}0{% endif %}px; 
                                         height: {% if hour == start_hour and hour == end_hour %}{{ end_minute|add:"-"|add:start_minute }}{% elif hour == start_hour %}{{ 60|add:"-"|add:start_minute }}{% elif hour == end_hour %}{{ end_minute }}{% else %}60{% endif %}px; 
@@ -150,12 +161,19 @@
                                  onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
                                  {% if blocked_time.pk %}onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"{% endif %}
                                  title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
-                                {% if hour == start_hour %}
-                                <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
-                                <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
-                                {% else %}
-                                <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong>
-                                {% endif %}
+                                <div style="display: flex; align-items: flex-start; gap: 4px;">
+                                    {% if blocked_time.pk %}
+                                    <input type="checkbox" class="blocked-time-checkbox" data-blocked-time-id="{{ blocked_time.pk }}" style="margin-top: 2px; flex-shrink: 0; cursor: pointer;" onchange="updateDeleteButton()" onclick="event.stopPropagation();">
+                                    {% endif %}
+                                    <div style="flex: 1;">
+                                        {% if hour == start_hour %}
+                                        <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
+                                        <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
+                                        {% else %}
+                                        <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                             {% endif %}
                             {% endwith %}
@@ -474,6 +492,115 @@ document.addEventListener('DOMContentLoaded', function() {
             block.style.height = totalTime + 'px';
         }
     });
+});
+
+// Blocked Time Selection and Bulk Delete
+function updateDeleteButton() {
+    const checkboxes = document.querySelectorAll('.blocked-time-checkbox:checked');
+    const deleteButton = document.getElementById('delete-selected-blocked-times');
+    if (checkboxes.length > 0) {
+        deleteButton.style.display = 'inline-block';
+        deleteButton.textContent = `🗑️ {% trans "Delete Selected" %} (${checkboxes.length})`;
+    } else {
+        deleteButton.style.display = 'none';
+    }
+}
+
+function deleteSelectedBlockedTimes() {
+    const checkboxes = document.querySelectorAll('.blocked-time-checkbox:checked');
+    const selectedIds = Array.from(checkboxes).map(cb => cb.dataset.blockedTimeId);
+    
+    if (selectedIds.length === 0) {
+        alert('{% trans "Please select at least one blocked time to delete." %}');
+        return;
+    }
+    
+    if (!confirm(`{% trans "Are you sure you want to delete" %} ${selectedIds.length} {% trans "selected blocked time(s)?" %}`)) {
+        return;
+    }
+    
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "blocked_times:bulk_delete" %}';
+    
+    // Add CSRF token from cookie
+    const csrftoken = getCookie('csrftoken');
+    if (csrftoken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrftoken;
+        form.appendChild(csrfInput);
+    } else {
+        console.error('CSRF token not found');
+        alert('{% trans "Error: CSRF token not found. Please refresh the page and try again." %}');
+        return;
+    }
+    
+    // Add selected IDs
+    selectedIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'blocked_time_ids';
+        input.value = id;
+        form.appendChild(input);
+    });
+    
+    // Add redirect parameters
+    const year = new URLSearchParams(window.location.search).get('year') || '{{ week_start.year }}';
+    const month = new URLSearchParams(window.location.search).get('month') || '{{ week_start.month }}';
+    const day = new URLSearchParams(window.location.search).get('day') || '{{ week_start.day }}';
+    
+    const yearInput = document.createElement('input');
+    yearInput.type = 'hidden';
+    yearInput.name = 'year';
+    yearInput.value = year;
+    form.appendChild(yearInput);
+    
+    const monthInput = document.createElement('input');
+    monthInput.type = 'hidden';
+    monthInput.name = 'month';
+    monthInput.value = month;
+    form.appendChild(monthInput);
+    
+    const dayInput = document.createElement('input');
+    dayInput.type = 'hidden';
+    dayInput.name = 'day';
+    dayInput.value = day;
+    form.appendChild(dayInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Select all checkbox
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all-blocked-times');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.blocked-time-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateDeleteButton();
+        });
+    }
 });
 </script>
 {% endblock %}
