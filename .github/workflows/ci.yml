@@ -29,8 +29,24 @@ jobs:
           pip install -r requirements.txt
           pip install ruff
 
-      - name: Ruff format check
-        run: ruff format --check backend/apps backend/tutorflow
+      - name: Ruff format
+        run: |
+          # Format code
+          ruff format backend/apps backend/tutorflow
+          # Check if there are any uncommitted changes after formatting
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Code formatting issues found. Files were auto-formatted."
+            echo "Please run './scripts/format.sh' or 'ruff format backend/apps backend/tutorflow' locally and commit the changes."
+            echo ""
+            echo "Files that need formatting:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          else
+            echo "✅ All files are properly formatted."
+          fi
 
       - name: Ruff lint
         run: ruff check backend/apps backend/tutorflow
