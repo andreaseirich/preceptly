@@ -1,0 +1,13 @@
+{% load i18n %}
+{% trans "New Lesson Booking" %}
+
+{% trans "A new lesson has been booked through the booking page:" %}
+
+{% trans "Student" %}: {{ lesson.contract.student }}
+{% trans "Date" %}: {{ lesson.date|date:"d.m.Y" }}
+{% trans "Time" %}: {{ lesson.start_time|time:"H:i" }} - {{ end_time|time:"H:i" }}
+{% trans "Duration" %}: {{ lesson.duration_minutes }} {% trans "minutes" %}
+{% trans "Contract" %}: {{ lesson.contract }}
+{% if lesson.contract.institute %}{% trans "Institute" %}: {{ lesson.contract.institute }}{% endif %}
+
+{% trans "You can view and manage this lesson in your TutorFlow dashboard." %}

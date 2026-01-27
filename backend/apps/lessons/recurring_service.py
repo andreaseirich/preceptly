@@ -32,7 +32,7 @@ class RecurringSessionService:
             - 'preview': List of Session instances (if dry_run=True)
         """
         if not recurring_session.is_active:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
+            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
 
         # Determine end date
         end_date = recurring_session.end_date
@@ -76,13 +76,14 @@ class RecurringSessionService:
         active_weekdays = recurring_session.get_active_weekdays()
 
         if not active_weekdays:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
+            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
 
         current_date = recurring_session.start_date
         created = 0
         skipped = 0
         conflicts = []
         preview = []
+        sessions = []  # Collect created sessions for email notifications
         dates_checked = []
 
         while current_date <= end_date:
@@ -98,6 +99,9 @@ class RecurringSessionService:
                     if result.get("session"):
                         if dry_run:
                             preview.append(result["session"])
+                        else:
+                            # Collect created sessions for email notifications
+                            sessions.append(result["session"])
                         if result.get("conflicts"):
                             conflicts.extend(result["conflicts"])
                 elif result["skipped"]:
@@ -110,6 +114,7 @@ class RecurringSessionService:
             "skipped": skipped,
             "conflicts": conflicts,
             "preview": preview if dry_run else [],
+            "sessions": sessions if not dry_run else [],
         }
 
     @staticmethod
@@ -119,13 +124,14 @@ class RecurringSessionService:
         """Generates bi-weekly sessions (every 2 weeks)."""
         active_weekdays = recurring_session.get_active_weekdays()
         if not active_weekdays:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
+            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
 
         current_date = recurring_session.start_date
         created = 0
         skipped = 0
         conflicts = []
         preview = []
+        sessions = []  # Collect created sessions for email notifications
 
         # Count weeks since start
         week_count = 0
@@ -144,6 +150,9 @@ class RecurringSessionService:
                         if result.get("session"):
                             if dry_run:
                                 preview.append(result["session"])
+                            else:
+                                # Collect created sessions for email notifications
+                                sessions.append(result["session"])
                             if result.get("conflicts"):
                                 conflicts.extend(result["conflicts"])
                     elif result["skipped"]:
@@ -160,6 +169,7 @@ class RecurringSessionService:
             "skipped": skipped,
             "conflicts": conflicts,
             "preview": preview if dry_run else [],
+            "sessions": sessions if not dry_run else [],
         }
 
     @staticmethod
@@ -169,12 +179,13 @@ class RecurringSessionService:
         """Generates monthly sessions (same calendar day every month)."""
         active_weekdays = recurring_session.get_active_weekdays()
         if not active_weekdays:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": []}
+            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
 
         created = 0
         skipped = 0
         conflicts = []
         preview = []
+        sessions = []  # Collect created sessions for email notifications
 
         # Start with the start date
         current_date = recurring_session.start_date
@@ -201,6 +212,9 @@ class RecurringSessionService:
                     if result.get("session"):
                         if dry_run:
                             preview.append(result["session"])
+                        else:
+                            # Collect created sessions for email notifications
+                            sessions.append(result["session"])
                         if result.get("conflicts"):
                             conflicts.extend(result["conflicts"])
                 elif result["skipped"]:
@@ -230,6 +244,7 @@ class RecurringSessionService:
             "skipped": skipped,
             "conflicts": conflicts,
             "preview": preview if dry_run else [],
+            "sessions": sessions if not dry_run else [],
         }
 
     @staticmethod
@@ -273,6 +288,7 @@ class RecurringSessionService:
             session.save()
             # Set status again after saving (if necessary)
             SessionStatusUpdater.update_status_for_session(session)
+            session.refresh_from_db()  # Refresh to get updated status
 
             # Check conflicts
             if check_conflicts:

@@ -7,6 +7,7 @@ from datetime import date, datetime
 
 from apps.contracts.models import Contract
 from apps.lessons.booking_service import BookingService
+from apps.lessons.email_service import send_booking_notification
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
@@ -229,6 +230,19 @@ class StudentBookingView(TemplateView):
                     travel_time_after_minutes=0,
                 )
 
+                # Send email notification
+                try:
+                    send_booking_notification(lesson)
+                except Exception:
+                    # Don't fail the booking if email fails
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.warning(
+                        f"Failed to send booking notification email for lesson {lesson.id}",
+                        exc_info=True,
+                    )
+
                 return JsonResponse(
                     {
                         "success": True,
@@ -370,6 +384,24 @@ class StudentBookingView(TemplateView):
                 result = RecurringLessonService.generate_lessons(
                     recurring_lesson, check_conflicts=True
                 )
+
+                # Send email notifications for created lessons
+                if result.get("created", 0) > 0:
+                    created_sessions = result.get("sessions", [])
+                    if created_sessions:
+                        # Send one email per created session
+                        for session in created_sessions:
+                            try:
+                                send_booking_notification(session)
+                            except Exception:
+                                # Don't fail the booking if email fails
+                                import logging
+
+                                logger = logging.getLogger(__name__)
+                                logger.warning(
+                                    f"Failed to send booking notification email for session {session.id}",
+                                    exc_info=True,
+                                )
 
                 return JsonResponse(
                     {

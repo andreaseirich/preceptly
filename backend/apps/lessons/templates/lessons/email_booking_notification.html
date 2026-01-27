@@ -1,0 +1,26 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% trans "New Booking Notification" %}</title>
+</head>
+<body>
+    <h2>{% trans "New Lesson Booking" %}</h2>
+    
+    <p>{% trans "A new lesson has been booked through the booking page:" %}</p>
+    
+    <ul>
+        <li><strong>{% trans "Student" %}:</strong> {{ lesson.contract.student }}</li>
+        <li><strong>{% trans "Date" %}:</strong> {{ lesson.date|date:"d.m.Y" }}</li>
+        <li><strong>{% trans "Time" %}:</strong> {{ lesson.start_time|time:"H:i" }} - {{ end_time|time:"H:i" }}</li>
+        <li><strong>{% trans "Duration" %}:</strong> {{ lesson.duration_minutes }} {% trans "minutes" %}</li>
+        <li><strong>{% trans "Contract" %}:</strong> {{ lesson.contract }}</li>
+        {% if lesson.contract.institute %}
+        <li><strong>{% trans "Institute" %}:</strong> {{ lesson.contract.institute }}</li>
+        {% endif %}
+    </ul>
+    
+    <p>{% trans "You can view and manage this lesson in your TutorFlow dashboard." %}</p>
+</body>
+</html>

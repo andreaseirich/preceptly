@@ -281,3 +281,17 @@ LOGGING = {
 # Create logs directory if it doesn't exist
 logs_dir = BASE_DIR / "logs"
 logs_dir.mkdir(exist_ok=True)
+
+# Email configuration
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = int(env("EMAIL_PORT", default="587"))
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", default=False)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@tutorflow.local")
+SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+
+# Email notification settings
+NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")
