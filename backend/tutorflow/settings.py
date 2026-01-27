@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -254,6 +255,7 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+            "stream": sys.stdout,
         },
         "file": {
             "class": "logging.FileHandler",
@@ -269,7 +271,12 @@ LOGGING = {
         },
         "apps.lessons.email_service": {
             "handlers": ["console", "file"],
-            "level": "INFO",
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        },
+        "apps.lessons.views_booking": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
         "django": {
@@ -279,7 +286,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING",
+        "level": "INFO" if DEBUG else "WARNING",
     },
 }
 

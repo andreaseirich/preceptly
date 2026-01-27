@@ -231,15 +231,17 @@ class StudentBookingView(TemplateView):
                 )
 
                 # Send email notification
+                import logging
+
+                logger = logging.getLogger(__name__)
+                logger.info(f"Lesson {lesson.id} created, attempting to send email notification")
                 try:
                     send_booking_notification(lesson)
-                except Exception:
+                    logger.info(f"Email notification call completed for lesson {lesson.id}")
+                except Exception as e:
                     # Don't fail the booking if email fails
-                    import logging
-
-                    logger = logging.getLogger(__name__)
                     logger.warning(
-                        f"Failed to send booking notification email for lesson {lesson.id}",
+                        f"Failed to send booking notification email for lesson {lesson.id}: {e}",
                         exc_info=True,
                     )
 
@@ -386,20 +388,25 @@ class StudentBookingView(TemplateView):
                 )
 
                 # Send email notifications for created lessons
+                import logging
+
+                logger = logging.getLogger(__name__)
                 if result.get("created", 0) > 0:
                     created_sessions = result.get("sessions", [])
+                    logger.info(
+                        f"Recurring booking created {len(created_sessions)} sessions, attempting to send email notifications"
+                    )
                     if created_sessions:
                         # Send one email per created session
                         for session in created_sessions:
+                            logger.info(f"Attempting to send email notification for session {session.id}")
                             try:
                                 send_booking_notification(session)
-                            except Exception:
+                                logger.info(f"Email notification call completed for session {session.id}")
+                            except Exception as e:
                                 # Don't fail the booking if email fails
-                                import logging
-
-                                logger = logging.getLogger(__name__)
                                 logger.warning(
-                                    f"Failed to send booking notification email for session {session.id}",
+                                    f"Failed to send booking notification email for session {session.id}: {e}",
                                     exc_info=True,
                                 )
 
