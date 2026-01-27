@@ -6,6 +6,7 @@ from apps.core import views
 from apps.core.views_auth import TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_email_test import test_email
 from apps.core.views_health import health_status
+from apps.core.views_log_test import test_logs
 from apps.core.views_pwa import manifest_view, service_worker_view
 from django.urls import path
 
@@ -13,6 +14,7 @@ app_name = "core"
 
 urlpatterns = [
     path("health/", health_status, name="health"),
+    path("test-logs/", test_logs, name="test_logs"),
     path("test-email/", test_email, name="test_email"),
     path("login/", TutorFlowLoginView.as_view(), name="login"),
     path("logout/", TutorFlowLogoutView.as_view(), name="logout"),
