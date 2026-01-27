@@ -300,6 +300,18 @@ EMAIL_HOST = env("EMAIL_HOST", default="localhost")
 EMAIL_PORT = int(env("EMAIL_PORT", default="587"))
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", default=False)
+
+# Validate that TLS and SSL are not both enabled
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    import warnings
+
+    warnings.warn(
+        "EMAIL_USE_TLS and EMAIL_USE_SSL are both True. "
+        "They are mutually exclusive. Disabling EMAIL_USE_SSL.",
+        UserWarning,
+    )
+    EMAIL_USE_SSL = False
+
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@tutorflow.local")
