@@ -372,7 +372,7 @@ def book_lesson_api(request):
                 if file_extension and f".{file_extension}" not in allowed_extensions:
                     continue  # Skip disallowed file types
 
-                document = LessonDocument.objects.create(lesson=lesson, file=file, name=file.name)
+                document = LessonDocument.objects.create(session=lesson, file=file, name=file.name)
                 uploaded_documents.append(document.id)
 
         return JsonResponse(

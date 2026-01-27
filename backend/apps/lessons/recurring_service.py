@@ -323,3 +323,5 @@ class RecurringSessionService:
 RecurringLessonService = RecurringSessionService
 # Alias for method name
 RecurringSessionService.preview_lessons = RecurringSessionService.preview_sessions
+# Alias for generate_lessons method name
+RecurringLessonService.generate_lessons = RecurringSessionService.generate_sessions
