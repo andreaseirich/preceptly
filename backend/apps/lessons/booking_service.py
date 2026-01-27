@@ -66,26 +66,30 @@ class BookingService:
                     blocked_times = list(blocked_times) + [bt_preview]
 
         for blocked_time in blocked_times:
-            current_date = blocked_time.start_datetime.date()
-            end_date_bt = blocked_time.end_datetime.date()
+            # Convert to local timezone for correct time extraction
+            local_start_datetime = timezone.localtime(blocked_time.start_datetime)
+            local_end_datetime = timezone.localtime(blocked_time.end_datetime)
+            
+            current_date = local_start_datetime.date()
+            end_date_bt = local_end_datetime.date()
 
             while current_date <= end_date_bt and current_date <= end_date:
                 if current_date >= start_date:
                     # Calculate the actual time range for this specific day
-                    if current_date == blocked_time.start_datetime.date():
+                    if current_date == local_start_datetime.date():
                         # First day: from start time to end of day or end time
                         if current_date == end_date_bt:
                             # Same day: use actual start and end time
-                            day_start_time = blocked_time.start_datetime.time()
-                            day_end_time = blocked_time.end_datetime.time()
+                            day_start_time = local_start_datetime.time()
+                            day_end_time = local_end_datetime.time()
                         else:
                             # Multi-day: from start time to end of day
-                            day_start_time = blocked_time.start_datetime.time()
+                            day_start_time = local_start_datetime.time()
                             day_end_time = time.max
                     elif current_date == end_date_bt:
                         # Last day: from start of day to end time
                         day_start_time = time.min
-                        day_end_time = blocked_time.end_datetime.time()
+                        day_end_time = local_end_datetime.time()
                     else:
                         # Middle days: full day
                         day_start_time = time.min
@@ -383,26 +387,30 @@ class BookingService:
                     blocked_times = list(blocked_times) + [bt_preview]
 
         for blocked_time in blocked_times:
-            current_date = blocked_time.start_datetime.date()
-            end_date_bt = blocked_time.end_datetime.date()
+            # Convert to local timezone for correct time extraction
+            local_start_datetime = timezone.localtime(blocked_time.start_datetime)
+            local_end_datetime = timezone.localtime(blocked_time.end_datetime)
+            
+            current_date = local_start_datetime.date()
+            end_date_bt = local_end_datetime.date()
 
             while current_date <= end_date_bt and current_date <= end_date:
                 if current_date >= start_date:
                     # Calculate the actual time range for this specific day
-                    if current_date == blocked_time.start_datetime.date():
+                    if current_date == local_start_datetime.date():
                         # First day: from start time to end of day or end time
                         if current_date == end_date_bt:
                             # Same day: use actual start and end time
-                            day_start_time = blocked_time.start_datetime.time()
-                            day_end_time = blocked_time.end_datetime.time()
+                            day_start_time = local_start_datetime.time()
+                            day_end_time = local_end_datetime.time()
                         else:
                             # Multi-day: from start time to end of day
-                            day_start_time = blocked_time.start_datetime.time()
+                            day_start_time = local_start_datetime.time()
                             day_end_time = time.max
                     elif current_date == end_date_bt:
                         # Last day: from start of day to end time
                         day_start_time = time.min
-                        day_end_time = blocked_time.end_datetime.time()
+                        day_end_time = local_end_datetime.time()
                     else:
                         # Middle days: full day
                         day_start_time = time.min
