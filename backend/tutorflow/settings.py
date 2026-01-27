@@ -255,7 +255,7 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-            "stream": sys.stderr,  # Use stderr for better visibility in Gunicorn logs
+            "stream": sys.stdout,  # Use stdout for better visibility in Railway/Gunicorn logs
         },
         "file": {
             "class": "logging.FileHandler",
@@ -286,7 +286,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO" if DEBUG else "WARNING",
+        "level": "INFO",  # Always INFO to see email logs
     },
 }
 

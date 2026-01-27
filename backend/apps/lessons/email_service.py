@@ -3,6 +3,7 @@ Service for sending email notifications related to lessons.
 """
 
 import logging
+import sys
 from datetime import timedelta
 
 from apps.lessons.models import Lesson
@@ -26,10 +27,11 @@ def send_booking_notification(lesson: Lesson) -> bool:
         True if email was sent successfully, False otherwise
     """
     logger.info(f"Attempting to send booking notification for lesson {lesson.id}")
-    # Also print to stderr for better visibility
+    # Also print to stdout for better visibility in Railway logs
     print(
         f"[EMAIL_SERVICE] Attempting to send booking notification for lesson {lesson.id}",
-        file=__import__("sys").stderr,
+        file=sys.stdout,
+        flush=True,
     )
 
     # Get notification email address
@@ -37,7 +39,8 @@ def send_booking_notification(lesson: Lesson) -> bool:
     logger.debug(f"NOTIFICATION_EMAIL from settings: {notification_email}")
     print(
         f"[EMAIL_SERVICE] NOTIFICATION_EMAIL from settings: {notification_email}",
-        file=__import__("sys").stderr,
+        file=sys.stdout,
+        flush=True,
     )
 
     if not notification_email:
@@ -57,13 +60,14 @@ def send_booking_notification(lesson: Lesson) -> bool:
     if not notification_email:
         error_msg = "No notification email configured. Skipping email notification. Please set NOTIFICATION_EMAIL environment variable."
         logger.error(error_msg)
-        print(f"[EMAIL_SERVICE] ERROR: {error_msg}", file=__import__("sys").stderr)
+        print(f"[EMAIL_SERVICE] ERROR: {error_msg}", file=sys.stdout, flush=True)
         return False
 
     logger.info(f"Sending booking notification email to {notification_email}")
     print(
         f"[EMAIL_SERVICE] Sending booking notification email to {notification_email}",
-        file=__import__("sys").stderr,
+        file=sys.stdout,
+        flush=True,
     )
 
     # Calculate end time
@@ -90,7 +94,11 @@ def send_booking_notification(lesson: Lesson) -> bool:
     # Log email backend configuration
     email_backend = getattr(settings, "EMAIL_BACKEND", "not set")
     logger.info(f"Using email backend: {email_backend}")
-    print(f"[EMAIL_SERVICE] Using email backend: {email_backend}", file=__import__("sys").stderr)
+    print(
+        f"[EMAIL_SERVICE] Using email backend: {email_backend}",
+        file=sys.stdout,
+        flush=True,
+    )
 
     if email_backend == "django.core.mail.backends.console.EmailBackend":
         warning_msg = (
@@ -99,7 +107,7 @@ def send_booking_notification(lesson: Lesson) -> bool:
             "Set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend' to send real emails."
         )
         logger.warning(warning_msg)
-        print(f"[EMAIL_SERVICE] WARNING: {warning_msg}", file=__import__("sys").stderr)
+        print(f"[EMAIL_SERVICE] WARNING: {warning_msg}", file=sys.stdout, flush=True)
 
     try:
         send_mail(
@@ -112,10 +120,10 @@ def send_booking_notification(lesson: Lesson) -> bool:
         )
         success_msg = f"Booking notification email sent successfully to {notification_email} for lesson {lesson.id}"
         logger.info(success_msg)
-        print(f"[EMAIL_SERVICE] SUCCESS: {success_msg}", file=__import__("sys").stderr)
+        print(f"[EMAIL_SERVICE] SUCCESS: {success_msg}", file=sys.stdout, flush=True)
         return True
     except Exception as e:
         error_msg = f"Failed to send booking notification email to {notification_email} for lesson {lesson.id}: {e}"
         logger.error(error_msg, exc_info=True)
-        print(f"[EMAIL_SERVICE] ERROR: {error_msg}", file=__import__("sys").stderr)
+        print(f"[EMAIL_SERVICE] ERROR: {error_msg}", file=sys.stdout, flush=True)
         return False
