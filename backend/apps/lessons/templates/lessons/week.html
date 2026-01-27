@@ -125,7 +125,7 @@
                             {% if start_hour|add:0 == hour|add:0 %}
                             {% with duration_minutes=blocked_time.end_datetime|timesince:blocked_time.start_datetime %}
                             <div class="blocked-time-block lesson-block" 
-                                 data-blocked-time-id="{{ blocked_time.id }}"
+                                 data-blocked-time-id="{% if blocked_time.pk %}{{ blocked_time.pk }}{% else %}preview-{{ forloop.counter }}{% endif %}"
                                  data-start-hour="{{ start_hour }}"
                                  data-start-minute="{{ start_minute }}"
                                  data-end-hour="{{ end_hour }}"
@@ -140,15 +140,15 @@
                                         padding: 2px 4px; 
                                         font-size: 0.75em; 
                                         border-radius: 3px;
-                                        cursor: pointer;
+                                        cursor: {% if blocked_time.pk %}pointer{% else %}default{% endif %};
                                         z-index: 10;
                                         overflow: hidden;
                                         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
                                         transition: all 0.2s;"
                                  onmouseover="showBlockedTimePreview(this, event); this.style.background='#e68900'; this.style.transform='scale(1.02)'; this.style.zIndex='20';"
                                  onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
-                                 onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
-                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}">
+                                 {% if blocked_time.pk %}onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:update' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"{% endif %}
+                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
                                 <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
                                 <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
                             </div>
