@@ -100,8 +100,14 @@ def test_email(request):
             }
         )
     except Exception as e:
+        # Log detailed error but don't expose it to the client
         logger.error(f"Failed to send test email: {e}", exc_info=True)
+        # Return generic error message to avoid information exposure
         return JsonResponse(
-            {"success": False, "error": str(e), "email_backend": email_backend},
+            {
+                "success": False,
+                "error": "Failed to send test email. Check server logs for details.",
+                "email_backend": email_backend,
+            },
             status=500,
         )
