@@ -110,7 +110,7 @@
     {% endif %}
     <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" style="margin-top: 15px;">
         {% csrf_token %}
-        <input type="hidden" name="next" value="{% url 'lesson_plans:lesson_plan' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}">
+        <input type="hidden" name="next" value="{% url 'lesson_plans:lesson_plan' lesson_id=lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}">
         <button type="submit" class="btn" style="background: #007bff; color: white;">
             {% if has_lesson_plan %}
                 🔄 {% trans "Regenerate AI Lesson Plan" %}
