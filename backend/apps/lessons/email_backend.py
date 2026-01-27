@@ -2,8 +2,9 @@
 Custom email backend with timeout support.
 """
 
-import socket
 import smtplib
+import socket
+
 from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend as SMTPEmailBackend
 
@@ -49,7 +50,7 @@ class TimeoutSMTPEmailBackend(SMTPEmailBackend):
                 self.connection.login(self.username, self.password)
 
             return True
-        except (smtplib.SMTPException, socket.error, OSError) as e:
+        except (smtplib.SMTPException, socket.error, OSError):
             if not self.fail_silently:
                 raise
             return False
