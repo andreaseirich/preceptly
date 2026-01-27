@@ -50,7 +50,16 @@ class TimeoutSMTPEmailBackend(SMTPEmailBackend):
                 self.connection.login(self.username, self.password)
 
             return True
-        except (smtplib.SMTPException, socket.error, OSError):
+        except socket.timeout:
+            # Connection timeout - server not reachable
+            if not self.fail_silently:
+                raise smtplib.SMTPConnectError(
+                    f"Connection to {self.host}:{self.port} timed out after {self.timeout} seconds. "
+                    "Check your SMTP server configuration and network connectivity."
+                )
+            return False
+        except (smtplib.SMTPException, socket.error, OSError) as e:
+            # Other SMTP/socket errors
             if not self.fail_silently:
                 raise
             return False
