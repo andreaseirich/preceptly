@@ -399,10 +399,14 @@ class StudentBookingView(TemplateView):
                     if created_sessions:
                         # Send one email per created session
                         for session in created_sessions:
-                            logger.info(f"Attempting to send email notification for session {session.id}")
+                            logger.info(
+                                f"Attempting to send email notification for session {session.id}"
+                            )
                             try:
                                 send_booking_notification(session)
-                                logger.info(f"Email notification call completed for session {session.id}")
+                                logger.info(
+                                    f"Email notification call completed for session {session.id}"
+                                )
                             except Exception as e:
                                 # Don't fail the booking if email fails
                                 logger.warning(
