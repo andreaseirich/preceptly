@@ -92,3 +92,6 @@ cursor_master_prompt.txt # Not for jury/recruiters
 .gitignore # Not for jury/recruiters
 
 scripts/export_to_railway.sh # Not for jury/recruiters
+
+*.sql
+check_data.py
