@@ -26,11 +26,11 @@ def send_booking_notification(lesson: Lesson) -> bool:
         True if email was sent successfully, False otherwise
     """
     logger.info(f"Attempting to send booking notification for lesson {lesson.id}")
-    
+
     # Get notification email address
     notification_email = getattr(settings, "NOTIFICATION_EMAIL", None)
     logger.debug(f"NOTIFICATION_EMAIL from settings: {notification_email}")
-    
+
     if not notification_email:
         # Fallback: try to get email from first user
         from django.contrib.auth.models import User
@@ -46,9 +46,11 @@ def send_booking_notification(lesson: Lesson) -> bool:
             logger.warning(f"Could not get user email: {e}", exc_info=True)
 
     if not notification_email:
-        logger.error("No notification email configured. Skipping email notification. Please set NOTIFICATION_EMAIL environment variable.")
+        logger.error(
+            "No notification email configured. Skipping email notification. Please set NOTIFICATION_EMAIL environment variable."
+        )
         return False
-    
+
     logger.info(f"Sending booking notification email to {notification_email}")
 
     # Calculate end time
@@ -75,14 +77,14 @@ def send_booking_notification(lesson: Lesson) -> bool:
     # Log email backend configuration
     email_backend = getattr(settings, "EMAIL_BACKEND", "not set")
     logger.info(f"Using email backend: {email_backend}")
-    
+
     if email_backend == "django.core.mail.backends.console.EmailBackend":
         logger.warning(
             "EMAIL_BACKEND is set to console backend. "
             "Emails will only be printed to console, not actually sent. "
             "Set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend' to send real emails."
         )
-    
+
     try:
         send_mail(
             subject=subject,
@@ -99,6 +101,6 @@ def send_booking_notification(lesson: Lesson) -> bool:
     except Exception as e:
         logger.error(
             f"Failed to send booking notification email to {notification_email} for lesson {lesson.id}: {e}",
-            exc_info=True
+            exc_info=True,
         )
         return False
