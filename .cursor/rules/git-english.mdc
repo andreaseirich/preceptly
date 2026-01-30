@@ -1,0 +1,15 @@
+---
+description: Git commits and pushes must always be in English
+alwaysApply: true
+---
+
+# Git: English Only
+
+**Rule:** When committing and pushing changes to this repository:
+- Commit messages must always be written in **English**
+- Use conventional commit format: `fix:`, `feat:`, `docs:`, `chore:`, etc.
+
+Examples:
+- ✅ `fix: disable Django Admin, add 404 test`
+- ✅ `feat: add multi-tenancy - separate data per user`
+- ❌ German commit messages
