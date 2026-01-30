@@ -70,7 +70,7 @@ fi
 echo ""
 
 echo -e "${YELLOW}5. Prüfe Dokumentation...${NC}"
-REQUIRED_DOCS=("README.md" "CHANGELOG.md" "docs/ARCHITECTURE.md" "docs/ETHICS.md" "docs/PHASES.md" "docs/CHECKPOINTS.md" "docs/DEVPOST.md")
+REQUIRED_DOCS=("README.md" "CHANGELOG.md" "docs/ARCHITECTURE.md" "docs/ETHICS.md" "docs/DEVPOST.md")
 MISSING_DOCS=()
 for doc in "${REQUIRED_DOCS[@]}"; do
     if [ ! -f "../$doc" ]; then

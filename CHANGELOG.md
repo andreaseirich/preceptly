@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - 2026-01-30
+
+### Changed
+- **Django Admin disabled**: The Django Admin interface is not exposed. `/admin/` returns 404. `django.contrib.admin` is not in INSTALLED_APPS. This simplifies the application and avoids an additional attack surface.
+- **Documentation**: run_demo.sh now auto-creates `.env` from `.env.example` if missing for better reproducibility. validate.sh no longer requires gitignored docs (PHASES.md, CHECKPOINTS.md).
+
+### Added
+- **Test**: `test_admin_disabled.py` verifies that `/admin/` and `/admin/login/` return 404.
+
 ## [0.10.2] - 2026-01-21
 
 ### Added

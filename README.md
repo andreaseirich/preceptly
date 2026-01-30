@@ -119,11 +119,10 @@ The system automatically enforces contract quotas, detects conflicts across all 
 ### One-Command Demo
 
 ```bash
-cp .env.example .env
 ./scripts/run_demo.sh
 ```
 
-Starts the application with mocked AI (`MOCK_LLM=1`) and deterministic demo data. Access at `http://127.0.0.1:8000/`.
+Creates `.env` from `.env.example` if missing, then starts the application with mocked AI (`MOCK_LLM=1`) and deterministic demo data. Access at `http://127.0.0.1:8000/`.
 
 ### Manual Setup
 

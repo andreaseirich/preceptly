@@ -63,52 +63,14 @@ LLM_MODEL_NAME=gpt-3.5-turbo
 
 ## Production Settings
 
-Update `settings.py` or create `settings_production.py`:
+TutorFlow uses **env-first configuration**. The main `settings.py` reads from environment variables. Ensure these are set:
 
-```python
-import os
+- `SECRET_KEY` – Required in production
+- `DEBUG=False` – Never use True in production
+- `ALLOWED_HOSTS` – Comma-separated list of allowed hosts
+- `DATABASE_URL` – PostgreSQL connection string (e.g. `postgresql://user:pass@host:5432/dbname`). Uses `dj-database-url`; if unset, falls back to SQLite.
 
-DEBUG = False
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
-# Database from environment variable
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
-
-# Static files
-STATIC_ROOT = '/var/www/tutorflow/static/'
-MEDIA_ROOT = '/var/www/tutorflow/media/'
-
-# Logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/tutorflow/django.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
-}
-```
+For static/media paths and logging, override `STATIC_ROOT`, `MEDIA_ROOT`, and `LOGGING` via environment or a local settings override if needed.
 
 ## Deployment Steps
 
