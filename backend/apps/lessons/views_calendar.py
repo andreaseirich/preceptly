@@ -60,7 +60,7 @@ class WeekView(LoginRequiredMixin, TemplateView):
             day = now.day
 
         # Load week data
-        week_data = WeekService.get_week_data(year, month, day)
+        week_data = WeekService.get_week_data(year, month, day, user=self.request.user)
 
         # Navigation: Previous/Next week
         week_start = week_data["week_start"]
@@ -126,7 +126,7 @@ class LessonMonthView(LoginRequiredMixin, ListView):
         """Returns lessons for the specified month."""
         year = int(self.kwargs.get("year", timezone.now().year))
         month = int(self.kwargs.get("month", timezone.now().month))
-        return LessonQueryService.get_lessons_for_month(year, month)
+        return LessonQueryService.get_lessons_for_month(year, month, user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -186,7 +186,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 pass
 
         # Load calendar data
-        calendar_data = CalendarService.get_calendar_data(year, month)
+        calendar_data = CalendarService.get_calendar_data(year, month, user=self.request.user)
 
         # Calculate previous and next month
         if month == 1:

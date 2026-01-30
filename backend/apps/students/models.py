@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -5,6 +6,12 @@ from django.utils.translation import gettext_lazy as _
 class Student(models.Model):
     """Student with contact information, school/grade and subjects."""
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="students",
+        help_text=_("Tutor who owns this student data"),
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True)

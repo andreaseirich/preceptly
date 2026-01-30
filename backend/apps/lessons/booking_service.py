@@ -259,7 +259,7 @@ class BookingService:
         }
 
     @staticmethod
-    def get_public_booking_data(year: int, month: int, day: int) -> Dict:
+    def get_public_booking_data(year: int, month: int, day: int, user=None) -> Dict:
         """
         Gibt Daten für die öffentliche Buchungsseite einer Woche zurück (ohne Contract-Token).
 
@@ -267,6 +267,7 @@ class BookingService:
             year: Jahr
             month: Monat
             day: Tag
+            user: Optional - filtert nach User (für Multi-Tenancy)
 
         Returns:
             Dict mit:
@@ -281,10 +282,14 @@ class BookingService:
         week_start = target_date - timedelta(days=days_since_monday)
         week_end = week_start + timedelta(days=6)
 
-        # Use default working hours from UserProfile (first entry)
+        # Use default working hours from UserProfile
         working_hours = {}
         try:
-            profile = UserProfile.objects.first()
+            profile = (
+                UserProfile.objects.filter(user=user).first()
+                if user
+                else UserProfile.objects.first()
+            )
             if profile and profile.default_working_hours:
                 working_hours = profile.default_working_hours
         except (UserProfile.DoesNotExist, AttributeError) as e:
@@ -295,8 +300,7 @@ class BookingService:
             logger.debug(f"Could not load default working hours: {str(e)}")
 
         # Load occupied time slots (for all contracts, as there is no specific contract)
-        # Use a method that returns all occupied slots
-        occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end)
+        occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end, user=user)
 
         # Weekday names
         weekday_names = [
@@ -341,14 +345,15 @@ class BookingService:
 
     @staticmethod
     def get_all_occupied_time_slots(
-        start_date: date, end_date: date
+        start_date: date, end_date: date, user=None
     ) -> Dict[date, List[Tuple[time, time]]]:
         """
-        Gibt alle belegten Zeitslots zurück (für alle Contracts).
+        Gibt alle belegten Zeitslots zurück.
 
         Args:
             start_date: Startdatum
             end_date: Enddatum
+            user: Optional - filtert nach User (für Multi-Tenancy)
 
         Returns:
             Dict[date, List[Tuple[start_time, end_time]]] - belegte Zeitslots pro Tag
@@ -356,9 +361,12 @@ class BookingService:
         occupied = defaultdict(list)
 
         # Load all lessons in the period
-        lessons = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
+        lessons_qs = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
             "contract", "contract__student"
         )
+        if user:
+            lessons_qs = lessons_qs.filter(contract__student__user=user)
+        lessons = lessons_qs
 
         for lesson in lessons:
             start_datetime, end_datetime = LessonConflictService.calculate_time_block(lesson)
@@ -367,16 +375,22 @@ class BookingService:
         # Load blocked times in the period
         start_datetime = timezone.make_aware(datetime.combine(start_date, time.min))
         end_datetime = timezone.make_aware(datetime.combine(end_date, time.max))
-        blocked_times = BlockedTime.objects.filter(
+        blocked_times_qs = BlockedTime.objects.filter(
             start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
         ).order_by("start_datetime")
+        if user:
+            blocked_times_qs = blocked_times_qs.filter(user=user)
+        blocked_times = blocked_times_qs
 
         # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für den Zeitraum
-        recurring_blocked_times = RecurringBlockedTime.objects.filter(
+        recurring_qs = RecurringBlockedTime.objects.filter(
             start_date__lte=end_date, end_date__gte=start_date, is_active=True
         ) | RecurringBlockedTime.objects.filter(
             start_date__lte=end_date, end_date__isnull=True, is_active=True
         )
+        if user:
+            recurring_qs = recurring_qs.filter(user=user)
+        recurring_blocked_times = recurring_qs
 
         # Füge Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten hinzu
         for rbt in recurring_blocked_times:

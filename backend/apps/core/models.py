@@ -25,6 +25,13 @@ class UserProfile(models.Model):
             "Default working hours for booking pages (format: {'monday': [{'start': '09:00', 'end': '17:00'}], ...}). Used as fallback when contract has no working_hours."
         ),
     )
+    public_booking_token = models.CharField(
+        max_length=64,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=_("Token for public booking URL (e.g. /public-booking/<token>/)"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

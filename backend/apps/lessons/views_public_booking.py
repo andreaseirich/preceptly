@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from apps.contracts.models import Contract
+from apps.core.utils_booking import get_tutor_for_booking
 from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson, LessonDocument
 from apps.students.models import Student
@@ -28,6 +29,7 @@ class PublicBookingView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        tutor_token = self.kwargs.get("tutor_token")
 
         # Aktuelles Datum oder aus GET-Parameter
         try:
@@ -38,15 +40,18 @@ class PublicBookingView(TemplateView):
         except (ValueError, TypeError):
             target_date = timezone.now().date()
 
+        tutor = get_tutor_for_booking(tutor_token)
+
         # Week data for booking page (without contract)
         week_data = BookingService.get_public_booking_data(
-            target_date.year, target_date.month, target_date.day
+            target_date.year, target_date.month, target_date.day, user=tutor
         )
 
         context.update(
             {
                 "week_data": week_data,
                 "current_date": target_date,
+                "tutor_token": tutor_token or "",
             }
         )
 
@@ -60,14 +65,21 @@ def search_student_api(request):
     try:
         data = json.loads(request.body)
         name = data.get("name", "").strip()
+        tutor_token = data.get("tutor_token")
 
         if not name:
             return JsonResponse(
                 {"success": False, "message": _("Please enter a name.")}, status=400
             )
 
-        # Search for exact match
-        exact_match = StudentSearchService.find_exact_match(name)
+        tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            return JsonResponse(
+                {"success": False, "message": _("Booking is not available.")}, status=400
+            )
+
+        # Search for exact match (within tutor's students)
+        exact_match = StudentSearchService.find_exact_match(name, user=tutor)
         if exact_match:
             return JsonResponse(
                 {
@@ -82,8 +94,8 @@ def search_student_api(request):
                 }
             )
 
-        # Search for similar names
-        similar_students = StudentSearchService.search_by_name(name, threshold=0.7)
+        # Search for similar names (within tutor's students)
+        similar_students = StudentSearchService.search_by_name(name, threshold=0.7, user=tutor)
 
         if similar_students:
             return JsonResponse(
@@ -137,6 +149,7 @@ def create_student_api(request):
         school = data.get("school", "").strip()
         grade = data.get("grade", "").strip()
         subjects = data.get("subjects", "").strip()
+        tutor_token = data.get("tutor_token")
 
         if not first_name or not last_name:
             return JsonResponse(
@@ -144,8 +157,15 @@ def create_student_api(request):
                 status=400,
             )
 
-        # Create new student
+        tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            return JsonResponse(
+                {"success": False, "message": _("Booking is not available.")}, status=400
+            )
+
+        # Create new student (assigned to tutor)
         student = Student.objects.create(
+            user=tutor,
             first_name=first_name,
             last_name=last_name,
             email=email if email else None,
@@ -221,13 +241,21 @@ def book_lesson_api(request):
         else:
             institute = ""
 
+        tutor_token = data.get("tutor_token")
+        tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            return JsonResponse(
+                {"success": False, "message": _("Booking is not available.")},
+                status=400,
+            )
+
         if not student_id:
             return JsonResponse(
                 {"success": False, "message": _("Student ID is required.")}, status=400
             )
 
         try:
-            student = Student.objects.get(id=student_id)
+            student = Student.objects.get(id=student_id, user=tutor)
         except Student.DoesNotExist:
             return JsonResponse({"success": False, "message": _("Student not found.")}, status=404)
 
@@ -313,7 +341,10 @@ def book_lesson_api(request):
 
         # Check availability
         week_data = BookingService.get_public_booking_data(
-            booking_date_obj.year, booking_date_obj.month, booking_date_obj.day
+            booking_date_obj.year,
+            booking_date_obj.month,
+            booking_date_obj.day,
+            user=tutor,
         )
 
         # Find the day in week_data
@@ -328,7 +359,7 @@ def book_lesson_api(request):
 
         # Check if slot is available
         occupied_slots = BookingService.get_all_occupied_time_slots(
-            booking_date_obj, booking_date_obj
+            booking_date_obj, booking_date_obj, user=tutor
         )
 
         if not BookingService.is_time_slot_available(
@@ -338,9 +369,10 @@ def book_lesson_api(request):
                 {"success": False, "message": _("Time slot is already booked.")}, status=400
             )
 
-        # Find or create contract for this student
-        # Search for active contract if available
-        contract = Contract.objects.filter(student=student, is_active=True).first()
+        # Find or create contract for this student (student belongs to tutor)
+        contract = Contract.objects.filter(
+            student=student, student__user=tutor, is_active=True
+        ).first()
 
         if not contract:
             # Create new contract with hourly_rate=0.00 (to be set later by tutor)

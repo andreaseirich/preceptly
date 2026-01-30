@@ -19,7 +19,7 @@ def generate_lesson_plan(request, lesson_id):
     Generates an AI lesson plan for a session.
     Only available for premium users.
     """
-    session = get_object_or_404(Session, pk=lesson_id)
+    session = get_object_or_404(Session, pk=lesson_id, contract__student__user=request.user)
 
     # Premium-Check
     if not is_premium_user(request.user):

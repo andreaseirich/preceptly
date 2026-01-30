@@ -18,12 +18,15 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 
 class ContractListView(LoginRequiredMixin, ListView):
-    """List of all contracts."""
+    """List of all contracts for the current user."""
 
     model = Contract
     template_name = "contracts/contract_list.html"
     context_object_name = "contracts"
     paginate_by = 20
+
+    def get_queryset(self):
+        return super().get_queryset().filter(student__user=self.request.user)
 
 
 class ContractDetailView(LoginRequiredMixin, DetailView):
@@ -33,12 +36,21 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
     template_name = "contracts/contract_detail.html"
     context_object_name = "contract"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(student__user=self.request.user)
+
 
 class ContractCreateView(LoginRequiredMixin, CreateView):
     """Create a new contract."""
 
     model = Contract
     form_class = ContractForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     template_name = "contracts/contract_form.html"
     success_url = reverse_lazy("contracts:list")
 
@@ -81,6 +93,15 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
 
     model = Contract
     form_class = ContractForm
+
+    def get_queryset(self):
+        return super().get_queryset().filter(student__user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     template_name = "contracts/contract_form.html"
     success_url = reverse_lazy("contracts:list")
 
@@ -172,6 +193,9 @@ class ContractDeleteView(LoginRequiredMixin, DeleteView):
     model = Contract
     template_name = "contracts/contract_confirm_delete.html"
     success_url = reverse_lazy("contracts:list")
+
+    def get_queryset(self):
+        return super().get_queryset().filter(student__user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, _("Contract successfully deleted."))

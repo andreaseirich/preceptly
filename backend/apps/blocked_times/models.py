@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -7,6 +8,12 @@ from django.utils.translation import gettext_lazy as _
 class BlockedTime(models.Model):
     """Personal appointments/blocked times (e.g., university, job, community)."""
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="blocked_times",
+        help_text=_("User who owns this blocked time"),
+    )
     title = models.CharField(
         max_length=200,
         help_text=_("Title of the blocked time (e.g., 'University lecture', 'Community')"),

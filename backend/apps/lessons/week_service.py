@@ -18,7 +18,7 @@ class WeekService:
     """Service für Wochenansicht."""
 
     @staticmethod
-    def get_week_data(year: int, month: int, day: int) -> Dict:
+    def get_week_data(year: int, month: int, day: int, user=None) -> Dict:
         """
         Lädt alle Lessons und Blockzeiten für eine Woche (Montag bis Sonntag).
 
@@ -26,6 +26,7 @@ class WeekService:
             year: Jahr
             month: Monat (1-12)
             day: Tag des Monats (1-31) - wird verwendet, um die Woche zu bestimmen
+            user: Optional - filtert Daten nach User (für Multi-Tenancy)
 
         Returns:
             Dict mit:
@@ -42,25 +43,34 @@ class WeekService:
         week_end = week_start + timedelta(days=6)  # Sonntag
 
         # Lade Lessons für die Woche
-        lessons = (
+        lessons_qs = (
             Lesson.objects.filter(date__gte=week_start, date__lte=week_end)
             .select_related("contract", "contract__student")
             .order_by("date", "start_time")
         )
+        if user:
+            lessons_qs = lessons_qs.filter(contract__student__user=user)
+        lessons = lessons_qs
 
         # Lade Blockzeiten für die Woche
         start_datetime = timezone.make_aware(datetime.combine(week_start, time.min))
         end_datetime = timezone.make_aware(datetime.combine(week_end, time.max))
-        blocked_times = BlockedTime.objects.filter(
+        blocked_times_qs = BlockedTime.objects.filter(
             start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
         ).order_by("start_datetime")
+        if user:
+            blocked_times_qs = blocked_times_qs.filter(user=user)
+        blocked_times = blocked_times_qs
 
         # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für die Woche
-        recurring_blocked_times = RecurringBlockedTime.objects.filter(
+        recurring_qs = RecurringBlockedTime.objects.filter(
             start_date__lte=week_end, end_date__gte=week_start, is_active=True
         ) | RecurringBlockedTime.objects.filter(
             start_date__lte=week_end, end_date__isnull=True, is_active=True
         )
+        if user:
+            recurring_qs = recurring_qs.filter(user=user)
+        recurring_blocked_times = recurring_qs
 
         # Gruppiere Lessons nach Datum
         lessons_by_date = defaultdict(list)

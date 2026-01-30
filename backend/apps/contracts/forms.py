@@ -10,6 +10,11 @@ from django.utils.translation import gettext_lazy as _
 class ContractForm(forms.ModelForm):
     """Form für Contract-Erstellung und -Bearbeitung."""
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields["student"].queryset = self.fields["student"].queryset.filter(user=user)
+
     has_monthly_planning_limit = forms.BooleanField(
         required=False,
         initial=True,

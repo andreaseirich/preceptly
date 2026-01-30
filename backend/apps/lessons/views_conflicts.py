@@ -17,7 +17,7 @@ class ConflictDetailView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         lesson_id = self.kwargs.get("pk")
-        lesson = get_object_or_404(Lesson, pk=lesson_id)
+        lesson = get_object_or_404(Lesson, pk=lesson_id, contract__student__user=self.request.user)
 
         # Load conflicts
         conflicts = LessonConflictService.check_conflicts(lesson, exclude_self=True)

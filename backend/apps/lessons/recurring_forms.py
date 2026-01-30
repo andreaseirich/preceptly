@@ -10,6 +10,13 @@ from django.utils.translation import gettext_lazy as _
 class RecurringLessonForm(forms.ModelForm):
     """Form für RecurringLesson-Erstellung und -Bearbeitung."""
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields["contract"].queryset = self.fields["contract"].queryset.filter(
+                student__user=user
+            )
+
     class Meta:
         model = RecurringLesson
         fields = [

@@ -26,13 +26,20 @@ class InvoiceCreateForm(forms.Form):
         help_text=_("End of the billing period"),
     )
     contract = forms.ModelChoiceField(
-        queryset=Contract.objects.filter(is_active=True),
+        queryset=Contract.objects.none(),  # Set in __init__ based on user
         required=False,
         widget=forms.Select(attrs={"class": "form-control"}),
         help_text=_(
             "Optional: Filter by contract (only lessons from this contract will be billed)"
         ),
     )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields["contract"].queryset = Contract.objects.filter(
+                is_active=True, student__user=user
+            )
 
     def clean(self):
         cleaned_data = super().clean()

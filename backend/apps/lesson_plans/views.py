@@ -19,7 +19,9 @@ class LessonPlanView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         lesson_id = self.kwargs.get("lesson_id")
-        session = get_object_or_404(Session, pk=lesson_id)
+        session = get_object_or_404(
+            Session, pk=lesson_id, contract__student__user=self.request.user
+        )
 
         # Get existing lesson plans for this session
         lesson_plans = LessonPlan.objects.filter(lesson=session).order_by("-created_at")

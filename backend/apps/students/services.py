@@ -26,13 +26,14 @@ class StudentSearchService:
         return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
     @staticmethod
-    def search_by_name(name: str, threshold: float = 0.7) -> List[Tuple[Student, float]]:
+    def search_by_name(name: str, threshold: float = 0.7, user=None) -> List[Tuple[Student, float]]:
         """
         Search for students by name using fuzzy matching.
 
         Args:
             name: Name to search for (can be full name, first name, or last name)
             threshold: Minimum similarity ratio (default: 0.7 = 70%)
+            user: Optional - filter to this user's students (for multi-tenancy)
 
         Returns:
             List of tuples (Student, similarity_ratio) sorted by similarity (highest first)
@@ -43,8 +44,10 @@ class StudentSearchService:
         name_lower = name.strip().lower()
         results = []
 
-        # Get all students
+        # Get students (optionally filtered by user)
         all_students = Student.objects.all()
+        if user:
+            all_students = all_students.filter(user=user)
 
         for student in all_students:
             # Calculate similarity for full name
@@ -83,12 +86,13 @@ class StudentSearchService:
         return results
 
     @staticmethod
-    def find_exact_match(name: str) -> Student | None:
+    def find_exact_match(name: str, user=None) -> Student | None:
         """
         Find exact match for a student name.
 
         Args:
             name: Name to search for
+            user: Optional - filter to this user's students (for multi-tenancy)
 
         Returns:
             Student if exact match found, None otherwise
@@ -99,7 +103,10 @@ class StudentSearchService:
         name_lower = name.strip().lower()
 
         # Try exact match on full name
-        for student in Student.objects.all():
+        students_qs = Student.objects.all()
+        if user:
+            students_qs = students_qs.filter(user=user)
+        for student in students_qs:
             if student.full_name.lower() == name_lower:
                 return student
 

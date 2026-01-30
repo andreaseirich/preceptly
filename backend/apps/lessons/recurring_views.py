@@ -30,6 +30,9 @@ class RecurringLessonListView(LoginRequiredMixin, ListView):
     context_object_name = "recurring_lessons"
     paginate_by = 20
 
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
+
 
 class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
     """Detailansicht einer wiederholenden Unterrichtsstunde."""
@@ -37,6 +40,9 @@ class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
     model = RecurringLesson
     template_name = "lessons/recurringlesson_detail.html"
     context_object_name = "recurring_lesson"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -53,6 +59,11 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
     model = RecurringLesson
     form_class = RecurringLessonForm
     template_name = "lessons/recurringlesson_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def get_initial(self):
         """Setzt initiale Werte, z. B. Contract aus Query-Parameter."""
@@ -111,6 +122,14 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "lessons/recurringlesson_form.html"
     success_url = reverse_lazy("lessons:recurring_list")
 
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         messages.success(self.request, _("Recurring lesson successfully updated."))
         return super().form_valid(form)
@@ -123,6 +142,9 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "lessons/recurringlesson_confirm_delete.html"
     success_url = reverse_lazy("lessons:recurring_list")
 
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
+
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, _("Recurring lesson successfully deleted."))
         return super().delete(request, *args, **kwargs)
@@ -131,7 +153,9 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
 @login_required
 def generate_lessons_from_recurring(request, pk):
     """Generiert Lessons aus einer RecurringLesson."""
-    recurring_lesson = get_object_or_404(RecurringLesson, pk=pk)
+    recurring_lesson = get_object_or_404(
+        RecurringLesson, pk=pk, contract__student__user=request.user
+    )
 
     result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 

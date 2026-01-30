@@ -60,11 +60,16 @@ urlpatterns = [
         views_booking.student_booking_api,
         name="student_booking_api",
     ),
-    # Public booking page (without token)
+    # Public booking page (optional tutor token for multi-tenancy)
     path(
         "public-booking/",
         views_public_booking.PublicBookingView.as_view(),
         name="public_booking",
+    ),
+    path(
+        "public-booking/<str:tutor_token>/",
+        views_public_booking.PublicBookingView.as_view(),
+        name="public_booking_with_token",
     ),
     path(
         "public-booking/api/search-student/",

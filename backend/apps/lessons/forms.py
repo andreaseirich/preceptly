@@ -91,8 +91,12 @@ class SessionForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        if user:
+            self.fields["contract"].queryset = self.fields["contract"].queryset.filter(
+                student__user=user
+            )
         # Hide recurrence fields when editing (only show when creating)
         if self.instance and self.instance.pk:
             self.fields["is_recurring"].widget = forms.HiddenInput()

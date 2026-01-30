@@ -33,14 +33,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         SessionStatusUpdater.update_past_sessions_to_taught()
 
         now = timezone.now()
+        user = self.request.user
 
         # Today's sessions
-        today_sessions = SessionQueryService.get_today_sessions()
+        today_sessions = SessionQueryService.get_today_sessions(user=user)
         for session in today_sessions:
             session.conflicts = LessonConflictService.check_conflicts(session)
 
         # Upcoming sessions
-        upcoming_sessions = SessionQueryService.get_upcoming_sessions(days=7)
+        upcoming_sessions = SessionQueryService.get_upcoming_sessions(days=7, user=user)
         for session in upcoming_sessions:
             session.conflicts = LessonConflictService.check_conflicts(session)
 
@@ -49,10 +50,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         conflict_count = sum(1 for session in all_sessions if session.conflicts)
 
         # Income for current month
-        current_month_income = IncomeSelector.get_monthly_income(now.year, now.month, status="paid")
+        current_month_income = IncomeSelector.get_monthly_income(
+            now.year, now.month, status="paid", user=user
+        )
 
         # Income by status for current month
-        income_by_status = IncomeSelector.get_income_by_status(year=now.year, month=now.month)
+        income_by_status = IncomeSelector.get_income_by_status(
+            year=now.year, month=now.month, user=user
+        )
 
         # Premium status
         from apps.core.utils import is_premium_user
@@ -124,10 +129,15 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
             next_year = year + 1
             next_month = 1
 
+        user = self.request.user
         if month:
             # Monthly view
-            monthly_income = IncomeSelector.get_monthly_income(year, month, status="paid")
-            income_by_status = IncomeSelector.get_income_by_status(year=year, month=month)
+            monthly_income = IncomeSelector.get_monthly_income(
+                year, month, status="paid", user=user
+            )
+            income_by_status = IncomeSelector.get_income_by_status(
+                year=year, month=month, user=user
+            )
             context.update(
                 {
                     "view_type": "month",
@@ -143,8 +153,8 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
             )
         else:
             # Yearly view
-            yearly_income = IncomeSelector.get_yearly_income(year, status="paid")
-            income_by_status = IncomeSelector.get_income_by_status(year=year)
+            yearly_income = IncomeSelector.get_yearly_income(year, status="paid", user=user)
+            income_by_status = IncomeSelector.get_income_by_status(year=year, user=user)
             context.update(
                 {
                     "view_type": "year",
@@ -195,7 +205,7 @@ class SettingsView(LoginRequiredMixin, FormView):
         from apps.contracts.models import Contract
 
         contracts = (
-            Contract.objects.filter(is_active=True)
+            Contract.objects.filter(is_active=True, student__user=self.request.user)
             .select_related("student")
             .order_by("student__last_name", "student__first_name")
         )

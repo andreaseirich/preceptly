@@ -267,6 +267,7 @@ class RecurringBlockedTimeService:
 
         # Erstelle neuen BlockedTime-Eintrag
         blocked_time = BlockedTime(
+            user=recurring_blocked_time.user,
             title=recurring_blocked_time.title,
             description=recurring_blocked_time.description,
             start_datetime=start_datetime,

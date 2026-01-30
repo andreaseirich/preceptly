@@ -56,8 +56,35 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Creating demo data..."))
 
-        # Students
+        # Create users first (required for multi-tenancy)
+        premium_user, _ = User.objects.get_or_create(
+            username="demo_premium",
+            defaults={"email": "premium@example.com", "is_staff": True, "is_active": True},
+        )
+        premium_user.set_password("demo123")
+        premium_user.is_staff = True
+        premium_user.is_active = True
+        premium_user.save()
+
+        UserProfile.objects.get_or_create(
+            user=premium_user,
+            defaults={"is_premium": True, "premium_since": timezone.now()},
+        )
+
+        non_premium_user, _ = User.objects.get_or_create(
+            username="demo_user",
+            defaults={"email": "demo_user@example.com", "is_staff": True, "is_active": True},
+        )
+        non_premium_user.set_password("demo123")
+        non_premium_user.is_staff = True
+        non_premium_user.is_active = True
+        non_premium_user.save()
+
+        UserProfile.objects.get_or_create(user=non_premium_user, defaults={"is_premium": False})
+
+        # Students (assigned to premium_user)
         student1 = Student.objects.create(
+            user=premium_user,
             first_name="Max",
             last_name="Mustermann",
             email="max.mustermann@example.com",
@@ -69,6 +96,7 @@ class Command(BaseCommand):
         )
 
         student2 = Student.objects.create(
+            user=premium_user,
             first_name="Anna",
             last_name="Schmidt",
             email="anna.schmidt@example.com",
@@ -80,6 +108,7 @@ class Command(BaseCommand):
         )
 
         student3 = Student.objects.create(
+            user=premium_user,
             first_name="Tom",
             last_name="Weber",
             email="tom.weber@example.com",
@@ -89,6 +118,7 @@ class Command(BaseCommand):
         )
 
         student4 = Student.objects.create(
+            user=premium_user,
             first_name="Lisa",
             last_name="Müller",
             email="lisa.mueller@example.com",
@@ -281,9 +311,9 @@ class Command(BaseCommand):
         # Generate lessons from recurring lesson
         RecurringLessonService.generate_lessons(recurring2, check_conflicts=True, dry_run=False)
 
-        # Blocked times
-        # Blocked time 1: University lecture (one-time)
+        # Blocked times (assigned to premium_user)
         BlockedTime.objects.create(
+            user=premium_user,
             title="University Lecture",
             description="Mathematics lecture",
             start_datetime=timezone.make_aware(
@@ -298,6 +328,7 @@ class Command(BaseCommand):
         # Blocked time 2: Multi-day vacation (3 days)
         vacation_start = today + timedelta(days=10)
         BlockedTime.objects.create(
+            user=premium_user,
             title="Vacation",
             description="Multi-day vacation",
             start_datetime=timezone.make_aware(
@@ -312,6 +343,7 @@ class Command(BaseCommand):
         # Blocked time 3: Conflict with a lesson (intentional)
         conflict_date = today + timedelta(days=5)
         BlockedTime.objects.create(
+            user=premium_user,
             title="Other Activity",
             description="Intentional conflict with a lesson",
             start_datetime=timezone.make_aware(
@@ -332,59 +364,6 @@ class Command(BaseCommand):
             status="planned",
             notes="Math: Analysis - CONFLICT WITH BLOCKED TIME",
         )
-
-        # Premium user with lesson plan
-        # Check if user already exists, otherwise create it
-        premium_user, created = User.objects.get_or_create(
-            username="demo_premium",
-            defaults={
-                "email": "premium@example.com",
-                "is_staff": True,  # Required for admin login
-                "is_active": True,
-            },
-        )
-
-        # Set password (even if user already exists, to ensure it's correct)
-        premium_user.set_password("demo123")
-        premium_user.is_staff = True  # Required for admin login
-        premium_user.is_active = True
-        premium_user.save()
-
-        # Create or update UserProfile
-        profile, profile_created = UserProfile.objects.get_or_create(
-            user=premium_user, defaults={"is_premium": True, "premium_since": timezone.now()}
-        )
-
-        # Update profile if it already exists
-        if not profile_created:
-            profile.is_premium = True
-            if not profile.premium_since:
-                profile.premium_since = timezone.now()
-            profile.save()
-
-        # Non-premium user for comparison (use demo_user for consistency with README)
-        non_premium_user, created = User.objects.get_or_create(
-            username="demo_user",
-            defaults={
-                "email": "demo_user@example.com",
-                "is_staff": True,
-                "is_active": True,
-            },
-        )
-        non_premium_user.set_password("demo123")
-        non_premium_user.is_staff = True
-        non_premium_user.is_active = True
-        non_premium_user.save()
-
-        # Create or update UserProfile (non-premium)
-        non_premium_profile, _ = UserProfile.objects.get_or_create(
-            user=non_premium_user,
-            defaults={
-                "is_premium": False,
-            },
-        )
-        non_premium_profile.is_premium = False
-        non_premium_profile.save()
 
         # Demo LessonPlan 1 (for lesson1 - already existing)
         LessonPlan.objects.create(
@@ -450,7 +429,10 @@ class Command(BaseCommand):
 
             # Create invoice with lesson4
             demo_invoice = InvoiceService.create_invoice_from_lessons(
-                period_start=invoice_period_start, period_end=invoice_period_end, contract=contract3
+                period_start=invoice_period_start,
+                period_end=invoice_period_end,
+                contract=contract3,
+                user=premium_user,
             )
 
             # Set invoice status to "sent" (as example)

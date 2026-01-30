@@ -27,6 +27,9 @@ class InvoiceListView(LoginRequiredMixin, ListView):
     context_object_name = "invoices"
     paginate_by = 20
 
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
+
 
 class InvoiceDetailView(LoginRequiredMixin, DetailView):
     """Detailansicht einer Rechnung."""
@@ -34,6 +37,9 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
     model = Invoice
     template_name = "billing/invoice_detail.html"
     context_object_name = "invoice"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
 
 
 class InvoiceCreateView(LoginRequiredMixin, CreateView):
@@ -48,6 +54,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         # Remove 'instance' if present (added by CreateView)
         kwargs.pop("instance", None)
+        kwargs["user"] = self.request.user
 
         # If GET parameters are present (e.g., after preview), set initial values
         if self.request.method == "GET":
@@ -99,10 +106,12 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                 period_end = date.fromisoformat(period_end)
                 contract = None
                 if contract_id:
-                    contract = Contract.objects.get(pk=contract_id)
+                    contract = Contract.objects.filter(
+                        pk=contract_id, student__user=self.request.user
+                    ).first()
 
                 billable_lessons = InvoiceService.get_billable_lessons(
-                    period_start, period_end, contract_id
+                    period_start, period_end, contract_id, user=self.request.user
                 )
                 context["billable_lessons"] = billable_lessons
                 context["period_start"] = period_start
@@ -122,7 +131,9 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
 
         try:
             # Create invoice automatically with all available lessons in the period
-            invoice = InvoiceService.create_invoice_from_lessons(period_start, period_end, contract)
+            invoice = InvoiceService.create_invoice_from_lessons(
+                period_start, period_end, contract, user=self.request.user
+            )
             lesson_count = invoice.items.count()
             messages.success(
                 self.request,
@@ -144,6 +155,9 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
     model = Invoice
     template_name = "billing/invoice_confirm_delete.html"
     success_url = reverse_lazy("billing:invoice_list")
+
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
         """Löscht die Rechnung und setzt Lessons zurück."""
@@ -168,7 +182,7 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
 @login_required
 def generate_invoice_document(request, pk):
     """Generiert das Rechnungsdokument für eine Invoice."""
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(Invoice, pk=pk, contract__student__user=request.user)
 
     try:
         InvoiceDocumentService.save_document(invoice)
@@ -186,7 +200,7 @@ def serve_invoice_document(request, pk):
 
     from django.http import FileResponse, Http404
 
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(Invoice, pk=pk, contract__student__user=request.user)
 
     if not invoice.document:
         raise Http404(_("Invoice document not found."))

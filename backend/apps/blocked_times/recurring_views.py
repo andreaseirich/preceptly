@@ -21,6 +21,9 @@ class RecurringBlockedTimeDetailView(LoginRequiredMixin, DetailView):
     template_name = "blocked_times/recurring_blockedtime_detail.html"
     context_object_name = "recurring_blocked_time"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Vorschau der zu erzeugenden BlockedTime-Einträge
@@ -36,16 +39,17 @@ class RecurringBlockedTimeCreateView(LoginRequiredMixin, CreateView):
     form_class = RecurringBlockedTimeForm
     template_name = "blocked_times/recurring_blockedtime_form.html"
 
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, _("Recurring blocked time successfully created."))
+        return super().form_valid(form)
+
     def get_success_url(self):
         """Weiterleitung zurück zum Kalender."""
         from django.utils import timezone
 
         now = timezone.now()
         return reverse_lazy("lessons:week") + f"?year={now.year}&month={now.month}&day={now.day}"
-
-    def form_valid(self, form):
-        messages.success(self.request, _("Recurring blocked time successfully created."))
-        return super().form_valid(form)
 
 
 class RecurringBlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
@@ -54,6 +58,9 @@ class RecurringBlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
     model = RecurringBlockedTime
     form_class = RecurringBlockedTimeForm
     template_name = "blocked_times/recurring_blockedtime_form.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_success_url(self):
         """Weiterleitung zurück zum Kalender."""
@@ -73,6 +80,9 @@ class RecurringBlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
     model = RecurringBlockedTime
     template_name = "blocked_times/recurring_blockedtime_confirm_delete.html"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
     def get_success_url(self):
         """Weiterleitung zurück zum Kalender."""
         from django.utils import timezone
@@ -90,6 +100,9 @@ class RecurringBlockedTimeGenerateView(LoginRequiredMixin, DetailView):
 
     model = RecurringBlockedTime
     template_name = "blocked_times/recurring_blockedtime_generate.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
 
     def post(self, request, *args, **kwargs):
         recurring_blocked_time = self.get_object()

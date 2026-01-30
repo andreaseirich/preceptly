@@ -2,6 +2,7 @@
 Models for recurring blocked times (series appointments).
 """
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -9,6 +10,12 @@ from django.utils.translation import gettext_lazy as _
 class RecurringBlockedTime(models.Model):
     """Recurring blocked time - template for series appointments."""
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="recurring_blocked_times",
+        help_text=_("User who owns this recurring blocked time"),
+    )
     title = models.CharField(
         max_length=200,
         help_text=_("Title of the blocked time (e.g., 'University lecture', 'Community')"),

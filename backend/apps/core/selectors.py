@@ -10,6 +10,7 @@ from apps.billing.models import InvoiceItem
 from apps.contracts.models import ContractMonthlyPlan
 from apps.lessons.models import Lesson
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 
 class IncomeSelector:
@@ -67,7 +68,7 @@ class IncomeSelector:
             return IncomeSelector._calculate_lesson_amount(lesson)
 
     @staticmethod
-    def get_monthly_income(year: int, month: int, status: str = "paid") -> dict:
+    def get_monthly_income(year: int, month: int, status: str = "paid", user: User = None) -> dict:
         """
         Berechnet die Einnahmen für einen bestimmten Monat.
 
@@ -85,9 +86,12 @@ class IncomeSelector:
         else:
             end_date = date(year, month + 1, 1)
 
-        lessons = Lesson.objects.filter(
+        lessons_qs = Lesson.objects.filter(
             date__gte=start_date, date__lt=end_date, status=status
         ).select_related("contract")
+        if user:
+            lessons_qs = lessons_qs.filter(contract__student__user=user)
+        lessons = lessons_qs
 
         total_income = Decimal("0.00")
         lesson_count = 0
@@ -118,7 +122,7 @@ class IncomeSelector:
         }
 
     @staticmethod
-    def get_monthly_planned_vs_actual(year: int, month: int) -> dict:
+    def get_monthly_planned_vs_actual(year: int, month: int, user: User = None) -> dict:
         """
         Vergleicht geplante vs. tatsächliche Einheiten und Einnahmen für einen Monat.
 
@@ -130,7 +134,10 @@ class IncomeSelector:
             Dict mit planned_units, planned_amount, actual_units, actual_amount
         """
         # Geplante Einheiten aus ContractMonthlyPlan
-        monthly_plans = ContractMonthlyPlan.objects.filter(year=year, month=month)
+        monthly_plans_qs = ContractMonthlyPlan.objects.filter(year=year, month=month)
+        if user:
+            monthly_plans_qs = monthly_plans_qs.filter(contract__student__user=user)
+        monthly_plans = monthly_plans_qs
         planned_units = sum(plan.planned_units for plan in monthly_plans)
         planned_amount = Decimal("0.00")
 
@@ -146,9 +153,12 @@ class IncomeSelector:
         else:
             end_date = date(year, month + 1, 1)
 
-        lessons = Lesson.objects.filter(date__gte=start_date, date__lt=end_date).select_related(
+        lessons_qs = Lesson.objects.filter(date__gte=start_date, date__lt=end_date).select_related(
             "contract"
         )
+        if user:
+            lessons_qs = lessons_qs.filter(contract__student__user=user)
+        lessons = lessons_qs
 
         actual_units = lessons.count()
         actual_amount = Decimal("0.00")
@@ -169,7 +179,7 @@ class IncomeSelector:
         }
 
     @staticmethod
-    def get_yearly_income(year: int, status: str = "paid") -> dict:
+    def get_yearly_income(year: int, status: str = "paid", user: User = None) -> dict:
         """
         Berechnet die Einnahmen für ein ganzes Jahr.
 
@@ -185,7 +195,7 @@ class IncomeSelector:
         total_lessons = 0
 
         for month in range(1, 13):
-            monthly_data = IncomeSelector.get_monthly_income(year, month, status)
+            monthly_data = IncomeSelector.get_monthly_income(year, month, status, user=user)
             monthly_incomes.append(monthly_data)
             total_income += monthly_data["total_income"]
             total_lessons += monthly_data["lesson_count"]
@@ -198,7 +208,7 @@ class IncomeSelector:
         }
 
     @staticmethod
-    def get_income_by_status(year: int = None, month: int = None) -> dict:
+    def get_income_by_status(year: int = None, month: int = None, user: User = None) -> dict:
         """
         Gruppiert Einnahmen nach Status.
 
@@ -220,7 +230,10 @@ class IncomeSelector:
         elif year:
             query &= Q(date__year=year)
 
-        lessons = Lesson.objects.filter(query).select_related("contract")
+        lessons_qs = Lesson.objects.filter(query).select_related("contract")
+        if user:
+            lessons_qs = lessons_qs.filter(contract__student__user=user)
+        lessons = lessons_qs
 
         status_breakdown = {}
         for status_code, status_name in Lesson.STATUS_CHOICES:
@@ -241,7 +254,7 @@ class IncomeSelector:
         return status_breakdown
 
     @staticmethod
-    def get_billing_status(year: int = None, month: int = None) -> dict:
+    def get_billing_status(year: int = None, month: int = None, user: User = None) -> dict:
         """
         Gibt Informationen über abgerechnete vs. nicht abgerechnete Lessons zurück.
 
@@ -271,16 +284,22 @@ class IncomeSelector:
         invoiced_lesson_ids = InvoiceItem.objects.filter(lesson__isnull=False).values_list(
             "lesson_id", flat=True
         )
-        invoiced_lessons = Lesson.objects.filter(
+        invoiced_lessons_qs = Lesson.objects.filter(
             query & Q(id__in=invoiced_lesson_ids)
         ).select_related("contract")
+        if user:
+            invoiced_lessons_qs = invoiced_lessons_qs.filter(contract__student__user=user)
+        invoiced_lessons = invoiced_lessons_qs
 
         # Lessons without InvoiceItem with status TAUGHT (not invoiced, but taught)
-        not_invoiced_lessons = (
+        not_invoiced_qs = (
             Lesson.objects.filter(query & Q(status="taught"))
             .exclude(id__in=invoiced_lesson_ids)
             .select_related("contract")
         )
+        if user:
+            not_invoiced_qs = not_invoiced_qs.filter(contract__student__user=user)
+        not_invoiced_lessons = not_invoiced_qs
 
         # Calculate income
         # For invoiced lessons: amounts from InvoiceItems (Single Source of Truth)

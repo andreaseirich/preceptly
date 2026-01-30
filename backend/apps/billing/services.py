@@ -14,7 +14,7 @@ class InvoiceService:
     """Service für Invoice-Operationen."""
 
     @staticmethod
-    def get_billable_lessons(period_start, period_end, contract_id=None):
+    def get_billable_lessons(period_start, period_end, contract_id=None, user=None):
         """
         Gibt alle Lessons zurück, die für eine Abrechnung in Frage kommen.
 
@@ -44,11 +44,13 @@ class InvoiceService:
 
         if contract_id:
             queryset = queryset.filter(contract_id=contract_id)
+        if user:
+            queryset = queryset.filter(contract__student__user=user)
 
         return queryset.order_by("date", "start_time")
 
     @staticmethod
-    def create_invoice_from_lessons(period_start, period_end, contract=None):
+    def create_invoice_from_lessons(period_start, period_end, contract=None, user=None):
         """
         Erstellt eine Invoice mit InvoiceItems aus allen verfügbaren Lessons im Zeitraum.
 
@@ -67,7 +69,7 @@ class InvoiceService:
         contract_id = contract.id if contract else None
         with transaction.atomic():
             lessons = InvoiceService.get_billable_lessons(
-                period_start, period_end, contract_id
+                period_start, period_end, contract_id, user=user
             ).select_for_update()
 
             if not lessons.exists():

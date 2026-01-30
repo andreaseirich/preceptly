@@ -23,8 +23,8 @@ class LessonListView(LoginRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
-        """Filter lessons by date range if provided."""
-        queryset = super().get_queryset()
+        """Filter lessons by user and optionally by date range."""
+        queryset = super().get_queryset().filter(contract__student__user=self.request.user)
 
         # Filter by date range if provided
         start_date = self.request.GET.get("start_date")
@@ -45,6 +45,9 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
     template_name = "lessons/lesson_detail.html"
     context_object_name = "lesson"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add last calendar view to context for template
@@ -58,6 +61,11 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
     model = Lesson
     form_class = LessonForm
     template_name = "lessons/lesson_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         """Redirect back to last used calendar view."""
@@ -279,6 +287,14 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
     form_class = LessonForm
     template_name = "lessons/lesson_form.html"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from apps.lessons.recurring_utils import find_matching_recurring_lesson
@@ -455,6 +471,9 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
 
     model = Lesson
     template_name = "lessons/lesson_confirm_delete.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(contract__student__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

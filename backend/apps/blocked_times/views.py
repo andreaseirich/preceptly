@@ -17,6 +17,9 @@ class BlockedTimeDetailView(LoginRequiredMixin, DetailView):
     template_name = "blocked_times/blockedtime_detail.html"
     context_object_name = "blocked_time"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
 
 class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
     """Neue Blockzeit erstellen."""
@@ -141,6 +144,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
 
             # Create RecurringBlockedTime
             recurring_blocked_time = RecurringBlockedTime(
+                user=self.request.user,
                 title=blocked_time.title,
                 description=blocked_time.description,
                 start_date=blocked_time.start_datetime.date(),
@@ -202,6 +206,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 # Find the first created BlockedTime
                 first_blocked_time = (
                     BlockedTime.objects.filter(
+                        user=self.request.user,
                         title=recurring_blocked_time.title,
                         start_datetime__date__gte=recurring_blocked_time.start_date,
                         start_datetime__time=recurring_blocked_time.start_time,
@@ -212,12 +217,15 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 self.object = first_blocked_time
             else:
                 # If no BlockedTime was created, use the original BlockedTime
+                blocked_time.user = self.request.user
                 blocked_time.save()
                 recalculate_conflicts_for_blocked_time(blocked_time)
                 self.object = blocked_time
         else:
             # Create normal single BlockedTime
-            blocked_time = form.save()
+            blocked_time = form.save(commit=False)
+            blocked_time.user = self.request.user
+            blocked_time.save()
 
             # Recalculate conflicts for affected lessons
             recalculate_conflicts_for_blocked_time(blocked_time)
@@ -228,7 +236,8 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
 
             # Check conflicts with lessons
             conflicting_lessons = Lesson.objects.filter(
-                date=blocked_time.start_datetime.date()
+                date=blocked_time.start_datetime.date(),
+                contract__student__user=self.request.user,
             ).select_related("contract", "contract__student")
 
             for lesson in conflicting_lessons:
@@ -258,6 +267,9 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
     model = BlockedTime
     form_class = BlockedTimeForm
     template_name = "blocked_times/blockedtime_form.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -434,6 +446,9 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
     model = BlockedTime
     template_name = "blocked_times/blockedtime_confirm_delete.html"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from apps.blocked_times.recurring_utils import (
@@ -499,6 +514,7 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
 
             # Find all BlockedTimes in the period with the same title and same time
             all_blocked_times_query = BlockedTime.objects.filter(
+                user=request.user,
                 title=matching_recurring.title,
                 start_datetime__time=matching_recurring.start_time,
                 start_datetime__date__gte=start_date,

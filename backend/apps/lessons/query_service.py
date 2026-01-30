@@ -5,6 +5,7 @@ Service for session queries and filtering.
 from datetime import date, timedelta
 
 from apps.lessons.models import Session
+from django.contrib.auth.models import User
 from django.utils import timezone
 
 
@@ -12,7 +13,7 @@ class SessionQueryService:
     """Service for session queries and filtering."""
 
     @staticmethod
-    def get_sessions_for_month(year: int, month: int) -> list[Session]:
+    def get_sessions_for_month(year: int, month: int, user: User = None) -> list[Session]:
         """
         Returns all sessions for a specific month.
 
@@ -29,24 +30,30 @@ class SessionQueryService:
         else:
             end_date = date(year, month + 1, 1)
 
-        return (
+        qs = (
             Session.objects.filter(date__gte=start_date, date__lt=end_date)
             .select_related("contract", "contract__student")
             .order_by("date", "start_time")
         )
+        if user:
+            qs = qs.filter(contract__student__user=user)
+        return qs
 
     @staticmethod
-    def get_today_sessions() -> list[Session]:
+    def get_today_sessions(user: User = None) -> list[Session]:
         """Returns all sessions for today."""
         today = timezone.now().date()
-        return (
+        qs = (
             Session.objects.filter(date=today)
             .select_related("contract", "contract__student")
             .order_by("start_time")
         )
+        if user:
+            qs = qs.filter(contract__student__user=user)
+        return qs
 
     @staticmethod
-    def get_upcoming_sessions(days: int = 7) -> list[Session]:
+    def get_upcoming_sessions(days: int = 7, user: User = None) -> list[Session]:
         """
         Returns upcoming sessions (excluding today's sessions).
 
@@ -63,11 +70,14 @@ class SessionQueryService:
         end_date = today + timedelta(days=days)
 
         # Only sessions from tomorrow (date > today), not today
-        return (
+        qs = (
             Session.objects.filter(date__gt=today, date__lte=end_date)
             .select_related("contract", "contract__student")
             .order_by("date", "start_time")[:10]
         )
+        if user:
+            qs = qs.filter(contract__student__user=user)
+        return qs
 
 
 # Alias for backwards compatibility
