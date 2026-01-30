@@ -73,11 +73,11 @@ class SessionQueryService:
         qs = (
             Session.objects.filter(date__gt=today, date__lte=end_date)
             .select_related("contract", "contract__student")
-            .order_by("date", "start_time")[:10]
+            .order_by("date", "start_time")
         )
         if user:
             qs = qs.filter(contract__student__user=user)
-        return qs
+        return qs[:10]
 
 
 # Alias for backwards compatibility
