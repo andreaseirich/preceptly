@@ -150,6 +150,14 @@ python manage.py load_demo_data
 python manage.py runserver
 ```
 
+### Pre-commit hook (optional)
+
+To auto-fix ruff format and lint (including import sorting) before each commit:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ---
 
 ## Project Status

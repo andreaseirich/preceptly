@@ -9,8 +9,8 @@ from decimal import Decimal
 from apps.billing.models import InvoiceItem
 from apps.contracts.models import ContractMonthlyPlan
 from apps.lessons.models import Lesson
-from django.db.models import Q
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class IncomeSelector:
