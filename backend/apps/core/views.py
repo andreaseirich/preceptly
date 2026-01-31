@@ -5,11 +5,12 @@ Views for dashboard and income overview.
 from apps.core.forms import WorkingHoursForm
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
+from apps.core.utils_booking import ensure_public_booking_token
 from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
@@ -199,9 +200,12 @@ class SettingsView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        """Add profile and contracts to context."""
+        """Add profile, contracts, and booking links to context."""
         context = super().get_context_data(**kwargs)
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        ensure_public_booking_token(profile)
+        profile.refresh_from_db()
+
         from apps.contracts.models import Contract
 
         contracts = (
@@ -212,4 +216,19 @@ class SettingsView(LoginRequiredMixin, FormView):
         context["profile"] = profile
         context["current_working_hours"] = profile.default_working_hours or {}
         context["contracts"] = contracts
+        context["public_booking_url"] = self.request.build_absolute_uri(
+            reverse(
+                "lessons:public_booking_with_token",
+                kwargs={"tutor_token": profile.public_booking_token},
+            )
+        )
+        context["contract_booking_urls"] = [
+            {
+                "contract": c,
+                "url": self.request.build_absolute_uri(
+                    reverse("lessons:student_booking", kwargs={"token": c.booking_token})
+                ),
+            }
+            for c in contracts
+        ]
         return context

@@ -12,7 +12,7 @@ from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson, LessonDocument
 from apps.students.models import Student
 from apps.students.services import StudentSearchService
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
@@ -41,6 +41,10 @@ class PublicBookingView(TemplateView):
             target_date = timezone.now().date()
 
         tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            raise Http404(
+                _("Booking link invalid or expired. Please use the link shared by your tutor.")
+            )
 
         # Week data for booking page (without contract)
         week_data = BookingService.get_public_booking_data(

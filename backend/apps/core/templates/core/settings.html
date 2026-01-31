@@ -170,19 +170,69 @@
     </div>
 </form>
 
-<h2 style="margin-top: 40px;">{% trans "Booking Link" %}</h2>
-<p>{% trans "Use this link for all students. Students will enter their name and can book lessons." %}</p>
+<h2 style="margin-top: 40px;">{% trans "Your Booking Links" %}</h2>
+<p>{% trans "Each user has their own booking links. Share only your links with your students." %}</p>
 
-<div style="margin-top: 20px;">
-    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{% trans "Public Booking Link" %}</label>
-    <input type="text" 
-           value="{{ request.scheme }}://{{ request.get_host }}{% url 'lessons:public_booking' %}" 
-           readonly 
-           style="width: 100%; padding: 10px; font-family: monospace; font-size: 0.9em; border: 1px solid #ddd; border-radius: 4px;"
-           onclick="this.select();">
+<div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
+    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{% trans "Public Booking Link (your personal link)" %}</label>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="public-booking-url"
+               value="{{ public_booking_url }}" 
+               readonly 
+               style="flex: 1; min-width: 200px; padding: 10px; font-family: monospace; font-size: 0.9em; border: 1px solid #ddd; border-radius: 4px;"
+               onclick="this.select();">
+        <button type="button" class="btn btn-secondary" onclick="copyToClipboard('public-booking-url')">{% trans "Copy" %}</button>
+    </div>
     <p style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
-        {% trans "Share this link with all students. They can enter their name and book lessons." %}
+        {% trans "Share this link with new students. They can enter their name and book lessons." %}
     </p>
 </div>
 
+{% if contract_booking_urls %}
+<h3 style="margin-top: 30px; color: #34495e;">{% trans "Contract Booking Links (per student)" %}</h3>
+<p style="font-size: 0.95em; color: #6c757d;">{% trans "Each contract has its own link. Share the link with the respective student for direct booking." %}</p>
+<div style="margin-top: 15px;">
+    {% for item in contract_booking_urls %}
+    <div style="margin-bottom: 15px; padding: 12px; background: white; border: 1px solid #dee2e6; border-radius: 4px;">
+        <strong>{{ item.contract.student.full_name }}</strong>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px;">
+            <input type="text" id="contract-url-{{ item.contract.id }}" readonly
+                   value="{{ item.url }}"
+                   style="flex: 1; min-width: 200px; padding: 8px; font-family: monospace; font-size: 0.85em; border: 1px solid #ddd; border-radius: 4px;"
+                   onclick="this.select();">
+            <button type="button" class="btn btn-secondary" style="padding: 8px 15px;" 
+                    onclick="copyContractUrl({{ item.contract.id }})">{% trans "Copy" %}</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+function copyToClipboard(inputId) {
+    const input = document.getElementById(inputId);
+    input.select();
+    document.execCommand('copy');
+    const btn = input.nextElementSibling;
+    if (btn && btn.tagName === 'BUTTON') {
+        const orig = btn.textContent;
+        btn.textContent = '{% trans "Copied!" %}';
+        setTimeout(function() { btn.textContent = orig; }, 1500);
+    }
+}
+function copyContractUrl(contractId) {
+    const input = document.getElementById('contract-url-' + contractId);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(input.value).then(function() {
+            const btn = input.nextElementSibling;
+            if (btn) { btn.textContent = '{% trans "Copied!" %}'; setTimeout(function() { btn.textContent = '{% trans "Copy" %}'; }, 1500); }
+        });
+    } else {
+        input.select();
+        document.execCommand('copy');
+        const btn = input.nextElementSibling;
+        if (btn) { btn.textContent = '{% trans "Copied!" %}'; setTimeout(function() { btn.textContent = '{% trans "Copy" %}'; }, 1500); }
+    }
+}
+</script>
 {% endblock %}

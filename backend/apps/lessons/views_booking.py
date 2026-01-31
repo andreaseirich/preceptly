@@ -46,21 +46,16 @@ class StudentBookingView(TemplateView):
         except (ValueError, TypeError):
             target_date = timezone.now().date()
 
-        # Working hours from contract, fallback to default_working_hours
+        # Working hours from contract, fallback to tutor's default
         working_hours = contract.working_hours or {}
         if not working_hours:
-            # Fallback to general tutor working hours
-            # Since contracts don't have a direct user relationship, we take the first UserProfile
-            # In a multi-user environment, this logic would need to be adjusted
             from apps.core.models import UserProfile
 
             try:
-                # Try to find the first UserProfile (for single-user setup)
-                profile = UserProfile.objects.first()
+                profile = UserProfile.objects.filter(user=contract.student.user).first()
                 if profile and profile.default_working_hours:
                     working_hours = profile.default_working_hours
             except (UserProfile.DoesNotExist, AttributeError):
-                # UserProfile not found or missing attribute - use empty working hours
                 pass
 
         # Week data for booking page
@@ -487,7 +482,7 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
         from apps.core.models import UserProfile
 
         try:
-            profile = UserProfile.objects.first()
+            profile = UserProfile.objects.filter(user=contract.student.user).first()
             if profile and profile.default_working_hours:
                 working_hours = profile.default_working_hours
         except (UserProfile.DoesNotExist, AttributeError):
