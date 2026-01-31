@@ -255,8 +255,9 @@
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
                 <button class="btn btn-secondary" onclick="clearSelection()" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
             </div>
-            
+            <div id="public-week-loading" style="display: none; text-align: center; padding: 20px; color: #6c757d;">{% trans "Loading..." %}</div>
             <div class="week-calendar">
+                <div id="public-week-calendar-days">
                 {% for day in week_data.days %}
                 <div class="day-column">
                     <div class="day-header">
@@ -291,6 +292,7 @@
                     {% endif %}
                 </div>
                 {% endfor %}
+                </div>
             </div>
             
             <button type="button" class="btn btn-secondary" onclick="goToStep(2)">{% trans "Back" %}</button>
@@ -805,16 +807,82 @@
             });
         }
         
+        function loadWeek(year, month, day) {
+            if (!TUTOR_TOKEN) return;
+            const loadingEl = document.getElementById('public-week-loading');
+            const daysEl = document.getElementById('public-week-calendar-days');
+            loadingEl.style.display = 'block';
+            daysEl.style.opacity = '0.5';
+
+            const url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?year=' + year + '&month=' + month + '&day=' + day;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    loadingEl.style.display = 'none';
+                    daysEl.style.opacity = '1';
+                    if (data.success) {
+                        renderWeekCalendar(data.week_data);
+                        currentYear = year;
+                        currentMonth = month;
+                        currentDay = day;
+                        clearSelection();
+                        updateContinueButton();
+                        const newUrl = `${window.location.pathname}?year=${year}&month=${month}&day=${day}`;
+                        if (window.history.replaceState) {
+                            window.history.replaceState({}, '', newUrl);
+                        }
+                    } else {
+                        showMessage(data.message || '{% trans "Error loading week." %}', 'error');
+                    }
+                })
+                .catch(() => {
+                    loadingEl.style.display = 'none';
+                    daysEl.style.opacity = '1';
+                    showMessage('{% trans "Error loading week. Please try again." %}', 'error');
+                });
+        }
+
+        function renderWeekCalendar(weekData) {
+            const occupiedLabel = '{% trans "Occupied" %}';
+            const noWorkingHours = '{% trans "No working hours configured for this day." %}';
+            let html = '';
+            for (const day of weekData.days) {
+                const dateFormatted = formatDateDE(day.date);
+                html += '<div class="day-column"><div class="day-header">' + day.weekday_display + ', ' + dateFormatted + '</div>';
+                if (day.working_hours && day.working_hours.length > 0) {
+                    html += '<div class="time-slots">';
+                    for (const slot of day.available_slots) {
+                        html += '<div class="time-slot" data-date="' + day.date + '" data-start="' + slot[0] + '" data-end="' + slot[1] + '" onclick="toggleSlot(this)"><div class="time-slot-label">' + slot[0] + '</div></div>';
+                    }
+                    for (const occ of day.occupied_slots) {
+                        html += '<div class="time-slot occupied"><div class="time-slot-label">' + occ[0] + ' - ' + occ[1] + '</div><div class="occupied-label">' + occupiedLabel + '</div></div>';
+                    }
+                    html += '</div>';
+                } else {
+                    html += '<p style="color: #6c757d;">' + noWorkingHours + '</p>';
+                }
+                html += '</div>';
+            }
+            document.getElementById('public-week-calendar-days').innerHTML = html;
+        }
+
+        function formatDateDE(isoDate) {
+            const d = new Date(isoDate + 'T12:00:00');
+            const pad = n => String(n).padStart(2, '0');
+            return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
+        }
+
         function previousWeek() {
             const date = new Date(currentYear, currentMonth - 1, currentDay);
             date.setDate(date.getDate() - 7);
-            window.location.href = `?year=${date.getFullYear()}&month=${date.getMonth() + 1}&day=${date.getDate()}`;
+            loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());
         }
-        
+
         function nextWeek() {
             const date = new Date(currentYear, currentMonth - 1, currentDay);
             date.setDate(date.getDate() + 7);
-            window.location.href = `?year=${date.getFullYear()}&month=${date.getMonth() + 1}&day=${date.getDate()}`;
+            loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());
         }
         
         function getCookie(name) {

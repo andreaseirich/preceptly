@@ -77,6 +77,11 @@ urlpatterns = [
         name="public_booking_with_token",
     ),
     path(
+        "public-booking/<str:tutor_token>/week/",
+        views_public_booking.public_booking_week_api,
+        name="public_booking_week_api",
+    ),
+    path(
         "public-booking/api/search-student/",
         views_public_booking.search_student_api,
         name="public_booking_search_student",

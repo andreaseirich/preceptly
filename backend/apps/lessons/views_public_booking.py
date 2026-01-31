@@ -62,6 +62,52 @@ class PublicBookingView(TemplateView):
         return context
 
 
+def _serialize_public_week_data(week_data):
+    """Serialize public booking week data to JSON-serializable dict."""
+
+    def serialize_day(day_data):
+        return {
+            "date": day_data["date"].strftime("%Y-%m-%d"),
+            "weekday": day_data["weekday"],
+            "weekday_display": day_data["weekday_display"],
+            "working_hours": day_data["working_hours"],
+            "available_slots": [
+                [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")]
+                for s in day_data["available_slots"]
+            ],
+            "occupied_slots": [
+                [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")] for s in day_data["occupied_slots"]
+            ],
+        }
+
+    return {
+        "week_start": week_data["week_start"].strftime("%Y-%m-%d"),
+        "week_end": week_data["week_end"].strftime("%Y-%m-%d"),
+        "days": [serialize_day(d) for d in week_data["days"]],
+    }
+
+
+@require_http_methods(["GET"])
+def public_booking_week_api(request, tutor_token):
+    """API for fetching public booking week data (for AJAX week navigation)."""
+    tutor = get_tutor_for_booking(tutor_token)
+    if not tutor:
+        return JsonResponse(
+            {"success": False, "message": _("Booking link invalid or expired.")}, status=404
+        )
+
+    try:
+        year = int(request.GET.get("year", timezone.now().year))
+        month = int(request.GET.get("month", timezone.now().month))
+        day = int(request.GET.get("day", timezone.now().day))
+    except (ValueError, TypeError):
+        return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
+
+    week_data = BookingService.get_public_booking_data(year, month, day, user=tutor)
+    data = _serialize_public_week_data(week_data)
+    return JsonResponse({"success": True, "week_data": data})
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def search_student_api(request):
