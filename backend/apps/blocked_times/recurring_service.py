@@ -281,15 +281,15 @@ class RecurringBlockedTimeService:
         if not dry_run:
             blocked_time.save()
 
-            # Prüfe Konflikte mit Lessons (falls gewünscht)
+            # Prüfe Konflikte mit Lessons (falls gewünscht) - nur Lessons desselben Users
             if check_conflicts:
                 from apps.lessons.models import Lesson
                 from apps.lessons.services import LessonConflictService
 
-                # Finde alle Lessons, die mit dieser Blockzeit kollidieren
-                conflicting_lessons = Lesson.objects.filter(date=blocked_date).select_related(
-                    "contract", "contract__student"
-                )
+                # Finde alle Lessons desselben Users, die mit dieser Blockzeit kollidieren
+                conflicting_lessons = Lesson.objects.filter(
+                    date=blocked_date, contract__student__user=recurring_blocked_time.user
+                ).select_related("contract", "contract__student")
 
                 for lesson in conflicting_lessons:
                     lesson_start, lesson_end = LessonConflictService.calculate_time_block(lesson)

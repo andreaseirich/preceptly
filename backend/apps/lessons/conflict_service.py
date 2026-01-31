@@ -17,26 +17,21 @@ def recalculate_conflicts_for_affected_sessions(session: Session):
     Recalculates conflicts for a session and all potentially affected sessions.
 
     This should be called after a session is created, updated, or deleted
-    to ensure all conflict flags are up to date.
+    to ensure all conflict flags are up to date. Only sessions of the same user
+    are considered (multi-tenancy).
 
     Args:
         session: The session that was changed
     """
-    # Recalculate conflicts for the session itself (if it still exists)
-    if session.pk:
-        # This will be done when the session is accessed, but we can force it here
-        pass
+    owner_user = session.contract.student.user
 
-    # Find all sessions on the same date that might be affected
-    affected_sessions = Session.objects.filter(date=session.date).exclude(
-        pk=session.pk if session.pk else None
-    )
+    # Find all sessions on the same date of the same user that might be affected
+    affected_sessions = Session.objects.filter(
+        date=session.date, contract__student__user=owner_user
+    ).exclude(pk=session.pk if session.pk else None)
 
-    # Recalculate conflicts for affected sessions
-    # (The conflicts will be recalculated on-demand when accessed)
-    # But we can trigger a check here to ensure consistency
     for affected_session in affected_sessions:
-        # Force conflict check (this will be cached in the property)
+        # Force conflict check (clears cached conflicts)
         affected_session.get_conflicts()
 
 
@@ -48,18 +43,19 @@ def recalculate_conflicts_for_blocked_time(blocked_time: BlockedTime):
     """
     Recalculates conflicts for all sessions that might be affected by a blocked time change.
 
+    Only sessions of the same user as the blocked time are considered (multi-tenancy).
+
     Args:
         blocked_time: The blocked time that was changed or deleted
     """
-    # Find all sessions that might overlap with this blocked time
-    start_datetime = blocked_time.start_datetime
+    # Find sessions on the same date belonging to the same user
+    affected_sessions = Session.objects.filter(
+        date=blocked_time.start_datetime.date(),
+        contract__student__user=blocked_time.user,
+    )
 
-    # Find sessions on the same date
-    affected_sessions = Session.objects.filter(date=start_datetime.date())
-
-    # Check each session for conflicts with this blocked time
     for session in affected_sessions:
-        # Force conflict check
+        # Force conflict check (clears cached conflicts)
         session.get_conflicts()
 
 
@@ -126,8 +122,9 @@ class SessionConflictService:
         conflicts = []
         start_datetime, end_datetime = SessionConflictService.calculate_time_block(session)
 
-        # Check conflicts with other sessions
-        query = Q(date=session.date, start_time__isnull=False)
+        # Check conflicts with other sessions (same user only - multi-tenancy)
+        owner_user = session.contract.student.user
+        query = Q(date=session.date, start_time__isnull=False, contract__student__user=owner_user)
 
         if exclude_self and session.pk:
             query &= ~Q(pk=session.pk)
@@ -156,12 +153,12 @@ class SessionConflictService:
                     }
                 )
 
-        # Check conflicts with blocked times
-        # Use a broader query, but then explicitly check for overlap
-        # Filter by date to improve performance (for multi-day blocked times)
+        # Check conflicts with blocked times (same user only - multi-tenancy)
         # Find blocked times that could overlap: start before session ends, end after session starts
         blocked_times = BlockedTime.objects.filter(
-            start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
+            user=owner_user,
+            start_datetime__lt=end_datetime,
+            end_datetime__gt=start_datetime,
         )
 
         for blocked_time in blocked_times:
