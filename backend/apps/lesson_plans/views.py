@@ -36,7 +36,7 @@ class LessonPlanView(LoginRequiredMixin, TemplateView):
         quota_conflicts = []
 
         for conflict in conflicts:
-            if conflict["type"] == "session":
+            if conflict["type"] in ("lesson", "session"):
                 conflict_sessions.append(conflict["object"])
             elif conflict["type"] == "blocked_time":
                 conflict_blocked_times.append(conflict["object"])

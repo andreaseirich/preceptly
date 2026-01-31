@@ -52,6 +52,13 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         # Add last calendar view to context for template
         context["last_calendar_view"] = self.request.session.get("last_calendar_view", "week")
+        # Load conflicts for display
+        lesson = context["lesson"]
+        conflicts = LessonConflictService.check_conflicts(lesson, exclude_self=True)
+        conflict_lessons = [c["object"] for c in conflicts if c["type"] in ("lesson", "session")]
+        context["conflicts"] = conflicts
+        context["conflict_lessons"] = conflict_lessons
+        context["has_conflicts"] = len(conflicts) > 0
         return context
 
 

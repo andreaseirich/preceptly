@@ -65,6 +65,7 @@
                             {% if lesson.start_time.hour|add:0 == hour|add:0 %}
                             <div class="lesson-block {% if lesson.id in conflicts_by_lesson %}has-conflict{% endif %}" 
                                  data-lesson-id="{{ lesson.id }}"
+                                 data-conflict-reasons="{% if lesson.id in conflicts_by_lesson %}{{ conflicts_by_lesson|dict_get:lesson.id|conflict_reasons }}{% endif %}"
                                  data-start-hour="{{ lesson.start_time.hour }}"
                                  data-start-minute="{{ lesson.start_time.minute }}"
                                  data-duration="{{ lesson.duration_minutes }}"
@@ -100,7 +101,9 @@
                                     <div style="flex: 1;">
                                         <span style="font-size: 1.1em; margin-right: 4px;">📚</span> <strong>{{ lesson.contract.student.first_name }}</strong>
                                         {% if lesson.id in conflicts_by_lesson %}
-                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" style="color: #ffeb3b; font-size: 1.1em; margin-left: 4px; text-decoration: none;" title="{% trans 'Conflict detected - Click for details' %}" aria-label="{% trans 'View Conflicts' %}" onclick="event.stopPropagation();">⚠️</a>
+                                        {% with conflict_reasons_text=conflicts_by_lesson|dict_get:lesson.id|conflict_reasons %}
+                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" style="color: #ffeb3b; font-size: 1.1em; margin-left: 4px; text-decoration: none;" title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Conflict - Click for details' %}{% endif %}" aria-label="{% trans 'View Conflicts' %}" onclick="event.stopPropagation();">⚠️</a>
+                                        {% endwith %}
                                         {% endif %}<br>
                                         <small style="opacity: 0.9;">{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans "Min." %}</small>
                                         {% if lesson.status == 'paid' %}<small style="display: block; opacity: 0.8;">✓ {% trans "Paid" %}</small>{% endif %}
@@ -278,6 +281,7 @@ function showLessonPreview(element, event) {
     const studentName = element.querySelector('strong').textContent.trim();
     const timeInfo = element.querySelector('small').textContent.trim();
     const hasConflict = element.classList.contains('has-conflict');
+    const conflictReasons = element.dataset.conflictReasons || '';
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
     previewTooltip = document.createElement('div');
@@ -298,7 +302,7 @@ function showLessonPreview(element, event) {
     previewTooltip.innerHTML = `
         <strong>${studentName}</strong><br>
         <small>${timeInfo}</small>
-        ${hasConflict ? '<br><small style="color: #ffeb3b;">⚠️ {% trans "Conflict" %}</small>' : ''}
+        ${hasConflict ? '<br><small style="color: #ffeb3b;">⚠️ {% trans "Conflict" %}' + (conflictReasons ? ': ' + conflictReasons : '') + '</small>' : ''}
     `;
     
     document.body.appendChild(previewTooltip);

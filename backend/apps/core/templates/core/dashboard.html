@@ -26,7 +26,7 @@
             <td>{{ lesson.get_status_display }}</td>
             <td>
                 {% if lesson.conflicts %}
-                <span class="conflict-icon">⚠</span> <span class="conflict">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</span>
+                <span class="conflict-icon">⚠</span> <a href="{% url 'lessons:conflicts' lesson.pk %}" class="conflict" title="{% for c in lesson.conflicts %}{{ c.message }}{% if not forloop.last %} | {% endif %}{% endfor %}">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</a>
                 {% else %}
                 <span style="color: #28a745;">✓ {% trans "OK" %}</span>
                 {% endif %}
@@ -60,7 +60,7 @@
             <td>{{ lesson.get_status_display }}</td>
             <td>
                 {% if lesson.conflicts %}
-                <span class="conflict-icon">⚠</span> <span class="conflict">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</span>
+                <span class="conflict-icon">⚠</span> <a href="{% url 'lessons:conflicts' lesson.pk %}" class="conflict" title="{% for c in lesson.conflicts %}{{ c.message }}{% if not forloop.last %} | {% endif %}{% endfor %}">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</a>
                 {% else %}
                 <span style="color: #28a745;">✓ {% trans "OK" %}</span>
                 {% endif %}

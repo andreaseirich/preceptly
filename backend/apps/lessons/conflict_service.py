@@ -145,9 +145,9 @@ class SessionConflictService:
             ):
                 conflicts.append(
                     {
-                        "type": "session",
+                        "type": "lesson",
                         "object": other_session,
-                        "message": _("Overlap with session for {student} ({time})").format(
+                        "message": _("Overlap with lesson for {student} ({time})").format(
                             student=other_session.contract.student,
                             time=other_session.start_time.strftime("%H:%M"),
                         ),

@@ -28,7 +28,7 @@ class ConflictDetailView(LoginRequiredMixin, TemplateView):
         quota_conflicts = []
 
         for conflict in conflicts:
-            if conflict["type"] == "lesson":
+            if conflict["type"] in ("lesson", "session"):
                 conflict_lessons.append(conflict["object"])
             elif conflict["type"] == "blocked_time":
                 conflict_blocked_times.append(conflict["object"])

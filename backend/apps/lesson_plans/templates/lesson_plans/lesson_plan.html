@@ -51,7 +51,7 @@
             {% for conflict in conflicts %}
             <li style="margin-bottom: 8px;">
                 <strong>
-                    {% if conflict.type == 'lesson' %}
+                    {% if conflict.type == 'lesson' or conflict.type == 'session' %}
                         ⚠️ {% trans "Time overlap with another lesson" %}
                     {% elif conflict.type == 'blocked_time' %}
                         🚫 {% trans "Time overlap with blocked time" %}
@@ -59,12 +59,13 @@
                         📊 {% trans "Contract quota exceeded" %}
                     {% endif %}
                 </strong>
-                {% if conflict.type == 'lesson' and conflict.object %}
+                <br><small>{{ conflict.message|default:"" }}</small>
+                {% if conflict.type == 'lesson' or conflict.type == 'session' %}
+                    {% if conflict.object %}
                     <br><small>{% trans "Conflicting lesson:" %} <a href="{% url 'lessons:detail' conflict.object.pk %}">{{ conflict.object.contract.student.full_name }} - {{ conflict.object.date|date:"SHORT_DATE_FORMAT" }} {{ conflict.object.start_time|time:"H:i" }}</a></small>
+                    {% endif %}
                 {% elif conflict.type == 'blocked_time' and conflict.object %}
                     <br><small>{% trans "Blocked time:" %} {{ conflict.object.title }} ({{ conflict.object.start_datetime|date:"SHORT_DATETIME_FORMAT" }} - {{ conflict.object.end_datetime|time:"H:i" }})</small>
-                {% elif conflict.type == 'quota' %}
-                    <br><small>{{ conflict.message }}</small>
                 {% endif %}
             </li>
             {% endfor %}

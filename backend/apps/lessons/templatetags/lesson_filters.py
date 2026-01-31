@@ -33,3 +33,19 @@ def local_date(datetime_obj):
         local_dt = timezone.localtime(datetime_obj)
         return local_dt.date()
     return None
+
+
+@register.filter
+def dict_get(d, key):
+    """Returns d[key] or empty list if not found."""
+    if d is None:
+        return []
+    return d.get(key, [])
+
+
+@register.filter
+def conflict_reasons(conflicts):
+    """Returns a string of conflict reasons from a list of conflict dicts."""
+    if not conflicts:
+        return ""
+    return " | ".join(c.get("message", "") for c in conflicts if c.get("message"))

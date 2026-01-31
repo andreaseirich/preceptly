@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load lesson_filters %}
 
 {% block title %}{% blocktrans with month=month_label year=year %}Calendar {{ month }} {{ year }}{% endblocktrans %} - TutorFlow{% endblock %}
 
@@ -60,9 +61,11 @@
                             {{ lesson.contract.student.first_name }}
                             <small style="opacity: 0.8;">({{ lesson.duration_minutes }}{% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}+{{ lesson.travel_time_before_minutes|add:lesson.travel_time_after_minutes }}{% endif %} {% trans "Min." %})</small>
                             {% if lesson.id in conflicts_by_lesson %}
+                            {% with conflict_reasons_text=conflicts_by_lesson|dict_get:lesson.id|conflict_reasons %}
                             <a href="{% url 'lessons:conflicts' lesson.pk %}" 
                                style="color: #dc3545; text-decoration: none; margin-left: 5px;"
-                               title="{% trans 'Show conflict details' %}">⚠ {% trans "Details" %}</a>
+                               title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Show conflict details' %}{% endif %}">⚠ {% trans "Details" %}</a>
+                            {% endwith %}
                             {% endif %}
                         </a>
                     </div>

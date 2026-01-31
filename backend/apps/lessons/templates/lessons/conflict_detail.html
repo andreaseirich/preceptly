@@ -18,6 +18,17 @@
     <p><strong>{% trans "Student:" %}</strong> {{ lesson.contract.student.full_name }}</p>
 </div>
 
+{% if conflict_lessons or conflict_blocked_times or quota_conflicts %}
+<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
+    <h2 style="color: #dc3545; margin-top: 0;">{% trans "Conflict reasons" %}</h2>
+    <ul style="margin-bottom: 0;">
+        {% for conflict in conflicts %}
+        <li style="margin-bottom: 8px;"><strong>{{ conflict.message }}</strong></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 {% if conflict_lessons %}
 <div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
     <h2 style="color: #dc3545; margin-top: 0;">{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h2>
