@@ -817,26 +817,31 @@
             const url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?year=' + year + '&month=' + month + '&day=' + day;
 
             fetch(url)
-                .then(response => response.json())
-                .then(data => {
+                .then(function(response) {
+                    return response.json().then(function(data) {
+                        return { ok: response.ok, data: data };
+                    });
+                })
+                .then(function(result) {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
-                    if (data.success) {
-                        renderWeekCalendar(data.week_data);
+                    if (result.ok && result.data.success && result.data.week_data) {
+                        document.getElementById('messages').innerHTML = '';
+                        renderWeekCalendar(result.data.week_data);
                         currentYear = year;
                         currentMonth = month;
                         currentDay = day;
                         clearSelection();
                         updateContinueButton();
-                        const newUrl = `${window.location.pathname}?year=${year}&month=${month}&day=${day}`;
+                        const newUrl = window.location.pathname + '?year=' + year + '&month=' + month + '&day=' + day;
                         if (window.history.replaceState) {
                             window.history.replaceState({}, '', newUrl);
                         }
                     } else {
-                        showMessage(data.message || '{% trans "Error loading week." %}', 'error');
+                        showMessage(result.data && result.data.message ? result.data.message : '{% trans "Error loading week." %}', 'error');
                     }
                 })
-                .catch(() => {
+                .catch(function() {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
                     showMessage('{% trans "Error loading week. Please try again." %}', 'error');

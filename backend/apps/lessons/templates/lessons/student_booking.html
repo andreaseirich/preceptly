@@ -509,31 +509,37 @@
             loadingEl.style.display = 'block';
             daysEl.style.opacity = '0.5';
             
-            const url = `/lessons/booking/${token}/week/?year=${year}&month=${month}&day=${day}`;
+            const url = '/lessons/booking/' + encodeURIComponent(token) + '/week/?year=' + year + '&month=' + month + '&day=' + day;
             fetch(url)
-                .then(response => response.json())
-                .then(data => {
+                .then(function(response) {
+                    return response.json().then(function(data) {
+                        return { ok: response.ok, data: data };
+                    });
+                })
+                .then(function(result) {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
-                    if (data.success) {
-                        renderWeekCalendar(data.week_data);
+                    if (result.ok && result.data.success && result.data.week_data) {
+                        var messagesEl = document.getElementById('messages');
+                        if (messagesEl) messagesEl.innerHTML = '';
+                        renderWeekCalendar(result.data.week_data);
                         currentYear = year;
                         currentMonth = month;
                         currentDay = day;
                         clearSelection();
-                        const jumpInput = document.getElementById('jump-to-date');
+                        var jumpInput = document.getElementById('jump-to-date');
                         if (jumpInput) {
-                            jumpInput.value = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            jumpInput.value = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
                         }
-                        const newUrl = `${window.location.pathname}?year=${year}&month=${month}&day=${day}`;
+                        var newUrl = window.location.pathname + '?year=' + year + '&month=' + month + '&day=' + day;
                         if (window.history.replaceState) {
                             window.history.replaceState({}, '', newUrl);
                         }
                     } else {
-                        showMessage(data.message || '{% trans "Error loading week." %}', 'error');
+                        showMessage(result.data && result.data.message ? result.data.message : '{% trans "Error loading week." %}', 'error');
                     }
                 })
-                .catch(err => {
+                .catch(function() {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
                     showMessage('{% trans "Error loading week. Please try again." %}', 'error');
