@@ -3,6 +3,7 @@ Views für öffentliche Buchungsseite (ohne Token).
 """
 
 import json
+import logging
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
@@ -444,7 +445,9 @@ def book_lesson_api(request):
 
             send_booking_notification(lesson)
         except Exception:
-            pass
+            logging.getLogger(__name__).warning(
+                "Booking notification failed", exc_info=True, extra={"lesson_id": lesson.id}
+            )
 
         # Process document upload (if present)
         uploaded_documents = []
@@ -478,11 +481,9 @@ def book_lesson_api(request):
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({"success": False, "message": _("Invalid data format.")}, status=400)
     except Exception as e:
-        # Log the error for debugging but don't expose details to user
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in book_lesson_api: {str(e)}", exc_info=True)
+        logging.getLogger(__name__).error(
+            "Error in book_lesson_api", exc_info=True, extra={"error": str(e)}
+        )
         return JsonResponse(
             {"success": False, "message": _("An error occurred. Please try again.")}, status=500
         )
