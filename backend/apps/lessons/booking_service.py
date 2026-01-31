@@ -228,19 +228,33 @@ class BookingService:
             "sunday",
         ]
 
+        from apps.contracts.models import Contract
+
+        student_id = None
+        owner_user = None
+        try:
+            contract = Contract.objects.select_related("student").get(pk=contract_id)
+            student_id = contract.student_id
+            owner_user = contract.student.user_id
+        except Contract.DoesNotExist:
+            pass
+
+        busy_per_day = (
+            BookingService._get_busy_intervals_for_week(
+                week_start, week_end, owner_user, student_id
+            )
+            if owner_user and student_id
+            else {}
+        )
+
         days_data = []
         for i in range(7):
             current_date = week_start + timedelta(days=i)
             weekday_name = weekday_names[i]
-
-            # Working hours for this weekday
             day_working_hours = working_hours.get(weekday_name, [])
-
-            # Available slots
             available_slots = BookingService.get_available_time_slots(
                 current_date, day_working_hours, occupied_slots
             )
-
             days_data.append(
                 {
                     "date": current_date,
@@ -249,6 +263,7 @@ class BookingService:
                     "working_hours": day_working_hours,
                     "available_slots": available_slots,
                     "occupied_slots": occupied_slots.get(current_date, []),
+                    "busy_intervals": busy_per_day.get(current_date, []),
                 }
             )
 
@@ -259,7 +274,88 @@ class BookingService:
         }
 
     @staticmethod
-    def get_public_booking_data(year: int, month: int, day: int, user=None) -> Dict:
+    def _get_busy_intervals_for_week(
+        week_start: date, week_end: date, user, student_id: int | None
+    ) -> Dict[date, List[dict]]:
+        """
+        Build busy_intervals per day with own/other distinction.
+        Returns Dict[date, List[{start, end, own, label?}]].
+        """
+        result = defaultdict(list)
+
+        if not user:
+            return dict(result)
+
+        lessons = Lesson.objects.filter(
+            date__gte=week_start, date__lte=week_end, contract__student__user=user
+        ).select_related("contract", "contract__student")
+
+        for lesson in lessons:
+            start_dt, end_dt = LessonConflictService.calculate_time_block(lesson)
+            start_str = start_dt.time().strftime("%H:%M")
+            end_str = end_dt.time().strftime("%H:%M")
+            is_own = student_id is not None and lesson.contract.student_id == student_id
+            interval = {"start": start_str, "end": end_str, "own": is_own}
+            if is_own:
+                interval["label"] = lesson.contract.student.full_name
+            result[lesson.date].append(interval)
+
+        start_datetime = timezone.make_aware(datetime.combine(week_start, time.min))
+        end_datetime = timezone.make_aware(datetime.combine(week_end, time.max))
+        blocked_qs = BlockedTime.objects.filter(
+            user=user,
+            start_datetime__lt=end_datetime,
+            end_datetime__gt=start_datetime,
+        ).order_by("start_datetime")
+
+        recurring_qs = RecurringBlockedTime.objects.filter(
+            user=user,
+            start_date__lte=week_end,
+            end_date__gte=week_start,
+            is_active=True,
+        ) | RecurringBlockedTime.objects.filter(
+            user=user,
+            start_date__lte=week_end,
+            end_date__isnull=True,
+            is_active=True,
+        )
+        for rbt in recurring_qs:
+            for bt in RecurringBlockedTimeService.preview_blocked_times(rbt):
+                if week_start <= bt.start_datetime.date() <= week_end:
+                    blocked_qs = list(blocked_qs) + [bt]
+
+        for bt in blocked_qs:
+            local_start = timezone.localtime(bt.start_datetime)
+            local_end = timezone.localtime(bt.end_datetime)
+            d = local_start.date()
+            end_d = local_end.date()
+            while d <= end_d and d <= week_end:
+                if d >= week_start:
+                    if d == local_start.date() and d == end_d:
+                        s, e = local_start.time(), local_end.time()
+                    elif d == local_start.date():
+                        s, e = local_start.time(), time.max
+                    elif d == end_d:
+                        s, e = time.min, local_end.time()
+                    else:
+                        s, e = time.min, time.max
+                    result[d].append(
+                        {
+                            "start": s.strftime("%H:%M"),
+                            "end": e.strftime("%H:%M"),
+                            "own": False,
+                        }
+                    )
+                d += timedelta(days=1)
+
+        for d in result:
+            result[d].sort(key=lambda x: (x["start"], x["end"]))
+        return dict(result)
+
+    @staticmethod
+    def get_public_booking_data(
+        year: int, month: int, day: int, user=None, student_id: int | None = None
+    ) -> Dict:
         """
         Gibt Daten für die öffentliche Buchungsseite einer Woche zurück (ohne Contract-Token).
 
@@ -268,6 +364,7 @@ class BookingService:
             month: Monat
             day: Tag
             user: Optional - filtert nach User (für Multi-Tenancy)
+            student_id: Optional - verified student for own/other slot labelling
 
         Returns:
             Dict mit:
@@ -282,7 +379,6 @@ class BookingService:
         week_start = target_date - timedelta(days=days_since_monday)
         week_end = week_start + timedelta(days=6)
 
-        # Use default working hours from UserProfile
         working_hours = {}
         try:
             profile = (
@@ -292,17 +388,14 @@ class BookingService:
             )
             if profile and profile.default_working_hours:
                 working_hours = profile.default_working_hours
-        except (UserProfile.DoesNotExist, AttributeError) as e:
-            # Log the error for debugging
-            import logging
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
 
-            logger = logging.getLogger(__name__)
-            logger.debug(f"Could not load default working hours: {str(e)}")
-
-        # Load occupied time slots (for all contracts, as there is no specific contract)
         occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end, user=user)
+        busy_intervals = BookingService._get_busy_intervals_for_week(
+            week_start, week_end, user, student_id
+        )
 
-        # Weekday names
         weekday_names = [
             "monday",
             "tuesday",
@@ -317,15 +410,10 @@ class BookingService:
         for i in range(7):
             current_date = week_start + timedelta(days=i)
             weekday_name = weekday_names[i]
-
-            # Working hours for this weekday
             day_working_hours = working_hours.get(weekday_name, [])
-
-            # Available slots
             available_slots = BookingService.get_available_time_slots(
                 current_date, day_working_hours, occupied_slots
             )
-
             days_data.append(
                 {
                     "date": current_date,
@@ -334,6 +422,7 @@ class BookingService:
                     "working_hours": day_working_hours,
                     "available_slots": available_slots,
                     "occupied_slots": occupied_slots.get(current_date, []),
+                    "busy_intervals": busy_intervals.get(current_date, []),
                 }
             )
 

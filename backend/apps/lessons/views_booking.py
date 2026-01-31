@@ -451,6 +451,7 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
             "occupied_slots": [
                 [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")] for s in day_data["occupied_slots"]
             ],
+            "busy_intervals": day_data.get("busy_intervals", []),
         }
 
     return {

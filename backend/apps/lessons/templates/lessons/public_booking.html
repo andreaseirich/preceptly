@@ -115,6 +115,10 @@
             cursor: not-allowed; 
             opacity: 0.6; 
         }
+        .time-slot.own-lesson { 
+            background: #d4edda; 
+            border-color: #28a745; 
+        }
         .time-slot.selected { 
             background: #fff3cd; 
             border-color: #ffc107; 
@@ -291,7 +295,14 @@
                                 </div>
                             </div>
                             {% endfor %}
-                            
+                            {% if day.busy_intervals %}
+                            {% for bi in day.busy_intervals %}
+                            <div class="time-slot occupied {% if bi.own %}own-lesson{% endif %}">
+                                <div class="time-slot-label">{{ bi.start }} - {{ bi.end }}</div>
+                                <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% else %}{% trans "Booked" %}{% endif %}</div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
                             {% for occupied in day.occupied_slots %}
                             <div class="time-slot occupied">
                                 <div class="time-slot-label">
@@ -300,6 +311,7 @@
                                 <div class="occupied-label">{% trans "Occupied" %}</div>
                             </div>
                             {% endfor %}
+                            {% endif %}
                         </div>
                     {% else %}
                         <p style="color: #6c757d;">{% trans "No working hours configured for this day." %}</p>
@@ -356,7 +368,10 @@
             });
             
             if (stepId === 4) updateBookingSummary();
-            if (stepId === 3) updateContinueButton();
+            if (stepId === 3) {
+                if (currentStudent) loadWeek(currentYear, currentMonth, currentDay);
+                updateContinueButton();
+            }
         }
         
         function verifyStudent() {
@@ -712,6 +727,7 @@
 
         function renderWeekCalendar(weekData) {
             const occupiedLabel = '{% trans "Occupied" %}';
+            const bookedLabel = '{% trans "Booked" %}';
             const noWorkingHours = '{% trans "No working hours configured for this day." %}';
             let html = '';
             for (const day of weekData.days) {
@@ -722,8 +738,17 @@
                     for (const slot of day.available_slots) {
                         html += '<div class="time-slot" data-date="' + day.date + '" data-start="' + slot[0] + '" data-end="' + slot[1] + '" onclick="toggleSlot(this)"><div class="time-slot-label">' + slot[0] + '</div></div>';
                     }
-                    for (const occ of day.occupied_slots) {
-                        html += '<div class="time-slot occupied"><div class="time-slot-label">' + occ[0] + ' - ' + occ[1] + '</div><div class="occupied-label">' + occupiedLabel + '</div></div>';
+                    var intervals = day.busy_intervals || [];
+                    if (intervals.length > 0) {
+                        for (const bi of intervals) {
+                            var label = bi.own && bi.label ? bi.label : bookedLabel;
+                            var cls = bi.own ? 'occupied own-lesson' : 'occupied';
+                            html += '<div class="time-slot ' + cls + '"><div class="time-slot-label">' + bi.start + ' - ' + bi.end + '</div><div class="occupied-label">' + escapeHtml(label) + '</div></div>';
+                        }
+                    } else {
+                        for (const occ of day.occupied_slots) {
+                            html += '<div class="time-slot occupied"><div class="time-slot-label">' + occ[0] + ' - ' + occ[1] + '</div><div class="occupied-label">' + occupiedLabel + '</div></div>';
+                        }
                     }
                     html += '</div>';
                 } else {
@@ -732,6 +757,11 @@
                 html += '</div>';
             }
             document.getElementById('public-week-calendar-days').innerHTML = html;
+        }
+        function escapeHtml(s) {
+            var div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
         }
 
         function formatDateDE(isoDate) {

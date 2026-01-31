@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Public Booking week calendar own/other**: After verify, own lessons show with student name; other slots show "Booked" (anonymous). Session stores verified student for week API.
 - **Public Booking authentication with student codes**: Privacy-friendly two-factor auth for Public Booking
   - Each student has a unique, stable booking code (12 chars, no ambiguous characters)
   - Code is stored hashed (SHA-256); plaintext shown only at generation/regeneration

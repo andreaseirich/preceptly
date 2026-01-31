@@ -48,9 +48,12 @@ class PublicBookingView(TemplateView):
                 _("Booking link invalid or expired. Please use the link shared by your tutor.")
             )
 
-        # Week data for booking page (without contract)
+        student_id = None
+        if self.request.session.get("public_booking_tutor_token") == tutor_token:
+            student_id = self.request.session.get("public_booking_student_id")
+
         week_data = BookingService.get_public_booking_data(
-            target_date.year, target_date.month, target_date.day, user=tutor
+            target_date.year, target_date.month, target_date.day, user=tutor, student_id=student_id
         )
 
         context.update(
@@ -68,7 +71,7 @@ def _serialize_public_week_data(week_data):
     """Serialize public booking week data to JSON-serializable dict."""
 
     def serialize_day(day_data):
-        return {
+        result = {
             "date": day_data["date"].strftime("%Y-%m-%d"),
             "weekday": day_data["weekday"],
             "weekday_display": day_data["weekday_display"],
@@ -80,7 +83,9 @@ def _serialize_public_week_data(week_data):
             "occupied_slots": [
                 [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")] for s in day_data["occupied_slots"]
             ],
+            "busy_intervals": day_data.get("busy_intervals", []),
         }
+        return result
 
     return {
         "week_start": week_data["week_start"].strftime("%Y-%m-%d"),
@@ -105,7 +110,13 @@ def public_booking_week_api(request, tutor_token):
     except (ValueError, TypeError):
         return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
 
-    week_data = BookingService.get_public_booking_data(year, month, day, user=tutor)
+    student_id = None
+    if request.session.get("public_booking_tutor_token") == tutor_token:
+        student_id = request.session.get("public_booking_student_id")
+
+    week_data = BookingService.get_public_booking_data(
+        year, month, day, user=tutor, student_id=student_id
+    )
     data = _serialize_public_week_data(week_data)
     return JsonResponse({"success": True, "week_data": data})
 
@@ -148,6 +159,10 @@ def verify_student_api(request):
 
         if not exact_match.booking_code_hash:
             return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
+
+        request.session["public_booking_student_id"] = exact_match.id
+        request.session["public_booking_tutor_token"] = tutor_token
+        request.session.set_expiry(7200)
 
         return JsonResponse(
             {
