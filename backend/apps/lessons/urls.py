@@ -60,6 +60,11 @@ urlpatterns = [
         views_booking.student_booking_api,
         name="student_booking_api",
     ),
+    path(
+        "booking/<str:token>/week/",
+        views_booking.student_booking_week_api,
+        name="student_booking_week_api",
+    ),
     # Public booking page (optional tutor token for multi-tenancy)
     path(
         "public-booking/",

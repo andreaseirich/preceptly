@@ -480,6 +480,62 @@ class StudentBookingView(TemplateView):
         return JsonResponse({"success": False, "message": _("Unknown action.")}, status=400)
 
 
+def _get_week_data_json(contract, year: int, month: int, day: int):
+    """Returns week booking data as JSON-serializable dict."""
+    working_hours = contract.working_hours or {}
+    if not working_hours:
+        from apps.core.models import UserProfile
+
+        try:
+            profile = UserProfile.objects.first()
+            if profile and profile.default_working_hours:
+                working_hours = profile.default_working_hours
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
+
+    week_data = BookingService.get_week_booking_data(contract.id, year, month, day, working_hours)
+
+    def serialize_day(day_data):
+        return {
+            "date": day_data["date"].strftime("%Y-%m-%d"),
+            "weekday": day_data["weekday"],
+            "weekday_display": day_data["weekday_display"],
+            "working_hours": day_data["working_hours"],
+            "available_slots": [
+                [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")]
+                for s in day_data["available_slots"]
+            ],
+            "occupied_slots": [
+                [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")] for s in day_data["occupied_slots"]
+            ],
+        }
+
+    return {
+        "week_start": week_data["week_start"].strftime("%Y-%m-%d"),
+        "week_end": week_data["week_end"].strftime("%Y-%m-%d"),
+        "days": [serialize_day(d) for d in week_data["days"]],
+    }
+
+
+@require_http_methods(["GET"])
+def student_booking_week_api(request, token):
+    """API for fetching week booking data (for AJAX week navigation)."""
+    try:
+        contract = Contract.objects.get(booking_token=token, is_active=True)
+    except Contract.DoesNotExist:
+        return JsonResponse({"success": False, "message": _("Booking link not found.")}, status=404)
+
+    try:
+        year = int(request.GET.get("year", timezone.now().year))
+        month = int(request.GET.get("month", timezone.now().month))
+        day = int(request.GET.get("day", timezone.now().day))
+    except (ValueError, TypeError):
+        return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
+
+    data = _get_week_data_json(contract, year, month, day)
+    return JsonResponse({"success": True, "week_data": data})
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def student_booking_api(request, token):
