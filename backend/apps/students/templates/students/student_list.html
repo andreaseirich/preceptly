@@ -13,6 +13,7 @@
             <th>{% trans "Name" %}</th>
             <th>{% trans "School" %}</th>
             <th>{% trans "Grade" %}</th>
+            <th>{% trans "Booking Code" %}</th>
             <th>{% trans "Actions" %}</th>
         </tr>
     </thead>
@@ -23,13 +24,20 @@
             <td>{{ student.school|default:"-" }}</td>
             <td>{{ student.grade|default:"-" }}</td>
             <td>
+                {% if student.booking_code_hash %}
+                <a href="{% url 'students:detail' student.pk %}" title="{% trans 'View details / Regenerate' %}">✓</a>
+                {% else %}
+                <a href="{% url 'students:detail' student.pk %}" title="{% trans 'Set code (Regenerate)' %}">-</a>
+                {% endif %}
+            </td>
+            <td>
                 <a href="{% url 'students:detail' student.pk %}">{% trans "Details" %}</a> |
                 <a href="{% url 'students:update' student.pk %}">{% trans "Edit" %}</a> |
                 <a href="{% url 'students:delete' student.pk %}">{% trans "Delete" %}</a>
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">{% trans "No students available." %}</td></tr>
+        <tr><td colspan="5">{% trans "No students available." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>

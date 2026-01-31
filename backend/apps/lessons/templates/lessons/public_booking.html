@@ -177,7 +177,21 @@
                 <label for="student-name">{% trans "Full Name" %}</label>
                 <input type="text" id="student-name" placeholder="{% trans 'e.g., Max Mustermann' %}" required>
             </div>
-            <button class="btn" onclick="searchStudent()">{% trans "Continue" %}</button>
+            <button class="btn" onclick="goToStep('2-code')">{% trans "Continue" %}</button>
+        </div>
+        
+        <!-- Schritt 2: Code eingeben oder neu anlegen -->
+        <div class="step" id="step-2-code">
+            <h2>{% trans "Enter your booking code" %}</h2>
+            <p>{% trans "Your tutor has given you a code. Enter it here." %}</p>
+            <div class="form-group">
+                <label for="booking-code">{% trans "Booking Code" %}</label>
+                <input type="text" id="booking-code" placeholder="{% trans 'e.g., ABC123XYZ456' %}" autocomplete="off">
+            </div>
+            <button class="btn" onclick="verifyStudent()">{% trans "Verify" %}</button>
+            <p style="margin-top: 20px;">{% trans "Don't have a code?" %}</p>
+            <button type="button" class="btn btn-secondary" onclick="goToCreateNew()">{% trans "Create new student profile" %}</button>
+            <button type="button" class="btn btn-secondary" onclick="goToStep(1)" style="margin-left: 10px;">{% trans "Back" %}</button>
         </div>
         
         <!-- Schritt 2a: Neuer Schüler -->
@@ -217,7 +231,7 @@
                     <input type="text" id="institute">
                     <small>{% trans "Leave empty if no institute" %}</small>
                 </div>
-                <button type="button" class="btn btn-secondary" onclick="goToStep(1)">{% trans "Back" %}</button>
+                <button type="button" class="btn btn-secondary" onclick="goToStep('2-code')">{% trans "Back" %}</button>
                 <button type="button" class="btn btn-success" onclick="createStudent()">{% trans "Continue" %}</button>
             </form>
         </div>
@@ -239,7 +253,7 @@
                     <input type="file" id="documents" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
                     <small>{% trans "You can upload multiple files (PDF, DOC, DOCX, TXT, JPG, PNG, max 10 MB each)" %}</small>
                 </div>
-                <button type="button" class="btn btn-secondary" onclick="goToStep(1)">{% trans "Back" %}</button>
+                <button type="button" class="btn btn-secondary" onclick="goToStep('2-code')">{% trans "Back" %}</button>
                 <button type="button" class="btn btn-success" onclick="goToStep(3)">{% trans "Continue" %}</button>
             </form>
         </div>
@@ -315,6 +329,7 @@
         const TUTOR_TOKEN = "{{ tutor_token|default:''|escapejs }}";
         
         let currentStudent = null;
+        let currentBookingCode = null;
         let selectedSlots = [];
         let currentDate = null;
         let bookingData = {};
@@ -328,184 +343,60 @@
             setTimeout(() => messageDiv.remove(), 5000);
         }
         
-        function goToStep(stepNumber) {
-            // Hide all steps
+        function goToStep(stepId) {
             document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            var stepEl = document.getElementById('step-' + stepId);
+            if (stepEl) stepEl.classList.add('active');
             
-            // Show selected step
-            if (stepNumber === 2) {
-                // Decide between 2a and 2b
-                if (currentStudent) {
-                    document.getElementById('step-2b').classList.add('active');
-                } else {
-                    document.getElementById('step-2a').classList.add('active');
-                }
-            } else {
-                document.getElementById(`step-${stepNumber}`).classList.add('active');
-            }
-            
-            // Update Progress Indicator
-            document.querySelectorAll('.progress-step').forEach((step, index) => {
+            var stepNum = (stepId === 1) ? 1 : (stepId === '2-code' || stepId === '2a' || stepId === '2b') ? 2 : (stepId === 3) ? 3 : (stepId === 4) ? 4 : 1;
+            document.querySelectorAll('.progress-step').forEach(function(step, index) {
                 step.classList.remove('active', 'completed');
-                if (index + 1 < stepNumber) {
-                    step.classList.add('completed');
-                } else if (index + 1 === stepNumber) {
-                    step.classList.add('active');
-                }
+                if (index + 1 < stepNum) step.classList.add('completed');
+                else if (index + 1 === stepNum) step.classList.add('active');
             });
             
-            // Special logic for Step 4
-            if (stepNumber === 4) {
-                updateBookingSummary();
-            }
+            if (stepId === 4) updateBookingSummary();
+            if (stepId === 3) updateContinueButton();
+        }
+        
+        function verifyStudent() {
+            var name = document.getElementById('student-name').value.trim();
+            var code = document.getElementById('booking-code').value.trim();
+            if (!name) { showMessage('{% trans "Please enter your name." %}', 'error'); return; }
+            if (!code) { showMessage('{% trans "Please enter the booking code." %}', 'error'); return; }
             
-            // Special logic for Step 3
-            if (stepNumber === 3) {
-                updateContinueButton();
-            }
-        }
-        
-        function searchStudent() {
-            const name = document.getElementById('student-name').value.trim();
-            if (!name) {
-                showMessage('{% trans "Please enter your name." %}', 'error');
-                return;
-            }
-            
-            // Use centralized API helper if available, otherwise use fetch with proper error handling
-            if (typeof apiRequest === 'function') {
-                apiRequest('{% url "lessons:public_booking_search_student" %}', {
-                    method: 'POST',
-                    body: JSON.stringify({ name: name, tutor_token: TUTOR_TOKEN })
-                })
-                .then(data => {
-                    if (data.success) {
-                        if (data.exact_match) {
-                            // Exact match found
-                            currentStudent = data.student;
-                            document.getElementById('student-name-display').textContent = data.student.full_name;
-                            goToStep(2);
-                        } else if (data.similar_students && data.similar_students.length > 0) {
-                            // Similar names found
-                            showSimilarStudents(data.similar_students, name);
-                        } else {
-                            // No match found
-                            goToStep(2);
-                        }
-                    } else {
-                        showMessage(data.message || '{% trans "Error searching for student." %}', 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error searching for student. Please try again." %}', 'error');
-                });
-            } else {
-                // Fallback to fetch with improved error handling
-                fetch('{% url "lessons:public_booking_search_student" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ name: name, tutor_token: TUTOR_TOKEN })
-                })
-                .then(async response => {
-                    if (!response.ok) {
-                        let errorMessage = `HTTP ${response.status}`;
-                        try {
-                            const errorData = await response.json();
-                            if (errorData.message) {
-                                errorMessage = errorData.message;
-                            }
-                        } catch (e) {
-                            errorMessage = response.statusText || '{% trans "Server error" %}';
-                        }
-                        throw new Error(errorMessage);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        if (data.exact_match) {
-                            currentStudent = data.student;
-                            document.getElementById('student-name-display').textContent = data.student.full_name;
-                            goToStep(2);
-                        } else if (data.similar_students && data.similar_students.length > 0) {
-                            showSimilarStudents(data.similar_students, name);
-                        } else {
-                            goToStep(2);
-                        }
-                    } else {
-                        showMessage(data.message || '{% trans "Error searching for student." %}', 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error searching for student. Please try again." %}', 'error');
-                });
-            }
-        }
-        
-        function showSimilarStudents(similarStudents, searchedName) {
-            const step1 = document.getElementById('step-1');
-            let html = '<div class="similar-students">';
-            html += '<h3>{% trans "Similar names found" %}</h3>';
-            html += '<p>{% trans "Did you mean one of these?" %}</p>';
-            similarStudents.forEach(student => {
-                html += `<div class="similar-student" onclick="selectStudent(${student.id}, '${student.full_name}')">`;
-                html += `<strong>${student.full_name}</strong> (${student.similarity}% {% trans "similar" %})`;
-                html += '</div>';
-            });
-            html += '<div class="similar-student" onclick="goToStep(2)" style="border: 2px dashed #007bff;">';
-            html += '<strong>{% trans "Create new student" %}: ' + searchedName + '</strong>';
-            html += '</div>';
-            html += '</div>';
-            step1.insertAdjacentHTML('beforeend', html);
-        }
-        
-        function selectStudent(studentId, studentName) {
-            const url = '{% url "lessons:public_booking_search_student" %}';
-            const options = {
+            fetch('{% url "lessons:public_booking_verify_student" %}', {
                 method: 'POST',
-                body: JSON.stringify({ name: studentName, tutor_token: TUTOR_TOKEN })
-            };
-            
-            if (typeof apiRequest === 'function') {
-                apiRequest(url, options)
-                .then(data => {
-                    if (data.success && data.exact_match) {
-                        currentStudent = data.student;
-                        document.getElementById('student-name-display').textContent = data.student.full_name;
-                        goToStep(2);
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error selecting student." %}', 'error');
-                });
-            } else {
-                fetch(url, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(async response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success && data.exact_match) {
-                        currentStudent = data.student;
-                        document.getElementById('student-name-display').textContent = data.student.full_name;
-                        goToStep(2);
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error selecting student." %}', 'error');
-                });
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({ name: name, code: code, tutor_token: TUTOR_TOKEN })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+            .then(function(result) {
+                if (result.data.success && result.data.student) {
+                    currentStudent = result.data.student;
+                    currentBookingCode = code;
+                    document.getElementById('student-name-display').textContent = result.data.student.full_name;
+                    goToStep('2b');
+                } else {
+                    showMessage(result.data.message || '{% trans "Invalid name or code. Please try again." %}', 'error');
+                }
+            })
+            .catch(function() {
+                showMessage('{% trans "Invalid name or code. Please try again." %}', 'error');
+            });
+        }
+        
+        function goToCreateNew() {
+            var name = document.getElementById('student-name').value.trim();
+            var parts = name.split(/\s+/);
+            if (parts.length >= 2) {
+                document.getElementById('last-name').value = parts.pop();
+                document.getElementById('first-name').value = parts.join(' ');
+            } else if (parts.length === 1) {
+                document.getElementById('first-name').value = parts[0];
+                document.getElementById('last-name').value = '';
             }
+            goToStep('2a');
         }
         
         function createStudent() {
@@ -526,62 +417,29 @@
                 return;
             }
             
-            const url = '{% url "lessons:public_booking_create_student" %}';
-            const options = {
+            var url = '{% url "lessons:public_booking_create_student" %}';
+            fetch(url, {
                 method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
                 body: JSON.stringify(formData)
-            };
-            
-            if (typeof apiRequest === 'function') {
-                apiRequest(url, options)
-                .then(data => {
-                    if (data.success) {
-                        currentStudent = data.student;
-                        document.getElementById('student-name-display').textContent = data.student.full_name;
-                        goToStep(2);
-                    } else {
-                        showMessage(data.message || '{% trans "Error creating student." %}', 'error');
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    currentStudent = data.student;
+                    currentBookingCode = data.booking_code || null;
+                    document.getElementById('student-name-display').textContent = data.student.full_name;
+                    if (data.booking_code) {
+                        alert('{% trans "Save this code for next time" %}: ' + data.booking_code);
                     }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error creating student. Please try again." %}', 'error');
-                });
-            } else {
-                fetch(url, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(async response => {
-                    if (!response.ok) {
-                        let errorMessage = `HTTP ${response.status}`;
-                        try {
-                            const errorData = await response.json();
-                            if (errorData.message) {
-                                errorMessage = errorData.message;
-                            }
-                        } catch (e) {
-                            errorMessage = response.statusText || '{% trans "Server error" %}';
-                        }
-                        throw new Error(errorMessage);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        currentStudent = data.student;
-                        document.getElementById('student-name-display').textContent = data.student.full_name;
-                        goToStep(2);
-                    } else {
-                        showMessage(data.message || '{% trans "Error creating student." %}', 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error creating student. Please try again." %}', 'error');
-                });
-            }
+                    goToStep('2b');
+                } else {
+                    showMessage(data.message || '{% trans "Error creating student." %}', 'error');
+                }
+            })
+            .catch(function() {
+                showMessage('{% trans "Error creating student. Please try again." %}', 'error');
+            });
         }
         
         function toggleSlot(element) {
@@ -723,6 +581,10 @@
                 showMessage('{% trans "Please complete all steps." %}', 'error');
                 return;
             }
+            if (!currentBookingCode) {
+                showMessage('{% trans "Booking code is required. Please go back and verify again." %}', 'error');
+                return;
+            }
             
             const sortedSlots = [...selectedSlots].sort((a, b) => {
                 if (a.date !== b.date) return a.date.localeCompare(b.date);
@@ -739,6 +601,7 @@
             
             const formData = new FormData();
             formData.append('student_id', currentStudent.id);
+            formData.append('booking_code', currentBookingCode);
             formData.append('tutor_token', TUTOR_TOKEN);
             formData.append('date', firstSlot.date);
             formData.append('start_time', firstSlot.startTime);
@@ -784,11 +647,12 @@
             .then(data => {
                 if (data.success) {
                     showMessage(data.message, 'success');
-                    setTimeout(() => {
-                        // Reset and return to step 1
+                    setTimeout(function() {
                         currentStudent = null;
+                        currentBookingCode = null;
                         selectedSlots = [];
                         document.getElementById('student-name').value = '';
+                        document.getElementById('booking-code').value = '';
                         document.getElementById('new-student-form').reset();
                         document.getElementById('booking-form').reset();
                         clearSelection();

@@ -29,6 +29,13 @@ class Student(models.Model):
     notes = models.TextField(
         blank=True, null=True, help_text=_("Additional notes about the student")
     )
+    booking_code_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("SHA-256 hash of the public booking code (never store plaintext)"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

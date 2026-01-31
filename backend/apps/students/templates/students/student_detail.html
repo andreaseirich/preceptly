@@ -24,6 +24,56 @@
     {% if student.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ student.notes }}</td></tr>{% endif %}
 </table>
 
+<h2>{% trans "Public Booking Code" %}</h2>
+<p class="form-help">{% trans "Share this code with the student's parents for Public Booking. The code is required in addition to the student's name." %}</p>
+<div style="display: flex; align-items: center; gap: 10px; margin: 15px 0;">
+    <span id="booking-code-display" style="font-family: monospace; font-size: 1.1em; letter-spacing: 0.15em;">{% if student.booking_code_hash %}••••••••••••{% else %}{% trans "Not set" %}{% endif %}</span>
+    <button type="button" class="btn btn-secondary" id="regenerate-code-btn" onclick="regenerateBookingCode()">{% trans "Regenerate" %}</button>
+</div>
+<div id="regenerate-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+        <h3 style="margin-top: 0;">{% trans "New Booking Code" %}</h3>
+        <p>{% trans "Copy this code and share it with the parents. It will not be shown again." %}</p>
+        <div style="display: flex; gap: 10px; align-items: center; margin: 15px 0;">
+            <input type="text" id="new-code-display" readonly style="flex: 1; padding: 10px; font-family: monospace; letter-spacing: 0.1em;">
+            <button type="button" class="btn" onclick="copyNewCode()">{% trans "Copy" %}</button>
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="closeRegenerateModal()">{% trans "Close" %}</button>
+    </div>
+</div>
+<script>
+function getCookie(name) {
+    var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+function regenerateBookingCode() {
+    var btn = document.getElementById('regenerate-code-btn');
+    btn.disabled = true;
+    fetch('{% url "students:regenerate_booking_code" student.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken') || '', 'Content-Type': 'application/json'}
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        if (data.success) {
+            document.getElementById('new-code-display').value = data.booking_code;
+            document.getElementById('regenerate-modal').style.display = 'flex';
+            document.getElementById('booking-code-display').textContent = '••••••••••••';
+        }
+    })
+    .catch(function() { btn.disabled = false; });
+}
+function copyNewCode() {
+    var inp = document.getElementById('new-code-display');
+    inp.select();
+    document.execCommand('copy');
+}
+function closeRegenerateModal() {
+    document.getElementById('regenerate-modal').style.display = 'none';
+}
+</script>
+
 <h2>{% trans "Contracts" %}</h2>
 {% if student.contracts.all %}
 <table>

@@ -10,6 +10,7 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ["first_name", "last_name", "email", "phone", "school"]
     list_filter = ["school", "grade", "created_at"]
     readonly_fields = ["created_at", "updated_at"]
+    exclude = ["booking_code_hash"]
     fieldsets = (
         (_("Personal Information"), {"fields": ("first_name", "last_name", "email", "phone")}),
         (_("School Information"), {"fields": ("school", "grade", "subjects")}),

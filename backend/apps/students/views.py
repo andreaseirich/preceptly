@@ -2,12 +2,15 @@
 Views for student CRUD operations.
 """
 
+from apps.students.booking_code_service import set_booking_code
 from apps.students.forms import StudentForm
 from apps.students.models import Student
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
@@ -77,3 +80,16 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, _("Student successfully deleted."))
         return super().delete(request, *args, **kwargs)
+
+
+class StudentRegenerateBookingCodeView(LoginRequiredMixin, View):
+    """Regenerate booking code for a student. Returns new code once (never stored)."""
+
+    def post(self, request, pk):
+        try:
+            student = Student.objects.get(pk=pk, user=request.user)
+        except Student.DoesNotExist:
+            return JsonResponse({"success": False, "message": _("Student not found.")}, status=404)
+
+        new_code = set_booking_code(student)
+        return JsonResponse({"success": True, "booking_code": new_code})

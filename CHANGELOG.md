@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Public Booking authentication with student codes**: Privacy-friendly two-factor auth for Public Booking
+  - Each student has a unique, stable booking code (12 chars, no ambiguous characters)
+  - Code is stored hashed (SHA-256); plaintext shown only at generation/regeneration
+  - Step 1: Name. Step 2: Code (or "Create new student"). Access only with correct name+code
+  - Neutral error messages (never reveal if student exists)
+  - Rate limiting (IP + tutor_token) against brute force
+  - Regenerate button on student detail page; code column in student list
+  - Contract Booking (token link) unchanged and compatible
+
+### Changed
+- **Public Booking flow**: Name-only search removed; verification requires name + code
+- **Student model**: Added `booking_code_hash` field (excluded from admin)
+
 ## [0.10.3] - 2026-01-30
 
 ### Changed

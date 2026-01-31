@@ -10,6 +10,8 @@ from apps.contracts.models import Contract
 from apps.core.utils_booking import get_tutor_for_booking
 from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson, LessonDocument
+from apps.lessons.throttle import is_public_booking_throttled, record_public_booking_attempt
+from apps.students.booking_code_service import set_booking_code, verify_booking_code
 from apps.students.models import Student
 from apps.students.services import StudentSearchService
 from django.http import Http404, JsonResponse
@@ -108,87 +110,65 @@ def public_booking_week_api(request, tutor_token):
     return JsonResponse({"success": True, "week_data": data})
 
 
+_NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
-def search_student_api(request):
-    """API-Endpoint für Namenssuche."""
+def verify_student_api(request):
+    """
+    Verify name + code for Public Booking. Never reveals if student exists.
+
+    Returns student data only if both name and code are correct.
+    Rate-limited by IP and tutor_token.
+    """
     try:
         data = json.loads(request.body)
         name = data.get("name", "").strip()
+        code = data.get("code", "").strip()
         tutor_token = data.get("tutor_token")
 
-        if not name:
+        if not name or not code:
             return JsonResponse(
-                {"success": False, "message": _("Please enter a name.")}, status=400
+                {"success": False, "message": _("Please enter both name and code.")}, status=400
             )
 
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:
-            return JsonResponse(
-                {"success": False, "message": _("Booking is not available.")}, status=400
-            )
+            return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
-        # Search for exact match (within tutor's students)
+        if is_public_booking_throttled(request, tutor_token):
+            return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=429)
+
+        record_public_booking_attempt(request, tutor_token)
+
         exact_match = StudentSearchService.find_exact_match(name, user=tutor)
-        if exact_match:
-            return JsonResponse(
-                {
-                    "success": True,
-                    "exact_match": True,
-                    "student": {
-                        "id": exact_match.id,
-                        "full_name": exact_match.full_name,
-                        "email": exact_match.email or "",
-                        "phone": exact_match.phone or "",
-                    },
-                }
-            )
+        if not exact_match or not verify_booking_code(exact_match, code):
+            return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
-        # Search for similar names (within tutor's students)
-        similar_students = StudentSearchService.search_by_name(name, threshold=0.7, user=tutor)
+        if not exact_match.booking_code_hash:
+            return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
-        if similar_students:
-            return JsonResponse(
-                {
-                    "success": True,
-                    "exact_match": False,
-                    "similar_students": [
-                        {
-                            "id": student.id,
-                            "full_name": student.full_name,
-                            "similarity": round(ratio * 100, 1),
-                        }
-                        for student, ratio in similar_students[:5]  # Max 5 Ergebnisse
-                    ],
-                }
-            )
-        else:
-            return JsonResponse(
-                {
-                    "success": True,
-                    "exact_match": False,
-                    "similar_students": [],
-                    "message": _("No student found with this name."),
-                }
-            )
+        return JsonResponse(
+            {
+                "success": True,
+                "student": {
+                    "id": exact_match.id,
+                    "full_name": exact_match.full_name,
+                    "email": exact_match.email or "",
+                    "phone": exact_match.phone or "",
+                },
+            }
+        )
 
     except json.JSONDecodeError:
-        return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
-    except Exception as e:
-        # Log the error for debugging but don't expose details to user
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in search_student_api: {str(e)}", exc_info=True)
-        return JsonResponse(
-            {"success": False, "message": _("An error occurred. Please try again.")}, status=500
-        )
+        return JsonResponse({"success": False, "message": _("Invalid request.")}, status=400)
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def create_student_api(request):
-    """API-Endpoint für neue Schüler."""
+    """API for creating new students. Generates booking code; returned once."""
     try:
         data = json.loads(request.body)
 
@@ -213,7 +193,6 @@ def create_student_api(request):
                 {"success": False, "message": _("Booking is not available.")}, status=400
             )
 
-        # Create new student (assigned to tutor)
         student = Student.objects.create(
             user=tutor,
             first_name=first_name,
@@ -225,6 +204,8 @@ def create_student_api(request):
             subjects=subjects if subjects else None,
         )
 
+        new_code = set_booking_code(student)
+
         return JsonResponse(
             {
                 "success": True,
@@ -235,17 +216,13 @@ def create_student_api(request):
                     "email": student.email or "",
                     "phone": student.phone or "",
                 },
+                "booking_code": new_code,
             }
         )
 
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
-    except Exception as e:
-        # Log the error for debugging but don't expose details to user
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in search_student_api: {str(e)}", exc_info=True)
+    except Exception:
         return JsonResponse(
             {"success": False, "message": _("An error occurred. Please try again.")}, status=500
         )
@@ -254,24 +231,14 @@ def create_student_api(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def book_lesson_api(request):
-    """API-Endpoint für Buchung."""
-    import logging
-    import sys
-
-    logger = logging.getLogger(__name__)
-    logger.info("POST request received in book_lesson_api")
-    print("[PUBLIC_BOOKING] POST request received in book_lesson_api", file=sys.stdout, flush=True)
-
+    """API for booking a lesson. Requires valid student_id and booking_code."""
     try:
-        # Use request.POST for FormData, not JSON
         if request.content_type and "application/json" in request.content_type:
             data = json.loads(request.body)
         else:
             data = request.POST
 
         student_id = data.get("student_id")
-        logger.info(f"Student ID: {student_id}")
-        print(f"[PUBLIC_BOOKING] Student ID: {student_id}", file=sys.stdout, flush=True)
         booking_date = data.get("date")
         start_time = data.get("start_time")
         end_time = data.get("end_time")
@@ -304,10 +271,21 @@ def book_lesson_api(request):
                 {"success": False, "message": _("Student ID is required.")}, status=400
             )
 
+        booking_code = (data.get("booking_code") or "").strip()
+        if not booking_code:
+            return JsonResponse(
+                {"success": False, "message": _("Booking code is required.")}, status=400
+            )
+
         try:
             student = Student.objects.get(id=student_id, user=tutor)
         except Student.DoesNotExist:
             return JsonResponse({"success": False, "message": _("Student not found.")}, status=404)
+
+        if not verify_booking_code(student, booking_code):
+            return JsonResponse(
+                {"success": False, "message": _("Invalid booking code.")}, status=400
+            )
 
         if not booking_date or not start_time:
             return JsonResponse(
@@ -435,16 +413,6 @@ def book_lesson_api(request):
                 is_active=True,
             )
 
-        # Create lesson
-        logger.info(
-            f"Creating lesson: student={student_id}, date={booking_date_obj}, start_time={start_time_obj}, duration={duration_total}"
-        )
-        print(
-            f"[PUBLIC_BOOKING] Creating lesson: student={student_id}, date={booking_date_obj}, start_time={start_time_obj}, duration={duration_total}",
-            file=sys.stdout,
-            flush=True,
-        )
-
         lesson = Lesson.objects.create(
             contract=contract,
             date=booking_date_obj,
@@ -456,35 +424,12 @@ def book_lesson_api(request):
             notes=f"{_('Subject')}: {subject}\n{notes}" if subject or notes else notes,
         )
 
-        logger.info(f"Lesson created successfully with ID: {lesson.id}")
-        print(
-            f"[PUBLIC_BOOKING] Lesson created successfully with ID: {lesson.id}",
-            file=sys.stdout,
-            flush=True,
-        )
-
-        # Send email notification
-        logger.info(f"Lesson {lesson.id} created, attempting to send email notification")
-        print(
-            f"[PUBLIC_BOOKING] Lesson {lesson.id} created, attempting to send email notification",
-            file=sys.stdout,
-            flush=True,
-        )
         try:
             from apps.lessons.email_service import send_booking_notification
 
             send_booking_notification(lesson)
-            logger.info(f"Email notification call completed for lesson {lesson.id}")
-            print(
-                f"[PUBLIC_BOOKING] Email notification call completed for lesson {lesson.id}",
-                file=sys.stdout,
-                flush=True,
-            )
-        except Exception as e:
-            # Don't fail the booking if email fails
-            error_msg = f"Failed to send booking notification email for lesson {lesson.id}: {e}"
-            logger.warning(error_msg, exc_info=True)
-            print(f"[PUBLIC_BOOKING] WARNING: {error_msg}", file=sys.stdout, flush=True)
+        except Exception:
+            pass
 
         # Process document upload (if present)
         uploaded_documents = []
