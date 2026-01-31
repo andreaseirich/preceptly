@@ -12,11 +12,19 @@ from apps.contracts.models import Contract
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
+
+
+def _user_invoice_queryset(user):
+    """Invoices visible to the user (via contract or via items)."""
+    return Invoice.objects.filter(
+        Q(contract__student__user=user) | Q(items__lesson__contract__student__user=user)
+    ).distinct()
 
 
 class InvoiceListView(LoginRequiredMixin, ListView):
@@ -28,7 +36,7 @@ class InvoiceListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return _user_invoice_queryset(self.request.user)
 
 
 class InvoiceDetailView(LoginRequiredMixin, DetailView):
@@ -39,7 +47,7 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "invoice"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return _user_invoice_queryset(self.request.user)
 
 
 class InvoiceCreateView(LoginRequiredMixin, CreateView):
@@ -157,7 +165,7 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("billing:invoice_list")
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return _user_invoice_queryset(self.request.user)
 
     def delete(self, request, *args, **kwargs):
         """Löscht die Rechnung und setzt Lessons zurück."""
@@ -182,7 +190,7 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
 @login_required
 def generate_invoice_document(request, pk):
     """Generiert das Rechnungsdokument für eine Invoice."""
-    invoice = get_object_or_404(Invoice, pk=pk, contract__student__user=request.user)
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
 
     try:
         InvoiceDocumentService.save_document(invoice)
@@ -200,7 +208,7 @@ def serve_invoice_document(request, pk):
 
     from django.http import FileResponse, Http404
 
-    invoice = get_object_or_404(Invoice, pk=pk, contract__student__user=request.user)
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
 
     if not invoice.document:
         raise Http404(_("Invoice document not found."))
