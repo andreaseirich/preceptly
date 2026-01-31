@@ -825,26 +825,24 @@
                 .then(function(result) {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
-                    if (result.ok && result.data.success && result.data.week_data) {
-                        document.getElementById('messages').innerHTML = '';
+                    if (result.ok && result.data && result.data.success && result.data.week_data) {
+                        var msgEl = document.getElementById('messages');
+                        if (msgEl) msgEl.innerHTML = '';
                         renderWeekCalendar(result.data.week_data);
                         currentYear = year;
                         currentMonth = month;
                         currentDay = day;
                         clearSelection();
                         updateContinueButton();
-                        const newUrl = window.location.pathname + '?year=' + year + '&month=' + month + '&day=' + day;
+                        var newUrl = window.location.pathname + '?year=' + year + '&month=' + month + '&day=' + day;
                         if (window.history.replaceState) {
                             window.history.replaceState({}, '', newUrl);
                         }
-                    } else {
-                        showMessage(result.data && result.data.message ? result.data.message : '{% trans "Error loading week." %}', 'error');
                     }
                 })
                 .catch(function() {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
-                    showMessage('{% trans "Error loading week. Please try again." %}', 'error');
                 });
         }
 

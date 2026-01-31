@@ -519,7 +519,7 @@
                 .then(function(result) {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
-                    if (result.ok && result.data.success && result.data.week_data) {
+                    if (result.ok && result.data && result.data.success && result.data.week_data) {
                         var messagesEl = document.getElementById('messages');
                         if (messagesEl) messagesEl.innerHTML = '';
                         renderWeekCalendar(result.data.week_data);
@@ -535,14 +535,11 @@
                         if (window.history.replaceState) {
                             window.history.replaceState({}, '', newUrl);
                         }
-                    } else {
-                        showMessage(result.data && result.data.message ? result.data.message : '{% trans "Error loading week." %}', 'error');
                     }
                 })
                 .catch(function() {
                     loadingEl.style.display = 'none';
                     daysEl.style.opacity = '1';
-                    showMessage('{% trans "Error loading week. Please try again." %}', 'error');
                 });
         }
         
