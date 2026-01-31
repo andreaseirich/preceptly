@@ -232,12 +232,10 @@ class BookingService:
 
         student_id = None
         owner_user = None
-        try:
-            contract = Contract.objects.select_related("student").get(pk=contract_id)
+        contract = Contract.objects.select_related("student").filter(pk=contract_id).first()
+        if contract:
             student_id = contract.student_id
             owner_user = contract.student.user_id
-        except Contract.DoesNotExist:
-            pass
 
         busy_per_day = (
             BookingService._get_busy_intervals_for_week(
@@ -380,16 +378,11 @@ class BookingService:
         week_end = week_start + timedelta(days=6)
 
         working_hours = {}
-        try:
-            profile = (
-                UserProfile.objects.filter(user=user).first()
-                if user
-                else UserProfile.objects.first()
-            )
-            if profile and profile.default_working_hours:
-                working_hours = profile.default_working_hours
-        except (UserProfile.DoesNotExist, AttributeError):
-            pass
+        profile = (
+            UserProfile.objects.filter(user=user).first() if user else UserProfile.objects.first()
+        )
+        if profile and getattr(profile, "default_working_hours", None):
+            working_hours = profile.default_working_hours
 
         occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end, user=user)
         busy_intervals = BookingService._get_busy_intervals_for_week(
