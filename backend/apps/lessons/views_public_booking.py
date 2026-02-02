@@ -118,12 +118,12 @@ def public_booking_week_api(request, tutor_token):
         student_id = request.session.get("public_booking_student_id")
 
     exclude_lesson_id = None
-    try:
-        eid = request.GET.get("exclude_lesson_id")
-        if eid:
+    eid = request.GET.get("exclude_lesson_id")
+    if eid:
+        try:
             exclude_lesson_id = int(eid)
-    except (ValueError, TypeError):
-        pass
+        except (ValueError, TypeError):
+            exclude_lesson_id = None
 
     week_data = BookingService.get_public_booking_data(
         year,
