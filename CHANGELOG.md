@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **404 handling**: Custom handler404 returns HTML (i18n) or JSON for API; templates/404.html; no 500 on non-existent URLs.
 - **Reschedule list removed**: Existing-bookings list and reschedule modal removed from public booking (step 2b). Reschedule only via inline calendar (tap on own lesson). list_reschedulable API removed.
 - **i18n booking page**: Language switcher on public booking; German translations for all booking strings (tap to reschedule, Confirm Reschedule, Booked, Loading, etc.).
 - **Series reschedule fix**: recurrence_weekdays was overwritten by HiddenInput when editing; fixed so "Edit entire series" works. edit_scope radios moved inside form so scope=series is submitted. On conflict: atomic rollback, clear error. Tests: updates_all_instances, respects_scope_single, is_atomic_on_conflict.

@@ -3182,6 +3182,22 @@ msgstr "Umbuchung nicht möglich. Bitte versuchen Sie es erneut."
 msgid "Language"
 msgstr "Sprache"
 
+#: templates/404.html
+msgid "Page not found"
+msgstr "Seite nicht gefunden"
+
+#: templates/404.html
+msgid "The page you are looking for does not exist."
+msgstr "Die gesuchte Seite existiert nicht."
+
+#: templates/404.html
+msgid "Back to Home"
+msgstr "Zurück zur Startseite"
+
+#: tutorflow/views.py
+msgid "The requested resource was not found."
+msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 
