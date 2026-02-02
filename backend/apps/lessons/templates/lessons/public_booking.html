@@ -251,6 +251,11 @@
         <!-- Schritt 2b: Bestehender Schüler - Buchungsformular -->
         <div class="step" id="step-2b">
             <h2>{% trans "Book Lesson" %} - <span id="student-name-display"></span></h2>
+            <div id="existing-bookings-section" style="margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;">
+                <h3 style="margin-top: 0; font-size: 1em;">{% trans "Existing bookings" %}</h3>
+                <div id="existing-bookings-list"></div>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #6c757d;">{% trans "Please inform your tutor when you reschedule a lesson." %}</p>
+            </div>
             <form id="booking-form">
                 <div class="form-group">
                     <label for="subject">{% trans "Subject" %}</label>
@@ -340,6 +345,28 @@
             <button type="button" class="btn btn-secondary" onclick="goToStep(3)">{% trans "Back" %}</button>
             <button type="button" class="btn btn-success" onclick="confirmBooking()">{% trans "Confirm and Book" %}</button>
         </div>
+        
+        <!-- Reschedule Modal -->
+        <div id="reschedule-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+            <div style="max-width: 900px; margin: 30px auto; background: white; padding: 25px; border-radius: 8px;">
+                <h2>{% trans "Reschedule Lesson" %}</h2>
+                <p id="reschedule-lesson-info" style="margin-bottom: 15px;"></p>
+                <div style="margin-bottom: 15px;">
+                    <button type="button" class="btn" onclick="reschedulePrevWeek()">← {% trans "Previous Week" %}</button>
+                    <button type="button" class="btn" onclick="rescheduleNextWeek()">{% trans "Next Week" %} →</button>
+                </div>
+                <div id="reschedule-selected-info" style="margin: 10px 0; padding: 10px; background: #fff3cd; border-radius: 4px; display: none;">
+                    <strong>{% trans "New time:" %}</strong> <span id="reschedule-selected-range"></span>
+                    <button type="button" class="btn btn-secondary" onclick="rescheduleClearSelection()" style="margin-left: 10px;">{% trans "Clear" %}</button>
+                </div>
+                <div id="reschedule-loading" style="display: none; padding: 20px; text-align: center;">{% trans "Loading..." %}</div>
+                <div id="reschedule-week-calendar"></div>
+                <div style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeRescheduleModal()">{% trans "Cancel" %}</button>
+                    <button type="button" class="btn btn-success" id="reschedule-confirm-btn" onclick="confirmReschedule()" disabled>{% trans "Confirm Reschedule" %}</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -387,6 +414,7 @@
                 if (currentStudent) loadWeek(currentYear, currentMonth, currentDay);
                 updateContinueButton();
             }
+            if (stepId === '2b' && currentStudent) loadReschedulableLessons();
         }
         
         function verifyStudent() {
@@ -812,6 +840,188 @@
             const date = new Date(currentYear, currentMonth - 1, currentDay);
             date.setDate(date.getDate() + 7);
             loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());
+        }
+
+        var rescheduleLessonId = null;
+        var rescheduleLessonInfo = null;
+        var rescheduleSelectedSlot = null;
+        var rescheduleYear = currentYear;
+        var rescheduleMonth = currentMonth;
+        var rescheduleDay = currentDay;
+
+        function loadReschedulableLessons() {
+            if (!currentStudent || !TUTOR_TOKEN) return;
+            fetch('{% url "lessons:public_booking_list_reschedulable" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({ tutor_token: TUTOR_TOKEN })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var section = document.getElementById('existing-bookings-section');
+                var listEl = document.getElementById('existing-bookings-list');
+                if (!data.success || !data.lessons || data.lessons.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+                var html = '';
+                data.lessons.forEach(function(les) {
+                    html += '<div style="padding: 8px 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">';
+                    html += '<span>' + les.date + ' ' + les.start_time + ' - ' + les.end_time + '</span>';
+                    html += '<button type="button" class="btn" onclick="openRescheduleModal(' + les.id + ',\'' + les.date + '\',\'' + les.start_time + '\',\'' + les.end_time + '\')">{% trans "Reschedule" %}</button>';
+                    html += '</div>';
+                });
+                listEl.innerHTML = html;
+                section.style.display = 'block';
+            })
+            .catch(function() {});
+        }
+
+        function openRescheduleModal(lessonId, dateStr, startStr, endStr) {
+            rescheduleLessonId = lessonId;
+            rescheduleLessonInfo = dateStr + ' ' + startStr + ' - ' + endStr;
+            rescheduleSelectedSlot = null;
+            var today = new Date();
+            rescheduleYear = today.getFullYear();
+            rescheduleMonth = today.getMonth() + 1;
+            rescheduleDay = today.getDate();
+            document.getElementById('reschedule-lesson-info').textContent = '{% trans "Current:" %} ' + rescheduleLessonInfo + ' → {% trans "Select new time:" %}';
+            document.getElementById('reschedule-modal').style.display = 'block';
+            document.getElementById('reschedule-selected-info').style.display = 'none';
+            document.getElementById('reschedule-confirm-btn').disabled = true;
+            loadRescheduleWeek();
+        }
+
+        function closeRescheduleModal() {
+            document.getElementById('reschedule-modal').style.display = 'none';
+            rescheduleLessonId = null;
+            loadReschedulableLessons();
+        }
+
+        function loadRescheduleWeek() {
+            if (!rescheduleLessonId || !TUTOR_TOKEN) return;
+            document.getElementById('reschedule-loading').style.display = 'block';
+            var url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?year=' + rescheduleYear + '&month=' + rescheduleMonth + '&day=' + rescheduleDay + '&exclude_lesson_id=' + rescheduleLessonId;
+            fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                document.getElementById('reschedule-loading').style.display = 'none';
+                if (result.success && result.week_data) {
+                    renderRescheduleCalendar(result.week_data);
+                }
+            })
+            .catch(function() { document.getElementById('reschedule-loading').style.display = 'none'; });
+        }
+
+        function renderRescheduleCalendar(weekData) {
+            const occupiedLabel = '{% trans "Occupied" %}';
+            const bookedLabel = '{% trans "Booked" %}';
+            const noWorkingHours = '{% trans "No working hours configured for this day." %}';
+            let html = '';
+            for (const day of weekData.days) {
+                const dateFormatted = formatDateDE(day.date);
+                html += '<div class="day-column"><div class="day-header">' + day.weekday_display + ', ' + dateFormatted + '</div>';
+                if (day.working_hours && day.working_hours.length > 0) {
+                    html += '<div class="time-slots">';
+                    for (const slot of day.available_slots) {
+                        html += '<div class="time-slot reschedule-slot" data-date="' + day.date + '" data-start="' + slot[0] + '" data-end="' + slot[1] + '"><div class="time-slot-label">' + slot[0] + '</div></div>';
+                    }
+                    var intervals = day.busy_intervals || [];
+                    if (intervals.length > 0) {
+                        for (const bi of intervals) {
+                            var label = bi.own && bi.label ? bi.label : bookedLabel;
+                            var cls = bi.own ? 'occupied own-lesson' : 'occupied';
+                            html += '<div class="time-slot ' + cls + '"><div class="time-slot-label">' + bi.start + ' - ' + bi.end + '</div><div class="occupied-label">' + escapeHtml(label) + '</div></div>';
+                        }
+                    } else {
+                        for (const occ of day.occupied_slots) {
+                            html += '<div class="time-slot occupied"><div class="time-slot-label">' + occ[0] + ' - ' + occ[1] + '</div><div class="occupied-label">' + occupiedLabel + '</div></div>';
+                        }
+                    }
+                    html += '</div>';
+                } else {
+                    html += '<p style="color: #6c757d;">' + noWorkingHours + '</p>';
+                }
+                html += '</div>';
+            }
+            var container = document.getElementById('reschedule-week-calendar');
+            container.innerHTML = html;
+            container.querySelectorAll('.time-slot.reschedule-slot').forEach(function(el) {
+                el.onclick = function() { rescheduleSelectSlot(this); };
+            });
+        }
+
+        function rescheduleSelectSlot(element) {
+            if (element.classList.contains('occupied')) return;
+            document.querySelectorAll('#reschedule-week-calendar .time-slot.selected').forEach(function(el) { el.classList.remove('selected'); });
+            element.classList.add('selected');
+            rescheduleSelectedSlot = {
+                date: element.dataset.date,
+                start: element.dataset.start,
+                end: element.dataset.end
+            };
+            document.getElementById('reschedule-selected-info').style.display = 'block';
+            document.getElementById('reschedule-selected-range').textContent = rescheduleSelectedSlot.date + ' ' + rescheduleSelectedSlot.start + ' - ' + rescheduleSelectedSlot.end;
+            document.getElementById('reschedule-confirm-btn').disabled = false;
+        }
+
+        function rescheduleClearSelection() {
+            rescheduleSelectedSlot = null;
+            document.querySelectorAll('#reschedule-week-calendar .time-slot.selected').forEach(function(el) { el.classList.remove('selected'); });
+            document.getElementById('reschedule-selected-info').style.display = 'none';
+            document.getElementById('reschedule-confirm-btn').disabled = true;
+        }
+
+        function reschedulePrevWeek() {
+            var d = new Date(rescheduleYear, rescheduleMonth - 1, rescheduleDay);
+            d.setDate(d.getDate() - 7);
+            rescheduleYear = d.getFullYear();
+            rescheduleMonth = d.getMonth() + 1;
+            rescheduleDay = d.getDate();
+            loadRescheduleWeek();
+        }
+
+        function rescheduleNextWeek() {
+            var d = new Date(rescheduleYear, rescheduleMonth - 1, rescheduleDay);
+            d.setDate(d.getDate() + 7);
+            rescheduleYear = d.getFullYear();
+            rescheduleMonth = d.getMonth() + 1;
+            rescheduleDay = d.getDate();
+            loadRescheduleWeek();
+        }
+
+        function confirmReschedule() {
+            if (!rescheduleSelectedSlot || !rescheduleLessonId || !currentBookingCode) {
+                showMessage('{% trans "Please select a new time slot." %}', 'error');
+                return;
+            }
+            var btn = document.getElementById('reschedule-confirm-btn');
+            btn.disabled = true;
+            fetch('{% url "lessons:public_booking_reschedule_lesson" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({
+                    lesson_id: rescheduleLessonId,
+                    new_date: rescheduleSelectedSlot.date,
+                    new_start_time: rescheduleSelectedSlot.start,
+                    tutor_token: TUTOR_TOKEN,
+                    booking_code: currentBookingCode
+                })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+            .then(function(result) {
+                if (result.data.success) {
+                    showMessage(result.data.message, 'success');
+                    closeRescheduleModal();
+                } else {
+                    showMessage(result.data.message || '{% trans "Reschedule failed." %}', 'error');
+                    btn.disabled = false;
+                }
+            })
+            .catch(function() {
+                showMessage('{% trans "Error. Please try again." %}', 'error');
+                btn.disabled = false;
+            });
         }
         
         function getCookie(name) {

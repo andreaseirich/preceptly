@@ -272,7 +272,11 @@ class BookingService:
 
     @staticmethod
     def _get_busy_intervals_for_week(
-        week_start: date, week_end: date, user, student_id: int | None
+        week_start: date,
+        week_end: date,
+        user,
+        student_id: int | None,
+        exclude_lesson_id: int | None = None,
     ) -> Dict[date, List[dict]]:
         """
         Build busy_intervals per day with own/other distinction.
@@ -283,9 +287,12 @@ class BookingService:
         if not user:
             return dict(result)
 
-        lessons = Lesson.objects.filter(
+        lessons_qs = Lesson.objects.filter(
             date__gte=week_start, date__lte=week_end, contract__student__user=user
         ).select_related("contract", "contract__student")
+        if exclude_lesson_id:
+            lessons_qs = lessons_qs.exclude(pk=exclude_lesson_id)
+        lessons = lessons_qs
 
         for lesson in lessons:
             start_dt, end_dt = LessonConflictService.calculate_time_block(lesson)
@@ -351,7 +358,12 @@ class BookingService:
 
     @staticmethod
     def get_public_booking_data(
-        year: int, month: int, day: int, user=None, student_id: int | None = None
+        year: int,
+        month: int,
+        day: int,
+        user=None,
+        student_id: int | None = None,
+        exclude_lesson_id: int | None = None,
     ) -> Dict:
         """
         Gibt Daten für die öffentliche Buchungsseite einer Woche zurück (ohne Contract-Token).
@@ -394,9 +406,11 @@ class BookingService:
         if profile and getattr(profile, "default_working_hours", None):
             working_hours = profile.default_working_hours
 
-        occupied_slots = BookingService.get_all_occupied_time_slots(week_start, week_end, user=user)
+        occupied_slots = BookingService.get_all_occupied_time_slots(
+            week_start, week_end, user=user, exclude_lesson_id=exclude_lesson_id
+        )
         busy_intervals = BookingService._get_busy_intervals_for_week(
-            week_start, week_end, user, student_id
+            week_start, week_end, user, student_id, exclude_lesson_id=exclude_lesson_id
         )
 
         weekday_names = [
@@ -441,7 +455,7 @@ class BookingService:
 
     @staticmethod
     def get_all_occupied_time_slots(
-        start_date: date, end_date: date, user=None
+        start_date: date, end_date: date, user=None, exclude_lesson_id: int | None = None
     ) -> Dict[date, List[Tuple[time, time]]]:
         """
         Gibt alle belegten Zeitslots zurück.
@@ -450,6 +464,7 @@ class BookingService:
             start_date: Startdatum
             end_date: Enddatum
             user: Optional - filtert nach User (für Multi-Tenancy)
+            exclude_lesson_id: Optional - Lesson-ID ausschließen (z. B. bei Umbuchung)
 
         Returns:
             Dict[date, List[Tuple[start_time, end_time]]] - belegte Zeitslots pro Tag
@@ -462,6 +477,8 @@ class BookingService:
         )
         if user:
             lessons_qs = lessons_qs.filter(contract__student__user=user)
+        if exclude_lesson_id:
+            lessons_qs = lessons_qs.exclude(pk=exclude_lesson_id)
         lessons = lessons_qs
 
         for lesson in lessons:

@@ -4,7 +4,7 @@ Views für öffentliche Buchungsseite (ohne Token).
 
 import json
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
 from apps.contracts.models import Contract
@@ -15,6 +15,7 @@ from apps.lessons.throttle import is_public_booking_throttled, record_public_boo
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
 from apps.students.models import Student
 from apps.students.services import StudentSearchService
+from django.db import transaction
 from django.http import Http404, JsonResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -116,8 +117,21 @@ def public_booking_week_api(request, tutor_token):
     if request.session.get("public_booking_tutor_token") == tutor_token:
         student_id = request.session.get("public_booking_student_id")
 
+    exclude_lesson_id = None
+    try:
+        eid = request.GET.get("exclude_lesson_id")
+        if eid:
+            exclude_lesson_id = int(eid)
+    except (ValueError, TypeError):
+        pass
+
     week_data = BookingService.get_public_booking_data(
-        year, month, day, user=tutor, student_id=student_id
+        year,
+        month,
+        day,
+        user=tutor,
+        student_id=student_id,
+        exclude_lesson_id=exclude_lesson_id,
     )
     data = _serialize_public_week_data(week_data)
     return JsonResponse({"success": True, "week_data": data})
@@ -555,4 +569,211 @@ def book_lesson_api(request):
         )
         return JsonResponse(
             {"success": False, "message": _("An error occurred. Please try again.")}, status=500
+        )
+
+
+_RESCHEDULE_NEUTRAL = _("Reschedule not possible. Please try again.")
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def list_reschedulable_lessons_api(request):
+    """
+    List own future lessons with status=planned (reschedulable).
+    Requires session auth (public_booking_student_id + public_booking_tutor_token).
+    """
+    try:
+        data = json.loads(request.body) if request.body else {}
+        tutor_token = data.get("tutor_token")
+        tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            return JsonResponse(
+                {"success": False, "message": _("Booking link invalid.")}, status=400
+            )
+
+        if request.session.get("public_booking_tutor_token") != tutor_token:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
+
+        student_id = request.session.get("public_booking_student_id")
+        if not student_id:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
+
+        if is_public_booking_throttled(request, tutor_token):
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=429)
+        record_public_booking_attempt(request, tutor_token)
+
+        today = timezone.now().date()
+        lessons = (
+            Lesson.objects.filter(
+                contract__student_id=student_id,
+                contract__student__user=tutor,
+                status="planned",
+                date__gte=today,
+            )
+            .select_related("contract")
+            .order_by("date", "start_time")[:50]
+        )
+
+        out = []
+        for les in lessons:
+            end_min = les.start_time.hour * 60 + les.start_time.minute + les.duration_minutes
+            end_h = end_min // 60
+            end_m = end_min % 60
+            end_time_str = f"{end_h:02d}:{end_m:02d}"
+            out.append(
+                {
+                    "id": les.id,
+                    "date": les.date.strftime("%Y-%m-%d"),
+                    "start_time": les.start_time.strftime("%H:%M"),
+                    "end_time": end_time_str,
+                    "duration_minutes": les.duration_minutes,
+                }
+            )
+
+        return JsonResponse({"success": True, "lessons": out})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": _("Invalid data.")}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def reschedule_lesson_api(request):
+    """
+    Reschedule a planned lesson to a new date/time.
+    Atomic, same validation as booking. Requires session auth + booking_code.
+    """
+    try:
+        if request.content_type and "application/json" in request.content_type:
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+
+        lesson_id = data.get("lesson_id")
+        new_date_str = data.get("new_date")
+        new_start_time_str = data.get("new_start_time")
+        tutor_token = data.get("tutor_token")
+        booking_code = (data.get("booking_code") or "").strip()
+
+        tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+        if not booking_code:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+        if request.session.get("public_booking_tutor_token") != tutor_token:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
+
+        student_id = request.session.get("public_booking_student_id")
+        if not student_id:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
+
+        try:
+            student = Student.objects.get(id=student_id, user=tutor)
+        except Student.DoesNotExist:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=404)
+
+        if not verify_booking_code(student, booking_code):
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+        if is_public_booking_throttled(request, tutor_token):
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=429)
+        record_public_booking_attempt(request, tutor_token)
+
+        if not lesson_id or not new_date_str or not new_start_time_str:
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+        try:
+            lesson_id = int(lesson_id)
+        except (ValueError, TypeError):
+            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+        try:
+            new_date_obj = datetime.strptime(new_date_str, "%Y-%m-%d").date()
+            new_start_obj = datetime.strptime(new_start_time_str, "%H:%M").time()
+        except ValueError:
+            return JsonResponse(
+                {"success": False, "message": _("Invalid date or time format.")}, status=400
+            )
+
+        with transaction.atomic():
+            lesson = (
+                Lesson.objects.select_for_update()
+                .filter(
+                    pk=lesson_id,
+                    contract__student_id=student_id,
+                    contract__student__user=tutor,
+                    status="planned",
+                )
+                .select_related("contract")
+                .first()
+            )
+
+            if not lesson:
+                return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=404)
+
+            contract = lesson.contract
+            duration = lesson.duration_minutes
+            new_end_min = new_start_obj.hour * 60 + new_start_obj.minute + duration
+            new_end_h = new_end_min // 60
+            new_end_m = new_end_min % 60
+            if new_end_h >= 24:
+                return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+            new_end_obj = time(new_end_h, new_end_m)
+
+            if duration != contract.unit_duration_minutes:
+                return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+            start_min = new_start_obj.hour * 60 + new_start_obj.minute
+            end_min = new_end_obj.hour * 60 + new_end_obj.minute
+            if start_min % 30 != 0 or end_min % 30 != 0:
+                return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+            booking_datetime = timezone.make_aware(datetime.combine(new_date_obj, new_start_obj))
+            min_booking = timezone.now() + timedelta(minutes=30)
+            if booking_datetime < min_booking:
+                return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+            occupied = BookingService.get_all_occupied_time_slots(
+                new_date_obj, new_date_obj, user=tutor, exclude_lesson_id=lesson.id
+            )
+            if not BookingService.is_time_slot_available(
+                new_date_obj, new_start_obj, new_end_obj, occupied
+            ):
+                return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+            old_date = lesson.date
+            old_start = lesson.start_time
+
+            lesson.date = new_date_obj
+            lesson.start_time = new_start_obj
+            lesson.save()
+
+            logging.getLogger(__name__).info(
+                "Lesson rescheduled",
+                extra={
+                    "lesson_id": lesson.id,
+                    "old_date": str(old_date),
+                    "old_start": str(old_start),
+                    "new_date": str(new_date_obj),
+                    "new_start": str(new_start_obj),
+                },
+            )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": _("Lesson rescheduled successfully."),
+                "lesson_id": lesson.id,
+            }
+        )
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": _("Invalid data.")}, status=400)
+    except Exception:
+        logging.getLogger(__name__).error("Reschedule failed", exc_info=True)
+        return JsonResponse(
+            {"success": False, "message": _("An error occurred. Please try again.")},
+            status=500,
         )

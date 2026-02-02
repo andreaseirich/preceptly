@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Reschedule (Umbuchung)**: Students can reschedule their own planned lessons on Public Booking. List existing bookings, select lesson, choose new time slot; same rules as booking (working hours, conflicts, duration). Atomic, logged, rate-limited.
 - **Contract unit duration for booking**: Time slots and booking validation use contract.unit_duration_minutes. One click selects full block; wrong duration rejected.
 - **Public Booking step 1: name search with suggestions**: Imprecise name (e.g. first name only) shows similar student suggestions; no match offers create-new flow.
 - **Public Booking week calendar own/other**: After verify, own lessons show with student name; other slots show "Booked" (anonymous). Session stores verified student for week API.
