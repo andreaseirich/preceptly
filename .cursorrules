@@ -1,0 +1,41 @@
+# TutorFlow – Cursor Rules (binding)
+
+**IMPORTANT:** Read these rules fully before making architectural decisions, code changes, docs, or commits.
+
+## 1. Project Identity
+- **Name:** TutorFlow – Web app for tutors (students, contracts, lessons, blocked times, income)
+- **Goal:** Functional MVP for CodeCraze Hackathon; clean, documented, ethically responsible
+- **Tech:** Django, Europe/Berlin timezone, ISO dates (YYYY-MM-DD)
+
+## 2. Git & Workflow
+- **Commit messages:** Always in **English**; use `feat:`, `fix:`, `docs:`, `chore:`
+- **After every change:** Commit and push. Never leave uncommitted changes.
+
+## 3. Repo Hygiene Policy (MANDATORY – check before every commit)
+**Never commit or stage:**
+- Editor/IDE: `.cursor/`, `.vscode/`, `.idea/`, `.DS_Store`
+- Build/runtime: `node_modules/`, `.next/`, `dist/`, `build/`, `coverage/`, `__pycache__/`, `.pytest_cache/`
+- Secrets: `.env`, `.env.*` (except `.env.example`), `*.pem`, `*.key`
+- Runtime data: `media/`, `uploads/`, `*.sqlite3`, `*.log`, `tmp/`, `temp/`
+
+**Check before commit:** Run `git status` and `git diff --name-only --cached`. If any forbidden path appears, STOP and report which files violate the policy. Do not commit until fixed.
+
+## 4. General Rules
+- Open real files before changing; no assumptions
+- Keep docs in sync: README, ARCHITECTURE, ETHICS, CHANGELOG
+- Run validation (ruff, tests) before commit
+- No code without tests
+- No silent failures; ask if unclear
+- Timezone: Europe/Berlin for all dates, logs, docs
+- Code: snake_case (Python), PascalCase (classes), focused modules (~300–400 lines max)
+
+## 5. Ethics & Standards
+- Honesty, transparency, no data abuse
+- Order, clarity, traceability
+- No hidden functions or manipulative logic
+- Respect for language and user data
+
+## 6. Hackathon Compliance
+- No copying full projects; AI tools allowed with human oversight
+- Open-source libs must be listed in README
+- No copyright violations or inappropriate content

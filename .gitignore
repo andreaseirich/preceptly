@@ -40,7 +40,8 @@ backend/media/
 # PWA generated icons (can be regenerated)
 backend/apps/core/static/icons/*.png
 
-# IDE
+# Cursor / Editor / IDE (never version - jury/recruiter irrelevant)
+.cursor/
 .vscode/
 .idea/
 *.swp
@@ -48,9 +49,13 @@ backend/apps/core/static/icons/*.png
 *~
 .DS_Store
 
-# Environment variables
+# Environment variables and secrets
 .env
 .env.local
+.env.*
+!.env.example
+*.pem
+*.key
 
 # Coverage
 htmlcov/
@@ -67,31 +72,33 @@ coverage.xml
 # pyenv
 .python-version
 
+# Logs, temp, runtime data
 logs/
 *.log
+tmp/
+temp/
+uploads/
+.pytest_cache/
+node_modules/
+.next/
+coverage/
 
-cursor_master_prompt.txt
-invoice*.html # Not for jury/recruiters
+# SQLite and local DB
+*.sqlite3
 
-# Internal development documentation (not for jury)
+# Internal / not for jury
+invoice*.html
 docs/PHASES.md
 docs/CHECKPOINTS.md
 docs/UX.md
 README_DATABASE.md
 docs/VIDEO_SCRIPT.md
-
-# Internal management commands with personal names (not for jury/recruiters)
 backend/apps/*/management/commands/*_for_anita*.py
 backend/apps/*/management/commands/*_for_chris*.py
 backend/apps/*/management/commands/*_for_johann*.py
 backend/apps/*/management/commands/move_*_*.py
 backend/apps/*/management/commands/delete_*_for_*.py
 backend/apps/billing/management/commands/update_invoice_payers.py
-
-cursor_master_prompt.txt # Not for jury/recruiters
-.gitignore # Not for jury/recruiters
-
-scripts/export_to_railway.sh # Not for jury/recruiters
-
+scripts/export_to_railway.sh
 *.sql
 check_data.py
