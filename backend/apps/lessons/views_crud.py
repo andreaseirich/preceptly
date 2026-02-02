@@ -9,6 +9,7 @@ from apps.lessons.services import LessonConflictService
 from apps.lessons.status_service import LessonStatusService
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -341,60 +342,102 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         matching_recurring = find_matching_recurring_lesson(original_lesson)
 
         if edit_scope == "series" and matching_recurring:
-            # Edit the entire series (RecurringLesson)
-            recurring = matching_recurring
-
-            # IMPORTANT: Save the original start_time BEFORE we change it!
-            original_start_time = recurring.start_time
-
-            # IMPORTANT: Find all lessons of this series BEFORE we change RecurringLesson!
-            # (Otherwise we won't find them anymore, as they still have the old start_time)
             from apps.lessons.recurring_utils import get_all_lessons_for_recurring
 
-            all_lessons = get_all_lessons_for_recurring(
-                recurring, original_start_time=original_start_time
-            )
+            with transaction.atomic():
+                # Edit the entire series (RecurringLesson) - atomic
+                recurring = matching_recurring
 
-            # Check if weekdays have changed
-            new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
-            new_weekdays_set = {int(wd) for wd in new_weekdays}
-            old_weekdays_set = set(recurring.get_active_weekdays())
-            weekdays_changed = new_weekdays_set != old_weekdays_set
+                # IMPORTANT: Save the original start_time BEFORE we change it!
+                original_start_time = recurring.start_time
 
-            # Update RecurringLesson with new values
-            recurring.start_time = form.cleaned_data["start_time"]
-            recurring.duration_minutes = form.cleaned_data["duration_minutes"]
-            recurring.travel_time_before_minutes = form.cleaned_data["travel_time_before_minutes"]
-            recurring.travel_time_after_minutes = form.cleaned_data["travel_time_after_minutes"]
-            recurring.notes = form.cleaned_data["notes"]
+                # IMPORTANT: Find all lessons of this series BEFORE we change RecurringLesson!
+                # (Otherwise we won't find them anymore, as they still have the old start_time)
+                all_lessons = get_all_lessons_for_recurring(
+                    recurring, original_start_time=original_start_time
+                )
 
-            # Update weekdays
-            if new_weekdays:
-                recurring.monday = "0" in new_weekdays
-                recurring.tuesday = "1" in new_weekdays
-                recurring.wednesday = "2" in new_weekdays
-                recurring.thursday = "3" in new_weekdays
-                recurring.friday = "4" in new_weekdays
-                recurring.saturday = "5" in new_weekdays
-                recurring.sunday = "6" in new_weekdays
+                # Check if weekdays have changed
+                new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
 
-            recurring.save()
+                new_weekdays_set = {int(wd) for wd in new_weekdays}
+                old_weekdays_set = set(recurring.get_active_weekdays())
+                weekdays_changed = new_weekdays_set != old_weekdays_set
 
-            if weekdays_changed:
-                # If weekdays have changed:
-                # 1. Delete all old lessons that no longer match the new weekdays
-                # 2. Generate new lessons for the new weekdays
+                # Update RecurringLesson with new values
+                recurring.start_time = form.cleaned_data["start_time"]
+                recurring.duration_minutes = form.cleaned_data["duration_minutes"]
+                recurring.travel_time_before_minutes = form.cleaned_data[
+                    "travel_time_before_minutes"
+                ]
+                recurring.travel_time_after_minutes = form.cleaned_data["travel_time_after_minutes"]
+                recurring.notes = form.cleaned_data["notes"]
 
-                deleted_count = 0
-                for lesson in all_lessons:
-                    # Check if this lesson matches the new weekdays
-                    lesson_weekday = lesson.date.weekday()
-                    if lesson_weekday not in new_weekdays_set:
-                        # This lesson no longer belongs to the new weekdays -> delete
-                        lesson.delete()
-                        deleted_count += 1
-                    else:
-                        # This lesson still matches -> update
+                # Update weekdays
+                if new_weekdays:
+                    recurring.monday = "0" in new_weekdays
+                    recurring.tuesday = "1" in new_weekdays
+                    recurring.wednesday = "2" in new_weekdays
+                    recurring.thursday = "3" in new_weekdays
+                    recurring.friday = "4" in new_weekdays
+                    recurring.saturday = "5" in new_weekdays
+                    recurring.sunday = "6" in new_weekdays
+
+                recurring.save()
+
+                if weekdays_changed:
+                    # If weekdays have changed:
+                    # 1. Delete all old lessons that no longer match the new weekdays
+                    # 2. Generate new lessons for the new weekdays
+
+                    deleted_count = 0
+                    for lesson in all_lessons:
+                        # Check if this lesson matches the new weekdays
+                        lesson_weekday = lesson.date.weekday()
+                        if lesson_weekday not in new_weekdays_set:
+                            # This lesson no longer belongs to the new weekdays -> delete
+                            lesson.delete()
+                            deleted_count += 1
+                        else:
+                            # This lesson still matches -> update
+                            lesson.start_time = recurring.start_time
+                            lesson.duration_minutes = recurring.duration_minutes
+                            lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
+                            lesson.travel_time_after_minutes = recurring.travel_time_after_minutes
+                            lesson.notes = recurring.notes
+                            LessonStatusService.update_status_for_lesson(lesson)
+                            lesson.save()
+                            recalculate_conflicts_for_affected_lessons(lesson)
+
+                    # Generate new lessons for the new weekdays
+                    result = RecurringLessonService.generate_lessons(
+                        recurring, check_conflicts=True, dry_run=False
+                    )
+                    created_count = result.get("created", 0)
+
+                    if result.get("conflicts"):
+                        messages.warning(
+                            self.request,
+                            _("{count} conflict(s) detected in generated lessons.").format(
+                                count=len(result.get("conflicts", []))
+                            ),
+                        )
+
+                    messages.success(
+                        self.request,
+                        _(
+                            "Series updated. {deleted} lesson(s) deleted, {created} new lesson(s) created, {updated} lesson(s) updated."
+                        ).format(
+                            deleted=deleted_count,
+                            created=created_count,
+                            updated=len(all_lessons) - deleted_count,
+                        ),
+                    )
+                else:
+                    # Weekdays have not changed -> only update existing lessons
+                    updated_count = 0
+                    for lesson in all_lessons:
+                        # Update this lesson with new values from RecurringLesson
                         lesson.start_time = recurring.start_time
                         lesson.duration_minutes = recurring.duration_minutes
                         lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
@@ -402,53 +445,15 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                         lesson.notes = recurring.notes
                         LessonStatusService.update_status_for_lesson(lesson)
                         lesson.save()
+                        updated_count += 1
+
+                        # Recalculate conflicts
                         recalculate_conflicts_for_affected_lessons(lesson)
 
-                # Generate new lessons for the new weekdays
-                result = RecurringLessonService.generate_lessons(
-                    recurring, check_conflicts=True, dry_run=False
-                )
-                created_count = result.get("created", 0)
-
-                if result.get("conflicts"):
-                    messages.warning(
+                    messages.success(
                         self.request,
-                        _("{count} conflict(s) detected in generated lessons.").format(
-                            count=len(result.get("conflicts", []))
-                        ),
+                        _("Series updated. {count} lesson(s) updated.").format(count=updated_count),
                     )
-
-                messages.success(
-                    self.request,
-                    _(
-                        "Series updated. {deleted} lesson(s) deleted, {created} new lesson(s) created, {updated} lesson(s) updated."
-                    ).format(
-                        deleted=deleted_count,
-                        created=created_count,
-                        updated=len(all_lessons) - deleted_count,
-                    ),
-                )
-            else:
-                # Weekdays have not changed -> only update existing lessons
-                updated_count = 0
-                for lesson in all_lessons:
-                    # Update this lesson with new values from RecurringLesson
-                    lesson.start_time = recurring.start_time
-                    lesson.duration_minutes = recurring.duration_minutes
-                    lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
-                    lesson.travel_time_after_minutes = recurring.travel_time_after_minutes
-                    lesson.notes = recurring.notes
-                    LessonStatusService.update_status_for_lesson(lesson)
-                    lesson.save()
-                    updated_count += 1
-
-                    # Recalculate conflicts
-                    recalculate_conflicts_for_affected_lessons(lesson)
-
-                messages.success(
-                    self.request,
-                    _("Series updated. {count} lesson(s) updated.").format(count=updated_count),
-                )
         else:
             # Edit only this one lesson
             lesson = form.save()

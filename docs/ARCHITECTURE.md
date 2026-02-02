@@ -750,6 +750,7 @@ This structure makes it easy to find related code: if you're working on scheduli
 - Validation of all inputs
 - No direct SQL queries (use ORM)
 - **Public Booking**: Student booking codes (hashed storage, constant-time compare); rate limiting; neutral error messages; tap-to-reschedule for own planned lessons in the week calendar (inline, no modal)
+- **Series reschedule**: When editing a lesson that belongs to a RecurringLesson, "Edit entire series" updates the RecurringLesson and all matching lessons (within series period). Operation is atomic.
 
 ## Extensibility
 

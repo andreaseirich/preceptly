@@ -122,7 +122,7 @@ class SessionForm(forms.ModelForm):
             else:
                 # Hide edit_scope and recurrence_weekdays if no series found
                 self.fields["edit_scope"].widget = forms.HiddenInput()
-            self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
+                self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
         else:
             # When creating: hide edit_scope
             self.fields["edit_scope"].widget = forms.HiddenInput()
