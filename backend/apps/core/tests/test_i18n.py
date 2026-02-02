@@ -148,3 +148,43 @@ class I18nTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Stunde buchen", response.content)
         self.assertIn(b"Daten", response.content)
+
+    def test_csrf_after_language_switch_on_booking_page(self):
+        """After switching language, page reloads with valid CSRF token and next is preserved."""
+        user = User.objects.create_user(username="tutor", password="test")
+        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
+        prof.public_booking_token = "tok-csrf"
+        prof.save()
+        # Load booking page
+        r1 = self.client.get("/lessons/public-booking/tok-csrf/")
+        self.assertEqual(r1.status_code, 200)
+        self.assertIn(b"csrf-token", r1.content)
+        # Switch language (POST to set_language with next=current path)
+        r2 = self.client.post(
+            reverse("set_language"),
+            {"language": "de", "next": "/lessons/public-booking/tok-csrf/"},
+            follow=True,
+        )
+        self.assertEqual(r2.status_code, 200)
+        # Page must still have csrf-token meta after redirect
+        self.assertIn(b"csrf-token", r2.content)
+
+    def test_jump_to_date_german(self):
+        """Jump to date label is translated when German is active."""
+        user = User.objects.create_user(username="tutor", password="test")
+        user.save()
+        self.client.force_login(user)
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get(reverse("lessons:week"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Zum Datum springen:", response.content)
+
+    def test_weekday_locale_german(self):
+        """Week view shows German weekday when language is German."""
+        user = User.objects.create_user(username="tutor", password="test")
+        user.save()
+        self.client.force_login(user)
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get(reverse("lessons:week"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Montag", response.content)

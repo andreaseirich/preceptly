@@ -12,6 +12,7 @@ from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from apps.lessons.conflict_service import LessonConflictService
 from apps.lessons.models import Lesson
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 
 class BookingService:
@@ -240,6 +241,15 @@ class BookingService:
             else {}
         )
 
+        weekday_display_keys = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
         days_data = []
         for i in range(7):
             current_date = week_start + timedelta(days=i)
@@ -255,7 +265,7 @@ class BookingService:
                 {
                     "date": current_date,
                     "weekday": weekday_name,
-                    "weekday_display": current_date.strftime("%A"),
+                    "weekday_display": _(weekday_display_keys[i]),
                     "working_hours": day_working_hours,
                     "available_slots": available_slots,
                     "occupied_slots": occupied_slots.get(current_date, []),
@@ -425,6 +435,15 @@ class BookingService:
             "saturday",
             "sunday",
         ]
+        weekday_display_keys = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
 
         days_data = []
         for i in range(7):
@@ -441,7 +460,7 @@ class BookingService:
                 {
                     "date": current_date,
                     "weekday": weekday_name,
-                    "weekday_display": current_date.strftime("%A"),
+                    "weekday_display": _(weekday_display_keys[i]),
                     "working_hours": day_working_hours,
                     "available_slots": available_slots,
                     "occupied_slots": occupied_slots.get(current_date, []),

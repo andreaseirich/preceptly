@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% trans "Book Lesson" %}</title>
     <style>
         * { box-sizing: border-box; }
@@ -180,7 +181,7 @@
             <h1 style="margin: 0;">{% trans "Book Lesson" %}</h1>
             <form action="{% url 'set_language' %}" method="post" style="margin: 0;">
                 {% csrf_token %}
-                <input name="next" type="hidden" value="{{ request.path }}">
+                <input name="next" type="hidden" value="{{ request.get_full_path }}">
                 <select name="language" onchange="this.form.submit()" title="{% trans 'Language' %}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
                     {% for lang_code, lang_name in LANGUAGES %}
                     <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{% if lang_code == 'de' %}DE{% elif lang_code == 'en' %}EN{% else %}{{ lang_code|upper }}{% endif %}</option>
@@ -315,7 +316,7 @@
                 {% for day in week_data.days %}
                 <div class="day-column">
                     <div class="day-header">
-                        {{ day.weekday_display }}, {{ day.date|date:"d.m.Y" }}
+                        {{ day.weekday_display }}, {{ day.date|date:"SHORT_DATE_FORMAT" }}
                     </div>
                     
                     {% if day.working_hours %}
@@ -432,7 +433,7 @@
             if (name) payload.name = name;
             fetch('{% url "lessons:public_booking_verify_student" %}', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
                 body: JSON.stringify(payload)
             })
             .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
@@ -458,7 +459,7 @@
             btn.disabled = true;
             fetch('{% url "lessons:public_booking_search_student" %}', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
                 body: JSON.stringify({ name: name, tutor_token: TUTOR_TOKEN })
             })
             .then(function(r) { return r.json(); })
@@ -549,7 +550,7 @@
             var url = '{% url "lessons:public_booking_create_student" %}';
             fetch(url, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
                 body: JSON.stringify(formData)
             })
             .then(function(r) { return r.json(); })
@@ -710,7 +711,7 @@
             const options = {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
+                    'X-CSRFToken': getCsrfToken()
                 },
                 body: formData
             };
@@ -838,7 +839,7 @@
             btn.disabled = true;
             fetch('{% url "lessons:public_booking_reschedule_lesson" %}', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
                 body: JSON.stringify({
                     lesson_id: inlineRescheduleLessonId,
                     new_date: inlineRescheduleSelectedSlot.date,
@@ -870,7 +871,7 @@
             const noWorkingHours = '{% trans "No working hours configured for this day." %}';
             let html = '';
             for (const day of weekData.days) {
-                const dateFormatted = formatDateDE(day.date);
+                const dateFormatted = formatDateLocale(day.date);
                 html += '<div class="day-column"><div class="day-header">' + day.weekday_display + ', ' + dateFormatted + '</div>';
                 if (day.working_hours && day.working_hours.length > 0) {
                     html += '<div class="time-slots">';
@@ -909,10 +910,11 @@
             return div.innerHTML;
         }
 
-        function formatDateDE(isoDate) {
+        function formatDateLocale(isoDate) {
             const d = new Date(isoDate + 'T12:00:00');
-            const pad = n => String(n).padStart(2, '0');
-            return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
+            const lang = document.documentElement.lang || 'en';
+            const locale = lang === 'de' ? 'de-DE' : 'en-US';
+            return d.toLocaleDateString(locale);
         }
 
         function previousWeek() {
@@ -942,6 +944,11 @@
                 }
             }
             return cookieValue;
+        }
+        function getCsrfToken() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+            return getCookie('csrftoken');
         }
     </script>
 </body>

@@ -506,7 +506,7 @@
             
             let html = '';
             for (const day of weekData.days) {
-                const dateFormatted = formatDateDE(day.date);
+                const dateFormatted = formatDateLocale(day.date);
                 html += `<div class="day-column">
                     <div class="day-header">${day.weekday_display}, ${dateFormatted}</div>`;
                 if (day.working_hours && day.working_hours.length > 0) {
@@ -538,10 +538,11 @@
             document.getElementById('week-calendar-days').innerHTML = html;
         }
         
-        function formatDateDE(isoDate) {
+        function formatDateLocale(isoDate) {
             const d = new Date(isoDate + 'T12:00:00');
-            const pad = n => String(n).padStart(2, '0');
-            return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+            const lang = document.documentElement.lang || 'en';
+            const locale = lang === 'de' ? 'de-DE' : 'en-US';
+            return d.toLocaleDateString(locale);
         }
         
         function previousWeek() {

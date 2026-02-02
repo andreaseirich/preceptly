@@ -2,7 +2,7 @@
 Calendar views for lessons (Week, Month, Calendar redirect).
 """
 
-from calendar import month_name, monthcalendar
+from calendar import monthcalendar
 from datetime import date, timedelta
 
 from apps.lessons.calendar_service import CalendarService
@@ -69,17 +69,24 @@ class WeekView(LoginRequiredMixin, TemplateView):
 
         # Create weekday list
         weekdays = []
-        # Weekday names will be translated in template using i18n
         weekday_names = [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
+            _("Monday"),
+            _("Tuesday"),
+            _("Wednesday"),
+            _("Thursday"),
+            _("Friday"),
+            _("Saturday"),
+            _("Sunday"),
         ]
-        weekday_names_short = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        weekday_names_short = [
+            _("Mon"),
+            _("Tue"),
+            _("Wed"),
+            _("Thu"),
+            _("Fri"),
+            _("Sat"),
+            _("Sun"),
+        ]
 
         for i in range(7):
             day_date = week_start + timedelta(days=i)
@@ -227,7 +234,20 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                     )
             weeks.append(week_days)
 
-        # Weekday names (will be translated in template)
+        month_names = [
+            _("January"),
+            _("February"),
+            _("March"),
+            _("April"),
+            _("May"),
+            _("June"),
+            _("July"),
+            _("August"),
+            _("September"),
+            _("October"),
+            _("November"),
+            _("December"),
+        ]
         weekday_names = [
             _("Monday"),
             _("Tuesday"),
@@ -242,7 +262,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             {
                 "year": year,
                 "month": month,
-                "month_label": month_name[month],
+                "month_label": month_names[month - 1],
                 "weeks": weeks,
                 "weekday_names": weekday_names,
                 "conflicts_by_lesson": calendar_data["conflicts_by_lesson"],

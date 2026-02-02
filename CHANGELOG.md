@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **CSRF + i18n on booking page**: Language form uses request.get_full_path for next; meta csrf-token + getCsrfToken() for AJAX; base.html gets next + csrf meta.
+- **Localized date/weekday**: weekday_display, month_label, weekday short (Mon→Mo) use gettext; SHORT_DATE_FORMAT for dates; week dialog uses document.lang for toLocaleDateString.
+- **Jump to date**: German translation "Zum Datum springen:" added.
 - **404 handling**: Custom handler404 returns HTML (i18n) or JSON for API; templates/404.html; no 500 on non-existent URLs.
 - **Reschedule list removed**: Existing-bookings list and reschedule modal removed from public booking (step 2b). Reschedule only via inline calendar (tap on own lesson). list_reschedulable API removed.
 - **i18n booking page**: Language switcher on public booking; German translations for all booking strings (tap to reschedule, Confirm Reschedule, Booked, Loading, etc.).

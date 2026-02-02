@@ -235,8 +235,9 @@ function showCreateDialog(startDateTime, endDateTime, date) {
     
     const startStr = formatLocalDateTime(startDateTime);
     const endStr = formatLocalDateTime(endDateTime);
-    
-    const locale = 'en-US';
+
+    const localeMap = { 'de': 'de-DE', 'en': 'en-US' };
+    const locale = localeMap[document.documentElement.lang] || 'en-US';
     timeInfo.textContent = `From: ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} to ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} on ${new Date(date).toLocaleDateString(locale)}`;
     
     dialog.dataset.start = startStr;

@@ -823,6 +823,33 @@ msgstr "Samstag"
 msgid "Sunday"
 msgstr "Sonntag"
 
+#: apps/lessons/templates/lessons/week.html:18
+#: apps/lessons/templates/lessons/student_booking.html:181
+msgid "Jump to date:"
+msgstr "Zum Datum springen:"
+
+#: apps/lessons/views_calendar.py
+msgid "Mon"
+msgstr "Mo"
+
+msgid "Tue"
+msgstr "Di"
+
+msgid "Wed"
+msgstr "Mi"
+
+msgid "Thu"
+msgstr "Do"
+
+msgid "Fri"
+msgstr "Fr"
+
+msgid "Sat"
+msgstr "Sa"
+
+msgid "Sun"
+msgstr "So"
+
 #: apps/blocked_times/recurring_models.py:43
 #: apps/lessons/recurring_models.py:54
 msgid "Is the series active?"
