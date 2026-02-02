@@ -102,11 +102,6 @@ urlpatterns = [
         name="public_booking_book_lesson",
     ),
     path(
-        "public-booking/api/list-reschedulable-lessons/",
-        views_public_booking.list_reschedulable_lessons_api,
-        name="public_booking_list_reschedulable",
-    ),
-    path(
         "public-booking/api/reschedule-lesson/",
         views_public_booking.reschedule_lesson_api,
         name="public_booking_reschedule_lesson",

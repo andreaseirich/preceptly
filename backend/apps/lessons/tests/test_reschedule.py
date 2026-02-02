@@ -94,44 +94,6 @@ class WeekApiReschedulableTest(RescheduleTestMixin, TestCase):
         self.assertTrue(found)
 
 
-class ListReschedulableLessonsTest(RescheduleTestMixin, TestCase):
-    """List reschedulable lessons requires auth and returns only own planned lessons."""
-
-    def test_list_requires_session_auth(self):
-        resp = self.client.post(
-            reverse("lessons:public_booking_list_reschedulable"),
-            data=json.dumps({"tutor_token": "tok-reschedule"}),
-            content_type="application/json",
-        )
-        self.assertEqual(resp.status_code, 401)
-
-    def test_list_returns_own_lessons_only(self):
-        from datetime import time
-
-        self._verify()
-
-        future = self._future_monday()
-        Lesson.objects.create(
-            contract=self.contract,
-            date=future,
-            start_time=time(10, 0),
-            duration_minutes=60,
-            status="planned",
-        )
-
-        resp = self.client.post(
-            reverse("lessons:public_booking_list_reschedulable"),
-            data=json.dumps({"tutor_token": "tok-reschedule"}),
-            content_type="application/json",
-        )
-        self.assertEqual(resp.status_code, 200)
-        data = json.loads(resp.content)
-        self.assertTrue(data.get("success"))
-        lessons = data.get("lessons", [])
-        self.assertGreaterEqual(len(lessons), 1)
-        self.assertEqual(lessons[0]["date"], future.strftime("%Y-%m-%d"))
-
-
 class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
     """Reschedule API: happy path and failure cases."""
 

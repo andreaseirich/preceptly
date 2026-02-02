@@ -577,67 +577,6 @@ _RESCHEDULE_NEUTRAL = _("Reschedule not possible. Please try again.")
 
 @csrf_exempt
 @require_http_methods(["POST"])
-def list_reschedulable_lessons_api(request):
-    """
-    List own future lessons with status=planned (reschedulable).
-    Requires session auth (public_booking_student_id + public_booking_tutor_token).
-    """
-    try:
-        data = json.loads(request.body) if request.body else {}
-        tutor_token = data.get("tutor_token")
-        tutor = get_tutor_for_booking(tutor_token)
-        if not tutor:
-            return JsonResponse(
-                {"success": False, "message": _("Booking link invalid.")}, status=400
-            )
-
-        if request.session.get("public_booking_tutor_token") != tutor_token:
-            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
-
-        student_id = request.session.get("public_booking_student_id")
-        if not student_id:
-            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
-
-        if is_public_booking_throttled(request, tutor_token):
-            return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=429)
-        record_public_booking_attempt(request, tutor_token)
-
-        today = timezone.now().date()
-        lessons = (
-            Lesson.objects.filter(
-                contract__student_id=student_id,
-                contract__student__user=tutor,
-                status="planned",
-                date__gte=today,
-            )
-            .select_related("contract")
-            .order_by("date", "start_time")[:50]
-        )
-
-        out = []
-        for les in lessons:
-            end_min = les.start_time.hour * 60 + les.start_time.minute + les.duration_minutes
-            end_h = end_min // 60
-            end_m = end_min % 60
-            end_time_str = f"{end_h:02d}:{end_m:02d}"
-            out.append(
-                {
-                    "id": les.id,
-                    "date": les.date.strftime("%Y-%m-%d"),
-                    "start_time": les.start_time.strftime("%H:%M"),
-                    "end_time": end_time_str,
-                    "duration_minutes": les.duration_minutes,
-                }
-            )
-
-        return JsonResponse({"success": True, "lessons": out})
-
-    except json.JSONDecodeError:
-        return JsonResponse({"success": False, "message": _("Invalid data.")}, status=400)
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
 def reschedule_lesson_api(request):
     """
     Reschedule a planned lesson to a new date/time.

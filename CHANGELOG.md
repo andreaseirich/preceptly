@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Reschedule list removed**: Existing-bookings list and reschedule modal removed from public booking (step 2b). Reschedule only via inline calendar (tap on own lesson). list_reschedulable API removed.
+- **i18n booking page**: Language switcher on public booking; German translations for all booking strings (tap to reschedule, Confirm Reschedule, Booked, Loading, etc.).
 - **Series reschedule fix**: recurrence_weekdays was overwritten by HiddenInput when editing; fixed so "Edit entire series" works. edit_scope radios moved inside form so scope=series is submitted. On conflict: atomic rollback, clear error. Tests: updates_all_instances, respects_scope_single, is_atomic_on_conflict.
 - **Repo hygiene without .gitignore/.cursorrules**: .gitignore, .cursorrules, .githooks removed from repo. scripts/repo_hygiene_check.sh enforces denylist; CI fails on forbidden paths. scripts/setup_local_git.sh configures local exclude + pre-commit.
 - **Tap entry to reschedule in calendar**: Own planned lessons in Public Booking week calendar are clickable; tap enters inline Reschedule Mode, pick new slot, confirm. Backend: busy_intervals include lesson_id and reschedulable for own lessons.

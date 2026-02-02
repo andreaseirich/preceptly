@@ -3114,6 +3114,74 @@ msgstr "Öffentlicher Buchungslink"
 msgid "Share this link with all students. They can enter their name and book lessons."
 msgstr "Teilen Sie diesen Link mit allen Schülern. Sie können ihren Namen eingeben und Stunden buchen."
 
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "tap to reschedule"
+msgstr "tippen zum Verschieben"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Booked"
+msgstr "Gebucht"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Loading..."
+msgstr "Laden..."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Confirm Reschedule"
+msgstr "Umbuchung bestätigen"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Reschedule: select a new time slot below."
+msgstr "Umbuchung: wählen Sie unten einen neuen Zeitslot."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Reschedule failed."
+msgstr "Umbuchung fehlgeschlagen."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Please select a new time slot."
+msgstr "Bitte wählen Sie einen neuen Zeitslot."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "New time:"
+msgstr "Neue Zeit:"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Enter the code for"
+msgstr "Code eingeben für"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Save this code for next time"
+msgstr "Merken Sie sich diesen Code für das nächste Mal"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Server error"
+msgstr "Serverfehler"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Network error: Please check your internet connection."
+msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Booking code is required. Please go back and verify again."
+msgstr "Buchungscode erforderlich. Bitte gehen Sie zurück und verifizieren Sie erneut."
+
+#: apps/lessons/views_public_booking.py
+msgid "Lesson rescheduled successfully."
+msgstr "Stunde erfolgreich umgebucht."
+
+#: apps/lessons/views_public_booking.py
+msgid "Reschedule not possible. Please try again."
+msgstr "Umbuchung nicht möglich. Bitte versuchen Sie es erneut."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Language"
+msgstr "Sprache"
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 

@@ -2,6 +2,8 @@
 Tests for internationalization (i18n) functionality.
 """
 
+from apps.core.models import UserProfile
+from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils.translation import activate
@@ -134,3 +136,15 @@ class I18nTestCase(TestCase):
         except Exception:
             # Skip if view requires authentication or other setup
             pass
+
+    def test_booking_page_german_translations(self):
+        """When language is German, booking page shows German text."""
+        user = User.objects.create_user(username="tutor", password="test")
+        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
+        prof.public_booking_token = "tok-i18n"
+        prof.save()
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get("/lessons/public-booking/tok-i18n/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Stunde buchen", response.content)
+        self.assertIn(b"Daten", response.content)
