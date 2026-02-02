@@ -19,17 +19,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Repo hygiene check
-        run: |
-          TRACKED=$(git ls-files)
-          FAIL=0
-          echo "$TRACKED" | grep -qE '^\.cursor/' && { echo "::error::Forbidden: .cursor/"; FAIL=1; }
-          echo "$TRACKED" | grep -qE '^\.vscode/' && { echo "::error::Forbidden: .vscode/"; FAIL=1; }
-          echo "$TRACKED" | grep -qE '^\.idea/' && { echo "::error::Forbidden: .idea/"; FAIL=1; }
-          echo "$TRACKED" | grep -q node_modules/ && { echo "::error::Forbidden: node_modules/"; FAIL=1; }
-          BAD_ENV=$(echo "$TRACKED" | grep -E '^\.env$|/\.env$|^\.env\.' | grep -v '\.env\.example' || true)
-          [ -n "$BAD_ENV" ] && { echo "::error::Forbidden .env files tracked:"; echo "$BAD_ENV"; FAIL=1; }
-          [ $FAIL -eq 1 ] && exit 1
-          echo "✅ Repo hygiene OK"
+        run: bash scripts/repo_hygiene_check.sh
 
       - name: Set up Python
         uses: actions/setup-python@v5

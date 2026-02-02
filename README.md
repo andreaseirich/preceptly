@@ -150,12 +150,12 @@ python manage.py load_demo_data
 python manage.py runserver
 ```
 
-### Pre-commit hook (optional)
+### Local git setup (optional)
 
-To auto-fix ruff format and lint (including import sorting) before each commit:
+To configure local exclude patterns and a pre-commit hygiene check (blocks forbidden paths):
 
 ```bash
-git config core.hooksPath .githooks
+./scripts/setup_local_git.sh
 ```
 
 ---
