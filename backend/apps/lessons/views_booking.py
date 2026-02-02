@@ -156,18 +156,13 @@ class StudentBookingView(TemplateView):
                         status=400,
                     )
 
-                # Validation: Check that the time period consists of whole 30-minute blocks
                 duration_total = end_minutes - start_minutes
-                if duration_total % 30 != 0:
+                if duration_total != contract.unit_duration_minutes:
                     return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("Duration must be a multiple of 30 minutes."),
-                        },
+                        {"success": False, "message": _("Invalid booking duration.")},
                         status=400,
                     )
 
-                # Calculate duration_minutes from start and end time
                 duration_minutes = duration_total
 
                 # Validation: Check that appointment is not in the past
@@ -457,6 +452,7 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
     return {
         "week_start": week_data["week_start"].strftime("%Y-%m-%d"),
         "week_end": week_data["week_end"].strftime("%Y-%m-%d"),
+        "unit_duration_minutes": week_data.get("unit_duration_minutes", 60),
         "days": [serialize_day(d) for d in week_data["days"]],
     }
 

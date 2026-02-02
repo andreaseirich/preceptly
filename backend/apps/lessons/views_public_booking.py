@@ -91,6 +91,7 @@ def _serialize_public_week_data(week_data):
     return {
         "week_start": week_data["week_start"].strftime("%Y-%m-%d"),
         "week_end": week_data["week_end"].strftime("%Y-%m-%d"),
+        "unit_duration_minutes": week_data.get("unit_duration_minutes", 60),
         "days": [serialize_day(d) for d in week_data["days"]],
     }
 
@@ -423,15 +424,17 @@ def book_lesson_api(request):
                 {"success": False, "message": _("End time must be after start time.")}, status=400
             )
 
-        # Validation: Check that the time period consists of whole 30-minute blocks
         duration_total = end_minutes - start_minutes
-        if duration_total % 30 != 0:
+
+        contract = (
+            Contract.objects.filter(student=student, student__user=tutor, is_active=True)
+            .order_by("-start_date")
+            .first()
+        )
+        expected_duration = contract.unit_duration_minutes if contract else 60
+        if duration_total != expected_duration:
             return JsonResponse(
-                {
-                    "success": False,
-                    "message": _("Duration must be a multiple of 30 minutes."),
-                },
-                status=400,
+                {"success": False, "message": _("Invalid booking duration.")}, status=400
             )
 
         # Validation: Check that appointment is not in the past

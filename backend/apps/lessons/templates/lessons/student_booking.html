@@ -235,7 +235,7 @@
         
         <div class="week-calendar">
             <h2>{% trans "Available Time Slots" %}</h2>
-            <p>{% trans "Click on available time slots to select them. You can select multiple consecutive slots (e.g., 13:30 and 14:30 = booking from 13:30 to 14:30)." %}</p>
+            <p>{% trans "Click on a time slot to select one lesson block (duration from your contract)." %}</p>
             <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: #fff3cd; border-radius: 4px; display: none;">
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
                 <button class="btn btn-success" onclick="confirmBooking()" style="margin-left: 15px;">{% trans "Book Selected Slots" %}</button>
@@ -310,83 +310,25 @@
         let currentDate = null;
         
         function toggleSlot(element) {
-            if (element.classList.contains('occupied') || element.classList.contains('booked')) {
+            if (element.classList.contains('occupied') || element.classList.contains('booked')) return;
+            var date = element.dataset.date, startTime = element.dataset.start, endTime = element.dataset.end;
+            var slotKey = date + '_' + startTime;
+            if (selectedSlots.length === 1 && selectedSlots[0].key === slotKey) {
+                clearSelection();
                 return;
             }
-            
-            const date = element.dataset.date;
-            const startTime = element.dataset.start;
-            const endTime = element.dataset.end;
-            
-            // If a new day is selected, clear the selection
-            if (currentDate && currentDate !== date) {
-                clearSelection();
-            }
+            clearSelection();
+            selectedSlots = [{ key: slotKey, date: date, startTime: startTime, endTime: endTime }];
+            element.classList.add('selected');
             currentDate = date;
-            
-            const slotKey = `${date}_${startTime}`;
-            const slotIndex = selectedSlots.findIndex(s => s.key === slotKey);
-            
-            if (slotIndex >= 0) {
-                // Slot already selected - remove it
-                selectedSlots.splice(slotIndex, 1);
-                element.classList.remove('selected');
-            } else {
-                // Check if the slot is consecutive
-                if (selectedSlots.length > 0) {
-                    const sortedSlots = [...selectedSlots, { key: slotKey, date, startTime, endTime }]
-                        .sort((a, b) => {
-                            if (a.date !== b.date) return a.date.localeCompare(b.date);
-                            return a.startTime.localeCompare(b.startTime);
-                        });
-                    
-                    // Check if all slots are consecutive
-                    let isConsecutive = true;
-                    for (let i = 1; i < sortedSlots.length; i++) {
-                        const prevEnd = sortedSlots[i - 1].endTime;
-                        const currStart = sortedSlots[i].startTime;
-                        if (prevEnd !== currStart) {
-                            isConsecutive = false;
-                            break;
-                        }
-                    }
-                    
-                    if (!isConsecutive) {
-                        showMessage('{% trans "Please select consecutive time slots only." %}', 'error');
-                        return;
-                    }
-                }
-                
-                // Add slot
-                selectedSlots.push({ key: slotKey, date, startTime, endTime });
-                element.classList.add('selected');
-            }
-            
             updateSelectionInfo();
         }
         
         function updateSelectionInfo() {
-            const infoDiv = document.getElementById('selected-slots-info');
-            const rangeSpan = document.getElementById('selected-range');
-            
-            if (selectedSlots.length === 0) {
-                infoDiv.style.display = 'none';
-                return;
-            }
-            
-            // Sortiere Slots nach Zeit
-            const sortedSlots = [...selectedSlots].sort((a, b) => {
-                if (a.date !== b.date) return a.date.localeCompare(b.date);
-                return a.startTime.localeCompare(b.startTime);
-            });
-            
-            const firstSlot = sortedSlots[0];
-            const lastSlot = sortedSlots[sortedSlots.length - 1];
-            
-            const startDateTime = `${firstSlot.date} ${firstSlot.startTime}`;
-            const endDateTime = `${lastSlot.date} ${lastSlot.endTime}`;
-            
-            rangeSpan.textContent = `${startDateTime} - ${endDateTime}`;
+            var infoDiv = document.getElementById('selected-slots-info'), rangeSpan = document.getElementById('selected-range');
+            if (selectedSlots.length === 0) { infoDiv.style.display = 'none'; return; }
+            var s = selectedSlots[0];
+            rangeSpan.textContent = s.date + ' ' + s.startTime + ' - ' + s.endTime;
             infoDiv.style.display = 'block';
         }
         

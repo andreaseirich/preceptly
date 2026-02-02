@@ -539,75 +539,26 @@
         }
         
         function toggleSlot(element) {
-            if (element.classList.contains('occupied')) {
+            if (element.classList.contains('occupied')) return;
+            var date = element.dataset.date, startTime = element.dataset.start, endTime = element.dataset.end;
+            var slotKey = date + '_' + startTime;
+            if (selectedSlots.length === 1 && selectedSlots[0].key === slotKey) {
+                clearSelection();
                 return;
             }
-            
-            const date = element.dataset.date;
-            const startTime = element.dataset.start;
-            const endTime = element.dataset.end;
-            
-            if (currentDate && currentDate !== date) {
-                clearSelection();
-            }
+            clearSelection();
+            selectedSlots = [{ key: slotKey, date: date, startTime: startTime, endTime: endTime }];
+            element.classList.add('selected');
             currentDate = date;
-            
-            const slotKey = `${date}_${startTime}`;
-            const slotIndex = selectedSlots.findIndex(s => s.key === slotKey);
-            
-            if (slotIndex >= 0) {
-                selectedSlots.splice(slotIndex, 1);
-                element.classList.remove('selected');
-            } else {
-                if (selectedSlots.length > 0) {
-                    const sortedSlots = [...selectedSlots, { key: slotKey, date, startTime, endTime }]
-                        .sort((a, b) => {
-                            if (a.date !== b.date) return a.date.localeCompare(b.date);
-                            return a.startTime.localeCompare(b.startTime);
-                        });
-                    
-                    let isConsecutive = true;
-                    for (let i = 1; i < sortedSlots.length; i++) {
-                        const prevEnd = sortedSlots[i - 1].endTime;
-                        const currStart = sortedSlots[i].startTime;
-                        if (prevEnd !== currStart) {
-                            isConsecutive = false;
-                            break;
-                        }
-                    }
-                    
-                    if (!isConsecutive) {
-                        showMessage('{% trans "Please select consecutive time slots only." %}', 'error');
-                        return;
-                    }
-                }
-                
-                selectedSlots.push({ key: slotKey, date, startTime, endTime });
-                element.classList.add('selected');
-            }
-            
             updateSelectionInfo();
             updateContinueButton();
         }
         
         function updateSelectionInfo() {
-            const infoDiv = document.getElementById('selected-slots-info');
-            const rangeSpan = document.getElementById('selected-range');
-            
-            if (selectedSlots.length === 0) {
-                infoDiv.style.display = 'none';
-                return;
-            }
-            
-            const sortedSlots = [...selectedSlots].sort((a, b) => {
-                if (a.date !== b.date) return a.date.localeCompare(b.date);
-                return a.startTime.localeCompare(b.startTime);
-            });
-            
-            const firstSlot = sortedSlots[0];
-            const lastSlot = sortedSlots[sortedSlots.length - 1];
-            
-            rangeSpan.textContent = `${firstSlot.date} ${firstSlot.startTime} - ${lastSlot.date} ${lastSlot.endTime}`;
+            var infoDiv = document.getElementById('selected-slots-info'), rangeSpan = document.getElementById('selected-range');
+            if (selectedSlots.length === 0) { infoDiv.style.display = 'none'; return; }
+            var s = selectedSlots[0];
+            rangeSpan.textContent = s.date + ' ' + s.startTime + ' - ' + s.endTime;
             infoDiv.style.display = 'block';
         }
         

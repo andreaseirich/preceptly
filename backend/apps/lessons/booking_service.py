@@ -133,6 +133,8 @@ class BookingService:
 
         return True
 
+    _SLOT_STEP_MINUTES = 30  # Start times on 30-min grid
+
     @staticmethod
     def get_available_time_slots(
         target_date: date,
@@ -141,32 +143,24 @@ class BookingService:
         slot_duration_minutes: int = 30,
     ) -> List[Tuple[time, time]]:
         """
-        Gibt verfügbare Zeitslots für einen Tag zurück.
-
-        Args:
-            target_date: Datum
-            working_hours: Liste von Arbeitszeiten [{'start': '09:00', 'end': '17:00'}, ...]
-            occupied_slots: Dict mit belegten Zeitslots
-            slot_duration_minutes: Dauer eines Slots in Minuten
-
-        Returns:
-            Liste von (start_time, end_time) Tupeln
+        Return available time slots. Each slot spans slot_duration_minutes.
+        Start times iterate on 30-min grid. A slot is only added if the full
+        block (start -> start+duration) is free within working hours.
         """
         available = []
         now = timezone.now()
-        min_booking_datetime = now + timedelta(minutes=30)  # At least 30 minutes advance notice
+        min_booking_datetime = now + timedelta(minutes=30)
+        step = BookingService._SLOT_STEP_MINUTES
 
         for work_period in working_hours:
             start_str = work_period.get("start", "00:00")
             end_str = work_period.get("end", "23:59")
-
             try:
                 period_start = datetime.strptime(start_str, "%H:%M").time()
                 period_end = datetime.strptime(end_str, "%H:%M").time()
             except ValueError:
                 continue
 
-            # Generate slots within working hours
             current = datetime.combine(target_date, period_start)
             period_end_dt = datetime.combine(target_date, period_end)
 
@@ -174,10 +168,9 @@ class BookingService:
                 slot_start = current.time()
                 slot_end = (current + timedelta(minutes=slot_duration_minutes)).time()
 
-                # Check if slot is in the past or less than 30 minutes in the future
                 slot_datetime = timezone.make_aware(datetime.combine(target_date, slot_start))
                 if slot_datetime < min_booking_datetime:
-                    current += timedelta(minutes=slot_duration_minutes)
+                    current += timedelta(minutes=step)
                     continue
 
                 if BookingService.is_time_slot_available(
@@ -185,7 +178,7 @@ class BookingService:
                 ):
                     available.append((slot_start, slot_end))
 
-                current += timedelta(minutes=slot_duration_minutes)
+                current += timedelta(minutes=step)
 
         return available
 
@@ -232,10 +225,12 @@ class BookingService:
 
         student_id = None
         owner_user = None
+        unit_duration = 60
         contract = Contract.objects.select_related("student").filter(pk=contract_id).first()
         if contract:
             student_id = contract.student_id
             owner_user = contract.student.user_id
+            unit_duration = contract.unit_duration_minutes
 
         busy_per_day = (
             BookingService._get_busy_intervals_for_week(
@@ -251,7 +246,10 @@ class BookingService:
             weekday_name = weekday_names[i]
             day_working_hours = working_hours.get(weekday_name, [])
             available_slots = BookingService.get_available_time_slots(
-                current_date, day_working_hours, occupied_slots
+                current_date,
+                day_working_hours,
+                occupied_slots,
+                slot_duration_minutes=unit_duration,
             )
             days_data.append(
                 {
@@ -269,6 +267,7 @@ class BookingService:
             "week_start": week_start,
             "week_end": week_end,
             "days": days_data,
+            "unit_duration_minutes": unit_duration,
         }
 
     @staticmethod
@@ -370,12 +369,23 @@ class BookingService:
             - 'week_end': date
             - 'days': List[Dict] mit Daten für jeden Tag
         """
+        from apps.contracts.models import Contract
         from apps.core.models import UserProfile
 
         target_date = date(year, month, day)
         days_since_monday = target_date.weekday()
         week_start = target_date - timedelta(days=days_since_monday)
         week_end = week_start + timedelta(days=6)
+
+        unit_duration = 60
+        if student_id and user:
+            contract = (
+                Contract.objects.filter(student_id=student_id, student__user=user, is_active=True)
+                .order_by("-start_date")
+                .first()
+            )
+            if contract:
+                unit_duration = contract.unit_duration_minutes
 
         working_hours = {}
         profile = (
@@ -405,7 +415,10 @@ class BookingService:
             weekday_name = weekday_names[i]
             day_working_hours = working_hours.get(weekday_name, [])
             available_slots = BookingService.get_available_time_slots(
-                current_date, day_working_hours, occupied_slots
+                current_date,
+                day_working_hours,
+                occupied_slots,
+                slot_duration_minutes=unit_duration,
             )
             days_data.append(
                 {
@@ -423,6 +436,7 @@ class BookingService:
             "week_start": week_start,
             "week_end": week_end,
             "days": days_data,
+            "unit_duration_minutes": unit_duration,
         }
 
     @staticmethod
