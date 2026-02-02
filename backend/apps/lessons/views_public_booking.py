@@ -127,6 +127,62 @@ _NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
 
 @csrf_exempt
 @require_http_methods(["POST"])
+def search_student_api(request):
+    """
+    Search for students by name (Public Booking step 1).
+    Returns exact_match | suggestions | no_match. Stricty tutor-scoped, no sensitive data.
+    """
+    try:
+        data = json.loads(request.body)
+        name = (data.get("name") or "").strip()
+        tutor_token = data.get("tutor_token")
+
+        if not name:
+            return JsonResponse(
+                {"success": False, "message": _("Please enter a name.")}, status=400
+            )
+
+        tutor = get_tutor_for_booking(tutor_token)
+        if not tutor:
+            return JsonResponse(
+                {"success": False, "message": _("Booking link invalid.")}, status=400
+            )
+
+        if is_public_booking_throttled(request, tutor_token):
+            return JsonResponse({"success": False, "message": _("Too many attempts.")}, status=429)
+
+        record_public_booking_attempt(request, tutor_token)
+
+        exact_match, suggestions = StudentSearchService.search_for_public_booking(
+            name, user=tutor, max_suggestions=10
+        )
+
+        if exact_match:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "result": "exact_match",
+                    "student": {"id": exact_match.id, "display_name": exact_match.full_name},
+                }
+            )
+        if suggestions:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "result": "suggestions",
+                    "suggestions": [
+                        {"id": s.id, "display_name": s.full_name} for s, _ in suggestions
+                    ],
+                }
+            )
+        return JsonResponse({"success": True, "result": "no_match", "suggestions": []})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": _("Invalid request.")}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def verify_student_api(request):
     """
     Verify name + code for Public Booking. Never reveals if student exists.

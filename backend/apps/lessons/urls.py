@@ -82,6 +82,11 @@ urlpatterns = [
         name="public_booking_week_api",
     ),
     path(
+        "public-booking/api/search-student/",
+        views_public_booking.search_student_api,
+        name="public_booking_search_student",
+    ),
+    path(
         "public-booking/api/verify-student/",
         views_public_booking.verify_student_api,
         name="public_booking_verify_student",

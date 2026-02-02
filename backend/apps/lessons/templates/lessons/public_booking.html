@@ -181,13 +181,21 @@
                 <label for="student-name">{% trans "Full Name" %}</label>
                 <input type="text" id="student-name" placeholder="{% trans 'e.g., Max Mustermann' %}" required>
             </div>
-            <button class="btn" onclick="goToStep('2-code')">{% trans "Continue" %}</button>
+            <div id="step-1-search-result" style="display: none;">
+                <div id="step-1-suggestions" class="similar-students" style="margin: 15px 0; display: none;"></div>
+                <div id="step-1-no-match" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;">
+                    <p>{% trans "No matching student found." %}</p>
+                    <button type="button" class="btn" onclick="goToCreateNew()">{% trans "Create new student profile" %}</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearSearchResult()">{% trans "Try again" %}</button>
+                </div>
+            </div>
+            <button class="btn" id="step-1-continue-btn" onclick="searchStudent()">{% trans "Continue" %}</button>
         </div>
         
         <!-- Schritt 2: Code eingeben oder neu anlegen -->
         <div class="step" id="step-2-code">
             <h2>{% trans "Enter your booking code" %}</h2>
-            <p>{% trans "Your tutor has given you a code. Enter it here." %}</p>
+            <p id="step-2-code-intro">{% trans "Your tutor has given you a code. Enter it here." %}</p>
             <div class="form-group">
                 <label for="booking-code">{% trans "Booking Code" %}</label>
                 <input type="text" id="booking-code" placeholder="{% trans 'e.g., ABC123XYZ456' %}" autocomplete="off">
@@ -342,6 +350,7 @@
         
         let currentStudent = null;
         let currentBookingCode = null;
+        let selectedStudentName = null;
         let selectedSlots = [];
         let currentDate = null;
         let bookingData = {};
@@ -367,6 +376,11 @@
                 else if (index + 1 === stepNum) step.classList.add('active');
             });
             
+            if (stepId === 1) { selectedStudentName = null; clearSearchResult(); }
+            if (stepId === '2-code' && selectedStudentName) {
+                var intro = document.getElementById('step-2-code-intro');
+                if (intro) intro.textContent = '{% trans "Enter the code for" %} ' + selectedStudentName;
+            }
             if (stepId === 4) updateBookingSummary();
             if (stepId === 3) {
                 if (currentStudent) loadWeek(currentYear, currentMonth, currentDay);
@@ -375,7 +389,7 @@
         }
         
         function verifyStudent() {
-            var name = document.getElementById('student-name').value.trim();
+            var name = selectedStudentName || document.getElementById('student-name').value.trim();
             var code = document.getElementById('booking-code').value.trim();
             if (!name) { showMessage('{% trans "Please enter your name." %}', 'error'); return; }
             if (!code) { showMessage('{% trans "Please enter the booking code." %}', 'error'); return; }
@@ -401,14 +415,73 @@
             });
         }
         
-        function goToCreateNew() {
+        function searchStudent() {
             var name = document.getElementById('student-name').value.trim();
+            if (!name) { showMessage('{% trans "Please enter your name." %}', 'error'); return; }
+            var btn = document.getElementById('step-1-continue-btn');
+            btn.disabled = true;
+            fetch('{% url "lessons:public_booking_search_student" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({ name: name, tutor_token: TUTOR_TOKEN })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                if (!data.success) { showMessage(data.message || '{% trans "Error." %}', 'error'); return; }
+                var suggEl = document.getElementById('step-1-suggestions');
+                var noMatchEl = document.getElementById('step-1-no-match');
+                var resultEl = document.getElementById('step-1-search-result');
+                suggEl.style.display = 'none';
+                noMatchEl.style.display = 'none';
+                resultEl.style.display = 'block';
+                if (data.result === 'exact_match') {
+                    selectedStudentName = data.student.display_name;
+                    goToStep('2-code');
+                } else if (data.result === 'suggestions' && data.suggestions && data.suggestions.length > 0) {
+                    var html = '<p>{% trans "Did you mean one of these?" %}</p>';
+                    data.suggestions.forEach(function(s) {
+                        html += '<div class="similar-student" onclick="selectSuggestion(\'' + escapeJs(s.display_name) + '\')">' + escapeHtml(s.display_name) + '</div>';
+                    });
+                    html += '<div class="similar-student" style="border: 2px dashed #007bff;" onclick="goToCreateNew()"><strong>{% trans "Create new student" %}: ' + escapeHtml(name) + '</strong></div>';
+                    suggEl.innerHTML = html;
+                    suggEl.style.display = 'block';
+                } else {
+                    noMatchEl.style.display = 'block';
+                }
+            })
+            .catch(function() { btn.disabled = false; showMessage('{% trans "Error. Please try again." %}', 'error'); });
+        }
+        function escapeHtml(s) {
+            var d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+        function escapeJs(s) {
+            return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        }
+        function selectSuggestion(displayName) {
+            selectedStudentName = displayName;
+            goToStep('2-code');
+        }
+        function clearSearchResult() {
+            document.getElementById('step-1-search-result').style.display = 'none';
+            document.getElementById('step-1-suggestions').innerHTML = '';
+            document.getElementById('step-1-suggestions').style.display = 'none';
+            document.getElementById('step-1-no-match').style.display = 'none';
+        }
+        function goToCreateNew() {
+            var name = selectedStudentName || document.getElementById('student-name').value.trim();
+            selectedStudentName = null;
             var parts = name.split(/\s+/);
             if (parts.length >= 2) {
                 document.getElementById('last-name').value = parts.pop();
                 document.getElementById('first-name').value = parts.join(' ');
             } else if (parts.length === 1) {
                 document.getElementById('first-name').value = parts[0];
+                document.getElementById('last-name').value = '';
+            } else {
+                document.getElementById('first-name').value = '';
                 document.getElementById('last-name').value = '';
             }
             goToStep('2a');

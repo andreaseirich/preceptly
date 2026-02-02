@@ -2,10 +2,21 @@
 Services for student-related operations.
 """
 
+import unicodedata
 from difflib import SequenceMatcher
 from typing import List, Tuple
 
 from apps.students.models import Student
+
+
+def _normalize_name(s: str) -> str:
+    """Normalize for matching: trim, collapse whitespace, lowercase, optional diacritics."""
+    if not s or not isinstance(s, str):
+        return ""
+    s = " ".join(s.split()).strip().lower()
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s
 
 
 class StudentSearchService:
@@ -111,3 +122,52 @@ class StudentSearchService:
                 return student
 
         return None
+
+    @staticmethod
+    def search_for_public_booking(
+        name: str, user=None, max_suggestions: int = 10
+    ) -> tuple["Student | None", List[Tuple["Student", float]]]:
+        """
+        Search for students by name. Returns (exact_match, suggestions).
+        Used for Public Booking step 1: no code required, tutor-scoped only.
+        """
+        if not name or not name.strip():
+            return None, []
+
+        norm = _normalize_name(name)
+        norm_tokens = set(norm.split())
+
+        students_qs = Student.objects.filter(user=user) if user else Student.objects.none()
+        if not user:
+            return None, []
+
+        exact = StudentSearchService.find_exact_match(name, user=user)
+        if exact:
+            return exact, []
+
+        scored: List[Tuple[Student, float]] = []
+        for student in students_qs:
+            fn_norm = _normalize_name(student.first_name)
+            ln_norm = _normalize_name(student.last_name)
+            full_norm = f"{fn_norm} {ln_norm}".strip()
+
+            ratio = StudentSearchService.similarity_ratio(norm, full_norm)
+            ratio = max(
+                ratio,
+                StudentSearchService.similarity_ratio(norm, fn_norm),
+                StudentSearchService.similarity_ratio(norm, ln_norm),
+            )
+
+            if norm in full_norm or norm in fn_norm or norm in ln_norm:
+                ratio = max(ratio, 0.85)
+            if norm_tokens:
+                for t in norm_tokens:
+                    if t in fn_norm or t in ln_norm or t in full_norm:
+                        ratio = max(ratio, 0.75)
+                        break
+
+            if ratio >= 0.5:
+                scored.append((student, ratio))
+
+        scored.sort(key=lambda x: (-x[1], x[0].last_name.lower(), x[0].first_name.lower()))
+        return None, scored[:max_suggestions]
