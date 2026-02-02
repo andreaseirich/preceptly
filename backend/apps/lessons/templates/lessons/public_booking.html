@@ -351,6 +351,7 @@
         let currentStudent = null;
         let currentBookingCode = null;
         let selectedStudentName = null;
+        let selectedStudentId = null;
         let selectedSlots = [];
         let currentDate = null;
         let bookingData = {};
@@ -376,7 +377,7 @@
                 else if (index + 1 === stepNum) step.classList.add('active');
             });
             
-            if (stepId === 1) { selectedStudentName = null; clearSearchResult(); }
+            if (stepId === 1) { selectedStudentName = null; selectedStudentId = null; clearSearchResult(); }
             if (stepId === '2-code' && selectedStudentName) {
                 var intro = document.getElementById('step-2-code-intro');
                 if (intro) intro.textContent = '{% trans "Enter the code for" %} ' + selectedStudentName;
@@ -391,13 +392,15 @@
         function verifyStudent() {
             var name = selectedStudentName || document.getElementById('student-name').value.trim();
             var code = document.getElementById('booking-code').value.trim();
-            if (!name) { showMessage('{% trans "Please enter your name." %}', 'error'); return; }
             if (!code) { showMessage('{% trans "Please enter the booking code." %}', 'error'); return; }
-            
+            if (!selectedStudentId && !name) { showMessage('{% trans "Please enter your name or select a student." %}', 'error'); return; }
+            var payload = { code: code, tutor_token: TUTOR_TOKEN };
+            if (selectedStudentId) payload.student_id = selectedStudentId;
+            if (name) payload.name = name;
             fetch('{% url "lessons:public_booking_verify_student" %}', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
-                body: JSON.stringify({ name: name, code: code, tutor_token: TUTOR_TOKEN })
+                body: JSON.stringify(payload)
             })
             .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
             .then(function(result) {
@@ -437,11 +440,13 @@
                 resultEl.style.display = 'block';
                 if (data.result === 'exact_match') {
                     selectedStudentName = data.student.display_name;
+                    selectedStudentId = data.student.id;
                     goToStep('2-code');
                 } else if (data.result === 'suggestions' && data.suggestions && data.suggestions.length > 0) {
+                    lastSuggestions = data.suggestions;
                     var html = '<p>{% trans "Did you mean one of these?" %}</p>';
-                    data.suggestions.forEach(function(s) {
-                        html += '<div class="similar-student" onclick="selectSuggestion(\'' + escapeJs(s.display_name) + '\')">' + escapeHtml(s.display_name) + '</div>';
+                    data.suggestions.forEach(function(s, idx) {
+                        html += '<div class="similar-student" data-idx="' + idx + '" onclick="selectSuggestionByIdx(' + idx + ')">' + escapeHtml(s.display_name) + '</div>';
                     });
                     html += '<div class="similar-student" style="border: 2px dashed #007bff;" onclick="goToCreateNew()"><strong>{% trans "Create new student" %}: ' + escapeHtml(name) + '</strong></div>';
                     suggEl.innerHTML = html;
@@ -457,12 +462,14 @@
             d.textContent = s;
             return d.innerHTML;
         }
-        function escapeJs(s) {
-            return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
-        }
-        function selectSuggestion(displayName) {
-            selectedStudentName = displayName;
-            goToStep('2-code');
+        var lastSuggestions = [];
+        function selectSuggestionByIdx(idx) {
+            var s = lastSuggestions[idx];
+            if (s) {
+                selectedStudentName = s.display_name;
+                selectedStudentId = s.id;
+                goToStep('2-code');
+            }
         }
         function clearSearchResult() {
             document.getElementById('step-1-search-result').style.display = 'none';
@@ -473,6 +480,7 @@
         function goToCreateNew() {
             var name = selectedStudentName || document.getElementById('student-name').value.trim();
             selectedStudentName = null;
+            selectedStudentId = null;
             var parts = name.split(/\s+/);
             if (parts.length >= 2) {
                 document.getElementById('last-name').value = parts.pop();

@@ -195,10 +195,11 @@ def verify_student_api(request):
         name = data.get("name", "").strip()
         code = data.get("code", "").strip()
         tutor_token = data.get("tutor_token")
+        student_id = data.get("student_id")
 
-        if not name or not code:
+        if not code:
             return JsonResponse(
-                {"success": False, "message": _("Please enter both name and code.")}, status=400
+                {"success": False, "message": _("Please enter the booking code.")}, status=400
             )
 
         tutor = get_tutor_for_booking(tutor_token)
@@ -210,7 +211,16 @@ def verify_student_api(request):
 
         record_public_booking_attempt(request, tutor_token)
 
-        exact_match = StudentSearchService.find_exact_match(name, user=tutor)
+        if student_id:
+            try:
+                exact_match = Student.objects.get(pk=student_id, user=tutor)
+            except (Student.DoesNotExist, ValueError, TypeError):
+                exact_match = None
+        elif name:
+            exact_match = StudentSearchService.find_exact_match(name, user=tutor)
+        else:
+            exact_match = None
+
         if not exact_match or not verify_booking_code(exact_match, code):
             return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
