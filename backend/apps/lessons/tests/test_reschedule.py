@@ -64,6 +64,36 @@ class RescheduleTestMixin:
         return d
 
 
+class WeekApiReschedulableTest(RescheduleTestMixin, TestCase):
+    """Week API returns lesson_id and reschedulable for own planned lessons."""
+
+    def test_busy_intervals_include_reschedulable_for_own(self):
+        from datetime import time
+
+        self._verify()
+        future = self._future_monday()
+        les = Lesson.objects.create(
+            contract=self.contract,
+            date=future,
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="planned",
+        )
+        url = f"/lessons/public-booking/tok-reschedule/week/?year={future.year}&month={future.month}&day={future.day}"
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        self.assertTrue(data.get("success"))
+        week = data.get("week_data", {})
+        found = False
+        for day in week.get("days", []):
+            for bi in day.get("busy_intervals", []):
+                if bi.get("own") and bi.get("lesson_id") == les.id:
+                    self.assertTrue(bi.get("reschedulable"))
+                    found = True
+        self.assertTrue(found)
+
+
 class ListReschedulableLessonsTest(RescheduleTestMixin, TestCase):
     """List reschedulable lessons requires auth and returns only own planned lessons."""
 
@@ -237,3 +267,73 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 404)
+
+    def test_reschedule_conflict_prevents(self):
+        """Reschedule to occupied slot fails."""
+        from datetime import time
+
+        self._verify()
+        future = self._future_monday()
+        Lesson.objects.create(
+            contract=self.contract,
+            date=future,
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="planned",
+        )
+        les2 = Lesson.objects.create(
+            contract=self.contract,
+            date=future,
+            start_time=time(14, 0),
+            duration_minutes=60,
+            status="planned",
+        )
+        resp = self.client.post(
+            reverse("lessons:public_booking_reschedule_lesson"),
+            data=json.dumps(
+                {
+                    "lesson_id": les2.id,
+                    "new_date": future.strftime("%Y-%m-%d"),
+                    "new_start_time": "10:00",
+                    "tutor_token": "tok-reschedule",
+                    "booking_code": self.booking_code,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        les2.refresh_from_db()
+        self.assertEqual(les2.start_time.hour, 14)
+
+    def test_reschedule_keeps_lesson_identity(self):
+        """Successful reschedule updates same lesson, does not create new."""
+        from datetime import time
+
+        self._verify()
+        future = self._future_monday()
+        les = Lesson.objects.create(
+            contract=self.contract,
+            date=future,
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="planned",
+        )
+        orig_id = les.id
+        new_date = future + timedelta(days=1)
+        resp = self.client.post(
+            reverse("lessons:public_booking_reschedule_lesson"),
+            data=json.dumps(
+                {
+                    "lesson_id": orig_id,
+                    "new_date": new_date.strftime("%Y-%m-%d"),
+                    "new_start_time": "14:00",
+                    "tutor_token": "tok-reschedule",
+                    "booking_code": self.booking_code,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        self.assertEqual(data.get("lesson_id"), orig_id)
+        self.assertEqual(Lesson.objects.filter(contract=self.contract).count(), 1)

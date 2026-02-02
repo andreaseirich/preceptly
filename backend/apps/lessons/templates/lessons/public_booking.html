@@ -119,6 +119,17 @@
             background: #d4edda; 
             border-color: #28a745; 
         }
+        .time-slot.reschedulable { 
+            cursor: pointer; 
+        }
+        .time-slot.reschedulable:hover { 
+            opacity: 1; 
+        }
+        .time-slot.reschedule-selected { 
+            border-width: 3px; 
+            border-color: #ffc107; 
+            box-shadow: 0 0 0 2px #ffc107; 
+        }
         .time-slot.selected { 
             background: #fff3cd; 
             border-color: #ffc107; 
@@ -286,6 +297,11 @@
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
                 <button class="btn btn-secondary" onclick="clearSelection()" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
             </div>
+            <div id="inline-reschedule-banner" style="margin: 15px 0; padding: 12px; background: #e3f2fd; border-radius: 4px; border: 1px solid #2196f3; display: none;">
+                <p id="inline-reschedule-text" style="margin: 0 0 8px 0;"></p>
+                <button type="button" class="btn btn-success" id="inline-reschedule-confirm-btn" onclick="confirmInlineReschedule()" style="display: none; margin-right: 8px;">{% trans "Confirm Reschedule" %}</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelInlineReschedule()">{% trans "Cancel" %}</button>
+            </div>
             <div id="public-week-loading" style="display: none; text-align: center; padding: 20px; color: #6c757d;">{% trans "Loading..." %}</div>
             <div class="week-calendar">
                 <div id="public-week-calendar-days">
@@ -310,9 +326,10 @@
                             {% endfor %}
                             {% if day.busy_intervals %}
                             {% for bi in day.busy_intervals %}
-                            <div class="time-slot occupied {% if bi.own %}own-lesson{% endif %}">
+                            <div class="time-slot occupied {% if bi.own %}own-lesson{% endif %} {% if bi.reschedulable %}reschedulable{% endif %}"
+                                 {% if bi.reschedulable %}data-lesson-id="{{ bi.lesson_id }}" data-date="{{ day.date|date:'Y-m-d' }}" data-start="{{ bi.start }}" data-end="{{ bi.end }}" onclick="tapOnReschedulableEntry(this)"{% endif %}>
                                 <div class="time-slot-label">{{ bi.start }} - {{ bi.end }}</div>
-                                <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% else %}{% trans "Booked" %}{% endif %}</div>
+                                <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% if bi.reschedulable %} ({% trans "tap to reschedule" %}){% endif %}{% else %}{% trans "Booked" %}{% endif %}</div>
                             </div>
                             {% endfor %}
                             {% else %}
@@ -382,6 +399,9 @@
         let selectedSlots = [];
         let currentDate = null;
         let bookingData = {};
+        let inlineRescheduleLessonId = null;
+        let inlineRescheduleLessonInfo = null;
+        let inlineRescheduleSelectedSlot = null;
         
         function showMessage(message, type = 'success') {
             const messagesDiv = document.getElementById('messages');
@@ -569,6 +589,14 @@
         function toggleSlot(element) {
             if (element.classList.contains('occupied')) return;
             var date = element.dataset.date, startTime = element.dataset.start, endTime = element.dataset.end;
+            if (inlineRescheduleLessonId) {
+                inlineRescheduleSelectedSlot = { date: date, start: startTime, end: endTime };
+                document.querySelectorAll('#public-week-calendar-days .time-slot.selected').forEach(function(el) { el.classList.remove('selected'); });
+                element.classList.add('selected');
+                document.getElementById('inline-reschedule-text').textContent = '{% trans "New time:" %} ' + date + ' ' + startTime + ' - ' + endTime;
+                document.getElementById('inline-reschedule-confirm-btn').style.display = 'inline-block';
+                return;
+            }
             var slotKey = date + '_' + startTime;
             if (selectedSlots.length === 1 && selectedSlots[0].key === slotKey) {
                 clearSelection();
@@ -785,9 +813,75 @@
                 });
         }
 
+        function tapOnReschedulableEntry(element) {
+            if (!currentStudent || !currentBookingCode) return;
+            var lessonId = element.dataset.lessonId;
+            var dateStr = element.dataset.date, startStr = element.dataset.start, endStr = element.dataset.end;
+            if (!lessonId) return;
+            clearSelection();
+            inlineRescheduleLessonId = parseInt(lessonId, 10);
+            inlineRescheduleLessonInfo = dateStr + ' ' + startStr + ' - ' + endStr;
+            inlineRescheduleSelectedSlot = null;
+            document.querySelectorAll('#public-week-calendar-days .time-slot.reschedule-selected').forEach(function(el) { el.classList.remove('reschedule-selected'); });
+            element.classList.add('reschedule-selected');
+            document.getElementById('inline-reschedule-banner').style.display = 'block';
+            document.getElementById('inline-reschedule-text').textContent = '{% trans "Reschedule: select a new time slot below." %}';
+            document.getElementById('inline-reschedule-confirm-btn').style.display = 'none';
+        }
+
+        function cancelInlineReschedule() {
+            inlineRescheduleLessonId = null;
+            inlineRescheduleLessonInfo = null;
+            inlineRescheduleSelectedSlot = null;
+            document.getElementById('inline-reschedule-banner').style.display = 'none';
+            document.querySelectorAll('#public-week-calendar-days .time-slot.reschedule-selected, #public-week-calendar-days .time-slot.selected').forEach(function(el) { el.classList.remove('reschedule-selected', 'selected'); });
+            loadWeek(currentYear, currentMonth, currentDay);
+        }
+        function clearInlineRescheduleState() {
+            inlineRescheduleLessonId = null;
+            inlineRescheduleLessonInfo = null;
+            inlineRescheduleSelectedSlot = null;
+            document.getElementById('inline-reschedule-banner').style.display = 'none';
+        }
+
+        function confirmInlineReschedule() {
+            if (!inlineRescheduleLessonId || !inlineRescheduleSelectedSlot || !currentBookingCode) {
+                showMessage('{% trans "Please select a new time slot." %}', 'error');
+                return;
+            }
+            var btn = document.getElementById('inline-reschedule-confirm-btn');
+            btn.disabled = true;
+            fetch('{% url "lessons:public_booking_reschedule_lesson" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({
+                    lesson_id: inlineRescheduleLessonId,
+                    new_date: inlineRescheduleSelectedSlot.date,
+                    new_start_time: inlineRescheduleSelectedSlot.start,
+                    tutor_token: TUTOR_TOKEN,
+                    booking_code: currentBookingCode
+                })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+            .then(function(result) {
+                btn.disabled = false;
+                if (result.data.success) {
+                    showMessage(result.data.message, 'success');
+                    cancelInlineReschedule();
+                } else {
+                    showMessage(result.data.message || '{% trans "Reschedule failed." %}', 'error');
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                showMessage('{% trans "Error. Please try again." %}', 'error');
+            });
+        }
+
         function renderWeekCalendar(weekData) {
             const occupiedLabel = '{% trans "Occupied" %}';
             const bookedLabel = '{% trans "Booked" %}';
+            const tapHint = '{% trans "tap to reschedule" %}';
             const noWorkingHours = '{% trans "No working hours configured for this day." %}';
             let html = '';
             for (const day of weekData.days) {
@@ -802,8 +896,14 @@
                     if (intervals.length > 0) {
                         for (const bi of intervals) {
                             var label = bi.own && bi.label ? bi.label : bookedLabel;
+                            if (bi.own && bi.reschedulable) label += ' (' + tapHint + ')';
                             var cls = bi.own ? 'occupied own-lesson' : 'occupied';
-                            html += '<div class="time-slot ' + cls + '"><div class="time-slot-label">' + bi.start + ' - ' + bi.end + '</div><div class="occupied-label">' + escapeHtml(label) + '</div></div>';
+                            if (bi.reschedulable) cls += ' reschedulable';
+                            var extra = '';
+                            if (bi.reschedulable) {
+                                extra = ' data-lesson-id="' + bi.lesson_id + '" data-date="' + day.date + '" data-start="' + bi.start + '" data-end="' + bi.end + '" onclick="tapOnReschedulableEntry(this)"';
+                            }
+                            html += '<div class="time-slot ' + cls + '"' + extra + '><div class="time-slot-label">' + bi.start + ' - ' + bi.end + '</div><div class="occupied-label">' + escapeHtml(label) + '</div></div>';
                         }
                     } else {
                         for (const occ of day.occupied_slots) {
@@ -831,12 +931,14 @@
         }
 
         function previousWeek() {
+            if (inlineRescheduleLessonId) clearInlineRescheduleState();
             const date = new Date(currentYear, currentMonth - 1, currentDay);
             date.setDate(date.getDate() - 7);
             loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());
         }
 
         function nextWeek() {
+            if (inlineRescheduleLessonId) clearInlineRescheduleState();
             const date = new Date(currentYear, currentMonth - 1, currentDay);
             date.setDate(date.getDate() + 7);
             loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());

@@ -294,6 +294,7 @@ class BookingService:
             lessons_qs = lessons_qs.exclude(pk=exclude_lesson_id)
         lessons = lessons_qs
 
+        today = timezone.now().date()
         for lesson in lessons:
             start_dt, end_dt = LessonConflictService.calculate_time_block(lesson)
             start_str = start_dt.time().strftime("%H:%M")
@@ -302,6 +303,8 @@ class BookingService:
             interval = {"start": start_str, "end": end_str, "own": is_own}
             if is_own:
                 interval["label"] = lesson.contract.student.full_name
+                interval["lesson_id"] = lesson.id
+                interval["reschedulable"] = lesson.status == "planned" and lesson.date >= today
             result[lesson.date].append(interval)
 
         start_datetime = timezone.make_aware(datetime.combine(week_start, time.min))
