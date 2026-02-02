@@ -3,11 +3,23 @@ name: CodeQL
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'requirements.txt'
+      - '.github/workflows/codeql.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'requirements.txt'
+      - '.github/workflows/codeql.yml'
   schedule:
     # Run weekly on Monday at 2:00 UTC
     - cron: '0 2 * * 1'
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
