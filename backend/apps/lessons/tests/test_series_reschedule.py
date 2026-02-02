@@ -61,22 +61,20 @@ class SeriesRescheduleTest(TestCase):
         )
         csrf = match.group(1) if match else ""
 
-        response = self.client.post(
-            url,
-            data={
-                "csrfmiddlewaretoken": csrf,
-                "contract": self.contract.id,
-                "date": lesson.date.strftime("%Y-%m-%d"),
-                "start_time": "14:00",
-                "duration_minutes": 60,
-                "travel_time_before_minutes": 0,
-                "travel_time_after_minutes": 0,
-                "notes": "",
-                "edit_scope": "series",
-                "recurrence_weekdays": ["0", "2"],
-            },
-            follow=True,
-        )
+        data = [
+            ("csrfmiddlewaretoken", csrf),
+            ("contract", self.contract.id),
+            ("date", lesson.date.strftime("%Y-%m-%d")),
+            ("start_time", "14:00"),
+            ("duration_minutes", 60),
+            ("travel_time_before_minutes", 0),
+            ("travel_time_after_minutes", 0),
+            ("notes", ""),
+            ("edit_scope", "series"),
+            ("recurrence_weekdays", "0"),
+            ("recurrence_weekdays", "2"),
+        ]
+        response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
 
         self.recurring.refresh_from_db()
@@ -84,3 +82,83 @@ class SeriesRescheduleTest(TestCase):
 
         for les in get_all_lessons_for_recurring(self.recurring):
             self.assertEqual(les.start_time, time(14, 0))
+
+    def test_series_reschedule_respects_scope_single(self):
+        """Edit scope single: only the selected lesson is updated."""
+        all_lessons = get_all_lessons_for_recurring(self.recurring)
+        self.assertGreaterEqual(len(all_lessons), 2)
+        lesson = all_lessons[0]
+        other_lesson = all_lessons[1]
+        original_other_time = other_lesson.start_time
+
+        url = reverse("lessons:update", kwargs={"pk": lesson.pk})
+        get_resp = self.client.get(url)
+        match = re.search(
+            r'name="csrfmiddlewaretoken" value="([^"]+)"',
+            get_resp.content.decode(),
+        )
+        csrf = match.group(1) if match else ""
+
+        data = [
+            ("csrfmiddlewaretoken", csrf),
+            ("contract", self.contract.id),
+            ("date", lesson.date.strftime("%Y-%m-%d")),
+            ("start_time", "15:00"),
+            ("duration_minutes", 60),
+            ("travel_time_before_minutes", 0),
+            ("travel_time_after_minutes", 0),
+            ("notes", ""),
+            ("edit_scope", "single"),
+        ]
+        self.client.post(url, data=data, follow=True)
+
+        lesson.refresh_from_db()
+        other_lesson.refresh_from_db()
+        self.assertEqual(lesson.start_time, time(15, 0))
+        self.assertEqual(other_lesson.start_time, original_other_time)
+
+    def test_series_reschedule_is_atomic_on_conflict(self):
+        """When a conflict would occur, no lessons are updated (atomic rollback)."""
+        from apps.blocked_times.models import BlockedTime
+        from django.utils import timezone
+
+        all_lessons = get_all_lessons_for_recurring(self.recurring)
+        lesson = all_lessons[0]
+        original_time = lesson.start_time
+
+        # Create blocked time at 14:00 on the same date
+        BlockedTime.objects.create(
+            user=self.user,
+            title="Blocked",
+            start_datetime=timezone.make_aware(timezone.datetime.combine(lesson.date, time(14, 0))),
+            end_datetime=timezone.make_aware(timezone.datetime.combine(lesson.date, time(15, 0))),
+        )
+
+        url = reverse("lessons:update", kwargs={"pk": lesson.pk})
+        get_resp = self.client.get(url)
+        match = re.search(
+            r'name="csrfmiddlewaretoken" value="([^"]+)"',
+            get_resp.content.decode(),
+        )
+        csrf = match.group(1) if match else ""
+
+        data = [
+            ("csrfmiddlewaretoken", csrf),
+            ("contract", self.contract.id),
+            ("date", lesson.date.strftime("%Y-%m-%d")),
+            ("start_time", "14:00"),
+            ("duration_minutes", 60),
+            ("travel_time_before_minutes", 0),
+            ("travel_time_after_minutes", 0),
+            ("notes", ""),
+            ("edit_scope", "series"),
+            ("recurrence_weekdays", "0"),
+            ("recurrence_weekdays", "2"),
+        ]
+        response = self.client.post(url, data=data, follow=True)
+
+        self.recurring.refresh_from_db()
+        lesson.refresh_from_db()
+        self.assertEqual(self.recurring.start_time, original_time)
+        self.assertEqual(lesson.start_time, original_time)
+        self.assertTrue(response.context["form"].non_field_errors())

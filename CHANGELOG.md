@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Series reschedule fix**: recurrence_weekdays was overwritten by HiddenInput when editing; fixed so "Edit entire series" works. Wrapped series update in transaction.atomic(). Tests added.
+- **Series reschedule fix**: recurrence_weekdays was overwritten by HiddenInput when editing; fixed so "Edit entire series" works. edit_scope radios moved inside form so scope=series is submitted. On conflict: atomic rollback, clear error. Tests: updates_all_instances, respects_scope_single, is_atomic_on_conflict.
 - **Repo hygiene without .gitignore/.cursorrules**: .gitignore, .cursorrules, .githooks removed from repo. scripts/repo_hygiene_check.sh enforces denylist; CI fails on forbidden paths. scripts/setup_local_git.sh configures local exclude + pre-commit.
 - **Tap entry to reschedule in calendar**: Own planned lessons in Public Booking week calendar are clickable; tap enters inline Reschedule Mode, pick new slot, confirm. Backend: busy_intervals include lesson_id and reschedulable for own lessons.
 - **Repo hygiene & Cursor Rules**: .cursor/ and tool artefacts excluded; .cursorrules with Master Prompt + hygiene policy; CI hygiene check; cursor_master_prompt.txt removed.

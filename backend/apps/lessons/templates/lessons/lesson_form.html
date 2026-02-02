@@ -6,31 +6,29 @@
 {% block content %}
 <h1>{% if object %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %}</h1>
 
-{% if object and matching_recurring %}
-<div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px; border: 1px solid #2196f3;">
-    <h3>{% trans "This lesson is part of a series" %}</h3>
-    <p><strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
-    ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})</p>
-    <p><strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }} 
-    {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</p>
-    
-    <div style="margin-top: 15px;">
-        <label><strong>{% trans "What do you want to edit?" %}</strong></label>
-        <div style="margin-top: 10px;">
-            {% for choice in form.edit_scope %}
-            <label style="display: block; margin-bottom: 10px; cursor: pointer;">
-                {{ choice.tag }}
-                <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
-            </label>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-{% endif %}
-
 <form method="post">
     {% csrf_token %}
-    <input type="hidden" name="edit_scope" id="edit_scope_hidden" value="single">
+    {% if object and matching_recurring %}
+    <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px; border: 1px solid #2196f3;">
+        <h3>{% trans "This lesson is part of a series" %}</h3>
+        <p><strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }}
+        ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})</p>
+        <p><strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }}
+        {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</p>
+
+        <div style="margin-top: 15px;">
+            <label><strong>{% trans "What do you want to edit?" %}</strong></label>
+            <div style="margin-top: 10px;">
+                {% for choice in form.edit_scope %}
+                <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+                    {{ choice.tag }}
+                    <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <div style="margin-bottom: 20px;">
         <h3>{% trans "Lesson Details" %}</h3>
@@ -271,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
             editScopeRadios.forEach(function(radio) {
                 // Remove old event listeners if present
                 const newRadio = radio.cloneNode(true);
+                if (radio.checked) newRadio.checked = true;
                 radio.parentNode.replaceChild(newRadio, radio);
                 
                 // Add event listeners (both change and click)
@@ -288,10 +287,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleEditScopeChange() {
         const isSeries = this.value === 'series';
-        const hiddenField = document.getElementById('edit_scope_hidden');
-        if (hiddenField) {
-            hiddenField.value = this.value;
-        }
         toggleSeriesInfo(isSeries);
     }
     
