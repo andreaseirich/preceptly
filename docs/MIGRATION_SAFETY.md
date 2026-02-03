@@ -22,8 +22,8 @@ psql test_db < test_db.sql
 # Migrationen auf Test-Datenbank ausführen
 python manage.py migrate
 
-# Prüfen, ob Daten noch vorhanden sind
-python manage.py check_lessons_data
+# Projekt validieren
+python manage.py check
 ```
 
 ### 3. Datenmigrationen bei Modell-Änderungen

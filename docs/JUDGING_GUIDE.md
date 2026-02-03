@@ -3,9 +3,8 @@
 Single-page orientation for reviewers/judges (CodeCraze Hackathon). Focus: fast-start demo, clear core flows, safety notes.
 
 ## Start in < 2 minutes
-- **Setup:**
+- **Setup:** (run_demo creates `.env` from `.env.example` if missing)
   ```bash
-  cp .env.example .env
   ./scripts/run_demo.sh
   ```
 - **Health check:** `curl http://127.0.0.1:8000/health/` → `{ "status": "ok" }`
@@ -23,4 +22,4 @@ Single-page orientation for reviewers/judges (CodeCraze Hackathon). Focus: fast-
 ## Troubleshooting
 - Health check fails → run `./scripts/smoke_demo.sh` and inspect container logs.
 - Missing translations → `python manage.py compilemessages` (already in the demo setup).
-- Reset data → `python manage.py loaddata fixtures/demo_data.json`.
+- Reset data → `cd backend && python manage.py load_demo_data`.

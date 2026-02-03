@@ -59,7 +59,7 @@ LLM_API_BASE_URL=https://api.openai.com/v1
 LLM_MODEL_NAME=gpt-3.5-turbo
 ```
 
-**Important:** Never commit `.env` files to the repository. Add `.env` to `.gitignore`.
+**Important:** Never commit `.env` files to the repository. Keep `.env` local and untracked. The repo hygiene check and CI block tracked `.env`; forbidden paths must never be committed.
 
 ## Production Settings
 
