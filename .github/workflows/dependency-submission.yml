@@ -1,0 +1,25 @@
+# Submit pip dependencies to GitHub dependency graph.
+# continue-on-error: transient GitHub API errors ("try again later") don't block CI.
+name: Dependency Submission
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dependency-submission:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.33
+        with:
+          detectorsFilter: PipReport
+          detectorsCategories: Pip
+        continue-on-error: true
