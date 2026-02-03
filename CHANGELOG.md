@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **404 tests**: Additional tests for /lessons/, /students/ non-existent paths.
+- **i18n tests**: `test_weekday_short_german_in_week_view`, `test_public_booking_no_reschedule_list_in_data_section`.
 - **CSRF + i18n on booking page**: Language form uses request.get_full_path for next; meta csrf-token + getCsrfToken() for AJAX; base.html gets next + csrf meta.
 - **Localized date/weekday**: weekday_display, month_label, weekday short (Mon→Mo) use gettext; SHORT_DATE_FORMAT for dates; week dialog uses document.lang for toLocaleDateString.
 - **Jump to date**: German translation "Zum Datum springen:" added.
