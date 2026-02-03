@@ -53,7 +53,7 @@ class PublicBookingView(TemplateView):
             try:
                 target_date = date.fromisoformat(week_param)
             except ValueError:
-                pass
+                target_date = None
         if target_date is None:
             try:
                 year = int(self.request.GET.get("year", timezone.now().year))
@@ -146,7 +146,7 @@ def public_booking_week_api(request, tutor_token):
             target = date.fromisoformat(week_param)
             year, month, day = target.year, target.month, target.day
         except ValueError:
-            pass
+            year, month, day = None, None, None
     if year is None:
         try:
             year = int(request.GET.get("year", timezone.now().year))
