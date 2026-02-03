@@ -3,9 +3,40 @@
 from django.db import migrations
 
 
+def _owner_from_contract(invoice, Contract, Student):
+    """Resolve owner from invoice.contract.student.user; return None on missing relation."""
+    try:
+        return invoice.contract.student.user_id if invoice.contract_id else None
+    except (Contract.DoesNotExist, Student.DoesNotExist, AttributeError):
+        return None
+
+
+def _owner_from_first_item(apps, invoice, Contract, Student):
+    """Resolve owner from first item's lesson.contract.student.user; return None on failure."""
+    InvoiceItem = apps.get_model("billing", "InvoiceItem")
+    Lesson = apps.get_model("lessons", "Lesson")
+    item = (
+        InvoiceItem.objects.filter(invoice=invoice, lesson__isnull=False)
+        .order_by("id")
+        .first()
+    )
+    if not item or not item.lesson_id:
+        return None
+    lesson = (
+        Lesson.objects.filter(pk=item.lesson_id)
+        .select_related("contract__student__user")
+        .first()
+    )
+    if not lesson or not lesson.contract_id:
+        return None
+    try:
+        return lesson.contract.student.user_id
+    except (Contract.DoesNotExist, Student.DoesNotExist, AttributeError):
+        return None
+
+
 def backfill_invoice_owner(apps, schema_editor):
     Invoice = apps.get_model("billing", "Invoice")
-    InvoiceItem = apps.get_model("billing", "InvoiceItem")
     Contract = apps.get_model("contracts", "Contract")
     Student = apps.get_model("students", "Student")
 
@@ -13,31 +44,9 @@ def backfill_invoice_owner(apps, schema_editor):
     for invoice in Invoice.objects.filter(owner__isnull=True).select_related(
         "contract__student__user"
     ):
-        owner_id = None
-        if invoice.contract_id:
-            try:
-                owner_id = invoice.contract.student.user_id
-            except (Contract.DoesNotExist, Student.DoesNotExist, AttributeError):
-                owner_id = None  # Relation missing; fall through to items resolution
-
+        owner_id = _owner_from_contract(invoice, Contract, Student)
         if owner_id is None:
-            item = (
-                InvoiceItem.objects.filter(invoice=invoice, lesson__isnull=False)
-                .order_by("id")
-                .first()
-            )
-            if item and item.lesson_id:
-                Lesson = apps.get_model("lessons", "Lesson")
-                lesson = (
-                    Lesson.objects.filter(pk=item.lesson_id)
-                    .select_related("contract__student__user")
-                    .first()
-                )
-                if lesson and lesson.contract_id:
-                    try:
-                        owner_id = lesson.contract.student.user_id
-                    except (Contract.DoesNotExist, Student.DoesNotExist, AttributeError):
-                        owner_id = None  # Relation missing; cannot resolve owner
+            owner_id = _owner_from_first_item(apps, invoice, Contract, Student)
 
         if owner_id is None:
             failed_ids.append(invoice.id)
