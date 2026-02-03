@@ -43,3 +43,13 @@ class NotFoundTest(TestCase):
         """Regression: existing pages remain reachable."""
         response = self.client.get(reverse("core:landing"))
         self.assertEqual(response.status_code, 200)
+
+    def test_404_under_lessons_path(self):
+        """404 for non-existent path under /lessons/."""
+        response = self.client.get("/lessons/nonexistent-page-xyz/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_404_under_students_path(self):
+        """404 for non-existent path under /students/."""
+        response = self.client.get("/students/99999/does-not-exist/")
+        self.assertEqual(response.status_code, 404)

@@ -188,3 +188,25 @@ class I18nTestCase(TestCase):
         response = self.client.get(reverse("lessons:week"))
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Montag", response.content)
+
+    def test_public_booking_no_reschedule_list_in_data_section(self):
+        """Public booking page must not render reschedule list (reschedule is inline in calendar)."""
+        user = User.objects.create_user(username="tutor", password="test")
+        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
+        prof.public_booking_token = "tok-no-list"
+        prof.save()
+        response = self.client.get("/lessons/public-booking/tok-no-list/")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b"existing-bookings-section", response.content)
+        self.assertNotIn(b"loadReschedulableLessons", response.content)
+
+    def test_weekday_short_german_in_week_view(self):
+        """With German locale, week view shows German short weekday (Mo, Di) not English (Mon, Tue)."""
+        user = User.objects.create_user(username="tutor", password="test")
+        user.save()
+        self.client.force_login(user)
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get(reverse("lessons:week"))
+        self.assertEqual(response.status_code, 200)
+        # German short form must appear (Mo for Monday)
+        self.assertIn(b"Mo", response.content)
