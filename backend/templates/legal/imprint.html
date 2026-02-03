@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Imprint" %} - TutorFlow{% endblock %}
+
+{% block content %}
+{% include 'legal/_style.html' %}
+<div class="legal-page">
+    <h1>{% trans "Imprint" %}</h1>
+    <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
+
+    <div class="legal-placeholder-box">
+        <strong>{% trans "Placeholder – not legally binding yet." %}</strong>
+        <p>{% trans "Detailed legal information will be provided here soon." %}</p>
+        <p>{% trans "Contact: [email coming soon]" %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Responsible according to §5 TMG" %}</h2>
+        <p>{% trans "TutorFlow – Placeholder company name" %}</p>
+        <p>{% trans "Address follows here" %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Contact" %}</h2>
+        <p>{% trans "Phone: [number coming soon]" %}</p>
+        <p>{% trans "Email: [email coming soon]" %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Editorial responsibility" %}</h2>
+        <p>{% trans "Responsible person will be named here." %}</p>
+    </div>
+</div>
+{% endblock %}

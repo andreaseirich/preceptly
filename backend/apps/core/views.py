@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 
+LEGAL_PLACEHOLDER_LAST_UPDATED = "01.01.2026"
+
 
 class LandingPageView(TemplateView):
     """Landing page with demo mode and public booking options."""
@@ -232,3 +234,38 @@ class SettingsView(LoginRequiredMixin, FormView):
             for c in contracts
         ]
         return context
+
+
+class LegalPlaceholderView(TemplateView):
+    """Base view for legal placeholder pages."""
+
+    last_updated = LEGAL_PLACEHOLDER_LAST_UPDATED
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["last_updated"] = self.last_updated
+        return context
+
+
+class LegalImprintView(LegalPlaceholderView):
+    """Placeholder imprint page."""
+
+    template_name = "legal/imprint.html"
+
+
+class LegalPrivacyView(LegalPlaceholderView):
+    """Placeholder privacy policy page."""
+
+    template_name = "legal/privacy.html"
+
+
+class LegalTermsView(LegalPlaceholderView):
+    """Placeholder terms of service page."""
+
+    template_name = "legal/terms.html"
+
+
+class LegalAboutView(LegalPlaceholderView):
+    """Placeholder about page."""
+
+    template_name = "legal/about.html"

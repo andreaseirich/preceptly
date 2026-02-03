@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Privacy Policy" %} - TutorFlow{% endblock %}
+
+{% block content %}
+{% include 'legal/_style.html' %}
+<div class="legal-page">
+    <h1>{% trans "Privacy Policy" %}</h1>
+    <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
+
+    <div class="legal-placeholder-box">
+        <strong>{% trans "Placeholder – not legally binding yet." %}</strong>
+        <p>{% trans "Detailed privacy information will be published here soon." %}</p>
+        <p>{% trans "Contact: [email coming soon]" %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "1. General information" %}</h2>
+        <p>{% trans "This section will describe how TutorFlow handles personal data." %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "2. Data we process" %}</h2>
+        <p>{% trans "Overview of categories (students, contracts, lessons) will be added here." %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "3. Rights of users" %}</h2>
+        <p>{% trans "Information about access, rectification and deletion rights will be provided." %}</p>
+    </div>
+</div>
+{% endblock %}

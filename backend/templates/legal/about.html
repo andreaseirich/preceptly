@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "About TutorFlow" %} - TutorFlow{% endblock %}
+
+{% block content %}
+{% include 'legal/_style.html' %}
+<div class="legal-page">
+    <h1>{% trans "About TutorFlow" %}</h1>
+    <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
+
+    <div class="legal-placeholder-box">
+        <strong>{% trans "Placeholder – not legally binding yet." %}</strong>
+        <p>{% trans "This page will describe the mission and team behind TutorFlow." %}</p>
+        <p>{% trans "Contact: [email coming soon]" %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Our mission" %}</h2>
+        <p>{% trans "TutorFlow helps tutors manage lessons, contracts and billing efficiently." %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Status" %}</h2>
+        <p>{% trans "TutorFlow is currently in hackathon/demo mode. Detailed company information will follow." %}</p>
+    </div>
+</div>
+{% endblock %}

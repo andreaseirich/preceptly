@@ -22,6 +22,11 @@ urlpatterns = [
     path("", views.DashboardView.as_view(), name="dashboard"),
     path("income/", views.IncomeOverviewView.as_view(), name="income"),
     path("settings/", views.SettingsView.as_view(), name="settings"),
+    # Legal placeholder pages
+    path("legal/imprint/", views.LegalImprintView.as_view(), name="legal_imprint"),
+    path("legal/privacy/", views.LegalPrivacyView.as_view(), name="legal_privacy"),
+    path("legal/terms/", views.LegalTermsView.as_view(), name="legal_terms"),
+    path("legal/about/", views.LegalAboutView.as_view(), name="legal_about"),
     # PWA routes
     path("manifest.json", manifest_view, name="manifest"),
     path("sw.js", service_worker_view, name="service_worker"),

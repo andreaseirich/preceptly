@@ -1,0 +1,58 @@
+{% load i18n %}
+<style>
+.site-footer {
+    margin-top: 40px;
+    background: #1f2933;
+    color: #f5f7fa;
+    padding: 25px 20px;
+}
+.site-footer a {
+    color: #d9e2ec;
+    text-decoration: none;
+    margin-right: 15px;
+}
+.site-footer a:hover {
+    text-decoration: underline;
+}
+.site-footer .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+.site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.site-footer .footer-meta {
+    font-size: 0.85em;
+    color: #bcccdc;
+}
+@media (max-width: 768px) {
+    .site-footer .footer-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .site-footer a {
+        margin-right: 10px;
+    }
+}
+</style>
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-links" aria-label="{% trans 'Legal navigation' %}">
+            <a href="{% url 'core:legal_imprint' %}">{% trans "Imprint" %}</a>
+            <a href="{% url 'core:legal_privacy' %}">{% trans "Privacy Policy" %}</a>
+            <a href="{% url 'core:legal_terms' %}">{% trans "Terms of Service" %}</a>
+            <a href="{% url 'core:legal_about' %}">{% trans "About" %}</a>
+        </div>
+        <div class="footer-meta">
+            <span>© {% now "Y" %} TutorFlow</span>
+            <span>· {% trans "Legal placeholder – not legally binding yet." %}</span>
+        </div>
+    </div>
+</footer>

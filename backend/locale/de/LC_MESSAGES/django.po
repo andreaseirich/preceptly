@@ -3241,6 +3241,143 @@ msgstr "Zurück zur Startseite"
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
 
+#: templates/partials/footer.html:11
+msgid "Legal navigation"
+msgstr "Rechtliche Navigation"
+
+#: templates/partials/footer.html:20 templates/legal/imprint.html:5
+msgid "Imprint"
+msgstr "Impressum"
+
+#: templates/partials/footer.html:21 templates/legal/privacy.html:4
+msgid "Privacy Policy"
+msgstr "Datenschutzerklärung"
+
+#: templates/partials/footer.html:22 templates/legal/terms.html:4
+msgid "Terms of Service"
+msgstr "Allgemeine Geschäftsbedingungen"
+
+#: templates/partials/footer.html:23 templates/legal/about.html:4
+msgid "About TutorFlow"
+msgstr "Über TutorFlow"
+
+#: templates/partials/footer.html:27
+msgid "Legal placeholder – not legally binding yet."
+msgstr "Rechtlicher Platzhalter – noch nicht rechtsverbindlich."
+
+#: templates/legal/_style.html:1 templates/legal/imprint.html:13
+#: templates/legal/privacy.html:13 templates/legal/terms.html:13
+#: templates/legal/about.html:13
+msgid "Placeholder – not legally binding yet."
+msgstr "Platzhalter – noch nicht rechtsverbindlich."
+
+#: templates/legal/imprint.html:16 templates/legal/privacy.html:16
+#: templates/legal/terms.html:16 templates/legal/about.html:16
+msgid "Last updated: %(date)s"
+msgstr "Letzte Aktualisierung: %(date)s"
+
+#: templates/legal/imprint.html:19 templates/legal/privacy.html:19
+#: templates/legal/terms.html:19 templates/legal/about.html:19
+msgid "Detailed legal information will be provided here soon."
+msgstr "Detaillierte rechtliche Informationen folgen in Kürze."
+
+#: templates/legal/imprint.html:20 templates/legal/privacy.html:20
+#: templates/legal/terms.html:20 templates/legal/about.html:20
+msgid "Contact: [email coming soon]"
+msgstr "Kontakt: [E-Mail folgt in Kürze]"
+
+#: templates/legal/imprint.html:24
+msgid "Responsible according to §5 TMG"
+msgstr "Verantwortlich gemäß §5 TMG"
+
+#: templates/legal/imprint.html:25
+msgid "TutorFlow – Placeholder company name"
+msgstr "TutorFlow – Platzhalter-Firmenname"
+
+#: templates/legal/imprint.html:26
+msgid "Address follows here"
+msgstr "Adresse folgt hier"
+
+#: templates/legal/imprint.html:30 templates/legal/privacy.html:30
+msgid "Contact"
+msgstr "Kontakt"
+
+#: templates/legal/imprint.html:31
+msgid "Phone: [number coming soon]"
+msgstr "Telefon: [Nummer folgt in Kürze]"
+
+#: templates/legal/imprint.html:32
+msgid "Email: [email coming soon]"
+msgstr "E-Mail: [E-Mail folgt in Kürze]"
+
+#: templates/legal/imprint.html:36
+msgid "Editorial responsibility"
+msgstr "Inhaltlich Verantwortlicher"
+
+#: templates/legal/imprint.html:37
+msgid "Responsible person will be named here."
+msgstr "Verantwortliche Person wird hier benannt."
+
+#: templates/legal/privacy.html:24
+msgid "1. General information"
+msgstr "1. Allgemeine Hinweise"
+
+#: templates/legal/privacy.html:25
+msgid "This section will describe how TutorFlow handles personal data."
+msgstr "Dieser Abschnitt beschreibt künftig, wie TutorFlow personenbezogene Daten verarbeitet."
+
+#: templates/legal/privacy.html:29
+msgid "2. Data we process"
+msgstr "2. Daten, die wir verarbeiten"
+
+#: templates/legal/privacy.html:30
+msgid "Overview of categories (students, contracts, lessons) will be added here."
+msgstr "Eine Übersicht der Kategorien (Schüler, Verträge, Unterrichtsstunden) wird hier ergänzt."
+
+#: templates/legal/privacy.html:34
+msgid "3. Rights of users"
+msgstr "3. Rechte der Nutzer"
+
+#: templates/legal/privacy.html:35
+msgid "Information about access, rectification and deletion rights will be provided."
+msgstr "Informationen zu Auskunfts-, Berichtigungs- und Löschrechten folgen."
+
+#: templates/legal/terms.html:24
+msgid "1. Scope"
+msgstr "1. Geltungsbereich"
+
+#: templates/legal/terms.html:25
+msgid "TutorFlow usage guidelines will be defined in this section."
+msgstr "Anwendungsrichtlinien für TutorFlow werden in diesem Abschnitt definiert."
+
+#: templates/legal/terms.html:29
+msgid "2. Services of TutorFlow"
+msgstr "2. Leistungen von TutorFlow"
+
+#: templates/legal/terms.html:30
+msgid "Details about features and responsibilities will follow."
+msgstr "Details zu Funktionen und Verantwortlichkeiten folgen."
+
+#: templates/legal/terms.html:34
+msgid "3. Liability"
+msgstr "3. Haftung"
+
+#: templates/legal/terms.html:35
+msgid "Liability clauses and limitations will be outlined here."
+msgstr "Haftungsregelungen und Beschränkungen werden hier ausgeführt."
+
+#: templates/legal/about.html:24
+msgid "Our mission"
+msgstr "Unsere Mission"
+
+#: templates/legal/about.html:25
+msgid "TutorFlow helps tutors manage lessons, contracts and billing efficiently."
+msgstr "TutorFlow hilft Nachhilfelehrern, Unterricht, Verträge und Abrechnung effizient zu verwalten."
+
+#: templates/legal/about.html:30
+msgid "TutorFlow is currently in hackathon/demo mode. Detailed company information will follow."
+msgstr "TutorFlow befindet sich derzeit im Hackathon-/Demo-Modus. Detaillierte Unternehmensinformationen folgen."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 
