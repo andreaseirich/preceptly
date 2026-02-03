@@ -8,6 +8,7 @@ from apps.core.views_email_test import test_email
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
 from apps.core.views_pwa import manifest_view, service_worker_view
+from apps.core.views_reports import ReportsView
 from django.urls import path
 
 app_name = "core"
@@ -22,6 +23,7 @@ urlpatterns = [
     path("landing/", views.LandingPageView.as_view(), name="landing"),
     path("", views.DashboardView.as_view(), name="dashboard"),
     path("income/", views.IncomeOverviewView.as_view(), name="income"),
+    path("reports/", ReportsView.as_view(), name="reports"),
     path("settings/", views.SettingsView.as_view(), name="settings"),
     # Legal placeholder pages
     path("legal/imprint/", views.LegalImprintView.as_view(), name="legal_imprint"),

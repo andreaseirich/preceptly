@@ -7,9 +7,22 @@
 {% block content %}
 <h1>{% trans "Invoices" %}</h1>
 
-<div class="btn-group">
+<div class="btn-group" style="margin-bottom: 20px;">
     <a href="{% url 'billing:invoice_create' %}" class="btn btn-success">➕ {% trans "Create New Invoice" %}</a>
 </div>
+
+{% if is_billing_pro %}
+<form method="get" style="margin-bottom: 20px;">
+    <label for="status">{% trans "Filter by status" %}:</label>
+    <select name="status" id="status">
+        <option value="">{% trans "All" %}</option>
+        <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>{% trans "Draft" %}</option>
+        <option value="sent" {% if status_filter == "sent" %}selected{% endif %}>{% trans "Sent" %}</option>
+        <option value="paid" {% if status_filter == "paid" %}selected{% endif %}>{% trans "Paid" %}</option>
+    </select>
+    <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
+</form>
+{% endif %}
 
 {% if invoices %}
 <table>
@@ -27,7 +40,7 @@
     <tbody>
         {% for invoice in invoices %}
         <tr>
-            <td>{{ invoice.id }}</td>
+            <td>{% if invoice.invoice_number %}{{ invoice.invoice_number }}{% else %}{{ invoice.id }}{% endif %}</td>
             <td>{{ invoice.payer_name }}</td>
             <td>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</td>
             <td>{{ invoice.total_amount|euro }}</td>

@@ -297,6 +297,17 @@
         <!-- Schritt 3: Zeitslot-Auswahl -->
         <div class="step" id="step-3">
             <h2>{% trans "Select Time Slot" %}</h2>
+            {% if not is_premium %}
+            <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 0.9em;">
+                {% blocktrans with count=public_booking_count limit=public_booking_limit %}Public bookings this month: {{ count }}/{{ limit }}.{% endblocktrans %}
+                <a href="{% url 'core:settings' %}" style="margin-left: 8px;">{% trans "Upgrade to Premium for unlimited bookings." %}</a>
+            </div>
+            {% endif %}
+            {% if public_booking_limit_reached %}
+            <div class="message error" style="margin-bottom: 15px;">
+                {% trans "Public booking limit reached. Upgrade to Premium for unlimited bookings." %}
+            </div>
+            {% endif %}
             <div class="btn-group">
                 <button class="btn" onclick="previousWeek()">← {% trans "Previous Week" %}</button>
                 <button class="btn" onclick="nextWeek()">{% trans "Next Week" %} →</button>
@@ -307,6 +318,10 @@
             </div>
             <div id="inline-reschedule-banner" style="margin: 15px 0; padding: 12px; background: #e3f2fd; border-radius: 4px; border: 1px solid #2196f3; display: none;">
                 <p id="inline-reschedule-text" style="margin: 0 0 8px 0;"></p>
+                <div id="inline-reschedule-scope" style="margin: 10px 0; display: none;">
+                    <label><input type="radio" name="reschedule-scope" value="single" checked> {% trans "Reschedule this lesson only" %}</label>
+                    <label style="margin-left: 15px;"><input type="radio" name="reschedule-scope" value="series"> {% trans "Reschedule entire series" %}</label>
+                </div>
                 <button type="button" class="btn btn-success" id="inline-reschedule-confirm-btn" onclick="confirmInlineReschedule()" style="display: none; margin-right: 8px;">{% trans "Confirm Reschedule" %}</button>
                 <button type="button" class="btn btn-secondary" onclick="cancelInlineReschedule()">{% trans "Cancel" %}</button>
             </div>
@@ -334,10 +349,11 @@
                             {% endfor %}
                             {% if day.busy_intervals %}
                             {% for bi in day.busy_intervals %}
-                            <div class="time-slot occupied {% if bi.own %}own-lesson{% endif %} {% if bi.reschedulable %}reschedulable{% endif %}"
-                                 {% if bi.reschedulable %}data-lesson-id="{{ bi.lesson_id }}" data-date="{{ day.date|date:'Y-m-d' }}" data-start="{{ bi.start }}" data-end="{{ bi.end }}" onclick="tapOnReschedulableEntry(this)"{% endif %}>
+                            <div class="time-slot occupied {% if bi.own %}own-lesson{% endif %} {% if bi.reschedulable %}reschedulable{% endif %} {% if bi.reschedule_locked %}reschedule-locked{% endif %}"
+                                 {% if bi.reschedulable %}data-lesson-id="{{ bi.lesson_id }}" data-date="{{ day.date|date:'Y-m-d' }}" data-start="{{ bi.start }}" data-end="{{ bi.end }}" data-in-series="{{ bi.in_series|yesno:'true,false' }}" onclick="tapOnReschedulableEntry(this)"{% endif %}
+                                 {% if bi.reschedule_locked %}title="{% trans 'Reschedule requires Premium' %}"{% endif %}>
                                 <div class="time-slot-label">{{ bi.start }} - {{ bi.end }}</div>
-                                <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% if bi.reschedulable %} ({% trans "tap to reschedule" %}){% endif %}{% else %}{% trans "Booked" %}{% endif %}</div>
+                                <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% if bi.reschedulable %} ({% trans "tap to reschedule" %}){% elif bi.reschedule_locked %} ({% trans "Premium to reschedule" %}){% endif %}{% else %}{% trans "Booked" %}{% endif %}</div>
                             </div>
                             {% endfor %}
                             {% else %}
@@ -390,6 +406,7 @@
         let inlineRescheduleLessonId = null;
         let inlineRescheduleLessonInfo = null;
         let inlineRescheduleSelectedSlot = null;
+        let inlineRescheduleInSeries = false;
         
         function showMessage(message, type = 'success') {
             const messagesDiv = document.getElementById('messages');
@@ -809,11 +826,15 @@
             inlineRescheduleLessonId = parseInt(lessonId, 10);
             inlineRescheduleLessonInfo = dateStr + ' ' + startStr + ' - ' + endStr;
             inlineRescheduleSelectedSlot = null;
+            inlineRescheduleInSeries = element.dataset.inSeries === 'true';
             document.querySelectorAll('#public-week-calendar-days .time-slot.reschedule-selected').forEach(function(el) { el.classList.remove('reschedule-selected'); });
             element.classList.add('reschedule-selected');
             document.getElementById('inline-reschedule-banner').style.display = 'block';
             document.getElementById('inline-reschedule-text').textContent = '{% trans "Reschedule: select a new time slot below." %}';
             document.getElementById('inline-reschedule-confirm-btn').style.display = 'none';
+            var scopeEl = document.getElementById('inline-reschedule-scope');
+            scopeEl.style.display = inlineRescheduleInSeries ? 'block' : 'none';
+            if (scopeEl.querySelector('input[value="series"]')) scopeEl.querySelector('input[value="series"]').disabled = !inlineRescheduleInSeries;
         }
 
         function cancelInlineReschedule() {
@@ -846,7 +867,8 @@
                     new_date: inlineRescheduleSelectedSlot.date,
                     new_start_time: inlineRescheduleSelectedSlot.start,
                     tutor_token: TUTOR_TOKEN,
-                    booking_code: currentBookingCode
+                    booking_code: currentBookingCode,
+                    edit_scope: document.querySelector('input[name="reschedule-scope"]:checked') ? document.querySelector('input[name="reschedule-scope"]:checked').value : 'single'
                 })
             })
             .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
@@ -884,11 +906,13 @@
                         for (const bi of intervals) {
                             var label = bi.own && bi.label ? bi.label : bookedLabel;
                             if (bi.own && bi.reschedulable) label += ' (' + tapHint + ')';
+                            else if (bi.own && bi.reschedule_locked) label += ' ({% trans "Premium to reschedule" %})';
                             var cls = bi.own ? 'occupied own-lesson' : 'occupied';
                             if (bi.reschedulable) cls += ' reschedulable';
+                            if (bi.reschedule_locked) cls += ' reschedule-locked';
                             var extra = '';
                             if (bi.reschedulable) {
-                                extra = ' data-lesson-id="' + bi.lesson_id + '" data-date="' + day.date + '" data-start="' + bi.start + '" data-end="' + bi.end + '" onclick="tapOnReschedulableEntry(this)"';
+                                extra = ' data-lesson-id="' + bi.lesson_id + '" data-date="' + day.date + '" data-start="' + bi.start + '" data-end="' + bi.end + '" data-in-series="' + (bi.in_series ? 'true' : 'false') + '" onclick="tapOnReschedulableEntry(this)"';
                             }
                             html += '<div class="time-slot ' + cls + '"' + extra + '><div class="time-slot-label">' + bi.start + ' - ' + bi.end + '</div><div class="occupied-label">' + escapeHtml(label) + '</div></div>';
                         }

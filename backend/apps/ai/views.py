@@ -3,7 +3,7 @@ Views for AI functions (lesson plan generation).
 """
 
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
-from apps.core.utils import is_premium_user
+from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Session
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -22,7 +22,7 @@ def generate_lesson_plan(request, lesson_id):
     session = get_object_or_404(Session, pk=lesson_id, contract__student__user=request.user)
 
     # Premium-Check
-    if not is_premium_user(request.user):
+    if not user_has_feature(request.user, Feature.FEATURE_AI_LESSON_PLANS):
         messages.error(request, _("This function is only available for premium users."))
         # Redirect to lesson plan view if 'next' parameter is provided, otherwise to lesson detail
         next_url = request.POST.get("next") or request.GET.get("next")

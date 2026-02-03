@@ -5,6 +5,7 @@ Services für Billing-Funktionalität.
 from decimal import Decimal
 
 from apps.billing.models import Invoice, InvoiceItem
+from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
 from django.db import transaction
 from django.utils.translation import gettext as _
@@ -100,14 +101,28 @@ class InvoiceService:
                     payer_name = first_contract.student.full_name
                 payer_address = ""
 
-            invoice = Invoice.objects.create(
-                payer_name=payer_name,
-                payer_address=payer_address,
-                contract=contract or lessons.first().contract,
-                period_start=period_start,
-                period_end=period_end,
-                status="draft",
-            )
+            invoice_kwargs = {
+                "payer_name": payer_name,
+                "payer_address": payer_address,
+                "contract": contract or lessons.first().contract,
+                "period_start": period_start,
+                "period_end": period_end,
+                "status": "draft",
+            }
+            if user and user_has_feature(user, Feature.FEATURE_BILLING_PRO):
+                from apps.core.models import UserProfile
+
+                profile, _created = UserProfile.objects.get_or_create(
+                    user=user, defaults={"next_invoice_number": 1}
+                )
+                num = profile.next_invoice_number
+                invoice_kwargs["invoice_number"] = f"INV-{num:04d}"
+                profile.next_invoice_number = num + 1
+                profile.save(update_fields=["next_invoice_number"])
+            else:
+                invoice_kwargs["invoice_number"] = None
+
+            invoice = Invoice.objects.create(**invoice_kwargs)
 
             total_amount = Decimal("0.00")
             for lesson in lessons:

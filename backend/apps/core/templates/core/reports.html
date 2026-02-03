@@ -1,0 +1,80 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Reports" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Reports" %}{% if is_premium %} <span class="premium-badge">{% trans "Premium" %}</span>{% endif %}</h1>
+
+{% if is_premium %}
+<div style="margin-bottom: 30px;">
+    <form method="get" action="" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <label for="year">{% trans "Year" %}:</label>
+        <input type="number" id="year" name="year" value="{{ year }}" min="2020" max="2100" style="width: 80px;">
+        <label for="month">{% trans "Month" %}:</label>
+        <select id="month" name="month">
+            <option value="1" {% if month == 1 %}selected{% endif %}>{% trans "January" %}</option>
+            <option value="2" {% if month == 2 %}selected{% endif %}>{% trans "February" %}</option>
+            <option value="3" {% if month == 3 %}selected{% endif %}>{% trans "March" %}</option>
+            <option value="4" {% if month == 4 %}selected{% endif %}>{% trans "April" %}</option>
+            <option value="5" {% if month == 5 %}selected{% endif %}>{% trans "May" %}</option>
+            <option value="6" {% if month == 6 %}selected{% endif %}>{% trans "June" %}</option>
+            <option value="7" {% if month == 7 %}selected{% endif %}>{% trans "July" %}</option>
+            <option value="8" {% if month == 8 %}selected{% endif %}>{% trans "August" %}</option>
+            <option value="9" {% if month == 9 %}selected{% endif %}>{% trans "September" %}</option>
+            <option value="10" {% if month == 10 %}selected{% endif %}>{% trans "October" %}</option>
+            <option value="11" {% if month == 11 %}selected{% endif %}>{% trans "November" %}</option>
+            <option value="12" {% if month == 12 %}selected{% endif %}>{% trans "December" %}</option>
+        </select>
+        <button type="submit" class="btn">{% trans "Apply" %}</button>
+    </form>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div style="padding: 20px; background: var(--table-header-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Taught hours" %}</div>
+        <div style="font-size: 1.8em; font-weight: bold;">{{ taught_hours|floatformat:1 }}</div>
+    </div>
+    <div style="padding: 20px; background: var(--table-header-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Paid amount" %}</div>
+        <div style="font-size: 1.8em; font-weight: bold;">{{ paid_amount|floatformat:2 }} €</div>
+    </div>
+    <div style="padding: 20px; background: var(--table-header-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Invoices" %}</div>
+        <div style="font-size: 1.8em; font-weight: bold;">{{ invoice_count }}</div>
+    </div>
+</div>
+
+{% if contract_details %}
+<h2>{% trans "Top students (this month)" %}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans "Student" %}</th>
+            <th>{% trans "Lessons" %}</th>
+            <th>{% trans "Amount" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cd in contract_details %}
+        <tr>
+            <td>{{ cd.contract.student.full_name }}</td>
+            <td>{{ cd.lessons }}</td>
+            <td>{{ cd.income|floatformat:2 }} €</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>{% trans "No data for this month." %}</p>
+{% endif %}
+
+{% else %}
+<div style="padding: 30px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; margin: 20px 0;">
+    <h2 style="margin-top: 0;">{% trans "Reports – Premium feature" %}</h2>
+    <p>{% trans "Get detailed monthly reports: taught hours, paid amount, invoice count, and breakdown per student." %}</p>
+    <p><strong>{% trans "This month summary" %}:</strong> {{ taught_hours|floatformat:1 }} {% trans "hours taught" %}, {{ invoice_count }} {% trans "invoices" %}.</p>
+    <p>{% trans "Upgrade to Premium for full reports." %}</p>
+</div>
+{% endif %}
+{% endblock %}

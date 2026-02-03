@@ -8,6 +8,13 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
 from apps.contracts.models import Contract
+from apps.core.feature_flags import (
+    PUBLIC_BOOKING_MONTHLY_LIMIT,
+    Feature,
+    get_public_booking_count_this_month,
+    public_booking_limit_reached,
+    user_has_feature,
+)
 from apps.core.utils_booking import get_tutor_for_booking
 from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson, LessonDocument
@@ -58,11 +65,19 @@ class PublicBookingView(TemplateView):
             target_date.year, target_date.month, target_date.day, user=tutor, student_id=student_id
         )
 
+        is_premium = user_has_feature(tutor, Feature.FEATURE_PUBLIC_BOOKING_FULL)
+        limit_reached = public_booking_limit_reached(tutor)
+        public_booking_count = get_public_booking_count_this_month(tutor)
+
         context.update(
             {
                 "week_data": week_data,
                 "current_date": target_date,
                 "tutor_token": tutor_token or "",
+                "is_premium": is_premium,
+                "public_booking_limit_reached": limit_reached,
+                "public_booking_count": public_booking_count,
+                "public_booking_limit": PUBLIC_BOOKING_MONTHLY_LIMIT,
             }
         )
 
@@ -512,6 +527,17 @@ def book_lesson_api(request):
                 is_active=True,
             )
 
+        if public_booking_limit_reached(tutor):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": _(
+                        "Public booking limit reached. Upgrade to Premium for unlimited bookings."
+                    ),
+                },
+                status=403,
+            )
+
         lesson = Lesson.objects.create(
             contract=contract,
             date=booking_date_obj,
@@ -521,6 +547,7 @@ def book_lesson_api(request):
             travel_time_before_minutes=0,
             travel_time_after_minutes=0,
             notes=f"{_('Subject')}: {subject}\n{notes}" if subject or notes else notes,
+            created_via="public_booking",
         )
 
         try:
@@ -598,6 +625,28 @@ def reschedule_lesson_api(request):
         if not tutor:
             return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
 
+        edit_scope = (data.get("edit_scope") or "single").strip().lower()
+        if edit_scope == "series":
+            if not user_has_feature(tutor, Feature.FEATURE_PUBLIC_SERIES_RESCHEDULE):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": _(
+                            "Rescheduling entire series requires Premium. Upgrade to access."
+                        ),
+                    },
+                    status=403,
+                )
+        else:
+            if not user_has_feature(tutor, Feature.FEATURE_PUBLIC_RESCHEDULE):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": _("Rescheduling requires Premium. Upgrade to access."),
+                    },
+                    status=403,
+                )
+
         if not booking_code:
             return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
 
@@ -673,6 +722,91 @@ def reschedule_lesson_api(request):
             min_booking = timezone.now() + timedelta(minutes=30)
             if booking_datetime < min_booking:
                 return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400)
+
+            if edit_scope == "series":
+                from apps.lessons.recurring_service import RecurringSessionService
+                from apps.lessons.recurring_utils import (
+                    find_matching_recurring_session,
+                    get_all_sessions_for_recurring,
+                )
+
+                matching = find_matching_recurring_session(lesson)
+                if not matching:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _("This lesson is not part of a series."),
+                        },
+                        status=400,
+                    )
+
+                all_series_lessons = get_all_sessions_for_recurring(
+                    matching, original_start_time=lesson.start_time
+                )
+                future_lessons = [les for les in all_series_lessons if les.date >= lesson.date]
+                if not future_lessons:
+                    return JsonResponse(
+                        {"success": False, "message": _RESCHEDULE_NEUTRAL}, status=400
+                    )
+
+                new_weekday = new_date_obj.weekday()
+
+                matching.start_date = new_date_obj
+                matching.start_time = new_start_obj
+                matching.monday = new_weekday == 0
+                matching.tuesday = new_weekday == 1
+                matching.wednesday = new_weekday == 2
+                matching.thursday = new_weekday == 3
+                matching.friday = new_weekday == 4
+                matching.saturday = new_weekday == 5
+                matching.sunday = new_weekday == 6
+
+                dry_result = RecurringSessionService.generate_sessions(
+                    matching, check_conflicts=True, dry_run=True
+                )
+                if dry_result.get("conflicts"):
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _(
+                                "Cannot reschedule series: a time slot is already booked."
+                            ),
+                        },
+                        status=400,
+                    )
+
+                matching.save()
+                for old_lesson in future_lessons:
+                    old_lesson.delete()
+
+                result = RecurringSessionService.generate_sessions(
+                    matching, check_conflicts=True, dry_run=False
+                )
+                if result.get("conflicts"):
+                    from django.db import transaction as tx
+
+                    raise tx.TransactionManagementError(
+                        "Conflict detected during series reschedule"
+                    )
+
+                updated_count = result.get("created", 0) + result.get("skipped", 0)
+                logging.getLogger(__name__).info(
+                    "Series rescheduled",
+                    extra={
+                        "recurring_id": matching.id,
+                        "new_date": str(new_date_obj),
+                        "new_start": str(new_start_obj),
+                        "updated_count": updated_count,
+                    },
+                )
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "message": _("Series rescheduled successfully."),
+                        "lesson_id": lesson_id,
+                        "scope": "series",
+                    }
+                )
 
             occupied = BookingService.get_all_occupied_time_slots(
                 new_date_obj, new_date_obj, user=tutor, exclude_lesson_id=lesson.id

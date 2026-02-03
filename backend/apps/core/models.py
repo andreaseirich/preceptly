@@ -32,6 +32,10 @@ class UserProfile(models.Model):
         null=True,
         help_text=_("Token for public booking URL (e.g. /public-booking/<token>/)"),
     )
+    next_invoice_number = models.PositiveIntegerField(
+        default=1,
+        help_text=_("Next sequential invoice number (Premium only)."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

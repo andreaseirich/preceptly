@@ -3398,6 +3398,66 @@ msgstr "Bereits ein Konto? Anmelden"
 msgid "Please correct the errors below."
 msgstr "Bitte korrigieren Sie die Fehler unten."
 
+msgid "This feature requires Premium. Upgrade to access."
+msgstr "Diese Funktion erfordert Premium. Upgrade für vollen Zugang."
+
+msgid "Public booking limit reached. Upgrade to Premium for unlimited bookings."
+msgstr "Limit für öffentliche Buchungen erreicht. Upgrade auf Premium für unbegrenzte Buchungen."
+
+msgid "Upgrade to Premium for unlimited bookings."
+msgstr "Upgrade auf Premium für unbegrenzte Buchungen."
+
+msgid "Rescheduling requires Premium. Upgrade to access."
+msgstr "Umbuchung erfordert Premium. Upgrade für vollen Zugang."
+
+msgid "Rescheduling entire series requires Premium. Upgrade to access."
+msgstr "Umbuchung der gesamten Serie erfordert Premium. Upgrade für vollen Zugang."
+
+msgid "Reschedule this lesson only"
+msgstr "Nur diese Stunde umbuchen"
+
+msgid "Reschedule entire series"
+msgstr "Gesamte Serie umbuchen"
+
+msgid "Reschedule requires Premium"
+msgstr "Umbuchung erfordert Premium"
+
+msgid "Premium to reschedule"
+msgstr "Premium für Umbuchung"
+
+msgid "Reports"
+msgstr "Berichte"
+
+msgid "Filter by status"
+msgstr "Nach Status filtern"
+
+msgid "Taught hours"
+msgstr "Unterrichtete Stunden"
+
+msgid "Paid amount"
+msgstr "Bezahlter Betrag"
+
+msgid "Top students (this month)"
+msgstr "Top-Schüler (dieser Monat)"
+
+msgid "Reports – Premium feature"
+msgstr "Berichte – Premium-Funktion"
+
+msgid "Get detailed monthly reports: taught hours, paid amount, invoice count, and breakdown per student."
+msgstr "Detaillierte Monatsberichte: unterrichtete Stunden, bezahlter Betrag, Rechnungsanzahl und Aufschlüsselung pro Schüler."
+
+msgid "This month summary"
+msgstr "Zusammenfassung dieses Monats"
+
+msgid "hours taught"
+msgstr "Stunden unterrichtet"
+
+msgid "Upgrade to Premium for full reports."
+msgstr "Upgrade auf Premium für vollständige Berichte."
+
+msgid "Public bookings this month: %(count)s/%(limit)s."
+msgstr "Öffentliche Buchungen diesen Monat: %(count)s/%(limit)s."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 

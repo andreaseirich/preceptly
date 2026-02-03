@@ -223,6 +223,7 @@ class StudentBookingView(TemplateView):
                     status="planned",
                     travel_time_before_minutes=0,
                     travel_time_after_minutes=0,
+                    created_via="contract_booking",
                 )
 
                 logger.info("Lesson created successfully", extra={"lesson_id": lesson.id})

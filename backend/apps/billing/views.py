@@ -56,7 +56,22 @@ class InvoiceListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return _user_invoice_queryset(self.request.user)
+        qs = _user_invoice_queryset(self.request.user)
+        from apps.core.feature_flags import Feature, user_has_feature
+
+        if user_has_feature(self.request.user, Feature.FEATURE_BILLING_PRO):
+            status = self.request.GET.get("status", "").strip()
+            if status in ("draft", "sent", "paid"):
+                qs = qs.filter(status=status)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.core.feature_flags import Feature, user_has_feature
+
+        context["is_billing_pro"] = user_has_feature(self.request.user, Feature.FEATURE_BILLING_PRO)
+        context["status_filter"] = self.request.GET.get("status", "")
+        return context
 
 
 class InvoiceDetailView(LoginRequiredMixin, DetailView):

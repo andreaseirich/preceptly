@@ -20,6 +20,13 @@ class Invoice(models.Model):
         ("paid", _("Paid")),
     ]
 
+    invoice_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("Sequential invoice number (Premium). INV-<id> fallback for Basic."),
+    )
     payer_name = models.CharField(max_length=200, help_text=_("Name of the payer"))
     payer_address = models.TextField(blank=True, help_text=_("Address of the payer"))
     contract = models.ForeignKey(

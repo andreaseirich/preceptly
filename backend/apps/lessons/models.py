@@ -39,6 +39,13 @@ class Session(models.Model):
         default=0, help_text=_("Travel time after in minutes")
     )
     notes = models.TextField(blank=True, null=True, help_text=_("Notes for the session"))
+    created_via = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("Source: public_booking, contract_booking, or tutor"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

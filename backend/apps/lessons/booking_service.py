@@ -314,7 +314,18 @@ class BookingService:
             if is_own:
                 interval["label"] = lesson.contract.student.full_name
                 interval["lesson_id"] = lesson.id
-                interval["reschedulable"] = lesson.status == "planned" and lesson.date >= today
+                can_reschedule = lesson.status == "planned" and lesson.date >= today
+                from apps.core.feature_flags import Feature, user_has_feature
+
+                has_reschedule = user_has_feature(user, Feature.FEATURE_PUBLIC_RESCHEDULE)
+                interval["reschedulable"] = can_reschedule and has_reschedule
+                interval["reschedule_locked"] = can_reschedule and not has_reschedule
+                if can_reschedule:
+                    from apps.lessons.recurring_utils import find_matching_recurring_session
+
+                    interval["in_series"] = find_matching_recurring_session(lesson) is not None
+                else:
+                    interval["in_series"] = False
             result[lesson.date].append(interval)
 
         start_datetime = timezone.make_aware(datetime.combine(week_start, time.min))
