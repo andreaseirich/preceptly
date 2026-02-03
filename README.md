@@ -152,13 +152,13 @@ python manage.py runserver
 
 ### Local git setup (optional)
 
-To configure local exclude patterns and a pre-commit hygiene check (blocks forbidden paths):
+To install a pre-commit hook that blocks forbidden paths (e.g. `.gitignore`, `.cursor/`, `.env`) from being committed:
 
 ```bash
 ./scripts/setup_local_git.sh
 ```
 
-**Contributing:** Use a local (non-tracked) `.gitignore` for local-only files (e.g. `.env`, `.cursorrules`). The repo does not track `.gitignore`; hygiene is enforced via `scripts/repo_hygiene_check.sh` and CI. Forbidden paths must never be committed.
+**Contributing:** Use a local (non-tracked) `.gitignore` for local-only files. The repo does not track `.gitignore`. Hygiene is enforced by the pre-commit hook and CI; forbidden paths must never be committed.
 
 ---
 
