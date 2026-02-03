@@ -18,7 +18,7 @@ def backfill_invoice_owner(apps, schema_editor):
             try:
                 owner_id = invoice.contract.student.user_id
             except (Contract.DoesNotExist, Student.DoesNotExist, AttributeError):
-                pass
+                owner_id = None  # Relation missing; fall through to items resolution
 
         if owner_id is None:
             item = (
@@ -37,7 +37,7 @@ def backfill_invoice_owner(apps, schema_editor):
                     try:
                         owner_id = lesson.contract.student.user_id
                     except (Contract.DoesNotExist, Student.DoesNotExist, AttributeError):
-                        pass
+                        owner_id = None  # Relation missing; cannot resolve owner
 
         if owner_id is None:
             failed_ids.append(invoice.id)
