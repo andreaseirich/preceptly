@@ -38,10 +38,9 @@ class ContractAdmin(admin.ModelAdmin):
     )
 
     def get_lesson_count(self, obj):
-        return obj.lessons.count()
+        return obj.sessions.count()
 
     get_lesson_count.short_description = _("Lessons")
-    get_lesson_count.admin_order_field = "lessons"
 
 
 @admin.register(ContractMonthlyPlan)

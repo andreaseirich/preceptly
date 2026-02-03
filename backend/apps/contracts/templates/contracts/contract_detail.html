@@ -27,7 +27,7 @@
 </table>
 
 <h2>{% trans "Lessons" %}</h2>
-{% if contract.lessons.all %}
+{% if contract.sessions.all %}
 <table>
     <thead>
         <tr>
@@ -38,7 +38,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for lesson in contract.lessons.all %}
+        {% for lesson in contract.sessions.all %}
         <tr>
             <td>{{ lesson.date }}</td>
             <td>{{ lesson.start_time }}</td>

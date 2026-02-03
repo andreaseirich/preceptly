@@ -58,4 +58,4 @@ class LessonModelTest(TestCase):
         lesson = Lesson.objects.create(
             contract=self.contract, date=date.today(), start_time=time(14, 0), duration_minutes=60
         )
-        self.assertEqual(self.contract.lessons.first(), lesson)
+        self.assertEqual(self.contract.sessions.first(), lesson)
