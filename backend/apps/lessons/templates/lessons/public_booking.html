@@ -374,6 +374,7 @@
     </div>
     
     <script>
+        window.DJANGO_LANGUAGE = "{{ LANGUAGE_CODE|default:'en'|escapejs }}";
         const currentYear = {{ current_date.year }};
         const currentMonth = {{ current_date.month }};
         const currentDay = {{ current_date.day }};
@@ -769,7 +770,7 @@
 
             const url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?year=' + year + '&month=' + month + '&day=' + day;
 
-            fetch(url)
+            fetch(url, { credentials: 'same-origin' })
                 .then(function(response) {
                     return response.json().then(function(data) {
                         return { ok: response.ok, data: data };
@@ -912,8 +913,8 @@
 
         function formatDateLocale(isoDate) {
             const d = new Date(isoDate + 'T12:00:00');
-            const lang = document.documentElement.lang || 'en';
-            const locale = lang === 'de' ? 'de-DE' : 'en-US';
+            const lang = window.DJANGO_LANGUAGE || document.documentElement.lang || document.documentElement.getAttribute('lang') || 'en';
+            const locale = (lang && lang.indexOf('de') === 0) ? 'de-DE' : 'en-US';
             return d.toLocaleDateString(locale);
         }
 

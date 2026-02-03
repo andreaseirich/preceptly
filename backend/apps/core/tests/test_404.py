@@ -53,3 +53,20 @@ class NotFoundTest(TestCase):
         """404 for non-existent path under /students/."""
         response = self.client.get("/students/99999/does-not-exist/")
         self.assertEqual(response.status_code, 404)
+
+    def test_404_public_booking_invalid_token(self):
+        """404 for public booking with invalid token."""
+        response = self.client.get("/lessons/public-booking/invalid-token-xyz/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_404_public_booking_week_invalid_token(self):
+        """404 for week API with invalid token."""
+        response = self.client.get(
+            "/lessons/public-booking/invalid-token/week/?year=2026&month=1&day=1"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_404_trailing_slash_variation(self):
+        """404 for clearly non-existent path (trailing slash)."""
+        response = self.client.get("/lessons/nonexistent-slug-12345/")
+        self.assertEqual(response.status_code, 404)
