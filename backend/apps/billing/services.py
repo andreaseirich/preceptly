@@ -14,7 +14,7 @@ class InvoiceService:
     """Service für Invoice-Operationen."""
 
     @staticmethod
-    def get_billable_lessons(period_start, period_end, contract_id=None, user=None):
+    def get_billable_lessons(period_start, period_end, contract_id=None, institute=None, user=None):
         """
         Gibt alle Lessons zurück, die für eine Abrechnung in Frage kommen.
 
@@ -26,6 +26,8 @@ class InvoiceService:
             period_start: Startdatum des Zeitraums
             period_end: Enddatum des Zeitraums
             contract_id: Optional: Filter nach Vertrag-ID
+            institute: Optional: Filter nach Institut (Contract.institute)
+            user: Optional: Filter nach Tutor (contract__student__user)
 
         Returns:
             QuerySet von Lessons mit Status TAUGHT, die noch nicht in einem InvoiceItem sind
@@ -44,13 +46,17 @@ class InvoiceService:
 
         if contract_id:
             queryset = queryset.filter(contract_id=contract_id)
+        if institute:
+            queryset = queryset.filter(contract__institute=institute)
         if user:
             queryset = queryset.filter(contract__student__user=user)
 
         return queryset.order_by("date", "start_time")
 
     @staticmethod
-    def create_invoice_from_lessons(period_start, period_end, contract=None, user=None):
+    def create_invoice_from_lessons(
+        period_start, period_end, contract=None, institute=None, user=None
+    ):
         """
         Erstellt eine Invoice mit InvoiceItems aus allen verfügbaren Lessons im Zeitraum.
 
@@ -61,6 +67,8 @@ class InvoiceService:
             period_start: Startdatum
             period_end: Enddatum
             contract: Optional: Filter nach Vertrag
+            institute: Optional: Filter nach Institut
+            user: Optional: Filter nach Tutor
 
         Returns:
             Invoice-Instanz
@@ -69,7 +77,7 @@ class InvoiceService:
         contract_id = contract.id if contract else None
         with transaction.atomic():
             lessons = InvoiceService.get_billable_lessons(
-                period_start, period_end, contract_id, user=user
+                period_start, period_end, contract_id, institute=institute, user=user
             ).select_for_update()
 
             if not lessons.exists():

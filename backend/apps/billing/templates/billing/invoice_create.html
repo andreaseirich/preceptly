@@ -32,6 +32,12 @@
     </div>
     
     <div style="margin-bottom: 20px;">
+        <label for="{{ form.institute.id_for_label }}">{% trans "Institute (optional):" %}</label>
+        {{ form.institute }}
+        <small class="form-text text-muted">{% trans "If selected, only lessons from contracts with this institute will be billed." %}</small>
+    </div>
+
+    <div style="margin-bottom: 20px;">
         <label for="{{ form.contract.id_for_label }}">{% trans "Contract (optional):" %}</label>
         {{ form.contract }}
         <small class="form-text text-muted">{% trans "If selected, only lessons from this contract will be billed." %}</small>
@@ -96,6 +102,7 @@
 function loadLessons() {
     const periodStart = document.getElementById('{{ form.period_start.id_for_label }}').value;
     const periodEnd = document.getElementById('{{ form.period_end.id_for_label }}').value;
+    const institute = document.getElementById('{{ form.institute.id_for_label }}').value;
     const contract = document.getElementById('{{ form.contract.id_for_label }}').value;
     
     if (!periodStart || !periodEnd) {
@@ -106,6 +113,9 @@ function loadLessons() {
     const url = new URL(window.location.href);
     url.searchParams.set('period_start', periodStart);
     url.searchParams.set('period_end', periodEnd);
+    if (institute) {
+        url.searchParams.set('institute', institute);
+    }
     if (contract) {
         url.searchParams.set('contract', contract);
     }
@@ -117,20 +127,23 @@ function loadLessons() {
 document.addEventListener('DOMContentLoaded', function() {
     const periodStartField = document.getElementById('{{ form.period_start.id_for_label }}');
     const periodEndField = document.getElementById('{{ form.period_end.id_for_label }}');
+    const instituteField = document.getElementById('{{ form.institute.id_for_label }}');
     const contractField = document.getElementById('{{ form.contract.id_for_label }}');
     
-    // Lese Werte aus URL-Parametern
     const urlParams = new URLSearchParams(window.location.search);
     const periodStartParam = urlParams.get('period_start');
     const periodEndParam = urlParams.get('period_end');
+    const instituteParam = urlParams.get('institute');
     const contractParam = urlParams.get('contract');
     
-    // Setze Werte in die Felder, falls vorhanden
     if (periodStartParam && periodStartField) {
         periodStartField.value = periodStartParam;
     }
     if (periodEndParam && periodEndField) {
         periodEndField.value = periodEndParam;
+    }
+    if (instituteParam && instituteField) {
+        instituteField.value = instituteParam;
     }
     if (contractParam && contractField) {
         contractField.value = contractParam;

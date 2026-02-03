@@ -1386,6 +1386,22 @@ msgstr ""
 msgid "This action cannot be undone."
 msgstr "Diese Aktion kann nicht rückgängig gemacht werden."
 
+#: apps/billing/forms.py:49
+msgid "All institutes"
+msgstr "Alle Institute"
+
+#: apps/billing/forms.py:49
+msgid "Optional: Filter by institute (only lessons from contracts with this institute)"
+msgstr "Optional: Nach Institut filtern (nur Unterrichtsstunden von Verträgen mit diesem Institut)"
+
+#: apps/billing/templates/billing/invoice_create.html:36
+msgid "Institute (optional):"
+msgstr "Institut (optional):"
+
+#: apps/billing/templates/billing/invoice_create.html:38
+msgid "If selected, only lessons from contracts with this institute will be billed."
+msgstr "Bei Auswahl werden nur Unterrichtsstunden von Verträgen mit diesem Institut abgerechnet."
+
 #: apps/contracts/templates/contracts/contract_detail.html:18
 #: apps/contracts/templates/contracts/contract_list.html:14
 #: apps/students/templates/students/student_detail.html:32

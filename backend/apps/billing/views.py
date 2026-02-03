@@ -70,30 +70,28 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
             period_start = self.request.GET.get("period_start")
             period_end = self.request.GET.get("period_end")
             contract_id = self.request.GET.get("contract")
+            institute = self.request.GET.get("institute")
 
             if period_start:
                 try:
                     initial["period_start"] = date.fromisoformat(period_start)
                 except ValueError:
-                    # Silently ignore invalid date format in GET parameter
-                    # Form validation will catch this when user submits
                     pass
 
             if period_end:
                 try:
                     initial["period_end"] = date.fromisoformat(period_end)
                 except ValueError:
-                    # Silently ignore invalid date format in GET parameter
-                    # Form validation will catch this when user submits
                     pass
 
             if contract_id:
                 try:
                     initial["contract"] = int(contract_id)
                 except (ValueError, TypeError):
-                    # Silently ignore invalid contract ID in GET parameter
-                    # Form validation will catch this when user submits
                     pass
+
+            if institute is not None and institute != "":
+                initial["institute"] = institute
 
             if initial:
                 kwargs["initial"] = initial
@@ -107,6 +105,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         period_start = self.request.GET.get("period_start")
         period_end = self.request.GET.get("period_end")
         contract_id = self.request.GET.get("contract")
+        institute = self.request.GET.get("institute") or None
 
         if period_start and period_end:
             try:
@@ -119,7 +118,11 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                     ).first()
 
                 billable_lessons = InvoiceService.get_billable_lessons(
-                    period_start, period_end, contract_id, user=self.request.user
+                    period_start,
+                    period_end,
+                    contract_id=contract_id,
+                    institute=institute,
+                    user=self.request.user,
                 )
                 context["billable_lessons"] = billable_lessons
                 context["period_start"] = period_start
@@ -136,11 +139,15 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         period_start = form.cleaned_data["period_start"]
         period_end = form.cleaned_data["period_end"]
         contract = form.cleaned_data.get("contract")
+        institute = form.cleaned_data.get("institute") or None
 
         try:
-            # Create invoice automatically with all available lessons in the period
             invoice = InvoiceService.create_invoice_from_lessons(
-                period_start, period_end, contract, user=self.request.user
+                period_start,
+                period_end,
+                contract=contract,
+                institute=institute,
+                user=self.request.user,
             )
             lesson_count = invoice.items.count()
             messages.success(
