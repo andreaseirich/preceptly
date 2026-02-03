@@ -19,6 +19,7 @@ check() {
 
 check '^\.gitignore$' '.gitignore'
 check '^\.cursorrules$' '.cursorrules'
+check 'cursor_master_prompt\.txt$' 'cursor_master_prompt.txt'
 check '^\.cursor/' '.cursor/'
 check '^\.vscode/' '.vscode/'
 check '^\.idea/' '.idea/'
