@@ -3,7 +3,36 @@ Forms for core app.
 """
 
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+
+
+class RegisterForm(UserCreationForm):
+    """Registration form for new tutor accounts. No premium by default."""
+
+    class Meta:
+        model = User
+        fields = ("username", "password1", "password2")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].label = _("Username")
+        self.fields["password1"].label = _("Password")
+        self.fields["password2"].label = _("Password confirmation")
+        # Generic error to avoid account enumeration
+        self.error_messages["duplicate_username"] = _(
+            "Registration failed. Please try a different username or contact support."
+        )
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if username and User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError(
+                self.error_messages["duplicate_username"],
+                code="duplicate_username",
+            )
+        return username
 
 
 class WorkingHoursForm(forms.Form):

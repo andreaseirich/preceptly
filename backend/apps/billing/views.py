@@ -20,6 +20,26 @@ from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 
 
+def _safe_date(val):
+    """Parse ISO date or return None on invalid input."""
+    if val is None:
+        return None
+    try:
+        return date.fromisoformat(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_int(val):
+    """Parse int or return None on invalid input."""
+    if val is None:
+        return None
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return None
+
+
 def _user_invoice_queryset(user):
     """Invoices visible to the user (via contract or via items)."""
     return Invoice.objects.filter(
@@ -72,23 +92,17 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
             contract_id = self.request.GET.get("contract")
             institute = self.request.GET.get("institute")
 
-            if period_start:
-                try:
-                    initial["period_start"] = date.fromisoformat(period_start)
-                except ValueError:
-                    pass
+            parsed_start = _safe_date(period_start)
+            if parsed_start is not None:
+                initial["period_start"] = parsed_start
 
-            if period_end:
-                try:
-                    initial["period_end"] = date.fromisoformat(period_end)
-                except ValueError:
-                    pass
+            parsed_end = _safe_date(period_end)
+            if parsed_end is not None:
+                initial["period_end"] = parsed_end
 
-            if contract_id:
-                try:
-                    initial["contract"] = int(contract_id)
-                except (ValueError, TypeError):
-                    pass
+            parsed_contract = _safe_int(contract_id)
+            if parsed_contract is not None:
+                initial["contract"] = parsed_contract
 
             if institute is not None and institute != "":
                 initial["institute"] = institute
@@ -107,31 +121,27 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         contract_id = self.request.GET.get("contract")
         institute = self.request.GET.get("institute") or None
 
-        if period_start and period_end:
-            try:
-                period_start = date.fromisoformat(period_start)
-                period_end = date.fromisoformat(period_end)
-                contract = None
-                if contract_id:
-                    contract = Contract.objects.filter(
-                        pk=contract_id, student__user=self.request.user
-                    ).first()
+        parsed_start = _safe_date(period_start)
+        parsed_end = _safe_date(period_end)
+        if parsed_start is not None and parsed_end is not None:
+            contract = None
+            parsed_contract_id = _safe_int(contract_id)
+            if parsed_contract_id is not None:
+                contract = Contract.objects.filter(
+                    pk=parsed_contract_id, student__user=self.request.user
+                ).first()
 
-                billable_lessons = InvoiceService.get_billable_lessons(
-                    period_start,
-                    period_end,
-                    contract_id=contract_id,
-                    institute=institute,
-                    user=self.request.user,
-                )
-                context["billable_lessons"] = billable_lessons
-                context["period_start"] = period_start
-                context["period_end"] = period_end
-                context["contract"] = contract
-            except (ValueError, Contract.DoesNotExist):
-                # Silently ignore invalid date formats or non-existent contracts in preview
-                # The form validation will catch these errors when the user submits
-                pass
+            billable_lessons = InvoiceService.get_billable_lessons(
+                parsed_start,
+                parsed_end,
+                contract_id=parsed_contract_id,
+                institute=institute,
+                user=self.request.user,
+            )
+            context["billable_lessons"] = billable_lessons
+            context["period_start"] = parsed_start
+            context["period_end"] = parsed_end
+            context["contract"] = contract
 
         return context
 

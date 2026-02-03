@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Register" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 100px auto; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h1 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">{% trans "Register" %}</h1>
+
+    {% if form.non_field_errors %}
+    <div class="message error" style="margin-bottom: 20px;">
+        {% for err in form.non_field_errors %}{{ err }}{% if not forloop.last %} {% endif %}{% endfor %}
+    </div>
+    {% elif form.errors %}
+    <div class="message error" style="margin-bottom: 20px;">
+        {% trans "Please correct the errors below." %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'core:register' %}">
+        {% csrf_token %}
+        <div style="margin-bottom: 20px;">
+            <label for="id_username" style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 600;">{% trans "Username" %}:</label>
+            <input type="text" name="username" id="id_username" required autofocus
+                   value="{{ form.username.value|default:'' }}"
+                   maxlength="150" autocomplete="username"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+            {% if form.username.errors %}
+            <div class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.username.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="id_password1" style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 600;">{% trans "Password" %}:</label>
+            <input type="password" name="password1" id="id_password1" required autocomplete="new-password"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+            {% if form.password1.errors %}
+            <div class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.password1.errors.0 }}</div>
+            {% endif %}
+            {% if form.password1.help_text %}
+            <small style="display: block; margin-top: 5px; color: #6c757d; font-size: 0.85em;">{{ form.password1.help_text }}</small>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label for="id_password2" style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 600;">{% trans "Password confirmation" %}:</label>
+            <input type="password" name="password2" id="id_password2" required autocomplete="new-password"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+            {% if form.password2.errors %}
+            <div class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.password2.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">
+            {% trans "Register" %}
+        </button>
+    </form>
+
+    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+        <a href="{% url 'core:login' %}" style="color: #007bff; text-decoration: none;">
+            {% trans "Already have an account? Log in" %}
+        </a>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{% url 'core:landing' %}" style="color: #6c757d; text-decoration: none; font-size: 0.9em;">
+            ← {% trans "Back to Landing Page" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

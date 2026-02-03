@@ -3378,6 +3378,26 @@ msgstr "TutorFlow hilft Nachhilfelehrern, Unterricht, Verträge und Abrechnung e
 msgid "TutorFlow is currently in hackathon/demo mode. Detailed company information will follow."
 msgstr "TutorFlow befindet sich derzeit im Hackathon-/Demo-Modus. Detaillierte Unternehmensinformationen folgen."
 
+#: apps/core/forms.py:28
+msgid "Registration failed. Please try a different username or contact support."
+msgstr "Registrierung fehlgeschlagen. Bitte einen anderen Benutzernamen versuchen oder den Support kontaktieren."
+
+#: apps/core/forms.py:34
+msgid "Password confirmation"
+msgstr "Passwort bestätigen"
+
+#: apps/core/templates/core/register.html:4 apps/core/templates/core/login.html:42
+msgid "Register"
+msgstr "Registrieren"
+
+#: apps/core/templates/core/register.html:67
+msgid "Already have an account? Log in"
+msgstr "Bereits ein Konto? Anmelden"
+
+#: apps/core/templates/core/register.html:52
+msgid "Please correct the errors below."
+msgstr "Bitte korrigieren Sie die Fehler unten."
+
 #~ msgid "Create Recurring Lesson"
 #~ msgstr "Serientermin anlegen"
 
