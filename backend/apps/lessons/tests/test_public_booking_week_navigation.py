@@ -100,3 +100,35 @@ class PublicBookingWeekNavigationTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         data = json.loads(resp.content)
         self.assertEqual(data["week_data"]["week_start"], "2025-01-06")
+
+    def test_week_api_invalid_date_returns_400_not_500(self):
+        """Invalid date params must return 400, never 500 (regression for ValueError in BookingService)."""
+        # Feb 30 does not exist
+        resp = self._get_week_via_ymd(2025, 2, 30)
+        self.assertEqual(resp.status_code, 400)
+        data = json.loads(resp.content)
+        self.assertFalse(data.get("success", True))
+
+    def test_week_api_invalid_week_start_returns_400(self):
+        """Invalid week_start (e.g. Feb 30) must return 400 when used with fallback y/m/d."""
+        resp = self.client.get(
+            self.week_url,
+            {"week_start": "2025-02-30", "year": 2025, "month": 2, "day": 30},
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_week_api_invalid_token_returns_404_not_500(self):
+        """Invalid tutor_token must return 404, never 500."""
+        resp = self.client.get(
+            "/lessons/public-booking/invalid-token-xyz/week/",
+            {"year": 2025, "month": 1, "day": 6},
+        )
+        self.assertEqual(resp.status_code, 404)
+
+    def test_public_booking_page_invalid_date_does_not_500(self):
+        """Page with invalid date params must not 500 (uses fallback to today)."""
+        resp = self.client.get(
+            "/lessons/public-booking/tok-nav/",
+            {"week_start": "2025-02-30"},
+        )
+        self.assertEqual(resp.status_code, 200)

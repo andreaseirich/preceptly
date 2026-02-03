@@ -155,6 +155,12 @@ def public_booking_week_api(request, tutor_token):
         except (ValueError, TypeError):
             return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
 
+    # Validate that (year, month, day) form a valid date (avoids 500 in BookingService)
+    try:
+        date(year, month, day)
+    except ValueError:
+        return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
+
     student_id = None
     if request.session.get("public_booking_tutor_token") == tutor_token:
         student_id = request.session.get("public_booking_student_id")
@@ -167,14 +173,18 @@ def public_booking_week_api(request, tutor_token):
         except (ValueError, TypeError):
             exclude_lesson_id = None
 
-    week_data = BookingService.get_public_booking_data(
-        year,
-        month,
-        day,
-        user=tutor,
-        student_id=student_id,
-        exclude_lesson_id=exclude_lesson_id,
-    )
+    try:
+        week_data = BookingService.get_public_booking_data(
+            year,
+            month,
+            day,
+            user=tutor,
+            student_id=student_id,
+            exclude_lesson_id=exclude_lesson_id,
+        )
+    except ValueError:
+        return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
+
     data = _serialize_public_week_data(week_data)
     return JsonResponse({"success": True, "week_data": data})
 
