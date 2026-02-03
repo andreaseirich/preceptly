@@ -27,7 +27,7 @@ def backfill_invoice_owner(apps, schema_editor):
                 .first()
             )
             if item and item.lesson_id:
-                Lesson = apps.get_model("lessons", "Session")
+                Lesson = apps.get_model("lessons", "Lesson")
                 lesson = (
                     Lesson.objects.filter(pk=item.lesson_id)
                     .select_related("contract__student__user")

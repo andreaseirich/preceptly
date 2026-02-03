@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="session",
+            model_name="lesson",
             name="created_via",
             field=models.CharField(
                 blank=True,
