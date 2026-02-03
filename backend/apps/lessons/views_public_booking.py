@@ -19,6 +19,7 @@ from apps.core.utils_booking import get_tutor_for_booking
 from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson, LessonDocument
 from apps.lessons.throttle import is_public_booking_throttled, record_public_booking_attempt
+from apps.lessons.utils_dates import get_week_start
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
 from apps.students.models import Student
 from apps.students.services import StudentSearchService
@@ -42,9 +43,12 @@ class PublicBookingView(TemplateView):
         context = super().get_context_data(**kwargs)
         tutor_token = self.kwargs.get("tutor_token")
 
-        # Week cursor: prefer ?week=YYYY-MM-DD (Monday), fallback to year/month/day or today
+        # Week cursor: prefer ?week_start= or ?week= (Monday ISO), fallback to year/month/day or today
         target_date = None
-        week_param = self.request.GET.get("week", "").strip()
+        week_param = (
+            self.request.GET.get("week_start", "").strip()
+            or self.request.GET.get("week", "").strip()
+        )
         if week_param:
             try:
                 target_date = date.fromisoformat(week_param)
@@ -73,12 +77,13 @@ class PublicBookingView(TemplateView):
             target_date.year, target_date.month, target_date.day, user=tutor, student_id=student_id
         )
 
+        # Ensure week_start is canonical Monday (deterministic)
+        week_start_date = get_week_start(week_data["week_start"])
+        week_data["week_start"] = week_start_date
+
         is_premium = user_has_feature(tutor, Feature.FEATURE_PUBLIC_BOOKING_FULL)
         limit_reached = public_booking_limit_reached(tutor)
         public_booking_count = get_public_booking_count_this_month(tutor)
-
-        # Canonical week start (Monday) as ISO for client state
-        week_start_date = week_data["week_start"]
 
         context.update(
             {
@@ -133,9 +138,9 @@ def public_booking_week_api(request, tutor_token):
             {"success": False, "message": _("Booking link invalid or expired.")}, status=404
         )
 
-    # Prefer ?week=YYYY-MM-DD (Monday); fallback to year/month/day
+    # Prefer ?week_start= or ?week= (Monday ISO); fallback to year/month/day
     year, month, day = None, None, None
-    week_param = request.GET.get("week", "").strip()
+    week_param = request.GET.get("week_start", "").strip() or request.GET.get("week", "").strip()
     if week_param:
         try:
             target = date.fromisoformat(week_param)

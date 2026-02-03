@@ -823,6 +823,22 @@ msgstr "Samstag"
 msgid "Sunday"
 msgstr "Sonntag"
 
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Today"
+msgstr "Heute"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Reload"
+msgstr "Neu laden"
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Could not load week. Please try again."
+msgstr "Woche konnte nicht geladen werden. Bitte erneut versuchen."
+
+#: apps/lessons/templates/lessons/public_booking.html
+msgid "Could not load week. Please check your connection and try again."
+msgstr "Woche konnte nicht geladen werden. Bitte Verbindung prüfen und erneut versuchen."
+
 #: apps/lessons/templates/lessons/week.html:18
 #: apps/lessons/templates/lessons/student_booking.html:181
 msgid "Jump to date:"

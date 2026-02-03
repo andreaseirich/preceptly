@@ -407,11 +407,11 @@ class BookingService:
         """
         from apps.contracts.models import Contract
         from apps.core.models import UserProfile
+        from apps.lessons.utils_dates import add_days_to_date, get_week_start
 
         target_date = date(year, month, day)
-        days_since_monday = target_date.weekday()
-        week_start = target_date - timedelta(days=days_since_monday)
-        week_end = week_start + timedelta(days=6)
+        week_start = get_week_start(target_date)
+        week_end = add_days_to_date(week_start, 6)
 
         unit_duration = 60
         if student_id and user:

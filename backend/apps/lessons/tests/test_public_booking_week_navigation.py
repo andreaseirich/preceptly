@@ -32,14 +32,14 @@ class PublicBookingWeekNavigationTest(TestCase):
         self.client = Client()
         self.week_url = "/lessons/public-booking/tok-nav/week/"
 
-    def _get_week_via_param(self, week_iso):
-        return self.client.get(self.week_url, {"week": week_iso})
+    def _get_week_via_param(self, week_iso, param="week_start"):
+        return self.client.get(self.week_url, {param: week_iso})
 
     def _get_week_via_ymd(self, year, month, day):
         return self.client.get(self.week_url, {"year": year, "month": month, "day": day})
 
-    def test_week_param_returns_correct_week_start(self):
-        """Week API accepts ?week=YYYY-MM-DD and returns that Monday's week."""
+    def test_week_start_param_returns_correct_week_start(self):
+        """Week API accepts ?week_start=YYYY-MM-DD and returns that Monday's week."""
         resp = self._get_week_via_param("2025-01-06")
         self.assertEqual(resp.status_code, 200)
         data = json.loads(resp.content)
@@ -83,13 +83,20 @@ class PublicBookingWeekNavigationTest(TestCase):
                 f"For {y}-{m:02d}-{d:02d} expected week_start {expected_monday}",
             )
 
-    def test_public_booking_page_accepts_week_param(self):
-        """Public booking page with ?week= renders and includes initial week in HTML."""
+    def test_public_booking_page_accepts_week_start_param(self):
+        """Public booking page with ?week_start= renders and includes initial week in HTML."""
         resp = self.client.get(
             "/lessons/public-booking/tok-nav/",
-            {"week": "2025-01-13"},
+            {"week_start": "2025-01-13"},
         )
         self.assertEqual(resp.status_code, 200)
         content = resp.content.decode("utf-8")
         self.assertIn("2025-01-13", content)
         self.assertIn("INITIAL_WEEK_START", content)
+
+    def test_week_api_accepts_week_param_backward_compat(self):
+        """Week API still accepts ?week= for backward compatibility."""
+        resp = self._get_week_via_param("2025-01-06", param="week")
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        self.assertEqual(data["week_data"]["week_start"], "2025-01-06")

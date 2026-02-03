@@ -311,6 +311,7 @@
             <div class="btn-group">
                 <button class="btn" onclick="previousWeek()">← {% trans "Previous Week" %}</button>
                 <button class="btn" onclick="nextWeek()">{% trans "Next Week" %} →</button>
+                <button class="btn btn-secondary" onclick="goToToday()">{% trans "Today" %}</button>
                 <label style="margin-left: 15px; display: inline-flex; align-items: center; gap: 8px;">
                     {% trans "Jump to date:" %}
                     <input type="date" id="jump-to-date" value="{{ week_start_iso }}"
@@ -419,18 +420,18 @@
             d.setDate(d.getDate() + days);
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         }
-        function getWeekFromUrl() {
+        function getWeekStartFromUrl() {
             var params = new URLSearchParams(window.location.search);
-            return params.get('week') || '';
+            return params.get('week_start') || params.get('week') || '';
         }
         function updateUrlFromWeek(isoWeek, replace) {
             var params = new URLSearchParams(window.location.search);
-            params.set('week', isoWeek);
+            params.set('week_start', isoWeek);
             var newUrl = window.location.pathname + '?' + params.toString();
             if (replace && window.history.replaceState) {
-                window.history.replaceState({ week: isoWeek }, '', newUrl);
+                window.history.replaceState({ week_start: isoWeek }, '', newUrl);
             } else if (!replace && window.history.pushState) {
-                window.history.pushState({ week: isoWeek }, '', newUrl);
+                window.history.pushState({ week_start: isoWeek }, '', newUrl);
             }
         }
 
@@ -804,15 +805,21 @@
             });
         }
         
+        function showWeekError(message) {
+            var daysEl = document.getElementById('public-week-calendar-days');
+            if (!daysEl) return;
+            var reloadText = '{% trans "Reload" %}';
+            daysEl.innerHTML = '<div class="message error" style="margin: 20px 0;"><p>' + escapeHtml(message) + '</p><button type="button" class="btn" onclick="if(weekStart) loadWeek(weekStart, false);">' + reloadText + '</button></div>';
+        }
         function loadWeek(isoWeekStart, pushStateFlag) {
             if (!TUTOR_TOKEN || !isoWeekStart) return;
             var loadingEl = document.getElementById('public-week-loading');
             var daysEl = document.getElementById('public-week-calendar-days');
             if (loadingEl) loadingEl.style.display = 'block';
             if (daysEl) daysEl.style.opacity = '0.5';
-            var url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?week=' + encodeURIComponent(isoWeekStart);
-            fetch(url, { credentials: 'same-origin' })
-                .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            var url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?week_start=' + encodeURIComponent(isoWeekStart);
+            fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; }); })
                 .then(function(result) {
                     if (loadingEl) loadingEl.style.display = 'none';
                     if (daysEl) daysEl.style.opacity = '1';
@@ -827,11 +834,14 @@
                         updateUrlFromWeek(weekStart, !pushStateFlag);
                         var jumpInput = document.getElementById('jump-to-date');
                         if (jumpInput) jumpInput.value = weekStart;
+                    } else {
+                        showWeekError(result.data && result.data.message ? result.data.message : '{% trans "Could not load week. Please try again." %}');
                     }
                 })
-                .catch(function() {
+                .catch(function(err) {
                     if (loadingEl) loadingEl.style.display = 'none';
                     if (daysEl) daysEl.style.opacity = '1';
+                    showWeekError('{% trans "Could not load week. Please check your connection and try again." %}');
                 });
         }
 
@@ -963,25 +973,36 @@
         function previousWeek() {
             if (inlineRescheduleLessonId) clearInlineRescheduleState();
             if (!weekStart) return;
-            weekStart = addDays(weekStart, -7);
-            loadWeek(weekStart, true);
+            var prevWeekStart = addDays(weekStart, -7);
+            loadWeek(prevWeekStart, true);
         }
 
         function nextWeek() {
             if (inlineRescheduleLessonId) clearInlineRescheduleState();
             if (!weekStart) return;
-            weekStart = addDays(weekStart, 7);
-            loadWeek(weekStart, true);
+            var nextWeekStart = addDays(weekStart, 7);
+            loadWeek(nextWeekStart, true);
         }
 
+        function getTodayWeekStart() {
+            var d = new Date();
+            var dow = d.getDay();
+            var mondayOffset = dow === 0 ? -6 : 1 - dow;
+            d.setDate(d.getDate() + mondayOffset);
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        function goToToday() {
+            if (inlineRescheduleLessonId) clearInlineRescheduleState();
+            loadWeek(getTodayWeekStart(), true);
+        }
         function jumpToDate(isoDate) {
             if (!isoDate) return;
             var d = new Date(isoDate + 'T12:00:00');
             var dow = d.getDay();
             var mondayOffset = dow === 0 ? -6 : 1 - dow;
             d.setDate(d.getDate() + mondayOffset);
-            weekStart = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-            loadWeek(weekStart, true);
+            var mondayIso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            loadWeek(mondayIso, true);
         }
 
         function getCookie(name) {
@@ -1005,20 +1026,27 @@
         }
 
         (function initWeekState() {
-            var urlWeek = getWeekFromUrl();
-            if (urlWeek) {
-                weekStart = urlWeek;
-            } else if (INITIAL_WEEK_START) {
-                weekStart = INITIAL_WEEK_START;
-                updateUrlFromWeek(weekStart, true);
+            try {
+                var urlWeek = getWeekStartFromUrl();
+                if (urlWeek) {
+                    weekStart = urlWeek;
+                } else if (INITIAL_WEEK_START) {
+                    weekStart = INITIAL_WEEK_START;
+                    updateUrlFromWeek(weekStart, true);
+                }
+            } catch (err) {
+                if (INITIAL_WEEK_START) weekStart = INITIAL_WEEK_START;
             }
         })();
 
         window.addEventListener('popstate', function(e) {
-            var urlWeek = getWeekFromUrl();
-            if (urlWeek && document.getElementById('step-3').classList.contains('active')) {
-                weekStart = urlWeek;
-                if (currentStudent) loadWeek(weekStart, false);
+            var targetWeek = (e.state && e.state.week_start) || getWeekStartFromUrl();
+            if (targetWeek) {
+                var step3 = document.getElementById('step-3');
+                if (step3 && step3.classList.contains('active')) {
+                    weekStart = targetWeek;
+                    if (currentStudent) loadWeek(weekStart, false);
+                }
             }
         });
     </script>
