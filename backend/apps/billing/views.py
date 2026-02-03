@@ -12,7 +12,6 @@ from apps.contracts.models import Contract
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
@@ -41,10 +40,8 @@ def _safe_int(val):
 
 
 def _user_invoice_queryset(user):
-    """Invoices visible to the user (via contract or via items)."""
-    return Invoice.objects.filter(
-        Q(contract__student__user=user) | Q(items__lesson__contract__student__user=user)
-    ).distinct()
+    """Invoices visible to the user (owner-scoped)."""
+    return Invoice.objects.filter(owner=user)
 
 
 class InvoiceListView(LoginRequiredMixin, ListView):

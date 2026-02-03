@@ -25,7 +25,9 @@ class L10nTestCase(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.student = Student.objects.create(
+            user=self.user, first_name="Test", last_name="Student"
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -117,6 +119,7 @@ class L10nTestCase(TestCase):
 
         # Create invoice
         invoice = Invoice.objects.create(
+            owner=self.user,
             payer_name="Test Payer",
             contract=self.contract,
             period_start=date(2023, 1, 1),
@@ -139,6 +142,7 @@ class L10nTestCase(TestCase):
 
         # Create invoice
         invoice = Invoice.objects.create(
+            owner=self.user,
             payer_name="Test Payer",
             contract=self.contract,
             period_start=date(2023, 1, 1),

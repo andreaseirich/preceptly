@@ -6,8 +6,10 @@ from decimal import Decimal
 
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 
@@ -20,6 +22,13 @@ class Invoice(models.Model):
         ("paid", _("Paid")),
     ]
 
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="invoices",
+        db_index=True,
+        help_text=_("Tutor who owns this invoice"),
+    )
     invoice_number = models.CharField(
         max_length=50,
         blank=True,
@@ -65,6 +74,14 @@ class Invoice(models.Model):
         indexes = [
             models.Index(fields=["status"]),
             models.Index(fields=["period_start", "period_end"]),
+            models.Index(fields=["owner", "created_at"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "invoice_number"],
+                condition=Q(invoice_number__isnull=False),
+                name="uniq_owner_invoice_number_not_null",
+            ),
         ]
 
     def __str__(self):

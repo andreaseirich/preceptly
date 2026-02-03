@@ -40,13 +40,12 @@ class ReportsView(LoginRequiredMixin, TemplateView):
             taught_minutes = sum(les.duration_minutes for les in lessons)
 
             from apps.billing.models import Invoice
-            from django.db.models import Q
 
             invoices = Invoice.objects.filter(
-                Q(contract__student__user=user) | Q(items__lesson__contract__student__user=user),
+                owner=user,
                 period_start__year=year,
                 period_start__month=month,
-            ).distinct()
+            )
             invoice_count = invoices.count()
             paid_from_invoices = sum(inv.total_amount for inv in invoices.filter(status="paid"))
 

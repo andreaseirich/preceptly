@@ -10,6 +10,7 @@ from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 
@@ -17,8 +18,12 @@ class InvoiceCalculationTest(TestCase):
     """Tests für korrekte Rechnungsberechnung basierend auf Einheiten."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="tutor", password="test")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
         )
         # Vertrag: 45 Min/Einheit, 12€/Einheit
         self.contract = Contract.objects.create(
@@ -43,7 +48,7 @@ class InvoiceCalculationTest(TestCase):
 
         # Erstelle Rechnung (automatisch alle Lessons im Zeitraum)
         invoice = InvoiceService.create_invoice_from_lessons(
-            date(2025, 8, 1), date(2025, 8, 31), self.contract
+            date(2025, 8, 1), date(2025, 8, 31), contract=self.contract, user=self.user
         )
 
         # Prüfe Berechnung: 90 Min / 45 Min = 2 Einheiten, 2 * 12€ = 24€
@@ -78,7 +83,7 @@ class InvoiceCalculationTest(TestCase):
 
         # Erstelle Rechnung (automatisch alle Lessons im Zeitraum)
         invoice = InvoiceService.create_invoice_from_lessons(
-            date(2025, 8, 1), date(2025, 8, 31), self.contract
+            date(2025, 8, 1), date(2025, 8, 31), contract=self.contract, user=self.user
         )
 
         # Prüfe Berechnung:
@@ -97,8 +102,12 @@ class InvoiceStatusTransitionTest(TestCase):
     """Tests für Status-Übergänge bei Rechnungen."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="tutor", password="test")
         self.student = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user,
+            first_name="Lisa",
+            last_name="Müller",
+            email="lisa@example.com",
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -129,7 +138,7 @@ class InvoiceStatusTransitionTest(TestCase):
 
         # Erstelle Rechnung (automatisch alle Lessons im Zeitraum)
         InvoiceService.create_invoice_from_lessons(
-            date(2025, 8, 1), date(2025, 8, 31), self.contract
+            date(2025, 8, 1), date(2025, 8, 31), contract=self.contract, user=self.user
         )
 
         # Prüfe, dass Lessons auf PAID gesetzt wurden
@@ -150,7 +159,7 @@ class InvoiceStatusTransitionTest(TestCase):
         )
 
         invoice = InvoiceService.create_invoice_from_lessons(
-            date(2025, 8, 1), date(2025, 8, 31), self.contract
+            date(2025, 8, 1), date(2025, 8, 31), contract=self.contract, user=self.user
         )
 
         # Prüfe, dass Lesson auf PAID gesetzt wurde
@@ -178,12 +187,13 @@ class InvoiceStatusTransitionTest(TestCase):
 
         # Erstelle erste Rechnung (automatisch alle Lessons im Zeitraum)
         invoice1 = InvoiceService.create_invoice_from_lessons(
-            date(2025, 8, 1), date(2025, 8, 31), self.contract
+            date(2025, 8, 1), date(2025, 8, 31), contract=self.contract, user=self.user
         )
 
         # Erstelle zweite Rechnung mit derselben Lesson (manuell, da sie bereits PAID ist)
         # In der Praxis sollte das nicht passieren, aber testen wir trotzdem
         invoice2 = Invoice.objects.create(
+            owner=self.user,
             payer_name=self.student.full_name,
             payer_address="",
             contract=self.contract,

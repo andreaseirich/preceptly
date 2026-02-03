@@ -10,6 +10,7 @@ from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 
@@ -17,8 +18,12 @@ class InvoiceModelTest(TestCase):
     """Tests für Invoice Model."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="tutor", password="test")
         self.student = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user,
+            first_name="Lisa",
+            last_name="Müller",
+            email="lisa@example.com",
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -32,6 +37,7 @@ class InvoiceModelTest(TestCase):
     def test_create_invoice(self):
         """Test: Erstellen einer Invoice."""
         invoice = Invoice.objects.create(
+            owner=self.user,
             payer_name="Test Payer",
             payer_address="Test Street 1",
             contract=self.contract,
@@ -48,7 +54,10 @@ class InvoiceModelTest(TestCase):
     def test_invoice_calculate_total(self):
         """Test: calculate_total() berechnet Gesamtbetrag korrekt."""
         invoice = Invoice.objects.create(
-            payer_name="Test Payer", period_start=date(2025, 1, 1), period_end=date(2025, 1, 31)
+            owner=self.user,
+            payer_name="Test Payer",
+            period_start=date(2025, 1, 1),
+            period_end=date(2025, 1, 31),
         )
 
         InvoiceItem.objects.create(
@@ -75,8 +84,12 @@ class InvoiceServiceTest(TestCase):
     """Tests für InvoiceService."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="tutor", password="test")
         self.student = Student.objects.create(
-            first_name="Tom", last_name="Weber", email="tom@example.com"
+            user=self.user,
+            first_name="Tom",
+            last_name="Weber",
+            email="tom@example.com",
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -143,7 +156,7 @@ class InvoiceServiceTest(TestCase):
         )
 
         invoice = InvoiceService.create_invoice_from_lessons(
-            period_start, period_end, self.contract
+            period_start, period_end, contract=self.contract, user=self.user
         )
 
         self.assertIsNotNone(invoice)
@@ -197,10 +210,14 @@ class InvoiceServiceTest(TestCase):
             status="taught",
         )
 
-        InvoiceService.create_invoice_from_lessons(period_start, period_end, self.contract)
+        InvoiceService.create_invoice_from_lessons(
+            period_start, period_end, contract=self.contract, user=self.user
+        )
 
         with self.assertRaises(ValueError):
-            InvoiceService.create_invoice_from_lessons(period_start, period_end, self.contract)
+            InvoiceService.create_invoice_from_lessons(
+                period_start, period_end, contract=self.contract, user=self.user
+            )
 
     def test_create_invoice_without_student_address(self):
         """InvoiceService should not require a student address."""
@@ -215,7 +232,9 @@ class InvoiceServiceTest(TestCase):
             status="taught",
         )
 
-        invoice = InvoiceService.create_invoice_from_lessons(period_start, period_end, None)
+        invoice = InvoiceService.create_invoice_from_lessons(
+            period_start, period_end, contract=None, user=self.user
+        )
 
         self.assertEqual(invoice.payer_name, self.student.full_name)
         self.assertEqual(invoice.payer_address, "")
@@ -234,13 +253,16 @@ class InvoiceServiceTest(TestCase):
             status="taught",
         )
         invoice1 = InvoiceService.create_invoice_from_lessons(
-            period_start, period_end, self.contract
+            period_start, period_end, contract=self.contract, user=self.user
         )
         self.assertEqual(invoice1.payer_name, self.student.full_name)
 
         # Contract mit Institut - sollte Institut als Zahler verwenden
         student2 = Student.objects.create(
-            first_name="Anna", last_name="Schmidt", email="anna@example.com"
+            user=self.user,
+            first_name="Anna",
+            last_name="Schmidt",
+            email="anna@example.com",
         )
         contract_with_institute = Contract.objects.create(
             student=student2,
@@ -261,7 +283,7 @@ class InvoiceServiceTest(TestCase):
         )
 
         invoice2 = InvoiceService.create_invoice_from_lessons(
-            period_start, period_end, contract_with_institute
+            period_start, period_end, contract=contract_with_institute, user=self.user
         )
         self.assertEqual(invoice2.payer_name, "Nachhilfe-Institut ABC")
         self.assertEqual(invoice2.payer_address, "")

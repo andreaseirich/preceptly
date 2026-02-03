@@ -146,7 +146,7 @@ This documentation describes the API endpoints of TutorFlow. The API will be imp
 
 ### InvoiceService (apps.billing.services)
 - `get_billable_lessons(period_start, period_end, contract_id=None)`: Returns all lessons available for billing
-- `create_invoice_from_lessons(period_start, period_end, contract=None)`: Creates invoice with invoice items from lessons
+- `create_invoice_from_lessons(period_start, period_end, contract=None, institute=None, user=None)`: Creates invoice with invoice items from lessons; owner is set from user or derived from lessons
 - `delete_invoice(invoice)`: Deletes invoice and resets lesson status to TAUGHT
 
 ## Planned Endpoints (Future)

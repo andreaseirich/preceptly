@@ -101,7 +101,13 @@ class InvoiceService:
                     payer_name = first_contract.student.full_name
                 payer_address = ""
 
+            owner = user
+            if not owner:
+                first_lesson = lessons.first()
+                owner = first_lesson.contract.student.user
+
             invoice_kwargs = {
+                "owner": owner,
                 "payer_name": payer_name,
                 "payer_address": payer_address,
                 "contract": contract or lessons.first().contract,
