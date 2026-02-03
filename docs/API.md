@@ -81,14 +81,27 @@ This documentation describes the API endpoints of TutorFlow. The API will be imp
 - `POST /blocked-times/recurring/<id>/generate/` - Generate blocked times from recurring blocked time
 - **Note**: Recurring blocked times can no longer be created directly from the UI. They are managed internally but have no visible creation button.
 
+### Public Booking (student/parent self-service)
+- `GET /lessons/public-booking/<tutor_token>/` - Public booking page
+- `GET /lessons/public-booking/<tutor_token>/week/?year=&month=&day=` - Week data (JSON)
+- `POST /lessons/public-booking/api/search-student/` - Search by name (JSON)
+- `POST /lessons/public-booking/api/verify-student/` - Verify booking code (JSON)
+- `POST /lessons/public-booking/api/create-student/` - Create new student (JSON)
+- `POST /lessons/public-booking/api/book-lesson/` - Book lesson (multipart/form-data)
+- `POST /lessons/public-booking/api/reschedule-lesson/` - Reschedule lesson (JSON)
+
+### Contract Booking (with contract token)
+- `GET /lessons/booking/<token>/` - Contract-specific booking page
+- `GET /lessons/booking/<token>/week/` - Week data (JSON)
+
 ### Billing
-- `GET /billing/invoices/` - List of all invoices
-- `GET /billing/invoices/<id>/` - Invoice details
-- `GET /billing/invoices/create/` - Form to create invoice
-- `POST /billing/invoices/create/` - Create invoice from lessons
-- `GET /billing/invoices/<id>/delete/` - Confirmation page
-- `POST /billing/invoices/<id>/delete/` - Delete invoice (resets lesson status)
-- `GET /billing/invoices/<id>/document/` - Invoice document (HTML)
+- `GET /billing/` - List of all invoices
+- `GET /billing/<id>/` - Invoice details
+- `GET /billing/create/` - Form to create invoice
+- `POST /billing/create/` - Create invoice from lessons
+- `GET /billing/<id>/delete/` - Confirmation page
+- `POST /billing/<id>/delete/` - Delete invoice (resets lesson status)
+- `GET /billing/<id>/document/` - Invoice document (HTML)
 
 ### Income Evaluation
 - `GET /income/` - Income overview (current month)

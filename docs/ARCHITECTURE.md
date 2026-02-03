@@ -64,7 +64,6 @@ backend/
 │   ├── blocked_times/  # Blocked time management
 │   ├── lesson_plans/   # AI-generated lesson plans
 │   └── core/           # Core functionality (User extension, Income-Selector)
-├── config/             # Additional configuration files
 └── manage.py           # Django management script
 ```
 
