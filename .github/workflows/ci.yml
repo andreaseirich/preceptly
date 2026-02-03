@@ -3,12 +3,6 @@ name: CI
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'backend/**'
-      - 'scripts/**'
-      - 'requirements.txt'
-      - 'pyproject.toml'
-      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
     paths:
@@ -17,6 +11,7 @@ on:
       - 'requirements.txt'
       - 'pyproject.toml'
       - '.github/workflows/**'
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -24,7 +19,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       MOCK_LLM: 1
       DJANGO_SECRET_KEY: test-ci-secret
