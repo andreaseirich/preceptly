@@ -1,0 +1,22 @@
+# Hygiene: block forbidden paths on every push/PR.
+# Runs regardless of changed paths so .gitignore, .cursorrules etc. are never committed.
+
+name: Hygiene
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: hygiene-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repo hygiene check
+        run: bash scripts/repo_hygiene_check.sh

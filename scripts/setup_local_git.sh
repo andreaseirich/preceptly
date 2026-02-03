@@ -1,51 +1,14 @@
 #!/bin/bash
-# Setup local git: exclude patterns + pre-commit hook.
-# Run once after clone. These files are NOT versioned.
+# Setup local git: pre-commit hook to block forbidden paths.
+# Run once after clone. The hook is NOT versioned.
 # Usage: ./scripts/setup_local_git.sh
+#
+# Note: This repo does not track .gitignore. Use a local .gitignore for
+# ignored files. Hygiene is enforced by repo_hygiene_check.sh + CI.
 
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
-
-# Append exclude patterns to .git/info/exclude (if not already present)
-EXCLUDE="$REPO_ROOT/.git/info/exclude"
-MARKER="# tutorflow hygiene - add forbidden patterns"
-if ! grep -q "$MARKER" "$EXCLUDE" 2>/dev/null; then
-  echo "" >> "$EXCLUDE"
-  echo "$MARKER" >> "$EXCLUDE"
-  cat >> "$EXCLUDE" << 'EXCL'
-.cursor/
-.cursorrules
-.gitignore
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-node_modules/
-.next/
-dist/
-build/
-coverage/
-*.log
-*.tmp
-*.swp
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-db.sqlite3
-*.sqlite3
-media/
-uploads/
-.githooks/
-EXCL
-  echo "Added exclude patterns to .git/info/exclude"
-fi
 
 # Install pre-commit hook
 HOOK="$REPO_ROOT/.git/hooks/pre-commit"

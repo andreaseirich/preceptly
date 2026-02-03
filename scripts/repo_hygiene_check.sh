@@ -49,6 +49,8 @@ check 'db\.sqlite3$|\.sqlite3$' '*.sqlite3'
 check '/media/' 'media/'
 check '/uploads/' 'uploads/'
 check '^\.githooks/' '.githooks/'
+check '/venv/|^venv/' 'venv/'
+check '/\.venv/' '.venv/'
 
 if [ $FAIL -eq 1 ]; then
   exit 1

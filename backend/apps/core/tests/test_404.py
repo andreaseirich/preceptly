@@ -2,6 +2,8 @@
 Tests for 404 error handling.
 """
 
+import json
+
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
@@ -34,8 +36,17 @@ class NotFoundTest(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response["Content-Type"], "application/json")
-        import json
+        data = json.loads(response.content)
+        self.assertIn("error", data)
 
+    def test_404_lessons_path_returns_json_when_accept_json(self):
+        """404 under /lessons/ with Accept: application/json returns JSON."""
+        response = self.client.get(
+            "/lessons/nonexistent-slug-xyz/",
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("application/json", response["Content-Type"])
         data = json.loads(response.content)
         self.assertIn("error", data)
 

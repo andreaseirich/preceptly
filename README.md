@@ -158,7 +158,7 @@ To configure local exclude patterns and a pre-commit hygiene check (blocks forbi
 ./scripts/setup_local_git.sh
 ```
 
-**Contributing:** Use `.git/info/exclude` or a global gitignore for local-only files (e.g. `.env`, `.cursorrules`). The repo enforces hygiene via CI; forbidden paths must not be committed. See `scripts/repo_hygiene_check.sh`.
+**Contributing:** Use a local (non-tracked) `.gitignore` for local-only files (e.g. `.env`, `.cursorrules`). The repo does not track `.gitignore`; hygiene is enforced via `scripts/repo_hygiene_check.sh` and CI. Forbidden paths must never be committed.
 
 ---
 
