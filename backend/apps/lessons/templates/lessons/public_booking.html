@@ -311,6 +311,12 @@
             <div class="btn-group">
                 <button class="btn" onclick="previousWeek()">← {% trans "Previous Week" %}</button>
                 <button class="btn" onclick="nextWeek()">{% trans "Next Week" %} →</button>
+                <label style="margin-left: 15px; display: inline-flex; align-items: center; gap: 8px;">
+                    {% trans "Jump to date:" %}
+                    <input type="date" id="jump-to-date" value="{{ week_start_iso }}"
+                           style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           onchange="jumpToDate(this.value)">
+                </label>
             </div>
             <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: #fff3cd; border-radius: 4px; display: none;">
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
@@ -391,10 +397,8 @@
     
     <script>
         window.DJANGO_LANGUAGE = "{{ LANGUAGE_CODE|default:'en'|escapejs }}";
-        const currentYear = {{ current_date.year }};
-        const currentMonth = {{ current_date.month }};
-        const currentDay = {{ current_date.day }};
         const TUTOR_TOKEN = "{{ tutor_token|default:''|escapejs }}";
+        const INITIAL_WEEK_START = "{{ week_start_iso|default:''|escapejs }}";
         
         let currentStudent = null;
         let currentBookingCode = null;
@@ -407,7 +411,29 @@
         let inlineRescheduleLessonInfo = null;
         let inlineRescheduleSelectedSlot = null;
         let inlineRescheduleInSeries = false;
-        
+        /* Canonical week cursor: Monday as ISO YYYY-MM-DD. Next/Prev add/subtract 7 days exactly once. */
+        let weekStart = INITIAL_WEEK_START || '';
+
+        function addDays(isoDate, days) {
+            var d = new Date(isoDate + 'T12:00:00');
+            d.setDate(d.getDate() + days);
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        function getWeekFromUrl() {
+            var params = new URLSearchParams(window.location.search);
+            return params.get('week') || '';
+        }
+        function updateUrlFromWeek(isoWeek, replace) {
+            var params = new URLSearchParams(window.location.search);
+            params.set('week', isoWeek);
+            var newUrl = window.location.pathname + '?' + params.toString();
+            if (replace && window.history.replaceState) {
+                window.history.replaceState({ week: isoWeek }, '', newUrl);
+            } else if (!replace && window.history.pushState) {
+                window.history.pushState({ week: isoWeek }, '', newUrl);
+            }
+        }
+
         function showMessage(message, type = 'success') {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
@@ -436,7 +462,7 @@
             }
             if (stepId === 4) updateBookingSummary();
             if (stepId === 3) {
-                if (currentStudent) loadWeek(currentYear, currentMonth, currentDay);
+                if (currentStudent && weekStart) loadWeek(weekStart);
                 updateContinueButton();
             }
         }
@@ -778,42 +804,34 @@
             });
         }
         
-        function loadWeek(year, month, day) {
-            if (!TUTOR_TOKEN) return;
-            const loadingEl = document.getElementById('public-week-loading');
-            const daysEl = document.getElementById('public-week-calendar-days');
-            loadingEl.style.display = 'block';
-            daysEl.style.opacity = '0.5';
-
-            const url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?year=' + year + '&month=' + month + '&day=' + day;
-
+        function loadWeek(isoWeekStart, pushStateFlag) {
+            if (!TUTOR_TOKEN || !isoWeekStart) return;
+            var loadingEl = document.getElementById('public-week-loading');
+            var daysEl = document.getElementById('public-week-calendar-days');
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (daysEl) daysEl.style.opacity = '0.5';
+            var url = '/lessons/public-booking/' + encodeURIComponent(TUTOR_TOKEN) + '/week/?week=' + encodeURIComponent(isoWeekStart);
             fetch(url, { credentials: 'same-origin' })
-                .then(function(response) {
-                    return response.json().then(function(data) {
-                        return { ok: response.ok, data: data };
-                    });
-                })
+                .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
                 .then(function(result) {
-                    loadingEl.style.display = 'none';
-                    daysEl.style.opacity = '1';
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (daysEl) daysEl.style.opacity = '1';
                     if (result.ok && result.data && result.data.success && result.data.week_data) {
+                        var wd = result.data.week_data;
                         var msgEl = document.getElementById('messages');
                         if (msgEl) msgEl.innerHTML = '';
-                        renderWeekCalendar(result.data.week_data);
-                        currentYear = year;
-                        currentMonth = month;
-                        currentDay = day;
+                        renderWeekCalendar(wd);
+                        weekStart = wd.week_start || isoWeekStart;
                         clearSelection();
                         updateContinueButton();
-                        var newUrl = window.location.pathname + '?year=' + year + '&month=' + month + '&day=' + day;
-                        if (window.history.replaceState) {
-                            window.history.replaceState({}, '', newUrl);
-                        }
+                        updateUrlFromWeek(weekStart, !pushStateFlag);
+                        var jumpInput = document.getElementById('jump-to-date');
+                        if (jumpInput) jumpInput.value = weekStart;
                     }
                 })
                 .catch(function() {
-                    loadingEl.style.display = 'none';
-                    daysEl.style.opacity = '1';
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (daysEl) daysEl.style.opacity = '1';
                 });
         }
 
@@ -843,7 +861,7 @@
             inlineRescheduleSelectedSlot = null;
             document.getElementById('inline-reschedule-banner').style.display = 'none';
             document.querySelectorAll('#public-week-calendar-days .time-slot.reschedule-selected, #public-week-calendar-days .time-slot.selected').forEach(function(el) { el.classList.remove('reschedule-selected', 'selected'); });
-            loadWeek(currentYear, currentMonth, currentDay);
+            if (weekStart) loadWeek(weekStart, false);
         }
         function clearInlineRescheduleState() {
             inlineRescheduleLessonId = null;
@@ -944,16 +962,26 @@
 
         function previousWeek() {
             if (inlineRescheduleLessonId) clearInlineRescheduleState();
-            const date = new Date(currentYear, currentMonth - 1, currentDay);
-            date.setDate(date.getDate() - 7);
-            loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());
+            if (!weekStart) return;
+            weekStart = addDays(weekStart, -7);
+            loadWeek(weekStart, true);
         }
 
         function nextWeek() {
             if (inlineRescheduleLessonId) clearInlineRescheduleState();
-            const date = new Date(currentYear, currentMonth - 1, currentDay);
-            date.setDate(date.getDate() + 7);
-            loadWeek(date.getFullYear(), date.getMonth() + 1, date.getDate());
+            if (!weekStart) return;
+            weekStart = addDays(weekStart, 7);
+            loadWeek(weekStart, true);
+        }
+
+        function jumpToDate(isoDate) {
+            if (!isoDate) return;
+            var d = new Date(isoDate + 'T12:00:00');
+            var dow = d.getDay();
+            var mondayOffset = dow === 0 ? -6 : 1 - dow;
+            d.setDate(d.getDate() + mondayOffset);
+            weekStart = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            loadWeek(weekStart, true);
         }
 
         function getCookie(name) {
@@ -975,6 +1003,24 @@
             if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
             return getCookie('csrftoken');
         }
+
+        (function initWeekState() {
+            var urlWeek = getWeekFromUrl();
+            if (urlWeek) {
+                weekStart = urlWeek;
+            } else if (INITIAL_WEEK_START) {
+                weekStart = INITIAL_WEEK_START;
+                updateUrlFromWeek(weekStart, true);
+            }
+        })();
+
+        window.addEventListener('popstate', function(e) {
+            var urlWeek = getWeekFromUrl();
+            if (urlWeek && document.getElementById('step-3').classList.contains('active')) {
+                weekStart = urlWeek;
+                if (currentStudent) loadWeek(weekStart, false);
+            }
+        });
     </script>
     {% include 'partials/footer.html' %}
 </body>

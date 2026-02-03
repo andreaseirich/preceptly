@@ -42,14 +42,22 @@ class PublicBookingView(TemplateView):
         context = super().get_context_data(**kwargs)
         tutor_token = self.kwargs.get("tutor_token")
 
-        # Aktuelles Datum oder aus GET-Parameter
-        try:
-            year = int(self.request.GET.get("year", timezone.now().year))
-            month = int(self.request.GET.get("month", timezone.now().month))
-            day = int(self.request.GET.get("day", timezone.now().day))
-            target_date = date(year, month, day)
-        except (ValueError, TypeError):
-            target_date = timezone.now().date()
+        # Week cursor: prefer ?week=YYYY-MM-DD (Monday), fallback to year/month/day or today
+        target_date = None
+        week_param = self.request.GET.get("week", "").strip()
+        if week_param:
+            try:
+                target_date = date.fromisoformat(week_param)
+            except ValueError:
+                pass
+        if target_date is None:
+            try:
+                year = int(self.request.GET.get("year", timezone.now().year))
+                month = int(self.request.GET.get("month", timezone.now().month))
+                day = int(self.request.GET.get("day", timezone.now().day))
+                target_date = date(year, month, day)
+            except (ValueError, TypeError):
+                target_date = timezone.now().date()
 
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:
@@ -69,10 +77,14 @@ class PublicBookingView(TemplateView):
         limit_reached = public_booking_limit_reached(tutor)
         public_booking_count = get_public_booking_count_this_month(tutor)
 
+        # Canonical week start (Monday) as ISO for client state
+        week_start_date = week_data["week_start"]
+
         context.update(
             {
                 "week_data": week_data,
                 "current_date": target_date,
+                "week_start_iso": week_start_date.strftime("%Y-%m-%d"),
                 "tutor_token": tutor_token or "",
                 "is_premium": is_premium,
                 "public_booking_limit_reached": limit_reached,
@@ -121,12 +133,22 @@ def public_booking_week_api(request, tutor_token):
             {"success": False, "message": _("Booking link invalid or expired.")}, status=404
         )
 
-    try:
-        year = int(request.GET.get("year", timezone.now().year))
-        month = int(request.GET.get("month", timezone.now().month))
-        day = int(request.GET.get("day", timezone.now().day))
-    except (ValueError, TypeError):
-        return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
+    # Prefer ?week=YYYY-MM-DD (Monday); fallback to year/month/day
+    year, month, day = None, None, None
+    week_param = request.GET.get("week", "").strip()
+    if week_param:
+        try:
+            target = date.fromisoformat(week_param)
+            year, month, day = target.year, target.month, target.day
+        except ValueError:
+            pass
+    if year is None:
+        try:
+            year = int(request.GET.get("year", timezone.now().year))
+            month = int(request.GET.get("month", timezone.now().month))
+            day = int(request.GET.get("day", timezone.now().day))
+        except (ValueError, TypeError):
+            return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
 
     student_id = None
     if request.session.get("public_booking_tutor_token") == tutor_token:
