@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
         ("billing", "0004_invoice_owner"),
         ("contracts", "0004_alter_contract_options_and_more"),
         ("lessons", "0008_rename_lesson_to_session_state"),
-        ("students", "0001_initial"),
+        ("students", "0005_student_user_required"),
     ]
 
     operations = [
