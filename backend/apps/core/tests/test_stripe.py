@@ -453,6 +453,91 @@ class StripeCustomerEmailUpdateTest(TestCase):
         mock_modify.assert_not_called()
         mock_retrieve.assert_not_called()
 
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_portal_returns_200_when_customer_modify_raises_stripe_error(
+        self, mock_portal_create, mock_modify
+    ):
+        """A: Customer.modify raises StripeError -> Portal returns 200 with portal_url."""
+        self.user.email = "tutor@valid-domain.org"
+        self.user.save()
+        mock_modify.side_effect = stripe.error.StripeError("rate_limit")
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+        response = self.client.post(reverse("stripe_portal"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["portal_url"], "https://billing.stripe.com/ok")
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_returns_302_when_customer_modify_raises_stripe_error(
+        self, mock_customer_create, mock_session_create, mock_modify
+    ):
+        """B: Customer.modify raises StripeError -> Checkout returns 302 redirect."""
+        mock_customer_create.return_value = MagicMock(id="cus_existing")
+        mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/ok")
+        mock_modify.side_effect = stripe.error.StripeError("rate_limit")
+        self.user.email = "tutor@valid-domain.org"
+        self.user.save()
+        UserProfile.objects.filter(user=self.user).update(stripe_customer_id="cus_existing")
+        self.client.login(username="tutor_email", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "https://checkout.stripe.com/ok")
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_customer_modify_not_called_when_stripe_email_last_synced_matches(
+        self, mock_portal_create, mock_modify
+    ):
+        """C: stripe_email_last_synced equals current email -> Customer.modify NOT called."""
+        self.user.email = "synced@valid-domain.org"
+        self.user.save()
+        UserProfile.objects.filter(user=self.user).update(
+            stripe_email_last_synced="synced@valid-domain.org"
+        )
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+        self.client.post(reverse("stripe_portal"))
+        mock_modify.assert_not_called()
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.Customer.retrieve")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_customer_modify_called_when_email_changed(
+        self, mock_portal_create, mock_retrieve, mock_modify
+    ):
+        """D: Email changed and valid -> Customer.modify called."""
+        self.user.email = "changed@valid-domain.org"
+        self.user.save()
+        mock_retrieve.return_value = MagicMock(email=None)
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+        self.client.post(reverse("stripe_portal"))
+        mock_modify.assert_called_once_with("cus_update_test", email="changed@valid-domain.org")
+
+    @patch("apps.core.views_stripe.logger")
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_logs_contain_no_email_on_sync_failure(
+        self, mock_portal_create, mock_modify, mock_logger
+    ):
+        """E: Logs contain no real email on sync failure."""
+        self.user.email = "secret@valid-domain.org"
+        self.user.save()
+        mock_modify.side_effect = stripe.error.StripeError("rate_limit")
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+        self.client.post(reverse("stripe_portal"))
+        for call in mock_logger.warning.call_args_list:
+            msg = " ".join(str(a) for a in call[0])
+            self.assertNotIn(
+                "secret@valid-domain.org",
+                msg,
+                "Log must not contain user email",
+            )
+
 
 # --- Webhook ---
 @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")

@@ -174,20 +174,29 @@ def _maybe_update_stripe_customer_email(profile: UserProfile, user) -> None:
     """
     If user has valid email and Stripe customer exists but has no/different email, update via Customer.modify.
     No-op if email invalid, no stripe_customer_id, or already in sync.
+    Never raises; errors are logged (no PII) and flow continues.
     """
-    if not profile or not profile.stripe_customer_id:
-        return
-    new_email = get_email_for_stripe(user)
-    if not new_email:
-        return
     try:
+        if not profile or not profile.stripe_customer_id:
+            return
+        new_email = get_email_for_stripe(user)
+        if not new_email:
+            return
+        if profile.stripe_email_last_synced == new_email:
+            return
         customer = stripe.Customer.retrieve(profile.stripe_customer_id)
         current = (customer.email or "").strip() or None
         if current == new_email:
+            profile.stripe_email_last_synced = new_email
+            profile.save(update_fields=["stripe_email_last_synced"])
             return
         stripe.Customer.modify(profile.stripe_customer_id, email=new_email)
-    except stripe.error.StripeError as e:
-        logger.warning("Stripe Customer.modify failed: %s", str(e)[:100])
+        profile.stripe_email_last_synced = new_email
+        profile.save(update_fields=["stripe_email_last_synced"])
+    except stripe.error.StripeError:
+        logger.warning("Stripe Customer email sync failed")
+    except Exception:
+        logger.warning("Stripe Customer email sync failed")
 
 
 @method_decorator(login_required, name="dispatch")

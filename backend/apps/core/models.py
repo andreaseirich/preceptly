@@ -56,6 +56,12 @@ class UserProfile(models.Model):
         null=True,
         help_text=_("Source of premium: 'stripe', 'manual', or null"),
     )
+    stripe_email_last_synced = models.CharField(
+        max_length=254,
+        blank=True,
+        null=True,
+        help_text=_("Last email synced to Stripe Customer (skip modify if unchanged)"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
