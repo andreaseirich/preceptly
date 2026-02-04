@@ -2,7 +2,10 @@
 Management command for creating demo data for TutorFlow.
 
 Usage:
-    python manage.py seed_demo_data
+    python manage.py seed_demo_data           # Add demo data (idempotent for users)
+    python manage.py seed_demo_data --clear   # Delete demo_premium/demo_user data only, then seed
+
+Only demo_premium and demo_user are created or modified. Other users' data is never touched.
 
 Creates:
     - 4 students with different profiles
@@ -19,6 +22,7 @@ from decimal import Decimal
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.blocked_times.models import BlockedTime
+from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.models import UserProfile
 from apps.lesson_plans.models import LessonPlan
@@ -38,21 +42,39 @@ class Command(BaseCommand):
         parser.add_argument(
             "--clear",
             action="store_true",
-            help="Delete all existing data first (Caution!)",
+            help="Delete demo user data only before seeding",
         )
+
+    def _clear_demo_user_data(self):
+        """Delete only data belonging to demo_premium and demo_user."""
+        demo_users = User.objects.filter(username__in=["demo_premium", "demo_user"])
+        if not demo_users.exists():
+            return
+
+        demo_user_ids = list(demo_users.values_list("id", flat=True))
+        student_ids = list(
+            Student.objects.filter(user_id__in=demo_user_ids).values_list("id", flat=True)
+        )
+        contract_ids = list(
+            Contract.objects.filter(student_id__in=student_ids).values_list("id", flat=True)
+        )
+
+        LessonPlan.objects.filter(student_id__in=student_ids).delete()
+        Invoice.objects.filter(owner_id__in=demo_user_ids).delete()
+        Lesson.objects.filter(contract_id__in=contract_ids).delete()
+        RecurringLesson.objects.filter(contract_id__in=contract_ids).delete()
+        BlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
+        RecurringBlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
+        ContractMonthlyPlan.objects.filter(contract_id__in=contract_ids).delete()
+        Contract.objects.filter(student_id__in=student_ids).delete()
+        Student.objects.filter(user_id__in=demo_user_ids).delete()
+        UserProfile.objects.filter(user_id__in=demo_user_ids).delete()
+        User.objects.filter(id__in=demo_user_ids).delete()
 
     def handle(self, *args, **options):
         if options["clear"]:
-            self.stdout.write(self.style.WARNING("Deleting existing data..."))
-            LessonPlan.objects.all().delete()
-            Lesson.objects.all().delete()
-            RecurringLesson.objects.all().delete()
-            BlockedTime.objects.all().delete()
-            ContractMonthlyPlan.objects.all().delete()
-            Contract.objects.all().delete()
-            Student.objects.all().delete()
-            UserProfile.objects.all().delete()
-            User.objects.filter(is_superuser=False).delete()
+            self.stdout.write(self.style.WARNING("Deleting demo user data only..."))
+            self._clear_demo_user_data()
 
         self.stdout.write(self.style.SUCCESS("Creating demo data..."))
 
