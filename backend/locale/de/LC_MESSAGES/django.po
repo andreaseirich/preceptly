@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 19:03+0100\n"
+"POT-Creation-Date: 2026-02-04 19:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -189,7 +189,7 @@ msgstr "Betrag"
 #: apps/core/templates/core/dashboard.html:17
 #: apps/core/templates/core/dashboard.html:50
 #: apps/core/templates/core/income_overview.html:26
-#: apps/core/templates/core/income_overview.html:95 apps/lessons/admin.py:32
+#: apps/core/templates/core/income_overview.html:96 apps/lessons/admin.py:32
 #: apps/lessons/admin.py:102 apps/lessons/templates/lessons/lesson_list.html:19
 #: apps/lessons/templates/lessons/lesson_month.html:16
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:27
@@ -743,7 +743,6 @@ msgid "Description"
 msgstr "Beschreibung des Postens"
 
 #: apps/billing/templates/billing/invoice_detail.html:67
-#: apps/core/templates/core/income_overview.html:51
 msgid "Total:"
 msgstr "Gesamt:"
 
@@ -795,7 +794,7 @@ msgstr "ID"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:42
 #: apps/contracts/templates/contracts/contract_detail.html:37
 #: apps/contracts/templates/contracts/contract_list.html:20
-#: apps/core/templates/core/income_overview.html:60
+#: apps/core/templates/core/income_overview.html:61
 #: apps/lessons/templates/lessons/lesson_list.html:21
 #: apps/lessons/templates/lessons/lesson_month.html:18
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:49
@@ -1810,7 +1809,7 @@ msgstr "Aktionen"
 
 #: apps/contracts/admin.py:43
 #: apps/contracts/templates/contracts/contract_detail.html:29
-#: apps/core/templates/core/income_overview.html:58
+#: apps/core/templates/core/income_overview.html:59
 #: apps/core/templates/core/reports.html:90
 #: apps/lessons/templates/lessons/lesson_list.html:4
 #: apps/lessons/templates/lessons/lesson_list.html:7
@@ -1954,6 +1953,7 @@ msgstr "Diese Aktion kann nicht rückgängig gemacht werden."
 #: apps/contracts/templates/contracts/contract_detail.html:18
 #: apps/contracts/templates/contracts/contract_list.html:14
 #: apps/core/templates/core/reports.html:109
+#: apps/core/templates/core/reports.html:120
 #: apps/lessons/templates/lessons/email_booking_notification.html:20
 #: apps/lessons/templates/lessons/email_booking_notification.txt:11
 #: apps/lessons/templates/lessons/public_booking.html:266
@@ -2035,7 +2035,7 @@ msgstr ""
 "Geben Sie die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
 
 #: apps/contracts/templates/contracts/contract_form.html:22
-#: apps/core/templates/core/income_overview.html:57
+#: apps/core/templates/core/income_overview.html:58
 #: apps/core/templates/core/reports.html:14
 #: apps/core/templates/core/reports.html:66
 #: apps/core/templates/core/reports.html:76
@@ -2269,8 +2269,7 @@ msgstr "Kalender"
 #: apps/core/templates/core/base.html:329
 #: apps/core/templates/core/dashboard.html:76
 #: apps/core/templates/core/income_overview.html:28
-#: apps/core/templates/core/income_overview.html:59
-#: apps/core/templates/core/income_overview.html:97
+#: apps/core/templates/core/income_overview.html:60
 msgid "Income"
 msgstr "Einnahmen"
 
@@ -2350,12 +2349,14 @@ msgid "No upcoming lessons."
 msgstr "Keine kommenden Stunden."
 
 #: apps/core/templates/core/dashboard.html:77
-msgid "Paid:"
-msgstr "Ausgezahlt:"
+#: apps/core/templates/core/income_overview.html:20
+#: apps/core/templates/core/income_overview.html:52
+msgid "Recognized revenue (paid invoices):"
+msgstr "Umsatz (bezahlt):"
 
 #: apps/core/templates/core/dashboard.html:77
 #: apps/core/templates/core/income_overview.html:20
-#: apps/core/templates/core/income_overview.html:51
+#: apps/core/templates/core/income_overview.html:52
 #, python-format
 msgid "(%(counter)s lesson)"
 msgid_plural "(%(counter)s lessons)"
@@ -2404,115 +2405,120 @@ msgstr "Monatsansicht"
 msgid "Summary"
 msgstr "Zusammenfassung"
 
-#: apps/core/templates/core/income_overview.html:20
-#, fuzzy
-#| msgid "Income"
-msgid "Total Income:"
-msgstr "Einnahmen"
-
 #: apps/core/templates/core/income_overview.html:22
-#: apps/core/templates/core/income_overview.html:91
-#, fuzzy
-#| msgid "Invoice status"
-msgid "Income by Status"
-msgstr "Status der Rechnung"
+#: apps/core/templates/core/income_overview.html:92
+msgid "Teaching value by lesson status"
+msgstr "Unterrichtswert nach Unterrichtsstatus"
 
 #: apps/core/templates/core/income_overview.html:27
-#: apps/core/templates/core/income_overview.html:96
+#: apps/core/templates/core/income_overview.html:97
 #, fuzzy
 #| msgid "New Lesson"
 msgid "Number of Lessons"
 msgstr "Neue Stunde"
 
-#: apps/core/templates/core/income_overview.html:43
+#: apps/core/templates/core/income_overview.html:41
+#: apps/core/templates/core/income_overview.html:111
+msgid ""
+"Teaching value is computed from lesson duration and contract rate (not "
+"invoice amounts)."
+msgstr ""
+"Unterrichtswert wird aus Dauer und Vertragssatz berechnet (nicht aus "
+"Rechnungsbeträgen)."
+
+#: apps/core/templates/core/income_overview.html:44
 msgid "Year Overview"
 msgstr "Jahresübersicht"
 
-#: apps/core/templates/core/income_overview.html:46
+#: apps/core/templates/core/income_overview.html:47
 #, fuzzy
 #| msgid "Previous Week"
 msgid "Previous Year"
 msgstr "Vorige Woche"
 
-#: apps/core/templates/core/income_overview.html:47
+#: apps/core/templates/core/income_overview.html:48
 #, fuzzy
 #| msgid "Next Week"
 msgid "Next Year"
 msgstr "Nächste Woche"
 
-#: apps/core/templates/core/income_overview.html:50
+#: apps/core/templates/core/income_overview.html:51
 msgid "Year Summary"
 msgstr "Jahreszusammenfassung"
 
-#: apps/core/templates/core/income_overview.html:53
+#: apps/core/templates/core/income_overview.html:54
 msgid "Monthly Breakdown"
 msgstr "Monatsaufschlüsselung"
 
-#: apps/core/templates/core/income_overview.html:67
+#: apps/core/templates/core/income_overview.html:68
 #: apps/core/templates/core/reports.html:16 apps/lessons/views_calendar.py:238
 msgid "January"
 msgstr "Januar"
 
-#: apps/core/templates/core/income_overview.html:68
+#: apps/core/templates/core/income_overview.html:69
 #: apps/core/templates/core/reports.html:17 apps/lessons/views_calendar.py:239
 msgid "February"
 msgstr "Februar"
 
-#: apps/core/templates/core/income_overview.html:69
+#: apps/core/templates/core/income_overview.html:70
 #: apps/core/templates/core/reports.html:18 apps/lessons/views_calendar.py:240
 msgid "March"
 msgstr "März"
 
-#: apps/core/templates/core/income_overview.html:70
+#: apps/core/templates/core/income_overview.html:71
 #: apps/core/templates/core/reports.html:19 apps/lessons/views_calendar.py:241
 msgid "April"
 msgstr "April"
 
-#: apps/core/templates/core/income_overview.html:71
+#: apps/core/templates/core/income_overview.html:72
 #: apps/core/templates/core/reports.html:20 apps/lessons/views_calendar.py:242
 msgid "May"
 msgstr "Mai"
 
-#: apps/core/templates/core/income_overview.html:72
+#: apps/core/templates/core/income_overview.html:73
 #: apps/core/templates/core/reports.html:21 apps/lessons/views_calendar.py:243
 msgid "June"
 msgstr "Juni"
 
-#: apps/core/templates/core/income_overview.html:73
+#: apps/core/templates/core/income_overview.html:74
 #: apps/core/templates/core/reports.html:22 apps/lessons/views_calendar.py:244
 msgid "July"
 msgstr "Juli"
 
-#: apps/core/templates/core/income_overview.html:74
+#: apps/core/templates/core/income_overview.html:75
 #: apps/core/templates/core/reports.html:23 apps/lessons/views_calendar.py:245
 msgid "August"
 msgstr "August"
 
-#: apps/core/templates/core/income_overview.html:75
+#: apps/core/templates/core/income_overview.html:76
 #: apps/core/templates/core/reports.html:24 apps/lessons/views_calendar.py:246
 msgid "September"
 msgstr "September"
 
-#: apps/core/templates/core/income_overview.html:76
+#: apps/core/templates/core/income_overview.html:77
 #: apps/core/templates/core/reports.html:25 apps/lessons/views_calendar.py:247
 msgid "October"
 msgstr "Oktober"
 
-#: apps/core/templates/core/income_overview.html:77
+#: apps/core/templates/core/income_overview.html:78
 #: apps/core/templates/core/reports.html:26 apps/lessons/views_calendar.py:248
 msgid "November"
 msgstr "November"
 
-#: apps/core/templates/core/income_overview.html:78
+#: apps/core/templates/core/income_overview.html:79
 #: apps/core/templates/core/reports.html:27 apps/lessons/views_calendar.py:249
 msgid "December"
 msgstr "Dezember"
 
-#: apps/core/templates/core/income_overview.html:84
+#: apps/core/templates/core/income_overview.html:85
 #, fuzzy
 #| msgid "Details"
 msgid "View Details"
 msgstr "Details"
+
+#: apps/core/templates/core/income_overview.html:98
+msgid "Value"
+msgstr ""
 
 #: apps/core/templates/core/landing.html:4
 #: apps/core/templates/core/landing.html:8
@@ -2666,7 +2672,7 @@ msgid "Taught but not yet invoiced"
 msgstr "Unterrichtet, noch nicht in Rechnung gestellt"
 
 #: apps/core/templates/core/reports.html:54
-#: apps/core/templates/core/reports.html:122
+#: apps/core/templates/core/reports.html:133
 #, fuzzy
 #| msgid "Lessons"
 msgid "lessons"
@@ -2677,18 +2683,19 @@ msgid "Unpaid invoices"
 msgstr "Unbezahlte Rechnungen"
 
 #: apps/core/templates/core/reports.html:60
-#: apps/core/templates/core/reports.html:122
+#: apps/core/templates/core/reports.html:133
 #, fuzzy
 #| msgid "Invoices"
 msgid "invoices"
 msgstr "Rechnungen"
 
 #: apps/core/templates/core/reports.html:64
-msgid "Revenue (last 6 months)"
-msgstr "Umsatz (letzte 6 Monate)"
+#, fuzzy
+#| msgid "Revenue (last 6 months)"
+msgid "Revenue (paid invoices, last 6 months)"
+msgstr "Umsatz (bezahlte Rechnungen, letzte 6 Monate)"
 
 #: apps/core/templates/core/reports.html:66
-#: apps/core/templates/core/reports.html:109
 msgid "Revenue"
 msgstr "Umsatz"
 
@@ -2705,14 +2712,32 @@ msgid "Top 5 students by revenue (selected month)"
 msgstr "Top 5 Schüler nach Umsatz (ausgewählter Monat)"
 
 #: apps/core/templates/core/reports.html:107
-msgid "Revenue by institute"
-msgstr "Umsatz nach Institut"
+#, fuzzy
+msgid "Revenue by institute (paid)"
+msgstr "Umsatz nach Institut (bezahlt)"
+
+#: apps/core/templates/core/reports.html:109
+#, fuzzy
+#| msgid "Revenue"
+msgid "Revenue (paid)"
+msgstr "Umsatz (bezahlt)"
+
+#: apps/core/templates/core/reports.html:118
+#, fuzzy
+msgid "Revenue by institute (sent + paid)"
+msgstr "Umsatz nach Institut (gesendet + bezahlt)"
 
 #: apps/core/templates/core/reports.html:120
+#, fuzzy
+#| msgid "Revenue (last 6 months)"
+msgid "Revenue (sent + paid)"
+msgstr "Umsatz (gesendet + bezahlt)"
+
+#: apps/core/templates/core/reports.html:131
 msgid "Reports – Premium feature"
 msgstr "Berichte – Premium-Funktion"
 
-#: apps/core/templates/core/reports.html:121
+#: apps/core/templates/core/reports.html:132
 #, fuzzy
 #| msgid ""
 #| "Get detailed monthly reports: taught hours, paid amount, invoice count, "
@@ -2724,19 +2749,19 @@ msgstr ""
 "Detaillierte Monatsberichte: unterrichtete Stunden, bezahlter Betrag, "
 "Rechnungsanzahl und Aufschlüsselung pro Schüler."
 
-#: apps/core/templates/core/reports.html:122
+#: apps/core/templates/core/reports.html:133
 msgid "This month teaser"
 msgstr "Vorschau dieses Monats"
 
-#: apps/core/templates/core/reports.html:122
+#: apps/core/templates/core/reports.html:133
 msgid "hours taught"
 msgstr "Stunden unterrichtet"
 
-#: apps/core/templates/core/reports.html:122
+#: apps/core/templates/core/reports.html:133
 msgid "revenue"
 msgstr "Umsatz"
 
-#: apps/core/templates/core/reports.html:123
+#: apps/core/templates/core/reports.html:134
 msgid "Upgrade to Premium for full reports."
 msgstr "Upgrade auf Premium für vollständige Berichte."
 
@@ -5221,6 +5246,19 @@ msgstr "Rechtlicher Platzhalter – noch nicht rechtsverbindlich."
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+#~ msgid "Paid:"
+#~ msgstr "Ausgezahlt:"
+
+#, fuzzy
+#~| msgid "Income"
+#~ msgid "Total Income:"
+#~ msgstr "Einnahmen"
+
+#, fuzzy
+#~| msgid "Invoice status"
+#~ msgid "Income by Status"
+#~ msgstr "Status der Rechnung"
 
 #, python-brace-format
 #~ msgid "Error generating PDF: {error}"

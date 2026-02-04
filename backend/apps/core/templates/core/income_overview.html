@@ -17,9 +17,9 @@
 </div>
 
 <h3>{% trans "Summary" %}</h3>
-<p><strong>{% trans "Total Income:" %}</strong> {{ monthly_income.total_income|euro }} {% blocktrans count counter=monthly_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
+<p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ monthly_income.total_income|euro }} {% blocktrans count counter=monthly_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
 
-<h3>{% trans "Income by Status" %}</h3>
+<h3>{% trans "Teaching value by lesson status" %}</h3>
 <table>
     <thead>
         <tr>
@@ -38,6 +38,7 @@
         {% endfor %}
     </tbody>
 </table>
+<p class="text-muted" style="font-size: 0.9em;">{% trans "Teaching value is computed from lesson duration and contract rate (not invoice amounts)." %}</p>
 
 {% else %}
 <h2>{% trans "Year Overview" %}: {{ year }}</h2>
@@ -48,7 +49,7 @@
 </div>
 
 <h3>{% trans "Year Summary" %}</h3>
-<p><strong>{% trans "Total:" %}</strong> {{ yearly_income.total_income|euro }} {% blocktrans count counter=yearly_income.total_lessons %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
+<p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ yearly_income.total_income|euro }} {% blocktrans count counter=yearly_income.total_lessons %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
 
 <h3>{% trans "Monthly Breakdown" %}</h3>
 <table class="table">
@@ -88,13 +89,13 @@
     </tbody>
 </table>
 
-<h3>{% trans "Income by Status" %}</h3>
+<h3>{% trans "Teaching value by lesson status" %}</h3>
 <table>
     <thead>
         <tr>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Number of Lessons" %}</th>
-            <th>{% trans "Income" %}</th>
+            <th>{% trans "Value" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -107,5 +108,6 @@
         {% endfor %}
     </tbody>
 </table>
+<p class="text-muted" style="font-size: 0.9em;">{% trans "Teaching value is computed from lesson duration and contract rate (not invoice amounts)." %}</p>
 {% endif %}
 {% endblock %}

@@ -113,6 +113,11 @@ CRUD views and core features implemented. Django templates for UI; JSON for book
 - `GET /income/?year=<year>&month=<month>` - Monthly income
 - `GET /income/?year=<year>` - Yearly income with monthly breakdown
 
+**Revenue definitions (canonical):**
+- *Recognized revenue (paid)* = Sum of `Invoice.total_amount` where status = paid
+- *Pending revenue (sent)* = Sum of `Invoice.total_amount` where status = sent
+- *Total billed* = recognized + pending
+
 ## Services
 
 ### LessonConflictService
@@ -143,10 +148,18 @@ CRUD views and core features implemented. Django templates for UI; JSON for book
 ### WeekService (apps.lessons.week_service)
 - `get_week_data(year, month, day)`: Loads lessons and blocked times for a week (Monday to Sunday) and groups them by days
 
+### finance_metrics (apps.core.finance_metrics)
+Canonical definitions for revenue and statistics (owner-scoped):
+- `recognized_revenue(user, year, month)`: Sum of Invoice.total_amount where status=paid
+- `pending_revenue(user, year, month)`: Sum of Invoice.total_amount where status=sent
+- `total_billed_revenue(user, year, month)`: Sum where status in (paid, sent)
+- `taught_hours(user, year, month)`: Minutes of lessons (taught/paid) ÷ 60
+- `paid_hours(user, year, month)`: Minutes of lessons (paid) ÷ 60
+
 ### IncomeSelector (apps.core.selectors)
-- `get_monthly_income(year, month, status='paid')`: Monthly income
-- `get_yearly_income(year, status='paid')`: Yearly income
-- `get_income_by_status(year=None, month=None)`: Income grouped by status
+- `get_monthly_income(year, month, status='paid')`: Uses `recognized_revenue` for status=paid
+- `get_yearly_income(year, status='paid')`: Yearly income (sum of monthly)
+- `get_income_by_status(year=None, month=None)`: Teaching value grouped by lesson status
 - `get_monthly_planned_vs_actual(year, month)`: Comparison of planned vs. actual units and income per month
 
 ### InvoiceService (apps.billing.services)

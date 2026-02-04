@@ -61,7 +61,7 @@
 </div>
 {% endif %}
 
-<h2>{% trans "Revenue (last 6 months)" %}</h2>
+<h2>{% trans "Revenue (paid invoices, last 6 months)" %}</h2>
 <table class="table">
     <thead><tr><th>{% trans "Month" %}</th><th>{% trans "Revenue" %}</th></tr></thead>
     <tbody>
@@ -103,12 +103,23 @@
 </table>
 {% endif %}
 
-{% if breakdown_by_institute %}
-<h2>{% trans "Revenue by institute" %}</h2>
+{% if breakdown_recognized %}
+<h2>{% trans "Revenue by institute (paid)" %}</h2>
 <table class="table">
-    <thead><tr><th>{% trans "Institute" %}</th><th>{% trans "Revenue" %}</th></tr></thead>
+    <thead><tr><th>{% trans "Institute" %}</th><th>{% trans "Revenue (paid)" %}</th></tr></thead>
     <tbody>
-        {% for b in breakdown_by_institute %}
+        {% for b in breakdown_recognized %}
+        <tr><td>{{ b.institute }}</td><td>{{ b.revenue|floatformat:2 }} €</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% if breakdown_billed %}
+<h2>{% trans "Revenue by institute (sent + paid)" %}</h2>
+<table class="table">
+    <thead><tr><th>{% trans "Institute" %}</th><th>{% trans "Revenue (sent + paid)" %}</th></tr></thead>
+    <tbody>
+        {% for b in breakdown_billed %}
         <tr><td>{{ b.institute }}</td><td>{{ b.revenue|floatformat:2 }} €</td></tr>
         {% endfor %}
     </tbody>

@@ -70,16 +70,34 @@ class IncomeSelector:
     @staticmethod
     def get_monthly_income(year: int, month: int, status: str = "paid", user: User = None) -> dict:
         """
-        Berechnet die Einnahmen für einen bestimmten Monat.
+        Monthly income using canonical recognized_revenue (Invoice PAID).
 
-        Args:
-            year: Jahr
-            month: Monat (1-12)
-            status: Status der Lessons ('paid' = ausgezahlt)
-
-        Returns:
-            Dict mit Einnahmen-Details
+        total_income = sum of Invoice.total_amount where status=PAID.
+        lesson_count = count of lessons with status=paid (aligned with invoice workflow).
+        contract_details = top students by recognized revenue from PAID invoices.
         """
+        from apps.core.finance_metrics import (
+            lesson_count_taught_or_paid,
+            recognized_revenue,
+            top_students_by_recognized_revenue,
+        )
+
+        if user and status == "paid":
+            total = recognized_revenue(user, year, month)
+            count = lesson_count_taught_or_paid(user, year, month)
+            details = top_students_by_recognized_revenue(user, year, month, limit=20)
+            return {
+                "year": year,
+                "month": month,
+                "total_income": total,
+                "lesson_count": count,
+                "contract_details": details,
+            }
+        return IncomeSelector._get_monthly_income_legacy(year, month, status, user)
+
+    @staticmethod
+    def _get_monthly_income_legacy(year: int, month: int, status: str, user: User = None) -> dict:
+        """Legacy path for non-paid status (e.g. status=taught). Rarely used."""
         start_date = date(year, month, 1)
         if month == 12:
             end_date = date(year + 1, 1, 1)
@@ -98,7 +116,6 @@ class IncomeSelector:
         contract_details = {}
 
         for lesson in lessons:
-            # Use central calculation method (same logic as InvoiceService)
             lesson_income = IncomeSelector._get_lesson_amount(lesson)
             total_income += lesson_income
             lesson_count += 1

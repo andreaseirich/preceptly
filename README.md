@@ -64,6 +64,11 @@ Prevents double bookings by detecting time overlaps, travel constraints, and con
 ### 💰 **Automated Billing & Income Tracking**
 Generate invoices directly from taught sessions with automatic calculations based on contract rates. Export invoices as PDF; payment workflow (mark paid/undo). Track planned vs. actual income with monthly and yearly overviews for clear financial oversight.
 
+**Revenue definitions (canonical):**
+- *Recognized revenue (paid)* = Sum of `Invoice.total_amount` where status = paid
+- *Pending revenue (sent)* = Sum of `Invoice.total_amount` where status = sent
+- *Total billed* = recognized + pending (paid + sent invoices)
+
 ### 🤖 **AI-Powered Lesson Planning** (Premium)
 Generate structured lesson plans using LLM APIs with privacy-first design—PII sanitization ensures student data never leaves the system. Human-in-the-loop editing ensures accountability and quality.
 
