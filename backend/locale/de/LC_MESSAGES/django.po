@@ -839,6 +839,50 @@ msgstr "Woche konnte nicht geladen werden. Bitte erneut versuchen."
 msgid "Could not load week. Please check your connection and try again."
 msgstr "Woche konnte nicht geladen werden. Bitte Verbindung prüfen und erneut versuchen."
 
+#: apps/core/templates/core/settings.html
+msgid "Subscription"
+msgstr "Abonnement"
+
+#: apps/core/templates/core/settings.html
+msgid "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans."
+msgstr "Verwalten Sie Ihr Premium-Abo. Premium ermöglicht unbegrenztes Public Booking, Umbuchung, Berichte, Billing Pro und KI-Stundenpläne."
+
+#: apps/core/templates/core/settings.html
+msgid "Current plan"
+msgstr "Aktueller Plan"
+
+#: apps/core/templates/core/settings.html
+msgid "Basic"
+msgstr "Basis"
+
+#: apps/core/templates/core/settings.html
+msgid "Manage subscription"
+msgstr "Abonnement verwalten"
+
+#: apps/core/templates/core/settings.html
+msgid "Upgrade to Premium"
+msgstr "Auf Premium upgraden"
+
+#: apps/core/templates/core/settings.html
+msgid "Payment is not configured. Premium upgrades are currently unavailable."
+msgstr "Zahlung ist nicht konfiguriert. Premium-Upgrades sind derzeit nicht verfügbar."
+
+#: apps/core/views_stripe.py
+msgid "Payment is not configured. Please contact support."
+msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
+
+#: apps/core/views_stripe.py
+msgid "Could not create checkout session. Please try again."
+msgstr "Checkout-Sitzung konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
+
+#: apps/core/views_stripe.py
+msgid "Could not open billing portal. Please try again."
+msgstr "Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
+
+#: apps/core/templates/core/settings.html
+msgid "Premium (manual or demo)"
+msgstr "Premium (manuell oder Demo)"
+
 #: apps/lessons/templates/lessons/week.html:18
 #: apps/lessons/templates/lessons/student_booking.html:181
 msgid "Jump to date:"
