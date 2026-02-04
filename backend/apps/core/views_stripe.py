@@ -11,7 +11,7 @@ from apps.core.models import StripeWebhookEvent, UserProfile
 from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -158,22 +158,21 @@ def stripe_webhook_view(request):
     event_id = event.get("id")
     event_type = event.get("type")
 
-    # Idempotency: get_or_create to avoid race, skip if already processed
     payload_summary = {"type": event_type}
     obj = event.get("data", {}).get("object", {})
     if obj.get("id"):
         payload_summary["object_id"] = str(obj["id"])[:50]
 
     try:
-        webhook_event, created = StripeWebhookEvent.objects.get_or_create(
-            event_id=event_id,
-            defaults={"event_type": event_type, "payload_summary": payload_summary},
-        )
+        with transaction.atomic():
+            webhook_event, created = StripeWebhookEvent.objects.get_or_create(
+                event_id=event_id,
+                defaults={"event_type": event_type, "payload_summary": payload_summary},
+            )
+            if not created:
+                return HttpResponse(status=200)
     except IntegrityError:
-        return HttpResponse(status=200)
-
-    if not created:
-        return HttpResponse(status=200)
+        return HttpResponse(status=200)  # Race: duplicate event_id
 
     try:
         _handle_stripe_event(event)

@@ -366,28 +366,32 @@ class StripeWebhookTest(TestCase):
             "apps.core.views_stripe.stripe.Webhook.construct_event",
             side_effect=fake_construct,
         ):
-            r1 = self.client.post(
-                reverse("stripe_webhook"),
-                data=json.dumps(event),
-                content_type="application/json",
-                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
-            )
-            r2 = self.client.post(
-                reverse("stripe_webhook"),
-                data=json.dumps(event),
-                content_type="application/json",
-                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
-            )
+            with patch(
+                "apps.core.views_stripe._handle_stripe_event",
+            ) as mock_handler:
+                r1 = self.client.post(
+                    reverse("stripe_webhook"),
+                    data=json.dumps(event),
+                    content_type="application/json",
+                    HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+                )
+                r2 = self.client.post(
+                    reverse("stripe_webhook"),
+                    data=json.dumps(event),
+                    content_type="application/json",
+                    HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+                )
         self.assertEqual(r1.status_code, 200)
         self.assertEqual(r2.status_code, 200)
         self.assertEqual(StripeWebhookEvent.objects.filter(event_id="evt_idem123").count(), 1)
+        mock_handler.assert_called_once()
 
 
 @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
 class StripeWebhookConstraintsTest(TestCase):
     """Unique constraints on event_id and stripe_customer_id."""
 
-    def test_unique_constraints_event_id(self):
+    def test_duplicate_event_id_unique_constraint_enforced(self):
         StripeWebhookEvent.objects.create(
             event_id="evt_uniq1", event_type="test", payload_summary={}
         )
@@ -395,6 +399,32 @@ class StripeWebhookConstraintsTest(TestCase):
             StripeWebhookEvent.objects.create(
                 event_id="evt_uniq1", event_type="test", payload_summary={}
             )
+
+    def test_webhook_duplicate_race_returns_200(self):
+        event = {
+            "id": "evt_race123",
+            "type": "customer.subscription.updated",
+            "data": {"object": {"id": "sub_x", "customer": "cus_fake"}},
+        }
+
+        def raise_integrity(*args, **kwargs):
+            raise IntegrityError("duplicate key value")
+
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            with patch(
+                "apps.core.views_stripe.StripeWebhookEvent.objects.get_or_create",
+                side_effect=raise_integrity,
+            ):
+                response = self.client.post(
+                    reverse("stripe_webhook"),
+                    data=json.dumps(event),
+                    content_type="application/json",
+                    HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+                )
+        self.assertEqual(response.status_code, 200)
 
     def test_unique_constraints_customer_id(self):
         u1 = User.objects.create_user(username="u1", password="test")
