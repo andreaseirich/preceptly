@@ -14,7 +14,7 @@ def _owner_from_contract(invoice, Contract, Student):
 def _owner_from_first_item(apps, invoice, Contract, Student):
     """Resolve owner from first item's lesson.contract.student.user; return None on failure."""
     InvoiceItem = apps.get_model("billing", "InvoiceItem")
-    Lesson = apps.get_model("lessons", "Lesson")
+    Lesson = apps.get_model("lessons", "Session")
     item = (
         InvoiceItem.objects.filter(invoice=invoice, lesson__isnull=False)
         .order_by("id")
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("billing", "0004_invoice_owner"),
         ("contracts", "0004_alter_contract_options_and_more"),
-        ("lessons", "0007_session_created_via"),
+        ("lessons", "0008_rename_lesson_to_session_state"),
         ("students", "0001_initial"),
     ]
 

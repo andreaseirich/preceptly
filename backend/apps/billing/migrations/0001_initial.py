@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('contracts', '0003_remove_contract_planned_units_per_month'),
-        ('lessons', '0002_recurringlesson'),
+        ('lessons', '0008_rename_lesson_to_session_state'),
     ]
 
     operations = [
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ('amount', models.DecimalField(decimal_places=2, help_text='Betrag für diesen Posten', max_digits=10, validators=[django.core.validators.MinValueValidator(Decimal('0.00'))])),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('invoice', models.ForeignKey(help_text='Zugehörige Rechnung', on_delete=django.db.models.deletion.CASCADE, related_name='items', to='billing.invoice')),
-                ('lesson', models.ForeignKey(blank=True, help_text='Zugehörige Lesson (kann später gelöscht werden)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_items', to='lessons.lesson')),
+                ('lesson', models.ForeignKey(blank=True, help_text='Zugehörige Lesson (kann später gelöscht werden)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_items', to='lessons.session')),
             ],
             options={
                 'verbose_name': 'Rechnungsposten',
