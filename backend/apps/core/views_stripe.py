@@ -237,8 +237,10 @@ def _handle_stripe_event(event):
                 sub = stripe.Subscription.retrieve(sub_id)
                 status = sub.get("status", "")
                 _set_premium(profile, status in ("active", "trialing"))
-            except stripe.error.StripeError:
-                pass
+            except stripe.error.StripeError as e:
+                logger.warning(
+                    "Stripe Subscription.retrieve failed for %s: %s", sub_id, str(e)[:100]
+                )
 
     elif event_type in ("customer.subscription.created", "customer.subscription.updated"):
         subscription = obj
@@ -253,7 +255,7 @@ def _handle_stripe_event(event):
             try:
                 profile = UserProfile.objects.get(user_id=user_id)
             except UserProfile.DoesNotExist:
-                pass
+                profile = None
         if not profile and customer_id:
             profile = UserProfile.objects.filter(stripe_customer_id=customer_id).first()
         if not profile:
