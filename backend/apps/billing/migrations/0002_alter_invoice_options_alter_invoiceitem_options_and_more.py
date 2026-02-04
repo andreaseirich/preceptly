@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('billing', '0001_initial'),
         ('contracts', '0004_alter_contract_options_and_more'),
-        ('lessons', '0004_alter_lesson_options_alter_recurringlesson_options_and_more'),
+        ('lessons', '0008_rename_lesson_to_session_state'),
     ]
 
     operations = [
@@ -91,6 +91,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invoiceitem',
             name='lesson',
-            field=models.ForeignKey(blank=True, help_text='Associated lesson (may be deleted later)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_items', to='lessons.lesson'),
+            field=models.ForeignKey(blank=True, help_text='Associated lesson (may be deleted later)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_items', to='lessons.session'),
         ),
     ]
