@@ -6,7 +6,7 @@
 {% block content %}
 <h1>{% trans "Lessons" %}</h1>
 <a href="{% url 'lessons:create' %}" class="btn">{% trans "New Lesson" %}</a>
-<a href="{% url 'lessons:month' 2025 12 %}" class="btn">{% trans "Month View" %}</a>
+<a href="{% url 'lessons:month' current_year current_month %}" class="btn">{% trans "Month View" %}</a>
 
 <table>
     <thead>

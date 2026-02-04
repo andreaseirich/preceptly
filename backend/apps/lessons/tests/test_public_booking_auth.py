@@ -116,3 +116,13 @@ class PublicBookingAuthTest(TestCase):
         self.assertFalse(verify_booking_code(self.student1, "wrong"))
         self.assertFalse(verify_booking_code(self.student1, ""))
         self.assertFalse(verify_booking_code(self.student1, self.code2))
+
+    def test_verify_success_cycles_session_key(self):
+        """Successful verify cycles session key to reduce fixation risk."""
+        self.client.get(reverse("core:landing"))
+        session_key_before = self.client.session.session_key
+        self.assertIsNotNone(session_key_before)
+        resp = self._verify("Max Mustermann", self.code1)
+        self.assertEqual(resp.status_code, 200)
+        session_key_after = self.client.session.session_key
+        self.assertNotEqual(session_key_before, session_key_after)

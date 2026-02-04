@@ -1,33 +1,29 @@
 """
 Test endpoint for email functionality.
-Only available in DEBUG mode or for superusers.
+Only available when DEBUG=True. Returns 404 in production.
 """
 
 import logging
 
 from django.conf import settings
-from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-from django.http import JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger(__name__)
 
 
-def is_superuser_or_debug(user):
-    """Check if user is superuser or DEBUG is enabled."""
-    return user.is_superuser or settings.DEBUG
-
-
 @require_http_methods(["GET", "POST"])
-@user_passes_test(is_superuser_or_debug)
 def test_email(request):
     """
     Test endpoint to send a test email and check email configuration.
+    Returns 404 when DEBUG=False (production).
 
     GET: Returns email configuration (without sensitive data)
     POST: Sends a test email
     """
+    if not settings.DEBUG:
+        return HttpResponseNotFound()
     if request.method == "GET":
         # Return email configuration
         notification_email = getattr(settings, "NOTIFICATION_EMAIL", None)

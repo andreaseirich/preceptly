@@ -45,6 +45,18 @@ jobs:
           pip install -r requirements.txt
           pip install ruff
 
+      - name: Dependency audit
+        run: pip-audit
+
+      - name: Django deploy check
+        working-directory: ./backend
+        env:
+          DEBUG: "False"
+          SECRET_KEY: test-ci-secret-key-for-deploy-check
+          ALLOWED_HOSTS: test.example.com
+        run: |
+          python manage.py check --deploy
+
       - name: Ruff format
         run: |
           # Format code

@@ -294,6 +294,7 @@ def verify_student_api(request):
         if not exact_match.booking_code_hash:
             return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
+        request.session.cycle_key()
         request.session["public_booking_student_id"] = exact_match.id
         request.session["public_booking_tutor_token"] = tutor_token
         request.session.set_expiry(7200)

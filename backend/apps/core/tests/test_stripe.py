@@ -566,6 +566,49 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 400)
 
+    def test_webhook_forged_event_invalid_signature_returns_400_no_changes(self):
+        """Forged event with valid JSON but invalid signature => 400, no DB changes."""
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            side_effect=stripe.error.SignatureVerificationError("bad", "sig"),
+        ):
+            response = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(
+                    {
+                        "id": "evt_forged",
+                        "type": "customer.subscription.updated",
+                        "data": {"object": {"id": "sub_x", "status": "active"}},
+                    }
+                ),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=forged",
+            )
+        self.assertEqual(response.status_code, 400)
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.is_premium)
+
+    def test_webhook_unknown_event_type_returns_200_no_side_effects(self):
+        """Unknown event type => 200, no state changes."""
+        event = {
+            "id": "evt_ping",
+            "type": "ping",
+            "data": {"object": {}},
+        }
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            response = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.is_premium)
+
     def test_webhook_without_mapping_returns_200_and_does_not_change_user(self):
         event = {
             "id": "evt_nomap123",

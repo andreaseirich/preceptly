@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -22,6 +23,13 @@ class LessonListView(LoginRequiredMixin, ListView):
     template_name = "lessons/lesson_list.html"
     context_object_name = "lessons"
     paginate_by = 50
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        context["current_year"] = now.year
+        context["current_month"] = now.month
+        return context
 
     def get_queryset(self):
         """Filter lessons by user and optionally by date range."""

@@ -779,12 +779,12 @@ msgstr "Nach Status filtern"
 
 #: apps/billing/templates/billing/invoice_list.html:18
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 #: apps/billing/templates/billing/invoice_list.html:23
 #: apps/core/templates/core/reports.html:29
 msgid "Apply"
-msgstr ""
+msgstr "Anwenden"
 
 #: apps/billing/templates/billing/invoice_list.html:31
 msgid "ID"
@@ -920,6 +920,10 @@ msgstr "Gesamte Serie umbuchen"
 #| msgid "New Lesson"
 msgid "Edit scope"
 msgstr "Neue Stunde"
+
+#: apps/blocked_times/templates/blocked_times/blockedtime_form.html:25
+msgid "Warning: edit scope field is empty."
+msgstr "Hinweis: Das Bearbeitungsfeld ist leer."
 
 #: apps/blocked_times/forms.py:28
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:75
@@ -1362,9 +1366,8 @@ msgstr "Bearbeiten"
 #: apps/lessons/templates/lessons/lesson_detail.html:10
 #: apps/lessons/templates/lessons/lesson_month.html:8
 #, fuzzy
-#| msgid "Calendar"
 msgid "Back to Calendar"
-msgstr "Kalender"
+msgstr "Zurück zum Kalender"
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_detail.html:17
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:17
@@ -2766,14 +2769,12 @@ msgid "Upgrade to Premium for full reports."
 msgstr "Upgrade auf Premium für vollständige Berichte."
 
 #: apps/core/templates/core/settings.html:10
-#, fuzzy
-#| msgid "Dashboard"
 msgid "Back to Dashboard"
-msgstr "Dashboard"
+msgstr "Zurück zum Dashboard"
 
 #: apps/core/templates/core/settings.html:13
 msgid "Default Working Hours"
-msgstr ""
+msgstr "Standard-Arbeitszeiten"
 
 #: apps/core/templates/core/settings.html:14
 msgid ""
@@ -2783,7 +2784,7 @@ msgstr ""
 
 #: apps/core/templates/core/settings.html:168
 msgid "Save Working Hours"
-msgstr ""
+msgstr "Arbeitszeiten speichern"
 
 #: apps/core/templates/core/settings.html:175
 msgid ""
@@ -3616,10 +3617,8 @@ msgid "Conflicts for Lesson"
 msgstr "Nachhilfeunterricht"
 
 #: apps/lessons/templates/lessons/conflict_detail.html:10
-#, fuzzy
-#| msgid "Calendar"
 msgid "Back to Lesson"
-msgstr "Kalender"
+msgstr "Zurück zur Unterrichtsstunde"
 
 #: apps/lessons/templates/lessons/conflict_detail.html:15
 #: apps/lessons/templates/lessons/lesson_detail.html:7
@@ -4400,7 +4399,7 @@ msgstr "Zugehöriger Vertrag (optional)"
 
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:95
 msgid "Apply Changes"
-msgstr ""
+msgstr "Änderungen übernehmen"
 
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:4
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:7

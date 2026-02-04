@@ -23,7 +23,7 @@
                 <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
             </label>
             {% empty %}
-            <p style="color: red;">WARNING: edit_scope field is empty!</p>
+            <p style="color: red;">{% trans "Warning: edit scope field is empty." %}</p>
             {% endfor %}
         </div>
     </div>

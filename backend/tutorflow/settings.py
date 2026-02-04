@@ -110,6 +110,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "tutorflow.middleware.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -229,9 +230,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", default=False)
-SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=False)
-CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", default=False)
-
+# Production: secure cookies and HTTPOnly. Railway uses HTTPS (X-Forwarded-Proto).
+SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", default=not DEBUG)
+SESSION_COOKIE_HTTPONLY = True
+# CSRF_COOKIE_HTTPONLY=False: JS reads CSRF from cookie/meta for AJAX; Django expects it in header.
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 if not DEBUG:
     SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", default="3600"))
@@ -239,6 +245,10 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", default=True)
     # Trust X-Forwarded-Proto so build_absolute_uri yields https behind Railway/reverse proxy
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # Security headers (SecurityMiddleware adds X-Content-Type-Options; we add more via custom)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 
 # AI/LLM Configuration
 # Diese Werte sollten über Umgebungsvariablen gesetzt werden

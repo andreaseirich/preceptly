@@ -65,6 +65,10 @@ When using TutorFlow:
 - **No hardcoded secrets**: `SECRET_KEY`, database credentials, and LLM keys are expected from environment variables; defaults in the repo are demo-only
 - **Secure defaults**: In Produktion niemals mit `DEBUG=True` oder leeren `ALLOWED_HOSTS` betreiben; aktivieren Sie bei Bedarf `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` via ENV.
 
+## Dependency Scanning
+
+CI runs `pip-audit` to check for known vulnerabilities. If a vulnerability is found in a system or transitive package (e.g. pip itself) that cannot be fixed by upgrading our direct dependencies, add a justified ignore in CI and document it here. Do not ignore application dependency vulnerabilities without a clear mitigation plan.
+
 ## Acknowledgments
 
 We appreciate the security research community's efforts to help keep TutorFlow secure. Responsible disclosure helps protect all users of the application.

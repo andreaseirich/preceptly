@@ -2,6 +2,7 @@
 Authentication views for login, logout, and registration.
 """
 
+from apps.core.auth_throttle import throttle_login, throttle_register
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.utils_booking import ensure_public_booking_token
@@ -18,6 +19,12 @@ class TutorFlowLoginView(LoginView):
     template_name = "core/login.html"
     redirect_authenticated_user = True
     next_page = reverse_lazy("core:dashboard")
+
+    def post(self, request, *args, **kwargs):
+        throttled = throttle_login(request)
+        if throttled:
+            return throttled
+        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -43,6 +50,12 @@ class RegisterView(CreateView):
         if request.user.is_authenticated:
             return redirect("core:dashboard")
         return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        throttled = throttle_register(request)
+        if throttled:
+            return throttled
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         user = form.save()
