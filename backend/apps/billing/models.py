@@ -110,12 +110,20 @@ class Invoice(models.Model):
 
     def delete(self, *args, **kwargs):
         """
-        Overrides delete() to reset Lessons to TAUGHT.
+        Overrides delete() to reset Lessons to TAUGHT and delete invoice_pdf file.
 
         When deleting an invoice, all associated lessons
         with status PAID are reset to TAUGHT.
         A lesson is only reset if it is not in other invoices.
+        Also deletes the invoice_pdf file from storage if present.
         """
+        # Delete PDF file before DB delete so we have the field value
+        if self.invoice_pdf:
+            try:
+                self.invoice_pdf.delete(save=False)
+            except Exception:
+                pass  # Do not block invoice deletion on file/storage errors
+
         # Sammle alle Lessons dieser Rechnung (vor dem Löschen!)
         invoice_items = list(self.items.all())
         lesson_ids = [item.lesson_id for item in invoice_items if item.lesson_id]

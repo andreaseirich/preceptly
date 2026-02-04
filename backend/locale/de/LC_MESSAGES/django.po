@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 18:47+0100\n"
+"POT-Creation-Date: 2026-02-04 19:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -349,35 +349,35 @@ msgstr "Rechnung"
 msgid "Invoices"
 msgstr "Rechnungen"
 
-#: apps/billing/models.py:159
+#: apps/billing/models.py:167
 msgid "Associated invoice"
 msgstr "Zugehörige Rechnung"
 
-#: apps/billing/models.py:167
+#: apps/billing/models.py:175
 msgid "Associated lesson (may be deleted later)"
 msgstr "Zugehörige Lesson (kann später gelöscht werden)"
 
-#: apps/billing/models.py:169
+#: apps/billing/models.py:177
 msgid "Item description"
 msgstr "Beschreibung des Postens"
 
-#: apps/billing/models.py:170
+#: apps/billing/models.py:178
 msgid "Lesson date (copy)"
 msgstr "Datum der Unterrichtsstunde (Kopie)"
 
-#: apps/billing/models.py:171
+#: apps/billing/models.py:179
 msgid "Duration in minutes (copy)"
 msgstr "Dauer in Minuten (Kopie)"
 
-#: apps/billing/models.py:176
+#: apps/billing/models.py:184
 msgid "Amount for this item"
 msgstr "Betrag für diesen Posten"
 
-#: apps/billing/models.py:182
+#: apps/billing/models.py:190
 msgid "Invoice Item"
 msgstr "Rechnungsposten"
 
-#: apps/billing/models.py:183
+#: apps/billing/models.py:191
 #: apps/billing/templates/billing/invoice_detail.html:46
 #: apps/billing/templates/billing/invoice_document.html:119
 msgid "Invoice Items"
@@ -879,9 +879,9 @@ msgid "PDF successfully generated."
 msgstr "PDF erfolgreich erzeugt."
 
 #: apps/billing/views.py:311
-#, python-brace-format
-msgid "Error generating PDF: {error}"
-msgstr "Fehler beim PDF-Erzeugen: {error}"
+#, fuzzy
+msgid "Error generating PDF. Please try again."
+msgstr "Fehler beim PDF-Erzeugen. Bitte erneut versuchen."
 
 #: apps/billing/views.py:328
 msgid "Could not generate PDF."
@@ -5221,6 +5221,10 @@ msgstr "Rechtlicher Platzhalter – noch nicht rechtsverbindlich."
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+#, python-brace-format
+#~ msgid "Error generating PDF: {error}"
+#~ msgstr "Fehler beim PDF-Erzeugen: {error}"
 
 #, fuzzy
 #~| msgid "No lessons available."

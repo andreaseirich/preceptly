@@ -307,8 +307,8 @@ def invoice_pdf_generate(request, pk):
         invoice.invoice_pdf_created_at = timezone.now()
         invoice.save(update_fields=["invoice_pdf_created_at"])
         messages.success(request, _("PDF successfully generated."))
-    except Exception as e:
-        messages.error(request, _("Error generating PDF: {error}").format(error=str(e)))
+    except Exception:
+        messages.error(request, _("Error generating PDF. Please try again."))
     return redirect("billing:invoice_detail", pk=pk)
 
 
