@@ -14,6 +14,21 @@
     {% else %}
     <a href="{% url 'billing:invoice_document' invoice.pk %}" class="btn" target="_blank">📄 {% trans "View Document" %}</a>
     {% endif %}
+    <form method="post" action="{% url 'billing:invoice_pdf_generate' invoice.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn">📑 {% trans "Generate PDF" %}</button>
+    </form>
+    <a href="{% url 'billing:invoice_pdf_download' invoice.pk %}" class="btn" download>📥 {% trans "Download PDF" %}</a>
+    {% if invoice.invoice_pdf %}<span class="btn btn-secondary">✓ {% trans "PDF generated" %}{% if invoice.invoice_pdf_created_at %} ({{ invoice.invoice_pdf_created_at|date:"SHORT_DATETIME_FORMAT" }}){% endif %}</span>{% endif %}
+    {% if invoice.status == "draft" %}
+    <form method="post" action="{% url 'billing:invoice_mark_sent' invoice.pk %}" style="display:inline;">{% csrf_token %}<button type="submit" class="btn">✉️ {% trans "Mark as sent" %}</button></form>
+    {% endif %}
+    {% if invoice.status == "draft" or invoice.status == "sent" %}
+    <form method="post" action="{% url 'billing:invoice_mark_paid' invoice.pk %}" style="display:inline;">{% csrf_token %}<button type="submit" class="btn">✓ {% trans "Mark as paid" %}</button></form>
+    {% endif %}
+    {% if invoice.status == "paid" %}
+    <form method="post" action="{% url 'billing:invoice_undo_paid' invoice.pk %}" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-secondary">↩ {% trans "Undo payment" %}</button></form>
+    {% endif %}
     <a href="{% url 'billing:invoice_delete' invoice.pk %}" class="btn btn-danger">🗑️ {% trans "Delete" %}</a>
 </div>
 
@@ -23,7 +38,7 @@
     {% if invoice.payer_address %}<tr><th>{% trans "Address" %}</th><td>{{ invoice.payer_address|linebreaks }}</td></tr>{% endif %}
     {% if invoice.contract %}<tr><th>{% trans "Contract" %}</th><td><a href="{% url 'contracts:detail' invoice.contract.pk %}">{{ invoice.contract }}</a></td></tr>{% endif %}
     <tr><th>{% trans "Period" %}</th><td>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{{ invoice.get_status_display }}</td></tr>
+    <tr><th>{% trans "Status" %}</th><td>{{ invoice.get_status_display }}{% if invoice.paid_at %} ({% trans "paid at" %} {{ invoice.paid_at|date:"SHORT_DATETIME_FORMAT" }}){% endif %}</td></tr>
     <tr><th>{% trans "Total Amount" %}</th><td><strong>{{ invoice.total_amount|euro }}</strong></td></tr>
     <tr><th>{% trans "Created" %}</th><td>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>

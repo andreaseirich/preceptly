@@ -7,15 +7,20 @@ from datetime import date
 from apps.billing.document_service import InvoiceDocumentService
 from apps.billing.forms import InvoiceCreateForm
 from apps.billing.models import Invoice
+from apps.billing.pdf_service import generate_invoice_pdf
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files.base import ContentFile
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 
 
@@ -235,8 +240,6 @@ def serve_invoice_document(request, pk):
     """Serviert das Rechnungsdokument für eine Invoice."""
     import os
 
-    from django.http import FileResponse, Http404
-
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
 
     if not invoice.document:
@@ -251,3 +254,85 @@ def serve_invoice_document(request, pk):
     return FileResponse(
         open(file_path, "rb"), content_type="text/html", filename=os.path.basename(file_path)
     )
+
+
+@login_required
+@require_POST
+def invoice_mark_sent(request, pk):
+    """Mark invoice as sent."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.status not in ("draft",):
+        messages.warning(request, _("Invoice is already marked as sent or paid."))
+    else:
+        InvoiceService.mark_invoice_as_sent(invoice)
+        messages.success(request, _("Invoice marked as sent."))
+    return redirect("billing:invoice_detail", pk=pk)
+
+
+@login_required
+@require_POST
+def invoice_mark_paid(request, pk):
+    """Mark invoice as paid."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.status == "paid":
+        messages.warning(request, _("Invoice is already marked as paid."))
+    else:
+        InvoiceService.mark_invoice_as_paid(invoice)
+        messages.success(request, _("Invoice marked as paid."))
+    return redirect("billing:invoice_detail", pk=pk)
+
+
+@login_required
+@require_POST
+def invoice_undo_paid(request, pk):
+    """Undo paid status."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.status != "paid":
+        messages.warning(request, _("Invoice is not marked as paid."))
+    else:
+        InvoiceService.undo_invoice_paid(invoice)
+        messages.success(request, _("Payment status undone."))
+    return redirect("billing:invoice_detail", pk=pk)
+
+
+@login_required
+@require_POST
+def invoice_pdf_generate(request, pk):
+    """Generate and store PDF for invoice. Returns redirect."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    try:
+        pdf_bytes = generate_invoice_pdf(invoice)
+        filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
+        invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
+        invoice.invoice_pdf_created_at = timezone.now()
+        invoice.save(update_fields=["invoice_pdf_created_at"])
+        messages.success(request, _("PDF successfully generated."))
+    except Exception as e:
+        messages.error(request, _("Error generating PDF: {error}").format(error=str(e)))
+    return redirect("billing:invoice_detail", pk=pk)
+
+
+@login_required
+def invoice_pdf_download(request, pk):
+    """Download invoice PDF. Generates on-the-fly if missing."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if not invoice.invoice_pdf:
+        # Generate on-the-fly and store
+        try:
+            pdf_bytes = generate_invoice_pdf(invoice)
+            filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
+            invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
+            invoice.invoice_pdf_created_at = timezone.now()
+            invoice.save(update_fields=["invoice_pdf_created_at"])
+        except Exception:
+            raise Http404(_("Could not generate PDF.")) from None
+    if not invoice.invoice_pdf:
+        raise Http404(_("Invoice PDF not found."))
+    try:
+        with invoice.invoice_pdf.open("rb") as f:
+            pdf_bytes = f.read()
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="invoice_{invoice.id}.pdf"'
+        return response
+    except (FileNotFoundError, OSError) as err:
+        raise Http404(_("Invoice PDF file not found.")) from err

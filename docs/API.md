@@ -102,6 +102,11 @@ CRUD views and core features implemented. Django templates for UI; JSON for book
 - `GET /billing/<id>/delete/` - Confirmation page
 - `POST /billing/<id>/delete/` - Delete invoice (resets lesson status)
 - `GET /billing/<id>/document/` - Invoice document (HTML)
+- `POST /billing/<id>/pdf/generate/` - Generate and store invoice PDF
+- `GET /billing/<id>/pdf/` - Download invoice PDF (generates on-the-fly if missing)
+- `POST /billing/<id>/mark-sent/` - Mark invoice as sent
+- `POST /billing/<id>/mark-paid/` - Mark invoice as paid (updates lesson status)
+- `POST /billing/<id>/undo-paid/` - Undo paid status
 
 ### Income Evaluation
 - `GET /income/` - Income overview (current month)

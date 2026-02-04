@@ -8,6 +8,7 @@ from apps.billing.models import Invoice, InvoiceItem
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
 from django.db import transaction
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 
@@ -181,3 +182,50 @@ class InvoiceService:
         # lessons to TAUGHT and returns the count
         reset_count = invoice.delete()
         return reset_count
+
+    @staticmethod
+    def mark_invoice_as_sent(invoice: Invoice) -> None:
+        """Mark invoice as sent. Sets status=sent, sent_at=now."""
+        invoice.status = "sent"
+        invoice.sent_at = timezone.now()
+        invoice.save(update_fields=["status", "sent_at", "updated_at"])
+
+    @staticmethod
+    def mark_invoice_as_paid(invoice: Invoice) -> None:
+        """Mark invoice as paid. Sets status=paid, paid_at=now. Updates lessons: a lesson is
+        paid only if ALL invoices containing it have status=paid."""
+        invoice.status = "paid"
+        invoice.paid_at = timezone.now()
+        invoice.save(update_fields=["status", "paid_at", "updated_at"])
+        PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
+
+    @staticmethod
+    def undo_invoice_paid(invoice: Invoice) -> None:
+        """Undo paid: set status to sent (or draft if never sent), clear paid_at.
+        Recomputes lesson paid flags for affected lessons."""
+        invoice.status = "sent" if invoice.sent_at else "draft"
+        invoice.paid_at = None
+        invoice.save(update_fields=["status", "paid_at", "updated_at"])
+        PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
+
+
+class PaymentService:
+    """Recompute lesson paid status based on invoice states."""
+
+    @staticmethod
+    def recompute_lesson_paid_for_invoice_items(invoice: Invoice) -> None:
+        """For each lesson in this invoice's items, set paid iff all invoices
+        containing that lesson have status=paid."""
+        for item in invoice.items.select_related("lesson").filter(lesson__isnull=False):
+            lesson = item.lesson
+            if not lesson:
+                continue
+            all_paid = True
+            for ii in InvoiceItem.objects.filter(lesson=lesson).select_related("invoice"):
+                if ii.invoice.status != "paid":
+                    all_paid = False
+                    break
+            new_status = "paid" if all_paid else "taught"
+            if lesson.status != new_status:
+                lesson.status = new_status
+                lesson.save(update_fields=["status", "updated_at"])

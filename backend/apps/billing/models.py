@@ -13,6 +13,11 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 
+def _invoice_pdf_upload_to(instance, filename):
+    """Per-owner path: invoices_pdf/{owner_id}/{invoice_id}/invoice.pdf."""
+    return f"invoices_pdf/{instance.owner_id}/{instance.id}/invoice.pdf"
+
+
 class Invoice(models.Model):
     """Invoice for billed lessons."""
 
@@ -51,6 +56,8 @@ class Invoice(models.Model):
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="draft", help_text=_("Invoice status")
     )
+    sent_at = models.DateTimeField(null=True, blank=True, help_text=_("When marked as sent"))
+    paid_at = models.DateTimeField(null=True, blank=True, help_text=_("When marked as paid"))
     total_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -64,6 +71,13 @@ class Invoice(models.Model):
         blank=True,
         help_text=_("Generated invoice document (HTML/PDF)"),
     )
+    invoice_pdf = models.FileField(
+        upload_to=_invoice_pdf_upload_to,
+        null=True,
+        blank=True,
+        help_text=_("Generated PDF document"),
+    )
+    invoice_pdf_created_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

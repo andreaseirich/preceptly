@@ -30,7 +30,11 @@
     </form>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div style="padding: 20px; background: var(--table-header-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Lessons (this month)" %}</div>
+        <div style="font-size: 1.8em; font-weight: bold;">{{ lesson_count }}</div>
+    </div>
     <div style="padding: 20px; background: var(--table-header-bg); border-radius: 8px; border: 1px solid var(--border-color);">
         <div style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Taught hours" %}</div>
         <div style="font-size: 1.8em; font-weight: bold;">{{ taught_hours|floatformat:1 }}</div>
@@ -45,8 +49,40 @@
     </div>
 </div>
 
+{% if taught_not_invoiced.count %}
+<div style="padding: 15px; background: #e8f4fd; border-radius: 8px; margin-bottom: 20px;">
+    <strong>{% trans "Taught but not yet invoiced" %}:</strong> {{ taught_not_invoiced.count }} {% trans "lessons" %}, {{ taught_not_invoiced.value|floatformat:2 }} €
+</div>
+{% endif %}
+
+{% if unpaid_invoices.count %}
+<div style="padding: 15px; background: #fff3cd; border-radius: 8px; margin-bottom: 20px;">
+    <strong>{% trans "Unpaid invoices" %}:</strong> {{ unpaid_invoices.count }} {% trans "invoices" %}, {{ unpaid_invoices.amount|floatformat:2 }} €
+</div>
+{% endif %}
+
+<h2>{% trans "Revenue (last 6 months)" %}</h2>
+<table class="table">
+    <thead><tr><th>{% trans "Month" %}</th><th>{% trans "Revenue" %}</th></tr></thead>
+    <tbody>
+        {% for r in revenue_last_6 %}
+        <tr><td>{{ r.month }}/{{ r.year }}</td><td>{{ r.revenue|floatformat:2 }} €</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>{% trans "Hours taught (last 6 months)" %}</h2>
+<table class="table">
+    <thead><tr><th>{% trans "Month" %}</th><th>{% trans "Hours" %}</th></tr></thead>
+    <tbody>
+        {% for h in hours_last_6 %}
+        <tr><td>{{ h.month }}/{{ h.year }}</td><td>{{ h.hours|floatformat:1 }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% if contract_details %}
-<h2>{% trans "Top students (this month)" %}</h2>
+<h2>{% trans "Top 5 students by revenue (selected month)" %}</h2>
 <table class="table">
     <thead>
         <tr>
@@ -58,22 +94,32 @@
     <tbody>
         {% for cd in contract_details %}
         <tr>
-            <td>{{ cd.contract.student.full_name }}</td>
+            <td>{{ cd.contract.student.first_name }} {{ cd.contract.student.last_name }}</td>
             <td>{{ cd.lessons }}</td>
             <td>{{ cd.income|floatformat:2 }} €</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-{% else %}
-<p>{% trans "No data for this month." %}</p>
+{% endif %}
+
+{% if breakdown_by_institute %}
+<h2>{% trans "Revenue by institute" %}</h2>
+<table class="table">
+    <thead><tr><th>{% trans "Institute" %}</th><th>{% trans "Revenue" %}</th></tr></thead>
+    <tbody>
+        {% for b in breakdown_by_institute %}
+        <tr><td>{{ b.institute }}</td><td>{{ b.revenue|floatformat:2 }} €</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endif %}
 
 {% else %}
 <div style="padding: 30px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; margin: 20px 0;">
     <h2 style="margin-top: 0;">{% trans "Reports – Premium feature" %}</h2>
-    <p>{% trans "Get detailed monthly reports: taught hours, paid amount, invoice count, and breakdown per student." %}</p>
-    <p><strong>{% trans "This month summary" %}:</strong> {{ taught_hours|floatformat:1 }} {% trans "hours taught" %}, {{ invoice_count }} {% trans "invoices" %}.</p>
+    <p>{% trans "Get detailed monthly reports: taught hours, paid amount, invoice count, revenue by month, top students, and breakdown by institute." %}</p>
+    <p><strong>{% trans "This month teaser" %}:</strong> {{ lesson_count }} {% trans "lessons" %}, {{ taught_hours|floatformat:1 }} {% trans "hours taught" %}, {{ paid_amount|floatformat:2 }} € {% trans "revenue" %}, {{ invoice_count }} {% trans "invoices" %}.</p>
     <p>{% trans "Upgrade to Premium for full reports." %}</p>
 </div>
 {% endif %}

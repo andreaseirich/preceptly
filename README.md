@@ -62,7 +62,7 @@ All integrated into a single, coherent workflow that saves tutors hours every we
 Prevents double bookings by detecting time overlaps, travel constraints, and contract quota violations in real-time. Tutors never accidentally overcommit or miss scheduling conflicts.
 
 ### 💰 **Automated Billing & Income Tracking**
-Generate invoices directly from taught sessions with automatic calculations based on contract rates. Track planned vs. actual income with monthly and yearly overviews for clear financial oversight.
+Generate invoices directly from taught sessions with automatic calculations based on contract rates. Export invoices as PDF; payment workflow (mark paid/undo). Track planned vs. actual income with monthly and yearly overviews for clear financial oversight.
 
 ### 🤖 **AI-Powered Lesson Planning** (Premium)
 Generate structured lesson plans using LLM APIs with privacy-first design—PII sanitization ensures student data never leaves the system. Human-in-the-loop editing ensures accountability and quality.
