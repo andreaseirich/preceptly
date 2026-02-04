@@ -170,6 +170,35 @@
     </div>
 </form>
 
+<h2 style="margin-top: 40px;">{% trans "Subscription" %}</h2>
+<p>{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
+<div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
+    <p style="margin: 0 0 15px 0;"><strong>{% trans "Current plan" %}:</strong>
+        {% if is_premium %}
+            <span class="premium-badge">{% trans "Premium" %}</span>
+        {% else %}
+            {% trans "Basic" %}
+        {% endif %}
+    </p>
+    {% if stripe_enabled %}
+        {% if is_premium and profile.stripe_customer_id %}
+            <form method="post" action="{% url 'core:subscription_portal' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn">{% trans "Manage subscription" %}</button>
+            </form>
+        {% elif is_premium %}
+            <span style="color: #6c757d;">{% trans "Premium (manual or demo)" %}</span>
+        {% else %}
+            <form method="post" action="{% url 'core:subscription_checkout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">{% trans "Upgrade to Premium" %}</button>
+            </form>
+        {% endif %}
+    {% else %}
+        <p style="margin: 0; color: #6c757d; font-size: 0.95em;">{% trans "Payment is not configured. Premium upgrades are currently unavailable." %}</p>
+    {% endif %}
+</div>
+
 <h2 style="margin-top: 40px;">{% trans "Your Booking Links" %}</h2>
 <p>{% trans "Each user has their own booking links. Share only your links with your students." %}</p>
 

@@ -127,6 +127,20 @@ For demos without real API calls:
 MOCK_LLM=1
 ```
 
+## Stripe (optional, for Premium subscriptions)
+
+To enable Stripe subscription payments (TEST MODE):
+
+```bash
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID_MONTHLY=price_...
+```
+
+Optional: `STRIPE_PRICE_ID_YEARLY`, `STRIPE_PORTAL_RETURN_URL`, `STRIPE_CHECKOUT_SUCCESS_URL`, `STRIPE_CHECKOUT_CANCEL_URL`.
+
+Webhook URL: `https://your-domain/webhooks/stripe/`. Use Stripe CLI for local testing: `stripe listen --forward-to localhost:8000/webhooks/stripe/`.
+
 ## Monitoring and Logs
 
 - **Logs**: Click on "Deployments" → Select a deployment → "View Logs"

@@ -182,7 +182,7 @@ TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 –
 
 - **[Architecture](docs/ARCHITECTURE.md)** – Technical architecture and design decisions
 - **[API Documentation](docs/API.md)** – API endpoints and usage
-- **[Deployment Guide](docs/RAILWAY_DEPLOYMENT.md)** – Railway deployment instructions
+- **[Deployment Guide](docs/RAILWAY_DEPLOYMENT.md)** – Railway deployment, env vars, Stripe setup
 - **[Ethics & Privacy](docs/ETHICS.md)** – Ethical guidelines and data protection principles
 
 ---

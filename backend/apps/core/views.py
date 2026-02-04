@@ -203,12 +203,18 @@ class SettingsView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         """Add profile, contracts, and booking links to context."""
+        from apps.contracts.models import Contract
+        from apps.core.feature_flags import is_premium_user
+        from django.conf import settings
+
         context = super().get_context_data(**kwargs)
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         ensure_public_booking_token(profile)
         profile.refresh_from_db()
 
-        from apps.contracts.models import Contract
+        context["is_premium"] = is_premium_user(self.request.user)
+        context["stripe_enabled"] = getattr(settings, "STRIPE_ENABLED", False)
+        context["profile"] = profile
 
         contracts = (
             Contract.objects.filter(is_active=True, student__user=self.request.user)
