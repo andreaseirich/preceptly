@@ -50,16 +50,16 @@ class ReportsPremiumGatingTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Premium")
         self.assertContains(response, "Upgrade")
-        self.assertNotContains(response, "Revenue (last 6 months)")
+        self.assertNotContains(response, "Revenue (paid invoices, last 6 months)")
         self.assertNotContains(response, "Hours taught (last 6 months)")
-        self.assertNotContains(response, "Revenue by institute")
+        self.assertNotContains(response, "Revenue by institute (paid)")
 
     def test_premium_sees_full_sections(self):
         """Premium user sees full reports with computed sections."""
         self.client.login(username="premium", password="test")
         response = self.client.get(reverse("core:reports"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Revenue (last 6 months)")
+        self.assertContains(response, "Revenue (paid invoices, last 6 months)")
         self.assertContains(response, "Hours taught (last 6 months)")
         self.assertContains(response, "Top 5 students")
 

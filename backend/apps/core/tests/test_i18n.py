@@ -212,7 +212,7 @@ class I18nTestCase(TestCase):
         prof.save()
         student = Student.objects.create(user=user, first_name="Max", last_name="Test")
         code = set_booking_code(student)
-        # 1. Load booking page
+        # 1. Load booking page (gets CSRF cookie)
         self.client.get("/lessons/public-booking/tok-csrf2/")
         # 2. Switch language
         self.client.post(
@@ -220,11 +220,14 @@ class I18nTestCase(TestCase):
             {"language": "de", "next": "/lessons/public-booking/tok-csrf2/"},
             follow=True,
         )
-        # 3. POST verify-student (csrf_exempt but tests session integrity)
+        # 3. POST verify-student with CSRF token
+        csrf = self.client.cookies.get("csrftoken")
+        headers = {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
         r = self.client.post(
             reverse("lessons:public_booking_verify_student"),
             data=json.dumps({"name": "Max Test", "code": code, "tutor_token": "tok-csrf2"}),
             content_type="application/json",
+            **headers,
         )
         self.assertEqual(r.status_code, 200)
         data = json.loads(r.content)
@@ -239,6 +242,30 @@ class I18nTestCase(TestCase):
         response = self.client.get(reverse("lessons:week"))
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Zum Datum springen:", response.content)
+        self.assertNotIn(b"Jump to date", response.content)
+
+    def test_public_booking_jump_to_date_german(self):
+        """Public booking page: Jump to date in German, no English when de active."""
+        user = User.objects.create_user(username="tutor", password="test")
+        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
+        prof.public_booking_token = "tok-i18n-jump"
+        prof.save()
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get("/lessons/public-booking/tok-i18n-jump/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Zum Datum springen:", response.content)
+        self.assertNotIn(b"Jump to date", response.content)
+
+    def test_billing_headers_german(self):
+        """Billing invoice list: table headers in German when de active."""
+        user = User.objects.create_user(username="tutor", password="test")
+        self.client.force_login(user)
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get(reverse("billing:invoice_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Status", response.content)
+        self.assertIn(b"Betrag", response.content)
+        self.assertIn(b"Zeitraum", response.content)
 
     def test_weekday_locale_german(self):
         """Week view shows German weekday when language is German."""

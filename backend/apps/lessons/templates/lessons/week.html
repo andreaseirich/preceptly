@@ -33,6 +33,13 @@
 <p class="calendar-note" style="margin-top: 10px; color: #495057; font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Lessons and blocked times can be created by clicking in a time block; drag-to-create is not implemented." %}
 </p>
+<script>
+window.I18N = Object.assign(window.I18N || {}, {
+    timeFrom: "{% trans 'From' %}",
+    timeTo: "{% trans 'to' %}",
+    timeOn: "{% trans 'on' %}",
+});
+</script>
 
 <div id="week-calendar" class="week-calendar" style="margin-top: 20px; position: relative; overflow-x: auto;">
     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
@@ -238,7 +245,9 @@ function showCreateDialog(startDateTime, endDateTime, date) {
 
     const localeMap = { 'de': 'de-DE', 'en': 'en-US' };
     const locale = localeMap[document.documentElement.lang] || 'en-US';
-    timeInfo.textContent = `From: ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} to ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} on ${new Date(date).toLocaleDateString(locale)}`;
+    const t = (k) => (window.I18N && window.I18N[k]) || k;
+    const fromL = t('timeFrom'), toL = t('timeTo'), onL = t('timeOn');
+    timeInfo.textContent = `${fromL}: ${startDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} ${toL} ${endDateTime.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})} ${onL} ${new Date(date).toLocaleDateString(locale)}`;
     
     dialog.dataset.start = startStr;
     dialog.dataset.end = endStr;

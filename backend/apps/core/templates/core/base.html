@@ -375,7 +375,13 @@
     </div>
 
     {% include 'partials/footer.html' %}
-    
+
+    <script>
+    window.I18N = Object.assign(window.I18N || {}, {
+        networkError: "{% trans 'Network error: Please check your internet connection.' %}",
+        error: "{% trans 'Error' %}",
+    });
+    </script>
     <script>
     // Dark Mode Toggle
     (function() {
@@ -626,7 +632,7 @@
             } catch (error) {
                 // Handle network errors, JSON parse errors, etc.
                 if (error instanceof TypeError && error.message.includes('fetch')) {
-                    throw new Error('Network error: Please check your internet connection.');
+                    throw new Error((window.I18N && window.I18N.networkError) || 'Network error');
                 }
                 throw error;
             }

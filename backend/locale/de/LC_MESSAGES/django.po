@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 19:13+0100\n"
+"POT-Creation-Date: 2026-02-04 20:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -279,7 +279,7 @@ msgstr "Versendet"
 
 #: apps/billing/models.py:27
 #: apps/billing/templates/billing/invoice_list.html:21
-#: apps/lessons/models.py:18 apps/lessons/templates/lessons/week.html:110
+#: apps/lessons/models.py:18 apps/lessons/templates/lessons/week.html:117
 msgid "Paid"
 msgstr "Bezahlt"
 
@@ -462,7 +462,7 @@ msgstr "Ja, löschen"
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:15
 #: apps/lessons/templates/lessons/recurringlesson_form.html:37
 #: apps/lessons/templates/lessons/student_booking.html:230
-#: apps/lessons/templates/lessons/week.html:188
+#: apps/lessons/templates/lessons/week.html:195
 #: apps/students/templates/students/student_confirm_delete.html:16
 #: apps/students/templates/students/student_form.html:14
 msgid "Cancel"
@@ -498,6 +498,7 @@ msgstr "Zeitraum:"
 
 #: apps/billing/templates/billing/invoice_create.html:23
 #: apps/lessons/templates/lessons/student_booking.html:372
+#: apps/lessons/templates/lessons/week.html:39
 msgid "to"
 msgstr "bis"
 
@@ -571,7 +572,7 @@ msgstr "Datum"
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:25
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:21
 #: apps/lessons/templates/lessons/recurringlesson_list.html:18
-#: apps/lessons/templates/lessons/week.html:41
+#: apps/lessons/templates/lessons/week.html:48
 msgid "Time"
 msgstr "Zeit"
 
@@ -890,7 +891,7 @@ msgstr "PDF konnte nicht erzeugt werden."
 msgid "Invoice PDF not found."
 msgstr "Rechnungs-PDF nicht gefunden."
 
-#: apps/billing/views.py:338
+#: apps/billing/views.py:339
 msgid "Invoice PDF file not found."
 msgstr "Rechnungs-PDF-Datei nicht gefunden."
 
@@ -920,10 +921,6 @@ msgstr "Gesamte Serie umbuchen"
 #| msgid "New Lesson"
 msgid "Edit scope"
 msgstr "Neue Stunde"
-
-#: apps/blocked_times/templates/blocked_times/blockedtime_form.html:25
-msgid "Warning: edit scope field is empty."
-msgstr "Hinweis: Das Bearbeitungsfeld ist leer."
 
 #: apps/blocked_times/forms.py:28
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:75
@@ -1424,6 +1421,10 @@ msgstr "Serien-Blockzeit erstellen"
 #: apps/lessons/templates/lessons/lesson_form.html:20
 msgid "What do you want to edit?"
 msgstr ""
+
+#: apps/blocked_times/templates/blocked_times/blockedtime_form.html:26
+msgid "Warning: edit scope field is empty."
+msgstr "Hinweis: Das Bearbeitungsfeld ist leer."
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:38
 #, fuzzy
@@ -2062,6 +2063,7 @@ msgstr ""
 "Anzahl von geplanten Einheiten."
 
 #: apps/contracts/templates/contracts/contract_list.html:17
+#: apps/lessons/templates/lessons/week.html:38
 #: apps/students/templates/students/student_detail.html:85
 msgid "From"
 msgstr "Von"
@@ -2104,7 +2106,7 @@ msgid "Profile"
 msgstr "Profil"
 
 #: apps/core/admin.py:23 apps/core/templates/core/dashboard.html:8
-#: apps/core/templates/core/login.html:39
+#: apps/core/templates/core/login.html:41
 #: apps/core/templates/core/reports.html:7
 #: apps/core/templates/core/settings.html:198
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:126
@@ -2112,7 +2114,7 @@ msgstr "Profil"
 msgid "Premium"
 msgstr "Premium"
 
-#: apps/core/admin.py:23 apps/core/templates/core/login.html:40
+#: apps/core/admin.py:23 apps/core/templates/core/login.html:42
 #, fuzzy
 #| msgid "Calendar"
 msgid "Standard"
@@ -2132,6 +2134,18 @@ msgstr "Status"
 msgid "User"
 msgstr "Benutzer"
 
+#: apps/core/auth_throttle.py:70 apps/core/auth_throttle.py:85
+#, fuzzy
+#| msgid "Error creating student."
+msgid "Too many attempts. Please try again later."
+msgstr "Fehler beim Erstellen des Schülers."
+
+#: apps/core/auth_throttle.py:104
+#, fuzzy
+#| msgid "Error creating student."
+msgid "Too many registration attempts. Please try again later."
+msgstr "Fehler beim Erstellen des Schülers."
+
 #: apps/core/feature_flags.py:114
 msgid "This feature requires Premium. Upgrade to access."
 msgstr "Diese Funktion erfordert Premium. Upgrade für vollen Zugang."
@@ -2146,12 +2160,12 @@ msgid ""
 msgstr ""
 "Optional. Wird für Rechnungen und Stripe verwendet. Empfohlen für Premium."
 
-#: apps/core/forms.py:36 apps/core/templates/core/login.html:19
+#: apps/core/forms.py:36 apps/core/templates/core/login.html:21
 #: apps/core/templates/core/register.html:23
 msgid "Username"
 msgstr "Benutzername"
 
-#: apps/core/forms.py:37 apps/core/templates/core/login.html:25
+#: apps/core/forms.py:37 apps/core/templates/core/login.html:27
 #: apps/core/templates/core/register.html:34
 msgid "Password"
 msgstr "Passwort"
@@ -2302,7 +2316,7 @@ msgstr ""
 
 #: apps/core/templates/core/base.html:345
 #: apps/core/templates/core/base.html:347 apps/core/templates/core/login.html:4
-#: apps/core/templates/core/login.html:33
+#: apps/core/templates/core/login.html:35
 msgid "Login"
 msgstr "Anmelden"
 
@@ -2311,6 +2325,17 @@ msgstr "Anmelden"
 #| msgid "Language"
 msgid "Change language"
 msgstr "Sprache"
+
+#: apps/core/templates/core/base.html:381
+#: apps/lessons/templates/lessons/public_booking.html:801
+#: apps/lessons/templates/lessons/student_booking.html:453
+#: apps/lessons/templates/lessons/student_booking.html:683
+msgid "Network error: Please check your internet connection."
+msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
+
+#: apps/core/templates/core/base.html:382
+msgid "Error"
+msgstr "Fehler"
 
 #: apps/core/templates/core/dashboard.html:10
 msgid "Today's Lessons"
@@ -2628,22 +2653,22 @@ msgstr ""
 msgid "Login to TutorFlow"
 msgstr "Bei TutorFlow anmelden"
 
-#: apps/core/templates/core/login.html:12
+#: apps/core/templates/core/login.html:14
 msgid "Invalid username or password. Please try again."
 msgstr "Ungültiger Benutzername oder Passwort. Bitte versuchen Sie es erneut."
 
-#: apps/core/templates/core/login.html:38
+#: apps/core/templates/core/login.html:40
 msgid "Demo Logins"
 msgstr "Demo-Anmeldungen"
 
-#: apps/core/templates/core/login.html:45
+#: apps/core/templates/core/login.html:47
 #: apps/core/templates/core/register.html:4
 #: apps/core/templates/core/register.html:8
 #: apps/core/templates/core/register.html:55
 msgid "Register"
 msgstr "Registrieren"
 
-#: apps/core/templates/core/login.html:52
+#: apps/core/templates/core/login.html:54
 #: apps/core/templates/core/register.html:67
 #, fuzzy
 #| msgid "Calendar"
@@ -3013,7 +3038,7 @@ msgstr "Lektionsplan - %(date)s - %(student)s"
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:11
 #: apps/lessons/templates/lessons/lesson_form.html:4
 #: apps/lessons/templates/lessons/lesson_form.html:7
-#: apps/lessons/templates/lessons/week.html:114
+#: apps/lessons/templates/lessons/week.html:121
 #, fuzzy
 #| msgid "New Lesson"
 msgid "Edit Lesson"
@@ -3419,7 +3444,7 @@ msgstr[1] ""
 "Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
 "generiert."
 
-#: apps/lessons/recurring_views.py:98 apps/lessons/views_crud.py:240
+#: apps/lessons/recurring_views.py:98 apps/lessons/views_crud.py:248
 #, python-brace-format
 msgid "{count} lesson with conflicts detected."
 msgid_plural "{count} lessons with conflicts detected."
@@ -3557,15 +3582,15 @@ msgstr "Blockzeit hinzufügen"
 #: apps/lessons/templates/lessons/lesson_detail.html:31
 #: apps/lessons/templates/lessons/lesson_list.html:29
 #: apps/lessons/templates/lessons/lesson_list.html:35
-#: apps/lessons/templates/lessons/week.html:95
-#: apps/lessons/templates/lessons/week.html:98
-#: apps/lessons/templates/lessons/week.html:109
-#: apps/lessons/templates/lessons/week.html:121
+#: apps/lessons/templates/lessons/week.html:102
+#: apps/lessons/templates/lessons/week.html:105
+#: apps/lessons/templates/lessons/week.html:116
+#: apps/lessons/templates/lessons/week.html:128
 msgid "Min."
 msgstr "Min."
 
 #: apps/lessons/templates/lessons/calendar.html:67
-#: apps/lessons/templates/lessons/week.html:106
+#: apps/lessons/templates/lessons/week.html:113
 #, fuzzy
 #| msgid "Conflicts"
 msgid "Conflict:"
@@ -3590,7 +3615,7 @@ msgid "Lesson (clickable to edit)"
 msgstr "Unterrichtsstunde (anklickbar zum Bearbeiten)"
 
 #: apps/lessons/templates/lessons/calendar.html:99
-#: apps/lessons/templates/lessons/week.html:308
+#: apps/lessons/templates/lessons/week.html:317
 #, fuzzy
 #| msgid "Conflicts"
 msgid "Conflict"
@@ -4045,7 +4070,7 @@ msgstr "Leer lassen, wenn kein Institut"
 
 #: apps/lessons/templates/lessons/public_booking.html:280
 #: apps/lessons/templates/lessons/public_booking.html:699
-#: apps/lessons/views_public_booking.py:586
+#: apps/lessons/views_public_booking.py:583
 msgid "Subject"
 msgstr "Fach"
 
@@ -4082,7 +4107,7 @@ msgid "Upgrade to Premium for unlimited bookings."
 msgstr "Upgrade auf Premium für unbegrenzte Buchungen."
 
 #: apps/lessons/templates/lessons/public_booking.html:308
-#: apps/lessons/views_public_booking.py:572
+#: apps/lessons/views_public_booking.py:569
 msgid ""
 "Public booking limit reached. Upgrade to Premium for unlimited bookings."
 msgstr ""
@@ -4190,7 +4215,7 @@ msgid "Enter the code for"
 msgstr "Code eingeben für"
 
 #: apps/lessons/templates/lessons/public_booking.html:474
-#: apps/lessons/views_public_booking.py:269
+#: apps/lessons/views_public_booking.py:267
 #, fuzzy
 #| msgid "Please enter a period."
 msgid "Please enter the booking code."
@@ -4234,7 +4259,7 @@ msgid "Error. Please try again."
 msgstr "Ungültiger Benutzername oder Passwort. Bitte versuchen Sie es erneut."
 
 #: apps/lessons/templates/lessons/public_booking.html:591
-#: apps/lessons/views_public_booking.py:335
+#: apps/lessons/views_public_booking.py:333
 msgid "First name and last name are required."
 msgstr "Vorname und Nachname sind erforderlich."
 
@@ -4288,12 +4313,6 @@ msgstr "Serverfehler"
 #: apps/lessons/templates/lessons/public_booking.html:796
 msgid "Error booking lesson."
 msgstr "Fehler beim Buchen der Stunde."
-
-#: apps/lessons/templates/lessons/public_booking.html:801
-#: apps/lessons/templates/lessons/student_booking.html:453
-#: apps/lessons/templates/lessons/student_booking.html:683
-msgid "Network error: Please check your internet connection."
-msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
 
 #: apps/lessons/templates/lessons/public_booking.html:803
 #: apps/lessons/templates/lessons/student_booking.html:409
@@ -4571,51 +4590,55 @@ msgstr ""
 "Unterrichtsstunden und Blockzeiten können durch Klicken in einen Zeitblock "
 "erstellt werden; Drag-to-Create ist nicht implementiert."
 
-#: apps/lessons/templates/lessons/week.html:95
+#: apps/lessons/templates/lessons/week.html:40
+msgid "on"
+msgstr "am"
+
+#: apps/lessons/templates/lessons/week.html:102
 msgid "Click to view lesson plan"
 msgstr "Klicken, um Lektionsplan anzuzeigen"
 
-#: apps/lessons/templates/lessons/week.html:106
+#: apps/lessons/templates/lessons/week.html:113
 #, fuzzy
 #| msgid "Conflict detected - Click for details"
 msgid "Conflict - Click for details"
 msgstr "Konflikt erkannt - Klicken für Details"
 
-#: apps/lessons/templates/lessons/week.html:106
+#: apps/lessons/templates/lessons/week.html:113
 #, fuzzy
 #| msgid "Conflicts"
 msgid "View Conflicts"
 msgstr "Konflikte"
 
-#: apps/lessons/templates/lessons/week.html:114
+#: apps/lessons/templates/lessons/week.html:121
 #, fuzzy
 #| msgid "New Lesson"
 msgid "Edit lesson"
 msgstr "Neue Stunde"
 
-#: apps/lessons/templates/lessons/week.html:158
+#: apps/lessons/templates/lessons/week.html:165
 msgid "Preview - not yet created"
 msgstr ""
 
-#: apps/lessons/templates/lessons/week.html:176
+#: apps/lessons/templates/lessons/week.html:183
 msgid "Create New Appointment"
 msgstr "Neuen Termin erstellen"
 
-#: apps/lessons/templates/lessons/week.html:180
+#: apps/lessons/templates/lessons/week.html:187
 msgid "Tutoring Lesson"
 msgstr "Nachhilfeunterricht"
 
-#: apps/lessons/templates/lessons/week.html:183
+#: apps/lessons/templates/lessons/week.html:190
 msgid "Blocked Time/Other Appointment"
 msgstr "Blockzeit/anderer Termin"
 
-#: apps/lessons/templates/lessons/week.html:187
+#: apps/lessons/templates/lessons/week.html:194
 #, fuzzy
 #| msgid "Create Recurring Lesson"
 msgid "Create Lesson"
 msgstr "Serientermin anlegen"
 
-#: apps/lessons/templates/lessons/week.html:187
+#: apps/lessons/templates/lessons/week.html:194
 msgid "Create"
 msgstr "Erstellen"
 
@@ -4624,41 +4647,41 @@ msgid "Booking link not found or contract is inactive."
 msgstr ""
 
 #: apps/lessons/views_booking.py:111 apps/lessons/views_booking.py:263
-#: apps/lessons/views_public_booking.py:449
-#: apps/lessons/views_public_booking.py:722
+#: apps/lessons/views_public_booking.py:446
+#: apps/lessons/views_public_booking.py:718
 #, fuzzy
 #| msgid "Invalid end time format."
 msgid "Invalid date or time format."
 msgstr "Ungültiges Endzeit-Format."
 
 #: apps/lessons/views_booking.py:122 apps/lessons/views_booking.py:272
-#: apps/lessons/views_public_booking.py:458
+#: apps/lessons/views_public_booking.py:455
 msgid "Invalid end time format."
 msgstr "Ungültiges Endzeit-Format."
 
 #: apps/lessons/views_booking.py:139 apps/lessons/views_booking.py:289
-#: apps/lessons/views_public_booking.py:474
+#: apps/lessons/views_public_booking.py:471
 msgid "Start time must be on a 30-minute interval."
 msgstr "Startzeit muss auf einem 30-Minuten-Intervall liegen."
 
 #: apps/lessons/views_booking.py:147 apps/lessons/views_booking.py:297
-#: apps/lessons/views_public_booking.py:482
+#: apps/lessons/views_public_booking.py:479
 msgid "End time must be on a 30-minute interval."
 msgstr "Endzeit muss auf einem 30-Minuten-Intervall liegen."
 
 #: apps/lessons/views_booking.py:155 apps/lessons/views_booking.py:305
-#: apps/lessons/views_public_booking.py:490
+#: apps/lessons/views_public_booking.py:487
 msgid "End time must be after start time."
 msgstr "Endzeit muss nach der Startzeit liegen."
 
-#: apps/lessons/views_booking.py:162 apps/lessons/views_public_booking.py:503
+#: apps/lessons/views_booking.py:162 apps/lessons/views_public_booking.py:500
 #, fuzzy
 #| msgid "Invalid end date format."
 msgid "Invalid booking duration."
 msgstr "Ungültiges Enddatum-Format."
 
 #: apps/lessons/views_booking.py:179 apps/lessons/views_booking.py:338
-#: apps/lessons/views_public_booking.py:515
+#: apps/lessons/views_public_booking.py:512
 msgid ""
 "Bookings must be at least 30 minutes in advance. Past time slots cannot be "
 "booked."
@@ -4666,17 +4689,17 @@ msgstr ""
 "Buchungen müssen mindestens 30 Minuten im Voraus erfolgen. Vergangene "
 "Zeitslots können nicht gebucht werden."
 
-#: apps/lessons/views_booking.py:203 apps/lessons/views_public_booking.py:537
+#: apps/lessons/views_booking.py:203 apps/lessons/views_public_booking.py:534
 #, fuzzy
 #| msgid "Page not found"
 msgid "Date not found."
 msgstr "Seite nicht gefunden"
 
-#: apps/lessons/views_booking.py:215 apps/lessons/views_public_booking.py:548
+#: apps/lessons/views_booking.py:215 apps/lessons/views_public_booking.py:545
 msgid "Time slot is already booked."
 msgstr "Zeitslot ist bereits gebucht."
 
-#: apps/lessons/views_booking.py:244 apps/lessons/views_public_booking.py:621
+#: apps/lessons/views_booking.py:244 apps/lessons/views_public_booking.py:618
 msgid "Lesson successfully booked."
 msgstr "Stunde erfolgreich gebucht."
 
@@ -4694,7 +4717,7 @@ msgid ""
 "Recurring lesson series successfully created. {count} lesson(s) generated."
 msgstr "Serientermin-Serie erfolgreich erstellt. {count} Stunde(n) generiert."
 
-#: apps/lessons/views_booking.py:420 apps/lessons/views_public_booking.py:373
+#: apps/lessons/views_booking.py:420 apps/lessons/views_public_booking.py:371
 #, fuzzy
 #| msgid "Invalid end date format."
 msgid "Invalid JSON data."
@@ -4746,7 +4769,7 @@ msgstr "Sa"
 msgid "Sun"
 msgstr "So"
 
-#: apps/lessons/views_crud.py:222
+#: apps/lessons/views_crud.py:230
 #, fuzzy, python-brace-format
 #| msgid "Recurring lesson created and {count} lesson generated."
 #| msgid_plural "Recurring lesson created and {count} lessons generated."
@@ -4759,7 +4782,7 @@ msgstr[1] ""
 "Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
 "generiert."
 
-#: apps/lessons/views_crud.py:231
+#: apps/lessons/views_crud.py:239
 #, fuzzy
 #| msgid ""
 #| "Recurring lesson series successfully created. {count} lesson(s) generated."
@@ -4768,34 +4791,34 @@ msgid ""
 "already exist)."
 msgstr "Serientermin-Serie erfolgreich erstellt. {count} Stunde(n) generiert."
 
-#: apps/lessons/views_crud.py:281
+#: apps/lessons/views_crud.py:289
 #, python-brace-format
 msgid "Lesson created, but {count} conflict(s) detected!"
 msgstr "Unterrichtsstunde erstellt, aber {count} Konflikt(e) erkannt!"
 
-#: apps/lessons/views_crud.py:286
+#: apps/lessons/views_crud.py:294
 msgid "Lesson successfully created."
 msgstr "Unterrichtsstunde erfolgreich erstellt."
 
-#: apps/lessons/views_crud.py:426
+#: apps/lessons/views_crud.py:434
 #, fuzzy, python-brace-format
 #| msgid "No upcoming lessons."
 msgid "{count} conflict(s) detected. No changes were made."
 msgstr "Keine kommenden Stunden."
 
-#: apps/lessons/views_crud.py:435
+#: apps/lessons/views_crud.py:443
 #, python-brace-format
 msgid ""
 "Series updated. {deleted} lesson(s) deleted, {created} new lesson(s) "
 "created, {updated} lesson(s) updated."
 msgstr ""
 
-#: apps/lessons/views_crud.py:468
+#: apps/lessons/views_crud.py:476
 #, python-brace-format
 msgid "Conflict detected for {date} at {time}. No changes were made."
 msgstr ""
 
-#: apps/lessons/views_crud.py:477
+#: apps/lessons/views_crud.py:485
 #, fuzzy, python-brace-format
 #| msgid "Recurring lesson created and {count} lesson(s) generated."
 msgid "Series updated. {count} lesson(s) updated."
@@ -4803,16 +4826,16 @@ msgstr ""
 "Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde(n) "
 "generiert."
 
-#: apps/lessons/views_crud.py:498
+#: apps/lessons/views_crud.py:506
 #, python-brace-format
 msgid "Lesson updated, but {count} conflict(s) detected!"
 msgstr "Unterrichtsstunde aktualisiert, aber {count} Konflikt(e) erkannt!"
 
-#: apps/lessons/views_crud.py:503
+#: apps/lessons/views_crud.py:511
 msgid "Lesson successfully updated."
 msgstr "Unterrichtsstunde erfolgreich aktualisiert."
 
-#: apps/lessons/views_crud.py:613
+#: apps/lessons/views_crud.py:621
 #, fuzzy, python-brace-format
 #| msgid "Recurring lesson created and {count} lesson generated."
 #| msgid_plural "Recurring lesson created and {count} lessons generated."
@@ -4825,7 +4848,7 @@ msgstr[1] ""
 "Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
 "generiert."
 
-#: apps/lessons/views_crud.py:621
+#: apps/lessons/views_crud.py:629
 msgid "Lesson successfully deleted."
 msgstr "Unterrichtsstunde erfolgreich gelöscht."
 
@@ -4838,108 +4861,108 @@ msgstr ""
 msgid "Booking link invalid or expired."
 msgstr ""
 
-#: apps/lessons/views_public_booking.py:209
+#: apps/lessons/views_public_booking.py:208
 msgid "Please enter a name."
 msgstr "Bitte geben Sie einen Namen ein."
 
-#: apps/lessons/views_public_booking.py:215
+#: apps/lessons/views_public_booking.py:214
 #, fuzzy
 #| msgid "Booking Link"
 msgid "Booking link invalid."
 msgstr "Buchungslink"
 
-#: apps/lessons/views_public_booking.py:219
+#: apps/lessons/views_public_booking.py:218
 msgid "Too many attempts."
 msgstr ""
 
-#: apps/lessons/views_public_booking.py:248
-#: apps/lessons/views_public_booking.py:314
+#: apps/lessons/views_public_booking.py:247
+#: apps/lessons/views_public_booking.py:313
 #, fuzzy
 #| msgid "Invalid end time format."
 msgid "Invalid request."
 msgstr "Ungültiges Endzeit-Format."
 
-#: apps/lessons/views_public_booking.py:342
-#: apps/lessons/views_public_booking.py:414
+#: apps/lessons/views_public_booking.py:340
+#: apps/lessons/views_public_booking.py:411
 #, fuzzy
 #| msgid "No lessons available."
 msgid "Booking is not available."
 msgstr "Keine Stunden vorhanden."
 
-#: apps/lessons/views_public_booking.py:361
+#: apps/lessons/views_public_booking.py:359
 msgid "Student created successfully."
 msgstr "Schüler erfolgreich erstellt."
 
-#: apps/lessons/views_public_booking.py:376
-#: apps/lessons/views_public_booking.py:635
-#: apps/lessons/views_public_booking.py:887
+#: apps/lessons/views_public_booking.py:374
+#: apps/lessons/views_public_booking.py:632
+#: apps/lessons/views_public_booking.py:883
 #, fuzzy
 #| msgid "Invalid username or password. Please try again."
 msgid "An error occurred. Please try again."
 msgstr "Ungültiger Benutzername oder Passwort. Bitte versuchen Sie es erneut."
 
-#: apps/lessons/views_public_booking.py:420
+#: apps/lessons/views_public_booking.py:417
 msgid "Student ID is required."
 msgstr "Schüler-ID ist erforderlich."
 
-#: apps/lessons/views_public_booking.py:426
+#: apps/lessons/views_public_booking.py:423
 #, fuzzy
 #| msgid "Student ID is required."
 msgid "Booking code is required."
 msgstr "Schüler-ID ist erforderlich."
 
-#: apps/lessons/views_public_booking.py:432 apps/students/views.py:92
+#: apps/lessons/views_public_booking.py:429 apps/students/views.py:92
 msgid "Student not found."
 msgstr "Schüler nicht gefunden."
 
-#: apps/lessons/views_public_booking.py:436
+#: apps/lessons/views_public_booking.py:433
 msgid "Invalid booking code."
 msgstr ""
 
-#: apps/lessons/views_public_booking.py:441
+#: apps/lessons/views_public_booking.py:438
 msgid "Date and start time are required."
 msgstr "Datum und Startzeit sind erforderlich."
 
-#: apps/lessons/views_public_booking.py:629
+#: apps/lessons/views_public_booking.py:626
 #, fuzzy
 #| msgid "Invalid end date format."
 msgid "Invalid data format."
 msgstr "Ungültiges Enddatum-Format."
 
-#: apps/lessons/views_public_booking.py:639
+#: apps/lessons/views_public_booking.py:636
 msgid "Reschedule not possible. Please try again."
 msgstr "Umbuchung nicht möglich. Bitte versuchen Sie es erneut."
 
-#: apps/lessons/views_public_booking.py:672
+#: apps/lessons/views_public_booking.py:668
 msgid "Rescheduling entire series requires Premium. Upgrade to access."
 msgstr ""
 "Umbuchung der gesamten Serie erfordert Premium. Upgrade für vollen Zugang."
 
-#: apps/lessons/views_public_booking.py:682
+#: apps/lessons/views_public_booking.py:678
 msgid "Rescheduling requires Premium. Upgrade to access."
 msgstr "Umbuchung erfordert Premium. Upgrade für vollen Zugang."
 
-#: apps/lessons/views_public_booking.py:775
+#: apps/lessons/views_public_booking.py:771
 msgid "This lesson is not part of a series."
 msgstr ""
 
-#: apps/lessons/views_public_booking.py:809
+#: apps/lessons/views_public_booking.py:805
 #, fuzzy
 #| msgid "Time slot is already booked."
 msgid "Cannot reschedule series: a time slot is already booked."
 msgstr "Zeitslot ist bereits gebucht."
 
-#: apps/lessons/views_public_booking.py:842
+#: apps/lessons/views_public_booking.py:838
 #, fuzzy
 #| msgid "Lesson rescheduled successfully."
 msgid "Series rescheduled successfully."
 msgstr "Stunde erfolgreich umgebucht."
 
-#: apps/lessons/views_public_booking.py:877
+#: apps/lessons/views_public_booking.py:873
 msgid "Lesson rescheduled successfully."
 msgstr "Stunde erfolgreich umgebucht."
 
-#: apps/lessons/views_public_booking.py:883
+#: apps/lessons/views_public_booking.py:879
 #, fuzzy
 #| msgid "Invalid end date format."
 msgid "Invalid data."
