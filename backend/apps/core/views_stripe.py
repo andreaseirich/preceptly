@@ -135,13 +135,13 @@ class SubscriptionPortalView(View):
 
 
 def _stripe_premium_checkout_enabled() -> bool:
-    """True if Stripe is configured for Premium checkout (STRIPE_PRICE_ID_PREMIUM)."""
+    """True if Stripe is configured for Premium checkout (STRIPE_PRICE_ID_MONTHLY)."""
     return getattr(settings, "STRIPE_PREMIUM_CHECKOUT_ENABLED", False)
 
 
 @method_decorator(login_required, name="dispatch")
 class StripeCheckoutView(View):
-    """POST /stripe/checkout/: Create Stripe Checkout Session for subscription (STRIPE_PRICE_ID_PREMIUM)."""
+    """POST /stripe/checkout/: Create Stripe Checkout Session for subscription (STRIPE_PRICE_ID_MONTHLY)."""
 
     http_method_names = ["post"]
 
@@ -151,7 +151,7 @@ class StripeCheckoutView(View):
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
 
-        price_id = getattr(settings, "STRIPE_PRICE_ID_PREMIUM", None)
+        price_id = getattr(settings, "STRIPE_PRICE_ID_MONTHLY", None)
         if not price_id:
             return JsonResponse(
                 {"error": _("Payment is not configured. Please contact support.")}, status=503

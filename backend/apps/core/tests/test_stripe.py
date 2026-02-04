@@ -161,14 +161,14 @@ class SubscriptionPortalTest(TestCase):
         self.assertIn("settings", response.url)
 
 
-# --- /stripe/checkout/ and /stripe/portal/ (STRIPE_PRICE_ID_PREMIUM) ---
+# --- /stripe/checkout/ and /stripe/portal/ (STRIPE_PRICE_ID_MONTHLY) ---
 @override_settings(
     STRIPE_SECRET_KEY="sk_test_fake",
-    STRIPE_PRICE_ID_PREMIUM="price_premium_123",
+    STRIPE_PRICE_ID_MONTHLY="price_premium_123",
     STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
 )
 class StripeCheckoutPremiumTest(TestCase):
-    """POST /stripe/checkout/: uses STRIPE_PRICE_ID_PREMIUM, metadata.user_id, no Customer.create when customer_id exists."""
+    """POST /stripe/checkout/: uses STRIPE_PRICE_ID_MONTHLY, metadata.user_id, no Customer.create when customer_id exists."""
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor_prem", password="test")
@@ -209,7 +209,7 @@ class StripeCheckoutPremiumTest(TestCase):
 
 @override_settings(
     STRIPE_SECRET_KEY="sk_test_fake",
-    STRIPE_PRICE_ID_PREMIUM="price_premium_123",
+    STRIPE_PRICE_ID_MONTHLY="price_premium_123",
     STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
 )
 class StripePortalPremiumTest(TestCase):
