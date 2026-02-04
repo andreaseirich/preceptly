@@ -47,11 +47,14 @@ class PublicBookingLimitTest(TestCase):
             )
 
     def test_booking_blocked_when_limit_reached(self):
-        client = Client()
+        client = Client(enforce_csrf_checks=True)
+        client.get(reverse("lessons:public_booking_with_token", args=["tok-limit"]))
         session = client.session
         session["public_booking_tutor_token"] = "tok-limit"
         session["public_booking_student_id"] = self.student.id
         session.save()
+        csrf = client.cookies.get("csrftoken")
+        headers = {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
         future = timezone.now() + timedelta(days=14)
         dt_str = future.strftime("%Y-%m-%d")
@@ -68,6 +71,7 @@ class PublicBookingLimitTest(TestCase):
                 }
             ),
             content_type="application/json",
+            **headers,
         )
         self.assertEqual(response.status_code, 403)
         self.assertIn("limit", response.json().get("message", "").lower())
@@ -129,11 +133,14 @@ class PublicReschedulePremiumTest(TestCase):
         )
 
     def test_basic_reschedule_returns_403(self):
-        client = Client()
+        client = Client(enforce_csrf_checks=True)
+        client.get(reverse("lessons:public_booking_with_token", args=["tok-basic"]))
         session = client.session
         session["public_booking_tutor_token"] = "tok-basic"
         session["public_booking_student_id"] = self.student_basic.id
         session.save()
+        csrf = client.cookies.get("csrftoken")
+        headers = {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
         new_date = (timezone.now() + timedelta(days=14)).strftime("%Y-%m-%d")
         response = client.post(
@@ -148,5 +155,6 @@ class PublicReschedulePremiumTest(TestCase):
                 }
             ),
             content_type="application/json",
+            **headers,
         )
         self.assertEqual(response.status_code, 403)

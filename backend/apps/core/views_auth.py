@@ -26,6 +26,11 @@ class TutorFlowLoginView(LoginView):
             return throttled
         return super().post(request, *args, **kwargs)
 
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        self.request.session.cycle_key()
+        return result
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add landing page link for non-authenticated users

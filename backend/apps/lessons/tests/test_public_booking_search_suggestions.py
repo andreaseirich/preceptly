@@ -44,14 +44,20 @@ class PublicBookingSearchSuggestionsTest(TestCase):
             user=self.tutor_b, first_name="Max", last_name="Other"
         )
 
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
         self.search_url = reverse("lessons:public_booking_search_student")
+
+    def _csrf_headers(self, tutor_token: str = "tok-a"):
+        self.client.get(reverse("lessons:public_booking_with_token", args=[tutor_token]))
+        csrf = self.client.cookies.get("csrftoken")
+        return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
     def _search(self, name: str, tutor_token: str = "tok-a"):
         return self.client.post(
             self.search_url,
             data=json.dumps({"name": name, "tutor_token": tutor_token}),
             content_type="application/json",
+            **self._csrf_headers(tutor_token),
         )
 
     def test_first_name_only_returns_suggestions(self):

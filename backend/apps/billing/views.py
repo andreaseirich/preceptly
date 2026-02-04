@@ -331,8 +331,9 @@ def invoice_pdf_download(request, pk):
     try:
         with invoice.invoice_pdf.open("rb") as f:
             pdf_bytes = f.read()
+        fn = f"invoice-{invoice.invoice_number or invoice.id}.pdf"
         response = HttpResponse(pdf_bytes, content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="invoice_{invoice.id}.pdf"'
+        response["Content-Disposition"] = f'attachment; filename="{fn}"'
         return response
     except (FileNotFoundError, OSError) as err:
         raise Http404(_("Invoice PDF file not found.")) from err

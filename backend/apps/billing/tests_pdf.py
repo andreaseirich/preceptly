@@ -55,14 +55,17 @@ class InvoicePDFTest(TestCase):
         self.assertIsNotNone(self.invoice.invoice_pdf_created_at)
 
     def test_pdf_download_returns_application_pdf(self):
-        """Download endpoint returns application/pdf."""
+        """Download endpoint returns application/pdf and correct Content-Disposition."""
         self.client.login(username="tutor", password="test")
         response = self.client.get(
             reverse("billing:invoice_pdf_download", kwargs={"pk": self.invoice.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
-        self.assertIn("attachment", response.get("Content-Disposition", ""))
+        cd = response.get("Content-Disposition", "")
+        self.assertIn("attachment", cd)
+        self.assertIn("filename=", cd)
+        self.assertRegex(cd, r'filename="invoice-[^"]+\.pdf"')
 
     def test_pdf_download_404_for_other_user(self):
         """Non-owner cannot download invoice PDF (404)."""

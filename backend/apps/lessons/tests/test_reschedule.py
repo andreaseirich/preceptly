@@ -41,7 +41,12 @@ class RescheduleTestMixin:
             working_hours={"monday": [{"start": "09:00", "end": "17:00"}]},
         )
 
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
+
+    def _csrf_headers(self):
+        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-reschedule"]))
+        csrf = self.client.cookies.get("csrftoken")
+        return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
     def _verify(self):
         resp = self.client.post(
@@ -54,6 +59,7 @@ class RescheduleTestMixin:
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         assert resp.status_code == 200, resp.content
 
@@ -123,6 +129,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 200, resp.content)
         data = json.loads(resp.content)
@@ -158,6 +165,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 400)
 
@@ -198,6 +206,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 404)
 
@@ -227,6 +236,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 404)
 
@@ -262,6 +272,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 400)
         les2.refresh_from_db()
@@ -294,6 +305,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                 }
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 200)
         data = json.loads(resp.content)

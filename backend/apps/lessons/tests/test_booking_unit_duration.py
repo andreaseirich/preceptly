@@ -57,7 +57,12 @@ class BookingUnitDurationTest(TestCase):
             is_active=True,
         )
 
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
+
+    def _csrf_headers(self):
+        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-x"]))
+        csrf = self.client.cookies.get("csrftoken")
+        return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
     def _verify(self):
         resp = self.client.post(
@@ -66,6 +71,7 @@ class BookingUnitDurationTest(TestCase):
                 {"name": "Max Test", "code": self.booking_code, "tutor_token": "tok-x"}
             ),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 200)
 
@@ -94,6 +100,7 @@ class BookingUnitDurationTest(TestCase):
             reverse("lessons:public_booking_book_lesson"),
             data=json.dumps(payload),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp.status_code, 200, resp.content)
 
@@ -103,6 +110,7 @@ class BookingUnitDurationTest(TestCase):
             reverse("lessons:public_booking_book_lesson"),
             data=json.dumps(payload),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         self.assertEqual(resp2.status_code, 400)
         data = json.loads(resp2.content)

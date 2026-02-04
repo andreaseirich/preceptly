@@ -45,14 +45,22 @@ class PublicBookingAuthTest(TestCase):
         )
         set_booking_code(self.other_student)
 
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
         self.verify_url = reverse("lessons:public_booking_verify_student")
 
+    def _get_csrf_headers(self):
+        """Get CSRF token by loading public booking page."""
+        self.client.get(reverse("lessons:public_booking_with_token", args=["test-token-123"]))
+        csrf = self.client.cookies.get("csrftoken")
+        return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
+
     def _verify(self, name: str, code: str, tutor_token: str = "test-token-123"):
+        headers = self._get_csrf_headers()
         return self.client.post(
             self.verify_url,
             data=json.dumps({"name": name, "code": code, "tutor_token": tutor_token}),
             content_type="application/json",
+            **headers,
         )
 
     def test_name_without_code_no_access(self):
@@ -119,10 +127,29 @@ class PublicBookingAuthTest(TestCase):
 
     def test_verify_success_cycles_session_key(self):
         """Successful verify cycles session key to reduce fixation risk."""
-        self.client.get(reverse("core:landing"))
+        self.client.get(reverse("lessons:public_booking_with_token", args=["test-token-123"]))
         session_key_before = self.client.session.session_key
         self.assertIsNotNone(session_key_before)
         resp = self._verify("Max Mustermann", self.code1)
         self.assertEqual(resp.status_code, 200)
         session_key_after = self.client.session.session_key
         self.assertNotEqual(session_key_before, session_key_after)
+
+    def test_verify_repeated_failed_attempts_return_429(self):
+        """Repeated failed verify attempts trigger rate limit and return 429."""
+        for _ in range(THROTTLE_IP_LIMIT + 2):
+            resp = self._verify("Max Mustermann", "WRONGCODE")
+            if resp.status_code == 429:
+                break
+        self.assertEqual(resp.status_code, 429)
+        data = json.loads(resp.content)
+        self.assertFalse(data.get("success"))
+        self.assertNotIn("exist", data.get("message", "").lower())
+
+    def test_verify_success_after_some_failures_still_works(self):
+        """Successful verify still works within throttle limit."""
+        for _ in range(3):
+            self._verify("Max Mustermann", "WRONGCODE")
+        resp = self._verify("Max Mustermann", self.code1)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(json.loads(resp.content).get("success"))

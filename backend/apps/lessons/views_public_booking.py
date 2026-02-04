@@ -28,7 +28,7 @@ from django.http import Http404, JsonResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
 
@@ -192,7 +192,6 @@ def public_booking_week_api(request, tutor_token):
 _NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def search_student_api(request):
     """
@@ -248,7 +247,6 @@ def search_student_api(request):
         return JsonResponse({"success": False, "message": _("Invalid request.")}, status=400)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def verify_student_api(request):
     """
@@ -315,7 +313,6 @@ def verify_student_api(request):
         return JsonResponse({"success": False, "message": _("Invalid request.")}, status=400)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def create_student_api(request):
     """API for creating new students. Generates booking code; returned once."""
@@ -378,7 +375,6 @@ def create_student_api(request):
         )
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def book_lesson_api(request):
     """API for booking a lesson. Requires valid student_id and booking_code."""
@@ -640,7 +636,6 @@ def book_lesson_api(request):
 _RESCHEDULE_NEUTRAL = _("Reschedule not possible. Please try again.")
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def reschedule_lesson_api(request):
     """

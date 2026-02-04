@@ -68,17 +68,23 @@ class PublicBookingWeekOwnOtherTest(TestCase):
             status="planned",
         )
 
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
         self.week_url = "/lessons/public-booking/tok-abc/week/"
 
     def _get_week(self, year=2025, month=1, day=6):
         return self.client.get(self.week_url, {"year": year, "month": month, "day": day})
+
+    def _csrf_headers(self):
+        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-abc"]))
+        csrf = self.client.cookies.get("csrftoken")
+        return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
     def _verify(self, name, code):
         resp = self.client.post(
             reverse("lessons:public_booking_verify_student"),
             data=json.dumps({"name": name, "code": code, "tutor_token": "tok-abc"}),
             content_type="application/json",
+            **self._csrf_headers(),
         )
         return resp
 
