@@ -95,7 +95,7 @@ If you need to run commands locally, get the public DATABASE_URL from Railway:
 - Premium User: `demo_premium` / `demo123`
 - Standard User: `demo_user` / `demo123`
 
-See `docs/RAILWAY_MANAGEMENT_COMMANDS.md` for detailed instructions.
+**Running management commands:** Must run inside the Railway container (e.g. Dashboard → Deployments → Shell) because `postgres.railway.internal` only resolves there. Alternatively, copy the public `DATABASE_URL` from the PostgreSQL service Variables tab, then locally: `export DATABASE_URL="postgresql://user:pass@host.up.railway.app:5432/railway"` and run `python manage.py load_demo_data` from `/app/backend` (or `cd backend` from repo root).
 
 ### Compile Translations
 
@@ -139,7 +139,7 @@ STRIPE_PRICE_ID_MONTHLY=price_...
 
 Optional: `STRIPE_PRICE_ID_YEARLY`, `STRIPE_PORTAL_RETURN_URL`, `STRIPE_CHECKOUT_SUCCESS_URL`, `STRIPE_CHECKOUT_CANCEL_URL`.
 
-Webhook URL: `https://your-domain/webhooks/stripe/`. Use Stripe CLI for local testing: `stripe listen --forward-to localhost:8000/webhooks/stripe/`.
+Webhook URL: `https://your-domain/webhooks/stripe/` (must match the path in `backend/tutorflow/urls.py`). Use Stripe CLI for local testing: `stripe listen --forward-to localhost:8000/webhooks/stripe/`.
 
 ## Monitoring and Logs
 

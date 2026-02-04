@@ -58,9 +58,9 @@ All security-related information will be handled confidentially and will not be 
 When using TutorFlow:
 
 - **Never commit sensitive data** (API keys, passwords, real student data) to the repository
-- **Use environment variables** for configuration (see `docs/DEPLOYMENT.md`)
+- **Use environment variables** for configuration (see `docs/RAILWAY_DEPLOYMENT.md`)
 - **Keep dependencies updated** (Dependabot is configured to help with this)
-- **Follow deployment guidelines** in `docs/DEPLOYMENT.md` for production environments
+- **Follow deployment guidelines** in `docs/RAILWAY_DEPLOYMENT.md` for production environments
 - **Use strong passwords** and enable authentication features as appropriate
 - **No hardcoded secrets**: `SECRET_KEY`, database credentials, and LLM keys are expected from environment variables; defaults in the repo are demo-only
 - **Secure defaults**: In Produktion niemals mit `DEBUG=True` oder leeren `ALLOWED_HOSTS` betreiben; aktivieren Sie bei Bedarf `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` via ENV.

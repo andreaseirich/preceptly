@@ -9,6 +9,8 @@
 
 **The productivity bridge for educators** – A comprehensive tutoring management system that eliminates administrative overhead and enables tutors to focus on teaching.
 
+**Premium vs Basic:** Basic users get full scheduling, conflict detection, billing, and invoicing. Premium adds AI-assisted lesson plans (LLM-powered), public booking with reschedule, and Stripe subscription management.
+
 ### 🎥 Demo Video
 
 [![TutorFlow Demo](https://img.youtube.com/vi/YUsSuPgR1XQ/maxresdefault.jpg)](https://youtu.be/YUsSuPgR1XQ?si=P2ucdtZZjWFqePLB)
@@ -122,33 +124,27 @@ The system automatically enforces contract quotas, detects conflicts across all 
 ./scripts/run_demo.sh
 ```
 
-Creates `.env` from `.env.example` if missing, then starts the application with mocked AI (`MOCK_LLM=1`) and deterministic demo data. Access at `http://127.0.0.1:8000/`.
+Requires Python 3.12+ and `pip install -r requirements.txt` first. Creates `.env` from `.env.example` if missing, runs migrations, loads demo data, and starts the server at `http://127.0.0.1:8000/` with mocked AI (`MOCK_LLM=1`).
 
 ### Manual Setup
 
 ```bash
-# Clone repository
 git clone https://github.com/andreaseirich/tutorflow.git
 cd tutorflow
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # Linux/Mac
-
-# Install dependencies
+python3 -m venv .venv && source .venv/bin/activate  # or venv
 pip install -r requirements.txt
-
-# Setup database
-cd backend
-python manage.py migrate
-python manage.py compilemessages
-
-# Load demo data (optional)
-python manage.py load_demo_data
-
-# Start server
+cd backend && python manage.py migrate && python manage.py compilemessages
+python manage.py load_demo_data  # optional
 python manage.py runserver
 ```
+
+### Deploy on Railway
+
+See [docs/RAILWAY_DEPLOYMENT.md](docs/RAILWAY_DEPLOYMENT.md) for Railway deployment, env vars, and Stripe setup.
+
+### Security & Privacy
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting and [docs/ETHICS.md](docs/ETHICS.md) for data protection principles.
 
 ### Local git setup (optional)
 
@@ -181,9 +177,10 @@ TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 –
 ## Documentation
 
 - **[Architecture](docs/ARCHITECTURE.md)** – Technical architecture and design decisions
-- **[API Documentation](docs/API.md)** – API endpoints and usage
-- **[Deployment Guide](docs/RAILWAY_DEPLOYMENT.md)** – Railway deployment, env vars, Stripe setup
-- **[Ethics & Privacy](docs/ETHICS.md)** – Ethical guidelines and data protection principles
+- **[API](docs/API.md)** – Endpoints and usage
+- **[Railway Deployment](docs/RAILWAY_DEPLOYMENT.md)** – Deploy, env vars, Stripe
+- **[Ethics & Privacy](docs/ETHICS.md)** – Data protection principles
+- **[Judging Guide](docs/JUDGING_GUIDE.md)** – Reviewer shortcuts and demo flows
 
 ---
 

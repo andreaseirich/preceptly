@@ -2,11 +2,11 @@
 
 ## Overview
 
-This documentation describes the API endpoints of TutorFlow. The API will be implemented in later phases.
+This documentation describes the endpoints and views of TutorFlow. Django-based views with JSON responses for API endpoints.
 
 ## Status
 
-**Phase 3**: CRUD views and core features implemented. Django-based views (no REST API).
+CRUD views and core features implemented. Django templates for UI; JSON for booking/search APIs.
 
 ## Implemented Views (Phase 3)
 
