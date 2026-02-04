@@ -10,6 +10,7 @@ import stripe
 from apps.core.models import StripeWebhookEvent, UserProfile
 from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -36,6 +37,25 @@ def _get_base_url(request: HttpRequest) -> str:
 
 def _stripe_enabled() -> bool:
     return getattr(settings, "STRIPE_ENABLED", False)
+
+
+def _wants_json(request: HttpRequest) -> bool:
+    """True if request expects JSON (AJAX/API)."""
+    accept = (request.META.get("HTTP_ACCEPT") or "").lower()
+    if "application/json" in accept:
+        return True
+    if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+        return True
+    return False
+
+
+def _stripe_checkout_error_response(request: HttpRequest) -> HttpResponse:
+    """Return redirect (HTML) or 502 JSON for Stripe upstream failures."""
+    msg = _("Could not start checkout. Please try again in a moment.")
+    if _wants_json(request):
+        return JsonResponse({"error": str(msg)}, status=502)
+    messages.error(request, msg)
+    return redirect(reverse("core:settings"), status=302)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -68,13 +88,17 @@ class SubscriptionCheckoutView(View):
 
         customer_id = profile.stripe_customer_id if profile else None
         if not customer_id:
-            customer = stripe.Customer.create(
-                email=user.email or f"{user.username}@placeholder.local",
-                metadata={"user_id": str(user.id), "username": user.username},
-            )
-            customer_id = customer.id
-            profile.stripe_customer_id = customer_id
-            profile.save(update_fields=["stripe_customer_id"])
+            try:
+                customer = stripe.Customer.create(
+                    email=user.email or f"{user.username}@placeholder.local",
+                    metadata={"user_id": str(user.id), "username": user.username},
+                )
+                customer_id = customer.id
+                profile.stripe_customer_id = customer_id
+                profile.save(update_fields=["stripe_customer_id"])
+            except stripe.error.StripeError as e:
+                logger.warning("Stripe Customer.create failed: %s", str(e)[:200])
+                return _stripe_checkout_error_response(request)
 
         try:
             session = stripe.checkout.Session.create(
@@ -93,9 +117,7 @@ class SubscriptionCheckoutView(View):
             )
         except stripe.error.StripeError as e:
             logger.warning("Stripe checkout create failed: %s", str(e)[:200])
-            return JsonResponse(
-                {"error": _("Could not create checkout session. Please try again.")}, status=500
-            )
+            return _stripe_checkout_error_response(request)
 
         return redirect(session.url, status=303)
 
@@ -127,9 +149,11 @@ class SubscriptionPortalView(View):
             )
         except stripe.error.StripeError as e:
             logger.warning("Stripe portal create failed: %s", str(e)[:200])
-            return JsonResponse(
-                {"error": _("Could not open billing portal. Please try again.")}, status=500
-            )
+            msg = _("Could not open billing portal. Please try again.")
+            if _wants_json(request):
+                return JsonResponse({"error": str(msg)}, status=502)
+            messages.error(request, msg)
+            return redirect(reverse("core:settings"), status=302)
 
         return redirect(session.url, status=303)
 
@@ -182,9 +206,7 @@ class StripeCheckoutView(View):
                     profile.save(update_fields=["stripe_customer_id"])
                 except stripe.error.StripeError as e:
                     logger.warning("Stripe Customer.create failed: %s", str(e)[:200])
-                    return JsonResponse(
-                        {"error": _("Could not create customer. Please try again.")}, status=500
-                    )
+                    return _stripe_checkout_error_response(request)
 
         try:
             session = stripe.checkout.Session.create(
@@ -198,9 +220,7 @@ class StripeCheckoutView(View):
             )
         except stripe.error.StripeError as e:
             logger.warning("Stripe checkout create failed: %s", str(e)[:200])
-            return JsonResponse(
-                {"error": _("Could not create checkout session. Please try again.")}, status=500
-            )
+            return _stripe_checkout_error_response(request)
 
         return redirect(session.url, status=303)
 
@@ -240,9 +260,8 @@ class StripePortalView(View):
             )
         except stripe.error.StripeError as e:
             logger.warning("Stripe portal create failed: %s", str(e)[:200])
-            return JsonResponse(
-                {"error": _("Could not open billing portal. Please try again.")}, status=500
-            )
+            msg = _("Could not open billing portal. Please try again.")
+            return JsonResponse({"error": str(msg)}, status=502)
 
         return JsonResponse({"portal_url": session.url}, status=200)
 

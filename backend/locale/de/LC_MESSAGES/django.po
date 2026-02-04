@@ -891,6 +891,10 @@ msgstr "Kein Abrechnungskunde gefunden. Bitte zuerst ein Abo abschließen, um es
 msgid "Could not create customer. Please try again."
 msgstr "Kunde konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
 
+#: apps/core/views_stripe.py
+msgid "Could not start checkout. Please try again in a moment."
+msgstr "Checkout konnte nicht gestartet werden. Bitte in einem Moment erneut versuchen."
+
 #: apps/core/templates/core/settings.html
 msgid "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet."
 msgstr "Zahlung eingegangen. Die Abo-Aktivierung kann einen Moment dauern. Seite neu laden, falls Premium noch nicht sichtbar ist."

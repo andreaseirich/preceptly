@@ -9,6 +9,7 @@ import stripe
 from apps.core.models import StripeWebhookEvent, UserProfile
 from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -237,15 +238,74 @@ class StripeCheckoutPremiumTest(TestCase):
         self.assertEqual(call_kw["customer"], "cus_after_first")
 
     @patch("apps.core.views_stripe.stripe.Customer.create")
-    def test_checkout_customer_create_failure_returns_safe_error(self, mock_customer_create):
-        """Customer.create failure returns 500 with safe message, no secrets."""
+    def test_checkout_customer_create_failure_html_redirects_with_message(
+        self, mock_customer_create
+    ):
+        """HTML flow: Customer.create raises -> 302 redirect to Settings, message queued."""
         mock_customer_create.side_effect = stripe.error.StripeError("api_error")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
-        self.assertEqual(response.status_code, 500)
+        response = self.client.post(reverse("stripe_checkout"), follow=True)
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("checkout" in str(m.message).lower() for m in messages_list))
+
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_customer_create_failure_json_returns_502(self, mock_customer_create):
+        """JSON flow: Customer.create raises -> 502 with error."""
+        mock_customer_create.side_effect = stripe.error.StripeError("api_error")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(
+            reverse("stripe_checkout"),
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(response.status_code, 502)
         data = response.json()
         self.assertIn("error", data)
         self.assertNotIn("api_error", data["error"])
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_session_create_failure_html_redirects_with_message(
+        self, mock_customer_create, mock_session_create
+    ):
+        """HTML flow: Session.create raises -> 302 redirect to Settings, message queued."""
+        mock_customer_create.return_value = MagicMock(id="cus_ok")
+        mock_session_create.side_effect = stripe.error.StripeError("session_error")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"), follow=True)
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("checkout" in str(m.message).lower() for m in messages_list))
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_session_create_failure_json_returns_502(
+        self, mock_customer_create, mock_session_create
+    ):
+        """JSON flow: Session.create raises -> 502 with error."""
+        mock_customer_create.return_value = MagicMock(id="cus_ok")
+        mock_session_create.side_effect = stripe.error.StripeError("session_error")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(
+            reverse("stripe_checkout"),
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(response.status_code, 502)
+        data = response.json()
+        self.assertIn("error", data)
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_session_failure_keeps_stripe_customer_id(
+        self, mock_customer_create, mock_session_create
+    ):
+        """Customer created successfully, Session.create fails -> stripe_customer_id is kept."""
+        mock_customer_create.return_value = MagicMock(id="cus_saved")
+        mock_session_create.side_effect = stripe.error.StripeError("session_error")
+        self.client.login(username="tutor_prem", password="test")
+        self.client.post(reverse("stripe_checkout"))
+        profile = UserProfile.objects.get(user=self.user)
+        self.assertEqual(profile.stripe_customer_id, "cus_saved")
 
 
 @override_settings(
