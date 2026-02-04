@@ -386,6 +386,65 @@ class StripeWebhookTest(TestCase):
         self.assertEqual(StripeWebhookEvent.objects.filter(event_id="evt_idem123").count(), 1)
         mock_handler.assert_called_once()
 
+    def test_webhook_same_event_twice_is_idempotent_and_premium_stable(self):
+        """Integration test: same event twice -> premium set once, idempotent, single DB record."""
+        user = User.objects.create_user(username="idem_user", password="test")
+        profile = UserProfile.objects.create(
+            user=user,
+            is_premium=False,
+            stripe_customer_id="cus_idem_test",
+            stripe_subscription_id=None,
+        )
+        event = {
+            "id": "evt_test_idempotency_123",
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": "sub_idem_test",
+                    "status": "active",
+                    "customer": "cus_idem_test",
+                    "metadata": {"user_id": str(user.id)},
+                    "items": {"data": [{"price": {"id": "price_fake"}}]},
+                }
+            },
+        }
+
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            r1 = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+        self.assertEqual(r1.status_code, 200)
+        profile.refresh_from_db()
+        self.assertTrue(profile.is_premium)
+        self.assertEqual(profile.stripe_subscription_id, "sub_idem_test")
+        self.assertEqual(profile.stripe_customer_id, "cus_idem_test")
+
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            r2 = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+        self.assertEqual(r2.status_code, 200)
+        profile.refresh_from_db()
+        self.assertTrue(profile.is_premium)
+        self.assertEqual(profile.stripe_subscription_id, "sub_idem_test")
+        self.assertEqual(profile.stripe_customer_id, "cus_idem_test")
+
+        self.assertEqual(
+            StripeWebhookEvent.objects.filter(event_id="evt_test_idempotency_123").count(), 1
+        )
+
 
 @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
 class StripeWebhookConstraintsTest(TestCase):
