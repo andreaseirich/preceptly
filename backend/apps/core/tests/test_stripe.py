@@ -1,16 +1,83 @@
 """
-Tests for Stripe subscription: checkout, portal, webhook.
+Tests for Stripe subscription: checkout, portal, webhook, user resolution, premium rules.
 """
 
 import json
 from unittest.mock import MagicMock, patch
 
+import stripe
 from apps.core.models import StripeWebhookEvent, UserProfile
+from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
 
+# --- stripe_utils unit tests ---
+class IsPremiumSubscriptionStatusTest(TestCase):
+    """Premium True only for active/trialing."""
+
+    def test_active_returns_true(self):
+        self.assertTrue(is_premium_subscription_status("active"))
+
+    def test_trialing_returns_true(self):
+        self.assertTrue(is_premium_subscription_status("trialing"))
+
+    def test_past_due_returns_false(self):
+        self.assertFalse(is_premium_subscription_status("past_due"))
+
+    def test_unpaid_returns_false(self):
+        self.assertFalse(is_premium_subscription_status("unpaid"))
+
+    def test_canceled_returns_false(self):
+        self.assertFalse(is_premium_subscription_status("canceled"))
+
+    def test_incomplete_returns_false(self):
+        self.assertFalse(is_premium_subscription_status("incomplete"))
+
+    def test_none_returns_false(self):
+        self.assertFalse(is_premium_subscription_status(None))
+
+    def test_empty_returns_false(self):
+        self.assertFalse(is_premium_subscription_status(""))
+
+
+class ResolveUserFromStripeEventTest(TestCase):
+    """User resolution via metadata.user_id and customer_id fallback."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor", password="test")
+        self.profile = UserProfile.objects.create(
+            user=self.user,
+            stripe_customer_id="cus_abc123",
+            stripe_subscription_id="sub_xyz789",
+        )
+
+    def test_resolve_user_via_metadata_user_id(self):
+        event = {
+            "data": {"object": {"metadata": {"user_id": str(self.user.id)}}},
+        }
+        result = resolve_user_from_stripe_event(event)
+        self.assertEqual(result, self.profile)
+
+    def test_resolve_user_via_customer_id_fallback(self):
+        event = {"data": {"object": {"customer": "cus_abc123"}}}
+        result = resolve_user_from_stripe_event(event)
+        self.assertEqual(result, self.profile)
+
+    def test_resolve_user_via_subscription_id_fallback(self):
+        event = {"data": {"object": {"id": "sub_xyz789"}}}
+        result = resolve_user_from_stripe_event(event)
+        self.assertEqual(result, self.profile)
+
+    def test_resolve_returns_none_when_no_mapping(self):
+        event = {"data": {"object": {"customer": "cus_unknown"}}}
+        result = resolve_user_from_stripe_event(event)
+        self.assertIsNone(result)
+
+
+# --- Checkout / Portal ---
 @override_settings(
     STRIPE_SECRET_KEY="sk_test_fake",
     STRIPE_WEBHOOK_SECRET="whsec_fake",
@@ -94,8 +161,10 @@ class SubscriptionPortalTest(TestCase):
         self.assertIn("settings", response.url)
 
 
+# --- Webhook ---
+@override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
 class StripeWebhookTest(TestCase):
-    """Webhook signature verification and event handling."""
+    """Webhook signature verification, event handling, idempotency."""
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
@@ -106,11 +175,10 @@ class StripeWebhookTest(TestCase):
             stripe_subscription_id=None,
         )
 
-    @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake")
-    def test_webhook_invalid_signature_returns_400(self):
+    def test_webhook_rejects_invalid_signature_returns_400(self):
         with patch(
             "apps.core.views_stripe.stripe.Webhook.construct_event",
-            side_effect=Exception("Invalid signature"),
+            side_effect=stripe.error.SignatureVerificationError("bad", "sig"),
         ):
             response = self.client.post(
                 reverse("stripe_webhook"),
@@ -120,7 +188,26 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 400)
 
-    @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
+    def test_webhook_without_mapping_returns_200_and_does_not_change_user(self):
+        event = {
+            "id": "evt_nomap123",
+            "type": "customer.subscription.updated",
+            "data": {"object": {"id": "sub_unknown", "customer": "cus_unknown"}},
+        }
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            response = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.is_premium)
+
     @patch("apps.core.views_stripe._handle_stripe_event")
     def test_webhook_success_returns_200(self, mock_handle):
         event = {
@@ -141,8 +228,7 @@ class StripeWebhookTest(TestCase):
         self.assertEqual(response.status_code, 200)
         mock_handle.assert_called_once()
 
-    @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
-    def test_webhook_subscription_updated_active_flips_premium_true(self):
+    def test_subscription_updated_active_sets_premium_true(self):
         event = {
             "id": "evt_upd123",
             "type": "customer.subscription.updated",
@@ -171,8 +257,68 @@ class StripeWebhookTest(TestCase):
         self.assertTrue(self.profile.is_premium)
         self.assertEqual(self.profile.stripe_subscription_id, "sub_new")
 
-    @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
-    def test_webhook_subscription_deleted_flips_premium_false(self):
+    def test_subscription_updated_trialing_sets_premium_true(self):
+        event = {
+            "id": "evt_trial123",
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": "sub_trial",
+                    "status": "trialing",
+                    "customer": "cus_fake",
+                    "metadata": {"user_id": str(self.user.id)},
+                    "items": {"data": []},
+                }
+            },
+        }
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            response = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertTrue(self.profile.is_premium)
+
+    def test_subscription_updated_past_due_sets_premium_false(self):
+        self.profile.is_premium = True
+        self.profile.stripe_subscription_id = "sub_pd"
+        self.profile.premium_source = "stripe"
+        self.profile.save()
+
+        event = {
+            "id": "evt_pastdue123",
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": "sub_pd",
+                    "status": "past_due",
+                    "customer": "cus_fake",
+                    "metadata": {"user_id": str(self.user.id)},
+                    "items": {"data": []},
+                }
+            },
+        }
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            response = self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.is_premium)
+
+    def test_subscription_deleted_sets_premium_false(self):
         self.profile.is_premium = True
         self.profile.stripe_subscription_id = "sub_fake"
         self.profile.premium_source = "stripe"
@@ -198,8 +344,7 @@ class StripeWebhookTest(TestCase):
         self.assertFalse(self.profile.is_premium)
         self.assertIsNone(self.profile.stripe_subscription_id)
 
-    @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
-    def test_webhook_idempotency_same_event_twice(self):
+    def test_idempotency_same_event_id_processed_once(self):
         event = {
             "id": "evt_idem123",
             "type": "customer.subscription.updated",
@@ -236,3 +381,24 @@ class StripeWebhookTest(TestCase):
         self.assertEqual(r1.status_code, 200)
         self.assertEqual(r2.status_code, 200)
         self.assertEqual(StripeWebhookEvent.objects.filter(event_id="evt_idem123").count(), 1)
+
+
+@override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
+class StripeWebhookConstraintsTest(TestCase):
+    """Unique constraints on event_id and stripe_customer_id."""
+
+    def test_unique_constraints_event_id(self):
+        StripeWebhookEvent.objects.create(
+            event_id="evt_uniq1", event_type="test", payload_summary={}
+        )
+        with self.assertRaises(IntegrityError):
+            StripeWebhookEvent.objects.create(
+                event_id="evt_uniq1", event_type="test", payload_summary={}
+            )
+
+    def test_unique_constraints_customer_id(self):
+        u1 = User.objects.create_user(username="u1", password="test")
+        u2 = User.objects.create_user(username="u2", password="test")
+        UserProfile.objects.create(user=u1, stripe_customer_id="cus_same")
+        with self.assertRaises(IntegrityError):
+            UserProfile.objects.create(user=u2, stripe_customer_id="cus_same")

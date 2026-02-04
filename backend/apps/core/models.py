@@ -38,7 +38,11 @@ class UserProfile(models.Model):
     )
     # Stripe subscription (source of truth for premium via webhook)
     stripe_customer_id = models.CharField(
-        max_length=255, blank=True, null=True, help_text=_("Stripe Customer ID")
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text=_("Stripe Customer ID"),
     )
     stripe_subscription_id = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Stripe Subscription ID")

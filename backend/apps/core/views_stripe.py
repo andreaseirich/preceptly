@@ -7,12 +7,15 @@ Premium status is set ONLY via verified webhook events (source of truth).
 import logging
 
 import stripe
-from apps.core.models import UserProfile
+from apps.core.models import StripeWebhookEvent, UserProfile
+from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -155,140 +158,154 @@ def stripe_webhook_view(request):
     event_id = event.get("id")
     event_type = event.get("type")
 
-    # Idempotency: skip if already processed
-    from apps.core.models import StripeWebhookEvent
+    # Idempotency: get_or_create to avoid race, skip if already processed
+    payload_summary = {"type": event_type}
+    obj = event.get("data", {}).get("object", {})
+    if obj.get("id"):
+        payload_summary["object_id"] = str(obj["id"])[:50]
 
-    if StripeWebhookEvent.objects.filter(event_id=event_id).exists():
+    try:
+        webhook_event, created = StripeWebhookEvent.objects.get_or_create(
+            event_id=event_id,
+            defaults={"event_type": event_type, "payload_summary": payload_summary},
+        )
+    except IntegrityError:
         return HttpResponse(status=200)
 
-    payload_summary = {"type": event_type}
-    if event.get("data", {}).get("object", {}).get("id"):
-        payload_summary["object_id"] = event["data"]["object"]["id"][:50]
-
-    StripeWebhookEvent.objects.create(
-        event_id=event_id,
-        event_type=event_type,
-        payload_summary=payload_summary,
-    )
+    if not created:
+        return HttpResponse(status=200)
 
     try:
         _handle_stripe_event(event)
     except Exception as e:
         logger.exception("Webhook handling failed for %s: %s", event_type, e)
-        return HttpResponse(status=200)  # Return 200 to avoid Stripe retries for logic errors
+        return HttpResponse(status=200)  # 200 to avoid Stripe retries for logic errors
 
     return HttpResponse(status=200)
 
 
-def _handle_stripe_event(event):
-    """Process Stripe event and update UserProfile premium status."""
-    from django.utils import timezone
+def _set_premium(profile: UserProfile, is_premium: bool) -> None:
+    """Update profile premium status."""
+    profile.is_premium = is_premium
+    if is_premium and not profile.premium_since:
+        profile.premium_since = timezone.now()
+    if not is_premium:
+        profile.premium_since = None
+    profile.premium_source = "stripe" if is_premium else (profile.premium_source or "")
+    profile.save(update_fields=["is_premium", "premium_since", "premium_source"])
 
+
+def _handle_stripe_event(event: dict) -> None:
+    """Process Stripe event and update UserProfile premium status. Unknown types -> no-op (200)."""
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     event_type = event["type"]
     data = event.get("data", {})
     obj = data.get("object", {})
 
-    def _get_user_id_from_obj(o):
-        uid = o.get("metadata", {}).get("user_id")
-        if uid:
-            return int(uid)
-        subscription_id = o.get("id") or o.get("subscription")
-        if subscription_id:
-            profile = UserProfile.objects.filter(stripe_subscription_id=subscription_id).first()
-            if profile:
-                return profile.user_id
-        customer_id = o.get("customer")
-        if customer_id:
-            if isinstance(customer_id, str) and customer_id.startswith("cus_"):
-                profile = UserProfile.objects.filter(stripe_customer_id=customer_id).first()
-                if profile:
-                    return profile.user_id
-        return None
-
-    def _set_premium(profile, is_premium):
-        profile.is_premium = is_premium
-        if is_premium and not profile.premium_since:
-            profile.premium_since = timezone.now()
-        if not is_premium:
-            profile.premium_since = None
-        profile.premium_source = "stripe" if is_premium else profile.premium_source or ""
-        profile.save(update_fields=["is_premium", "premium_since", "premium_source"])
-
     if event_type == "checkout.session.completed":
-        session = obj
-        user_id = int(session.get("metadata", {}).get("user_id", 0)) or _get_user_id_from_obj(
-            session
-        )
-        if not user_id:
-            return
-        try:
-            profile = UserProfile.objects.get(user_id=user_id)
-        except UserProfile.DoesNotExist:
-            return
-        profile.stripe_customer_id = session.get("customer") or profile.stripe_customer_id
-        sub_id = session.get("subscription")
-        if sub_id:
-            profile.stripe_subscription_id = sub_id
-        profile.save(update_fields=["stripe_customer_id", "stripe_subscription_id"])
-        if sub_id:
-            try:
-                sub = stripe.Subscription.retrieve(sub_id)
-                status = sub.get("status", "")
-                _set_premium(profile, status in ("active", "trialing"))
-            except stripe.error.StripeError as e:
-                logger.warning(
-                    "Stripe Subscription.retrieve failed for %s: %s", sub_id, str(e)[:100]
-                )
-
+        _handle_checkout_session_completed(event, obj)
     elif event_type in ("customer.subscription.created", "customer.subscription.updated"):
-        subscription = obj
-        sub_id = subscription.get("id")
-        customer_id = subscription.get("customer")
-        status = subscription.get("status", "")
-        is_premium = status in ("active", "trialing")
-
-        profile = None
-        user_id = _get_user_id_from_obj(subscription)
-        if user_id:
-            try:
-                profile = UserProfile.objects.get(user_id=user_id)
-            except UserProfile.DoesNotExist:
-                profile = None
-        if not profile and customer_id:
-            profile = UserProfile.objects.filter(stripe_customer_id=customer_id).first()
-        if not profile:
-            return
-
-        profile.stripe_subscription_id = sub_id
-        profile.stripe_customer_id = customer_id or profile.stripe_customer_id
-        price_id = None
-        items_data = subscription.get("items") or {}
-        if isinstance(items_data, dict):
-            items_list = items_data.get("data") or []
-        else:
-            items_list = []
-        if items_list:
-            first_item = items_list[0]
-            price_obj = first_item.get("price")
-            if isinstance(price_obj, dict):
-                price_id = price_obj.get("id")
-            elif isinstance(price_obj, str):
-                price_id = price_obj
-        if price_id:
-            profile.stripe_price_id = price_id
-        profile.save(
-            update_fields=["stripe_subscription_id", "stripe_customer_id", "stripe_price_id"]
-        )
-        _set_premium(profile, is_premium)
-
+        _handle_subscription_created_or_updated(obj)
     elif event_type == "customer.subscription.deleted":
-        subscription = obj
-        sub_id = subscription.get("id")
+        _handle_subscription_deleted(obj)
+    elif event_type == "invoice.payment_failed":
+        _handle_invoice_payment_failed(obj)
+    elif event_type == "invoice.paid":
+        _handle_invoice_paid(obj)
+    else:
+        logger.debug("Unhandled Stripe event type: %s", event_type)
+
+
+def _handle_checkout_session_completed(event: dict, session: dict) -> None:
+    """Handle checkout.session.completed: capture customer+subscription, set premium from status."""
+    profile = resolve_user_from_stripe_event(event)
+    if not profile:
+        return
+
+    profile.stripe_customer_id = session.get("customer") or profile.stripe_customer_id
+    sub_id = session.get("subscription")
+    if sub_id:
+        profile.stripe_subscription_id = sub_id
+    profile.save(update_fields=["stripe_customer_id", "stripe_subscription_id"])
+
+    if sub_id:
+        try:
+            sub = stripe.Subscription.retrieve(sub_id)
+            status = sub.get("status", "")
+            _set_premium(profile, is_premium_subscription_status(status))
+        except stripe.error.StripeError as e:
+            logger.warning("Stripe Subscription.retrieve failed for %s: %s", sub_id, str(e)[:100])
+
+
+def _handle_subscription_created_or_updated(subscription: dict) -> None:
+    """Handle subscription.created/updated: update profile and premium from status."""
+    from apps.core.stripe_utils import _extract_customer_id
+
+    sub_id = subscription.get("id")
+    customer_id = _extract_customer_id(subscription)
+    status = subscription.get("status", "")
+    is_premium = is_premium_subscription_status(status)
+
+    # Build synthetic event for resolve_user_from_stripe_event
+    synthetic_event = {"data": {"object": subscription}}
+    profile = resolve_user_from_stripe_event(synthetic_event)
+
+    if not profile and customer_id:
+        profile = UserProfile.objects.filter(stripe_customer_id=customer_id).first()
+    if not profile and sub_id:
         profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
-        if profile:
-            profile.stripe_subscription_id = None
-            profile.stripe_price_id = None
-            profile.save(update_fields=["stripe_subscription_id", "stripe_price_id"])
+    if not profile:
+        return
+
+    profile.stripe_subscription_id = sub_id
+    profile.stripe_customer_id = customer_id or profile.stripe_customer_id
+
+    price_id = None
+    items_data = subscription.get("items") or {}
+    items_list = items_data.get("data", []) if isinstance(items_data, dict) else []
+    if items_list:
+        first_item = items_list[0]
+        price_obj = first_item.get("price")
+        if isinstance(price_obj, dict):
+            price_id = price_obj.get("id")
+        elif isinstance(price_obj, str):
+            price_id = price_obj
+    if price_id:
+        profile.stripe_price_id = price_id
+
+    profile.save(update_fields=["stripe_subscription_id", "stripe_customer_id", "stripe_price_id"])
+    _set_premium(profile, is_premium)
+
+
+def _handle_subscription_deleted(subscription: dict) -> None:
+    """Handle subscription.deleted: clear subscription, set premium False."""
+    sub_id = subscription.get("id")
+    profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
+    if profile:
+        profile.stripe_subscription_id = None
+        profile.stripe_price_id = None
+        profile.save(update_fields=["stripe_subscription_id", "stripe_price_id"])
+        _set_premium(profile, False)
+
+
+def _handle_invoice_payment_failed(invoice: dict) -> None:
+    """invoice.payment_failed: if subscription status implies non-premium, set premium False."""
+    sub_id = invoice.get("subscription")
+    if not sub_id:
+        return
+    profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
+    if not profile:
+        return
+    try:
+        sub = stripe.Subscription.retrieve(sub_id)
+        status = sub.get("status", "")
+        if not is_premium_subscription_status(status):
             _set_premium(profile, False)
+    except stripe.error.StripeError as e:
+        logger.warning("Stripe Subscription.retrieve failed for invoice: %s", str(e)[:100])
+
+
+def _handle_invoice_paid(invoice: dict) -> None:
+    """invoice.paid: no premium toggle, ensure no errors."""
+    pass
