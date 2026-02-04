@@ -84,5 +84,5 @@ class RecurringBlockedTime(models.Model):
         from django.utils.translation import gettext_lazy as _
 
         weekday_names = [_("Mo"), _("Tu"), _("We"), _("Th"), _("Fr"), _("Sa"), _("Su")]
-        active = [weekday_names[i] for i in self.get_active_weekdays()]
-        return ", ".join(active) if active else _("None")
+        active = [str(weekday_names[i]) for i in self.get_active_weekdays()]
+        return ", ".join(active) if active else str(_("None"))
