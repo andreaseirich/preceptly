@@ -3,7 +3,9 @@ Tests for internationalization (i18n) functionality.
 """
 
 import json
+from datetime import date
 
+from apps.billing.models import Invoice
 from apps.core.models import UserProfile
 from apps.students.booking_code_service import set_booking_code
 from apps.students.models import Student
@@ -298,3 +300,65 @@ class I18nTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         # German short form must appear (Mo for Monday)
         self.assertIn(b"Mo", response.content)
+
+    def test_public_booking_de_contains_german_strings(self):
+        """When DE is active, public booking contains German UI strings."""
+        user = User.objects.create_user(username="tutor", password="test")
+        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
+        prof.public_booking_token = "tok-de-strings"
+        prof.save()
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get("/lessons/public-booking/tok-de-strings/")
+        self.assertEqual(response.status_code, 200)
+        # Must contain German strings
+        self.assertIn(b"Zur\xc3\xbcck", response.content)  # Zurück
+        self.assertIn(b"Best\xc3\xa4tigen", response.content)  # Bestätigen
+        self.assertIn(b"Zum Datum springen:", response.content)
+        self.assertIn(b"Heute", response.content)
+
+    def test_public_booking_de_does_not_contain_english_strings(self):
+        """When DE is active, public booking must NOT contain English UI strings."""
+        user = User.objects.create_user(username="tutor", password="test")
+        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
+        prof.public_booking_token = "tok-de-no-en"
+        prof.save()
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get("/lessons/public-booking/tok-de-no-en/")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b"Jump to date", response.content)
+        self.assertNotIn(b">Back<", response.content)
+        self.assertNotIn(b">Confirm<", response.content)
+
+    def test_reports_premium_german_labels(self):
+        """Reports page with premium user: DE labels when de active, no English."""
+        user = User.objects.create_user(username="premium", password="test")
+        UserProfile.objects.create(user=user, is_premium=True)
+        self.client.force_login(user)
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get(reverse("core:reports"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Umsatz", response.content)
+        self.assertIn(b"Stunden", response.content)
+        self.assertIn(b"Top 5 Sch\xc3\xbcler", response.content)  # Top 5 Schüler
+        self.assertNotIn(b">Revenue<", response.content)
+        self.assertNotIn(b">Hours<", response.content)
+
+    def test_invoice_detail_german_buttons(self):
+        """Invoice detail page: buttons in German when de active."""
+        user = User.objects.create_user(username="tutor", password="test")
+        UserProfile.objects.create(user=user, is_premium=True)
+        inv = Invoice.objects.create(
+            owner=user,
+            payer_name="Test",
+            total_amount=100,
+            period_start=date(2025, 1, 1),
+            period_end=date(2025, 1, 31),
+        )
+        self.client.force_login(user)
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
+        response = self.client.get(reverse("billing:invoice_detail", args=[inv.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"PDF erzeugen", response.content)
+        self.assertIn(b"Als gesendet markieren", response.content)
+        self.assertNotIn(b"Generate PDF", response.content)
+        self.assertNotIn(b"Mark as sent", response.content)

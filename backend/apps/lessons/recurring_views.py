@@ -211,9 +211,9 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["recurring_lessons"] = RecurringLesson.objects.all().order_by(
-            "contract__student", "start_date"
-        )
+        context["recurring_lessons"] = RecurringLesson.objects.filter(
+            contract__student__user=self.request.user
+        ).order_by("contract__student", "start_date")
         return context
 
     def post(self, request, *args, **kwargs):
@@ -225,7 +225,10 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
             messages.error(request, _("Please select at least one recurring lesson."))
             return redirect("lessons:recurring_bulk_edit")
 
-        recurring_lessons = RecurringLesson.objects.filter(pk__in=recurring_ids)
+        recurring_lessons = RecurringLesson.objects.filter(
+            pk__in=recurring_ids,
+            contract__student__user=request.user,
+        )
 
         if action == "delete":
             count = recurring_lessons.count()

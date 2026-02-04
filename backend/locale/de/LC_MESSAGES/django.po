@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 20:08+0100\n"
+"POT-Creation-Date: 2026-02-04 20:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -454,6 +454,7 @@ msgstr "Ja, löschen"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_generate.html:21
 #: apps/contracts/templates/contracts/contract_confirm_delete.html:16
 #: apps/contracts/templates/contracts/contract_form.html:50
+#: apps/core/templates/core/base.html:383
 #: apps/core/templates/core/settings.html:169
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:47
 #: apps/lessons/templates/lessons/lesson_form.html:168
@@ -497,8 +498,10 @@ msgid "Period:"
 msgstr "Zeitraum:"
 
 #: apps/billing/templates/billing/invoice_create.html:23
+#: apps/core/templates/core/base.html:406
 #: apps/lessons/templates/lessons/student_booking.html:372
 #: apps/lessons/templates/lessons/week.html:39
+#: apps/lessons/templates/lessons/week.html:165
 msgid "to"
 msgstr "bis"
 
@@ -646,6 +649,7 @@ msgid "View Document"
 msgstr "Dokument anzeigen"
 
 #: apps/billing/templates/billing/invoice_detail.html:19
+#: apps/core/templates/core/base.html:396
 msgid "Generate PDF"
 msgstr "PDF erzeugen"
 
@@ -658,14 +662,17 @@ msgid "PDF generated"
 msgstr "PDF erzeugt"
 
 #: apps/billing/templates/billing/invoice_detail.html:24
+#: apps/core/templates/core/base.html:398
 msgid "Mark as sent"
 msgstr "Als gesendet markieren"
 
 #: apps/billing/templates/billing/invoice_detail.html:27
+#: apps/core/templates/core/base.html:399
 msgid "Mark as paid"
 msgstr "Als bezahlt markieren"
 
 #: apps/billing/templates/billing/invoice_detail.html:30
+#: apps/core/templates/core/base.html:400
 msgid "Undo payment"
 msgstr "Bezahlung rückgängig"
 
@@ -675,6 +682,7 @@ msgstr "Bezahlung rückgängig"
 #: apps/contracts/templates/contracts/contract_confirm_delete.html:15
 #: apps/contracts/templates/contracts/contract_detail.html:11
 #: apps/contracts/templates/contracts/contract_list.html:36
+#: apps/core/templates/core/base.html:384
 #: apps/lessons/templates/lessons/lesson_detail.html:12
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:11
 #: apps/students/templates/students/student_confirm_delete.html:15
@@ -1344,6 +1352,7 @@ msgstr "Löschen bestätigen"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:10
 #: apps/contracts/templates/contracts/contract_detail.html:10
 #: apps/contracts/templates/contracts/contract_list.html:35
+#: apps/core/templates/core/base.html:385
 #: apps/lessons/templates/lessons/conflict_detail.html:53
 #: apps/lessons/templates/lessons/lesson_detail.html:11
 #: apps/lessons/templates/lessons/lesson_detail.html:110
@@ -1526,6 +1535,7 @@ msgstr ""
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:176
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_form.html:36
 #: apps/contracts/templates/contracts/contract_form.html:49
+#: apps/core/templates/core/base.html:382
 #: apps/core/templates/core/settings.html:189
 #: apps/lessons/templates/lessons/lesson_form.html:167
 #: apps/students/templates/students/student_form.html:13
@@ -1598,6 +1608,7 @@ msgid "Inactive"
 msgstr "Inaktiv"
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:31
+#: apps/core/templates/core/base.html:397
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:29
 #, fuzzy
 #| msgid "Previous Week"
@@ -2039,6 +2050,7 @@ msgstr ""
 "Geben Sie die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
 
 #: apps/contracts/templates/contracts/contract_form.html:22
+#: apps/core/templates/core/base.html:410
 #: apps/core/templates/core/income_overview.html:58
 #: apps/core/templates/core/reports.html:14
 #: apps/core/templates/core/reports.html:66
@@ -2063,6 +2075,7 @@ msgstr ""
 "Anzahl von geplanten Einheiten."
 
 #: apps/contracts/templates/contracts/contract_list.html:17
+#: apps/core/templates/core/base.html:405
 #: apps/lessons/templates/lessons/week.html:38
 #: apps/students/templates/students/student_detail.html:85
 msgid "From"
@@ -2326,16 +2339,104 @@ msgstr "Anmelden"
 msgid "Change language"
 msgstr "Sprache"
 
-#: apps/core/templates/core/base.html:381
+#: apps/core/templates/core/base.html:386
+#: apps/lessons/templates/lessons/week.html:194
+msgid "Create"
+msgstr "Erstellen"
+
+#: apps/core/templates/core/base.html:387
+#, fuzzy
+#| msgid "Last updated: %(date)s"
+msgid "Update"
+msgstr "Letzte Aktualisierung: %(date)s"
+
+#: apps/core/templates/core/base.html:388
+#: apps/lessons/templates/lessons/public_booking.html:230
+#: apps/lessons/templates/lessons/public_booking.html:270
+#: apps/lessons/templates/lessons/public_booking.html:292
+#: apps/lessons/templates/lessons/public_booking.html:385
+#: apps/lessons/templates/lessons/public_booking.html:393
+msgid "Back"
+msgstr "Zurück"
+
+#: apps/core/templates/core/base.html:389
+msgid "Next"
+msgstr "Weiter"
+
+#: apps/core/templates/core/base.html:390
+#: apps/lessons/templates/lessons/public_booking.html:198
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: apps/core/templates/core/base.html:391
+msgid "Search"
+msgstr "Suchen"
+
+#: apps/core/templates/core/base.html:392
+#: apps/lessons/templates/lessons/public_booking.html:227
+msgid "Verify"
+msgstr "Prüfen"
+
+#: apps/core/templates/core/base.html:393
+msgid "Reschedule"
+msgstr "Umbuchen"
+
+#: apps/core/templates/core/base.html:394
+msgid "Book"
+msgstr "Buchen"
+
+#: apps/core/templates/core/base.html:395
+msgid "Download"
+msgstr "Herunterladen"
+
+#: apps/core/templates/core/base.html:401
+#: apps/lessons/templates/lessons/public_booking.html:335
+#: apps/lessons/templates/lessons/student_booking.html:244
+msgid "Loading..."
+msgstr "Laden..."
+
+#: apps/core/templates/core/base.html:402
+msgid "No data"
+msgstr "Keine Daten"
+
+#: apps/core/templates/core/base.html:403
+msgid "Error"
+msgstr "Fehler"
+
+#: apps/core/templates/core/base.html:404
 #: apps/lessons/templates/lessons/public_booking.html:801
 #: apps/lessons/templates/lessons/student_booking.html:453
 #: apps/lessons/templates/lessons/student_booking.html:683
 msgid "Network error: Please check your internet connection."
 msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
 
-#: apps/core/templates/core/base.html:382
-msgid "Error"
-msgstr "Fehler"
+#: apps/core/templates/core/base.html:407
+#: apps/lessons/templates/lessons/week.html:40
+msgid "on"
+msgstr "am"
+
+#: apps/core/templates/core/base.html:408
+#: apps/lessons/templates/lessons/public_booking.html:314
+msgid "Today"
+msgstr "Heute"
+
+#: apps/core/templates/core/base.html:409
+#, fuzzy
+#| msgid "Weekly"
+msgid "Week"
+msgstr "Wöchentlich"
+
+#: apps/core/templates/core/base.html:411
+#: apps/lessons/templates/lessons/public_booking.html:316
+#: apps/lessons/templates/lessons/student_booking.html:181
+#: apps/lessons/templates/lessons/week.html:18
+msgid "Jump to date:"
+msgstr "Zum Datum springen:"
+
+#: apps/core/templates/core/base.html:412
+#: apps/lessons/templates/lessons/public_booking.html:811
+msgid "Reload"
+msgstr "Neu laden"
 
 #: apps/core/templates/core/dashboard.html:10
 msgid "Today's Lessons"
@@ -3943,10 +4044,6 @@ msgstr "Daten"
 msgid "Time Slot"
 msgstr "Zeitslot"
 
-#: apps/lessons/templates/lessons/public_booking.html:198
-msgid "Confirm"
-msgstr "Bestätigen"
-
 #: apps/lessons/templates/lessons/public_booking.html:203
 msgid "Enter your name"
 msgstr "Geben Sie Ihren Namen ein"
@@ -4003,20 +4100,8 @@ msgstr "Buchungslink"
 msgid "e.g., ABC123XYZ456"
 msgstr ""
 
-#: apps/lessons/templates/lessons/public_booking.html:227
-msgid "Verify"
-msgstr ""
-
 #: apps/lessons/templates/lessons/public_booking.html:228
 msgid "Don't have a code?"
-msgstr ""
-
-#: apps/lessons/templates/lessons/public_booking.html:230
-#: apps/lessons/templates/lessons/public_booking.html:270
-#: apps/lessons/templates/lessons/public_booking.html:292
-#: apps/lessons/templates/lessons/public_booking.html:385
-#: apps/lessons/templates/lessons/public_booking.html:393
-msgid "Back"
 msgstr ""
 
 #: apps/lessons/templates/lessons/public_booking.html:235
@@ -4126,16 +4211,6 @@ msgstr "Vorige Woche"
 msgid "Next Week"
 msgstr "Nächste Woche"
 
-#: apps/lessons/templates/lessons/public_booking.html:314
-msgid "Today"
-msgstr "Heute"
-
-#: apps/lessons/templates/lessons/public_booking.html:316
-#: apps/lessons/templates/lessons/student_booking.html:181
-#: apps/lessons/templates/lessons/week.html:18
-msgid "Jump to date:"
-msgstr "Zum Datum springen:"
-
 #: apps/lessons/templates/lessons/public_booking.html:323
 #: apps/lessons/templates/lessons/student_booking.html:240
 msgid "Selected:"
@@ -4157,11 +4232,6 @@ msgstr "Gesamte Serie umbuchen"
 #: apps/lessons/templates/lessons/public_booking.html:332
 msgid "Confirm Reschedule"
 msgstr "Umbuchung bestätigen"
-
-#: apps/lessons/templates/lessons/public_booking.html:335
-#: apps/lessons/templates/lessons/student_booking.html:244
-msgid "Loading..."
-msgstr "Laden..."
 
 #: apps/lessons/templates/lessons/public_booking.html:361
 msgid "Reschedule requires Premium"
@@ -4321,10 +4391,6 @@ msgstr "Fehler beim Buchen der Stunde."
 #| msgid "Error booking lesson."
 msgid "Error booking lesson. Please try again."
 msgstr "Fehler beim Buchen der Stunde."
-
-#: apps/lessons/templates/lessons/public_booking.html:811
-msgid "Reload"
-msgstr "Neu laden"
 
 #: apps/lessons/templates/lessons/public_booking.html:838
 msgid "Could not load week. Please try again."
@@ -4590,10 +4656,6 @@ msgstr ""
 "Unterrichtsstunden und Blockzeiten können durch Klicken in einen Zeitblock "
 "erstellt werden; Drag-to-Create ist nicht implementiert."
 
-#: apps/lessons/templates/lessons/week.html:40
-msgid "on"
-msgstr "am"
-
 #: apps/lessons/templates/lessons/week.html:102
 msgid "Click to view lesson plan"
 msgstr "Klicken, um Lektionsplan anzuzeigen"
@@ -4637,10 +4699,6 @@ msgstr "Blockzeit/anderer Termin"
 #| msgid "Create Recurring Lesson"
 msgid "Create Lesson"
 msgstr "Serientermin anlegen"
-
-#: apps/lessons/templates/lessons/week.html:194
-msgid "Create"
-msgstr "Erstellen"
 
 #: apps/lessons/views_booking.py:38 apps/lessons/views_booking.py:89
 msgid "Booking link not found or contract is inactive."

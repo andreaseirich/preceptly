@@ -243,7 +243,7 @@
             headers: { 'X-CSRFToken': token, 'Content-Type': 'application/json' },
             body: '{}'
         }).then(function(r) {
-            if (!r.ok) return r.json().then(function(d) { alert(d.error || (window.I18N && window.I18N.error) || 'Error'); });
+            if (!r.ok) return r.json().then(function(d) { alert(d.error || (window.I18N && window.I18N.error)); });
             return r.json();
         }).then(function(d) {
             if (d && d.portal_url) window.location.href = d.portal_url;

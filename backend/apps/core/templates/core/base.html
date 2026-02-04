@@ -377,9 +377,40 @@
     {% include 'partials/footer.html' %}
 
     <script>
+    {% get_current_language as LANGUAGE_CODE %}
+    window.DJANGO_LANGUAGE = "{{ LANGUAGE_CODE|default:'en'|escapejs }}";
     window.I18N = Object.assign(window.I18N || {}, {
-        networkError: "{% trans 'Network error: Please check your internet connection.' %}",
+        save: "{% trans 'Save' %}",
+        cancel: "{% trans 'Cancel' %}",
+        delete: "{% trans 'Delete' %}",
+        edit: "{% trans 'Edit' %}",
+        create: "{% trans 'Create' %}",
+        update: "{% trans 'Update' %}",
+        back: "{% trans 'Back' %}",
+        next: "{% trans 'Next' %}",
+        confirm: "{% trans 'Confirm' %}",
+        search: "{% trans 'Search' %}",
+        verify: "{% trans 'Verify' %}",
+        reschedule: "{% trans 'Reschedule' %}",
+        book: "{% trans 'Book' %}",
+        download: "{% trans 'Download' %}",
+        generatePdf: "{% trans 'Generate PDF' %}",
+        preview: "{% trans 'Preview' %}",
+        markSent: "{% trans 'Mark as sent' %}",
+        markPaid: "{% trans 'Mark as paid' %}",
+        undoPaid: "{% trans 'Undo payment' %}",
+        loading: "{% trans 'Loading...' %}",
+        noData: "{% trans 'No data' %}",
         error: "{% trans 'Error' %}",
+        networkError: "{% trans 'Network error: Please check your internet connection.' %}",
+        from: "{% trans 'From' %}",
+        to: "{% trans 'to' %}",
+        on: "{% trans 'on' %}",
+        today: "{% trans 'Today' %}",
+        week: "{% trans 'Week' %}",
+        month: "{% trans 'Month' %}",
+        jumpToDate: "{% trans 'Jump to date:' %}",
+        reload: "{% trans 'Reload' %}",
     });
     </script>
     <script>

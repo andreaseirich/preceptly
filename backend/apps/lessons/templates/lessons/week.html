@@ -160,7 +160,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                                  onmouseover="showBlockedTimePreview(this, event); this.style.background='#e68900'; this.style.transform='scale(1.02)'; this.style.zIndex='20';"
                                  onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
                                  {% if blocked_time.pk %}onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:detail' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"{% endif %}
-                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} to {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
+                                 title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} {% trans 'to' %} {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
                                 <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
                                 <small>{{ blocked_time.start_datetime|time:'H:i' }} - {{ blocked_time.end_datetime|time:'H:i' }}</small>
                             </div>
