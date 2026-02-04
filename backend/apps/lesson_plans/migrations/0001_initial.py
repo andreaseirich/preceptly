@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('lessons', '0001_initial'),
+        ('lessons', '0008_rename_lesson_to_session_state'),
         ('students', '0001_initial'),
     ]
 
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('llm_model', models.CharField(blank=True, help_text="Verwendetes LLM-Modell (z. B. 'gpt-4', 'claude-3')", max_length=100, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('lesson', models.ForeignKey(blank=True, help_text='Verknüpfte Unterrichtsstunde (optional)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lesson_plans', to='lessons.lesson')),
+                ('lesson', models.ForeignKey(blank=True, help_text='Verknüpfte Unterrichtsstunde (optional)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lesson_plans', to='lessons.session')),
                 ('student', models.ForeignKey(help_text='Schüler, für den der Plan erstellt wurde', on_delete=django.db.models.deletion.CASCADE, related_name='lesson_plans', to='students.student')),
             ],
             options={
