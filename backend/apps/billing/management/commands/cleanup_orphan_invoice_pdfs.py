@@ -89,6 +89,6 @@ class Command(BaseCommand):
                     if not os.listdir(dir_path):
                         os.rmdir(dir_path)
                 except OSError:
-                    pass
+                    self.stdout.write(self.style.WARNING(f"Could not remove empty dir: {dir_path}"))
 
         self.stdout.write(self.style.SUCCESS(f"Deleted {deleted} orphaned PDF file(s)."))
