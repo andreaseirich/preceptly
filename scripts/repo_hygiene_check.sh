@@ -5,7 +5,7 @@
 #   bash scripts/repo_hygiene_check.sh --staged   # Pre-commit: check only staged files
 # No .gitignore dependency; untracked files are ignored.
 
-set -e
+set -euo pipefail
 
 STAGED=false
 if [ "${1:-}" = "--staged" ]; then

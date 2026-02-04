@@ -2,7 +2,7 @@
 # Linting script for TutorFlow
 # Usage: ./scripts/lint.sh
 
-set -e
+set -euo pipefail
 
 echo "🔍 Running linting checks..."
 

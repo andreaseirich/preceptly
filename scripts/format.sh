@@ -2,7 +2,7 @@
 # Auto-format script for TutorFlow
 # Usage: ./scripts/format.sh
 
-set -e
+set -euo pipefail
 
 echo "📝 Formatting code with ruff..."
 

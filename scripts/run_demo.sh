@@ -4,6 +4,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+# Ensure Django is available
+if ! python -c "import django" 2>/dev/null; then
+  echo "Django not found. Run: pip install -r requirements.txt"
+  exit 1
+fi
+
 # Ensure .env exists for reproducibility (copy from .env.example if missing)
 if [ ! -f "${ROOT_DIR}/.env" ]; then
     if [ -f "${ROOT_DIR}/.env.example" ]; then

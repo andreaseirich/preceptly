@@ -6,7 +6,7 @@
 # Note: This repo does not track .gitignore. Use a local .gitignore for
 # ignored files. Hygiene is enforced by repo_hygiene_check.sh + CI.
 
-set -e
+set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 

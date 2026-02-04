@@ -2,7 +2,7 @@
 # Validierungsskript für TutorFlow
 # Führt verschiedene Checks und Tests durch
 
-set -e  # Stoppe bei Fehlern
+set -euo pipefail
 
 echo "🔍 TutorFlow Validierung"
 echo "========================"
@@ -15,6 +15,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Prüfe ob wir im richtigen Verzeichnis sind
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
 if [ ! -f "backend/manage.py" ]; then
     echo -e "${RED}❌ Fehler: backend/manage.py nicht gefunden. Bitte im Projekt-Root ausführen.${NC}"
     exit 1
@@ -23,7 +25,9 @@ fi
 cd backend
 
 # Aktiviere venv falls vorhanden
-if [ -d "../venv" ]; then
+if [ -d "../.venv" ]; then
+    source ../.venv/bin/activate
+elif [ -d "../venv" ]; then
     source ../venv/bin/activate
 fi
 
@@ -48,7 +52,8 @@ fi
 echo ""
 
 echo -e "${YELLOW}3. Prüfe auf TODO-Kommentare in produktivem Code...${NC}"
-TODO_COUNT=$(grep -r "TODO\|FIXME" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" | wc -l)
+TODO_COUNT=$(grep -r "TODO\|FIXME" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" | wc -l) || true
+TODO_COUNT=${TODO_COUNT:-0}
 if [ "$TODO_COUNT" -gt 0 ]; then
     echo -e "${YELLOW}⚠️  Gefunden: $TODO_COUNT TODO/FIXME-Kommentare${NC}"
     grep -r "TODO\|FIXME" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" || true
@@ -58,8 +63,10 @@ fi
 echo ""
 
 echo -e "${YELLOW}4. Prüfe auf Debug-Ausgaben (print, pdb)...${NC}"
-DEBUG_COUNT=$(grep -r "print(" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" | wc -l)
-PDB_COUNT=$(grep -r "pdb\|breakpoint" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" | wc -l)
+DEBUG_COUNT=$(grep -r "print(" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" | wc -l) || true
+DEBUG_COUNT=${DEBUG_COUNT:-0}
+PDB_COUNT=$(grep -r "pdb\|breakpoint" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" | wc -l) || true
+PDB_COUNT=${PDB_COUNT:-0}
 if [ "$DEBUG_COUNT" -gt 0 ] || [ "$PDB_COUNT" -gt 0 ]; then
     echo -e "${YELLOW}⚠️  Gefunden: $DEBUG_COUNT print()-Aufrufe, $PDB_COUNT pdb/breakpoint${NC}"
     grep -r "print(" --include="*.py" apps/ tutorflow/ 2>/dev/null | grep -v "test" | grep -v "__pycache__" || true
@@ -70,10 +77,10 @@ fi
 echo ""
 
 echo -e "${YELLOW}5. Prüfe Dokumentation...${NC}"
-REQUIRED_DOCS=("README.md" "CHANGELOG.md" "docs/ARCHITECTURE.md" "docs/ETHICS.md" "docs/DEVPOST.md")
+REQUIRED_DOCS=("README.md" "CHANGELOG.md" "SECURITY.md" "docs/ARCHITECTURE.md" "docs/API.md" "docs/ETHICS.md" "docs/RAILWAY_DEPLOYMENT.md" "docs/JUDGING_GUIDE.md" "docs/DEVPOST.md")
 MISSING_DOCS=()
 for doc in "${REQUIRED_DOCS[@]}"; do
-    if [ ! -f "../$doc" ]; then
+    if [ ! -f "$ROOT_DIR/$doc" ]; then
         MISSING_DOCS+=("$doc")
     fi
 done
