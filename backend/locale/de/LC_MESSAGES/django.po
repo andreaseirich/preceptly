@@ -907,6 +907,26 @@ msgstr "Abrechnungsportal konnte nicht geöffnet werden."
 msgid "Premium (manual or demo)"
 msgstr "Premium (manuell oder Demo)"
 
+#: apps/core/templates/core/settings.html
+msgid "For invoices and Stripe we recommend adding an email address."
+msgstr "Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
+
+#: apps/core/templates/core/settings.html
+msgid "Optional. Used for invoices and Stripe billing notifications."
+msgstr "Optional. Wird für Rechnungen und Stripe-Benachrichtigungen verwendet."
+
+#: apps/core/forms.py
+msgid "Email address"
+msgstr "E-Mail-Adresse"
+
+#: apps/core/forms.py
+msgid "Optional. Used for invoices and Stripe billing. Recommended for Premium."
+msgstr "Optional. Wird für Rechnungen und Stripe verwendet. Empfohlen für Premium."
+
+#: apps/core/views.py
+msgid "Email updated successfully."
+msgstr "E-Mail wurde erfolgreich aktualisiert."
+
 #: apps/lessons/templates/lessons/week.html:18
 #: apps/lessons/templates/lessons/student_booking.html:181
 msgid "Jump to date:"

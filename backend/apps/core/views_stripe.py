@@ -8,7 +8,11 @@ import logging
 
 import stripe
 from apps.core.models import StripeWebhookEvent, UserProfile
-from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
+from apps.core.stripe_utils import (
+    get_email_for_stripe,
+    is_premium_subscription_status,
+    resolve_user_from_stripe_event,
+)
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -89,10 +93,11 @@ class SubscriptionCheckoutView(View):
         customer_id = profile.stripe_customer_id if profile else None
         if not customer_id:
             try:
-                customer = stripe.Customer.create(
-                    email=user.email or f"{user.username}@placeholder.local",
-                    metadata={"user_id": str(user.id), "username": user.username},
-                )
+                create_kw: dict = {"metadata": {"user_id": str(user.id), "username": user.username}}
+                email = get_email_for_stripe(user)
+                if email:
+                    create_kw["email"] = email
+                customer = stripe.Customer.create(**create_kw)
                 customer_id = customer.id
                 profile.stripe_customer_id = customer_id
                 profile.save(update_fields=["stripe_customer_id"])
@@ -139,6 +144,8 @@ class SubscriptionPortalView(View):
         if not profile or not profile.stripe_customer_id:
             return redirect(reverse("core:settings"))
 
+        _maybe_update_stripe_customer_email(profile, request.user)
+
         base_url = _get_base_url(request)
         return_url = settings.STRIPE_PORTAL_RETURN_URL or f"{base_url}{reverse('core:settings')}"
 
@@ -161,6 +168,26 @@ class SubscriptionPortalView(View):
 def _stripe_premium_checkout_enabled() -> bool:
     """True if Stripe is configured for Premium checkout (STRIPE_PRICE_ID_MONTHLY)."""
     return getattr(settings, "STRIPE_PREMIUM_CHECKOUT_ENABLED", False)
+
+
+def _maybe_update_stripe_customer_email(profile: UserProfile, user) -> None:
+    """
+    If user has valid email and Stripe customer exists but has no/different email, update via Customer.modify.
+    No-op if email invalid, no stripe_customer_id, or already in sync.
+    """
+    if not profile or not profile.stripe_customer_id:
+        return
+    new_email = get_email_for_stripe(user)
+    if not new_email:
+        return
+    try:
+        customer = stripe.Customer.retrieve(profile.stripe_customer_id)
+        current = (customer.email or "").strip() or None
+        if current == new_email:
+            return
+        stripe.Customer.modify(profile.stripe_customer_id, email=new_email)
+    except stripe.error.StripeError as e:
+        logger.warning("Stripe Customer.modify failed: %s", str(e)[:100])
 
 
 @method_decorator(login_required, name="dispatch")
@@ -197,16 +224,19 @@ class StripeCheckoutView(View):
             customer_id = profile.stripe_customer_id
             if not customer_id:
                 try:
-                    customer = stripe.Customer.create(
-                        email=user.email or f"{user.username}@placeholder.local",
-                        metadata={"user_id": str(user.id)},
-                    )
+                    create_kw: dict = {"metadata": {"user_id": str(user.id)}}
+                    email = get_email_for_stripe(user)
+                    if email:
+                        create_kw["email"] = email
+                    customer = stripe.Customer.create(**create_kw)
                     customer_id = customer.id
                     profile.stripe_customer_id = customer_id
                     profile.save(update_fields=["stripe_customer_id"])
                 except stripe.error.StripeError as e:
                     logger.warning("Stripe Customer.create failed: %s", str(e)[:200])
                     return _stripe_checkout_error_response(request)
+            else:
+                _maybe_update_stripe_customer_email(profile, user)
 
         try:
             session = stripe.checkout.Session.create(
@@ -249,6 +279,7 @@ class StripePortalView(View):
             )
 
         stripe.api_key = settings.STRIPE_SECRET_KEY
+        _maybe_update_stripe_customer_email(profile, request.user)
         return_url = getattr(
             settings, "STRIPE_PORTAL_RETURN_URL", None
         ) or request.build_absolute_uri(reverse("core:settings"))

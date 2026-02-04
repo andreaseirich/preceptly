@@ -175,6 +175,21 @@
     {% trans "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet." %}
 </div>
 {% endif %}
+{% if show_email_recommendation %}
+<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
+    {% trans "For invoices and Stripe we recommend adding an email address." %}
+</div>
+{% endif %}
+<h2 style="margin-top: 40px;">{% trans "Email address" %}</h2>
+<p>{% trans "Optional. Used for invoices and Stripe billing notifications." %}</p>
+<form method="post" style="margin-top: 15px;">
+    {% csrf_token %}
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        {{ email_form.email }}
+        <button type="submit" name="save_email" class="btn btn-secondary">{% trans "Save" %}</button>
+    </div>
+    {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;">{{ email_form.email.errors.0 }}</p>{% endif %}
+</form>
 <h2 style="margin-top: 40px;">{% trans "Subscription" %}</h2>
 <p>{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
 <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">

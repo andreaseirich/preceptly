@@ -7,7 +7,11 @@ from unittest.mock import MagicMock, patch
 
 import stripe
 from apps.core.models import StripeWebhookEvent, UserProfile
-from apps.core.stripe_utils import is_premium_subscription_status, resolve_user_from_stripe_event
+from apps.core.stripe_utils import (
+    get_email_for_stripe,
+    is_premium_subscription_status,
+    resolve_user_from_stripe_event,
+)
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.db import IntegrityError
@@ -224,6 +228,57 @@ class StripeCheckoutPremiumTest(TestCase):
 
     @patch("apps.core.views_stripe.stripe.checkout.Session.create")
     @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_creates_customer_without_email_when_user_email_missing(
+        self, mock_customer_create, mock_session_create
+    ):
+        """User with no email: Customer.create must NOT receive email parameter."""
+        self.user.email = ""
+        self.user.save()
+        mock_customer_create.return_value = MagicMock(id="cus_no_email")
+        mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        mock_customer_create.assert_called_once()
+        call_kw = mock_customer_create.call_args[1]
+        self.assertNotIn("email", call_kw)
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_creates_customer_with_email_when_present(
+        self, mock_customer_create, mock_session_create
+    ):
+        """User with valid email: Customer.create receives email=user.email."""
+        self.user.email = "tutor@valid-domain.org"
+        self.user.save()
+        mock_customer_create.return_value = MagicMock(id="cus_with_email")
+        mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        call_kw = mock_customer_create.call_args[1]
+        self.assertEqual(call_kw["email"], "tutor@valid-domain.org")
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_does_not_use_placeholder_email(
+        self, mock_customer_create, mock_session_create
+    ):
+        """No placeholder strings (placeholder, example, no-reply) ever passed to Stripe."""
+        self.user.email = "user@placeholder.local"
+        self.user.save()
+        mock_customer_create.return_value = MagicMock(id="cus_test")
+        mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        call_kw = mock_customer_create.call_args[1]
+        self.assertNotIn("email", call_kw)
+        # Also ensure get_email_for_stripe rejects placeholders
+        self.assertIsNone(get_email_for_stripe(self.user))
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
     def test_checkout_second_request_no_customer_create_race_safety(
         self, mock_customer_create, mock_session_create
     ):
@@ -350,6 +405,53 @@ class StripePortalPremiumTest(TestCase):
         mock_create.assert_called_once()
         call_kw = mock_create.call_args[1]
         self.assertEqual(call_kw["customer"], "cus_portal_test")
+
+
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_MONTHLY="price_premium_123",
+    STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
+)
+class StripeCustomerEmailUpdateTest(TestCase):
+    """Customer.modify when user adds email later."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_email", password="test")
+        UserProfile.objects.create(
+            user=self.user,
+            stripe_customer_id="cus_update_test",
+            is_premium=False,
+        )
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.Customer.retrieve")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_customer_email_is_updated_when_user_adds_email_later(
+        self, mock_portal_create, mock_retrieve, mock_modify
+    ):
+        """Profile has stripe_customer_id, user adds email -> Customer.modify called."""
+        self.user.email = "new@valid-domain.org"
+        self.user.save()
+        mock_retrieve.return_value = MagicMock(email=None)
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+        self.client.post(reverse("stripe_portal"))
+        mock_modify.assert_called_once_with("cus_update_test", email="new@valid-domain.org")
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.Customer.retrieve")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_customer_email_not_updated_when_user_email_invalid_or_empty(
+        self, mock_portal_create, mock_retrieve, mock_modify
+    ):
+        """Empty or invalid email -> no Customer.modify."""
+        self.user.email = ""
+        self.user.save()
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+        self.client.post(reverse("stripe_portal"))
+        mock_modify.assert_not_called()
+        mock_retrieve.assert_not_called()
 
 
 # --- Webhook ---

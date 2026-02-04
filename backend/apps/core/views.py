@@ -2,7 +2,7 @@
 Views for dashboard and income overview.
 """
 
-from apps.core.forms import WorkingHoursForm
+from apps.core.forms import UserEmailForm, WorkingHoursForm
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.core.utils_booking import ensure_public_booking_token
@@ -10,6 +10,7 @@ from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -201,10 +202,24 @@ class SettingsView(LoginRequiredMixin, FormView):
         messages.success(self.request, _("Default working hours updated successfully."))
         return super().form_valid(form)
 
+    def post(self, request, *args, **kwargs):
+        """Handle both WorkingHoursForm and UserEmailForm."""
+        if "save_email" in request.POST:
+            form = UserEmailForm(request.POST, instance=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, _("Email updated successfully."))
+                return redirect(self.success_url)
+            context = self.get_context_data()
+            context["email_form"] = form
+            return self.render_to_response(context)
+        return super().post(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         """Add profile, contracts, and booking links to context."""
         from apps.contracts.models import Contract
         from apps.core.feature_flags import is_premium_user
+        from apps.core.stripe_utils import _is_valid_email_for_stripe
         from django.conf import settings
 
         context = super().get_context_data(**kwargs)
@@ -222,6 +237,10 @@ class SettingsView(LoginRequiredMixin, FormView):
             q.get("stripe_success") == "1" or q.get("checkout") == "success"
         )
         context["profile"] = profile
+        context["show_email_recommendation"] = not _is_valid_email_for_stripe(
+            self.request.user.email
+        )
+        context["email_form"] = UserEmailForm(instance=self.request.user)
 
         contracts = (
             Contract.objects.filter(is_active=True, student__user=self.request.user)

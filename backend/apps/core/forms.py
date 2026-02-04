@@ -8,6 +8,22 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 
+class UserEmailForm(forms.ModelForm):
+    """Form to edit user email (optional, for Stripe/invoices)."""
+
+    class Meta:
+        model = User
+        fields = ("email",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].required = False
+        self.fields["email"].label = _("Email address")
+        self.fields["email"].help_text = _(
+            "Optional. Used for invoices and Stripe billing. Recommended for Premium."
+        )
+
+
 class RegisterForm(UserCreationForm):
     """Registration form for new tutor accounts. No premium by default."""
 
