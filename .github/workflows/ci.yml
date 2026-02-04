@@ -61,13 +61,13 @@ jobs:
         run: |
           # Format code
           ruff format backend/apps backend/tutorflow
-          # Check if there are any uncommitted changes after formatting
-          if [ -n "$(git status --porcelain)" ]; then
+          # Fail only if tracked files were modified (ignore untracked __pycache__/logs from CI)
+          if ! git diff --quiet; then
             echo "::error::Code formatting issues found. Files were auto-formatted."
             echo "Please run './scripts/format.sh' or 'ruff format backend/apps backend/tutorflow' locally and commit the changes."
             echo ""
             echo "Files that need formatting:"
-            git status --porcelain
+            git diff --name-only
             echo ""
             echo "Diff:"
             git diff
