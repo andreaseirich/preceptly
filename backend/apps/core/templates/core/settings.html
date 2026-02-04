@@ -170,6 +170,11 @@
     </div>
 </form>
 
+{% if show_stripe_success_banner %}
+<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+    {% trans "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet." %}
+</div>
+{% endif %}
 <h2 style="margin-top: 40px;">{% trans "Subscription" %}</h2>
 <p>{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
 <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">

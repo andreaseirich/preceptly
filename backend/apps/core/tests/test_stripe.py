@@ -206,6 +206,47 @@ class StripeCheckoutPremiumTest(TestCase):
         call_kw = mock_create.call_args[1]
         self.assertEqual(call_kw["customer"], "cus_existing")
 
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_creates_customer_with_metadata_user_id(
+        self, mock_customer_create, mock_session_create
+    ):
+        """When stripe_customer_id is missing, checkout creates customer with metadata.user_id."""
+        mock_customer_create.return_value = MagicMock(id="cus_new_meta")
+        mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        mock_customer_create.assert_called_once()
+        call_kw = mock_customer_create.call_args[1]
+        self.assertEqual(call_kw["metadata"]["user_id"], str(self.user.id))
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_second_request_no_customer_create_race_safety(
+        self, mock_customer_create, mock_session_create
+    ):
+        """Second request with existing stripe_customer_id does not create customer (race safety)."""
+        mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        UserProfile.objects.filter(user=self.user).update(stripe_customer_id="cus_after_first")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        mock_customer_create.assert_not_called()
+        call_kw = mock_session_create.call_args[1]
+        self.assertEqual(call_kw["customer"], "cus_after_first")
+
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    def test_checkout_customer_create_failure_returns_safe_error(self, mock_customer_create):
+        """Customer.create failure returns 500 with safe message, no secrets."""
+        mock_customer_create.side_effect = stripe.error.StripeError("api_error")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 500)
+        data = response.json()
+        self.assertIn("error", data)
+        self.assertNotIn("api_error", data["error"])
+
 
 @override_settings(
     STRIPE_SECRET_KEY="sk_test_fake",
@@ -238,6 +279,17 @@ class StripePortalPremiumTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["portal_url"], "https://billing.stripe.com/session/fake")
+
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_portal_uses_stored_customer_id(self, mock_create):
+        """Portal calls billing_portal.Session.create with exact stored stripe_customer_id."""
+        mock_create.return_value = MagicMock(url="https://billing.stripe.com/session/ok")
+        self.client.login(username="tutor_portal", password="test")
+        response = self.client.post(reverse("stripe_portal"))
+        self.assertEqual(response.status_code, 200)
+        mock_create.assert_called_once()
+        call_kw = mock_create.call_args[1]
+        self.assertEqual(call_kw["customer"], "cus_portal_test")
 
 
 # --- Webhook ---
@@ -570,3 +622,44 @@ class StripeWebhookConstraintsTest(TestCase):
         UserProfile.objects.create(user=u1, stripe_customer_id="cus_same")
         with self.assertRaises(IntegrityError):
             UserProfile.objects.create(user=u2, stripe_customer_id="cus_same")
+
+
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_MONTHLY="price_premium_123",
+    STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
+    SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO", "https"),
+)
+class StripeAbsoluteUrlsBehindProxyTest(TestCase):
+    """Ensure build_absolute_uri yields https URLs when X-Forwarded-Proto is https."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_urls", password="test")
+        UserProfile.objects.create(user=self.user, stripe_customer_id="cus_url_test")
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_checkout_urls_use_https_behind_proxy(self, mock_create):
+        mock_create.return_value = MagicMock(url="https://checkout.stripe.com/fake")
+        self.client.login(username="tutor_urls", password="test")
+        self.client.post(
+            reverse("stripe_checkout"),
+            HTTP_X_FORWARDED_PROTO="https",
+            HTTP_HOST="example.com",
+        )
+        mock_create.assert_called_once()
+        call_kw = mock_create.call_args[1]
+        self.assertTrue(call_kw["success_url"].startswith("https://"))
+        self.assertTrue(call_kw["cancel_url"].startswith("https://"))
+
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_portal_return_url_uses_https_behind_proxy(self, mock_create):
+        mock_create.return_value = MagicMock(url="https://billing.stripe.com/fake")
+        self.client.login(username="tutor_urls", password="test")
+        self.client.post(
+            reverse("stripe_portal"),
+            HTTP_X_FORWARDED_PROTO="https",
+            HTTP_HOST="example.com",
+        )
+        mock_create.assert_called_once()
+        call_kw = mock_create.call_args[1]
+        self.assertTrue(call_kw["return_url"].startswith("https://"))

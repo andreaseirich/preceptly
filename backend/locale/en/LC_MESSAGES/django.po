@@ -620,3 +620,11 @@ msgstr ""
 #: apps/students/models.py:33
 msgid "Additional notes about the student"
 msgstr ""
+
+#: apps/core/views_stripe.py
+msgid "Could not create customer. Please try again."
+msgstr ""
+
+#: apps/core/templates/core/settings.html
+msgid "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet."
+msgstr ""

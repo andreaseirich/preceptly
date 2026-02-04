@@ -172,13 +172,19 @@ class StripeCheckoutView(View):
             )
             customer_id = profile.stripe_customer_id
             if not customer_id:
-                customer = stripe.Customer.create(
-                    email=user.email or f"{user.username}@placeholder.local",
-                    metadata={"user_id": str(user.id), "username": user.username},
-                )
-                customer_id = customer.id
-                profile.stripe_customer_id = customer_id
-                profile.save(update_fields=["stripe_customer_id"])
+                try:
+                    customer = stripe.Customer.create(
+                        email=user.email or f"{user.username}@placeholder.local",
+                        metadata={"user_id": str(user.id)},
+                    )
+                    customer_id = customer.id
+                    profile.stripe_customer_id = customer_id
+                    profile.save(update_fields=["stripe_customer_id"])
+                except stripe.error.StripeError as e:
+                    logger.warning("Stripe Customer.create failed: %s", str(e)[:200])
+                    return JsonResponse(
+                        {"error": _("Could not create customer. Please try again.")}, status=500
+                    )
 
         try:
             session = stripe.checkout.Session.create(

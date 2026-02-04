@@ -237,6 +237,7 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", default="3600"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", default=True)
+    # Trust X-Forwarded-Proto so build_absolute_uri yields https behind Railway/reverse proxy
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # AI/LLM Configuration
