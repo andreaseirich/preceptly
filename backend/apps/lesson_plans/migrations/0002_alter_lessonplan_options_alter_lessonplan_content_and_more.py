@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('lesson_plans', '0001_initial'),
-        ('lessons', '0004_alter_lesson_options_alter_recurringlesson_options_and_more'),
+        ('lessons', '0008_rename_lesson_to_session_state'),
         ('students', '0002_alter_student_options_alter_student_grade_and_more'),
     ]
 
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lessonplan',
             name='lesson',
-            field=models.ForeignKey(blank=True, help_text='Associated lesson (optional)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lesson_plans', to='lessons.lesson'),
+            field=models.ForeignKey(blank=True, help_text='Associated lesson (optional)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lesson_plans', to='lessons.session'),
         ),
         migrations.AlterField(
             model_name='lessonplan',
