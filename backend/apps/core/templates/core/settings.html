@@ -180,7 +180,18 @@
             {% trans "Basic" %}
         {% endif %}
     </p>
-    {% if stripe_enabled %}
+    {% if stripe_premium_checkout_enabled %}
+        {% if is_premium and profile.stripe_customer_id %}
+            <button type="button" class="btn" id="stripe-portal-btn">{% trans "Manage subscription" %}</button>
+        {% elif is_premium %}
+            <span style="color: #6c757d;">{% trans "Premium (manual or demo)" %}</span>
+        {% else %}
+            <form method="post" action="{% url 'stripe_checkout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">{% trans "Activate Premium" %}</button>
+            </form>
+        {% endif %}
+    {% elif stripe_enabled %}
         {% if is_premium and profile.stripe_customer_id %}
             <form method="post" action="{% url 'core:subscription_portal' %}" style="display: inline;">
                 {% csrf_token %}
@@ -198,6 +209,30 @@
         <p style="margin: 0; color: #6c757d; font-size: 0.95em;">{% trans "Payment is not configured. Premium upgrades are currently unavailable." %}</p>
     {% endif %}
 </div>
+{% if stripe_premium_checkout_enabled and is_premium and profile.stripe_customer_id %}
+<script>
+(function() {
+    var btn = document.getElementById('stripe-portal-btn');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+        btn.disabled = true;
+        var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+        var token = csrf ? csrf.value : '';
+        fetch('{% url "stripe_portal" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': token, 'Content-Type': 'application/json' },
+            body: '{}'
+        }).then(function(r) {
+            if (!r.ok) return r.json().then(function(d) { alert(d.error || 'Error'); });
+            return r.json();
+        }).then(function(d) {
+            if (d && d.portal_url) window.location.href = d.portal_url;
+        }).catch(function() { alert('{% trans "Could not open billing portal." %}'); })
+        .finally(function() { btn.disabled = false; });
+    });
+})();
+</script>
+{% endif %}
 
 <h2 style="margin-top: 40px;">{% trans "Your Booking Links" %}</h2>
 <p>{% trans "Each user has their own booking links. Share only your links with your students." %}</p>

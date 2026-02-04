@@ -860,6 +860,10 @@ msgid "Manage subscription"
 msgstr "Abonnement verwalten"
 
 #: apps/core/templates/core/settings.html
+msgid "Activate Premium"
+msgstr "Premium aktivieren"
+
+#: apps/core/templates/core/settings.html
 msgid "Upgrade to Premium"
 msgstr "Auf Premium upgraden"
 
@@ -878,6 +882,14 @@ msgstr "Checkout-Sitzung konnte nicht erstellt werden. Bitte versuchen Sie es er
 #: apps/core/views_stripe.py
 msgid "Could not open billing portal. Please try again."
 msgstr "Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
+
+#: apps/core/views_stripe.py
+msgid "No billing customer found. Subscribe first to manage your subscription."
+msgstr "Kein Abrechnungskunde gefunden. Bitte zuerst ein Abo abschließen, um es zu verwalten."
+
+#: apps/core/templates/core/settings.html
+msgid "Could not open billing portal."
+msgstr "Abrechnungsportal konnte nicht geöffnet werden."
 
 #: apps/core/templates/core/settings.html
 msgid "Premium (manual or demo)"

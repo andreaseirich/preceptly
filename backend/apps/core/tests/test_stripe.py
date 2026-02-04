@@ -161,6 +161,85 @@ class SubscriptionPortalTest(TestCase):
         self.assertIn("settings", response.url)
 
 
+# --- /stripe/checkout/ and /stripe/portal/ (STRIPE_PRICE_ID_PREMIUM) ---
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_PREMIUM="price_premium_123",
+    STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
+)
+class StripeCheckoutPremiumTest(TestCase):
+    """POST /stripe/checkout/: uses STRIPE_PRICE_ID_PREMIUM, metadata.user_id, no Customer.create when customer_id exists."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_prem", password="test")
+        UserProfile.objects.create(user=self.user, is_premium=False)
+
+    def test_stripe_checkout_requires_login(self):
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/login/"))
+
+    @patch("apps.core.views_stripe.stripe.Customer.create")
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_stripe_checkout_sets_metadata_user_id(self, mock_create, mock_customer):
+        mock_customer.return_value = MagicMock(id="cus_new123")
+        mock_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "https://checkout.stripe.com/premium")
+        call_kw = mock_create.call_args[1]
+        self.assertEqual(call_kw["metadata"]["user_id"], str(self.user.id))
+        self.assertEqual(call_kw["line_items"][0]["price"], "price_premium_123")
+        self.assertEqual(call_kw["line_items"][0]["quantity"], 1)
+        self.assertEqual(call_kw["mode"], "subscription")
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_stripe_checkout_with_existing_customer_does_not_create_customer(self, mock_create):
+        UserProfile.objects.filter(user=self.user).update(stripe_customer_id="cus_existing")
+        mock_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
+        self.client.login(username="tutor_prem", password="test")
+        with patch("apps.core.views_stripe.stripe.Customer.create") as mock_customer:
+            response = self.client.post(reverse("stripe_checkout"))
+        self.assertEqual(response.status_code, 302)
+        mock_customer.assert_not_called()
+        call_kw = mock_create.call_args[1]
+        self.assertEqual(call_kw["customer"], "cus_existing")
+
+
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_PREMIUM="price_premium_123",
+    STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
+)
+class StripePortalPremiumTest(TestCase):
+    """POST /stripe/portal/: 400 without customer_id, 200 + portal_url with customer_id."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_portal", password="test")
+        self.profile = UserProfile.objects.create(
+            user=self.user, stripe_customer_id="cus_portal_test"
+        )
+
+    def test_stripe_portal_without_customer_id_returns_400(self):
+        self.profile.stripe_customer_id = None
+        self.profile.save()
+        self.client.login(username="tutor_portal", password="test")
+        response = self.client.post(reverse("stripe_portal"))
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertIn("error", data)
+
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_stripe_portal_with_customer_id_returns_200_and_portal_url(self, mock_create):
+        mock_create.return_value = MagicMock(url="https://billing.stripe.com/session/fake")
+        self.client.login(username="tutor_portal", password="test")
+        response = self.client.post(reverse("stripe_portal"))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["portal_url"], "https://billing.stripe.com/session/fake")
+
+
 # --- Webhook ---
 @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
 class StripeWebhookTest(TestCase):

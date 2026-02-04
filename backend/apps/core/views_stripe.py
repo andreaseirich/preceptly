@@ -134,6 +134,113 @@ class SubscriptionPortalView(View):
         return redirect(session.url, status=303)
 
 
+def _stripe_premium_checkout_enabled() -> bool:
+    """True if Stripe is configured for Premium checkout (STRIPE_PRICE_ID_PREMIUM)."""
+    return getattr(settings, "STRIPE_PREMIUM_CHECKOUT_ENABLED", False)
+
+
+@method_decorator(login_required, name="dispatch")
+class StripeCheckoutView(View):
+    """POST /stripe/checkout/: Create Stripe Checkout Session for subscription (STRIPE_PRICE_ID_PREMIUM)."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        if not _stripe_premium_checkout_enabled():
+            return JsonResponse(
+                {"error": _("Payment is not configured. Please contact support.")}, status=503
+            )
+
+        price_id = getattr(settings, "STRIPE_PRICE_ID_PREMIUM", None)
+        if not price_id:
+            return JsonResponse(
+                {"error": _("Payment is not configured. Please contact support.")}, status=503
+            )
+
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        user = request.user
+        success_url = getattr(
+            settings, "STRIPE_CHECKOUT_SUCCESS_URL", None
+        ) or request.build_absolute_uri(reverse("core:settings") + "?checkout=success")
+        cancel_url = getattr(
+            settings, "STRIPE_CHECKOUT_CANCEL_URL", None
+        ) or request.build_absolute_uri(reverse("core:settings") + "?checkout=cancelled")
+
+        with transaction.atomic():
+            profile, _created = UserProfile.objects.select_for_update().get_or_create(
+                user=user, defaults={"is_premium": False}
+            )
+            customer_id = profile.stripe_customer_id
+            if not customer_id:
+                customer = stripe.Customer.create(
+                    email=user.email or f"{user.username}@placeholder.local",
+                    metadata={"user_id": str(user.id), "username": user.username},
+                )
+                customer_id = customer.id
+                profile.stripe_customer_id = customer_id
+                profile.save(update_fields=["stripe_customer_id"])
+
+        try:
+            session = stripe.checkout.Session.create(
+                mode="subscription",
+                customer=customer_id,
+                line_items=[{"price": price_id, "quantity": 1}],
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={"user_id": str(user.id)},
+                subscription_data={"metadata": {"user_id": str(user.id)}},
+            )
+        except stripe.error.StripeError as e:
+            logger.warning("Stripe checkout create failed: %s", str(e)[:200])
+            return JsonResponse(
+                {"error": _("Could not create checkout session. Please try again.")}, status=500
+            )
+
+        return redirect(session.url, status=303)
+
+
+@method_decorator(login_required, name="dispatch")
+class StripePortalView(View):
+    """POST /stripe/portal/: Create Stripe Billing Portal Session. Requires stripe_customer_id."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        if not _stripe_premium_checkout_enabled():
+            return JsonResponse(
+                {"error": _("Payment is not configured. Please contact support.")}, status=503
+            )
+
+        profile = getattr(request.user, "profile", None)
+        if not profile or not profile.stripe_customer_id:
+            return JsonResponse(
+                {
+                    "error": _(
+                        "No billing customer found. Subscribe first to manage your subscription."
+                    )
+                },
+                status=400,
+            )
+
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        return_url = getattr(
+            settings, "STRIPE_PORTAL_RETURN_URL", None
+        ) or request.build_absolute_uri(reverse("core:settings"))
+
+        try:
+            session = stripe.billing_portal.Session.create(
+                customer=profile.stripe_customer_id,
+                return_url=return_url,
+            )
+        except stripe.error.StripeError as e:
+            logger.warning("Stripe portal create failed: %s", str(e)[:200])
+            return JsonResponse(
+                {"error": _("Could not open billing portal. Please try again.")}, status=500
+            )
+
+        return JsonResponse({"portal_url": session.url}, status=200)
+
+
 @csrf_exempt
 @require_POST
 def stripe_webhook_view(request):

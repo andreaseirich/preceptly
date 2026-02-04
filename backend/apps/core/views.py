@@ -214,6 +214,9 @@ class SettingsView(LoginRequiredMixin, FormView):
 
         context["is_premium"] = is_premium_user(self.request.user)
         context["stripe_enabled"] = getattr(settings, "STRIPE_ENABLED", False)
+        context["stripe_premium_checkout_enabled"] = getattr(
+            settings, "STRIPE_PREMIUM_CHECKOUT_ENABLED", False
+        )
         context["profile"] = profile
 
         contracts = (
