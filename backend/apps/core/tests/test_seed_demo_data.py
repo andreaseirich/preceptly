@@ -91,13 +91,32 @@ class SeedDemoDataTest(TestCase):
         call_command("seed_demo_data", "--clear")
 
         # Check non-premium user exists
-        non_premium_user = User.objects.filter(username="demo_standard").first()
+        non_premium_user = User.objects.filter(username="demo_user").first()
         self.assertIsNotNone(non_premium_user)
 
         # Check non-premium profile
         profile = UserProfile.objects.filter(user=non_premium_user).first()
         self.assertIsNotNone(profile)
         self.assertFalse(profile.is_premium)
+
+    def test_seed_demo_data_creates_demo_user_with_data(self):
+        """Test: demo_user has students, contracts, lessons, and blocked times."""
+        call_command("seed_demo_data", "--clear")
+
+        non_premium_user = User.objects.get(username="demo_user")
+        students = Student.objects.filter(user=non_premium_user)
+        self.assertGreaterEqual(students.count(), 2, "demo_user should have at least 2 students")
+
+        contracts = Contract.objects.filter(student__user=non_premium_user)
+        self.assertGreaterEqual(contracts.count(), 2, "demo_user should have at least 2 contracts")
+
+        lessons = Lesson.objects.filter(contract__student__user=non_premium_user)
+        self.assertGreaterEqual(lessons.count(), 3, "demo_user should have at least 3 lessons")
+
+        blocked_times = BlockedTime.objects.filter(user=non_premium_user)
+        self.assertGreaterEqual(
+            blocked_times.count(), 1, "demo_user should have at least 1 blocked time"
+        )
 
     def test_seed_demo_data_week_view_loads_without_errors(self):
         """Test: Week view loads without errors with seed data."""

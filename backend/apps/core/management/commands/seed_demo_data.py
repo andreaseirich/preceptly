@@ -443,6 +443,111 @@ class Command(BaseCommand):
                 llm_model="gpt-3.5-turbo",
             )
 
+        # --- Demo data for non_premium_user (demo_user) ---
+        # Standard user gets a smaller set of data for comparison
+        std_student1 = Student.objects.create(
+            user=non_premium_user,
+            first_name="Emma",
+            last_name="Braun",
+            email="emma.braun@example.com",
+            phone="0987-654321",
+            school="Gymnasium Z",
+            grade="Grade 9",
+            subjects="Math, English",
+            notes="Standard demo student",
+        )
+
+        std_student2 = Student.objects.create(
+            user=non_premium_user,
+            first_name="Leon",
+            last_name="Fischer",
+            email="leon.fischer@example.com",
+            school="Realschule M",
+            grade="Grade 8",
+            subjects="German",
+        )
+
+        std_contract1 = Contract.objects.create(
+            student=std_student1,
+            hourly_rate=Decimal("24.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 11, 1),
+            is_active=True,
+            notes="Weekly Math lessons",
+        )
+
+        std_contract2 = Contract.objects.create(
+            student=std_student2,
+            hourly_rate=Decimal("20.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 10, 20),
+            is_active=True,
+            notes="German support",
+        )
+
+        ContractMonthlyPlan.objects.create(
+            contract=std_contract1, year=2025, month=11, planned_units=4
+        )
+
+        Lesson.objects.create(
+            contract=std_contract1,
+            date=today + timedelta(days=2),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="planned",
+            notes="Math: Fractions",
+        )
+
+        Lesson.objects.create(
+            contract=std_contract1,
+            date=today + timedelta(days=4),
+            start_time=time(14, 0),
+            duration_minutes=60,
+            status="planned",
+            notes="Math: Percentages",
+        )
+
+        Lesson.objects.create(
+            contract=std_contract2,
+            date=today + timedelta(days=3),
+            start_time=time(16, 0),
+            duration_minutes=60,
+            status="planned",
+            notes="German: Reading comprehension",
+        )
+
+        std_lesson_taught = Lesson.objects.create(
+            contract=std_contract1,
+            date=today - timedelta(days=5),
+            start_time=time(11, 0),
+            duration_minutes=60,
+            status="taught",
+            notes="Math: Basics - completed",
+        )
+
+        BlockedTime.objects.create(
+            user=non_premium_user,
+            title="Doctor Appointment",
+            description="Annual checkup",
+            start_datetime=timezone.make_aware(
+                timezone.datetime.combine(today + timedelta(days=7), time(9, 0))
+            ),
+            end_datetime=timezone.make_aware(
+                timezone.datetime.combine(today + timedelta(days=7), time(10, 30))
+            ),
+            is_recurring=False,
+        )
+
+        if std_lesson_taught and std_lesson_taught.status == "taught":
+            std_invoice = InvoiceService.create_invoice_from_lessons(
+                period_start=std_lesson_taught.date,
+                period_end=std_lesson_taught.date,
+                contract=std_contract1,
+                user=non_premium_user,
+            )
+            std_invoice.status = "draft"
+            std_invoice.save(update_fields=["status", "updated_at"])
+
         # Create a demo invoice for lesson4 (so it becomes "paid")
         # Only if lesson4 exists and is marked as "taught"
         if lesson4 and lesson4.status == "taught":
