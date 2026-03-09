@@ -1,53 +1,30 @@
 # Generated manually to fix missing lessons_lesson table
-# This migration creates the lessons_lesson table if it doesn't exist
+# This migration creates the lessons_lesson table if it doesn't exist.
+# Uses introspection + schema_editor so it works with SQLite and PostgreSQL.
 
-from django.db import migrations, connection
+from django.db import connection, migrations
 
 
 def create_lessons_lesson_table_if_not_exists(apps, schema_editor):
-    """Create lessons_lesson table if it doesn't exist."""
+    """Create lessons_lesson table if it doesn't exist (SQLite + PostgreSQL)."""
+    Lesson = apps.get_model("lessons", "Lesson")
+    table_name = Lesson._meta.db_table
     with connection.cursor() as cursor:
-        # Check if table exists
-        cursor.execute("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND table_name = 'lessons_lesson'
-            );
-        """)
-        table_exists = cursor.fetchone()[0]
-        
-        if not table_exists:
-            # Create the table manually
-            cursor.execute("""
-                CREATE TABLE lessons_lesson (
-                    id BIGSERIAL PRIMARY KEY,
-                    date DATE NOT NULL,
-                    start_time TIME NOT NULL,
-                    duration_minutes INTEGER NOT NULL CHECK (duration_minutes >= 1),
-                    status VARCHAR(20) NOT NULL DEFAULT 'planned',
-                    travel_time_before_minutes INTEGER NOT NULL DEFAULT 0,
-                    travel_time_after_minutes INTEGER NOT NULL DEFAULT 0,
-                    notes TEXT,
-                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-                    contract_id BIGINT NOT NULL REFERENCES contracts_contract(id) ON DELETE CASCADE
-                );
-            """)
-            
-            # Create indexes
-            cursor.execute("""
-                CREATE INDEX lessons_les_date_e38248_idx ON lessons_lesson(date, start_time);
-            """)
-            cursor.execute("""
-                CREATE INDEX lessons_les_status_ff86f9_idx ON lessons_lesson(status);
-            """)
+        tables = connection.introspection.table_names(cursor)
+    if any(t.lower() == table_name.lower() for t in tables):
+        return
+    schema_editor.create_model(Lesson)
 
 
 def reverse_create_lessons_lesson_table(apps, schema_editor):
     """Reverse migration - drop table if it exists."""
+    Lesson = apps.get_model("lessons", "Lesson")
+    table_name = Lesson._meta.db_table
     with connection.cursor() as cursor:
-        cursor.execute("DROP TABLE IF EXISTS lessons_lesson CASCADE;")
+        tables = connection.introspection.table_names(cursor)
+    if not any(t.lower() == table_name.lower() for t in tables):
+        return
+    schema_editor.delete_model(Lesson)
 
 
 class Migration(migrations.Migration):

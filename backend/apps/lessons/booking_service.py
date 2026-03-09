@@ -11,6 +11,7 @@ from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from apps.lessons.conflict_service import LessonConflictService
 from apps.lessons.models import Lesson
+from apps.lessons.travel_policy import get_synthetic_occupied_for_date
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -433,10 +434,6 @@ class BookingService:
         occupied_slots = BookingService.get_all_occupied_time_slots(
             week_start, week_end, user=user, exclude_lesson_id=exclude_lesson_id
         )
-        busy_intervals = BookingService._get_busy_intervals_for_week(
-            week_start, week_end, user, student_id, exclude_lesson_id=exclude_lesson_id
-        )
-
         weekday_names = [
             "monday",
             "tuesday",
@@ -446,6 +443,22 @@ class BookingService:
             "saturday",
             "sunday",
         ]
+        if profile and getattr(profile, "default_booking_location", "online") == "vor_ort":
+            policy = getattr(profile, "travel_policy", None) or {}
+            if policy.get("enabled"):
+                for i in range(7):
+                    d = week_start + timedelta(days=i)
+                    day_wh = working_hours.get(weekday_names[i], [])
+                    synthetic = get_synthetic_occupied_for_date(
+                        d, policy, working_hours_for_date=day_wh
+                    )
+                    if synthetic:
+                        occupied_slots[d] = occupied_slots.get(d, []) + synthetic
+                        occupied_slots[d].sort()
+
+        busy_intervals = BookingService._get_busy_intervals_for_week(
+            week_start, week_end, user, student_id, exclude_lesson_id=exclude_lesson_id
+        )
         weekday_display_keys = [
             "Monday",
             "Tuesday",

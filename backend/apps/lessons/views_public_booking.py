@@ -15,10 +15,12 @@ from apps.core.feature_flags import (
     public_booking_limit_reached,
     user_has_feature,
 )
+from apps.core.models import UserProfile
 from apps.core.utils_booking import get_tutor_for_booking
 from apps.lessons.booking_service import BookingService
 from apps.lessons.models import Lesson, LessonDocument
 from apps.lessons.throttle import is_public_booking_throttled, record_public_booking_attempt
+from apps.lessons.travel_policy import is_slot_allowed_by_policy
 from apps.lessons.utils_dates import get_week_start
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
 from apps.students.models import Student
@@ -85,6 +87,15 @@ class PublicBookingView(TemplateView):
         limit_reached = public_booking_limit_reached(tutor)
         public_booking_count = get_public_booking_count_this_month(tutor)
 
+        profile = None
+        if tutor:
+            profile = UserProfile.objects.filter(user=tutor).first()
+        travel_policy_active = (
+            profile
+            and getattr(profile, "default_booking_location", "online") == "vor_ort"
+            and (getattr(profile, "travel_policy", None) or {}).get("enabled")
+        )
+
         context.update(
             {
                 "week_data": week_data,
@@ -95,6 +106,7 @@ class PublicBookingView(TemplateView):
                 "public_booking_limit_reached": limit_reached,
                 "public_booking_count": public_booking_count,
                 "public_booking_limit": PUBLIC_BOOKING_MONTHLY_LIMIT,
+                "travel_policy_active": travel_policy_active,
             }
         )
 
@@ -544,6 +556,33 @@ def book_lesson_api(request):
             return JsonResponse(
                 {"success": False, "message": _("Time slot is already booked.")}, status=400
             )
+
+        profile = UserProfile.objects.filter(user=tutor).first()
+        if profile and getattr(profile, "default_booking_location", "online") == "vor_ort":
+            policy = getattr(profile, "travel_policy", None) or {}
+            if policy.get("enabled"):
+                day_working_hours = target_day.get("working_hours") or []
+                if not is_slot_allowed_by_policy(
+                    booking_date_obj,
+                    start_time_obj,
+                    end_time_obj,
+                    policy,
+                    working_hours_for_date=day_working_hours,
+                ):
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": _(
+                                "This time is not available due to travel time rules. "
+                                "Please choose another slot."
+                            ),
+                            "alternative_slots": [
+                                [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")]
+                                for s in target_day.get("available_slots", [])
+                            ][:10],
+                        },
+                        status=400,
+                    )
 
         # Find or create contract for this student (student belongs to tutor)
         contract = Contract.objects.filter(

@@ -36,6 +36,20 @@ class UserProfile(models.Model):
         default=1,
         help_text=_("Next sequential invoice number (Premium only)."),
     )
+    travel_policy = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=_(
+            "Time-dependent travel policy for on-site booking: enabled, buffer_rules "
+            "(weekday, start_time, end_time, buffer_minutes), no_go_windows. Weekday 0=Monday."
+        ),
+    )
+    default_booking_location = models.CharField(
+        max_length=20,
+        choices=[("online", "Online"), ("vor_ort", "Vor Ort")],
+        default="online",
+        help_text=_("Default appointment type for public booking; vor_ort applies travel policy."),
+    )
     # Stripe subscription (source of truth for premium via webhook)
     stripe_customer_id = models.CharField(
         max_length=255,

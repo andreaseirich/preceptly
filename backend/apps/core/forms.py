@@ -131,3 +131,34 @@ class WorkingHoursForm(forms.Form):
 
         cleaned_data["working_hours"] = working_hours
         return cleaned_data
+
+
+class TravelPolicyForm(forms.Form):
+    """Form for transport mode for on-site appointments (no technical details shown)."""
+
+    TRANSPORT_CHOICES = [
+        ("oepnv", _("Public transport (time-dependent)")),
+        ("fahrrad", _("Bicycle (constant short buffer)")),
+    ]
+    transport_mode = forms.ChoiceField(
+        choices=TRANSPORT_CHOICES,
+        label=_("Travel mode for on-site appointments"),
+        help_text=_(
+            "Determines which time slots are offered for on-site appointments. "
+            "Public transport uses time-dependent rules; bicycle uses a fixed buffer."
+        ),
+    )
+    fahrrad_buffer_minutes = forms.IntegerField(
+        min_value=5,
+        max_value=60,
+        initial=25,
+        required=False,
+        label=_("Buffer (minutes) when using bicycle"),
+        help_text=_("Only used when bicycle is selected. Typical: 20–30 minutes."),
+    )
+
+    def clean_fahrrad_buffer_minutes(self):
+        value = self.cleaned_data.get("fahrrad_buffer_minutes")
+        if value is None:
+            return 25
+        return max(5, min(60, value))

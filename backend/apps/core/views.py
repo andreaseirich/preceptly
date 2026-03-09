@@ -2,7 +2,7 @@
 Views for dashboard and income overview.
 """
 
-from apps.core.forms import UserEmailForm, WorkingHoursForm
+from apps.core.forms import TravelPolicyForm, UserEmailForm, WorkingHoursForm
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.core.utils_booking import ensure_public_booking_token
@@ -203,7 +203,7 @@ class SettingsView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):
-        """Handle both WorkingHoursForm and UserEmailForm."""
+        """Handle WorkingHoursForm, UserEmailForm, and TravelPolicyForm."""
         if "save_email" in request.POST:
             form = UserEmailForm(request.POST, instance=request.user)
             if form.is_valid():
@@ -212,6 +212,26 @@ class SettingsView(LoginRequiredMixin, FormView):
                 return redirect(self.success_url)
             context = self.get_context_data()
             context["email_form"] = form
+            return self.render_to_response(context)
+        if "save_travel" in request.POST:
+            travel_form = TravelPolicyForm(request.POST)
+            if travel_form.is_valid():
+                profile, _created = UserProfile.objects.get_or_create(user=request.user)
+                policy = dict(profile.travel_policy or {})
+                policy["transport_mode"] = travel_form.cleaned_data["transport_mode"]
+                policy["fahrrad_buffer_minutes"] = (
+                    travel_form.cleaned_data.get("fahrrad_buffer_minutes") or 25
+                )
+                policy["enabled"] = True
+                profile.travel_policy = policy
+                profile.save()
+                messages.success(
+                    request,
+                    _("Travel mode for on-site appointments updated."),
+                )
+                return redirect(self.success_url)
+            context = self.get_context_data()
+            context["travel_form"] = travel_form
             return self.render_to_response(context)
         return super().post(request, *args, **kwargs)
 
@@ -241,6 +261,13 @@ class SettingsView(LoginRequiredMixin, FormView):
             self.request.user.email
         )
         context["email_form"] = UserEmailForm(instance=self.request.user)
+        policy = getattr(profile, "travel_policy", None) or {}
+        context["travel_form"] = TravelPolicyForm(
+            initial={
+                "transport_mode": policy.get("transport_mode", "oepnv"),
+                "fahrrad_buffer_minutes": policy.get("fahrrad_buffer_minutes", 25),
+            }
+        )
 
         contracts = (
             Contract.objects.filter(is_active=True, student__user=self.request.user)

@@ -333,6 +333,11 @@
                 <button type="button" class="btn btn-secondary" onclick="cancelInlineReschedule()">{% trans "Cancel" %}</button>
             </div>
             <div id="public-week-loading" style="display: none; text-align: center; padding: 20px; color: #6c757d;">{% trans "Loading..." %}</div>
+            {% if travel_policy_active %}
+            <p class="message" style="background: #e7f3ff; border-color: #0066cc; color: #004085; margin-bottom: 15px;">
+                {% trans "On-site appointments: Only time slots that are realistic considering travel times are shown. Times that are not possible due to travel time rules cannot be booked." %}
+            </p>
+            {% endif %}
             <div class="week-calendar">
                 <div id="public-week-calendar-days">
                 {% for day in week_data.days %}
