@@ -68,15 +68,12 @@ class Contract(models.Model):
     def save(self, *args, **kwargs):
         """Generate booking token if not set. When deactivating, delete future lessons."""
         if self.pk:
-            try:
-                old = Contract.objects.get(pk=self.pk)
-                if old.is_active and not self.is_active:
-                    from apps.lessons.models import Lesson
+            old = Contract.objects.filter(pk=self.pk).first()
+            if old and old.is_active and not self.is_active:
+                from apps.lessons.models import Lesson
 
-                    today = timezone.localdate()
-                    Lesson.objects.filter(contract=self, date__gte=today).delete()
-            except Contract.DoesNotExist:
-                pass
+                today = timezone.localdate()
+                Lesson.objects.filter(contract=self, date__gte=today).delete()
         if not self.booking_token:
             self.booking_token = secrets.token_urlsafe(32)
         super().save(*args, **kwargs)
