@@ -12,7 +12,7 @@ from apps.lessons.models import Lesson
 def _month_planning_for_contract(
     contract: Contract, year: int, month: int, carried_over: int = 0
 ) -> dict:
-    """Single month: planned, carried_over, taught, remaining."""
+    """Single month: planned, carried_over, taught, scheduled (in calendar), remaining."""
     start_d = date(year, month, 1)
     if month == 12:
         end_d = date(year + 1, 1, 1)
@@ -29,14 +29,22 @@ def _month_planning_for_contract(
         status__in=["taught", "paid"],
     ).count()
 
+    scheduled = Lesson.objects.filter(
+        contract=contract,
+        date__gte=start_d,
+        date__lt=end_d,
+        status="planned",
+    ).count()
+
     total_to_teach = planned + carried_over
-    remaining = max(0, total_to_teach - taught)
+    remaining = max(0, total_to_teach - taught - scheduled)
     return {
         "year": year,
         "month": month,
         "planned_units": planned,
         "carried_over_units": carried_over,
         "taught_units": taught,
+        "scheduled_units": scheduled,
         "remaining_units": remaining,
     }
 

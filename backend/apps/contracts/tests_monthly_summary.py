@@ -85,3 +85,36 @@ class ContractMonthlySummaryCarryOverTest(TestCase):
         self.assertEqual(mar["carried_over_units"], 9)
         self.assertEqual(mar["taught_units"], 0)
         self.assertEqual(mar["remaining_units"], 15)
+
+    def test_scheduled_lessons_not_counted_as_missing(self):
+        """Lessons in calendar (status=planned) reduce remaining, not counted as missing."""
+        Lesson.objects.create(
+            contract=self.contract,
+            date=date(2025, 1, 10),
+            start_time="10:00",
+            duration_minutes=60,
+            status="taught",
+        )
+        for _ in range(2):
+            Lesson.objects.create(
+                contract=self.contract,
+                date=date(2025, 1, 15),
+                start_time="10:00",
+                duration_minutes=60,
+                status="taught",
+            )
+        for _ in range(3):
+            Lesson.objects.create(
+                contract=self.contract,
+                date=date(2025, 1, 20),
+                start_time="10:00",
+                duration_minutes=60,
+                status="planned",
+            )
+
+        summary = get_contract_monthly_planning_summary(self.contract, year=2025)
+        jan = summary[0]
+        self.assertEqual(jan["planned_units"], 8)
+        self.assertEqual(jan["taught_units"], 3)
+        self.assertEqual(jan["scheduled_units"], 3)
+        self.assertEqual(jan["remaining_units"], 2)

@@ -28,7 +28,7 @@
 
 {% if contract.has_monthly_planning_limit and monthly_planning_summary %}
 <h2>{% trans "Monthly planning (this year)" %}</h2>
-<p>{% trans "Planned units per month; remaining units are carried over to the next month. Taught and remaining." %}</p>
+<p>{% trans "Planned units per month; remaining carried to next month. Scheduled lessons in calendar are not counted as missing." %}</p>
 <table>
     <thead>
         <tr>
@@ -36,6 +36,7 @@
             <th>{% trans "Planned" %}</th>
             <th>{% trans "Carried over" %}</th>
             <th>{% trans "Taught" %}</th>
+            <th>{% trans "Scheduled" %}</th>
             <th>{% trans "Remaining" %}</th>
         </tr>
     </thead>
@@ -46,6 +47,7 @@
             <td>{{ row.planned_units }}</td>
             <td>{{ row.carried_over_units }}</td>
             <td>{{ row.taught_units }}</td>
+            <td>{{ row.scheduled_units }}</td>
             <td>{{ row.remaining_units }}</td>
         </tr>
         {% endfor %}

@@ -2025,11 +2025,11 @@ msgstr "Monatliche Planung (dieses Jahr)"
 
 #: apps/contracts/templates/contracts/contract_detail.html:31
 msgid ""
-"Planned units per month; remaining units are carried over to the next month. "
-"Taught and remaining."
+"Planned units per month; remaining carried to next month. Scheduled lessons "
+"in calendar are not counted as missing."
 msgstr ""
-"Geplante Einheiten pro Monat; verbleibende Einheiten werden in den nächsten "
-"Monat übertragen. Erteilt und noch übrig."
+"Geplante Einheiten pro Monat; Übertrag in den nächsten Monat. Im Kalender "
+"eingetragene Termine zählen nicht als fehlend."
 
 #: apps/contracts/templates/contracts/contract_detail.html:36
 msgid "Carried over"
@@ -2055,7 +2055,11 @@ msgstr "Geplant"
 msgid "Taught"
 msgstr "Unterrichtet"
 
-#: apps/contracts/templates/contracts/contract_detail.html:38
+#: apps/contracts/templates/contracts/contract_detail.html:39
+msgid "Scheduled"
+msgstr "Im Kalender"
+
+#: apps/contracts/templates/contracts/contract_detail.html:40
 msgid "Remaining"
 msgstr "Noch übrig"
 
