@@ -28,12 +28,13 @@
 
 {% if contract.has_monthly_planning_limit and monthly_planning_summary %}
 <h2>{% trans "Monthly planning (this year)" %}</h2>
-<p>{% trans "Planned units per month, how many were taught, and how many remain to be taught." %}</p>
+<p>{% trans "Planned units per month; remaining units are carried over to the next month. Taught and remaining." %}</p>
 <table>
     <thead>
         <tr>
             <th>{% trans "Month" %}</th>
             <th>{% trans "Planned" %}</th>
+            <th>{% trans "Carried over" %}</th>
             <th>{% trans "Taught" %}</th>
             <th>{% trans "Remaining" %}</th>
         </tr>
@@ -43,6 +44,7 @@
         <tr>
             <td>{{ row.year }}-{{ row.month|stringformat:"02d" }}</td>
             <td>{{ row.planned_units }}</td>
+            <td>{{ row.carried_over_units }}</td>
             <td>{{ row.taught_units }}</td>
             <td>{{ row.remaining_units }}</td>
         </tr>

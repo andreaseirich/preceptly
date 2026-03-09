@@ -34,7 +34,11 @@
             <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
             <td>
                 {% if summary %}
+                {% if summary.carried_over_units %}
+                {% blocktrans with planned=summary.planned_units carried=summary.carried_over_units taught=summary.taught_units remaining=summary.remaining_units %}Planned: {{ planned }}+{{ carried }} · Taught: {{ taught }} · Remaining: {{ remaining }}{% endblocktrans %}
+                {% else %}
                 {% blocktrans with planned=summary.planned_units taught=summary.taught_units remaining=summary.remaining_units %}Planned: {{ planned }} · Taught: {{ taught }} · Remaining: {{ remaining }}{% endblocktrans %}
+                {% endif %}
                 {% else %}
                 —
                 {% endif %}

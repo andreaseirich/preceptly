@@ -2025,13 +2025,17 @@ msgstr "Monatliche Planung (dieses Jahr)"
 
 #: apps/contracts/templates/contracts/contract_detail.html:31
 msgid ""
-"Planned units per month, how many were taught, and how many remain to be "
-"taught."
+"Planned units per month; remaining units are carried over to the next month. "
+"Taught and remaining."
 msgstr ""
-"Geplante Einheiten pro Monat, wie viele erteilt wurden und wie viele noch "
-"nachzuholen sind."
+"Geplante Einheiten pro Monat; verbleibende Einheiten werden in den nächsten "
+"Monat übertragen. Erteilt und noch übrig."
 
-#: apps/contracts/templates/contracts/contract_detail.html:35
+#: apps/contracts/templates/contracts/contract_detail.html:36
+msgid "Carried over"
+msgstr "Übertrag"
+
+#: apps/contracts/templates/contracts/contract_detail.html:37
 #: apps/contracts/templates/contracts/contract_form.html:22
 #: apps/core/templates/core/base.html:411
 #: apps/core/templates/core/income_overview.html:58
@@ -2115,10 +2119,15 @@ msgstr "Bis"
 msgid "This month (planned / taught / remaining)"
 msgstr "Dieser Monat (geplant / erteilt / noch übrig)"
 
-#: apps/contracts/templates/contracts/contract_list.html:37
+#: apps/contracts/templates/contracts/contract_list.html:38
 #, python-format
 msgid "Planned: %(planned)s · Taught: %(taught)s · Remaining: %(remaining)s"
 msgstr "Geplant: %(planned)s · Erteilt: %(taught)s · Noch übrig: %(remaining)s"
+
+#: apps/contracts/templates/contracts/contract_list.html:39
+#, python-format
+msgid "Planned: %(planned)s+%(carried)s · Taught: %(taught)s · Remaining: %(remaining)s"
+msgstr "Geplant: %(planned)s+%(carried)s · Erteilt: %(taught)s · Noch übrig: %(remaining)s"
 
 #: apps/contracts/templates/contracts/contract_list.html:50
 #: apps/students/templates/students/student_detail.html:105
