@@ -4,6 +4,7 @@ from decimal import Decimal
 from apps.students.models import Student
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -65,7 +66,17 @@ class Contract(models.Model):
         verbose_name_plural = _("Contracts")
 
     def save(self, *args, **kwargs):
-        """Generate booking token if not set."""
+        """Generate booking token if not set. When deactivating, delete future lessons."""
+        if self.pk:
+            try:
+                old = Contract.objects.get(pk=self.pk)
+                if old.is_active and not self.is_active:
+                    from apps.lessons.models import Lesson
+
+                    today = timezone.localdate()
+                    Lesson.objects.filter(contract=self, date__gte=today).delete()
+            except Contract.DoesNotExist:
+                pass
         if not self.booking_token:
             self.booking_token = secrets.token_urlsafe(32)
         super().save(*args, **kwargs)

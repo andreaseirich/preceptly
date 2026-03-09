@@ -38,7 +38,12 @@ class ContractListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         contracts = list(context.get("contracts", []))
         context["contract_list_with_summary"] = [
-            {"contract": c, "current_month_summary": get_contract_current_month_summary(c)}
+            {
+                "contract": c,
+                "current_month_summary": get_contract_current_month_summary(c)
+                if c.is_active
+                else None,
+            }
             for c in contracts
         ]
         return context
@@ -57,7 +62,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         contract = context["contract"]
-        if contract.has_monthly_planning_limit:
+        if contract.is_active and contract.has_monthly_planning_limit:
             context["monthly_planning_summary"] = get_contract_monthly_planning_summary(
                 contract, year=date.today().year
             )
