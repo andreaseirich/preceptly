@@ -26,6 +26,31 @@
     <tr><th>{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
 
+{% if contract.has_monthly_planning_limit and monthly_planning_summary %}
+<h2>{% trans "Monthly planning (this year)" %}</h2>
+<p>{% trans "Planned units per month, how many were taught, and how many remain to be taught." %}</p>
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Month" %}</th>
+            <th>{% trans "Planned" %}</th>
+            <th>{% trans "Taught" %}</th>
+            <th>{% trans "Remaining" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in monthly_planning_summary %}
+        <tr>
+            <td>{{ row.year }}-{{ row.month|stringformat:"02d" }}</td>
+            <td>{{ row.planned_units }}</td>
+            <td>{{ row.taught_units }}</td>
+            <td>{{ row.remaining_units }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
 <h2>{% trans "Lessons" %}</h2>
 {% if contract.sessions.all %}
 <table>

@@ -2,6 +2,8 @@
 Views for contract CRUD operations.
 """
 
+from datetime import date
+
 from apps.contracts.forms import ContractForm
 from apps.contracts.formsets import (
     ContractMonthlyPlanFormSet,
@@ -9,6 +11,10 @@ from apps.contracts.formsets import (
     iter_contract_months,
 )
 from apps.contracts.models import Contract, ContractMonthlyPlan
+from apps.contracts.services import (
+    get_contract_current_month_summary,
+    get_contract_monthly_planning_summary,
+)
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -28,6 +34,15 @@ class ContractListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().filter(student__user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contracts = list(context.get("contracts", []))
+        context["contract_list_with_summary"] = [
+            {"contract": c, "current_month_summary": get_contract_current_month_summary(c)}
+            for c in contracts
+        ]
+        return context
+
 
 class ContractDetailView(LoginRequiredMixin, DetailView):
     """Detail view of a contract."""
@@ -38,6 +53,17 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().filter(student__user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contract = context["contract"]
+        if contract.has_monthly_planning_limit:
+            context["monthly_planning_summary"] = get_contract_monthly_planning_summary(
+                contract, year=date.today().year
+            )
+        else:
+            context["monthly_planning_summary"] = []
+        return context
 
 
 class ContractCreateView(LoginRequiredMixin, CreateView):

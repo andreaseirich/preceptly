@@ -17,11 +17,13 @@
             <th>{% trans "From" %}</th>
             <th>{% trans "To" %}</th>
             <th>{% trans "Status" %}</th>
+            <th>{% trans "This month (planned / taught / remaining)" %}</th>
             <th>{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
-        {% for contract in contracts %}
+        {% for item in contract_list_with_summary %}
+        {% with contract=item.contract summary=item.current_month_summary %}
         <tr>
             <td>{{ contract.student.full_name }}</td>
             <td>{{ contract.institute|default:"-" }}</td>
@@ -31,13 +33,21 @@
             <td>{{ contract.end_date|default:_("unlimited") }}</td>
             <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
             <td>
+                {% if summary %}
+                {% blocktrans with planned=summary.planned_units taught=summary.taught_units remaining=summary.remaining_units %}Planned: {{ planned }} · Taught: {{ taught }} · Remaining: {{ remaining }}{% endblocktrans %}
+                {% else %}
+                —
+                {% endif %}
+            </td>
+            <td>
                 <a href="{% url 'contracts:detail' contract.pk %}">{% trans "Details" %}</a> |
                 <a href="{% url 'contracts:update' contract.pk %}">{% trans "Edit" %}</a> |
                 <a href="{% url 'contracts:delete' contract.pk %}">{% trans "Delete" %}</a>
             </td>
         </tr>
+        {% endwith %}
         {% empty %}
-        <tr><td colspan="8">{% trans "No contracts available." %}</td></tr>
+        <tr><td colspan="9">{% trans "No contracts available." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>
