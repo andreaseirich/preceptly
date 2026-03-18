@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from apps.contracts.models import Contract
 from apps.students.models import Student
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 
@@ -11,7 +12,10 @@ class ContractModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.student = Student.objects.create(first_name="Max", last_name="Mustermann")
+        self.user = User.objects.create_user(username="tutor_contracts", password="test")
+        self.student = Student.objects.create(
+            user=self.user, first_name="Max", last_name="Mustermann"
+        )
 
     def test_create_contract(self):
         """Test: Contract kann erstellt werden."""

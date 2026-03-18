@@ -134,11 +134,19 @@ class InvoiceService:
             total_amount = Decimal("0.00")
             for lesson in lessons:
                 contract = lesson.contract
-                unit_duration = Decimal(str(contract.unit_duration_minutes))
-                lesson_duration = Decimal(str(lesson.duration_minutes))
-                units = lesson_duration / unit_duration
-                rate_per_unit = contract.hourly_rate
-                amount = units * rate_per_unit
+                from apps.contracts.tutorspace_compensation import (
+                    calculate_tutorspace_amount_for_session,
+                    is_tutorspace_institute,
+                )
+
+                if is_tutorspace_institute(getattr(contract, "institute", None)):
+                    amount = calculate_tutorspace_amount_for_session(lesson, tutor=user)
+                else:
+                    unit_duration = Decimal(str(contract.unit_duration_minutes))
+                    lesson_duration = Decimal(str(lesson.duration_minutes))
+                    units = lesson_duration / unit_duration
+                    rate_per_unit = contract.hourly_rate
+                    amount = units * rate_per_unit
 
                 InvoiceItem.objects.create(
                     invoice=invoice,

@@ -37,6 +37,15 @@ class IncomeSelector:
             Betrag als Decimal
         """
         contract = lesson.contract
+        from apps.contracts.tutorspace_compensation import (
+            calculate_tutorspace_amount_for_session,
+            is_tutorspace_institute,
+        )
+
+        if is_tutorspace_institute(getattr(contract, "institute", None)):
+            tutor = contract.student.user
+            return calculate_tutorspace_amount_for_session(lesson, tutor=tutor)
+
         unit_duration = Decimal(str(contract.unit_duration_minutes))
         lesson_duration = Decimal(str(lesson.duration_minutes))
         units = lesson_duration / unit_duration
