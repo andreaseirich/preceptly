@@ -195,6 +195,27 @@
     {% endif %}
 </form>
 
+<h2 style="margin-top: 40px;">{% trans "TutorSpace: missed lesson (student was waiting)" %}</h2>
+<p>{% trans "If you did not attend a booked TutorSpace lesson but the student was there, you can mark that on the lesson. Here you set what share of the calculated amount still counts toward your income (0% = no pay)." %}</p>
+<form method="post" style="margin-top: 15px;">
+    {% csrf_token %}
+    <div style="max-width: 480px;">
+        <p style="margin-bottom: 8px;">
+            <label for="{{ tutor_no_show_form.tutor_no_show_pay_percent.id_for_label }}">{{ tutor_no_show_form.tutor_no_show_pay_percent.label }}</label>
+        </p>
+        {{ tutor_no_show_form.tutor_no_show_pay_percent }}
+        {% if tutor_no_show_form.tutor_no_show_pay_percent.help_text %}
+        <p style="font-size: 0.9em; color: #6c757d; margin-top: 4px;">{{ tutor_no_show_form.tutor_no_show_pay_percent.help_text }}</p>
+        {% endif %}
+    </div>
+    <div style="margin-top: 15px;">
+        <button type="submit" name="save_tutor_no_show" class="btn btn-success">{% trans "Save TutorSpace missed-lesson pay" %}</button>
+    </div>
+    {% if tutor_no_show_form.non_field_errors %}
+    <p style="color: #dc3545; margin-top: 8px;">{{ tutor_no_show_form.non_field_errors }}</p>
+    {% endif %}
+</form>
+
 {% if show_stripe_success_banner %}
 <div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
     {% trans "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet." %}

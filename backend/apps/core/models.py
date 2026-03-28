@@ -76,6 +76,13 @@ class UserProfile(models.Model):
         null=True,
         help_text=_("Last email synced to Stripe Customer (skip modify if unchanged)"),
     )
+    tutor_no_show_pay_percent = models.PositiveSmallIntegerField(
+        default=0,
+        help_text=_(
+            "For TutorSpace: when a session is marked 'tutor did not show (student waited)', "
+            "pay this percentage of the calculated amount (0 = no pay, 100 = full pay)."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

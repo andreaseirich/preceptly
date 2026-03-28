@@ -60,6 +60,15 @@
             <label for="{{ form.notes.id_for_label }}">{% trans "Notes:" %}</label>
             {{ form.notes }}
         </p>
+        <p style="padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
+            <label for="{{ form.tutor_no_show.id_for_label }}" style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                {{ form.tutor_no_show }}
+                <span>{{ form.tutor_no_show.label }}{% if form.tutor_no_show.help_text %}<br><small style="font-weight: normal; color: #6c757d;">{{ form.tutor_no_show.help_text }}</small>{% endif %}</span>
+            </label>
+        </p>
+        {% if form.tutor_no_show.errors %}
+        <p style="color: #dc3545;">{{ form.tutor_no_show.errors.0 }}</p>
+        {% endif %}
     </div>
     
     {% if not object %}

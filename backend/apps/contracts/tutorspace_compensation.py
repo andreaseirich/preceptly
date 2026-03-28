@@ -16,6 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
+from apps.core.models import UserProfile
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 
@@ -99,11 +100,13 @@ def calculate_tutorspace_amount_for_session(session, tutor: User) -> Decimal:
     if getattr(session, "id", None):
         before_q |= Q(date=session.date, start_time=session.start_time, id__lt=session.id)
 
+    # Tutor no-show (student waited): does not advance cumulative tier for later sessions.
     minutes_before = (
         Session.objects.filter(
             contract__student__user=tutor,
             contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
             status__in=["taught", "paid"],
+            tutor_no_show=False,
         )
         .filter(before_q)
         .aggregate(total=Sum("duration_minutes"))
@@ -133,5 +136,11 @@ def calculate_tutorspace_amount_for_session(session, tutor: User) -> Decimal:
         amount += (Decimal(chunk) / Decimal("60")) * rate
         cursor += chunk
         remaining -= chunk
+
+    if getattr(session, "tutor_no_show", False):
+        profile = UserProfile.objects.filter(user=tutor).first()
+        pct = int(getattr(profile, "tutor_no_show_pay_percent", 0) or 0) if profile else 0
+        pct = max(0, min(100, pct))
+        amount = amount * (Decimal(pct) / Decimal("100"))
 
     return amount.quantize(Decimal("0.01"))

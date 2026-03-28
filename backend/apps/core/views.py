@@ -2,7 +2,12 @@
 Views for dashboard and income overview.
 """
 
-from apps.core.forms import TravelPolicyForm, UserEmailForm, WorkingHoursForm
+from apps.core.forms import (
+    TravelPolicyForm,
+    TutorNoShowPayForm,
+    UserEmailForm,
+    WorkingHoursForm,
+)
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.core.utils_booking import ensure_public_booking_token
@@ -233,6 +238,22 @@ class SettingsView(LoginRequiredMixin, FormView):
             context = self.get_context_data()
             context["travel_form"] = travel_form
             return self.render_to_response(context)
+        if "save_tutor_no_show" in request.POST:
+            ns_form = TutorNoShowPayForm(request.POST)
+            if ns_form.is_valid():
+                profile, _created = UserProfile.objects.get_or_create(user=request.user)
+                profile.tutor_no_show_pay_percent = ns_form.cleaned_data[
+                    "tutor_no_show_pay_percent"
+                ]
+                profile.save()
+                messages.success(
+                    request,
+                    _("TutorSpace: pay when you missed (student waited) saved."),
+                )
+                return redirect(self.success_url)
+            context = self.get_context_data()
+            context["tutor_no_show_form"] = ns_form
+            return self.render_to_response(context)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -266,6 +287,11 @@ class SettingsView(LoginRequiredMixin, FormView):
             initial={
                 "transport_mode": policy.get("transport_mode", "oepnv"),
                 "fahrrad_buffer_minutes": policy.get("fahrrad_buffer_minutes", 25),
+            }
+        )
+        context["tutor_no_show_form"] = kwargs.get("tutor_no_show_form") or TutorNoShowPayForm(
+            initial={
+                "tutor_no_show_pay_percent": getattr(profile, "tutor_no_show_pay_percent", 0) or 0,
             }
         )
 

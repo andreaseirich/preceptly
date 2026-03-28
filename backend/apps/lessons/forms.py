@@ -76,6 +76,7 @@ class SessionForm(forms.ModelForm):
             "travel_time_before_minutes",
             "travel_time_after_minutes",
             "notes",
+            "tutor_no_show",
         ]
         widgets = {
             "contract": forms.Select(attrs={"class": "form-control"}),
@@ -89,6 +90,10 @@ class SessionForm(forms.ModelForm):
             "travel_time_before_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "travel_time_after_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+        labels = {
+            "tutor_no_show": _("I did not attend; student was waiting (TutorSpace pay)"),
         }
 
     def __init__(self, *args, user=None, **kwargs):

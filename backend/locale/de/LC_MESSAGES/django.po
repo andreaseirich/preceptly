@@ -5444,6 +5444,50 @@ msgstr "Wählen Sie, wie Sie üblicherweise zu Vor-Ort-Terminen anreisen. Das be
 msgid "Save travel mode"
 msgstr "Anreise-Modus speichern"
 
+#: apps/core/templates/core/settings.html
+msgid "TutorSpace: missed lesson (student was waiting)"
+msgstr "TutorSpace: Stunde verpasst (Schüler war anwesend)"
+
+#: apps/core/templates/core/settings.html
+msgid "If you did not attend a booked TutorSpace lesson but the student was there, you can mark that on the lesson. Here you set what share of the calculated amount still counts toward your income (0% = no pay)."
+msgstr "Wenn Sie eine gebuchte TutorSpace-Stunde nicht wahrgenommen haben, der Schüler aber da war, können Sie das bei der Stunde markieren. Hier legen Sie fest, welcher Anteil des berechneten Betrags noch für Ihre Einnahmen zählt (0 % = keine Vergütung)."
+
+#: apps/core/templates/core/settings.html
+msgid "Save TutorSpace missed-lesson pay"
+msgstr "TutorSpace-Vergütung bei verpasster Stunde speichern"
+
+#: apps/core/views.py
+msgid "TutorSpace: pay when you missed (student waited) saved."
+msgstr "TutorSpace: Vergütung bei verpasster Stunde (Schüler wartete) wurde gespeichert."
+
+#: apps/core/forms.py
+msgid "Pay when you missed the lesson (student was waiting)"
+msgstr "Vergütung, wenn Sie die Stunde verpasst haben (Schüler wartete)"
+
+#: apps/core/forms.py
+msgid "For TutorSpace sessions only: if you mark a lesson as “you did not attend, student was waiting”, this percentage of the calculated amount still counts (0 = none, 100 = full amount)."
+msgstr "Nur bei TutorSpace: Wenn Sie eine Stunde als „nicht erschienen, Schüler wartete“ markieren, zählt dieser Prozentsatz des berechneten Betrags noch (0 = keine Vergütung, 100 = voller Betrag)."
+
+#: apps/lessons/forms.py
+msgid "I did not attend; student was waiting (TutorSpace pay)"
+msgstr "Ich bin nicht erschienen; Schüler wartete (TutorSpace-Vergütung)"
+
+#: apps/lessons/models.py
+msgid ""
+"Tutor did not attend while the student was waiting "
+"(affects TutorSpace compensation per your settings)."
+msgstr ""
+"Nachhilfelehrer ist nicht erschienen, während der Schüler wartete "
+"(beeinflusst die TutorSpace-Vergütung gemäß Ihren Einstellungen)."
+
+#: apps/core/models.py
+msgid ""
+"For TutorSpace: when a session is marked 'tutor did not show (student waited)', "
+"pay this percentage of the calculated amount (0 = no pay, 100 = full pay)."
+msgstr ""
+"Bei TutorSpace: Wenn eine Stunde als „nicht erschienen (Schüler wartete)“ markiert ist, "
+"zählt dieser Prozentsatz des berechneten Betrags (0 = keine Vergütung, 100 = voller Betrag)."
+
 #~ msgid "Paid:"
 #~ msgstr "Ausgezahlt:"
 

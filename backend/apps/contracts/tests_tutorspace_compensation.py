@@ -7,6 +7,7 @@ from apps.contracts.tutorspace_compensation import (
     calculate_tutorspace_amount_for_session,
     tutorspace_rate_for_hour_index,
 )
+from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.models import Student
 from django.contrib.auth.models import User
@@ -74,3 +75,66 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
         )
         amount = calculate_tutorspace_amount_for_session(lesson_51, tutor=self.tutor)
         self.assertEqual(amount, Decimal("14.00"))
+
+    def test_tutor_no_show_zero_percent_pays_nothing(self):
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"tutor_no_show_pay_percent": 0}
+        )
+        lesson = Lesson.objects.create(
+            contract=self.c1,
+            date=date(2025, 2, 1),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+            tutor_no_show=True,
+        )
+        amount = calculate_tutorspace_amount_for_session(lesson, tutor=self.tutor)
+        self.assertEqual(amount, Decimal("0.00"))
+
+    def test_tutor_no_show_half_pay(self):
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"tutor_no_show_pay_percent": 50}
+        )
+        lesson = Lesson.objects.create(
+            contract=self.c1,
+            date=date(2025, 2, 1),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+            tutor_no_show=True,
+        )
+        amount = calculate_tutorspace_amount_for_session(lesson, tutor=self.tutor)
+        self.assertEqual(amount, Decimal("6.50"))
+
+    def test_tutor_no_show_minutes_do_not_advance_tier(self):
+        """A no-show session must not count toward cumulative hours for later tiers."""
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"tutor_no_show_pay_percent": 0}
+        )
+        start_day = date(2025, 1, 1)
+        for i in range(49):
+            Lesson.objects.create(
+                contract=self.c1,
+                date=start_day + timedelta(days=i),
+                start_time=time(10, 0),
+                duration_minutes=60,
+                status="taught",
+                tutor_no_show=False,
+            )
+        Lesson.objects.create(
+            contract=self.c1,
+            date=start_day + timedelta(days=49),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+            tutor_no_show=True,
+        )
+        next_lesson = Lesson.objects.create(
+            contract=self.c1,
+            date=start_day + timedelta(days=50),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        amount = calculate_tutorspace_amount_for_session(next_lesson, tutor=self.tutor)
+        self.assertEqual(amount, Decimal("13.00"))

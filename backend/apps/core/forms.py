@@ -162,3 +162,25 @@ class TravelPolicyForm(forms.Form):
         if value is None:
             return 25
         return max(5, min(60, value))
+
+
+class TutorNoShowPayForm(forms.Form):
+    """Percentage of TutorSpace pay when session is marked tutor no-show (student waited)."""
+
+    tutor_no_show_pay_percent = forms.IntegerField(
+        min_value=0,
+        max_value=100,
+        initial=0,
+        label=_("Pay when you missed the lesson (student was waiting)"),
+        help_text=_(
+            "For TutorSpace sessions only: if you mark a lesson as “you did not attend, "
+            "student was waiting”, this percentage of the calculated amount still counts "
+            "(0 = none, 100 = full amount)."
+        ),
+    )
+
+    def clean_tutor_no_show_pay_percent(self):
+        value = self.cleaned_data.get("tutor_no_show_pay_percent")
+        if value is None:
+            return 0
+        return max(0, min(100, int(value)))
