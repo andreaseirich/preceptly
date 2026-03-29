@@ -4,6 +4,7 @@ from decimal import Decimal
 from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
 from apps.contracts.models import Contract
 from apps.contracts.tutorspace_compensation import (
+    _tutorspace_minutes_before_session,
     calculate_tutorspace_amount_for_session,
     tutorspace_rate_for_hour_index,
 )
@@ -51,8 +52,8 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
 
     def test_cross_contract_cumulative_rate_increases_at_51st_hour(self):
         """
-        Build 50h taught across two TutorSpace contracts, then verify that the next
-        (51st) hour is paid at 14€/h (not 13€).
+        Build 50h taught across two TutorSpace contracts (two pupils), then verify that the next
+        (51st) hour is paid at 14€/h (global pool across all TutorSpace pupils).
         """
         start_day = date(2025, 1, 1)
         # 50 sessions * 60 minutes (25 per contract)
@@ -75,6 +76,29 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
         )
         amount = calculate_tutorspace_amount_for_session(lesson_51, tutor=self.tutor)
         self.assertEqual(amount, Decimal("14.00"))
+
+    def test_same_date_time_breaks_tie_by_created_at(self):
+        """Same date & start_time: earlier created_at counts first in cumulative minutes."""
+        d = date(2025, 3, 16)
+        first = Lesson.objects.create(
+            contract=self.c1,
+            date=d,
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        second = Lesson.objects.create(
+            contract=self.c2,
+            date=d,
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertLess(first.created_at, second.created_at)
+        self.assertEqual(_tutorspace_minutes_before_session(first, self.tutor), 0)
+        self.assertEqual(_tutorspace_minutes_before_session(second, self.tutor), 60)
 
     def test_tutor_no_show_zero_percent_full_deduction(self):
         UserProfile.objects.update_or_create(

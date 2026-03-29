@@ -3,6 +3,7 @@ Views für Billing-App.
 """
 
 from datetime import date
+from decimal import Decimal
 
 from apps.billing.document_service import InvoiceDocumentService
 from apps.billing.forms import InvoiceCreateForm
@@ -10,6 +11,7 @@ from apps.billing.models import Invoice
 from apps.billing.pdf_service import generate_invoice_pdf
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
+from apps.core.selectors import IncomeSelector
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -155,7 +157,14 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                 institute=institute,
                 user=self.request.user,
             )
-            context["billable_lessons"] = billable_lessons
+            # Same amount logic as InvoiceService.create_invoice_from_lessons (not template widthratio).
+            lessons_list = list(billable_lessons)
+            preview_total = Decimal("0.00")
+            for lesson in lessons_list:
+                lesson.invoice_preview_amount = IncomeSelector._calculate_lesson_amount(lesson)
+                preview_total += lesson.invoice_preview_amount
+            context["billable_lessons"] = lessons_list
+            context["preview_total_amount"] = preview_total
             context["period_start"] = parsed_start
             context["period_end"] = parsed_end
             context["contract"] = contract

@@ -7,8 +7,10 @@ from decimal import Decimal
 
 from apps.billing.views import InvoiceCreateView
 from apps.contracts.models import Contract
+from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
+from django.contrib.auth.models import User
 from django.test import Client, RequestFactory, TestCase
 
 
@@ -119,3 +121,45 @@ class InvoicePreviewFormValuesTest(TestCase):
         self.assertNotIn("period_start", form.initial)
         # Gültiges Datum sollte gesetzt sein
         self.assertEqual(form.initial.get("period_end"), date(2025, 8, 31))
+
+    def test_preview_amount_matches_invoice_calculation(self):
+        """Vorschau-Beträge = IncomeSelector (wie create_invoice_from_lessons), nicht widthratio."""
+        user = User.objects.create_user(username="preview_amount_user", password="test")
+        student = Student.objects.create(
+            user=user, first_name="Max", last_name="Mustermann", email="max@example.com"
+        )
+        contract = Contract.objects.create(
+            student=student,
+            hourly_rate=Decimal("12.00"),
+            unit_duration_minutes=45,
+            start_date=date(2025, 1, 1),
+            end_date=date(2025, 12, 31),
+            is_active=True,
+        )
+        Lesson.objects.create(
+            contract=contract,
+            date=date(2025, 8, 15),
+            start_time=time(14, 0),
+            duration_minutes=90,
+            status="taught",
+        )
+        request = self.factory.get(
+            "/billing/create/",
+            {
+                "period_start": "2025-08-01",
+                "period_end": "2025-08-31",
+                "contract": str(contract.pk),
+            },
+        )
+        request.user = user
+        view = InvoiceCreateView()
+        view.request = request
+        view.object = None
+        view.setup(request)
+        context = view.get_context_data()
+        self.assertEqual(len(context["billable_lessons"]), 1)
+        les = context["billable_lessons"][0]
+        expected = IncomeSelector._calculate_lesson_amount(les)
+        self.assertEqual(les.invoice_preview_amount, Decimal("24.00"))
+        self.assertEqual(les.invoice_preview_amount, expected)
+        self.assertEqual(context["preview_total_amount"], Decimal("24.00"))

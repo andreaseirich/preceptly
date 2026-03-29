@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load currency %}
 
 {% block title %}{% trans "Create New Invoice" %} - TutorFlow{% endblock %}
 
@@ -66,15 +67,13 @@
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ lesson.start_time|time:"H:i" }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ lesson.contract.student.full_name }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{% blocktrans with minutes=lesson.duration_minutes %}{{ minutes }} Min.{% endblocktrans %}</td>
-                <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">
-                    {% with units=lesson.duration_minutes|floatformat:0 contract_unit=lesson.contract.unit_duration_minutes|floatformat:0 %}
-                    {% widthratio lesson.duration_minutes contract_unit 1 as calculated_units %}
-                    {% widthratio lesson.contract.hourly_rate 1 calculated_units as calculated_amount %}
-                    {{ calculated_amount|floatformat:2 }}€
-                    {% endwith %}
-                </td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">{{ lesson.invoice_preview_amount|euro }}</td>
             </tr>
             {% endfor %}
+            <tr style="background: #f0f0f0; font-weight: bold;">
+                <td style="padding: 8px; border: 1px solid #ddd;" colspan="4">{% trans "Total (preview)" %}</td>
+                <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">{{ preview_total_amount|euro }}</td>
+            </tr>
         </tbody>
     </table>
     {% elif period_start and period_end %}
