@@ -71,10 +71,14 @@ CI runs `pip-audit` to check for known vulnerabilities. If a vulnerability is fo
 
 ### pip-audit: CVE-2026-4539 (Pygments)
 
-- **Issue:** ReDoS in `AdlLexer` (archetype lexer); advisory affects Pygments up through **2.19.2** (current PyPI latest).
-- **Upstream:** Fixed in [pygments/pygments#3064](https://github.com/pygments/pygments/pull/3064) (commit on `master`); **no release newer than 2.19.2 on PyPI yet**, so `pip-audit` still reports **pygments 2.19.2** when installed (including as a transitive dependency, e.g. from tooling).
-- **Mitigation:** CI uses `pip-audit --ignore-vuln CVE-2026-4539` until a patched version is published on PyPI. Re-evaluate after upgrading to **Pygments > 2.19.2** when available.
-- **Risk note:** TutorFlow does not feed untrusted input into that lexer in the application runtime; impact is primarily supply-chain / dev tooling exposure.
+- **What it is:** **Regular Expression Denial of Service (ReDoS)** in Pygments’ **AdlLexer** (GUID/ID regex in `archetype.py`). An attacker who can force parsing of malicious input through that lexer could cause high CPU use. Advisories often rate this **Low** because exploitation typically requires **local** or **controlled** input paths, not generic internet-facing RCE.
+- **Issue:** Affected versions include PyPI’s latest **2.19.2** (metadata version string unchanged until the next release).
+- **Upstream fix:** [pygments/pygments#3064](https://github.com/pygments/pygments/pull/3064) (commit `24b8aa76…`).
+- **Our mitigation:**
+  1. **`requirements.txt` pins Pygments from that git revision** so installs get the **patched source**, even though the package still self-reports version **2.19.2**.
+  2. **CI** keeps `pip-audit --ignore-vuln CVE-2026-4539` until **Pygments > 2.19.2** exists on PyPI (otherwise the audit tool flags the metadata version only).
+- **TutorFlow:** The app does not use that lexer on untrusted user content; residual risk is mostly transitive/tooling (e.g. highlighting in dev dependencies).
+- **Follow-up:** When PyPI publishes a release **> 2.19.2**, switch to `Pygments==<version>`, remove the git pin, and **remove** the `pip-audit` ignore for this CVE.
 
 ## Acknowledgments
 

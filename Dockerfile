@@ -10,7 +10,9 @@ ENV DJANGO_SETTINGS_MODULE=tutorflow.settings
 WORKDIR /app
 
 # Install system dependencies
+# git: required for Pygments VCS pin in requirements.txt (CVE-2026-4539) until PyPI > 2.19.2
 RUN apt-get update && apt-get install -y \
+    git \
     postgresql-client \
     gettext \
     && rm -rf /var/lib/apt/lists/*
