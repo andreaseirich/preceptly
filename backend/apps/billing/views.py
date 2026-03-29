@@ -10,12 +10,16 @@ from apps.billing.forms import InvoiceCreateForm
 from apps.billing.models import Invoice
 from apps.billing.pdf_service import generate_invoice_pdf
 from apps.billing.services import InvoiceService
+from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME, is_tutorspace_institute
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
+from apps.lessons.models import Lesson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
+from django.db.models import Sum
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -168,6 +172,27 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
             context["period_start"] = parsed_start
             context["period_end"] = parsed_end
             context["contract"] = contract
+
+            if lessons_list and any(
+                is_tutorspace_institute(lesson.contract.institute) for lesson in lessons_list
+            ):
+                profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
+                tier_from = profile.tutorspace_tier_count_from
+                prior_qs = Lesson.objects.filter(
+                    contract__student__user=self.request.user,
+                    contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
+                    status__in=["taught", "paid"],
+                    tutor_no_show=False,
+                    date__lt=parsed_start,
+                )
+                if tier_from:
+                    prior_qs = prior_qs.filter(date__gte=tier_from)
+                prior_minutes = int(prior_qs.aggregate(t=Sum("duration_minutes"))["t"] or 0)
+                context["tutorspace_show_tier_explainer"] = True
+                context["tutorspace_preview_prior_minutes"] = prior_minutes
+                context["tutorspace_preview_prior_full_hours"] = prior_minutes // 60
+                context["tutorspace_preview_prior_remainder_minutes"] = prior_minutes % 60
+                context["tutorspace_tier_count_from"] = tier_from
 
         return context
 

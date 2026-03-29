@@ -1,7 +1,8 @@
 """
 TutorSpace compensation rules (Gehalt) based on cumulative taught hours.
 
-Rules (cumulative across **all** TutorSpace contracts of the same tutor, in chronological order):
+Rules (cumulative across **all** TutorSpace contracts of the same tutor, in chronological order;
+optional profile ``tutorspace_tier_count_from`` limits which lesson dates enter the pool):
 - Hours 1..50:   13 €/h
 - Hours 51..150: 14 €/h
 - Hours 151..450: 15 €/h
@@ -104,18 +105,25 @@ def _tutorspace_minutes_before_session(session, tutor: User) -> int:
 
     Note: a tutor_no_show session is not in this queryset but still gets a correct total from
     rows that precede it in time order.
+
+    If the tutor's profile has ``tutorspace_tier_count_from`` set, only sessions on or after
+    that date participate in the tier pool (earlier TutorSpace lessons are ignored for tiers).
     """
     from apps.lessons.models import Session  # local import to avoid circulars
 
-    qs = (
-        Session.objects.filter(
-            contract__student__user=tutor,
-            contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
-            status__in=["taught", "paid"],
-            tutor_no_show=False,
-        )
-        .order_by("date", "start_time", "created_at", "pk")
-        .only("id", "date", "start_time", "duration_minutes", "created_at")
+    profile = UserProfile.objects.filter(user=tutor).first()
+    tier_from = getattr(profile, "tutorspace_tier_count_from", None) if profile else None
+
+    qs = Session.objects.filter(
+        contract__student__user=tutor,
+        contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
+        status__in=["taught", "paid"],
+        tutor_no_show=False,
+    )
+    if tier_from is not None:
+        qs = qs.filter(date__gte=tier_from)
+    qs = qs.order_by("date", "start_time", "created_at", "pk").only(
+        "id", "date", "start_time", "duration_minutes", "created_at"
     )
 
     total = 0

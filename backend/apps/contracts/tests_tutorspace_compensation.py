@@ -77,6 +77,45 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
         amount = calculate_tutorspace_amount_for_session(lesson_51, tutor=self.tutor)
         self.assertEqual(amount, Decimal("14.00"))
 
+    def test_seventh_lesson_stays_13_when_only_seven_exist(self):
+        """Fewer than 50 counted hours → full hour still 13 € (regression guard)."""
+        for i in range(7):
+            Lesson.objects.create(
+                contract=self.c1,
+                date=date(2026, 3, 5) + timedelta(days=i),
+                start_time=time(15, 0),
+                duration_minutes=60,
+                status="taught",
+            )
+        seventh = Lesson.objects.order_by("date", "id").last()
+        amount = calculate_tutorspace_amount_for_session(seventh, tutor=self.tutor)
+        self.assertEqual(amount, Decimal("13.00"))
+
+    def test_tier_count_from_excludes_earlier_lessons(self):
+        """Profile tutorspace_tier_count_from: older TutorSpace hours ignored for tiers."""
+        UserProfile.objects.update_or_create(
+            user=self.tutor,
+            defaults={"tutorspace_tier_count_from": date(2026, 3, 1)},
+        )
+        start_day = date(2026, 1, 1)
+        for i in range(50):
+            Lesson.objects.create(
+                contract=self.c1,
+                date=start_day + timedelta(days=i),
+                start_time=time(10, 0),
+                duration_minutes=60,
+                status="taught",
+            )
+        march_lesson = Lesson.objects.create(
+            contract=self.c1,
+            date=date(2026, 3, 5),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        amount = calculate_tutorspace_amount_for_session(march_lesson, tutor=self.tutor)
+        self.assertEqual(amount, Decimal("13.00"))
+
     def test_same_date_time_breaks_tie_by_created_at(self):
         """Same date & start_time: earlier created_at counts first in cumulative minutes."""
         d = date(2025, 3, 16)

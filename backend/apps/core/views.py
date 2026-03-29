@@ -5,6 +5,7 @@ Views for dashboard and income overview.
 from apps.core.forms import (
     TravelPolicyForm,
     TutorNoShowPayForm,
+    TutorSpaceTierCountFromForm,
     UserEmailForm,
     WorkingHoursForm,
 )
@@ -254,6 +255,22 @@ class SettingsView(LoginRequiredMixin, FormView):
             context = self.get_context_data()
             context["tutor_no_show_form"] = ns_form
             return self.render_to_response(context)
+        if "save_tutorspace_tier_from" in request.POST:
+            tier_form = TutorSpaceTierCountFromForm(request.POST)
+            if tier_form.is_valid():
+                profile, _created = UserProfile.objects.get_or_create(user=request.user)
+                profile.tutorspace_tier_count_from = tier_form.cleaned_data[
+                    "tutorspace_tier_count_from"
+                ]
+                profile.save()
+                messages.success(
+                    request,
+                    _("TutorSpace tier counting start date saved."),
+                )
+                return redirect(self.success_url)
+            context = self.get_context_data()
+            context["tutorspace_tier_form"] = tier_form
+            return self.render_to_response(context)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -292,6 +309,13 @@ class SettingsView(LoginRequiredMixin, FormView):
         context["tutor_no_show_form"] = kwargs.get("tutor_no_show_form") or TutorNoShowPayForm(
             initial={
                 "tutor_no_show_pay_percent": getattr(profile, "tutor_no_show_pay_percent", 0) or 0,
+            }
+        )
+        context["tutorspace_tier_form"] = kwargs.get(
+            "tutorspace_tier_form"
+        ) or TutorSpaceTierCountFromForm(
+            initial={
+                "tutorspace_tier_count_from": getattr(profile, "tutorspace_tier_count_from", None),
             }
         )
 

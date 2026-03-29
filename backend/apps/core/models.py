@@ -85,6 +85,15 @@ class UserProfile(models.Model):
             "usual pay); 100%% = full usual pay (no deduction)."
         ),
     )
+    tutorspace_tier_count_from = models.DateField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "TutorSpace pay tiers (13/14 € …): if set, only lessons on or after this date "
+            "count toward cumulative hours. Empty = all past TutorSpace lessons count "
+            "(can make the preview look ‘too high’ if you have many older sessions)."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

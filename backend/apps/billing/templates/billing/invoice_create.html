@@ -47,6 +47,25 @@
     <button type="button" onclick="loadLessons()" class="btn">{% trans "Show Preview" %}</button>
     
     {% if billable_lessons %}
+    {% if tutorspace_show_tier_explainer %}
+    <div style="background: #e3f2fd; padding: 14px 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #1976d2; font-size: 0.95em;">
+        <p style="margin: 0 0 8px 0;"><strong>{% trans "TutorSpace – tier calculation" %}</strong></p>
+        <p style="margin: 0;">
+            {% blocktrans with mins=tutorspace_preview_prior_minutes fh=tutorspace_preview_prior_full_hours rm=tutorspace_preview_prior_remainder_minutes %}
+            Before this billing period you already have <strong>{{ mins }}</strong> minutes of TutorSpace lessons that count toward the rate tier (that is <strong>{{ fh }}</strong> full hours plus <strong>{{ rm }}</strong> minutes). The 13 € / 14 € amounts use this history, not only the table below.
+            {% endblocktrans %}
+        </p>
+        {% if tutorspace_tier_count_from %}
+        <p style="margin: 8px 0 0 0;">
+            {% blocktrans with d=tutorspace_tier_count_from|date:"SHORT_DATE_FORMAT" %}
+            Your settings only count lessons from <strong>{{ d }}</strong> onward toward the tier.
+            {% endblocktrans %}
+        </p>
+        {% else %}
+        <p style="margin: 8px 0 0 0;">{% trans "Tip: If 14 € appears too early, set “Count TutorSpace tier hours only from” in Settings (or remove very old test lessons)." %}</p>
+        {% endif %}
+    </div>
+    {% endif %}
     <h2>{% blocktrans count counter=billable_lessons|length %}Available Lesson ({{ counter }}){% plural %}Available Lessons ({{ counter }}){% endblocktrans %}</h2>
     <p>{% trans "These lessons will be automatically included in the invoice:" %}</p>
     

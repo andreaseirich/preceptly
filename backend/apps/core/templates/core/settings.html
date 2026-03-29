@@ -216,6 +216,27 @@
     {% endif %}
 </form>
 
+<h2 style="margin-top: 40px;">{% trans "TutorSpace: pay tier cumulative (13/14 €)" %}</h2>
+<p>{% trans "By default, all TutorSpace lessons in the past count toward the hourly tier. If your invoice preview shows 14 € too early, older lessons outside the period are usually the reason—set a start date here so only lessons from that day onward count." %}</p>
+<form method="post" style="margin-top: 15px;">
+    {% csrf_token %}
+    <div style="max-width: 480px;">
+        <p style="margin-bottom: 8px;">
+            <label for="{{ tutorspace_tier_form.tutorspace_tier_count_from.id_for_label }}">{{ tutorspace_tier_form.tutorspace_tier_count_from.label }}</label>
+        </p>
+        {{ tutorspace_tier_form.tutorspace_tier_count_from }}
+        {% if tutorspace_tier_form.tutorspace_tier_count_from.help_text %}
+        <p style="font-size: 0.9em; color: #6c757d; margin-top: 4px;">{{ tutorspace_tier_form.tutorspace_tier_count_from.help_text }}</p>
+        {% endif %}
+    </div>
+    <div style="margin-top: 15px;">
+        <button type="submit" name="save_tutorspace_tier_from" class="btn btn-success">{% trans "Save TutorSpace tier start date" %}</button>
+    </div>
+    {% if tutorspace_tier_form.non_field_errors %}
+    <p style="color: #dc3545; margin-top: 8px;">{{ tutorspace_tier_form.non_field_errors }}</p>
+    {% endif %}
+</form>
+
 {% if show_stripe_success_banner %}
 <div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
     {% trans "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet." %}

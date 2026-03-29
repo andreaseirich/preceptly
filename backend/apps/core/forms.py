@@ -185,3 +185,21 @@ class TutorNoShowPayForm(forms.Form):
         if value is None:
             return 0
         return max(0, min(100, int(value)))
+
+
+class TutorSpaceTierCountFromForm(forms.Form):
+    """Optional start date for TutorSpace tier cumulative (13/14 € steps)."""
+
+    tutorspace_tier_count_from = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={"class": "form-control", "type": "date"},
+            format="%Y-%m-%d",
+        ),
+        label=_("Count TutorSpace tier hours only from (optional)"),
+        help_text=_(
+            "Empty: every past TutorSpace lesson counts toward the 13/14 € tiers (all pupils "
+            "together). Set a date if the preview or amounts look wrong because many older "
+            "lessons are included—only lessons on or after this date will count."
+        ),
+    )
