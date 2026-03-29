@@ -46,7 +46,11 @@ jobs:
           pip install ruff
 
       - name: Dependency audit
-        run: pip-audit
+        run: |
+          pip-audit \
+            --ignore-vuln CVE-2026-4539
+        # Pygments: fix merged (pygments/pygments#3064) but no PyPI release >2.19.2 yet;
+        # pip-audit matches metadata version 2.19.2. See SECURITY.md.
 
       - name: Django deploy check
         working-directory: ./backend

@@ -69,6 +69,13 @@ When using TutorFlow:
 
 CI runs `pip-audit` to check for known vulnerabilities. If a vulnerability is found in a system or transitive package (e.g. pip itself) that cannot be fixed by upgrading our direct dependencies, add a justified ignore in CI and document it here. Do not ignore application dependency vulnerabilities without a clear mitigation plan.
 
+### pip-audit: CVE-2026-4539 (Pygments)
+
+- **Issue:** ReDoS in `AdlLexer` (archetype lexer); advisory affects Pygments up through **2.19.2** (current PyPI latest).
+- **Upstream:** Fixed in [pygments/pygments#3064](https://github.com/pygments/pygments/pull/3064) (commit on `master`); **no release newer than 2.19.2 on PyPI yet**, so `pip-audit` still reports **pygments 2.19.2** when installed (including as a transitive dependency, e.g. from tooling).
+- **Mitigation:** CI uses `pip-audit --ignore-vuln CVE-2026-4539` until a patched version is published on PyPI. Re-evaluate after upgrading to **Pygments > 2.19.2** when available.
+- **Risk note:** TutorFlow does not feed untrusted input into that lexer in the application runtime; impact is primarily supply-chain / dev tooling exposure.
+
 ## Acknowledgments
 
 We appreciate the security research community's efforts to help keep TutorFlow secure. Responsible disclosure helps protect all users of the application.
