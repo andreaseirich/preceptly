@@ -173,9 +173,10 @@ class TutorNoShowPayForm(forms.Form):
         initial=0,
         label=_("Pay when you missed the lesson (student was waiting)"),
         help_text=_(
-            "For TutorSpace sessions only: if you mark a lesson as “you did not attend, "
-            "student was waiting”, this percentage of the calculated amount still counts "
-            "(0 = none, 100 = full amount)."
+            "TutorSpace only, if you mark “you did not attend, student was waiting”: share of "
+            "the usual lesson pay you keep. You are not paid the rest, and the usual amount "
+            "is deducted (e.g. 0%% → line shows −full usual amount; 100%% → full pay, no "
+            "deduction)."
         ),
     )
 

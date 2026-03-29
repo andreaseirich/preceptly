@@ -42,8 +42,9 @@ class Session(models.Model):
     tutor_no_show = models.BooleanField(
         default=False,
         help_text=_(
-            "Tutor did not attend while the student was waiting "
-            "(affects TutorSpace compensation per your settings)."
+            "Tutor did not attend while the student was waiting. "
+            "TutorSpace: pay/deduction per your settings. "
+            "Abacus: lesson is not billed (0). Other contracts: no effect on amount."
         ),
     )
     created_via = models.CharField(

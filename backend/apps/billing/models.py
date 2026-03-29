@@ -7,7 +7,6 @@ from decimal import Decimal
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from django.conf import settings
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -62,8 +61,7 @@ class Invoice(models.Model):
         max_digits=10,
         decimal_places=2,
         default=Decimal("0.00"),
-        validators=[MinValueValidator(Decimal("0.00"))],
-        help_text=_("Total invoice amount"),
+        help_text=_("Total invoice amount (may be negative if items include deductions)."),
     )
     document = models.FileField(
         upload_to="invoices/",
@@ -180,8 +178,7 @@ class InvoiceItem(models.Model):
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        help_text=_("Amount for this item"),
+        help_text=_("Amount for this item (negative for deductions, e.g. TutorSpace no-show)."),
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

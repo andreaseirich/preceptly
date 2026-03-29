@@ -196,7 +196,7 @@
 </form>
 
 <h2 style="margin-top: 40px;">{% trans "TutorSpace: missed lesson (student was waiting)" %}</h2>
-<p>{% trans "If you did not attend a booked TutorSpace lesson but the student was there, you can mark that on the lesson. Here you set what share of the calculated amount still counts toward your income (0% = no pay)." %}</p>
+<p>{% trans "TutorSpace: mark a missed lesson (student waited) on the session; below you set pay share and deduction. Abacus: the same flag means the lesson is not billed (0 €). Other institutes: the flag does not change amounts." %}</p>
 <form method="post" style="margin-top: 15px;">
     {% csrf_token %}
     <div style="max-width: 480px;">

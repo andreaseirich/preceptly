@@ -79,8 +79,10 @@ class UserProfile(models.Model):
     tutor_no_show_pay_percent = models.PositiveSmallIntegerField(
         default=0,
         help_text=_(
-            "For TutorSpace: when a session is marked 'tutor did not show (student waited)', "
-            "pay this percentage of the calculated amount (0 = no pay, 100 = full pay)."
+            "TutorSpace, session marked 'tutor did not show (student waited)': share of the "
+            "usual lesson amount you still keep. The rest is not paid, and the usual amount "
+            "is deducted (net ≈ −(100−this)% of usual pay). 0%% = full deduction (−100%% of "
+            "usual pay); 100%% = full usual pay (no deduction)."
         ),
     )
     created_at = models.DateTimeField(auto_now_add=True)

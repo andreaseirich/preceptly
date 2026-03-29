@@ -5,6 +5,8 @@ Services für Billing-Funktionalität.
 from decimal import Decimal
 
 from apps.billing.models import Invoice, InvoiceItem
+from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
+from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
 from django.db import transaction
@@ -134,10 +136,6 @@ class InvoiceService:
             total_amount = Decimal("0.00")
             for lesson in lessons:
                 contract = lesson.contract
-                from apps.contracts.tutorspace_compensation import (
-                    calculate_tutorspace_amount_for_session,
-                    is_tutorspace_institute,
-                )
 
                 if is_tutorspace_institute(getattr(contract, "institute", None)):
                     amount = calculate_tutorspace_amount_for_session(lesson, tutor=user)
@@ -147,15 +145,26 @@ class InvoiceService:
                     units = lesson_duration / unit_duration
                     rate_per_unit = contract.hourly_rate
                     amount = units * rate_per_unit
+                    if getattr(lesson, "tutor_no_show", False) and is_abacus_institute(
+                        getattr(contract, "institute", None)
+                    ):
+                        amount = Decimal("0.00")
+
+                desc = _("Lesson {date} {time} - {student}").format(
+                    date=lesson.date,
+                    time=lesson.start_time.strftime("%H:%M"),
+                    student=lesson.contract.student.full_name,
+                )
+                if getattr(lesson, "tutor_no_show", False):
+                    if is_tutorspace_institute(getattr(contract, "institute", None)):
+                        desc = f"{desc} ({_('tutor no-show / deduction')})"
+                    elif is_abacus_institute(getattr(contract, "institute", None)):
+                        desc = f"{desc} ({_('not billed — tutor no-show')})"
 
                 InvoiceItem.objects.create(
                     invoice=invoice,
                     lesson=lesson,
-                    description=_("Lesson {date} {time} - {student}").format(
-                        date=lesson.date,
-                        time=lesson.start_time.strftime("%H:%M"),
-                        student=lesson.contract.student.full_name,
-                    ),
+                    description=desc,
                     date=lesson.date,
                     duration_minutes=lesson.duration_minutes,
                     amount=amount,

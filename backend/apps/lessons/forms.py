@@ -93,7 +93,7 @@ class SessionForm(forms.ModelForm):
             "tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         labels = {
-            "tutor_no_show": _("I did not attend; student was waiting (TutorSpace pay)"),
+            "tutor_no_show": _("I did not attend; student was waiting (TutorSpace / Abacus)"),
         }
 
     def __init__(self, *args, user=None, **kwargs):

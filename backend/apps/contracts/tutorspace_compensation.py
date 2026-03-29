@@ -16,11 +16,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
+from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME, is_tutorspace_institute
 from apps.core.models import UserProfile
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
-
-TUTORSPACE_INSTITUTE_NAME = "TutorSpace"
 
 
 @dataclass(frozen=True)
@@ -36,10 +35,6 @@ TIERS: list[TutorSpaceTier] = [
     TutorSpaceTier(start_hour_inclusive=451, rate_eur_per_hour=Decimal("16")),
     TutorSpaceTier(start_hour_inclusive=1001, rate_eur_per_hour=Decimal("17")),
 ]
-
-
-def is_tutorspace_institute(institute: str | None) -> bool:
-    return (institute or "").strip().lower() == TUTORSPACE_INSTITUTE_NAME.lower()
 
 
 def tutorspace_rate_for_hour_index(hour_index_1_based: int) -> Decimal:
@@ -141,6 +136,12 @@ def calculate_tutorspace_amount_for_session(session, tutor: User) -> Decimal:
         profile = UserProfile.objects.filter(user=tutor).first()
         pct = int(getattr(profile, "tutor_no_show_pay_percent", 0) or 0) if profile else 0
         pct = max(0, min(100, pct))
-        amount = amount * (Decimal(pct) / Decimal("100"))
+        base = amount
+        if pct >= 100:
+            pass  # full TutorSpace amount despite flag
+        else:
+            # Retain pct% of usual pay; remainder is not paid; additionally deduct the usual
+            # amount so net = base * pct/100 - base (e.g. 0% → -base, 50% → -base/2).
+            amount = base * (Decimal(pct) / Decimal("100")) - base
 
     return amount.quantize(Decimal("0.01"))

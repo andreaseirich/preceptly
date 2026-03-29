@@ -1,9 +1,9 @@
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
 from apps.contracts.models import Contract
 from apps.contracts.tutorspace_compensation import (
-    TUTORSPACE_INSTITUTE_NAME,
     calculate_tutorspace_amount_for_session,
     tutorspace_rate_for_hour_index,
 )
@@ -76,7 +76,7 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
         amount = calculate_tutorspace_amount_for_session(lesson_51, tutor=self.tutor)
         self.assertEqual(amount, Decimal("14.00"))
 
-    def test_tutor_no_show_zero_percent_pays_nothing(self):
+    def test_tutor_no_show_zero_percent_full_deduction(self):
         UserProfile.objects.update_or_create(
             user=self.tutor, defaults={"tutor_no_show_pay_percent": 0}
         )
@@ -89,9 +89,9 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
             tutor_no_show=True,
         )
         amount = calculate_tutorspace_amount_for_session(lesson, tutor=self.tutor)
-        self.assertEqual(amount, Decimal("0.00"))
+        self.assertEqual(amount, Decimal("-13.00"))
 
-    def test_tutor_no_show_half_pay(self):
+    def test_tutor_no_show_half_retention_halves_deduction(self):
         UserProfile.objects.update_or_create(
             user=self.tutor, defaults={"tutor_no_show_pay_percent": 50}
         )
@@ -104,7 +104,22 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
             tutor_no_show=True,
         )
         amount = calculate_tutorspace_amount_for_session(lesson, tutor=self.tutor)
-        self.assertEqual(amount, Decimal("6.50"))
+        self.assertEqual(amount, Decimal("-6.50"))
+
+    def test_tutor_no_show_hundred_percent_full_pay(self):
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"tutor_no_show_pay_percent": 100}
+        )
+        lesson = Lesson.objects.create(
+            contract=self.c1,
+            date=date(2025, 2, 1),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+            tutor_no_show=True,
+        )
+        amount = calculate_tutorspace_amount_for_session(lesson, tutor=self.tutor)
+        self.assertEqual(amount, Decimal("13.00"))
 
     def test_tutor_no_show_minutes_do_not_advance_tier(self):
         """A no-show session must not count toward cumulative hours for later tiers."""

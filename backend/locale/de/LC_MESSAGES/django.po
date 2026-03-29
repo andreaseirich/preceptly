@@ -5449,8 +5449,8 @@ msgid "TutorSpace: missed lesson (student was waiting)"
 msgstr "TutorSpace: Stunde verpasst (Schüler war anwesend)"
 
 #: apps/core/templates/core/settings.html
-msgid "If you did not attend a booked TutorSpace lesson but the student was there, you can mark that on the lesson. Here you set what share of the calculated amount still counts toward your income (0% = no pay)."
-msgstr "Wenn Sie eine gebuchte TutorSpace-Stunde nicht wahrgenommen haben, der Schüler aber da war, können Sie das bei der Stunde markieren. Hier legen Sie fest, welcher Anteil des berechneten Betrags noch für Ihre Einnahmen zählt (0 % = keine Vergütung)."
+msgid "TutorSpace: mark a missed lesson (student waited) on the session; below you set pay share and deduction. Abacus: the same flag means the lesson is not billed (0 €). Other institutes: the flag does not change amounts."
+msgstr "TutorSpace: Verpasste Stunde (Schüler wartete) bei der Stunde markieren; unten stellen Sie Vergütungsanteil und Abzug ein. Abacus: Dieselbe Markierung bedeutet, die Stunde wird nicht verrechnet (0 €). Andere Institute: Die Markierung ändert die Beträge nicht."
 
 #: apps/core/templates/core/settings.html
 msgid "Save TutorSpace missed-lesson pay"
@@ -5465,28 +5465,43 @@ msgid "Pay when you missed the lesson (student was waiting)"
 msgstr "Vergütung, wenn Sie die Stunde verpasst haben (Schüler wartete)"
 
 #: apps/core/forms.py
-msgid "For TutorSpace sessions only: if you mark a lesson as “you did not attend, student was waiting”, this percentage of the calculated amount still counts (0 = none, 100 = full amount)."
-msgstr "Nur bei TutorSpace: Wenn Sie eine Stunde als „nicht erschienen, Schüler wartete“ markieren, zählt dieser Prozentsatz des berechneten Betrags noch (0 = keine Vergütung, 100 = voller Betrag)."
+msgid "TutorSpace only, if you mark “you did not attend, student was waiting”: share of the usual lesson pay you keep. You are not paid the rest, and the usual amount is deducted (e.g. 0%% → line shows −full usual amount; 100%% → full pay, no deduction)."
+msgstr "Nur TutorSpace, wenn Sie „nicht erschienen, Schüler wartete“ markieren: Anteil der üblichen Stundenvergütung, den Sie behalten. Der Rest wird nicht ausgezahlt, der übliche Betrag wird abgezogen (z. B. 0 %% → Position zeigt −volle übliche Vergütung; 100 %% → volle Vergütung, kein Abzug)."
 
 #: apps/lessons/forms.py
-msgid "I did not attend; student was waiting (TutorSpace pay)"
-msgstr "Ich bin nicht erschienen; Schüler wartete (TutorSpace-Vergütung)"
+msgid "I did not attend; student was waiting (TutorSpace / Abacus)"
+msgstr "Ich bin nicht erschienen; Schüler wartete (TutorSpace / Abacus)"
 
 #: apps/lessons/models.py
 msgid ""
-"Tutor did not attend while the student was waiting "
-"(affects TutorSpace compensation per your settings)."
+"Tutor did not attend while the student was waiting. "
+"TutorSpace: pay/deduction per your settings. "
+"Abacus: lesson is not billed (0). Other contracts: no effect on amount."
 msgstr ""
-"Nachhilfelehrer ist nicht erschienen, während der Schüler wartete "
-"(beeinflusst die TutorSpace-Vergütung gemäß Ihren Einstellungen)."
+"Nachhilfelehrer ist nicht erschienen, während der Schüler wartete. "
+"TutorSpace: Vergütung/Abzug gemäß Ihren Einstellungen. "
+"Abacus: Stunde wird nicht verrechnet (0 €). Andere Verträge: keine Auswirkung auf den Betrag."
+
+#: apps/billing/services.py
+msgid "tutor no-show / deduction"
+msgstr "nicht erschienen / Abzug"
+
+#: apps/billing/services.py
+msgid "not billed — tutor no-show"
+msgstr "nicht verrechnet — Nachhilfelehrer nicht erschienen"
 
 #: apps/core/models.py
 msgid ""
-"For TutorSpace: when a session is marked 'tutor did not show (student waited)', "
-"pay this percentage of the calculated amount (0 = no pay, 100 = full pay)."
+"TutorSpace, session marked 'tutor did not show (student waited)': share of the "
+"usual lesson amount you still keep. The rest is not paid, and the usual amount "
+"is deducted (net ≈ −(100−this)% of usual pay). 0%% = full deduction (−100%% of "
+"usual pay); 100%% = full usual pay (no deduction)."
 msgstr ""
-"Bei TutorSpace: Wenn eine Stunde als „nicht erschienen (Schüler wartete)“ markiert ist, "
-"zählt dieser Prozentsatz des berechneten Betrags (0 = keine Vergütung, 100 = voller Betrag)."
+"TutorSpace, Stunde als „Nachhilfelehrer nicht erschienen (Schüler wartete)“: Anteil "
+"der üblichen Stundenvergütung, den Sie behalten. Der Rest wird nicht bezahlt, der übliche "
+"Betrag wird abgezogen (netto ≈ −(100−dieser Prozentsatz)%% der üblichen Vergütung). "
+"0 %% = voller Abzug (−100 %% der üblichen Vergütung); 100 %% = volle übliche Vergütung "
+"(kein Abzug)."
 
 #~ msgid "Paid:"
 #~ msgstr "Ausgezahlt:"
