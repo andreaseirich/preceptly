@@ -87,6 +87,10 @@ class InvoiceService:
             if not lessons.exists():
                 raise ValueError(_("No billable lessons found in the specified period."))
 
+            first_lesson = lessons.first()
+            # Tutor for TutorSpace tier math must always be set (calculate_tutorspace returns 0 if None).
+            owner = user if user is not None else first_lesson.contract.student.user
+
             if contract:
                 # Use tutoring institute as payer if available, otherwise student
                 if contract.institute:
@@ -95,7 +99,6 @@ class InvoiceService:
                     payer_name = contract.student.full_name
                 payer_address = ""
             else:
-                first_lesson = lessons.first()
                 first_contract = first_lesson.contract
                 # Use tutoring institute as payer if available, otherwise student
                 if first_contract.institute:
@@ -104,16 +107,11 @@ class InvoiceService:
                     payer_name = first_contract.student.full_name
                 payer_address = ""
 
-            owner = user
-            if not owner:
-                first_lesson = lessons.first()
-                owner = first_lesson.contract.student.user
-
             invoice_kwargs = {
                 "owner": owner,
                 "payer_name": payer_name,
                 "payer_address": payer_address,
-                "contract": contract or lessons.first().contract,
+                "contract": contract or first_lesson.contract,
                 "period_start": period_start,
                 "period_end": period_end,
                 "status": "draft",
@@ -138,7 +136,7 @@ class InvoiceService:
                 contract = lesson.contract
 
                 if is_tutorspace_institute(getattr(contract, "institute", None)):
-                    amount = calculate_tutorspace_amount_for_session(lesson, tutor=user)
+                    amount = calculate_tutorspace_amount_for_session(lesson, tutor=owner)
                 else:
                     unit_duration = Decimal(str(contract.unit_duration_minutes))
                     lesson_duration = Decimal(str(lesson.duration_minutes))

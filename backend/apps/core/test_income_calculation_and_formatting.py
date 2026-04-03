@@ -5,12 +5,14 @@ Tests für Einnahmenberechnung und Formatierung.
 from datetime import date, time
 from decimal import Decimal
 
+from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.core.selectors import IncomeSelector
 from apps.core.templatetags.currency import euro
 from apps.lessons.models import Lesson
 from apps.students.models import Student
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 
@@ -159,6 +161,55 @@ class IncomeCalculationTest(TestCase):
         self.assertEqual(billing_status["invoiced"]["income"], invoice.total_amount)
         self.assertEqual(billing_status["invoiced"]["income"], Decimal("24.00"))
         self.assertEqual(billing_status["not_invoiced"]["income"], Decimal("0.00"))
+
+    def test_get_lesson_amount_sums_all_invoice_lines_for_same_lesson(self):
+        """Regression: multiple InvoiceItems for one lesson must all count (not .first() only)."""
+        user = User.objects.create_user(username="tutor_sum", password="x")
+        student = Student.objects.create(user=user, first_name="A", last_name="B")
+        contract = Contract.objects.create(
+            student=student,
+            hourly_rate=Decimal("30.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
+        )
+        lesson = Lesson.objects.create(
+            contract=contract,
+            date=date(2025, 8, 10),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        inv1 = Invoice.objects.create(
+            owner=user,
+            payer_name="P",
+            period_start=date(2025, 8, 1),
+            period_end=date(2025, 8, 31),
+            status="draft",
+        )
+        InvoiceItem.objects.create(
+            invoice=inv1,
+            lesson=lesson,
+            description="Line A",
+            date=lesson.date,
+            duration_minutes=60,
+            amount=Decimal("10.00"),
+        )
+        inv2 = Invoice.objects.create(
+            owner=user,
+            payer_name="P",
+            period_start=date(2025, 8, 1),
+            period_end=date(2025, 8, 31),
+            status="draft",
+        )
+        InvoiceItem.objects.create(
+            invoice=inv2,
+            lesson=lesson,
+            description="Line B",
+            date=lesson.date,
+            duration_minutes=60,
+            amount=Decimal("20.00"),
+        )
+        self.assertEqual(IncomeSelector._get_lesson_amount(lesson), Decimal("30.00"))
 
 
 class EuroFormattingTest(TestCase):

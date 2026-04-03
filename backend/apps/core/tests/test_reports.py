@@ -62,6 +62,9 @@ class ReportsPremiumGatingTest(TestCase):
         self.assertContains(response, "Revenue (paid invoices, last 6 months)")
         self.assertContains(response, "Hours taught (last 6 months)")
         self.assertContains(response, "Top 5 students")
+        self.assertContains(response, "Definitions (same as Income)")
+        self.assertContains(response, "Lessons (selected month)")
+        self.assertContains(response, "Recognized revenue (paid)")
 
 
 class ReportsMultiUserIsolationTest(TestCase):

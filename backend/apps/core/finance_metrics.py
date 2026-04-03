@@ -2,7 +2,15 @@
 Canonical definitions for revenue and statistics.
 
 All metrics are owner-scoped (Invoice.owner / Lesson via contract->student->user).
-Revenue is always based on Invoice.total_amount; never on Lesson.status directly.
+
+Recognized revenue: sum of ``Invoice.total_amount`` for invoices with status PAID,
+bucketed by the **calendar month of** ``Invoice.period_start`` (billing period start),
+not by individual lesson dates. This matches the Income/Reports “recognized revenue”
+figures.
+
+Lesson counts and “taught hours” use lesson **session dates** in the selected month.
+
+See Income overview and Reports templates for user-facing explanations.
 """
 
 from datetime import date

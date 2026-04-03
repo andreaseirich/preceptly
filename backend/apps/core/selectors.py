@@ -12,7 +12,7 @@ from apps.contracts.models import ContractMonthlyPlan
 from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
 from apps.lessons.models import Lesson
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 
 class IncomeSelector:
@@ -20,11 +20,12 @@ class IncomeSelector:
     Selector für Einnahmenberechnungen und -auswertungen.
 
     Verwendet die gleiche Berechnungslogik wie das Abrechnungssystem:
-    - units = lesson_duration_minutes / contract_unit_duration_minutes
-    - amount = units * hourly_rate
+    - Standard: units = lesson_duration_minutes / contract_unit_duration_minutes,
+      amount = units * hourly_rate
+    - TutorSpace: Stufenvergütung wie InvoiceService (kumulierte Stunden).
 
-    Für Lessons, die in Rechnungen enthalten sind, werden die Beträge
-    aus den InvoiceItems genommen (Single Source of Truth).
+    Für Lessons mit Rechnungspositionen: Summe der zugehörigen InvoiceItem-Beträge
+    (Single Source of Truth).
     """
 
     @staticmethod
@@ -59,8 +60,9 @@ class IncomeSelector:
         """
         Gibt den Betrag für eine Lesson zurück.
 
-        Wenn die Lesson in einer Rechnung ist, wird der Betrag aus dem InvoiceItem genommen.
-        Sonst wird der Betrag mit der gleichen Logik wie InvoiceService berechnet.
+        Wenn die Lesson in Rechnungspositionen vorkommt, ist die Summe aller zugehörigen
+        InvoiceItem-Beträge maßgeblich (mehrere Rechnungen / mehrere Zeilen möglich).
+        Sonst wie InvoiceService berechnet.
 
         Args:
             lesson: Lesson-Instanz
@@ -68,14 +70,10 @@ class IncomeSelector:
         Returns:
             Betrag als Decimal
         """
-        # Check if lesson is in an invoice
-        invoice_item = InvoiceItem.objects.filter(lesson=lesson).first()
-        if invoice_item:
-            # Use amount from InvoiceItem (Single Source of Truth)
-            return invoice_item.amount
-        else:
-            # Calculate amount with same logic as InvoiceService
-            return IncomeSelector._calculate_lesson_amount(lesson)
+        invoiced_total = InvoiceItem.objects.filter(lesson=lesson).aggregate(s=Sum("amount"))["s"]
+        if invoiced_total is not None:
+            return invoiced_total
+        return IncomeSelector._calculate_lesson_amount(lesson)
 
     @staticmethod
     def get_monthly_income(year: int, month: int, status: str = "paid", user: User = None) -> dict:
@@ -332,12 +330,7 @@ class IncomeSelector:
         # For invoiced lessons: amounts from InvoiceItems (Single Source of Truth)
         invoiced_income = Decimal("0.00")
         for lesson in invoiced_lessons:
-            invoice_item = InvoiceItem.objects.filter(lesson=lesson).first()
-            if invoice_item:
-                invoiced_income += invoice_item.amount
-            else:
-                # Fallback: calculate with same logic
-                invoiced_income += IncomeSelector._calculate_lesson_amount(lesson)
+            invoiced_income += IncomeSelector._get_lesson_amount(lesson)
 
         # For not invoiced lessons: calculate with same logic as InvoiceService
         not_invoiced_income = Decimal("0.00")

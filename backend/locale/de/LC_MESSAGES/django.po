@@ -2544,7 +2544,7 @@ msgstr "Keine kommenden Stunden."
 #: apps/core/templates/core/income_overview.html:20
 #: apps/core/templates/core/income_overview.html:52
 msgid "Recognized revenue (paid invoices):"
-msgstr "Umsatz (bezahlt):"
+msgstr "Realisierte Einnahmen (bezahlte Rechnungen):"
 
 #: apps/core/templates/core/dashboard.html:77
 #: apps/core/templates/core/income_overview.html:20
@@ -2562,77 +2562,172 @@ msgid_plural "%(counter)s conflicts in upcoming lessons!"
 msgstr[0] "%(counter)s Konflikt in kommenden Unterrichtsstunden!"
 msgstr[1] "%(counter)s Konflikte in kommenden Unterrichtsstunden!"
 
+#: apps/core/templates/core/dashboard.html:78
+msgid ""
+"Paid invoices only, grouped by billing period start month (not always the "
+"month lessons occurred)."
+msgstr ""
+"Nur bezahlte Rechnungen, gruppiert nach Monat des Rechnungszeitraum-Beginns "
+"(nicht immer der Monat der Stunden)."
+
+#: apps/core/templates/core/dashboard.html:78
+msgid "Income overview"
+msgstr "Einnahmenübersicht"
+
+#: apps/core/templates/core/dashboard.html:78
+msgid "amounts by lesson status and notes."
+msgstr "Beträge nach Stundenstatus und Erläuterungen."
+
+#: apps/billing/templates/billing/invoice_create.html:65
+msgid "Open settings"
+msgstr "Einstellungen öffnen"
+
+#: apps/billing/templates/billing/invoice_create.html:65
+msgid ""
+"Tip: If 14 € appears too early, set \"Count TutorSpace tier hours only from"
+"\" in Settings, or remove old test lessons."
+msgstr ""
+"Hinweis: Wenn 14 € zu früh erscheint, stellen Sie in den Einstellungen "
+"„TutorSpace-Stunden für Stufen nur ab …“ ein oder entfernen Sie alte Test-"
+"Stunden."
+
 #: apps/core/templates/core/income_overview.html:5
 #: apps/core/templates/core/income_overview.html:8
 msgid "Income Overview"
 msgstr "Einnahmenübersicht"
 
 #: apps/core/templates/core/income_overview.html:11
-#, fuzzy
-#| msgid "Month View"
 msgid "Monthly Overview"
-msgstr "Monatsansicht"
+msgstr "Monatsübersicht"
 
 #: apps/core/templates/core/income_overview.html:14
 #: apps/lessons/templates/lessons/calendar.html:11
-#, fuzzy
-#| msgid "Previous Week"
 msgid "Previous Month"
-msgstr "Vorige Woche"
+msgstr "Voriger Monat"
 
 #: apps/core/templates/core/income_overview.html:15
-#, fuzzy
-#| msgid "Week View"
 msgid "Year View"
-msgstr "Wochenansicht"
+msgstr "Jahresansicht"
 
 #: apps/core/templates/core/income_overview.html:16
 #: apps/lessons/templates/lessons/calendar.html:13
-#, fuzzy
-#| msgid "Month View"
 msgid "Next Month"
-msgstr "Monatsansicht"
+msgstr "Nächster Monat"
 
 #: apps/core/templates/core/income_overview.html:19
 msgid "Summary"
 msgstr "Zusammenfassung"
 
-#: apps/core/templates/core/income_overview.html:22
-#: apps/core/templates/core/income_overview.html:92
-msgid "Teaching value by lesson status"
-msgstr "Unterrichtswert nach Unterrichtsstatus"
-
-#: apps/core/templates/core/income_overview.html:27
-#: apps/core/templates/core/income_overview.html:97
-#, fuzzy
-#| msgid "New Lesson"
-msgid "Number of Lessons"
-msgstr "Neue Stunde"
-
-#: apps/core/templates/core/income_overview.html:41
-#: apps/core/templates/core/income_overview.html:111
+#: apps/core/templates/core/income_overview.html:21
 msgid ""
-"Teaching value is computed from lesson duration and contract rate (not "
-"invoice amounts)."
+"Only invoices marked paid. Totals use the calendar month of each invoice "
+"billing period start date - not necessarily the month the lessons took place."
 msgstr ""
-"Unterrichtswert wird aus Dauer und Vertragssatz berechnet (nicht aus "
-"Rechnungsbeträgen)."
+"Nur als bezahlt markierte Rechnungen. Die Summe gilt für den Kalendermonat "
+"des Rechnungszeitraum-Beginns – nicht unbedingt für den Monat, in dem die "
+"Stunden stattfanden."
 
-#: apps/core/templates/core/income_overview.html:44
+#: apps/core/templates/core/income_overview.html:23
+msgid "Amounts by lesson status"
+msgstr "Beträge nach Stundenstatus"
+
+#: apps/core/templates/core/income_overview.html:23
+msgid "lessons dated in this month"
+msgstr "Stunden mit Datum in diesem Monat"
+
+#: apps/core/templates/core/income_overview.html:28
+#: apps/core/templates/core/income_overview.html:114
+msgid "Number of Lessons"
+msgstr "Anzahl Stunden"
+
+#: apps/core/templates/core/income_overview.html:43
+#: apps/core/templates/core/income_overview.html:124
+msgid "How amounts are calculated"
+msgstr "Wie die Beträge ermittelt werden"
+
+#: apps/core/templates/core/income_overview.html:45
+#: apps/core/templates/core/income_overview.html:126
+msgid ""
+"Lessons already on an invoice: sum of all invoice line amounts for that "
+"lesson (same as billing)."
+msgstr ""
+"Bereits in einer Rechnung: Summe aller Rechnungspositionen zu dieser Stunde "
+"(wie bei der Abrechnung)."
+
+#: apps/core/templates/core/income_overview.html:46
+#: apps/core/templates/core/income_overview.html:127
+msgid ""
+"Lessons not on an invoice yet: same rules as creating an invoice (TutorSpace: "
+"stepped pay from cumulative hours; others: duration ÷ unit length × contract "
+"rate)."
+msgstr ""
+"Noch nicht verrechnet: dieselben Regeln wie beim Erstellen einer Rechnung "
+"(TutorSpace: Stufenvergütung aus kumulierten Stunden; sonst: Dauer ÷ "
+"Einheitslänge × Vertragssatz)."
+
+#: apps/core/templates/core/income_overview.html:47
+msgid ""
+"The Paid status row total often differs from recognized revenue above, "
+"because billing period months and lesson dates do not always match."
+msgstr ""
+"Die Summe in der Zeile „Bezahlt“ weicht oft von den realisierten Einnahmen "
+"oben ab, weil Rechnungszeitraum und Stundendatum nicht immer zusammenpassen."
+
+#: apps/core/templates/core/income_overview.html:61
+#, python-format
+msgid ""
+"This total is the sum of recognized revenue for each month in %(yr)s. Each "
+"month counts only paid invoices whose billing period starts in that month."
+msgstr ""
+"Diese Summe ist die Summe der realisierten Einnahmen je Monat in %(yr)s. "
+"Pro Monat zählen nur bezahlte Rechnungen, deren Zeitraum in diesem Monat "
+"beginnt."
+
+#: apps/core/templates/core/income_overview.html:65
+msgid ""
+"The recognized revenue column is paid invoice totals for that month (by "
+"billing period start)."
+msgstr ""
+"Die Spalte Realisierte Einnahmen enthält die Summe bezahlter Rechnungen "
+"dieses Monats (nach Zeitraum-Beginn)."
+
+#: apps/core/templates/core/income_overview.html:73
+msgid "Recognized revenue"
+msgstr "Realisierte Einnahmen"
+
+#: apps/core/templates/core/income_overview.html:108
+#, python-format
+msgid "lessons dated in %(yr)s"
+msgstr "Stunden mit Datum in %(yr)s"
+
+#: apps/core/templates/core/income_overview.html:128
+#, python-format
+msgid ""
+"This table lists every lesson with a date in %(yr)s, no matter when it was "
+"invoiced."
+msgstr ""
+"Diese Tabelle enthält jede Stunde mit Datum in %(yr)s – unabhängig davon, "
+"wann sie verrechnet wurde."
+
+#: apps/core/templates/core/income_overview.html:129
+msgid ""
+"The sum of all status rows is not expected to equal the yearly recognized "
+"revenue total."
+msgstr ""
+"Die Summe aller Statuszeilen entspricht in der Regel nicht der Jahressumme "
+"der realisierten Einnahmen."
+
+#: apps/core/templates/core/income_overview.html:52
 msgid "Year Overview"
 msgstr "Jahresübersicht"
 
-#: apps/core/templates/core/income_overview.html:47
-#, fuzzy
-#| msgid "Previous Week"
+#: apps/core/templates/core/income_overview.html:55
 msgid "Previous Year"
-msgstr "Vorige Woche"
+msgstr "Voriges Jahr"
 
-#: apps/core/templates/core/income_overview.html:48
-#, fuzzy
-#| msgid "Next Week"
+#: apps/core/templates/core/income_overview.html:56
 msgid "Next Year"
-msgstr "Nächste Woche"
+msgstr "Nächstes Jahr"
 
 #: apps/core/templates/core/income_overview.html:51
 msgid "Year Summary"
@@ -2847,17 +2942,45 @@ msgstr "Bitte korrigieren Sie die Fehler unten."
 msgid "Already have an account? Log in"
 msgstr "Bereits ein Konto? Anmelden"
 
-#: apps/core/templates/core/reports.html:35
-msgid "Lessons (this month)"
-msgstr "Unterrichtsstunden (dieser Monat)"
+#: apps/core/templates/core/reports.html:12
+msgid "Definitions (same as Income)"
+msgstr "Begriffe (wie bei Einnahmen)"
 
-#: apps/core/templates/core/reports.html:39
+#: apps/core/templates/core/reports.html:14
+msgid ""
+"Recognized revenue: sum of paid invoice totals for the selected month, by "
+"each invoice billing period start date."
+msgstr ""
+"Realisierte Einnahmen: Summe bezahlter Rechnungen für den gewählten Monat, "
+"je nach Beginn des Rechnungszeitraums."
+
+#: apps/core/templates/core/reports.html:15
+msgid ""
+"Lessons and taught hours: sessions dated in the selected calendar month "
+"(taught or paid status, as shown)."
+msgstr ""
+"Stunden und unterrichtete Stunden: nach Kalendermonat des Stundendatums "
+"(Status unterrichtet oder bezahlt, wie angezeigt)."
+
+#: apps/core/templates/core/reports.html:16
+msgid ""
+"Taught but not invoiced: value uses the same billing rules as a new invoice "
+"(including TutorSpace tiers)."
+msgstr ""
+"Unterrichtet ohne Rechnung: Betrag wie bei neuer Rechnung (inkl. "
+"TutorSpace-Stufen)."
+
+#: apps/core/templates/core/reports.html:50
+msgid "Lessons (selected month)"
+msgstr "Stunden (ausgewählter Monat)"
+
+#: apps/core/templates/core/reports.html:55
 msgid "Taught hours"
 msgstr "Unterrichtete Stunden"
 
-#: apps/core/templates/core/reports.html:43
-msgid "Paid amount"
-msgstr "Bezahlter Betrag"
+#: apps/core/templates/core/reports.html:59
+msgid "Recognized revenue (paid)"
+msgstr "Realisierte Einnahmen (bezahlt)"
 
 #: apps/core/templates/core/reports.html:54
 msgid "Taught but not yet invoiced"
@@ -2881,27 +3004,50 @@ msgstr "Unbezahlte Rechnungen"
 msgid "invoices"
 msgstr "Rechnungen"
 
-#: apps/core/templates/core/reports.html:64
+#: apps/core/templates/core/reports.html:71
+msgid ""
+"Euro amount = what billing would produce today (TutorSpace includes "
+"cumulative tier rules)."
+msgstr ""
+"Euro-Betrag = heutige Abrechnung nach gleichen Regeln (TutorSpace inkl. "
+"kumulierter Stufen)."
+
+#: apps/core/templates/core/reports.html:80
 #, fuzzy
 #| msgid "Revenue (last 6 months)"
 msgid "Revenue (paid invoices, last 6 months)"
 msgstr "Umsatz (bezahlte Rechnungen, letzte 6 Monate)"
 
-#: apps/core/templates/core/reports.html:66
+#: apps/core/templates/core/reports.html:81
+msgid ""
+"Each row: recognized revenue for that calendar month (billing period start)."
+msgstr ""
+"Jede Zeile: realisierte Einnahmen dieses Kalendermonats (Rechnungszeitraum-"
+"Beginn)."
+
+#: apps/core/templates/core/reports.html:84
 msgid "Revenue"
 msgstr "Umsatz"
 
-#: apps/core/templates/core/reports.html:74
+#: apps/core/templates/core/reports.html:92
 msgid "Hours taught (last 6 months)"
 msgstr "Unterrichtete Stunden (letzte 6 Monate)"
 
-#: apps/core/templates/core/reports.html:76
+#: apps/core/templates/core/reports.html:94
 msgid "Hours"
 msgstr "Stunden"
 
-#: apps/core/templates/core/reports.html:85
+#: apps/core/templates/core/reports.html:103
 msgid "Top 5 students by revenue (selected month)"
 msgstr "Top 5 Schüler nach Umsatz (ausgewählter Monat)"
+
+#: apps/core/templates/core/reports.html:104
+msgid ""
+"Amounts from paid invoices linked to each contract; lesson count = taught/"
+"paid sessions dated in the selected month."
+msgstr ""
+"Beträge aus bezahlten Rechnungen je Vertrag; Stundenanzahl = unterrichtet/"
+"bezahlt mit Datum im gewählten Monat."
 
 #: apps/core/templates/core/reports.html:107
 #, fuzzy
@@ -2935,11 +3081,12 @@ msgstr "Berichte – Premium-Funktion"
 #| "Get detailed monthly reports: taught hours, paid amount, invoice count, "
 #| "and breakdown per student."
 msgid ""
-"Get detailed monthly reports: taught hours, paid amount, invoice count, "
-"revenue by month, top students, and breakdown by institute."
+"Get detailed monthly reports: taught hours, recognized revenue, invoice "
+"count, revenue by month, top students, and breakdown by institute."
 msgstr ""
-"Detaillierte Monatsberichte: unterrichtete Stunden, bezahlter Betrag, "
-"Rechnungsanzahl und Aufschlüsselung pro Schüler."
+"Detaillierte Monatsberichte: unterrichtete Stunden, realisierte Einnahmen, "
+"Rechnungsanzahl, Umsatz pro Monat, Top-Schüler und Aufschlüsselung nach "
+"Institut."
 
 #: apps/core/templates/core/reports.html:133
 msgid "This month teaser"
@@ -2950,8 +3097,8 @@ msgid "hours taught"
 msgstr "Stunden unterrichtet"
 
 #: apps/core/templates/core/reports.html:133
-msgid "revenue"
-msgstr "Umsatz"
+msgid "recognized revenue"
+msgstr "realisierte Einnahmen"
 
 #: apps/core/templates/core/reports.html:134
 msgid "Upgrade to Premium for full reports."

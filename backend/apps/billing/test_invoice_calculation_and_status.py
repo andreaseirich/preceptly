@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
+from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
@@ -229,3 +230,34 @@ class InvoiceStatusTransitionTest(TestCase):
         lesson.refresh_from_db()
         self.assertEqual(lesson.status, "taught")
         self.assertEqual(reset_count, 1)
+
+
+class TutorSpaceInvoiceOwnerFallbackTest(TestCase):
+    """TutorSpace amounts must not be 0 when create_invoice_from_lessons(user=None)."""
+
+    def test_tutorspace_line_amount_uses_contract_tutor_when_user_none(self):
+        tutor = User.objects.create_user(username="ts_tutor", password="test")
+        student = Student.objects.create(user=tutor, first_name="A", last_name="S")
+        contract = Contract.objects.create(
+            student=student,
+            institute=TUTORSPACE_INSTITUTE_NAME,
+            hourly_rate=Decimal("13.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
+            is_active=True,
+        )
+        Lesson.objects.create(
+            contract=contract,
+            date=date(2025, 6, 2),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        invoice = InvoiceService.create_invoice_from_lessons(
+            date(2025, 6, 1),
+            date(2025, 6, 30),
+            contract=contract,
+            user=None,
+        )
+        self.assertEqual(invoice.items.first().amount, Decimal("13.00"))
+        self.assertEqual(invoice.owner_id, tutor.id)

@@ -18,14 +18,15 @@
 
 <h3>{% trans "Summary" %}</h3>
 <p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ monthly_income.total_income|euro }} {% blocktrans count counter=monthly_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
+<p class="tutorflow-kpi-hint">{% trans "Only invoices marked paid. Totals use the calendar month of each invoice billing period start date - not necessarily the month the lessons took place." %}</p>
 
-<h3>{% trans "Teaching value by lesson status" %}</h3>
+<h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% trans "lessons dated in this month" %})</span></h3>
 <table>
     <thead>
         <tr>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Number of Lessons" %}</th>
-            <th>{% trans "Income" %}</th>
+            <th>{% trans "Amount" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -38,7 +39,14 @@
         {% endfor %}
     </tbody>
 </table>
-<p class="text-muted" style="font-size: 0.9em;">{% trans "Teaching value is computed from lesson duration and contract rate (not invoice amounts)." %}</p>
+<div class="tutorflow-help-box">
+    <strong>{% trans "How amounts are calculated" %}</strong>
+    <ul>
+        <li>{% trans "Lessons already on an invoice: sum of all invoice line amounts for that lesson (same as billing)." %}</li>
+        <li>{% trans "Lessons not on an invoice yet: same rules as creating an invoice (TutorSpace: stepped pay from cumulative hours; others: duration ÷ unit length × contract rate)." %}</li>
+        <li>{% trans "The Paid status row total often differs from recognized revenue above, because billing period months and lesson dates do not always match." %}</li>
+    </ul>
+</div>
 
 {% else %}
 <h2>{% trans "Year Overview" %}: {{ year }}</h2>
@@ -50,14 +58,16 @@
 
 <h3>{% trans "Year Summary" %}</h3>
 <p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ yearly_income.total_income|euro }} {% blocktrans count counter=yearly_income.total_lessons %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
+<p class="tutorflow-kpi-hint">{% blocktrans with yr=year %}This total is the sum of recognized revenue for each month in {{ yr }}. Each month counts only paid invoices whose billing period starts in that month.{% endblocktrans %}</p>
 
 <h3>{% trans "Monthly Breakdown" %}</h3>
+<p class="tutorflow-kpi-hint">{% trans "The recognized revenue column is paid invoice totals for that month (by billing period start)." %}</p>
 <table class="table">
     <thead>
         <tr>
             <th>{% trans "Month" %}</th>
             <th>{% trans "Lessons" %}</th>
-            <th>{% trans "Income" %}</th>
+            <th>{% trans "Recognized revenue" %}</th>
             <th>{% trans "Actions" %}</th>
         </tr>
     </thead>
@@ -89,13 +99,13 @@
     </tbody>
 </table>
 
-<h3>{% trans "Teaching value by lesson status" %}</h3>
+<h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% blocktrans with yr=year %}lessons dated in {{ yr }}{% endblocktrans %})</span></h3>
 <table>
     <thead>
         <tr>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Number of Lessons" %}</th>
-            <th>{% trans "Value" %}</th>
+            <th>{% trans "Amount" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -108,6 +118,14 @@
         {% endfor %}
     </tbody>
 </table>
-<p class="text-muted" style="font-size: 0.9em;">{% trans "Teaching value is computed from lesson duration and contract rate (not invoice amounts)." %}</p>
+<div class="tutorflow-help-box">
+    <strong>{% trans "How amounts are calculated" %}</strong>
+    <ul>
+        <li>{% trans "Lessons already on an invoice: sum of all invoice line amounts for that lesson (same as billing)." %}</li>
+        <li>{% trans "Lessons not on an invoice yet: same rules as creating an invoice (TutorSpace: stepped pay from cumulative hours; others: duration ÷ unit length × contract rate)." %}</li>
+        <li>{% blocktrans with yr=year %}This table lists every lesson with a date in {{ yr }}, no matter when it was invoiced.{% endblocktrans %}</li>
+        <li>{% trans "The sum of all status rows is not expected to equal the yearly recognized revenue total." %}</li>
+    </ul>
+</div>
 {% endif %}
 {% endblock %}

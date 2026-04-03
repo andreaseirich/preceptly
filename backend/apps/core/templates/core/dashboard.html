@@ -75,6 +75,7 @@
 
 <h2>{% trans "Income" %} ({{ current_month }}/{{ current_year }})</h2>
 <p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ current_month_income.total_income|euro }} {% blocktrans count counter=current_month_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
+<p class="tutorflow-kpi-hint">{% trans "Paid invoices only, grouped by billing period start month (not always the month lessons occurred)." %} <a href="{% url 'core:income' %}?year={{ current_year }}&month={{ current_month }}">{% trans "Income overview" %}</a> — {% trans "amounts by lesson status and notes." %}</p>
 
 {% if conflict_count > 0 %}
 <p class="conflict">⚠ {% blocktrans count counter=conflict_count %}{{ counter }} conflict in upcoming lessons!{% plural %}{{ counter }} conflicts in upcoming lessons!{% endblocktrans %}</p>

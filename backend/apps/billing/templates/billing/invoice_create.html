@@ -48,7 +48,7 @@
     
     {% if billable_lessons %}
     {% if tutorspace_show_tier_explainer %}
-    <div style="background: #e3f2fd; padding: 14px 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #1976d2; font-size: 0.95em;">
+    <div class="tutorflow-help-box" style="border-left: 4px solid #1976d2; background: #e3f2fd;">
         <p style="margin: 0 0 8px 0;"><strong>{% trans "TutorSpace – tier calculation" %}</strong></p>
         <p style="margin: 0;">
             {% blocktrans with mins=tutorspace_preview_prior_minutes fh=tutorspace_preview_prior_full_hours rm=tutorspace_preview_prior_remainder_minutes %}
@@ -62,7 +62,7 @@
             {% endblocktrans %}
         </p>
         {% else %}
-        <p style="margin: 8px 0 0 0;">{% trans "Tip: If 14 € appears too early, set “Count TutorSpace tier hours only from” in Settings (or remove very old test lessons)." %}</p>
+        <p style="margin: 8px 0 0 0;">{% trans 'Tip: If 14 € appears too early, set "Count TutorSpace tier hours only from" in Settings, or remove old test lessons.' %} <a href="{% url 'core:settings' %}">{% trans "Open settings" %}</a></p>
         {% endif %}
     </div>
     {% endif %}
