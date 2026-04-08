@@ -5582,6 +5582,10 @@ msgstr "Rechtliche Navigation"
 msgid "About"
 msgstr "Uber"
 
+#: templates/partials/footer.html:53
+msgid "About us"
+msgstr "Über uns"
+
 #: templates/partials/footer.html:57
 msgid "Legal placeholder – not legally binding yet."
 msgstr "Rechtlicher Platzhalter – noch nicht rechtsverbindlich."
