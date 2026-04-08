@@ -5580,7 +5580,7 @@ msgstr "Rechtliche Navigation"
 
 #: templates/partials/footer.html:53
 msgid "About"
-msgstr "Uber"
+msgstr "Über"
 
 #: templates/partials/footer.html:53
 msgid "About us"
