@@ -1,5 +1,5 @@
 """
-Tests for legal placeholder pages and footer integration.
+Tests for legal pages and footer integration.
 """
 
 from apps.core.models import UserProfile
@@ -9,18 +9,18 @@ from django.urls import reverse
 
 
 class LegalPagesTests(TestCase):
-    """Ensure legal placeholder pages render correctly."""
+    """Ensure legal pages render correctly."""
 
     def setUp(self):
         self.client = Client()
 
     def test_legal_pages_return_200(self):
-        """Each legal page should return HTTP 200 and contain placeholder text."""
+        """Each legal page should return HTTP 200 and contain business marker."""
         pages = [
-            ("core:legal_imprint", "Placeholder – not legally binding yet."),
-            ("core:legal_privacy", "Placeholder – not legally binding yet."),
-            ("core:legal_terms", "Placeholder – not legally binding yet."),
-            ("core:legal_about", "Placeholder – not legally binding yet."),
+            ("core:legal_imprint", "andicode.de"),
+            ("core:legal_privacy", "andicode.de"),
+            ("core:legal_terms", "andicode.de"),
+            ("core:legal_about", "andicode.de"),
         ]
         for name, marker in pages:
             with self.subTest(page=name):

@@ -106,6 +106,7 @@
     <div class="invoice-info">
         <p><strong>{% trans "Invoice Date:" %}</strong> {{ invoice.created_at|date:"SHORT_DATE_FORMAT" }}</p>
         <p><strong>{% trans "Period:" %}</strong> {{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</p>
+        <p><strong>{% trans "Tax number:" %}</strong> (2)367/111/08187</p>
     </div>
     
     <div class="payer-info">
