@@ -36,7 +36,7 @@ urlpatterns = [
         SubscriptionPortalView.as_view(),
         name="subscription_portal",
     ),
-    # Legal placeholder pages
+    # Legal pages
     path("legal/imprint/", views.LegalImprintView.as_view(), name="legal_imprint"),
     path("legal/privacy/", views.LegalPrivacyView.as_view(), name="legal_privacy"),
     path("legal/terms/", views.LegalTermsView.as_view(), name="legal_terms"),

@@ -43,7 +43,10 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
     elements.append(Paragraph("<b>Address:</b> Birkenweg 7, 49577 Ankum", styles["Normal"]))
     elements.append(Paragraph("<b>Tax number:</b> 367/111/08187", styles["Normal"]))
     elements.append(
-        Paragraph("<b>Contact:</b> info@andicode.de · https://andicode.de", styles["Normal"])
+        Paragraph(
+            "<b>Contact:</b> impressum@andicode.de · contact@andicode.de · https://andicode.de",
+            styles["Normal"],
+        )
     )
     elements.append(Spacer(1, 0.4 * cm))
 

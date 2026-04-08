@@ -5461,21 +5461,30 @@ msgstr "Verantwortliche Person wird hier benannt."
 msgid "Privacy Policy"
 msgstr "Datenschutzerklärung"
 
-#: templates/legal/privacy.html:14
-#, fuzzy
-#| msgid "Detailed legal information will be provided here soon."
-msgid "Detailed privacy information will be published here soon."
-msgstr "Detaillierte rechtliche Informationen folgen in Kürze."
+#: templates/legal/imprint.html:13
+msgid "Business details"
+msgstr "Unternehmensangaben"
+
+#: templates/legal/imprint.html:14
+msgid "This legal notice applies to andicode and TutorFlow."
+msgstr "Dieses Impressum gilt fur andicode und TutorFlow."
+
+#: templates/legal/privacy.html:13
+msgid "Controller"
+msgstr "Verantwortlicher"
 
 #: templates/legal/privacy.html:19
 msgid "1. General information"
 msgstr "1. Allgemeine Hinweise"
 
 #: templates/legal/privacy.html:20
-msgid "This section will describe how TutorFlow handles personal data."
+msgid ""
+"We process personal data only as far as necessary to provide TutorFlow "
+"(student management, contracts, lessons, billing, and communication)."
 msgstr ""
-"Dieser Abschnitt beschreibt künftig, wie TutorFlow personenbezogene Daten "
-"verarbeitet."
+"Wir verarbeiten personenbezogene Daten nur soweit erforderlich, um "
+"TutorFlow bereitzustellen (Schulerverwaltung, Vertrage, Unterrichtsstunden, "
+"Abrechnung und Kommunikation)."
 
 #: templates/legal/privacy.html:24
 msgid "2. Data we process"
@@ -5483,10 +5492,12 @@ msgstr "2. Daten, die wir verarbeiten"
 
 #: templates/legal/privacy.html:25
 msgid ""
-"Overview of categories (students, contracts, lessons) will be added here."
+"Typical categories: account data, student master data, contract and lesson "
+"data, invoice/payment data, and technical logs required for secure operation."
 msgstr ""
-"Eine Übersicht der Kategorien (Schüler, Verträge, Unterrichtsstunden) wird "
-"hier ergänzt."
+"Typische Kategorien: Kontodaten, Schulerstammdaten, Vertrags- und "
+"Unterrichtsdaten, Rechnungs-/Zahlungsdaten sowie technische Protokolle fur "
+"den sicheren Betrieb."
 
 #: templates/legal/privacy.html:29
 msgid "3. Rights of users"
@@ -5494,8 +5505,16 @@ msgstr "3. Rechte der Nutzer"
 
 #: templates/legal/privacy.html:30
 msgid ""
-"Information about access, rectification and deletion rights will be provided."
-msgstr "Informationen zu Auskunfts-, Berichtigungs- und Löschrechten folgen."
+"You can request information, correction, deletion, restriction, data "
+"portability, and object to processing where applicable."
+msgstr ""
+"Sie konnen - soweit anwendbar - Auskunft, Berichtigung, Loschung, "
+"Einschrankung, Datenubertragbarkeit und Widerspruch gegen die Verarbeitung "
+"verlangen."
+
+#: templates/legal/privacy.html:30
+msgid "For privacy requests, contact"
+msgstr "Bei Datenschutzanfragen kontaktieren Sie"
 
 #: templates/legal/terms.html:4 templates/legal/terms.html:9
 #: templates/partials/footer.html:52
@@ -5503,33 +5522,57 @@ msgid "Terms of Service"
 msgstr "Allgemeine Geschäftsbedingungen"
 
 #: templates/legal/terms.html:14
-msgid "The final terms of service will be published here."
-msgstr ""
+msgid "Provider"
+msgstr "Anbieter"
 
 #: templates/legal/terms.html:19
 msgid "1. Scope"
 msgstr "1. Geltungsbereich"
 
 #: templates/legal/terms.html:20
-msgid "TutorFlow usage guidelines will be defined in this section."
+msgid ""
+"These terms apply to use of TutorFlow by registered users and invited "
+"participants."
 msgstr ""
-"Anwendungsrichtlinien für TutorFlow werden in diesem Abschnitt definiert."
+"Diese Bedingungen gelten fur die Nutzung von TutorFlow durch registrierte "
+"Nutzer und eingeladene Teilnehmer."
 
 #: templates/legal/terms.html:24
 msgid "2. Services of TutorFlow"
 msgstr "2. Leistungen von TutorFlow"
 
 #: templates/legal/terms.html:25
-msgid "Details about features and responsibilities will follow."
-msgstr "Details zu Funktionen und Verantwortlichkeiten folgen."
+msgid ""
+"TutorFlow provides software features for lesson planning, student and "
+"contract management, booking, and billing support."
+msgstr ""
+"TutorFlow stellt Software-Funktionen fur Unterrichtsplanung, Schuler- und "
+"Vertragsverwaltung, Buchung sowie Abrechnungsunterstutzung bereit."
 
 #: templates/legal/terms.html:29
 msgid "3. Liability"
 msgstr "3. Haftung"
 
 #: templates/legal/terms.html:30
-msgid "Liability clauses and limitations will be outlined here."
-msgstr "Haftungsregelungen und Beschränkungen werden hier ausgeführt."
+msgid ""
+"The provider is liable under statutory law. Users remain responsible for "
+"legal correctness of their own business data and generated documents."
+msgstr ""
+"Der Anbieter haftet nach den gesetzlichen Vorschriften. Nutzer bleiben fur "
+"die rechtliche Korrektheit ihrer eigenen Geschaftsdaten und erzeugten "
+"Dokumente verantwortlich."
+
+#: templates/legal/about.html:13
+msgid "andicode"
+msgstr "andicode"
+
+#: templates/legal/about.html:14
+msgid "TutorFlow is operated as part of the andicode business."
+msgstr "TutorFlow wird als Teil des Unternehmens andicode betrieben."
+
+#: templates/legal/about.html:25
+msgid "TutorFlow is actively operated and developed for productive use."
+msgstr "TutorFlow wird aktiv betrieben und fur den produktiven Einsatz weiterentwickelt."
 
 #: templates/partials/footer.html:49
 msgid "Legal navigation"
@@ -5537,7 +5580,7 @@ msgstr "Rechtliche Navigation"
 
 #: templates/partials/footer.html:53
 msgid "About"
-msgstr ""
+msgstr "Uber"
 
 #: templates/partials/footer.html:57
 msgid "Legal placeholder – not legally binding yet."
