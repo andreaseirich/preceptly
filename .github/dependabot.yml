@@ -4,12 +4,28 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
+      time: "06:00"
+      timezone: "Europe/Berlin"
     open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    groups:
+      python-patch-minor:
+        update-types:
+          - "minor"
+          - "patch"
+      python-security:
+        applies-to: "security-updates"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "python"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
 
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
@@ -17,8 +33,19 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "06:30"
+      timezone: "Europe/Berlin"
     open-pull-requests-limit: 3
+    rebase-strategy: "auto"
+    groups:
+      github-actions-patch-minor:
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "github-actions"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
 
