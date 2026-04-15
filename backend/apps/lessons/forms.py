@@ -99,9 +99,13 @@ class SessionForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
-            self.fields["contract"].queryset = self.fields["contract"].queryset.filter(
-                student__user=user
-            )
+            contract_qs = self.fields["contract"].queryset.filter(student__user=user)
+            # Creating new sessions: only active contracts are selectable.
+            # Editing existing sessions: keep current contract selectable even if it became inactive.
+            if self.instance and self.instance.pk:
+                self.fields["contract"].queryset = contract_qs
+            else:
+                self.fields["contract"].queryset = contract_qs.filter(is_active=True)
         # Hide recurrence fields when editing (only show when creating)
         if self.instance and self.instance.pk:
             self.fields["is_recurring"].widget = forms.HiddenInput()
@@ -131,6 +135,22 @@ class SessionForm(forms.ModelForm):
         else:
             # When creating: hide edit_scope
             self.fields["edit_scope"].widget = forms.HiddenInput()
+
+    def clean_contract(self):
+        """Disallow creating sessions with inactive contracts."""
+        contract = self.cleaned_data.get("contract")
+        if not contract:
+            return contract
+        if getattr(contract, "is_active", True):
+            return contract
+        # Allow keeping inactive contract only when editing an existing session that already uses it.
+        if (
+            self.instance
+            and self.instance.pk
+            and getattr(self.instance, "contract_id", None) == contract.id
+        ):
+            return contract
+        raise forms.ValidationError(_("Inactive contracts cannot be used for new sessions."))
 
     def clean(self):
         """Validiere Recurrence-Felder."""
