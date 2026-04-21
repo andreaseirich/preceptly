@@ -550,11 +550,11 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
                     deleted_count,
                 ).format(count=deleted_count),
             )
+            # No conflict recalculation needed: all series lessons are gone.
         else:
             lesson.delete()
             messages.success(self.request, _("Lesson successfully deleted."))
-
-        temp_lesson = Lesson(date=lesson_date)
-        recalculate_conflicts_for_affected_lessons(temp_lesson)
+            # Pass the real lesson object (still has contract in memory after deletion).
+            recalculate_conflicts_for_affected_lessons(lesson)
 
         return HttpResponseRedirect(self.get_success_url())
