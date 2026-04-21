@@ -528,7 +528,6 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
 
     def form_valid(self, form):
         lesson = self.object
-        lesson_date = lesson.date
 
         matching_recurring = find_matching_recurring_lesson(lesson)
         delete_series = self.request.POST.get("delete_series", "false") == "true"
