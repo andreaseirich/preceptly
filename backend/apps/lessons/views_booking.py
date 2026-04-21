@@ -11,7 +11,10 @@ from apps.lessons.email_service import send_booking_notification
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
-from apps.lessons.recurring_utils import find_matching_recurring_session, get_all_sessions_for_recurring
+from apps.lessons.recurring_utils import (
+    find_matching_recurring_session,
+    get_all_sessions_for_recurring,
+)
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
