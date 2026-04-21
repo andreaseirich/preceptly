@@ -2,9 +2,11 @@
 Views für RecurringLesson-CRUD-Operationen.
 """
 
+from apps.lessons.models import Session
 from apps.lessons.recurring_forms import RecurringLessonForm
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
+from apps.lessons.recurring_utils import get_all_sessions_for_recurring
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -147,19 +149,24 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from apps.lessons.recurring_utils import get_all_sessions_for_recurring
-
-        context["sessions_count"] = len(get_all_sessions_for_recurring(self.object))
+        fk_ids = set(self.object.generated_sessions.values_list("id", flat=True))
+        pattern_ids = {s.id for s in get_all_sessions_for_recurring(self.object)}
+        context["sessions_count"] = len(fk_ids | pattern_ids)
         return context
 
-    def delete(self, request, *args, **kwargs):
-        recurring = self.get_object()
-        # CASCADE on the FK means all linked sessions are deleted automatically
-        # when the RecurringSession row is removed.
-        deleted_count = recurring.generated_sessions.count()
-        response = super().delete(request, *args, **kwargs)
+    def form_valid(self, form):
+        recurring = self.object
+        # Collect ALL sessions: FK-linked + legacy pattern-matched (covers
+        # sessions created before the recurring_session FK column existed).
+        fk_ids = set(recurring.generated_sessions.values_list("id", flat=True))
+        pattern_ids = {s.id for s in get_all_sessions_for_recurring(recurring)}
+        all_ids = fk_ids | pattern_ids
+        if all_ids:
+            Session.objects.filter(id__in=all_ids).delete()
+        deleted_count = len(all_ids)
+        response = super().form_valid(form)
         messages.success(
-            request,
+            self.request,
             ngettext(
                 "Recurring lesson and {count} generated lesson deleted.",
                 "Recurring lesson and {count} generated lessons deleted.",
@@ -250,7 +257,13 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
         )
 
         if action == "delete":
-            # CASCADE on the FK deletes all linked sessions automatically.
+            # Explicitly delete all sessions first (FK-linked + legacy pattern-matched)
+            all_session_ids: set[int] = set()
+            for recurring in recurring_lessons:
+                all_session_ids |= set(recurring.generated_sessions.values_list("id", flat=True))
+                all_session_ids |= {s.id for s in get_all_sessions_for_recurring(recurring)}
+            if all_session_ids:
+                Session.objects.filter(id__in=all_session_ids).delete()
             count = recurring_lessons.count()
             recurring_lessons.delete()
 
