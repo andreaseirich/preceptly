@@ -11,9 +11,27 @@ from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
 from apps.lessons.week_service import WeekService
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.generic import ListView, TemplateView
+
+
+def get_last_calendar_url(request):
+    """Returns the URL of the last visited calendar position from the session."""
+    view = request.session.get("last_calendar_view", "week")
+    year = request.session.get("last_calendar_year")
+    month = request.session.get("last_calendar_month")
+    day = request.session.get("last_calendar_day")
+
+    now = timezone.localdate()
+    y = year or now.year
+    m = month or now.month
+    d = day or now.day
+
+    if view == "calendar":
+        return reverse("lessons:calendar") + f"?year={y}&month={m}"
+    return reverse("lessons:week") + f"?year={y}&month={m}&day={d}"
 
 
 class WeekView(LoginRequiredMixin, TemplateView):
@@ -26,9 +44,6 @@ class WeekView(LoginRequiredMixin, TemplateView):
 
         # Automatic status update for past lessons
         LessonStatusUpdater.update_past_lessons_to_taught()
-
-        # Store this view as the last used calendar view in session
-        self.request.session["last_calendar_view"] = "week"
 
         # Year, month and day from URL parameters (fallback: current date)
         year_param = self.request.GET.get("year")
@@ -43,7 +58,6 @@ class WeekView(LoginRequiredMixin, TemplateView):
                 month = date_obj.month
                 day = date_obj.day
             except (ValueError, TypeError):
-                # Fallback: current date
                 now = timezone.now()
                 year = now.year
                 month = now.month
@@ -53,11 +67,16 @@ class WeekView(LoginRequiredMixin, TemplateView):
             month = int(month_param)
             day = int(day_param)
         else:
-            # Fallback: current date
             now = timezone.now()
             year = now.year
             month = now.month
             day = now.day
+
+        # Cache the current calendar position in the session
+        self.request.session["last_calendar_view"] = "week"
+        self.request.session["last_calendar_year"] = year
+        self.request.session["last_calendar_month"] = month
+        self.request.session["last_calendar_day"] = day
 
         # Load week data
         week_data = WeekService.get_week_data(year, month, day, user=self.request.user)
@@ -160,17 +179,11 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         # Automatic status update for past lessons
         LessonStatusUpdater.update_past_lessons_to_taught()
 
-        # Store this view as the last used calendar view in session
-        self.request.session["last_calendar_view"] = "calendar"
-
         # Year and month from URL parameters (fallback: current date)
-        # Support both ?year=X&month=Y and ?date=YYYY-MM-DD
-        # Initialize with current date as default
         now = timezone.now()
         year = now.year
         month = now.month
 
-        # Try to parse date parameter
         date_param = self.request.GET.get("date")
         if date_param:
             try:
@@ -178,10 +191,8 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 year = date_obj.year
                 month = date_obj.month
             except (ValueError, TypeError):
-                # Invalid date format - keep default values
                 pass
 
-        # Override with year/month parameters if provided
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")
         if year_param and month_param:
@@ -189,8 +200,12 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 year = int(year_param)
                 month = int(month_param)
             except (ValueError, TypeError):
-                # Invalid parameters - keep existing values
                 pass
+
+        # Cache the current calendar position in the session
+        self.request.session["last_calendar_view"] = "calendar"
+        self.request.session["last_calendar_year"] = year
+        self.request.session["last_calendar_month"] = month
 
         # Load calendar data
         calendar_data = CalendarService.get_calendar_data(year, month, user=self.request.user)

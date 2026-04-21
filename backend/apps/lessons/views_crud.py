@@ -14,6 +14,7 @@ from apps.lessons.recurring_utils import (
 )
 from apps.lessons.services import LessonConflictService, recalculate_conflicts_for_affected_lessons
 from apps.lessons.status_service import LessonStatusService
+from apps.lessons.views_calendar import get_last_calendar_url
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
@@ -93,23 +94,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def get_success_url(self):
-        """Redirect back to last used calendar view."""
-        lesson = self.object
-        # Use year/month/day from request if available, otherwise from lesson date
-        try:
-            year = int(self.request.GET.get("year", lesson.date.year))
-            month = int(self.request.GET.get("month", lesson.date.month))
-            day = int(self.request.GET.get("day", lesson.date.day))
-        except (ValueError, TypeError):
-            year, month, day = lesson.date.year, lesson.date.month, lesson.date.day
-
-        # Get last used calendar view from session (default: week)
-        last_view = self.request.session.get("last_calendar_view", "week")
-
-        if last_view == "week":
-            return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
-        else:
-            return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
+        return get_last_calendar_url(self.request)
 
     def get_initial(self):
         """Pre-fill form with date/time from request parameters."""
@@ -308,23 +293,7 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        """Redirect back to last used calendar view."""
-        lesson = self.object
-        # Use year/month/day from request if available, otherwise from lesson date
-        try:
-            year = int(self.request.GET.get("year", lesson.date.year))
-            month = int(self.request.GET.get("month", lesson.date.month))
-            day = int(self.request.GET.get("day", lesson.date.day))
-        except (ValueError, TypeError):
-            year, month, day = lesson.date.year, lesson.date.month, lesson.date.day
-
-        # Get last used calendar view from session (default: week)
-        last_view = self.request.session.get("last_calendar_view", "week")
-
-        if last_view == "week":
-            return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
-        else:
-            return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
+        return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
         # IMPORTANT: Get the original lesson instance from the database,
@@ -508,23 +477,7 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
     def get_success_url(self):
-        """Redirect back to last used calendar view."""
-        year = self.request.GET.get("year")
-        month = self.request.GET.get("month")
-        day = self.request.GET.get("day")
-
-        last_view = self.request.session.get("last_calendar_view", "week")
-
-        if year and month:
-            if last_view == "week" and day:
-                return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
-            elif last_view == "week":
-                now = timezone.now()
-                day = now.day
-                return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
-            else:
-                return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
-        return reverse_lazy("lessons:list")
+        return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
         lesson = self.object

@@ -7,6 +7,7 @@ from apps.lessons.recurring_forms import RecurringLessonForm
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.recurring_utils import get_all_sessions_for_recurring
+from apps.lessons.views_calendar import get_last_calendar_url
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -79,7 +80,6 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
         """Nach Erstellen: Generiere Lessons und weiter zum Kalender."""
         recurring_lesson = self.object
 
-        # Generiere Lessons automatisch
         result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 
         if result["created"] > 0:
@@ -103,13 +103,7 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
                 ).format(count=conflict_count),
             )
 
-        # Weiterleitung zum Kalender
-        from django.utils import timezone
-
-        today = timezone.localdate()
-        return (
-            reverse_lazy("lessons:week") + f"?year={today.year}&month={today.month}&day={today.day}"
-        )
+        return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
         messages.success(self.request, _("Recurring lesson successfully created."))
