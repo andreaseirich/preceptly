@@ -526,19 +526,24 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
                 return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
         return reverse_lazy("lessons:list")
 
-    def delete(self, request, *args, **kwargs):
-        lesson = self.get_object()
+    def form_valid(self, form):
+        lesson = self.object
         lesson_date = lesson.date
 
         matching_recurring = find_matching_recurring_lesson(lesson)
-        delete_series = request.POST.get("delete_series", "false") == "true"
+        delete_series = self.request.POST.get("delete_series", "false") == "true"
 
         if delete_series and matching_recurring:
-            # CASCADE on the FK deletes all linked sessions automatically.
-            deleted_count = matching_recurring.generated_sessions.count()
+            # Explicitly delete all sessions: FK-linked + legacy pattern-matched
+            fk_ids = set(matching_recurring.generated_sessions.values_list("id", flat=True))
+            pattern_ids = {s.id for s in get_all_lessons_for_recurring(matching_recurring)}
+            all_ids = fk_ids | pattern_ids
+            if all_ids:
+                Lesson.objects.filter(id__in=all_ids).delete()
+            deleted_count = len(all_ids)
             matching_recurring.delete()
             messages.success(
-                request,
+                self.request,
                 ngettext(
                     "Series deleted. {count} lesson deleted.",
                     "Series deleted. {count} lessons deleted.",
