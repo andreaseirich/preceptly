@@ -110,7 +110,10 @@ def _date_matches_recurring_pattern(session_date: date, recurring: RecurringSess
         return weeks_since_start % 2 == 0
 
     elif recurring.recurrence_type == "monthly":
-        # Monthly - same calendar day
-        return session_date.day == recurring.start_date.day
+        # Monthly - same calendar day, adjusted for months with fewer days
+        from calendar import monthrange
+        last_day = monthrange(session_date.year, session_date.month)[1]
+        target_day = min(recurring.start_date.day, last_day)
+        return session_date.day == target_day
 
     return False

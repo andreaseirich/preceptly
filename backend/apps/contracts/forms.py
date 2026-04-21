@@ -52,3 +52,11 @@ class ContractForm(forms.ModelForm):
             "has_monthly_planning_limit": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError(_("End date must not be before start date."))
+        return cleaned_data

@@ -126,22 +126,21 @@ class RecurringSessionService:
         if not active_weekdays:
             return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
 
-        current_date = recurring_session.start_date
+        start_date = recurring_session.start_date
+        current_date = start_date
         created = 0
         skipped = 0
         conflicts = []
         preview = []
         sessions = []  # Collect created sessions for email notifications
 
-        # Count weeks since start
-        week_count = 0
-
         while current_date <= end_date:
             weekday = current_date.weekday()
 
             if weekday in active_weekdays:
-                # Only every 2nd week (even week number)
-                if week_count % 2 == 0:
+                # Only every 2nd week — consistent with _date_matches_recurring_pattern()
+                weeks_since_start = (current_date - start_date).days // 7
+                if weeks_since_start % 2 == 0:
                     result = RecurringSessionService._create_session_if_not_exists(
                         recurring_session, current_date, check_conflicts, dry_run
                     )
@@ -157,10 +156,6 @@ class RecurringSessionService:
                                 conflicts.extend(result["conflicts"])
                     elif result["skipped"]:
                         skipped += 1
-
-            # When we reach a Monday, increment week counter
-            if weekday == 0:  # Monday
-                week_count += 1
 
             current_date += timedelta(days=1)
 

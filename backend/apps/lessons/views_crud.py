@@ -87,9 +87,12 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         """Redirect back to last used calendar view."""
         lesson = self.object
         # Use year/month/day from request if available, otherwise from lesson date
-        year = int(self.request.GET.get("year", lesson.date.year))
-        month = int(self.request.GET.get("month", lesson.date.month))
-        day = int(self.request.GET.get("day", lesson.date.day))
+        try:
+            year = int(self.request.GET.get("year", lesson.date.year))
+            month = int(self.request.GET.get("month", lesson.date.month))
+            day = int(self.request.GET.get("day", lesson.date.day))
+        except (ValueError, TypeError):
+            year, month, day = lesson.date.year, lesson.date.month, lesson.date.day
 
         # Get last used calendar view from session (default: week)
         last_view = self.request.session.get("last_calendar_view", "week")
@@ -325,9 +328,12 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         """Redirect back to last used calendar view."""
         lesson = self.object
         # Use year/month/day from request if available, otherwise from lesson date
-        year = int(self.request.GET.get("year", lesson.date.year))
-        month = int(self.request.GET.get("month", lesson.date.month))
-        day = int(self.request.GET.get("day", lesson.date.day))
+        try:
+            year = int(self.request.GET.get("year", lesson.date.year))
+            month = int(self.request.GET.get("month", lesson.date.month))
+            day = int(self.request.GET.get("day", lesson.date.day))
+        except (ValueError, TypeError):
+            year, month, day = lesson.date.year, lesson.date.month, lesson.date.day
 
         # Get last used calendar view from session (default: week)
         last_view = self.request.session.get("last_calendar_view", "week")
@@ -586,34 +592,24 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
 
         if delete_series and matching_recurring:
             # Delete the entire series
-            # Use a simple and robust method: Find ALL lessons in the period
-            # with the same contract and same start_time, regardless of pattern
-            # (as lessons may have been manually edited)
+            from apps.lessons.recurring_utils import get_all_sessions_for_recurring
+            from django.db import transaction
+
             start_date = matching_recurring.start_date
             end_date = matching_recurring.end_date
             if not end_date and matching_recurring.contract.end_date:
                 end_date = matching_recurring.contract.end_date
 
-            # Find all lessons in the period with the same contract and same start_time
-            # This is the safest method to find all lessons
-            all_lessons_query = Lesson.objects.filter(
-                contract=matching_recurring.contract,
-                start_time=matching_recurring.start_time,
-                date__gte=start_date,
-            )
-            if end_date:
-                all_lessons_query = all_lessons_query.filter(date__lte=end_date)
-
-            # Get all IDs
-            all_lesson_ids = list(all_lessons_query.values_list("id", flat=True))
+            # Use the same matching logic as the rest of the system to avoid
+            # accidentally deleting unrelated lessons with the same start_time
+            series_lessons = get_all_sessions_for_recurring(matching_recurring)
+            all_lesson_ids = [s.id for s in series_lessons]
             deleted_count = len(all_lesson_ids)
 
-            # Delete all lessons of the series directly via IDs (more efficient and safer)
-            if all_lesson_ids:
-                Lesson.objects.filter(id__in=all_lesson_ids).delete()
-
-            # Delete the RecurringLesson
-            matching_recurring.delete()
+            with transaction.atomic():
+                if all_lesson_ids:
+                    Lesson.objects.filter(id__in=all_lesson_ids).delete()
+                matching_recurring.delete()
 
             messages.success(
                 request,

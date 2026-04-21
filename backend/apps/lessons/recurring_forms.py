@@ -66,7 +66,6 @@ class RecurringLessonForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # Prüfe, dass mindestens ein Wochentag ausgewählt ist
         weekdays = [
             cleaned_data.get("monday"),
             cleaned_data.get("tuesday"),
@@ -78,4 +77,8 @@ class RecurringLessonForm(forms.ModelForm):
         ]
         if not any(weekdays):
             raise forms.ValidationError(_("At least one weekday must be selected."))
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError(_("End date must not be before start date."))
         return cleaned_data

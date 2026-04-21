@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Series delete form**: Radio buttons for "delete series / delete single lesson" were placed outside the `<form>` tag and were never submitted — deleting an entire series had no effect. Fixed by moving `<form>` tag before the series info block.
+- **Biweekly generation**: Week counter was incremented on each Monday, causing the first week's non-Monday active days to be skipped when start_date falls on a Monday. Generation now uses `(date - start_date).days // 7`, consistent with the matching logic in `recurring_utils.py`.
+- **Monthly matching for month-end series**: Sessions generated for months shorter than the start day (e.g. Feb 28/29 for a series starting Jan 31) were never matched by `find_matching_recurring_session` because the utils compared the raw day number. Fixed by applying the same last-day-of-month adjustment in the matcher.
+- **Series delete atomicity**: The two `delete()` calls (lessons + RecurringLesson template) in `LessonDeleteView` were not wrapped in a transaction; a failure in the second call would leave the RecurringLesson intact while all lessons were already deleted. Fixed with `transaction.atomic()`.
+- **Series delete query scope**: The delete query filtered by `contract + start_time` only, which could accidentally delete unrelated single lessons at the same time. Now uses `get_all_sessions_for_recurring()` (pattern-based matching) for precise scoping.
+- **ValueError on invalid calendar URL params**: `get_success_url()` in `LessonUpdateView` and `LessonDeleteView` called `int()` on GET params without error handling, causing a 500 on crafted URLs like `?year=foo`. Now falls back to the lesson's own date on `ValueError`/`TypeError`.
+- **ContractForm date validation**: Contracts with `end_date` before `start_date` could be saved without error. Added `clean()` validation.
+- **RecurringLessonForm date validation**: Recurring series with `end_date` before `start_date` could be saved without error. Added date check to the existing `clean()`.
+
 ### Added
 - **404 tests**: Additional tests for /lessons/, /students/ non-existent paths.
 - **i18n tests**: `test_weekday_short_german_in_week_view`, `test_public_booking_no_reschedule_list_in_data_section`.
