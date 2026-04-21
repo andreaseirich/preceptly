@@ -69,8 +69,12 @@ def get_all_sessions_for_recurring(
         qs = qs.filter(start_time=original_start_time)
 
     active_weekdays = recurring.get_active_weekdays()
-    return [s for s in qs if s.date.weekday() in active_weekdays
-            and _date_matches_recurring_pattern(s.date, recurring)]
+    return [
+        s
+        for s in qs
+        if s.date.weekday() in active_weekdays
+        and _date_matches_recurring_pattern(s.date, recurring)
+    ]
 
 
 # Alias for backwards compatibility
