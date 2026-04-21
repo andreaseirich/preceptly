@@ -595,11 +595,6 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
             from apps.lessons.recurring_utils import get_all_sessions_for_recurring
             from django.db import transaction
 
-            start_date = matching_recurring.start_date
-            end_date = matching_recurring.end_date
-            if not end_date and matching_recurring.contract.end_date:
-                end_date = matching_recurring.contract.end_date
-
             # Use the same matching logic as the rest of the system to avoid
             # accidentally deleting unrelated lessons with the same start_time
             series_lessons = get_all_sessions_for_recurring(matching_recurring)
