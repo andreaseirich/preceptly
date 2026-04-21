@@ -153,20 +153,11 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
     def delete(self, request, *args, **kwargs):
-        from apps.lessons.models import Session
-        from apps.lessons.recurring_utils import get_all_sessions_for_recurring
-        from django.db import transaction
-
         recurring = self.get_object()
-        series_sessions = get_all_sessions_for_recurring(recurring)
-        session_ids = [s.id for s in series_sessions]
-        deleted_count = len(session_ids)
-
-        with transaction.atomic():
-            if session_ids:
-                Session.objects.filter(id__in=session_ids).delete()
-            response = super().delete(request, *args, **kwargs)
-
+        # CASCADE on the FK means all linked sessions are deleted automatically
+        # when the RecurringSession row is removed.
+        deleted_count = recurring.generated_sessions.count()
+        response = super().delete(request, *args, **kwargs)
         messages.success(
             request,
             ngettext(
@@ -259,19 +250,9 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
         )
 
         if action == "delete":
-            from apps.lessons.models import Session
-            from apps.lessons.recurring_utils import get_all_sessions_for_recurring
-            from django.db import transaction
-
-            all_session_ids = []
-            for rl in recurring_lessons:
-                all_session_ids.extend(s.id for s in get_all_sessions_for_recurring(rl))
-
+            # CASCADE on the FK deletes all linked sessions automatically.
             count = recurring_lessons.count()
-            with transaction.atomic():
-                if all_session_ids:
-                    Session.objects.filter(id__in=all_session_ids).delete()
-                recurring_lessons.delete()
+            recurring_lessons.delete()
 
             messages.success(
                 request,

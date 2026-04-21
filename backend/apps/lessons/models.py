@@ -50,7 +50,7 @@ class Session(models.Model):
         "lessons.RecurringSession",
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="generated_sessions",
         help_text=_("Recurring series this session was generated from"),
     )

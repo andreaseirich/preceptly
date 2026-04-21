@@ -591,20 +591,9 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         delete_series = request.POST.get("delete_series", "false") == "true"
 
         if delete_series and matching_recurring:
-            # Delete the entire series
-            from apps.lessons.recurring_utils import get_all_sessions_for_recurring
-            from django.db import transaction
-
-            # Use the same matching logic as the rest of the system to avoid
-            # accidentally deleting unrelated lessons with the same start_time
-            series_lessons = get_all_sessions_for_recurring(matching_recurring)
-            all_lesson_ids = [s.id for s in series_lessons]
-            deleted_count = len(all_lesson_ids)
-
-            with transaction.atomic():
-                if all_lesson_ids:
-                    Lesson.objects.filter(id__in=all_lesson_ids).delete()
-                matching_recurring.delete()
+            # CASCADE on the FK deletes all linked sessions automatically.
+            deleted_count = matching_recurring.generated_sessions.count()
+            matching_recurring.delete()
 
             messages.success(
                 request,
