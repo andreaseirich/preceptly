@@ -2,17 +2,26 @@
 Views for lesson CRUD operations.
 """
 
+from datetime import datetime
+
 from apps.lessons.forms import LessonForm
 from apps.lessons.models import Lesson
+from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
-from apps.lessons.services import LessonConflictService
+from apps.lessons.recurring_utils import (
+    find_matching_recurring_lesson,
+    get_all_lessons_for_recurring,
+)
+from apps.lessons.services import LessonConflictService, recalculate_conflicts_for_affected_lessons
 from apps.lessons.status_service import LessonStatusService
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
@@ -112,8 +121,6 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
 
         if start_str:
             try:
-                from datetime import datetime
-
                 # Parse ISO format: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS
                 if "T" in start_str:
                     # ISO datetime format
@@ -122,8 +129,6 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                     else:  # YYYY-MM-DDTHH:MM:SS or with timezone
                         start_dt = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
                         if start_dt.tzinfo:
-                            from django.utils import timezone
-
                             start_dt = timezone.make_naive(start_dt)
                     initial["date"] = start_dt.date()
                     initial["start_time"] = start_dt.time()
@@ -136,8 +141,6 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                             else:  # YYYY-MM-DDTHH:MM:SS or with timezone
                                 end_dt = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
                                 if end_dt.tzinfo:
-                                    from django.utils import timezone
-
                                     end_dt = timezone.make_naive(end_dt)
 
                             # Calculate duration in minutes
@@ -146,14 +149,12 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                             if duration_minutes > 0:
                                 initial["duration_minutes"] = duration_minutes
                         except (ValueError, TypeError):
-                            # Invalid date/time format - skip duration calculation
                             pass
                 else:
                     # Fallback: treat as date only
                     date_obj = datetime.strptime(start_str, "%Y-%m-%d").date()
                     initial["date"] = date_obj
             except (ValueError, TypeError):
-                # Invalid date format - use default values
                 pass
 
         # Fallback: Get date from request (for backward compatibility)
@@ -161,12 +162,9 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
             date_str = self.request.GET.get("date")
             if date_str:
                 try:
-                    from datetime import datetime
-
                     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
                     initial["date"] = date_obj
                 except ValueError:
-                    # Invalid date format - use default values
                     pass
 
         # Fallback: Get time from request (for backward compatibility)
@@ -174,22 +172,14 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
             time_str = self.request.GET.get("time")
             if time_str:
                 try:
-                    from datetime import datetime
-
                     time_obj = datetime.strptime(time_str, "%H:%M").time()
                     initial["start_time"] = time_obj
                 except ValueError:
-                    # Invalid time format - use default values
                     pass
 
         return initial
 
     def form_valid(self, form):
-        from apps.lessons.recurring_models import RecurringLesson
-        from apps.lessons.recurring_service import RecurringLessonService
-        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
-        from django.utils.translation import ngettext
-
         # Check if a recurring lesson should be created
         is_recurring = form.cleaned_data.get("is_recurring", False)
 
@@ -255,11 +245,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 )
 
             # Set self.object for redirection
-            # Use the first created lesson or the first found lesson
             if result.get("created", 0) > 0:
-                # Find the first created lesson
-                from apps.lessons.models import Lesson
-
                 first_lesson = (
                     Lesson.objects.filter(
                         contract=recurring_lesson.contract,
@@ -316,12 +302,9 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from apps.lessons.recurring_utils import find_matching_recurring_lesson
-
         # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(self.object)
         context["matching_recurring"] = matching_recurring
-
         return context
 
     def get_success_url(self):
@@ -344,9 +327,6 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
-        from apps.lessons.recurring_utils import find_matching_recurring_lesson
-        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
-
         # IMPORTANT: Get the original lesson instance from the database,
         # before we search for RecurringLesson (self.object already has the changed values)
         original_lesson = Lesson.objects.get(pk=self.object.pk)
@@ -356,11 +336,8 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         matching_recurring = find_matching_recurring_lesson(original_lesson)
 
         if edit_scope == "series" and matching_recurring:
-            from apps.lessons.recurring_utils import get_all_lessons_for_recurring
-
             try:
                 with transaction.atomic():
-                    # Edit the entire series (RecurringLesson) - atomic
                     recurring = matching_recurring
 
                     # IMPORTANT: Save the original start_time BEFORE we change it!
@@ -374,7 +351,6 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
 
                     # Check if weekdays have changed
                     new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
-
                     new_weekdays_set = {int(wd) for wd in new_weekdays}
                     old_weekdays_set = set(recurring.get_active_weekdays())
                     weekdays_changed = new_weekdays_set != old_weekdays_set
@@ -403,20 +379,13 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                     recurring.save()
 
                     if weekdays_changed:
-                        # If weekdays have changed:
-                        # 1. Delete all old lessons that no longer match the new weekdays
-                        # 2. Generate new lessons for the new weekdays
-
                         deleted_count = 0
                         for lesson in all_lessons:
-                            # Check if this lesson matches the new weekdays
                             lesson_weekday = lesson.date.weekday()
                             if lesson_weekday not in new_weekdays_set:
-                                # This lesson no longer belongs to the new weekdays -> delete
                                 lesson.delete()
                                 deleted_count += 1
                             else:
-                                # This lesson still matches -> update
                                 lesson.start_time = recurring.start_time
                                 lesson.duration_minutes = recurring.duration_minutes
                                 lesson.travel_time_before_minutes = (
@@ -457,7 +426,6 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                         # Weekdays have not changed -> only update existing lessons
                         updated_count = 0
                         for lesson in all_lessons:
-                            # Update this lesson with new values from RecurringLesson
                             lesson.start_time = recurring.start_time
                             lesson.duration_minutes = recurring.duration_minutes
                             lesson.travel_time_before_minutes = recurring.travel_time_before_minutes
@@ -466,8 +434,6 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                             LessonStatusService.update_status_for_lesson(lesson)
                             lesson.save()
                             updated_count += 1
-
-                            # Recalculate conflicts
                             recalculate_conflicts_for_affected_lessons(lesson)
 
                         # Check for conflicts after update; rollback if any
@@ -530,18 +496,11 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from apps.lessons.recurring_utils import (
-            find_matching_recurring_lesson,
-            get_all_lessons_for_recurring,
-        )
-
         lesson = self.get_object()
-        # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(lesson)
         context["matching_recurring"] = matching_recurring
 
         if matching_recurring:
-            # Find all lessons of this series
             all_lessons = get_all_lessons_for_recurring(matching_recurring)
             context["series_lessons_count"] = len(all_lessons)
             context["series_lessons"] = all_lessons
@@ -550,21 +509,16 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         """Redirect back to last used calendar view."""
-        # Use year/month/day from request if available
         year = self.request.GET.get("year")
         month = self.request.GET.get("month")
         day = self.request.GET.get("day")
 
-        # Get last used calendar view from session (default: week)
         last_view = self.request.session.get("last_calendar_view", "week")
 
         if year and month:
             if last_view == "week" and day:
                 return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
             elif last_view == "week":
-                # If no day provided, use current day
-                from django.utils import timezone
-
                 now = timezone.now()
                 day = now.day
                 return reverse_lazy("lessons:week") + f"?year={year}&month={month}&day={day}"
@@ -573,28 +527,16 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy("lessons:list")
 
     def delete(self, request, *args, **kwargs):
-        from apps.lessons.models import Lesson
-        from apps.lessons.recurring_utils import (
-            find_matching_recurring_lesson,
-        )
-        from apps.lessons.services import recalculate_conflicts_for_affected_lessons
-        from django.http import HttpResponseRedirect
-        from django.utils.translation import ngettext
-
         lesson = self.get_object()
         lesson_date = lesson.date
 
-        # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(lesson)
-
-        # Check if user wants to delete the entire series
         delete_series = request.POST.get("delete_series", "false") == "true"
 
         if delete_series and matching_recurring:
             # CASCADE on the FK deletes all linked sessions automatically.
             deleted_count = matching_recurring.generated_sessions.count()
             matching_recurring.delete()
-
             messages.success(
                 request,
                 ngettext(
@@ -604,13 +546,8 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
                 ).format(count=deleted_count),
             )
         else:
-            # Delete only this one lesson
             lesson.delete()
             messages.success(self.request, _("Lesson successfully deleted."))
-
-        # Recalculate conflicts for affected lessons on the same date
-        # (We need to create a temporary lesson object with the date to check conflicts)
-        from apps.lessons.models import Lesson
 
         temp_lesson = Lesson(date=lesson_date)
         recalculate_conflicts_for_affected_lessons(temp_lesson)
