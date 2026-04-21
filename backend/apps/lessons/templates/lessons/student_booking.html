@@ -161,11 +161,29 @@
             color: #dc3545; 
             font-size: 0.9em; 
         }
-        .loading { 
-            text-align: center; 
-            padding: 20px; 
-            color: #6c757d; 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
         }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .lesson-actions { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .btn-action {
+            padding: 3px 8px;
+            font-size: 0.78em;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            color: white;
+            background: #dc3545;
+            transition: background 0.2s;
+        }
+        .btn-action:hover { background: #c82333; }
+        .btn-action.btn-secondary-sm { background: #6c757d; }
+        .btn-action.btn-secondary-sm:hover { background: #5a6268; }
+        .btn-action.btn-outline-danger { background: transparent; color: #dc3545; border: 1px solid #dc3545; }
+        .btn-action.btn-outline-danger:hover { background: #f8d7da; }
     </style>
 </head>
 <body>
@@ -228,7 +246,7 @@
                 </div>
                 <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: flex-end;">
                     <button class="btn btn-secondary" onclick="closeRecurringBookingModal()">{% trans "Cancel" %}</button>
-                    <button class="btn btn-success" onclick="confirmRecurringBooking()">{% trans "Book Recurring Lesson" %}</button>
+                    <button class="btn btn-success recurring-confirm-btn" onclick="confirmRecurringBooking()">{% trans "Book Recurring Lesson" %}</button>
                 </div>
             </div>
         </div>
@@ -268,6 +286,15 @@
                         <div class="time-slot occupied {% if bi.own %}own-lesson{% endif %}">
                             <div class="time-slot-label">{{ bi.start }} - {{ bi.end }}</div>
                             <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% else %}{% trans "Booked" %}{% endif %}</div>
+                            {% if bi.own and bi.cancellable %}
+                            <div class="lesson-actions">
+                                <button class="btn-action" onclick="cancelLesson({{ bi.lesson_id }}, event)">{% trans "Cancel" %}</button>
+                                {% if bi.in_series %}
+                                <button class="btn-action btn-outline-danger" onclick="cancelSeries({{ bi.lesson_id }}, event)">{% trans "Cancel Series" %}</button>
+                                <button class="btn-action btn-secondary-sm" onclick="showEditSeriesModal({{ bi.lesson_id }}, event)">{% trans "Edit Series" %}</button>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                         {% else %}
@@ -373,89 +400,19 @@
                 return;
             }
             
-            const url = `/lessons/booking/${token}/api/`;
-            const options = {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'book_slot',
-                    date: date,
-                    start_time: startTime,
-                    end_time: endTime
-                })
-            };
-            
-            if (typeof apiRequest === 'function') {
-                apiRequest(url, options)
-                .then(data => {
-                    if (data.success) {
-                        showMessage(data.message);
-                        // Mark all selected slots as booked
-                        selectedSlots.forEach(slot => {
-                            const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
-                            if (element) {
-                                element.classList.remove('selected');
-                                element.classList.add('booked');
-                                element.onclick = null;
-                            }
-                        });
-                        clearSelection();
-                        // Reload page after short delay
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showMessage(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error booking lesson. Please try again." %}', 'error');
-                });
-            } else {
-                fetch(url, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(async response => {
-                    if (!response.ok) {
-                        let errorMessage = `HTTP ${response.status}`;
-                        try {
-                            const errorData = await response.json();
-                            if (errorData.message) {
-                                errorMessage = errorData.message;
-                            }
-                        } catch (e) {
-                            errorMessage = response.statusText || '{% trans "Server error" %}';
-                        }
-                        throw new Error(errorMessage);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showMessage(data.message);
-                        selectedSlots.forEach(slot => {
-                            const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
-                            if (element) {
-                                element.classList.remove('selected');
-                                element.classList.add('booked');
-                                element.onclick = null;
-                            }
-                        });
-                        clearSelection();
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showMessage(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    if (error instanceof TypeError && error.message.includes('fetch')) {
-                        showMessage('{% trans "Network error: Please check your internet connection." %}', 'error');
-                    } else {
-                        showMessage(error.message || '{% trans "Error booking lesson. Please try again." %}', 'error');
+            doApiPost({ action: 'book_slot', date, start_time: startTime, end_time: endTime }, data => {
+                showMessage(data.message);
+                selectedSlots.forEach(slot => {
+                    const element = document.querySelector(`[data-date="${slot.date}"][data-start="${slot.startTime}"]`);
+                    if (element) {
+                        element.classList.remove('selected');
+                        element.classList.add('booked');
+                        element.onclick = null;
                     }
                 });
-            }
+                clearSelection();
+                setTimeout(() => location.reload(), 1500);
+            });
         }
         
         function loadWeek(year, month, day) {
@@ -502,8 +459,11 @@
             const occupiedLabel = '{% trans "Occupied" %}';
             const bookedLabel = '{% trans "Booked" %}';
             const noWorkingHours = '{% trans "No working hours configured for this day." %}';
+            const cancelLabel = '{% trans "Cancel" %}';
+            const cancelSeriesLabel = '{% trans "Cancel Series" %}';
+            const editSeriesLabel = '{% trans "Edit Series" %}';
             const escapeHtml = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
-            
+
             let html = '';
             for (const day of weekData.days) {
                 const dateFormatted = formatDateLocale(day.date);
@@ -520,8 +480,18 @@
                         for (const bi of intervals) {
                             var label = bi.own && bi.label ? bi.label : bookedLabel;
                             var cls = bi.own ? 'occupied own-lesson' : 'occupied';
+                            var actionsHtml = '';
+                            if (bi.own && bi.cancellable && bi.lesson_id) {
+                                actionsHtml += `<div class="lesson-actions">
+                                    <button class="btn-action" onclick="cancelLesson(${bi.lesson_id}, event)">${cancelLabel}</button>`;
+                                if (bi.in_series) {
+                                    actionsHtml += `<button class="btn-action btn-outline-danger" onclick="cancelSeries(${bi.lesson_id}, event)">${cancelSeriesLabel}</button>
+                                        <button class="btn-action btn-secondary-sm" onclick="showEditSeriesModal(${bi.lesson_id}, event)">${editSeriesLabel}</button>`;
+                                }
+                                actionsHtml += '</div>';
+                            }
                             html += `<div class="time-slot ${cls}"><div class="time-slot-label">${bi.start} - ${bi.end}</div>
-                                <div class="occupied-label">${escapeHtml(label)}</div></div>`;
+                                <div class="occupied-label">${escapeHtml(label)}</div>${actionsHtml}</div>`;
                         }
                     } else {
                         for (const occ of day.occupied_slots) {
@@ -578,16 +548,91 @@
             return cookieValue;
         }
         
-        function showRecurringBookingModal() {
-            document.getElementById('recurring-booking-modal').style.display = 'block';
-            // Setze Standard-Startdatum auf heute
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
-            document.getElementById('recurring-start-date').value = dateStr;
+        // Central API post helper
+        function doApiPost(requestData, onSuccess) {
+            const url = `/lessons/booking/${token}/api/`;
+            const body = JSON.stringify(requestData);
+            const handle = data => {
+                if (data.success) {
+                    onSuccess(data);
+                } else {
+                    showMessage(data.message || '{% trans "An error occurred." %}', 'error');
+                }
+            };
+            const handleError = err => showMessage(err.message || '{% trans "Network error." %}', 'error');
+            if (typeof apiRequest === 'function') {
+                apiRequest(url, { method: 'POST', body }).then(handle).catch(handleError);
+            } else {
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body,
+                })
+                .then(async r => {
+                    if (!r.ok) {
+                        const d = await r.json().catch(() => ({}));
+                        throw new Error(d.message || r.statusText || '{% trans "Server error" %}');
+                    }
+                    return r.json();
+                })
+                .then(handle)
+                .catch(handleError);
+            }
         }
-        
+
+        function cancelLesson(lessonId, event) {
+            if (event) event.stopPropagation();
+            if (!confirm('{% trans "Cancel this lesson?" %}')) return;
+            doApiPost({ action: 'cancel_lesson', lesson_id: lessonId }, data => {
+                showMessage(data.message);
+                setTimeout(() => location.reload(), 1200);
+            });
+        }
+
+        function cancelSeries(lessonId, event) {
+            if (event) event.stopPropagation();
+            if (!confirm('{% trans "Cancel the entire series? All future planned lessons will be deleted." %}')) return;
+            doApiPost({ action: 'cancel_series', lesson_id: lessonId }, data => {
+                showMessage(data.message);
+                setTimeout(() => location.reload(), 1200);
+            });
+        }
+
+        let editingLessonId = null;
+
+        function showEditSeriesModal(lessonId, event) {
+            if (event) event.stopPropagation();
+            editingLessonId = lessonId;
+            const modal = document.getElementById('recurring-booking-modal');
+            modal.querySelector('h2').textContent = '{% trans "Edit Recurring Series" %}';
+            modal.querySelector('.recurring-confirm-btn').textContent = '{% trans "Save Changes" %}';
+            doApiPost({ action: 'get_series', lesson_id: lessonId }, data => {
+                const s = data.series;
+                document.getElementById('recurring-start-date').value = s.start_date;
+                document.getElementById('recurring-end-date').value = s.end_date || '';
+                document.getElementById('recurring-start-time').value = s.start_time;
+                document.getElementById('recurring-end-time').value = s.end_time;
+                document.getElementById('recurring-type').value = s.recurrence_type;
+                document.querySelectorAll('.weekday-checkbox').forEach(cb => {
+                    cb.checked = s.weekdays.includes(parseInt(cb.value));
+                });
+                modal.style.display = 'block';
+            });
+        }
+
+        function showRecurringBookingModal() {
+            editingLessonId = null;
+            const modal = document.getElementById('recurring-booking-modal');
+            modal.querySelector('h2').textContent = '{% trans "Book Recurring Lesson" %}';
+            modal.querySelector('.recurring-confirm-btn').textContent = '{% trans "Book Recurring Lesson" %}';
+            const today = new Date();
+            document.getElementById('recurring-start-date').value = today.toISOString().split('T')[0];
+            modal.style.display = 'block';
+        }
+
         function closeRecurringBookingModal() {
             document.getElementById('recurring-booking-modal').style.display = 'none';
+            editingLessonId = null;
         }
         
         function confirmRecurringBooking() {
@@ -596,96 +641,29 @@
             const endTime = document.getElementById('recurring-end-time').value;
             const recurrenceType = document.getElementById('recurring-type').value;
             const endDate = document.getElementById('recurring-end-date').value || null;
-            
-            // Collect selected weekdays
+
             const weekdays = [];
-            document.querySelectorAll('.weekday-checkbox:checked').forEach(checkbox => {
-                weekdays.push(parseInt(checkbox.value));
-            });
-            
+            document.querySelectorAll('.weekday-checkbox:checked').forEach(cb => weekdays.push(parseInt(cb.value)));
+
             if (!startDate || !startTime || !endTime) {
                 showMessage('{% trans "Please fill in all required fields." %}', 'error');
                 return;
             }
-            
             if (weekdays.length === 0) {
                 showMessage('{% trans "Please select at least one weekday." %}', 'error');
                 return;
             }
-            
-            const requestData = {
-                action: 'book_recurring_slot',
-                date: startDate,
-                start_time: startTime,
-                end_time: endTime,
-                recurrence_type: recurrenceType,
-                weekdays: weekdays
-            };
-            
-            if (endDate) {
-                requestData.end_date = endDate;
-            }
-            
-            const url = `/lessons/booking/${token}/api/`;
-            const options = {
-                method: 'POST',
-                body: JSON.stringify(requestData)
-            };
-            
-            if (typeof apiRequest === 'function') {
-                apiRequest(url, options)
-                .then(data => {
-                    if (data.success) {
-                        showMessage(data.message);
-                        closeRecurringBookingModal();
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showMessage(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage(error.message || '{% trans "Error booking recurring lesson. Please try again." %}', 'error');
-                });
-            } else {
-                fetch(url, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(async response => {
-                    if (!response.ok) {
-                        let errorMessage = `HTTP ${response.status}`;
-                        try {
-                            const errorData = await response.json();
-                            if (errorData.message) {
-                                errorMessage = errorData.message;
-                            }
-                        } catch (e) {
-                            errorMessage = response.statusText || '{% trans "Server error" %}';
-                        }
-                        throw new Error(errorMessage);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showMessage(data.message);
-                        closeRecurringBookingModal();
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showMessage(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    if (error instanceof TypeError && error.message.includes('fetch')) {
-                        showMessage('{% trans "Network error: Please check your internet connection." %}', 'error');
-                    } else {
-                        showMessage(error.message || '{% trans "Error booking recurring lesson. Please try again." %}', 'error');
-                    }
-                });
-            }
+
+            const requestData = editingLessonId
+                ? { action: 'edit_series', lesson_id: editingLessonId, start_time: startTime, end_time: endTime, recurrence_type: recurrenceType, weekdays }
+                : { action: 'book_recurring_slot', date: startDate, start_time: startTime, end_time: endTime, recurrence_type: recurrenceType, weekdays };
+            if (endDate) requestData.end_date = endDate;
+
+            doApiPost(requestData, data => {
+                showMessage(data.message);
+                closeRecurringBookingModal();
+                setTimeout(() => location.reload(), 1500);
+            });
         }
     </script>
 </body>

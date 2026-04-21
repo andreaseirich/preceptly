@@ -321,12 +321,16 @@ class BookingService:
                 has_reschedule = user_has_feature(user, Feature.FEATURE_PUBLIC_RESCHEDULE)
                 interval["reschedulable"] = can_reschedule and has_reschedule
                 interval["reschedule_locked"] = can_reschedule and not has_reschedule
+                interval["cancellable"] = can_reschedule
                 if can_reschedule:
                     from apps.lessons.recurring_utils import find_matching_recurring_session
 
-                    interval["in_series"] = find_matching_recurring_session(lesson) is not None
+                    recurring = find_matching_recurring_session(lesson)
+                    interval["in_series"] = recurring is not None
+                    interval["recurring_lesson_id"] = recurring.id if recurring else None
                 else:
                     interval["in_series"] = False
+                    interval["recurring_lesson_id"] = None
             result[lesson.date].append(interval)
 
         start_datetime = timezone.make_aware(datetime.combine(week_start, time.min))
