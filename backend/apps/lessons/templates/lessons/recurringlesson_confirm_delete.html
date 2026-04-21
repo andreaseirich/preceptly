@@ -6,7 +6,9 @@
 {% block content %}
 <h1>{% trans "Delete Recurring Lesson" %}</h1>
 <p>{% blocktrans with student=object.contract.student weekdays=object.get_active_weekdays_display time=object.start_time %}Are you sure you want to delete the recurring lesson for "{{ student }}" ({{ weekdays }}, {{ time }})?{% endblocktrans %}</p>
-<p><strong>{% trans "Note:" %}</strong> {% trans "Already generated lessons will not be deleted." %}</p>
+{% if sessions_count %}
+<p><strong>{% trans "Note:" %}</strong> {% blocktrans count count=sessions_count %}{{ count }} generated lesson will also be deleted.{% plural %}{{ count }} generated lessons will also be deleted.{% endblocktrans %}</p>
+{% endif %}
 
 <form method="post">
     {% csrf_token %}

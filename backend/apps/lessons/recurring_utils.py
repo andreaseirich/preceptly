@@ -17,11 +17,12 @@ def find_matching_recurring_session(session: Session) -> RecurringSession | None
     - Same start time
     - The session's date matches the RecurringSession's recurrence pattern
     """
-    # Search for RecurringSessions with the same contract and start time
+    # Search for RecurringSessions with the same contract and start time.
+    # Do not filter by is_active — deactivated series must still be findable
+    # so their sessions can be displayed and deleted correctly.
     recurring_sessions = RecurringSession.objects.filter(
         contract=session.contract,
         start_time=session.start_time,
-        is_active=True,
     )
 
     for recurring in recurring_sessions:
