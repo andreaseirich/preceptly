@@ -47,6 +47,14 @@ class Session(models.Model):
             "Abacus: lesson is not billed (0). Other contracts: no effect on amount."
         ),
     )
+    recurring_session = models.ForeignKey(
+        "lessons.RecurringSession",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="generated_sessions",
+        help_text=_("Recurring series this session was generated from"),
+    )
     created_via = models.CharField(
         max_length=20,
         blank=True,

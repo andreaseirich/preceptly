@@ -12,23 +12,20 @@ def find_matching_recurring_session(session: Session) -> RecurringSession | None
     """
     Finds the RecurringSession that a session belongs to.
 
-    A session belongs to a RecurringSession if:
-    - Same contract
-    - Same start time
-    - The session's date matches the RecurringSession's recurrence pattern
+    Uses the recurring_session FK when available (set since migration 0011).
+    Falls back to pattern matching for legacy sessions without the FK.
     """
-    # Search for RecurringSessions with the same contract and start time.
-    # Do not filter by is_active — deactivated series must still be findable
-    # so their sessions can be displayed and deleted correctly.
+    # Fast path: FK is populated
+    if session.recurring_session_id is not None:
+        return session.recurring_session
+
+    # Fallback: pattern match by contract + start_time for legacy sessions
     recurring_sessions = RecurringSession.objects.filter(
         contract=session.contract,
         start_time=session.start_time,
     )
-
     for recurring in recurring_sessions:
-        # Check if the session's date matches the pattern
-        matches = _date_matches_recurring_pattern(session.date, recurring)
-        if matches:
+        if _date_matches_recurring_pattern(session.date, recurring):
             return recurring
 
     return None
@@ -44,40 +41,36 @@ def get_all_sessions_for_recurring(
     """
     Finds all sessions that belong to a RecurringSession.
 
-    This function finds sessions based on the recurrence pattern.
-    If original_start_time is provided, it filters by that time
-    (useful when the RecurringSession is being updated).
+    Primary strategy: use the recurring_session FK (set at creation time).
+    Fallback: pattern matching by contract + date range + weekday (for legacy
+    sessions created before the FK column existed, or during a series edit
+    where original_start_time is provided).
     """
-    # Get all sessions for this contract in the series period
-    all_sessions = Session.objects.filter(contract=recurring.contract)
+    # When called during a series edit we must use the old start_time, so
+    # fall through to pattern matching in that case.
+    if original_start_time is None:
+        fk_sessions = list(Session.objects.filter(recurring_session=recurring))
+        if fk_sessions:
+            return fk_sessions
 
-    # Determine the period
+    # Fallback: pattern matching (legacy sessions / series-edit path).
+    # Does NOT filter by start_time — matches any session on the correct
+    # weekday within the date range, regardless of rescheduling.
     start_date = recurring.start_date
     end_date = recurring.end_date
     if not end_date and recurring.contract.end_date:
         end_date = recurring.contract.end_date
 
-    # Filter by date
+    qs = Session.objects.filter(contract=recurring.contract, date__gte=start_date)
     if end_date:
-        all_sessions = all_sessions.filter(date__gte=start_date, date__lte=end_date)
-    else:
-        all_sessions = all_sessions.filter(date__gte=start_date)
+        qs = qs.filter(date__lte=end_date)
 
-    # Filter by start_time (if original_start_time is provided, use that, otherwise use current)
-    start_time_to_match = (
-        original_start_time if original_start_time is not None else recurring.start_time
-    )
-    all_sessions = all_sessions.filter(start_time=start_time_to_match)
+    if original_start_time is not None:
+        qs = qs.filter(start_time=original_start_time)
 
-    # Filter by weekday (based on active weekdays)
-    recurring.get_active_weekdays()
-    matching_sessions = []
-
-    for session in all_sessions:
-        if _date_matches_recurring_pattern(session.date, recurring):
-            matching_sessions.append(session)
-
-    return matching_sessions
+    active_weekdays = recurring.get_active_weekdays()
+    return [s for s in qs if s.date.weekday() in active_weekdays
+            and _date_matches_recurring_pattern(s.date, recurring)]
 
 
 # Alias for backwards compatibility

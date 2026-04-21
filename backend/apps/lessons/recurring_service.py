@@ -270,6 +270,7 @@ class RecurringSessionService:
             travel_time_after_minutes=recurring_session.travel_time_after_minutes,
             status="",  # Empty - will be set automatically
             notes=recurring_session.notes,
+            recurring_session=recurring_session,
         )
 
         # Automatic status setting (before saving)
