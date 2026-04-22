@@ -56,7 +56,7 @@ class Command(BaseCommand):
                     f"MISMATCH: RecurringLesson #{recurring.pk} "
                     f"({recurring.contract.student}) "
                     f"— template: {recurring.get_active_weekdays_display()} {recurring.start_time} "
-                    f"— sessions dominant: weekday(s)={[d for d in sorted(dominant_weekdays)]} "
+                    f"— sessions dominant: weekday(s)={sorted(dominant_weekdays)} "
                     f"time={dominant_time} "
                     f"(sample size: {len(sessions)})"
                 )
@@ -89,8 +89,7 @@ class Command(BaseCommand):
         elif not fix:
             self.stdout.write(
                 self.style.WARNING(
-                    f"\n{mismatches} mismatch(es) found. "
-                    "Run with --fix to apply corrections."
+                    f"\n{mismatches} mismatch(es) found. Run with --fix to apply corrections."
                 )
             )
         else:

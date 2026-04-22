@@ -132,9 +132,9 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
         today = timezone.localdate()
         # Only delete future planned sessions — preserve past/taught/paid records.
         fk_ids = set(
-            recurring.generated_sessions.filter(
-                date__gte=today, status="planned"
-            ).values_list("id", flat=True)
+            recurring.generated_sessions.filter(date__gte=today, status="planned").values_list(
+                "id", flat=True
+            )
         )
         pattern_ids = {
             s.id
