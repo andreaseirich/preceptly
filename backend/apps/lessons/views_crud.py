@@ -430,7 +430,17 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
                 form.add_error(None, str(e))
                 return self.form_invalid(form)
         else:
-            # Edit only this one lesson
+            # Edit only this one lesson.
+            # If time or weekday changes on a series session, unlink it from the
+            # recurring template so the template stays authoritative and accurate.
+            if original_lesson.recurring_session_id is not None:
+                time_changed = form.cleaned_data["start_time"] != original_lesson.start_time
+                weekday_changed = (
+                    form.cleaned_data["date"].weekday() != original_lesson.date.weekday()
+                )
+                if time_changed or weekday_changed:
+                    form.instance.recurring_session = None
+
             lesson = form.save()
 
             # Automatic status setting
