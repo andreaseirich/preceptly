@@ -1316,10 +1316,10 @@ msgid_plural ""
 "{created} blocked times created, {skipped} skipped, {conflicts} conflicts "
 "detected!"
 msgstr[0] ""
-"{created} Blockzeit erstellt, {skipped} übersprungen, {conflicts} Konflikt "
+"{created} Sperrzeit erstellt, {skipped} übersprungen, {conflicts} Konflikt "
 "erkannt!"
 msgstr[1] ""
-"{created} Blockzeiten erstellt, {skipped} übersprungen, {conflicts} "
+"{created} Sperrzeiten erstellt, {skipped} übersprungen, {conflicts} "
 "Konflikte erkannt!"
 
 #: apps/blocked_times/recurring_views.py:132
@@ -1327,9 +1327,9 @@ msgstr[1] ""
 msgid "{created} blocked time successfully created, {skipped} skipped."
 msgid_plural ""
 "{created} blocked times successfully created, {skipped} skipped."
-msgstr[0] "{created} Blockzeit erfolgreich erstellt, {skipped} übersprungen."
+msgstr[0] "{created} Sperrzeit erfolgreich erstellt, {skipped} übersprungen."
 msgstr[1] ""
-"{created} Blockzeiten erfolgreich erstellt, {skipped} übersprungen."
+"{created} Sperrzeiten erfolgreich erstellt, {skipped} übersprungen."
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:4
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:7
@@ -1409,8 +1409,8 @@ msgstr "Gesamte Serie umbuchen"
 #| msgid "Add blocked time"
 msgid "%(count)s blocked time"
 msgid_plural "%(count)s blocked times"
-msgstr[0] "Blockzeit hinzufügen"
-msgstr[1] "Blockzeit hinzufügen"
+msgstr[0] "%(count)s Sperrzeit"
+msgstr[1] "%(count)s Sperrzeiten"
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:46
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_confirm_delete.html:14
@@ -1820,12 +1820,8 @@ msgid ""
 "Recurring blocked time series created and {count} blocked time generated."
 msgid_plural ""
 "Recurring blocked time series created and {count} blocked times generated."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Sperrzeitserie erstellt und {count} Sperrzeit generiert."
+msgstr[1] "Sperrzeitserie erstellt und {count} Sperrzeiten generiert."
 
 #: apps/blocked_times/views.py:188
 msgid ""
@@ -1841,8 +1837,8 @@ msgstr ""
 #| msgid_plural "{count} lessons with conflicts detected."
 msgid "{count} blocked time with conflicts detected."
 msgid_plural "{count} blocked times with conflicts detected."
-msgstr[0] "{count} Unterrichtsstunde mit Konflikten erkannt."
-msgstr[1] "{count} Unterrichtsstunden mit Konflikten erkannt."
+msgstr[0] "{count} Sperrzeit mit Konflikten erkannt."
+msgstr[1] "{count} Sperrzeiten mit Konflikten erkannt."
 
 #: apps/blocked_times/views.py:254
 #, fuzzy, python-brace-format
@@ -1884,8 +1880,8 @@ msgstr "Blockzeit erfolgreich aktualisiert."
 #| msgid "Already generated blocked times will not be deleted."
 msgid "Series deleted. {count} blocked time deleted."
 msgid_plural "Series deleted. {count} blocked times deleted."
-msgstr[0] "Bereits generierte Blockzeiten werden nicht gelöscht."
-msgstr[1] "Bereits generierte Blockzeiten werden nicht gelöscht."
+msgstr[0] "Serie gelöscht. {count} Sperrzeit gelöscht."
+msgstr[1] "Serie gelöscht. {count} Sperrzeiten gelöscht."
 
 #: apps/blocked_times/views.py:552
 msgid "Blocked time successfully deleted."
@@ -4034,12 +4030,8 @@ msgstr "Wiederkehrende Unterrichtsstunden"
 #, python-brace-format
 msgid "Recurring lesson created and {count} lesson generated."
 msgid_plural "Recurring lesson created and {count} lessons generated."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Serientermin erstellt und {count} Stunde generiert."
+msgstr[1] "Serientermin erstellt und {count} Stunden generiert."
 
 #: apps/lessons/recurring_views.py:100 apps/lessons/recurring_views.py:169
 #: apps/lessons/views_crud.py:225
@@ -4060,12 +4052,8 @@ msgstr "Wiederkehrende Unterrichtsstunde erfolgreich erstellt."
 #| "Recurring lesson created and {count} lessons generated."
 msgid "Recurring lesson updated and {count} lesson regenerated."
 msgid_plural "Recurring lesson updated and {count} lessons regenerated."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Serientermin aktualisiert und {count} Stunde neu generiert."
+msgstr[1] "Serientermin aktualisiert und {count} Stunden neu generiert."
 
 #: apps/lessons/recurring_views.py:162
 msgid "Recurring lesson successfully updated."
@@ -4078,12 +4066,8 @@ msgstr "Wiederkehrende Unterrichtsstunde erfolgreich aktualisiert."
 #| "Recurring lesson created and {count} lessons generated."
 msgid "Recurring lesson and {count} generated lesson deleted."
 msgid_plural "Recurring lesson and {count} generated lessons deleted."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Serientermin und {count} generierte Stunde gelöscht."
+msgstr[1] "Serientermin und {count} generierte Stunden gelöscht."
 
 #: apps/lessons/recurring_views.py:233
 #, python-brace-format
@@ -4122,24 +4106,24 @@ msgstr "Bitte wählen Sie mindestens einen Zeitslot aus."
 #| msgid "Recurring lesson successfully deleted."
 msgid "{count} recurring lesson successfully deleted."
 msgid_plural "{count} recurring lessons successfully deleted."
-msgstr[0] "Wiederkehrende Unterrichtsstunde erfolgreich gelöscht."
-msgstr[1] "Wiederkehrende Unterrichtsstunde erfolgreich gelöscht."
+msgstr[0] "{count} Serientermin erfolgreich gelöscht."
+msgstr[1] "{count} Serientermine erfolgreich gelöscht."
 
 #: apps/lessons/recurring_views.py:324
 #, fuzzy, python-brace-format
 #| msgid "No lessons available."
 msgid "{count} recurring lesson activated."
 msgid_plural "{count} recurring lessons activated."
-msgstr[0] "Keine Stunden vorhanden."
-msgstr[1] "Keine Stunden vorhanden."
+msgstr[0] "{count} Serientermin aktiviert."
+msgstr[1] "{count} Serientermine aktiviert."
 
 #: apps/lessons/recurring_views.py:334
 #, fuzzy, python-brace-format
 #| msgid "No lessons available."
 msgid "{count} recurring lesson deactivated."
 msgid_plural "{count} recurring lessons deactivated."
-msgstr[0] "Keine Stunden vorhanden."
-msgstr[1] "Keine Stunden vorhanden."
+msgstr[0] "{count} Serientermin deaktiviert."
+msgstr[1] "{count} Serientermine deaktiviert."
 
 #: apps/lessons/recurring_views.py:344
 #, fuzzy
@@ -4158,8 +4142,8 @@ msgstr "Ungültiges Enddatum-Format."
 #| msgid "No lessons available."
 msgid "{count} recurring lesson updated."
 msgid_plural "{count} recurring lessons updated."
-msgstr[0] "Keine Stunden vorhanden."
-msgstr[1] "Keine Stunden vorhanden."
+msgstr[0] "{count} Serientermin aktualisiert."
+msgstr[1] "{count} Serientermine aktualisiert."
 
 #: apps/lessons/recurring_views.py:375
 #, fuzzy
@@ -4284,8 +4268,8 @@ msgstr "Nachhilfeunterricht"
 #| msgid "Tutoring Lesson"
 msgid "Conflicting Lesson"
 msgid_plural "Conflicting Lessons (%(counter)s)"
-msgstr[0] "Nachhilfeunterricht"
-msgstr[1] "Nachhilfeunterricht"
+msgstr[0] "Konfliktbehaftete Stunde"
+msgstr[1] "Konfliktbehaftete Stunden (%(counter)s)"
 
 #: apps/lessons/templates/lessons/conflict_detail.html:42
 #: apps/lessons/templates/lessons/lesson_detail.html:99
@@ -4307,16 +4291,16 @@ msgstr "Wochenansicht"
 #| msgid "Create Recurring Blocked Time"
 msgid "Conflicting Blocked Time"
 msgid_plural "Conflicting Blocked Times (%(counter)s)"
-msgstr[0] "Serien-Blockzeit erstellen"
-msgstr[1] "Serien-Blockzeit erstellen"
+msgstr[0] "Konfliktbehaftete Sperrzeit"
+msgstr[1] "Konfliktbehaftete Sperrzeiten (%(counter)s)"
 
 #: apps/lessons/templates/lessons/conflict_detail.html:81
 #, fuzzy, python-format
 #| msgid "Associated contract (optional)"
 msgid "Contract Quota Conflict"
 msgid_plural "Contract Quota Conflicts (%(counter)s)"
-msgstr[0] "Zugehöriger Vertrag (optional)"
-msgstr[1] "Zugehöriger Vertrag (optional)"
+msgstr[0] "Vertragskontingent-Konflikt"
+msgstr[1] "Vertragskontingent-Konflikte (%(counter)s)"
 
 #: apps/lessons/templates/lessons/conflict_detail.html:89
 #, python-format
@@ -4403,8 +4387,8 @@ msgstr "Serientermin anlegen"
 #| msgid_plural "(%(counter)s lessons)"
 msgid "%(count)s lesson"
 msgid_plural "%(count)s lessons"
-msgstr[0] "(%(counter)s Unterrichtsstunde)"
-msgstr[1] "(%(counter)s Unterrichtsstunden)"
+msgstr[0] "%(count)s Stunde"
+msgstr[1] "%(count)s Stunden"
 
 #: apps/lessons/templates/lessons/lesson_detail.html:4
 #, python-format
@@ -5041,8 +5025,8 @@ msgstr ""
 #| msgid "Already generated lessons will not be deleted."
 msgid "%(count)s generated lesson will also be deleted."
 msgid_plural "%(count)s generated lessons will also be deleted."
-msgstr[0] "Bereits generierte Unterrichtsstunden werden nicht gelöscht."
-msgstr[1] "Bereits generierte Unterrichtsstunden werden nicht gelöscht."
+msgstr[0] "%(count)s generierte Stunde wird ebenfalls gelöscht."
+msgstr[1] "%(count)s generierte Stunden werden ebenfalls gelöscht."
 
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:7
 msgid "Recurring Lesson"
@@ -5391,12 +5375,8 @@ msgstr "Diese Stunde ist kein Teil einer Serie."
 #| "Recurring lesson created and {count} lessons generated."
 msgid "Series cancelled. {count} lesson cancelled."
 msgid_plural "Series cancelled. {count} lessons cancelled."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Serie storniert. {count} Stunde storniert."
+msgstr[1] "Serie storniert. {count} Stunden storniert."
 
 #: apps/lessons/views_booking.py:570
 #, fuzzy
@@ -5409,12 +5389,8 @@ msgstr "Ungültiges Endzeit-Format."
 #| msgid "Recurring lesson created and {count} lesson(s) generated."
 msgid "Series updated. {count} lesson generated."
 msgid_plural "Series updated. {count} lessons generated."
-msgstr[0] ""
-"Serie aktualisiert. {count} Stunde(n) aktualisiert.Wiederkehrende "
-"Unterrichtsstunde erstellt und {count} Unterrichtsstunde(n) generiert."
-msgstr[1] ""
-"Serie aktualisiert. {count} Stunde(n) aktualisiert.Wiederkehrende "
-"Unterrichtsstunde erstellt und {count} Unterrichtsstunde(n) generiert."
+msgstr[0] "Serie aktualisiert. {count} Stunde generiert."
+msgstr[1] "Serie aktualisiert. {count} Stunden generiert."
 
 #: apps/lessons/views_booking.py:641 apps/lessons/views_public_booking.py:383
 #, fuzzy
@@ -5475,12 +5451,8 @@ msgstr "So"
 #| "Recurring lesson created and {count} lessons generated."
 msgid "Recurring lesson series created and {count} lesson generated."
 msgid_plural "Recurring lesson series created and {count} lessons generated."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Unterrichtsserie erstellt und {count} Stunde generiert."
+msgstr[1] "Unterrichtsserie erstellt und {count} Stunden generiert."
 
 #: apps/lessons/views_crud.py:216
 #, fuzzy
@@ -5546,12 +5518,8 @@ msgstr "Unterrichtsstunde erfolgreich aktualisiert."
 #| "Recurring lesson created and {count} lessons generated."
 msgid "Series deleted. {count} lesson deleted."
 msgid_plural "Series deleted. {count} lessons deleted."
-msgstr[0] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunde "
-"generiert."
-msgstr[1] ""
-"Wiederkehrende Unterrichtsstunde erstellt und {count} Unterrichtsstunden "
-"generiert."
+msgstr[0] "Serie gelöscht. {count} Stunde gelöscht."
+msgstr[1] "Serie gelöscht. {count} Stunden gelöscht."
 
 #: apps/lessons/views_crud.py:517
 msgid "Lesson successfully deleted."
