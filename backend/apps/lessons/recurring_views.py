@@ -126,10 +126,21 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
+        from django.utils import timezone
+
         recurring = form.instance
-        # Delete all previously generated sessions (FK-linked + legacy pattern-matched)
-        fk_ids = set(recurring.generated_sessions.values_list("id", flat=True))
-        pattern_ids = {s.id for s in get_all_sessions_for_recurring(recurring)}
+        today = timezone.localdate()
+        # Only delete future planned sessions — preserve past/taught/paid records.
+        fk_ids = set(
+            recurring.generated_sessions.filter(
+                date__gte=today, status="planned"
+            ).values_list("id", flat=True)
+        )
+        pattern_ids = {
+            s.id
+            for s in get_all_sessions_for_recurring(recurring)
+            if s.date >= today and s.status == "planned"
+        }
         all_ids = fk_ids | pattern_ids
         if all_ids:
             Session.objects.filter(id__in=all_ids).delete()
