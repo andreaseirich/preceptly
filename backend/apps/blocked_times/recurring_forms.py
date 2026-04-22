@@ -4,6 +4,7 @@ Forms für RecurringBlockedTime-Model.
 
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 
 class RecurringBlockedTimeForm(forms.ModelForm):
@@ -28,6 +29,23 @@ class RecurringBlockedTimeForm(forms.ModelForm):
             "sunday",
             "is_active",
         ]
+        labels = {
+            "title": _("Title"),
+            "description": _("Description"),
+            "start_date": _("Start Date"),
+            "end_date": _("End Date"),
+            "start_time": _("Start time"),
+            "end_time": _("End time"),
+            "recurrence_type": _("Recurrence type"),
+            "monday": _("Monday"),
+            "tuesday": _("Tuesday"),
+            "wednesday": _("Wednesday"),
+            "thursday": _("Thursday"),
+            "friday": _("Friday"),
+            "saturday": _("Saturday"),
+            "sunday": _("Sunday"),
+            "is_active": _("Active"),
+        }
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),

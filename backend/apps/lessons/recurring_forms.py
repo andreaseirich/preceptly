@@ -38,6 +38,25 @@ class RecurringLessonForm(forms.ModelForm):
             "is_active",
             "notes",
         ]
+        labels = {
+            "contract": _("Contract"),
+            "start_date": _("Start Date"),
+            "end_date": _("End Date"),
+            "start_time": _("Start time"),
+            "duration_minutes": _("Duration (minutes)"),
+            "travel_time_before_minutes": _("Travel time before (minutes)"),
+            "travel_time_after_minutes": _("Travel time after (minutes)"),
+            "recurrence_type": _("Recurrence type"),
+            "monday": _("Monday"),
+            "tuesday": _("Tuesday"),
+            "wednesday": _("Wednesday"),
+            "thursday": _("Thursday"),
+            "friday": _("Friday"),
+            "saturday": _("Saturday"),
+            "sunday": _("Sunday"),
+            "is_active": _("Active"),
+            "notes": _("Notes"),
+        }
         widgets = {
             "contract": forms.Select(attrs={"class": "form-control"}),
             "start_date": forms.DateInput(
