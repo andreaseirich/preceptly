@@ -106,7 +106,12 @@ class ContractMonthlyPlan(models.Model):
 
     class Meta:
         ordering = ["year", "month"]
-        unique_together = [["contract", "year", "month"]]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["contract", "year", "month"],
+                name="unique_contract_year_month",
+            )
+        ]
         verbose_name = _("Contract Monthly Plan")
         verbose_name_plural = _("Contract Monthly Plans")
 

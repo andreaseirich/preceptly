@@ -72,6 +72,7 @@ class Session(models.Model):
         indexes = [
             models.Index(fields=["date", "start_time"]),
             models.Index(fields=["status"]),
+            models.Index(fields=["contract", "date"], name="lessons_les_contract_date_idx"),
         ]
 
     def __str__(self):
