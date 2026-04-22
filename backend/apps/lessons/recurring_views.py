@@ -116,7 +116,6 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
     model = RecurringLesson
     form_class = RecurringLessonForm
     template_name = "lessons/recurringlesson_form.html"
-    success_url = reverse_lazy("lessons:recurring_list")
 
     def get_queryset(self):
         return super().get_queryset().filter(contract__student__user=self.request.user)
@@ -127,8 +126,45 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, _("Recurring lesson successfully updated."))
-        return super().form_valid(form)
+        recurring = form.instance
+        # Delete all previously generated sessions (FK-linked + legacy pattern-matched)
+        fk_ids = set(recurring.generated_sessions.values_list("id", flat=True))
+        pattern_ids = {s.id for s in get_all_sessions_for_recurring(recurring)}
+        all_ids = fk_ids | pattern_ids
+        if all_ids:
+            Session.objects.filter(id__in=all_ids).delete()
+
+        response = super().form_valid(form)
+
+        result = RecurringLessonService.generate_lessons(recurring, check_conflicts=True)
+
+        if result["created"] > 0:
+            messages.success(
+                self.request,
+                ngettext(
+                    "Recurring lesson updated and {count} lesson regenerated.",
+                    "Recurring lesson updated and {count} lessons regenerated.",
+                    result["created"],
+                ).format(count=result["created"]),
+            )
+        else:
+            messages.success(self.request, _("Recurring lesson successfully updated."))
+
+        if result["conflicts"]:
+            conflict_count = len(result["conflicts"])
+            messages.warning(
+                self.request,
+                ngettext(
+                    "{count} lesson with conflicts detected.",
+                    "{count} lessons with conflicts detected.",
+                    conflict_count,
+                ).format(count=conflict_count),
+            )
+
+        return response
+
+    def get_success_url(self):
+        return get_last_calendar_url(self.request)
 
 
 class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
