@@ -15,33 +15,55 @@ class Contract(models.Model):
         Student,
         on_delete=models.CASCADE,
         related_name="contracts",
+        verbose_name=_("student"),
         help_text=_("Student for whom the contract applies"),
     )
     institute = models.CharField(
-        max_length=200, blank=True, null=True, help_text=_("Institute name (if applicable)")
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name=_("institute"),
+        help_text=_("Institute name (if applicable)"),
     )
     hourly_rate = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
+        verbose_name=_("hourly rate"),
         help_text=_("Rate per unit in EUR"),
     )
     unit_duration_minutes = models.PositiveIntegerField(
-        default=60, help_text=_("Duration of one unit in minutes")
+        default=60,
+        verbose_name=_("unit duration (minutes)"),
+        help_text=_("Duration of one unit in minutes"),
     )
-    start_date = models.DateField(help_text=_("Contract start date"))
+    start_date = models.DateField(
+        verbose_name=_("start date"),
+        help_text=_("Contract start date"),
+    )
     end_date = models.DateField(
-        null=True, blank=True, help_text=_("Contract end date (optional, empty = unlimited)")
+        null=True,
+        blank=True,
+        verbose_name=_("end date"),
+        help_text=_("Contract end date (optional, empty = unlimited)"),
     )
-    is_active = models.BooleanField(default=True, help_text=_("Is the contract active?"))
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("active"),
+        help_text=_("Is the contract active?"),
+    )
     has_monthly_planning_limit = models.BooleanField(
         default=True,
+        verbose_name=_("monthly planning limit"),
         help_text=_(
             "If checked, monthly planning with planned units is required. If unchecked, no maximum number of units is planned."
         ),
     )
     notes = models.TextField(
-        blank=True, null=True, help_text=_("Additional notes about the contract")
+        blank=True,
+        null=True,
+        verbose_name=_("notes"),
+        help_text=_("Additional notes about the contract"),
     )
     booking_token = models.CharField(
         max_length=64,

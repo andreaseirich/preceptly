@@ -12,22 +12,36 @@ class Student(models.Model):
         related_name="students",
         help_text=_("Tutor who owns this student data"),
     )
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    school = models.CharField(max_length=200, blank=True, null=True, help_text=_("School name"))
+    first_name = models.CharField(max_length=100, verbose_name=_("first name"))
+    last_name = models.CharField(max_length=100, verbose_name=_("last name"))
+    email = models.EmailField(blank=True, null=True, verbose_name=_("email"))
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("phone"))
+    school = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name=_("school"),
+        help_text=_("School name"),
+    )
     grade = models.CharField(
-        max_length=50, blank=True, null=True, help_text=_("Grade/Level (e.g., '10th grade', 'Q1')")
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name=_("grade"),
+        help_text=_("Grade/Level (e.g., '10th grade', 'Q1')"),
     )
     subjects = models.CharField(
         max_length=500,
         blank=True,
         null=True,
+        verbose_name=_("subjects"),
         help_text=_("Subjects (comma-separated, e.g., 'Math, German, English')"),
     )
     notes = models.TextField(
-        blank=True, null=True, help_text=_("Additional notes about the student")
+        blank=True,
+        null=True,
+        verbose_name=_("notes"),
+        help_text=_("Additional notes about the student"),
     )
     booking_code_hash = models.CharField(
         max_length=64,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-22 14:52+0200\n"
+"POT-Creation-Date: 2026-04-25 09:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,17 +40,11 @@ msgstr "Unerwarteter Fehler: Maximale Wiederholungen überschritten ohne Fehler"
 #: apps/ai/client.py:132
 #, python-brace-format
 msgid "Mock mode is active, but no mock samples are available (key: {key})."
-msgstr ""
-"Mock-Modus ist aktiv, aber es sind keine Mock-Daten verfügbar (Schlüssel: "
-"{key}).Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar (Schlüssel: "
-"{key})."
+msgstr "Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar (Schlüssel: {key})."
 
 #: apps/ai/client.py:157
 msgid "Mock mode is disabled. Call generate_text() with real prompts instead."
-msgstr ""
-"Mock-Modus ist deaktiviert. Bitte generate_text() mit echten Prompts "
-"aufrufen.Mock-Modus ist deaktiviert. Rufen Sie generate_text() stattdessen "
-"mit echten Prompts auf."
+msgstr "Mock-Modus ist deaktiviert. Rufen Sie generate_text() stattdessen mit echten Prompts auf."
 
 #: apps/ai/client.py:167
 msgid "Mock mode is active, but no mock samples are available."
@@ -58,9 +52,7 @@ msgstr "Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar."
 
 #: apps/ai/client.py:250 apps/ai/client.py:308
 msgid "API rate limit exceeded. Please try again in a few minutes."
-msgstr ""
-"API-Ratenlimit überschritten. Bitte in einigen Minuten erneut versuchen.API-"
-"Rate-Limit überschritten. Bitte versuchen Sie es in ein paar Minuten erneut."
+msgstr "API-Rate-Limit überschritten. Bitte versuchen Sie es in ein paar Minuten erneut."
 
 #: apps/ai/client.py:252
 #, python-brace-format
@@ -69,10 +61,7 @@ msgstr "API-Rate-Limit überschritten: {details}"
 
 #: apps/ai/client.py:258
 msgid "Invalid API key. Please check your LLM_API_KEY configuration."
-msgstr ""
-"Ungültiger API-Schlüssel. Bitte die LLM_API_KEY-Konfiguration prüfen."
-"Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihre LLM_API_KEY-"
-"Konfiguration."
+msgstr "Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihre LLM_API_KEY-Konfiguration."
 
 #: apps/ai/client.py:260
 #, python-brace-format
@@ -156,7 +145,7 @@ msgstr ""
 
 #: apps/billing/admin.py:43 apps/billing/admin.py:56
 #: apps/billing/templates/billing/invoice_detail.html:39
-#: apps/contracts/admin.py:54 apps/contracts/models.py:65
+#: apps/contracts/admin.py:54 apps/contracts/models.py:83
 #: apps/lessons/admin.py:30 apps/lessons/admin.py:85
 #: apps/lessons/recurring_forms.py:42
 #: apps/lessons/templates/lessons/email_booking_notification.html:18
@@ -237,7 +226,7 @@ msgstr "Posten"
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:23
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:17
 #: apps/lessons/templates/lessons/recurringlesson_list.html:16
-#: apps/students/models.py:44
+#: apps/students/models.py:53
 msgid "Student"
 msgstr "Schüler"
 
@@ -394,9 +383,7 @@ msgstr "Rechnungsposten"
 #: apps/billing/services.py:88
 #: apps/billing/templates/billing/invoice_create.html:100
 msgid "No billable lessons found in the specified period."
-msgstr ""
-"Keine abrechenbaren Stunden im angegebenen Zeitraum gefunden.Keine "
-"abrechenbaren Unterrichtsstunden im angegebenen Zeitraum gefunden."
+msgstr "Keine abrechenbaren Unterrichtsstunden im angegebenen Zeitraum gefunden."
 
 #: apps/billing/services.py:151
 #, python-brace-format
@@ -527,9 +514,7 @@ msgstr "Zugehöriger Vertrag (optional)"
 
 #: apps/billing/templates/billing/invoice_create.html:44
 msgid "If selected, only lessons from this contract will be billed."
-msgstr ""
-"Wenn ausgewählt, werden nur Stunden aus diesem Vertrag abgerechnet.Wenn "
-"ausgewählt, werden nur Unterrichtsstunden aus diesem Vertrag abgerechnet."
+msgstr "Wenn ausgewählt, werden nur Unterrichtsstunden aus diesem Vertrag abgerechnet."
 
 #: apps/billing/templates/billing/invoice_create.html:47
 msgid "Show Preview"
@@ -592,9 +577,7 @@ msgstr[1] "Verfügbare Unterrichtsstunden (%(counter)s)"
 
 #: apps/billing/templates/billing/invoice_create.html:70
 msgid "These lessons will be automatically included in the invoice:"
-msgstr ""
-"Diese Stunden werden automatisch in die Rechnung aufgenommen:Diese "
-"Unterrichtsstunden werden automatisch in die Rechnung aufgenommen:"
+msgstr "Diese Unterrichtsstunden werden automatisch in die Rechnung aufgenommen:"
 
 #: apps/billing/templates/billing/invoice_create.html:75
 #: apps/billing/templates/billing/invoice_detail.html:51
@@ -667,9 +650,7 @@ msgstr "Es gibt Unterrichtsstunden mit Status 'unterrichtet' im Zeitraum"
 
 #: apps/billing/templates/billing/invoice_create.html:105
 msgid "These lessons are not already included in another invoice"
-msgstr ""
-"Diese Stunden sind noch in keiner anderen Rechnung enthaltenDiese "
-"Unterrichtsstunden sind nicht bereits in einer anderen Rechnung enthalten"
+msgstr "Diese Unterrichtsstunden sind nicht bereits in einer anderen Rechnung enthalten"
 
 #: apps/billing/templates/billing/invoice_create.html:113
 msgid "Create Invoice"
@@ -1142,10 +1123,7 @@ msgstr "Ist dies eine wiederkehrende Blockzeit?"
 
 #: apps/blocked_times/models.py:33
 msgid "Recurrence pattern (e.g., 'weekly', 'daily') - for future extension"
-msgstr ""
-"Wiederholungsmuster (z. B. 'weekly', 'daily') – für zukünftige "
-"ErweiterungWiederholungsmuster (z.B. 'wöchentlich', 'täglich') - für "
-"zukünftige Erweiterung"
+msgstr "Wiederholungsmuster (z. B. 'weekly', 'daily') – für zukünftige Erweiterung"
 
 #: apps/blocked_times/models.py:40
 msgid "Blocked Time"
@@ -1830,34 +1808,76 @@ msgid "End date must not be before start date."
 msgstr "Das Enddatum darf nicht vor dem Startdatum liegen."
 
 #: apps/contracts/models.py:18
+#, fuzzy
+#| msgid "Student"
+msgid "student"
+msgstr "Schüler"
+
+#: apps/contracts/models.py:19
 msgid "Student for whom the contract applies"
 msgstr "Schüler, für den der Vertrag gilt"
 
-#: apps/contracts/models.py:21
+#: apps/contracts/models.py:23
+#, fuzzy
+#| msgid "Institute"
+msgid "institute"
+msgstr "Institut"
+
+#: apps/contracts/models.py:24
 msgid "Institute name (if applicable)"
 msgstr "Name des Instituts (falls zutreffend)"
 
-#: apps/contracts/models.py:27
+#: apps/contracts/models.py:30
+#| msgid "hours taught"
+msgid "hourly rate"
+msgstr "Stundensatz"
+
+#: apps/contracts/models.py:31
 msgid "Rate per unit in EUR"
 msgstr "Satz pro Einheit in EUR"
 
-#: apps/contracts/models.py:30
+#: apps/contracts/models.py:35
+#| msgid "Duration (minutes)"
+msgid "unit duration (minutes)"
+msgstr "Einheitsdauer (Minuten)"
+
+#: apps/contracts/models.py:36
 msgid "Duration of one unit in minutes"
 msgstr "Dauer einer Einheit in Minuten"
 
-#: apps/contracts/models.py:32
+#: apps/contracts/models.py:39
+#| msgid "New start date:"
+msgid "start date"
+msgstr "Startdatum"
+
+#: apps/contracts/models.py:40
 msgid "Contract start date"
 msgstr "Vertragsstartdatum"
 
-#: apps/contracts/models.py:34
+#: apps/contracts/models.py:44
+#| msgid "End date"
+msgid "end date"
+msgstr "Enddatum"
+
+#: apps/contracts/models.py:45
 msgid "Contract end date (optional, empty = unlimited)"
 msgstr "Vertragsendedatum (optional, leer = unbegrenzt)"
 
-#: apps/contracts/models.py:36
+#: apps/contracts/models.py:49
+#| msgid "Inactive"
+msgid "active"
+msgstr "Aktiv"
+
+#: apps/contracts/models.py:50
 msgid "Is the contract active?"
 msgstr "Ist der Vertrag aktiv?"
 
-#: apps/contracts/models.py:40
+#: apps/contracts/models.py:54
+#| msgid "Monthly Planning"
+msgid "monthly planning limit"
+msgstr "Monatliche Planung"
+
+#: apps/contracts/models.py:56
 msgid ""
 "If checked, monthly planning with planned units is required. If unchecked, "
 "no maximum number of units is planned."
@@ -1866,16 +1886,21 @@ msgstr ""
 "erforderlich. Wenn deaktiviert, wird keine maximale Anzahl von Einheiten "
 "geplant."
 
-#: apps/contracts/models.py:44
+#: apps/contracts/models.py:61 apps/students/models.py:38
+#| msgid "Notes"
+msgid "notes"
+msgstr "Notizen"
+
+#: apps/contracts/models.py:62
 msgid "Additional notes about the contract"
 msgstr "Zusätzliche Notizen zum Vertrag"
 
-#: apps/contracts/models.py:51
+#: apps/contracts/models.py:69
 msgid "Token for external booking link (auto-generated if empty)"
 msgstr ""
 "Token für externen Buchungslink (wird automatisch generiert, wenn leer)"
 
-#: apps/contracts/models.py:57
+#: apps/contracts/models.py:75
 msgid ""
 "Working hours for booking page (format: {'monday': [{'start': '09:00', "
 "'end': '17:00'}], ...})"
@@ -1883,7 +1908,7 @@ msgstr ""
 "Arbeitszeiten für die Buchungsseite (Format: {'monday': [{'start': '09:00', "
 "'end': '17:00'}], ...})"
 
-#: apps/contracts/models.py:66
+#: apps/contracts/models.py:84
 #: apps/contracts/templates/contracts/contract_list.html:4
 #: apps/contracts/templates/contracts/contract_list.html:7
 #: apps/core/templates/core/base.html:343 apps/students/admin.py:24
@@ -1891,30 +1916,30 @@ msgstr ""
 msgid "Contracts"
 msgstr "Verträge"
 
-#: apps/contracts/models.py:95 apps/lessons/models.py:24
+#: apps/contracts/models.py:113 apps/lessons/models.py:24
 #: apps/lessons/recurring_models.py:18
 msgid "Associated contract"
 msgstr "Zugehöriger Vertrag"
 
-#: apps/contracts/models.py:97
+#: apps/contracts/models.py:115
 #: apps/contracts/templates/contracts/contract_form.html:21
 #: apps/core/templates/core/reports.html:22
 msgid "Year"
 msgstr "Jahr"
 
-#: apps/contracts/models.py:99
+#: apps/contracts/models.py:117
 msgid "Month (1-12)"
 msgstr "Monat (1-12)"
 
-#: apps/contracts/models.py:102
+#: apps/contracts/models.py:120
 msgid "Planned units for this month"
 msgstr "Geplante Einheiten für diesen Monat"
 
-#: apps/contracts/models.py:115
+#: apps/contracts/models.py:133
 msgid "Contract Monthly Plan"
 msgstr "Vertragsmonatsplan"
 
-#: apps/contracts/models.py:116
+#: apps/contracts/models.py:134
 msgid "Contract Monthly Plans"
 msgstr "Vertragsmonatspläne"
 
@@ -2050,9 +2075,7 @@ msgstr "Monatliche Planung"
 
 #: apps/contracts/templates/contracts/contract_form.html:15
 msgid "Enter the planned units for each month in the contract period."
-msgstr ""
-"Geplante Einheiten für jeden Monat im Vertragszeitraum eingeben.Geben Sie "
-"die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
+msgstr "Geben Sie die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
 
 #: apps/contracts/templates/contracts/contract_form.html:23
 msgid "Planned Units"
@@ -2103,9 +2126,7 @@ msgstr "Keine Verträge vorhanden."
 
 #: apps/contracts/views.py:114
 msgid "Contract created. Please enter the planned units per month."
-msgstr ""
-"Vertrag erstellt. Bitte die geplanten Einheiten pro Monat eingeben.Vertrag "
-"erstellt. Bitte geben Sie die geplanten Einheiten pro Monat ein."
+msgstr "Vertrag erstellt. Bitte geben Sie die geplanten Einheiten pro Monat ein."
 
 #: apps/contracts/views.py:118
 msgid "Contract successfully created."
@@ -2382,7 +2403,7 @@ msgid "Dashboard"
 msgstr "Dashboard"
 
 #: apps/core/templates/core/base.html:342
-#: apps/core/templates/core/landing.html:51 apps/students/models.py:45
+#: apps/core/templates/core/landing.html:51 apps/students/models.py:54
 #: apps/students/templates/students/student_list.html:4
 #: apps/students/templates/students/student_list.html:7
 msgid "Students"
@@ -3162,9 +3183,7 @@ msgstr ""
 
 #: apps/core/templates/core/settings.html:247
 msgid "For invoices and Stripe we recommend adding an email address."
-msgstr ""
-"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse hinzuzufügen."
-"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
+msgstr "Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
 
 #: apps/core/templates/core/settings.html:251
 msgid "Optional. Used for invoices and Stripe billing notifications."
@@ -3210,10 +3229,7 @@ msgstr "Auf Premium upgraden"
 
 #: apps/core/templates/core/settings.html:296
 msgid "Payment is not configured. Premium upgrades are currently unavailable."
-msgstr ""
-"Zahlung ist nicht konfiguriert. Premium-Upgrades sind derzeit nicht "
-"verfügbar.Zahlung ist nicht konfiguriert. Premium-Upgrades sind derzeit "
-"nicht verfügbar."
+msgstr "Zahlung ist nicht konfiguriert. Premium-Upgrades sind derzeit nicht verfügbar."
 
 #: apps/core/templates/core/settings.html:317
 msgid "Could not open billing portal."
@@ -3293,10 +3309,7 @@ msgstr "TutorSpace-Stufen-Startdatum gespeichert."
 
 #: apps/core/views_stripe.py:58
 msgid "Could not start checkout. Please try again in a moment."
-msgstr ""
-"Checkout konnte nicht gestartet werden. Bitte in einem Moment erneut "
-"versuchen.Checkout konnte nicht gestartet werden. Bitte in einem Moment "
-"erneut versuchen."
+msgstr "Checkout konnte nicht gestartet werden. Bitte in einem Moment erneut versuchen."
 
 #: apps/core/views_stripe.py:74 apps/core/views_stripe.py:139
 #: apps/core/views_stripe.py:211 apps/core/views_stripe.py:217
@@ -3306,17 +3319,11 @@ msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
 
 #: apps/core/views_stripe.py:159 apps/core/views_stripe.py:303
 msgid "Could not open billing portal. Please try again."
-msgstr ""
-"Abrechnungsportal konnte nicht geöffnet werden. Bitte erneut versuchen."
-"Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es "
-"erneut."
+msgstr "Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
 
 #: apps/core/views_stripe.py:284
 msgid "No billing customer found. Subscribe first to manage your subscription."
-msgstr ""
-"Kein Abrechnungskunde gefunden. Bitte zuerst ein Abonnement abschließen.Kein "
-"Abrechnungskunde gefunden. Bitte zuerst ein Abo abschließen, um es zu "
-"verwalten."
+msgstr "Kein Abrechnungskunde gefunden. Bitte zuerst ein Abo abschließen, um es zu verwalten."
 
 #: apps/lesson_plans/admin.py:16
 msgid "Student & Lesson"
@@ -3506,9 +3513,7 @@ msgstr ""
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:110
 msgid "Generate an AI-powered lesson plan for this lesson."
-msgstr ""
-"Einen KI-gestützten Unterrichtsplan für diese Stunde erstellen.Einen KI-"
-"gestützten Lektionsplan für diese Unterrichtsstunde generieren."
+msgstr "Einen KI-gestützten Lektionsplan für diese Unterrichtsstunde generieren."
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:117
 #: apps/lessons/templates/lessons/lesson_detail.html:176
@@ -3525,9 +3530,7 @@ msgstr "KI-Unterrichtsplan generieren"
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:127
 #: apps/lessons/templates/lessons/lesson_detail.html:186
 msgid "AI-powered lesson plan generation is only available for premium users."
-msgstr ""
-"KI-gestützte Unterrichtsplanung ist nur für Premium-Nutzer verfügbar.Die KI-"
-"gestützte Lektionsplangenerierung ist nur für Premium-Benutzer verfügbar."
+msgstr "KI-gestützte Lektionsplangenerierung ist nur für Premium-Benutzer verfügbar."
 
 #: apps/lessons/admin.py:31 apps/lessons/admin.py:86
 msgid "Schedule"
@@ -4510,10 +4513,7 @@ msgstr "Bitte vervollständigen Sie alle Schritte."
 
 #: apps/lessons/templates/lessons/public_booking.html:724
 msgid "Booking code is required. Please go back and verify again."
-msgstr ""
-"Buchungscode ist erforderlich. Bitte zurückgehen und erneut bestätigen."
-"Buchungscode erforderlich. Bitte gehen Sie zurück und verifizieren Sie "
-"erneut."
+msgstr "Buchungscode erforderlich. Bitte gehen Sie zurück und verifizieren Sie erneut."
 
 #: apps/lessons/templates/lessons/public_booking.html:737
 #: apps/lessons/templates/lessons/student_booking.html:391
@@ -4539,10 +4539,7 @@ msgstr "Woche konnte nicht geladen werden. Bitte erneut versuchen."
 
 #: apps/lessons/templates/lessons/public_booking.html:849
 msgid "Could not load week. Please check your connection and try again."
-msgstr ""
-"Woche konnte nicht geladen werden. Bitte Verbindung prüfen und erneut "
-"versuchen.Woche konnte nicht geladen werden. Bitte Verbindung prüfen und "
-"erneut versuchen."
+msgstr "Woche konnte nicht geladen werden. Bitte Verbindung prüfen und erneut versuchen."
 
 #: apps/lessons/templates/lessons/public_booking.html:866
 msgid "Reschedule: select a new time slot below."
@@ -5137,9 +5134,7 @@ msgstr "Umbuchung nicht möglich. Bitte versuchen Sie es erneut."
 
 #: apps/lessons/views_public_booking.py:707
 msgid "Rescheduling entire series requires Premium. Upgrade to access."
-msgstr ""
-"Das Verschieben der gesamten Serie erfordert Premium. Upgrade erforderlich."
-"Umbuchung der gesamten Serie erfordert Premium. Upgrade für vollen Zugang."
+msgstr "Umbuchung der gesamten Serie erfordert Premium. Upgrade für vollen Zugang."
 
 #: apps/lessons/views_public_booking.py:717
 msgid "Rescheduling requires Premium. Upgrade to access."
@@ -5173,23 +5168,58 @@ msgstr "Schulinformationen"
 msgid "Tutor who owns this student data"
 msgstr "Tutor, dem diese Schülerdaten gehören"
 
-#: apps/students/models.py:19
+#: apps/students/models.py:15
+#| msgid "First Name"
+msgid "first name"
+msgstr "Vorname"
+
+#: apps/students/models.py:16
+#| msgid "Last Name"
+msgid "last name"
+msgstr "Nachname"
+
+#: apps/students/models.py:17
+#| msgid "Email"
+msgid "email"
+msgstr "E-Mail"
+
+#: apps/students/models.py:18
+#| msgid "Phone"
+msgid "phone"
+msgstr "Telefon"
+
+#: apps/students/models.py:21
+#| msgid "School"
+msgid "school"
+msgstr "Schule"
+
+#: apps/students/models.py:22
 msgid "School name"
 msgstr "Schulname"
 
-#: apps/students/models.py:21
+#: apps/students/models.py:26
+#| msgid "Grade"
+msgid "grade"
+msgstr "Klasse/Stufe"
+
+#: apps/students/models.py:27
 msgid "Grade/Level (e.g., '10th grade', 'Q1')"
 msgstr "Klasse/Stufe (z.B. '10. Klasse', 'Q1')"
 
-#: apps/students/models.py:27
+#: apps/students/models.py:33
+#| msgid "Subjects"
+msgid "subjects"
+msgstr "Fächer"
+
+#: apps/students/models.py:34
 msgid "Subjects (comma-separated, e.g., 'Math, German, English')"
 msgstr "Fächer (kommagetrennt, z.B. 'Mathe, Deutsch, Englisch')"
 
-#: apps/students/models.py:30
+#: apps/students/models.py:39
 msgid "Additional notes about the student"
 msgstr "Zusätzliche Notizen zum Schüler"
 
-#: apps/students/models.py:37
+#: apps/students/models.py:46
 msgid "SHA-256 hash of the public booking code (never store plaintext)"
 msgstr ""
 "SHA-256-Hash des öffentlichen Buchungscodes (niemals im Klartext speichern)"
