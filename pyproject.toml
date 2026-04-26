@@ -23,6 +23,7 @@ extend-exclude = '''
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+src = ["backend"]
 exclude = [
     ".git",
     "__pycache__",
@@ -47,6 +48,9 @@ ignore = [
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
 ]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # unused imports in __init__.py are ok
