@@ -2,15 +2,16 @@
 Authentication views for login, logout, and registration.
 """
 
-from apps.core.auth_throttle import throttle_login, throttle_register
-from apps.core.forms import RegisterForm
-from apps.core.models import UserProfile
-from apps.core.utils_booking import ensure_public_booking_token
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+
+from apps.core.auth_throttle import throttle_login, throttle_register
+from apps.core.forms import RegisterForm
+from apps.core.models import UserProfile
+from apps.core.utils_booking import ensure_public_booking_token
 
 
 class TutorFlowLoginView(LoginView):

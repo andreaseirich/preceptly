@@ -19,6 +19,10 @@ Creates:
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.blocked_times.models import BlockedTime
@@ -30,9 +34,6 @@ from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.core.management.base import BaseCommand
-from django.utils import timezone
 
 
 class Command(BaseCommand):

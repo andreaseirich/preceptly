@@ -4,9 +4,10 @@ Formsets für ContractMonthlyPlan.
 
 from datetime import date
 
-from apps.contracts.models import Contract, ContractMonthlyPlan
 from django import forms
 from django.forms import inlineformset_factory
+
+from apps.contracts.models import Contract, ContractMonthlyPlan
 
 
 class ContractMonthlyPlanForm(forms.ModelForm):

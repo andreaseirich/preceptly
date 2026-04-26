@@ -5,12 +5,13 @@ Tests für Kalender-Datum-Synchronisation.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import RequestFactory, TestCase
+from django.utils import translation
+
 from apps.contracts.models import Contract
 from apps.lessons.views import CalendarView, LessonCreateView
 from apps.students.models import Student
-from django.test import RequestFactory, TestCase
-from django.utils import translation
-from django.contrib.auth.models import User
 
 
 class CalendarDateAlignmentTest(TestCase):

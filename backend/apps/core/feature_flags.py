@@ -81,8 +81,9 @@ def get_public_booking_count_this_month(tutor: User | None) -> int:
     """Count lessons created via public booking this month for the tutor."""
     if not tutor or not tutor.is_authenticated:
         return 0
-    from apps.lessons.models import Lesson
     from django.utils import timezone
+
+    from apps.lessons.models import Lesson
 
     now = timezone.now()
     return Lesson.objects.filter(

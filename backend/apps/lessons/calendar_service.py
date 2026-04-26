@@ -6,10 +6,11 @@ from collections import defaultdict
 from datetime import date, datetime
 from typing import Dict
 
+from django.utils import timezone
+
 from apps.blocked_times.models import BlockedTime
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService
-from django.utils import timezone
 
 
 class CalendarService:

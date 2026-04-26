@@ -5,14 +5,15 @@ Tests for blocked time overlap detection edge cases.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone
+
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService
 from apps.students.models import Student
-from django.test import TestCase
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class BlockedTimeOverlapTest(TestCase):

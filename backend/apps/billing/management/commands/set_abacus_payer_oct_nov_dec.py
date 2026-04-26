@@ -9,8 +9,9 @@ Usage:
 
 from datetime import date
 
-from apps.billing.models import Invoice
 from django.core.management.base import BaseCommand
+
+from apps.billing.models import Invoice
 
 
 class Command(BaseCommand):

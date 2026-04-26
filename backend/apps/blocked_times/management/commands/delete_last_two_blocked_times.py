@@ -5,8 +5,9 @@ Usage:
     python manage.py delete_last_two_blocked_times [--dry-run]
 """
 
-from apps.blocked_times.models import BlockedTime
 from django.core.management.base import BaseCommand
+
+from apps.blocked_times.models import BlockedTime
 
 
 class Command(BaseCommand):

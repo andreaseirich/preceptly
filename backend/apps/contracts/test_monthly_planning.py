@@ -5,14 +5,15 @@ Tests für ContractMonthlyPlan und monatliche Planung.
 from datetime import date
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+from django.test import TestCase
+
 from apps.contracts.formsets import generate_monthly_plans_for_contract, iter_contract_months
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.db import IntegrityError
-from django.test import TestCase
-from django.contrib.auth.models import User
 
 
 class ContractMonthlyPlanTest(TestCase):

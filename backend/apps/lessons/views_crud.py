@@ -4,6 +4,16 @@ Views for lesson CRUD operations.
 
 from datetime import datetime
 
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from django.http import HttpResponseRedirect
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
+from apps.core.feature_flags import is_premium_user
 from apps.lessons.forms import LessonForm
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
@@ -14,16 +24,7 @@ from apps.lessons.recurring_utils import (
 )
 from apps.lessons.services import LessonConflictService, recalculate_conflicts_for_affected_lessons
 from apps.lessons.status_service import LessonStatusService
-from apps.core.feature_flags import is_premium_user
 from apps.lessons.views_calendar import get_last_calendar_url
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
-from django.http import HttpResponseRedirect
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
 class LessonListView(LoginRequiredMixin, ListView):

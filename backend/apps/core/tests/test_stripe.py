@@ -6,17 +6,18 @@ import json
 from unittest.mock import MagicMock, patch
 
 import stripe
+from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
+from django.db import IntegrityError
+from django.test import TestCase, override_settings
+from django.urls import reverse
+
 from apps.core.models import StripeWebhookEvent, UserProfile
 from apps.core.stripe_utils import (
     get_email_for_stripe,
     is_premium_subscription_status,
     resolve_user_from_stripe_event,
 )
-from django.contrib.auth.models import User
-from django.contrib.messages import get_messages
-from django.db import IntegrityError
-from django.test import TestCase, override_settings
-from django.urls import reverse
 
 
 # --- stripe_utils unit tests ---

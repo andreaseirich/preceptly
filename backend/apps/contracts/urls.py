@@ -2,8 +2,9 @@
 URL-Konfiguration für Contract-App.
 """
 
-from apps.contracts import views
 from django.urls import path
+
+from apps.contracts import views
 
 app_name = "contracts"
 

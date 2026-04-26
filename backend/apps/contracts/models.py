@@ -1,11 +1,12 @@
 import secrets
 from decimal import Decimal
 
-from apps.students.models import Student
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from apps.students.models import Student
 
 
 class Contract(models.Model):

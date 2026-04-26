@@ -4,12 +4,13 @@ Tests für Kontingent-Konflikte (ContractQuotaService).
 
 from datetime import date, time
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lessons.models import Lesson
 from apps.lessons.quota_service import ContractQuotaService
 from apps.students.models import Student
-from django.test import TestCase
-from django.contrib.auth.models import User
 
 
 class ContractQuotaServiceTest(TestCase):

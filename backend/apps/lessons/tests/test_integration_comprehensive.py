@@ -6,6 +6,11 @@ Tests cover: Recurring Lesson generation, Conflict detection, Billing, Weekly Ca
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils import timezone
+
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.blocked_times.models import BlockedTime
@@ -16,10 +21,6 @@ from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.services import LessonConflictService
 from apps.lessons.week_service import WeekService
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
-from django.utils import timezone
 
 
 class RecurringLessonGenerationIntegrationTest(TestCase):
@@ -443,7 +444,9 @@ class WeeklyCalendarIntegrationTest(TestCase):
         week_data = WeekService.get_week_data(2023, 1, 4)
 
         # Should have lessons on Monday and Wednesday
-        all_lessons = [l for lessons in week_data["lessons_by_date"].values() for l in lessons]
+        all_lessons = [
+            lesson for lessons in week_data["lessons_by_date"].values() for lesson in lessons
+        ]
         monday_lessons = [lesson for lesson in all_lessons if lesson.date.weekday() == 0]
         wednesday_lessons = [lesson for lesson in all_lessons if lesson.date.weekday() == 2]
         self.assertGreater(len(monday_lessons), 0)
@@ -543,6 +546,6 @@ class WeeklyCalendarIntegrationTest(TestCase):
         # Verify week data includes the lesson
         week_data = WeekService.get_week_data(2023, 1, 31)
         lesson_dates = [
-            l.date for lessons in week_data["lessons_by_date"].values() for l in lessons
+            lesson.date for lessons in week_data["lessons_by_date"].values() for lesson in lessons
         ]
         self.assertIn(date(2023, 1, 31), lesson_dates)

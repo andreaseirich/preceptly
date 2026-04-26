@@ -7,6 +7,15 @@ import logging
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
+from django.db import transaction
+from django.http import Http404, JsonResponse
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_http_methods
+from django.views.generic import TemplateView
+
 from apps.contracts.models import Contract
 from apps.core.feature_flags import (
     PUBLIC_BOOKING_MONTHLY_LIMIT,
@@ -25,14 +34,6 @@ from apps.lessons.utils_dates import get_week_start
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
 from apps.students.models import Student
 from apps.students.services import StudentSearchService
-from django.db import transaction
-from django.http import Http404, JsonResponse
-from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django.utils.translation import gettext_lazy as _
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")

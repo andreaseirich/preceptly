@@ -2,9 +2,10 @@
 Service for invoice document generation.
 """
 
-from apps.billing.models import Invoice
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
+
+from apps.billing.models import Invoice
 
 
 class InvoiceDocumentService:

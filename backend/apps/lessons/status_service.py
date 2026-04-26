@@ -4,9 +4,10 @@ Service for automatically updating session statuses based on date/time.
 
 from datetime import datetime, timedelta
 
-from apps.lessons.models import Session
 from django.db import transaction
 from django.utils import timezone
+
+from apps.lessons.models import Session
 
 
 class SessionStatusUpdater:

@@ -5,14 +5,15 @@ Tests für verschiedene Wiederholungsmuster bei Recurring Lessons.
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone
+
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.students.models import Student
-from django.test import TestCase
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class WeeklyRecurrenceTest(TestCase):

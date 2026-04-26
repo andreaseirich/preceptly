@@ -5,6 +5,10 @@ Tests für Einnahmenberechnung und Formatierung.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils.translation import activate
+
 from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
@@ -12,9 +16,6 @@ from apps.core.selectors import IncomeSelector
 from apps.core.templatetags.currency import euro
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase
-from django.utils.translation import activate
 
 
 class IncomeCalculationTest(TestCase):

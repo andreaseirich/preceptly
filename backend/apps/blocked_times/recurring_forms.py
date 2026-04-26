@@ -2,9 +2,10 @@
 Forms für RecurringBlockedTime-Model.
 """
 
-from apps.blocked_times.recurring_models import RecurringBlockedTime
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
+from apps.blocked_times.recurring_models import RecurringBlockedTime
 
 
 class RecurringBlockedTimeForm(forms.ModelForm):

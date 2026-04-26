@@ -2,9 +2,10 @@
 Forms für RecurringLesson-Model.
 """
 
-from apps.lessons.recurring_models import RecurringLesson
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
+from apps.lessons.recurring_models import RecurringLesson
 
 
 class RecurringLessonForm(forms.ModelForm):

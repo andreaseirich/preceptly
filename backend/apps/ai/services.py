@@ -4,13 +4,14 @@ High-level service for lesson plan generation.
 
 from typing import Any, Dict, Optional
 
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+
 from apps.ai.client import LLMClient, LLMClientError
 from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_student
 from apps.ai.utils_safety import sanitize_context
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Session
-from django.conf import settings
-from django.utils.translation import gettext_lazy as _
 
 
 class LessonPlanGenerationError(Exception):

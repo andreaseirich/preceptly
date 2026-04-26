@@ -5,6 +5,9 @@ Tests for finance_metrics: canonical definitions, owner isolation, Reports/Incom
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.core.finance_metrics import (
@@ -17,8 +20,6 @@ from apps.core.finance_metrics import (
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase
 
 
 class FinanceMetricsOwnerIsolationTest(TestCase):

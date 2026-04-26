@@ -1,5 +1,6 @@
-from apps.ai.utils_safety import REDACTED, sanitize_context
 from django.test import SimpleTestCase
+
+from apps.ai.utils_safety import REDACTED, sanitize_context
 
 
 class SanitizeContextTest(SimpleTestCase):

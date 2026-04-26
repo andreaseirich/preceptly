@@ -5,16 +5,17 @@ Calendar views for lessons (Week, Month, Calendar redirect).
 from calendar import monthcalendar
 from datetime import date, timedelta
 
-from apps.lessons.calendar_service import CalendarService
-from apps.lessons.models import Lesson
-from apps.lessons.services import LessonConflictService, LessonQueryService
-from apps.lessons.status_service import LessonStatusUpdater
-from apps.lessons.week_service import WeekService
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.generic import ListView, TemplateView
+
+from apps.lessons.calendar_service import CalendarService
+from apps.lessons.models import Lesson
+from apps.lessons.services import LessonConflictService, LessonQueryService
+from apps.lessons.status_service import LessonStatusUpdater
+from apps.lessons.week_service import WeekService
 
 
 def get_last_calendar_url(request):

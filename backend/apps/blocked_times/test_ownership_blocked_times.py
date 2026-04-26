@@ -5,12 +5,13 @@ Tutor B cannot see/update/delete Tutor A's blocked times. Same for RecurringBloc
 
 from datetime import date, datetime, time, timedelta
 
-from apps.blocked_times.models import BlockedTime
-from apps.blocked_times.recurring_models import RecurringBlockedTime
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
+
+from apps.blocked_times.models import BlockedTime
+from apps.blocked_times.recurring_models import RecurringBlockedTime
 
 
 class BlockedTimeOwnershipIsolationTest(TestCase):

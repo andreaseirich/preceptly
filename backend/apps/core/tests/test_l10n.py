@@ -5,15 +5,16 @@ Tests for localization (l10n) - date, number, and currency formatting.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils.translation import activate
+
 from apps.billing.models import Invoice
 from apps.contracts.models import Contract
 from apps.core.templatetags.currency import euro
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
-from django.utils.translation import activate
 
 
 class L10nTestCase(TestCase):

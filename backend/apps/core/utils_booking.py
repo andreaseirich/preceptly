@@ -4,8 +4,9 @@ Utilities for public booking - resolve tutor from token.
 
 import secrets
 
-from apps.core.models import UserProfile
 from django.contrib.auth.models import User
+
+from apps.core.models import UserProfile
 
 
 def get_tutor_for_booking(tutor_token: str | None = None) -> User | None:

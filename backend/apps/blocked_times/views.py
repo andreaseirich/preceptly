@@ -2,12 +2,13 @@
 Views für BlockedTime-CRUD-Operationen.
 """
 
-from apps.blocked_times.forms import BlockedTimeForm
-from apps.blocked_times.models import BlockedTime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
+
+from apps.blocked_times.forms import BlockedTimeForm
+from apps.blocked_times.models import BlockedTime
 
 
 class BlockedTimeDetailView(LoginRequiredMixin, DetailView):
@@ -129,11 +130,12 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
+        from django.utils.translation import gettext_lazy as _
+        from django.utils.translation import ngettext
+
         from apps.blocked_times.recurring_models import RecurringBlockedTime
         from apps.blocked_times.recurring_service import RecurringBlockedTimeService
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
-        from django.utils.translation import gettext_lazy as _
-        from django.utils.translation import ngettext
 
         # Check if a recurring blocked time should be created
         is_recurring = form.cleaned_data.get("is_recurring", False)
@@ -298,13 +300,14 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
+        from django.utils.translation import gettext_lazy as _
+
         from apps.blocked_times.recurring_service import RecurringBlockedTimeService
         from apps.blocked_times.recurring_utils import (
             find_matching_recurring_blocked_time,
             get_all_blocked_times_for_recurring,
         )
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
-        from django.utils.translation import gettext_lazy as _
 
         # IMPORTANT: Get the original BlockedTime instance from the database,
         # before we search for RecurringBlockedTime
@@ -493,11 +496,12 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy("lessons:week")
 
     def delete(self, request, *args, **kwargs):
-        from apps.blocked_times.recurring_utils import find_matching_recurring_blocked_time
-        from apps.lessons.services import recalculate_conflicts_for_blocked_time
         from django.http import HttpResponseRedirect
         from django.utils.translation import gettext_lazy as _
         from django.utils.translation import ngettext
+
+        from apps.blocked_times.recurring_utils import find_matching_recurring_blocked_time
+        from apps.lessons.services import recalculate_conflicts_for_blocked_time
 
         blocked_time = self.get_object()
 

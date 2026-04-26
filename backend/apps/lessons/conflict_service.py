@@ -4,12 +4,13 @@ Service for conflict detection and recalculation.
 
 from datetime import datetime, timedelta
 
-from apps.blocked_times.models import BlockedTime
-from apps.lessons.models import Session
-from apps.lessons.quota_service import ContractQuotaService
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
+
+from apps.blocked_times.models import BlockedTime
+from apps.lessons.models import Session
+from apps.lessons.quota_service import ContractQuotaService
 
 
 def recalculate_conflicts_for_affected_sessions(session: Session):

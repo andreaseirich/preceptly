@@ -5,16 +5,17 @@ Tests for booking with contract unit_duration_minutes.
 import json
 from datetime import date, timedelta
 
-from apps.contracts.models import Contract
-from apps.core.models import UserProfile
-from apps.lessons.booking_service import BookingService
-from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+
+from apps.contracts.models import Contract
+from apps.core.models import UserProfile
+from apps.lessons.booking_service import BookingService
+from apps.students.booking_code_service import set_booking_code
+from apps.students.models import Student
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})

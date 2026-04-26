@@ -5,13 +5,14 @@ Tests für Dashboard-Bereiche (Today vs. Next 7 days).
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.utils import timezone
+
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonQueryService
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.utils import timezone
 
 
 class DashboardRangesTest(TestCase):

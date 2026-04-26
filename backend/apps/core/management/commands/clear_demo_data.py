@@ -3,14 +3,15 @@ Management command to clear demo data (students, lessons, contracts, invoices)
 while keeping admin users and system settings.
 """
 
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+
 from apps.billing.models import Invoice, InvoiceItem
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):

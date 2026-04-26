@@ -1,10 +1,11 @@
 from datetime import date
 from decimal import Decimal
 
-from apps.contracts.models import Contract
-from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.test import TestCase
+
+from apps.contracts.models import Contract
+from apps.students.models import Student
 
 
 class ContractModelTest(TestCase):

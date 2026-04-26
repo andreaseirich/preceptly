@@ -5,11 +5,12 @@ Tests for contract deactivation behavior.
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase
 
 
 class ContractDeactivateDeletesFutureLessonsTest(TestCase):

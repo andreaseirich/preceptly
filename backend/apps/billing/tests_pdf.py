@@ -7,14 +7,15 @@ import tempfile
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase, override_settings
+from django.urls import reverse
+
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase, override_settings
-from django.urls import reverse
 
 
 class InvoicePDFTest(TestCase):

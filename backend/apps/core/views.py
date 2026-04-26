@@ -2,6 +2,14 @@
 Views for dashboard and income overview.
 """
 
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import FormView, TemplateView
+
 from apps.core.forms import (
     TravelPolicyForm,
     TutorNoShowPayForm,
@@ -14,13 +22,6 @@ from apps.core.selectors import IncomeSelector
 from apps.core.utils_booking import ensure_public_booking_token
 from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, TemplateView
 
 LEGAL_LAST_UPDATED = "08.04.2026"
 
@@ -275,10 +276,11 @@ class SettingsView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         """Add profile, contracts, and booking links to context."""
+        from django.conf import settings
+
         from apps.contracts.models import Contract
         from apps.core.feature_flags import is_premium_user
         from apps.core.stripe_utils import _is_valid_email_for_stripe
-        from django.conf import settings
 
         context = super().get_context_data(**kwargs)
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)

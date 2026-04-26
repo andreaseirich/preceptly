@@ -6,14 +6,15 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 from typing import Dict, List, Tuple
 
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
 from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from apps.lessons.conflict_service import LessonConflictService
 from apps.lessons.models import Lesson
 from apps.lessons.travel_policy import get_synthetic_occupied_for_date
-from django.utils import timezone
-from django.utils.translation import gettext as _
 
 
 class BookingService:

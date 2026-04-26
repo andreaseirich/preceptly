@@ -4,6 +4,13 @@ Views for contract CRUD operations.
 
 from datetime import date
 
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
 from apps.contracts.forms import ContractForm
 from apps.contracts.formsets import (
     ContractMonthlyPlanFormSet,
@@ -15,12 +22,6 @@ from apps.contracts.services import (
     get_contract_current_month_summary,
     get_contract_monthly_planning_summary,
 )
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
-from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 
 class ContractListView(LoginRequiredMixin, ListView):

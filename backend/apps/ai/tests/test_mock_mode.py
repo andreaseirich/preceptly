@@ -1,7 +1,8 @@
 from unittest.mock import Mock, patch
 
-from apps.ai.client import LLMClient
 from django.test import TestCase, override_settings
+
+from apps.ai.client import LLMClient
 
 
 class MockLLMModeTest(TestCase):

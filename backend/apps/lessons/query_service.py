@@ -4,9 +4,10 @@ Service for session queries and filtering.
 
 from datetime import date, timedelta
 
-from apps.lessons.models import Session
 from django.contrib.auth.models import User
 from django.utils import timezone
+
+from apps.lessons.models import Session
 
 
 class SessionQueryService:

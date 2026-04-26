@@ -5,14 +5,15 @@ Tests for series reschedule (edit entire series) in LessonUpdateView.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+
 from apps.contracts.models import Contract
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.recurring_utils import get_all_lessons_for_recurring
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
 
 
 class SeriesRescheduleTest(TestCase):
@@ -104,8 +105,9 @@ class SeriesRescheduleTest(TestCase):
 
     def test_series_reschedule_is_atomic_on_conflict(self):
         """When a conflict would occur, no lessons are updated (atomic rollback)."""
-        from apps.blocked_times.models import BlockedTime
         from django.utils import timezone
+
+        from apps.blocked_times.models import BlockedTime
 
         all_lessons = get_all_lessons_for_recurring(self.recurring)
         lesson = all_lessons[0]

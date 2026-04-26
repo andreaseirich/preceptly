@@ -2,12 +2,6 @@
 Views für RecurringLesson-CRUD-Operationen.
 """
 
-from apps.lessons.models import Session
-from apps.lessons.recurring_forms import RecurringLessonForm
-from apps.lessons.recurring_models import RecurringLesson
-from apps.lessons.recurring_service import RecurringLessonService
-from apps.lessons.recurring_utils import get_all_sessions_for_recurring
-from apps.lessons.views_calendar import get_last_calendar_url
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -23,6 +17,13 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+
+from apps.lessons.models import Session
+from apps.lessons.recurring_forms import RecurringLessonForm
+from apps.lessons.recurring_models import RecurringLesson
+from apps.lessons.recurring_service import RecurringLessonService
+from apps.lessons.recurring_utils import get_all_sessions_for_recurring
+from apps.lessons.views_calendar import get_last_calendar_url
 
 
 class RecurringLessonListView(LoginRequiredMixin, ListView):

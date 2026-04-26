@@ -11,9 +11,10 @@ Usage:
 
 import os
 
-from apps.billing.models import Invoice
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
+from apps.billing.models import Invoice
 
 
 class Command(BaseCommand):

@@ -5,14 +5,15 @@ Tests for contract monthly planning summary with carry-over logic.
 from datetime import date
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.contracts.services import (
     get_contract_monthly_planning_summary,
 )
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase
 
 
 class ContractMonthlySummaryCarryOverTest(TestCase):

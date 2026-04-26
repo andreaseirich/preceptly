@@ -4,6 +4,11 @@ Tests for Public Booking authentication (name + code verification).
 
 import json
 
+from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.test import Client, RequestFactory, TestCase, override_settings
+from django.urls import reverse
+
 from apps.core.models import UserProfile
 from apps.lessons.throttle import (
     THROTTLE_IP_LIMIT,
@@ -12,10 +17,6 @@ from apps.lessons.throttle import (
 )
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.core.cache import cache
-from django.test import Client, RequestFactory, TestCase, override_settings
-from django.urls import reverse
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})

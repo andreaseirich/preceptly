@@ -4,8 +4,9 @@ Tests for lessons/utils_dates.py - week start and add_days.
 
 from datetime import date
 
-from apps.lessons.utils_dates import add_days_to_date, add_days_to_iso, get_week_start
 from django.test import TestCase
+
+from apps.lessons.utils_dates import add_days_to_date, add_days_to_iso, get_week_start
 
 
 class GetWeekStartTest(TestCase):

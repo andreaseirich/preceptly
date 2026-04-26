@@ -2,14 +2,15 @@
 Views for AI functions (lesson plan generation).
 """
 
-from apps.ai.services import LessonPlanGenerationError, LessonPlanService
-from apps.core.feature_flags import Feature, user_has_feature
-from apps.lessons.models import Session
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+
+from apps.ai.services import LessonPlanGenerationError, LessonPlanService
+from apps.core.feature_flags import Feature, user_has_feature
+from apps.lessons.models import Session
 
 
 @login_required

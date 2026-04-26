@@ -1,7 +1,8 @@
-from apps.lessons.models import Session
-from apps.students.models import Student
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from apps.lessons.models import Session
+from apps.students.models import Student
 
 
 class LessonPlan(models.Model):

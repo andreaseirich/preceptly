@@ -6,14 +6,15 @@ from datetime import date, time
 from decimal import Decimal
 from io import StringIO
 
+from django.contrib.auth.models import User
+from django.core.management import call_command
+from django.test import TestCase
+
 from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.core.management import call_command
-from django.test import TestCase
-from django.contrib.auth.models import User
 
 
 class ResetPaidLessonsCommandTest(TestCase):

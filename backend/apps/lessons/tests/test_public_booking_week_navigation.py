@@ -5,12 +5,13 @@ Tests for Public Booking week navigation: drift fix and week param.
 import json
 from datetime import date
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.booking_service import BookingService
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
 
 
 class PublicBookingWeekNavigationTest(TestCase):

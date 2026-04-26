@@ -2,10 +2,11 @@
 Models for recurring sessions (series appointments).
 """
 
-from apps.contracts.models import Contract
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from apps.contracts.models import Contract
 
 
 class RecurringSession(models.Model):

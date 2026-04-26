@@ -2,9 +2,10 @@
 Forms for Session model.
 """
 
-from apps.lessons.models import Session, SessionDocument
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
+from apps.lessons.models import Session, SessionDocument
 
 
 class SessionForm(forms.ModelForm):

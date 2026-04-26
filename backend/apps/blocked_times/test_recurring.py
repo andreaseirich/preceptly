@@ -4,13 +4,13 @@ Tests für RecurringBlockedTime und RecurringBlockedTimeService.
 
 from datetime import date, datetime, time, timedelta
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone, translation
+
 from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.blocked_times.recurring_service import RecurringBlockedTimeService
-from django.test import TestCase
-from django.utils import translation
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class RecurringBlockedTimeModelTest(TestCase):

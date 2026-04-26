@@ -6,13 +6,14 @@ Abgeleitete Monats-/Jahresauswertungen ohne eigenes Model.
 from datetime import date
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.db.models import Q, Sum
+
 from apps.billing.models import InvoiceItem
 from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
 from apps.contracts.models import ContractMonthlyPlan
 from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
 from apps.lessons.models import Lesson
-from django.contrib.auth.models import User
-from django.db.models import Q, Sum
 
 
 class IncomeSelector:

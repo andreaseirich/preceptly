@@ -7,12 +7,6 @@ Premium status is set ONLY via verified webhook events (source of truth).
 import logging
 
 import stripe
-from apps.core.models import StripeWebhookEvent, UserProfile
-from apps.core.stripe_utils import (
-    get_email_for_stripe,
-    is_premium_subscription_status,
-    resolve_user_from_stripe_event,
-)
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -26,6 +20,13 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
+from apps.core.models import StripeWebhookEvent, UserProfile
+from apps.core.stripe_utils import (
+    get_email_for_stripe,
+    is_premium_subscription_status,
+    resolve_user_from_stripe_event,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -5,10 +5,11 @@ Service für wiederholende Blockzeiten (Recurring Blocked Times).
 from datetime import date, datetime, timedelta
 from typing import List
 
-from apps.blocked_times.models import BlockedTime
-from apps.blocked_times.recurring_models import RecurringBlockedTime
 from django.utils import timezone
 from django.utils.translation import gettext as _
+
+from apps.blocked_times.models import BlockedTime
+from apps.blocked_times.recurring_models import RecurringBlockedTime
 
 
 class RecurringBlockedTimeService:

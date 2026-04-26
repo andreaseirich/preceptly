@@ -5,13 +5,14 @@ Tests für Formularwerte bei Rechnungsvorschau.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, RequestFactory, TestCase
+
 from apps.billing.views import InvoiceCreateView
 from apps.contracts.models import Contract
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, RequestFactory, TestCase
 
 
 class InvoicePreviewFormValuesTest(TestCase):

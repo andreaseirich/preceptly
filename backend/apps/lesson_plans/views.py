@@ -2,13 +2,14 @@
 Views for lesson plan management.
 """
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
+
 from apps.core.utils import is_premium_user
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Session
 from apps.lessons.services import SessionConflictService
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
 
 
 class LessonPlanView(LoginRequiredMixin, TemplateView):

@@ -1,10 +1,11 @@
 from functools import cached_property
 
-from apps.contracts.models import Contract
-from apps.lessons.recurring_models import RecurringSession  # noqa: F401
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from apps.contracts.models import Contract
+from apps.lessons.recurring_models import RecurringSession  # noqa: F401
 
 
 class Session(models.Model):

@@ -5,13 +5,14 @@ Tests für Kalender-Integration (Create mit Datum, Filterung).
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone
+
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.views import LessonCreateView
 from apps.students.models import Student
-from django.test import TestCase
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class CalendarIntegrationTest(TestCase):

@@ -2,11 +2,12 @@
 Forms for billing app.
 """
 
-from apps.billing.models import Invoice
-from apps.contracts.models import Contract
 from django import forms
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
+from apps.billing.models import Invoice
+from apps.contracts.models import Contract
 
 
 def _get_institute_choices_for_user(user):

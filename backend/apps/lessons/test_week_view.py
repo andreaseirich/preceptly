@@ -5,14 +5,15 @@ Tests für WeekView und WeekService.
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.utils import timezone
+
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.week_service import WeekService
 from apps.students.models import Student
-from django.test import Client, TestCase
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class WeekServiceTest(TestCase):

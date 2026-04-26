@@ -2,10 +2,11 @@
 Tests for legal pages and footer integration.
 """
 
-from apps.core.models import UserProfile
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
+
+from apps.core.models import UserProfile
 
 
 class LegalPagesTests(TestCase):

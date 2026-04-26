@@ -4,6 +4,10 @@ Reports/Stats view for tutors. Premium: full analytics. Basic: teaser.
 Uses canonical finance_metrics for all revenue and hour calculations.
 """
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
+from django.views.generic import TemplateView
+
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.core.finance_metrics import (
     breakdown_by_institute_billed,
@@ -18,9 +22,6 @@ from apps.core.finance_metrics import (
     top_students_by_recognized_revenue,
     unpaid_invoices,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils import timezone
-from django.views.generic import TemplateView
 
 
 class ReportsView(LoginRequiredMixin, TemplateView):

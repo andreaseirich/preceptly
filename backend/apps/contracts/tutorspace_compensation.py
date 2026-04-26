@@ -17,9 +17,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+
 from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME, is_tutorspace_institute
 from apps.core.models import UserProfile
-from django.contrib.auth.models import User
 
 
 @dataclass(frozen=True)

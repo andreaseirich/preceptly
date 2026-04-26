@@ -1,12 +1,13 @@
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.test import TestCase
-from django.contrib.auth.models import User
 
 
 class IncomeSelectorPlannedAmountTest(TestCase):

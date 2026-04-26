@@ -2,6 +2,8 @@
 URL-Konfiguration für Core-App (Dashboard, Einnahmen, Authentication).
 """
 
+from django.urls import path
+
 from apps.core import views
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_email_test import test_email
@@ -10,7 +12,6 @@ from apps.core.views_log_test import test_logs
 from apps.core.views_pwa import manifest_view, service_worker_view
 from apps.core.views_reports import ReportsView
 from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalView
-from django.urls import path
 
 app_name = "core"
 

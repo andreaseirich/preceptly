@@ -4,11 +4,12 @@ Service for generating invoice PDFs.
 
 from io import BytesIO
 
-from apps.billing.models import Invoice
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+from apps.billing.models import Invoice
 
 
 def generate_invoice_pdf(invoice: Invoice) -> bytes:

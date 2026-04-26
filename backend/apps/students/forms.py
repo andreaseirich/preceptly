@@ -2,8 +2,9 @@
 Forms für Student-Model.
 """
 
-from apps.students.models import Student
 from django import forms
+
+from apps.students.models import Student
 
 
 class StudentForm(forms.ModelForm):

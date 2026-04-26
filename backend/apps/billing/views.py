@@ -5,16 +5,6 @@ Views für Billing-App.
 from datetime import date
 from decimal import Decimal
 
-from apps.billing.document_service import InvoiceDocumentService
-from apps.billing.forms import InvoiceCreateForm
-from apps.billing.models import Invoice
-from apps.billing.pdf_service import generate_invoice_pdf
-from apps.billing.services import InvoiceService
-from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME, is_tutorspace_institute
-from apps.contracts.models import Contract
-from apps.core.models import UserProfile
-from apps.core.selectors import IncomeSelector
-from apps.lessons.models import Lesson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -28,6 +18,17 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
+
+from apps.billing.document_service import InvoiceDocumentService
+from apps.billing.forms import InvoiceCreateForm
+from apps.billing.models import Invoice
+from apps.billing.pdf_service import generate_invoice_pdf
+from apps.billing.services import InvoiceService
+from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME, is_tutorspace_institute
+from apps.contracts.models import Contract
+from apps.core.models import UserProfile
+from apps.core.selectors import IncomeSelector
+from apps.lessons.models import Lesson
 
 
 def _safe_date(val):

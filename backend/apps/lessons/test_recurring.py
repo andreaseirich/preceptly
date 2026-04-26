@@ -5,14 +5,15 @@ Tests für RecurringLesson und RecurringLessonService.
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.contracts.models import Contract
 from apps.lessons.calendar_service import CalendarService
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.students.models import Student
-from django.test import TestCase
-from django.contrib.auth.models import User
 
 
 class RecurringLessonModelTest(TestCase):

@@ -2,8 +2,9 @@
 URL configuration for Lesson app.
 """
 
-from apps.lessons import recurring_views, views, views_booking, views_public_booking
 from django.urls import path
+
+from apps.lessons import recurring_views, views, views_booking, views_public_booking
 
 app_name = "lessons"
 

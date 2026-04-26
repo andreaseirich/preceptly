@@ -2,6 +2,10 @@
 Tests for seed_demo_data management command.
 """
 
+from django.contrib.auth.models import User
+from django.core.management import call_command
+from django.test import TestCase
+
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.models import UserProfile
@@ -9,9 +13,6 @@ from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.core.management import call_command
-from django.test import TestCase
 
 
 class SeedDemoDataTest(TestCase):

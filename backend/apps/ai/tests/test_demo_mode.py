@@ -1,13 +1,12 @@
 import os
+from unittest import skip
 from unittest.mock import MagicMock, patch
 
-from apps.ai.services import LessonPlanService
-from apps.lessons.models import Lesson
 from django.conf import settings
 from django.test import TestCase, override_settings
 
-
-from unittest import skip
+from apps.ai.services import LessonPlanService
+from apps.lessons.models import Lesson
 
 
 @skip("Requires demo_data.json fixture not available in this environment")

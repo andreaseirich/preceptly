@@ -5,15 +5,16 @@ Tests for Premium gating on Public Booking (limit, reschedule).
 import json
 from datetime import time, timedelta
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils import timezone
+
 from apps.contracts.models import Contract
 from apps.core.feature_flags import PUBLIC_BOOKING_MONTHLY_LIMIT
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
-from django.utils import timezone
 
 
 class PublicBookingLimitTest(TestCase):

@@ -4,12 +4,13 @@ Tests for Public Booking step 1: name search with suggestions.
 
 import json
 
-from apps.core.models import UserProfile
-from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+
+from apps.core.models import UserProfile
+from apps.students.models import Student
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})

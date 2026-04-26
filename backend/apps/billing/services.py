@@ -4,14 +4,15 @@ Services für Billing-Funktionalität.
 
 from decimal import Decimal
 
+from django.db import transaction
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
 from apps.billing.models import Invoice, InvoiceItem
 from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
 from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
-from django.db import transaction
-from django.utils import timezone
-from django.utils.translation import gettext as _
 
 
 class InvoiceService:

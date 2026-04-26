@@ -6,11 +6,12 @@ Tutor B cannot see/update/delete Tutor A's contracts. Form student dropdown only
 from datetime import date
 from decimal import Decimal
 
-from apps.contracts.models import Contract
-from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
+
+from apps.contracts.models import Contract
+from apps.students.models import Student
 
 
 class ContractOwnershipIsolationTest(TestCase):

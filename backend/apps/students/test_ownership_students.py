@@ -3,10 +3,11 @@ Ownership/tenant isolation tests for Students.
 Tutor B must never see or modify Tutor A's students. Cross-user access => 404.
 """
 
-from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
+
+from apps.students.models import Student
 
 
 class StudentOwnershipIsolationTest(TestCase):

@@ -17,10 +17,11 @@ from datetime import date
 from decimal import Decimal
 from enum import StrEnum
 
-from apps.billing.models import Invoice, InvoiceItem
-from apps.lessons.models import Lesson
 from django.contrib.auth.models import User
 from django.db.models import Sum
+
+from apps.billing.models import Invoice, InvoiceItem
+from apps.lessons.models import Lesson
 
 
 class InvoiceStatus(StrEnum):

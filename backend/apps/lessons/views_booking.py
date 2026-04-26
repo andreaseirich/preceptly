@@ -5,16 +5,6 @@ Views für öffentliche Schüler-Buchungsseite.
 import json
 from datetime import date, datetime
 
-from apps.contracts.models import Contract
-from apps.lessons.booking_service import BookingService
-from apps.lessons.email_service import send_booking_notification
-from apps.lessons.models import Lesson
-from apps.lessons.recurring_models import RecurringLesson
-from apps.lessons.recurring_service import RecurringLessonService
-from apps.lessons.recurring_utils import (
-    find_matching_recurring_session,
-    get_all_sessions_for_recurring,
-)
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
@@ -25,6 +15,17 @@ from django.utils.translation import ngettext
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
+
+from apps.contracts.models import Contract
+from apps.lessons.booking_service import BookingService
+from apps.lessons.email_service import send_booking_notification
+from apps.lessons.models import Lesson
+from apps.lessons.recurring_models import RecurringLesson
+from apps.lessons.recurring_service import RecurringLessonService
+from apps.lessons.recurring_utils import (
+    find_matching_recurring_session,
+    get_all_sessions_for_recurring,
+)
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")

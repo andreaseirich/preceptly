@@ -7,14 +7,15 @@ Verify/book/reschedule must fail when tutor_token does not match session or reso
 import json
 from datetime import date, time
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.booking_code_service import set_booking_code
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
 
 
 class PublicBookingTutorTokenIsolationTest(TestCase):

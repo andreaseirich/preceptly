@@ -6,13 +6,14 @@ from datetime import date, time
 from decimal import Decimal
 from unittest.mock import patch
 
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase, override_settings
+
 from apps.contracts.models import Contract
 from apps.lessons.email_service import send_booking_notification
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.test import TestCase, override_settings
 
 
 class SendBookingNotificationTest(TestCase):

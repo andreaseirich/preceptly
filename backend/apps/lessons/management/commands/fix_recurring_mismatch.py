@@ -9,8 +9,9 @@ Usage:
 
 from collections import Counter
 
-from apps.lessons.recurring_models import RecurringSession
 from django.core.management.base import BaseCommand
+
+from apps.lessons.recurring_models import RecurringSession
 
 
 class Command(BaseCommand):

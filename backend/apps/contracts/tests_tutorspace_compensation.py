@@ -1,6 +1,9 @@
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+
 from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
 from apps.contracts.models import Contract
 from apps.contracts.tutorspace_compensation import (
@@ -11,8 +14,6 @@ from apps.contracts.tutorspace_compensation import (
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase
 
 
 class TutorSpaceCompensationTierTest(TestCase):

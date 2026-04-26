@@ -7,6 +7,11 @@ Tests for time-dependent travel policy (Vor-Ort: ÖPNV buffer + no-go windows).
 import json
 from datetime import date, time, timedelta
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils import timezone
+
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.booking_service import BookingService
@@ -16,10 +21,6 @@ from apps.lessons.travel_policy import (
 )
 from apps.students.booking_code_service import set_booking_code
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
-from django.utils import timezone
 
 
 def _next_monday() -> date:

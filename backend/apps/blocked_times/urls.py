@@ -2,8 +2,9 @@
 URL-Konfiguration für BlockedTime-App.
 """
 
-from apps.blocked_times import recurring_views, views
 from django.urls import path
+
+from apps.blocked_times import recurring_views, views
 
 app_name = "blocked_times"
 

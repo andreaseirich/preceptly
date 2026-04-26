@@ -6,13 +6,14 @@ import re
 from datetime import date, time
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+
 from apps.billing.forms import InvoiceCreateForm, _get_institute_choices_for_user
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
 
 
 class InstituteFilterTest(TestCase):

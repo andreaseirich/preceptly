@@ -1,10 +1,10 @@
-from apps.lessons.models import Lesson
-from apps.students.models import Student
+from unittest import skip
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-
-from unittest import skip
+from apps.lessons.models import Lesson
+from apps.students.models import Student
 
 
 @skip("Requires demo_data.json fixture not available")

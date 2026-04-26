@@ -2,9 +2,10 @@
 Forms für BlockedTime-Model.
 """
 
-from apps.blocked_times.models import BlockedTime
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
+from apps.blocked_times.models import BlockedTime
 
 
 class BlockedTimeForm(forms.ModelForm):

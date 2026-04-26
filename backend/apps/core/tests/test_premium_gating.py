@@ -4,6 +4,10 @@ Tests for Premium feature gating and Reports page.
 
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.urls import reverse
+
 from apps.contracts.models import Contract
 from apps.core.feature_flags import (
     PUBLIC_BOOKING_MONTHLY_LIMIT,
@@ -14,9 +18,6 @@ from apps.core.feature_flags import (
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.models import Student
-from django.contrib.auth.models import User
-from django.test import TestCase
-from django.urls import reverse
 
 
 class FeatureFlagsTest(TestCase):

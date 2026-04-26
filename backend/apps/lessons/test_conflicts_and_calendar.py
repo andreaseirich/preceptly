@@ -5,14 +5,15 @@ Tests für Konflikt-Details und Kalender mit vergangenen Lessons.
 from datetime import date, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth.models import User
+from django.test import Client, RequestFactory, TestCase
+from django.utils import timezone
+
 from apps.contracts.models import Contract
 from apps.lessons.calendar_service import CalendarService
 from apps.lessons.models import Lesson
 from apps.lessons.views import CalendarView
 from apps.students.models import Student
-from django.test import Client, RequestFactory, TestCase
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class ConflictDetailTest(TestCase):
