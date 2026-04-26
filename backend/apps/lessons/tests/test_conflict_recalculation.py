@@ -24,7 +24,11 @@ class ConflictRecalculationTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("30.00"),
@@ -106,6 +110,7 @@ class ConflictRecalculationTest(TestCase):
 
         # Create overlapping blocked time
         blocked_time = BlockedTime.objects.create(
+            user=self.user,
             title="Test Block",
             start_datetime=timezone.make_aware(datetime(2023, 1, 15, 14, 30)),
             end_datetime=timezone.make_aware(datetime(2023, 1, 15, 15, 30)),

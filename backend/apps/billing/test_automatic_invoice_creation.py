@@ -11,14 +11,16 @@ from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.students.models import Student
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 
 class AutomaticInvoiceCreationTest(TestCase):
     """Tests für automatische Rechnungserstellung."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -96,7 +98,7 @@ class AutomaticInvoiceCreationTest(TestCase):
             )
 
         # Prüfe, dass die Fehlermeldung korrekt ist
-        self.assertIn("Keine abrechenbaren Unterrichtsstunden", str(context.exception))
+        self.assertIn("No billable lessons found", str(context.exception))
 
         # Prüfe, dass Lesson immer noch nur in erster Rechnung ist
         self.assertEqual(InvoiceItem.objects.filter(lesson=lesson).count(), 1)

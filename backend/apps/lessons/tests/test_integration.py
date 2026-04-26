@@ -29,7 +29,11 @@ class RecurringLessonIntegrationTest(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -54,13 +58,13 @@ class RecurringLessonIntegrationTest(TestCase):
         # Generate lessons
         result = RecurringLessonService.generate_lessons(recurring, check_conflicts=False)
 
-        # Should generate 4 lessons (4 Mondays in January 2023)
-        self.assertEqual(result["created"], 4)
+        # Should generate 5 lessons (5 Mondays in January 2023: Jan 2,9,16,23,30)
+        self.assertEqual(result["created"], 5)
         self.assertEqual(result["skipped"], 0)
 
         # Verify lessons were created
         lessons = Lesson.objects.filter(contract=self.contract)
-        self.assertEqual(lessons.count(), 4)
+        self.assertEqual(lessons.count(), 5)
 
         # Verify all lessons are on Mondays
         for lesson in lessons:
@@ -96,16 +100,21 @@ class RecurringLessonIntegrationTest(TestCase):
 
         # Should skip the existing lesson
         self.assertEqual(result["skipped"], 1)
-        # Should create 3 new lessons (4 Mondays - 1 existing)
-        self.assertEqual(result["created"], 3)
+        # Should create 4 new lessons (5 Mondays - 1 existing)
+        self.assertEqual(result["created"], 4)
 
 
 class ConflictDetectionIntegrationTest(TestCase):
     """Integration tests for conflict detection."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Set up test data."""
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -145,6 +154,7 @@ class ConflictDetectionIntegrationTest(TestCase):
         """Test that lessons overlapping with blocked times are detected."""
         # Create blocked time: 14:00-15:00
         blocked_time = BlockedTime.objects.create(
+            user=self.user,
             title="University Lecture",
             start_datetime=timezone.make_aware(
                 timezone.datetime.combine(date(2023, 1, 2), time(14, 0))
@@ -181,7 +191,11 @@ class BillingIntegrationTest(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("30.00"),
@@ -267,7 +281,11 @@ class WeeklyCalendarIntegrationTest(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -303,6 +321,8 @@ class WeeklyCalendarIntegrationTest(TestCase):
                 "date": "2023-01-04",
                 "start_time": "14:00",
                 "duration_minutes": 60,
+                "travel_time_before_minutes": 0,
+                "travel_time_after_minutes": 0,
             },
             follow=True,
         )

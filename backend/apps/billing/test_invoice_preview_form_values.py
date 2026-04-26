@@ -18,10 +18,12 @@ class InvoicePreviewFormValuesTest(TestCase):
     """Tests für Erhaltung der Formularwerte bei Vorschau."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.client = Client()
+        self.client.force_login(self.user)
         self.factory = RequestFactory()
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -44,6 +46,7 @@ class InvoicePreviewFormValuesTest(TestCase):
             },
         )
 
+        request.user = self.user
         view = InvoiceCreateView()
         view.request = request
         view.setup(request)
@@ -93,6 +96,7 @@ class InvoicePreviewFormValuesTest(TestCase):
             "/billing/create/", {"period_start": "2025-08-01", "period_end": "2025-08-31"}
         )
 
+        request.user = self.user
         view = InvoiceCreateView()
         view.request = request
         view.setup(request)
@@ -111,6 +115,7 @@ class InvoicePreviewFormValuesTest(TestCase):
             "/billing/create/", {"period_start": "invalid-date", "period_end": "2025-08-31"}
         )
 
+        request.user = self.user
         view = InvoiceCreateView()
         view.request = request
         view.setup(request)

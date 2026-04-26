@@ -12,15 +12,25 @@ from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.students.models import Student
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class LessonConflictServiceTest(TestCase):
     """Tests für Konfliktprüfung."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Set up test data."""
-        self.student1 = Student.objects.create(first_name="Max", last_name="Mustermann")
-        self.student2 = Student.objects.create(first_name="Anna", last_name="Schmidt")
+        self.student1 = Student.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+        )
+        self.student2 = Student.objects.create(
+            user=self.user,
+            first_name="Anna",
+            last_name="Schmidt",
+        )
         self.contract1 = Contract.objects.create(
             student=self.student1, hourly_rate=Decimal("25.00"), start_date=date.today()
         )
@@ -88,6 +98,7 @@ class LessonConflictServiceTest(TestCase):
 
         # Blockzeit, die mit Lesson überlappt
         BlockedTime.objects.create(
+            user=self.user,
             title="Uni-Vorlesung",
             start_datetime=timezone.make_aware(datetime.combine(date.today(), time(14, 30))),
             end_datetime=timezone.make_aware(datetime.combine(date.today(), time(16, 0))),
@@ -121,8 +132,13 @@ class LessonQueryServiceTest(TestCase):
     """Tests für Lesson-Abfragen."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Set up test data."""
-        self.student = Student.objects.create(first_name="Max", last_name="Mustermann")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+        )
         self.contract = Contract.objects.create(
             student=self.student, hourly_rate=Decimal("25.00"), start_date=date(2025, 12, 1)
         )

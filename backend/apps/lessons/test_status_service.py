@@ -11,14 +11,16 @@ from apps.lessons.status_service import LessonStatusUpdater
 from apps.students.models import Student
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class LessonStatusUpdaterTest(TestCase):
     """Tests für LessonStatusService."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -178,8 +180,8 @@ class LessonStatusUpdaterTest(TestCase):
             status="planned",
         )
 
-        # Setze now auf 2 Stunden in der Zukunft
-        future_now = now + timedelta(hours=2)
+        # Setze now auf 2 Stunden + 1 Sekunde in der Zukunft (Lesson endet exakt um now+2h)
+        future_now = now + timedelta(hours=2, seconds=1)
 
         updated_count = LessonStatusUpdater.update_past_lessons_to_taught(now=future_now)
 

@@ -76,22 +76,23 @@ class BookingUnitDurationTest(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_duration_must_match_contract(self):
-        """Duration must equal active contract unit_duration."""
+        """Duration must equal active contract unit_duration (60 min)."""
         self._verify()
-        self.contract_60.is_active = False
-        self.contract_60.save()
+        self.contract_45.is_active = False
+        self.contract_45.save()
 
         future = timezone.now().date() + timedelta(days=7)
         while future.weekday() != 0:
             future += timedelta(days=1)
 
+        # 60-min booking matches contract_60 (unit_duration=60) -> success
         payload = {
             "student_id": self.student.id,
             "booking_code": self.booking_code,
             "tutor_token": "tok-x",
             "date": future.strftime("%Y-%m-%d"),
             "start_time": "10:00",
-            "end_time": "10:45",
+            "end_time": "11:00",
             "subject": "",
             "notes": "",
             "institute": "",
@@ -104,8 +105,9 @@ class BookingUnitDurationTest(TestCase):
         )
         self.assertEqual(resp.status_code, 200, resp.content)
 
+        # 30-min booking doesn't match contract_60 (needs 60 min) -> error
         payload["start_time"] = "14:00"
-        payload["end_time"] = "15:00"
+        payload["end_time"] = "14:30"
         resp2 = self.client.post(
             reverse("lessons:public_booking_book_lesson"),
             data=json.dumps(payload),

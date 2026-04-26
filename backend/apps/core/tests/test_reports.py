@@ -39,9 +39,11 @@ class ReportsPremiumGatingTest(TestCase):
             duration_minutes=60,
             status="taught",
         )
-        InvoiceService.create_invoice_from_lessons(
+        inv = InvoiceService.create_invoice_from_lessons(
             date(2025, 3, 1), date(2025, 3, 31), contract=self.contract, user=self.premium
         )
+        inv.status = "paid"
+        inv.save()
 
     def test_basic_sees_teaser_no_premium_sections(self):
         """Basic user sees teaser; no revenue_last_6, hours_last_6, breakdown_by_institute."""
@@ -57,7 +59,7 @@ class ReportsPremiumGatingTest(TestCase):
     def test_premium_sees_full_sections(self):
         """Premium user sees full reports with computed sections."""
         self.client.login(username="premium", password="test")
-        response = self.client.get(reverse("core:reports"))
+        response = self.client.get(reverse("core:reports") + "?year=2025&month=3")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Revenue (paid invoices, last 6 months)")
         self.assertContains(response, "Hours taught (last 6 months)")
@@ -106,14 +108,18 @@ class ReportsMultiUserIsolationTest(TestCase):
         self.inv_a = InvoiceService.create_invoice_from_lessons(
             date(2025, 3, 1), date(2025, 3, 31), contract=contract_a, user=self.user_a
         )
+        self.inv_a.status = "paid"
+        self.inv_a.save()
         self.inv_b = InvoiceService.create_invoice_from_lessons(
             date(2025, 3, 1), date(2025, 3, 31), contract=contract_b, user=self.user_b
         )
+        self.inv_b.status = "paid"
+        self.inv_b.save()
 
     def test_user_a_sees_only_own_student_in_reports(self):
         """User A's reports contain only A's student, not B's."""
         self.client.login(username="a", password="test")
-        response = self.client.get(reverse("core:reports"))
+        response = self.client.get(reverse("core:reports") + "?year=2025&month=3")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "A X")
         self.assertNotContains(response, "B Y")
@@ -121,7 +127,7 @@ class ReportsMultiUserIsolationTest(TestCase):
     def test_user_b_sees_only_own_student_in_reports(self):
         """User B's reports contain only B's student, not A's."""
         self.client.login(username="b", password="test")
-        response = self.client.get(reverse("core:reports"))
+        response = self.client.get(reverse("core:reports") + "?year=2025&month=3")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "B Y")
         self.assertNotContains(response, "A X")

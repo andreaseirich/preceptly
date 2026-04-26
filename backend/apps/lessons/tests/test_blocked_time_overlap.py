@@ -12,13 +12,19 @@ from apps.lessons.services import LessonConflictService
 from apps.students.models import Student
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class BlockedTimeOverlapTest(TestCase):
     """Tests for blocked time overlap detection."""
 
     def setUp(self):
-        self.student = Student.objects.create(first_name="Test", last_name="Student")
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("30.00"),
@@ -39,6 +45,7 @@ class BlockedTimeOverlapTest(TestCase):
 
         # Blocked Time: "Urlaub" 15.12.2025 00:00 – 23:59
         BlockedTime.objects.create(
+            user=self.user,
             title="Urlaub",
             description="Vacation",
             start_datetime=timezone.make_aware(
@@ -65,6 +72,7 @@ class BlockedTimeOverlapTest(TestCase):
         """Test: Lesson within a multi-day blocked time → YES conflict."""
         # Blocked Time: "Urlaub" 15.12.2025 00:00 – 18.12.2025 23:59
         blocked_time = BlockedTime.objects.create(
+            user=self.user,
             title="Urlaub",
             description="Multi-day vacation",
             start_datetime=timezone.make_aware(
@@ -99,6 +107,7 @@ class BlockedTimeOverlapTest(TestCase):
         """Test: Lesson ends exactly when blocked time starts → NO conflict (boundary case)."""
         # Blocked Time: starts at 17:00
         BlockedTime.objects.create(
+            user=self.user,
             title="Meeting",
             start_datetime=timezone.make_aware(
                 timezone.datetime.combine(date(2025, 12, 17), time(17, 0))
@@ -133,6 +142,7 @@ class BlockedTimeOverlapTest(TestCase):
         """Test: Lesson partially overlaps with blocked time → YES conflict."""
         # Blocked Time: 14:00-16:00
         BlockedTime.objects.create(
+            user=self.user,
             title="Meeting",
             start_datetime=timezone.make_aware(
                 timezone.datetime.combine(date(2025, 12, 17), time(14, 0))
@@ -172,8 +182,8 @@ class BlockedTimeOverlapTest(TestCase):
         dt5 = timezone.make_aware(timezone.datetime(2025, 12, 17, 15, 0))
         dt6 = timezone.make_aware(timezone.datetime(2025, 12, 17, 16, 0))
 
-        # Overlap: dt1-dt2 overlaps with dt5-dt6
-        self.assertTrue(LessonConflictService.intervals_overlap(dt1, dt2, dt5, dt6))
+        # Adjacent: dt1-dt2 (16:00-17:00) is adjacent to dt5-dt6 (15:00-16:00) -> NO overlap
+        self.assertFalse(LessonConflictService.intervals_overlap(dt1, dt2, dt5, dt6))
 
         # No overlap: dt1-dt2 does not overlap with dt3-dt4 (boundary)
         self.assertFalse(LessonConflictService.intervals_overlap(dt1, dt2, dt3, dt4))

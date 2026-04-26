@@ -337,6 +337,8 @@ def invoice_pdf_generate(request, pk):
     try:
         pdf_bytes = generate_invoice_pdf(invoice)
         filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
+        if invoice.invoice_pdf:
+            invoice.invoice_pdf.delete(save=False)
         invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
         invoice.invoice_pdf_created_at = timezone.now()
         invoice.save(update_fields=["invoice_pdf_created_at"])
@@ -355,6 +357,8 @@ def invoice_pdf_download(request, pk):
         try:
             pdf_bytes = generate_invoice_pdf(invoice)
             filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
+            if invoice.invoice_pdf:
+                invoice.invoice_pdf.delete(save=False)
             invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
             invoice.invoice_pdf_created_at = timezone.now()
             invoice.save(update_fields=["invoice_pdf_created_at"])

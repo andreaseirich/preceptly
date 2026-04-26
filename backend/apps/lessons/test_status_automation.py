@@ -13,14 +13,16 @@ from apps.lessons.status_service import LessonStatusService
 from apps.students.models import Student
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class RecurringLessonStatusAutomationTest(TestCase):
     """Tests für automatische Status-Setzung bei Recurring Lessons."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -123,8 +125,9 @@ class ManualLessonStatusAutomationTest(TestCase):
     """Tests für automatische Status-Setzung bei manueller Lesson-Erstellung."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,

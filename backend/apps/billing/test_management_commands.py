@@ -13,14 +13,16 @@ from apps.lessons.models import Lesson
 from apps.students.models import Student
 from django.core.management import call_command
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 
 class ResetPaidLessonsCommandTest(TestCase):
     """Tests für reset_paid_lessons Management Command."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,

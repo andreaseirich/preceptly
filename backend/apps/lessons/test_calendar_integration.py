@@ -11,14 +11,16 @@ from apps.lessons.views import LessonCreateView
 from apps.students.models import Student
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class CalendarIntegrationTest(TestCase):
     """Tests für Kalender-Integration."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -45,7 +47,7 @@ class CalendarIntegrationTest(TestCase):
         view.setup(request)
 
         initial = view.get_initial()
-        self.assertEqual(initial["date"], str(future_date))
+        self.assertEqual(initial["date"], future_date)
 
     def test_calendar_redirect_after_create(self):
         """Test: Nach Lesson-Erstellung Weiterleitung zum Kalender."""
@@ -60,7 +62,18 @@ class CalendarIntegrationTest(TestCase):
             status="planned",
         )
 
+        from django.test import RequestFactory
+
+        request = RequestFactory().get("/lessons/create/")
+        request.session = {
+            "last_calendar_view": "calendar",
+            "last_calendar_year": future_date.year,
+            "last_calendar_month": future_date.month,
+        }
+        request.user = self.user
         view = LessonCreateView()
+        view.request = request
+        view.setup(request)
         view.object = lesson
 
         success_url = view.get_success_url()

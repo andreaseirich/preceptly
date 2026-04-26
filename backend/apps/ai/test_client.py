@@ -30,6 +30,7 @@ class LLMClientTest(TestCase):
         mock_response.json.return_value = {
             "choices": [{"message": {"content": "Test generierter Text"}}]
         }
+        mock_response.status_code = 200
         mock_response.raise_for_status = Mock()
         mock_post.return_value = mock_response
 
@@ -51,7 +52,7 @@ class LLMClientTest(TestCase):
         with self.assertRaises(LLMClientError) as context:
             client.generate_text("Test-Prompt")
 
-        self.assertIn("Timeout", str(context.exception))
+        self.assertIn("timeout", str(context.exception))
 
     @patch("apps.ai.client.requests.post")
     def test_generate_text_api_error(self, mock_post):
@@ -65,7 +66,7 @@ class LLMClientTest(TestCase):
         with self.assertRaises(LLMClientError) as context:
             client.generate_text("Test-Prompt")
 
-        self.assertIn("API-Fehler", str(context.exception))
+        self.assertIn("API error", str(context.exception))
 
     @override_settings(LLM_API_KEY="")
     @patch.dict("os.environ", {}, clear=True)

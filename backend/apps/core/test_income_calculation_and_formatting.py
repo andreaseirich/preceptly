@@ -14,14 +14,16 @@ from apps.lessons.models import Lesson
 from apps.students.models import Student
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.utils.translation import activate
 
 
 class IncomeCalculationTest(TestCase):
     """Tests für korrekte Einnahmenberechnung (gleiche Logik wie InvoiceService)."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         # Vertrag: 45 Min/Einheit, 12€/Einheit
         self.contract = Contract.objects.create(
@@ -217,6 +219,7 @@ class EuroFormattingTest(TestCase):
 
     def test_euro_filter_formats_correctly(self):
         """Test: Euro-Filter formatiert korrekt."""
+        activate("de")
         # Test verschiedene Werte
         self.assertEqual(euro(Decimal("90")), "90,00 €")
         self.assertEqual(euro(Decimal("544")), "544,00 €")
@@ -227,9 +230,11 @@ class EuroFormattingTest(TestCase):
 
     def test_euro_filter_handles_none(self):
         """Test: Euro-Filter behandelt None korrekt."""
+        activate("de")
         self.assertEqual(euro(None), "0,00 €")
 
     def test_euro_filter_handles_strings(self):
         """Test: Euro-Filter konvertiert Strings korrekt."""
+        activate("de")
         self.assertEqual(euro("90"), "90,00 €")
         self.assertEqual(euro("544.50"), "544,50 €")

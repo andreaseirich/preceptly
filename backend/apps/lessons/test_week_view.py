@@ -12,14 +12,20 @@ from apps.lessons.week_service import WeekService
 from apps.students.models import Student
 from django.test import Client, TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class WeekServiceTest(TestCase):
     """Tests für WeekService."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Setzt Testdaten auf."""
-        self.student = Student.objects.create(first_name="Max", last_name="Mustermann")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -72,6 +78,7 @@ class WeekServiceTest(TestCase):
     def test_get_week_data_includes_blocked_times(self):
         """Test: WeekService enthält Blockzeiten innerhalb der Woche."""
         blocked_time = BlockedTime.objects.create(
+            user=self.user,
             title="Uni-Vorlesung",
             start_datetime=timezone.make_aware(
                 timezone.datetime.combine(date(2025, 1, 15), time(10, 0))
@@ -93,9 +100,15 @@ class WeekViewTest(TestCase):
     """Tests für WeekView."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Setzt Testdaten auf."""
         self.client = Client()
-        self.student = Student.objects.create(first_name="Max", last_name="Mustermann")
+        self.client.force_login(self.user)
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -155,9 +168,15 @@ class LessonCreateViewWithStartEndTest(TestCase):
     """Tests für LessonCreateView mit start/end Parametern."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Setzt Testdaten auf."""
         self.client = Client()
-        self.student = Student.objects.create(first_name="Max", last_name="Mustermann")
+        self.client.force_login(self.user)
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+        )
         self.contract = Contract.objects.create(
             student=self.student,
             hourly_rate=Decimal("25.00"),
@@ -186,15 +205,18 @@ class LessonCreateViewWithStartEndTest(TestCase):
 class BlockedTimeCreateViewWithStartEndTest(TestCase):
     """Tests für BlockedTimeCreateView mit start/end Parametern."""
 
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser_bt", password="testpass123")
+        self.client = Client()
+        self.client.force_login(self.user)
+
     def test_blocked_time_create_view_accepts_start_end_parameters(self):
         """Test: BlockedTimeCreateView übernimmt start/end aus GET-Parametern."""
-        client = Client()
-
         # Simuliere Drag-to-Create: 15.1.2025, 10:00-12:00
         start = "2025-01-15T10:00"
         end = "2025-01-15T12:00"
 
-        response = client.get(f"/blocked-times/create/?start={start}&end={end}")
+        response = self.client.get(f"/blocked-times/create/?start={start}&end={end}")
         self.assertEqual(response.status_code, 200)
 
         # Prüfe, ob initiale Werte gesetzt sind

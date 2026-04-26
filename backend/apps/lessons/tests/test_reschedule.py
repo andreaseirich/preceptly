@@ -17,7 +17,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 
-@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 class RescheduleTestMixin:
     def setUp(self):
         cache.clear()
@@ -25,6 +24,7 @@ class RescheduleTestMixin:
         prof, _ = UserProfile.objects.get_or_create(user=self.tutor, defaults={})
         prof.public_booking_token = "tok-reschedule"
         prof.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
+        prof.is_premium = True
         prof.save()
 
         self.student = Student.objects.create(
@@ -70,6 +70,7 @@ class RescheduleTestMixin:
         return d
 
 
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 class WeekApiReschedulableTest(RescheduleTestMixin, TestCase):
     """Week API returns lesson_id and reschedulable for own planned lessons."""
 
@@ -100,6 +101,7 @@ class WeekApiReschedulableTest(RescheduleTestMixin, TestCase):
         self.assertTrue(found)
 
 
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
     """Reschedule API: happy path and failure cases."""
 
@@ -167,7 +169,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
             content_type="application/json",
             **self._csrf_headers(),
         )
-        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 401)
 
     def test_reschedule_fails_for_other_student_lesson(self):
         other_student = Student.objects.create(

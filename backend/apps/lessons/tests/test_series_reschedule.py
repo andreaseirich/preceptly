@@ -2,7 +2,6 @@
 Tests for series reschedule (edit entire series) in LessonUpdateView.
 """
 
-import re
 from datetime import date, time
 from decimal import Decimal
 
@@ -55,25 +54,18 @@ class SeriesRescheduleTest(TestCase):
         url = reverse("lessons:update", kwargs={"pk": lesson.pk})
         get_resp = self.client.get(url)
         self.assertEqual(get_resp.status_code, 200)
-        match = re.search(
-            r'name="csrfmiddlewaretoken" value="([^"]+)"',
-            get_resp.content.decode(),
-        )
-        csrf = match.group(1) if match else ""
 
-        data = [
-            ("csrfmiddlewaretoken", csrf),
-            ("contract", self.contract.id),
-            ("date", lesson.date.strftime("%Y-%m-%d")),
-            ("start_time", "14:00"),
-            ("duration_minutes", 60),
-            ("travel_time_before_minutes", 0),
-            ("travel_time_after_minutes", 0),
-            ("notes", ""),
-            ("edit_scope", "series"),
-            ("recurrence_weekdays", "0"),
-            ("recurrence_weekdays", "2"),
-        ]
+        data = {
+            "contract": self.contract.id,
+            "date": lesson.date.strftime("%Y-%m-%d"),
+            "start_time": "14:00",
+            "duration_minutes": 60,
+            "travel_time_before_minutes": 0,
+            "travel_time_after_minutes": 0,
+            "notes": "",
+            "edit_scope": "series",
+            "recurrence_weekdays": ["0", "2"],
+        }
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
 
@@ -92,24 +84,17 @@ class SeriesRescheduleTest(TestCase):
         original_other_time = other_lesson.start_time
 
         url = reverse("lessons:update", kwargs={"pk": lesson.pk})
-        get_resp = self.client.get(url)
-        match = re.search(
-            r'name="csrfmiddlewaretoken" value="([^"]+)"',
-            get_resp.content.decode(),
-        )
-        csrf = match.group(1) if match else ""
 
-        data = [
-            ("csrfmiddlewaretoken", csrf),
-            ("contract", self.contract.id),
-            ("date", lesson.date.strftime("%Y-%m-%d")),
-            ("start_time", "15:00"),
-            ("duration_minutes", 60),
-            ("travel_time_before_minutes", 0),
-            ("travel_time_after_minutes", 0),
-            ("notes", ""),
-            ("edit_scope", "single"),
-        ]
+        data = {
+            "contract": self.contract.id,
+            "date": lesson.date.strftime("%Y-%m-%d"),
+            "start_time": "15:00",
+            "duration_minutes": 60,
+            "travel_time_before_minutes": 0,
+            "travel_time_after_minutes": 0,
+            "notes": "",
+            "edit_scope": "single",
+        }
         self.client.post(url, data=data, follow=True)
 
         lesson.refresh_from_db()
@@ -135,26 +120,18 @@ class SeriesRescheduleTest(TestCase):
         )
 
         url = reverse("lessons:update", kwargs={"pk": lesson.pk})
-        get_resp = self.client.get(url)
-        match = re.search(
-            r'name="csrfmiddlewaretoken" value="([^"]+)"',
-            get_resp.content.decode(),
-        )
-        csrf = match.group(1) if match else ""
 
-        data = [
-            ("csrfmiddlewaretoken", csrf),
-            ("contract", self.contract.id),
-            ("date", lesson.date.strftime("%Y-%m-%d")),
-            ("start_time", "14:00"),
-            ("duration_minutes", 60),
-            ("travel_time_before_minutes", 0),
-            ("travel_time_after_minutes", 0),
-            ("notes", ""),
-            ("edit_scope", "series"),
-            ("recurrence_weekdays", "0"),
-            ("recurrence_weekdays", "2"),
-        ]
+        data = {
+            "contract": self.contract.id,
+            "date": lesson.date.strftime("%Y-%m-%d"),
+            "start_time": "14:00",
+            "duration_minutes": 60,
+            "travel_time_before_minutes": 0,
+            "travel_time_after_minutes": 0,
+            "notes": "",
+            "edit_scope": "series",
+            "recurrence_weekdays": ["0", "2"],
+        }
         response = self.client.post(url, data=data, follow=True)
 
         self.recurring.refresh_from_db()

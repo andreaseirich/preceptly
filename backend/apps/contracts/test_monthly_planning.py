@@ -10,15 +10,18 @@ from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
+from django.db import IntegrityError
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 
 class ContractMonthlyPlanTest(TestCase):
     """Tests für ContractMonthlyPlan Model."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -45,7 +48,7 @@ class ContractMonthlyPlanTest(TestCase):
             contract=self.contract, year=2025, month=1, planned_units=8
         )
         # Zweiter Eintrag für denselben Monat sollte fehlschlagen
-        with self.assertRaises(ValueError):
+        with self.assertRaises(IntegrityError):
             ContractMonthlyPlan.objects.create(
                 contract=self.contract, year=2025, month=1, planned_units=10
             )
@@ -55,8 +58,9 @@ class GenerateMonthlyPlansTest(TestCase):
     """Tests für generate_monthly_plans_for_contract."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Anna", last_name="Schmidt", email="anna@example.com"
+            user=self.user, first_name="Anna", last_name="Schmidt", email="anna@example.com"
         )
 
     def test_generate_plans_for_date_range(self):
@@ -120,8 +124,9 @@ class IncomeSelectorPlannedVsActualTest(TestCase):
     """Tests für IncomeSelector mit geplanten vs. tatsächlichen Einheiten."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Tom", last_name="Weber", email="tom@example.com"
+            user=self.user, first_name="Tom", last_name="Weber", email="tom@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -226,8 +231,9 @@ class MonthlyPlanningDateRangeTest(TestCase):
     """Tests für monatliche Planung unabhängig vom aktuellen Datum."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
         )
 
     def test_future_contract_all_months(self):

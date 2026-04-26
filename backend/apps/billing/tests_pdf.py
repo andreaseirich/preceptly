@@ -85,20 +85,27 @@ class InvoicePDFTest(TestCase):
 
     def test_pdf_generate_idempotent(self):
         """Generating twice does not crash; overwrites same file."""
-        self.client.login(username="tutor", password="test")
-        r1 = self.client.post(
-            reverse("billing:invoice_pdf_generate", kwargs={"pk": self.invoice.pk})
-        )
-        self.assertEqual(r1.status_code, 302)
-        self.invoice.refresh_from_db()
-        path1 = self.invoice.invoice_pdf.name if self.invoice.invoice_pdf else None
-        r2 = self.client.post(
-            reverse("billing:invoice_pdf_generate", kwargs={"pk": self.invoice.pk})
-        )
-        self.assertEqual(r2.status_code, 302)
-        self.invoice.refresh_from_db()
-        path2 = self.invoice.invoice_pdf.name if self.invoice.invoice_pdf else None
-        self.assertEqual(path1, path2)
+        import shutil
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            with self.settings(MEDIA_ROOT=tmpdir):
+                self.client.login(username="tutor", password="test")
+                r1 = self.client.post(
+                    reverse("billing:invoice_pdf_generate", kwargs={"pk": self.invoice.pk})
+                )
+                self.assertEqual(r1.status_code, 302)
+                self.invoice.refresh_from_db()
+                path1 = self.invoice.invoice_pdf.name if self.invoice.invoice_pdf else None
+                r2 = self.client.post(
+                    reverse("billing:invoice_pdf_generate", kwargs={"pk": self.invoice.pk})
+                )
+                self.assertEqual(r2.status_code, 302)
+                self.invoice.refresh_from_db()
+                path2 = self.invoice.invoice_pdf.name if self.invoice.invoice_pdf else None
+                self.assertEqual(path1, path2)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 class InvoicePDFCleanupTest(TestCase):

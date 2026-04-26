@@ -9,14 +9,20 @@ from apps.lessons.models import Lesson
 from apps.lessons.quota_service import ContractQuotaService
 from apps.students.models import Student
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 
 class ContractQuotaServiceTest(TestCase):
     """Tests für ContractQuotaService."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Setzt Testdaten auf."""
-        self.student = Student.objects.create(first_name="Max", last_name="Mustermann")
+        self.student = Student.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+        )
 
         self.contract = Contract.objects.create(
             student=self.student,

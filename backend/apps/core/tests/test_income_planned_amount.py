@@ -6,12 +6,14 @@ from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 from apps.students.models import Student
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 
 class IncomeSelectorPlannedAmountTest(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Planned", last_name="Test", email="planned@example.com"
+            user=self.user, first_name="Planned", last_name="Test", email="planned@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,

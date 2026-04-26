@@ -10,19 +10,21 @@ from apps.lessons.calendar_service import CalendarService
 from apps.lessons.models import Lesson
 from apps.lessons.views import CalendarView
 from apps.students.models import Student
-from django.test import RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class ConflictDetailTest(TestCase):
     """Tests für Konflikt-Detailansicht."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student1 = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.student2 = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
         )
         self.contract1 = Contract.objects.create(
             student=self.student1,
@@ -41,6 +43,8 @@ class ConflictDetailTest(TestCase):
             is_active=True,
         )
         self.factory = RequestFactory()
+        self.client = Client()
+        self.client.force_login(self.user)
 
     def test_conflict_detail_view_shows_conflicting_lessons(self):
         """Test: ConflictDetailView zeigt kollidierende Lessons."""
@@ -58,11 +62,7 @@ class ConflictDetailTest(TestCase):
             duration_minutes=60,
         )
 
-        # Verwende Client für echten Request
-        from django.test import Client
-
-        client = Client()
-        response = client.get(f"/lessons/{lesson1.pk}/conflicts/")
+        response = self.client.get(f"/lessons/{lesson1.pk}/conflicts/")
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("conflict_lessons", response.context)
@@ -83,11 +83,7 @@ class ConflictDetailTest(TestCase):
             duration_minutes=60,
         )
 
-        # Verwende Client für echten Request
-        from django.test import Client
-
-        client = Client()
-        response = client.get(f"/lessons/{lesson1.pk}/")
+        response = self.client.get(f"/lessons/{lesson1.pk}/")
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["has_conflicts"])
@@ -98,8 +94,9 @@ class CalendarPastLessonsTest(TestCase):
     """Tests für Kalender mit vergangenen Lessons."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Test", last_name="Student", email="test@example.com"
+            user=self.user, first_name="Test", last_name="Student", email="test@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -156,6 +153,8 @@ class CalendarPastLessonsTest(TestCase):
         )
 
         request = RequestFactory().get(f"/lessons/calendar/?year={today.year}&month={today.month}")
+        request.session = {}
+        request.user = self.user
         view = CalendarView()
         view.request = request
         view.setup(request)
@@ -166,7 +165,8 @@ class CalendarPastLessonsTest(TestCase):
         all_lessons = []
         for week in context["weeks"]:
             for day in week:
-                all_lessons.extend(day["lessons"])
+                if day is not None:
+                    all_lessons.extend(day["lessons"])
 
         lesson_ids = [lesson.id for lesson in all_lessons]
         self.assertIn(lesson.id, lesson_ids)

@@ -8,15 +8,21 @@ from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from django.test import TestCase
+from django.utils import translation
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class RecurringBlockedTimeModelTest(TestCase):
     """Tests für RecurringBlockedTime-Model."""
 
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+
     def test_get_active_weekdays(self):
         """Test: Aktive Wochentage werden korrekt zurückgegeben."""
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Uni-Vorlesung",
             start_date=date(2025, 1, 1),
             start_time=time(10, 0),
@@ -32,6 +38,7 @@ class RecurringBlockedTimeModelTest(TestCase):
     def test_get_active_weekdays_display(self):
         """Test: Lesbare Darstellung der Wochentage."""
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Uni-Vorlesung",
             start_date=date(2025, 1, 1),
             start_time=time(10, 0),
@@ -40,16 +47,21 @@ class RecurringBlockedTimeModelTest(TestCase):
             tuesday=True,
         )
 
-        display = recurring.get_active_weekdays_display()
+        with translation.override("de"):
+            display = recurring.get_active_weekdays_display()
         self.assertEqual(display, "Mo, Di")
 
 
 class RecurringBlockedTimeServiceTest(TestCase):
     """Tests für RecurringBlockedTimeService."""
 
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+
     def test_generate_weekly_blocked_times(self):
         """Test: Wöchentliche Blockzeiten werden korrekt generiert."""
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Uni-Vorlesung",
             start_date=date(2025, 1, 6),  # Montag
             end_date=date(2025, 1, 20),  # 2 Wochen später
@@ -75,6 +87,7 @@ class RecurringBlockedTimeServiceTest(TestCase):
     def test_generate_biweekly_blocked_times(self):
         """Test: Zweiwöchentliche Blockzeiten werden korrekt generiert."""
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Gemeinde",
             start_date=date(2025, 1, 6),  # Montag
             end_date=date(2025, 1, 27),  # 3 Wochen später
@@ -96,6 +109,7 @@ class RecurringBlockedTimeServiceTest(TestCase):
         """Test: Monatliche Blockzeiten werden korrekt generiert."""
         # 15.1.2025 ist ein Mittwoch (weekday=2)
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Monatliche Besprechung",
             start_date=date(2025, 1, 15),  # 15. Januar (Mittwoch)
             end_date=date(2025, 3, 15),  # 15. März
@@ -128,6 +142,7 @@ class RecurringBlockedTimeServiceTest(TestCase):
     def test_preview_blocked_times(self):
         """Test: Vorschau funktioniert ohne Speicherung."""
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Test",
             start_date=date(2025, 1, 6),
             end_date=date(2025, 1, 13),
@@ -149,6 +164,7 @@ class RecurringBlockedTimeServiceTest(TestCase):
     def test_skip_existing_blocked_times(self):
         """Test: Bereits vorhandene Blockzeiten werden übersprungen."""
         recurring = RecurringBlockedTime.objects.create(
+            user=self.user,
             title="Uni-Vorlesung",
             start_date=date(2025, 1, 6),
             end_date=date(2025, 1, 13),
@@ -163,7 +179,10 @@ class RecurringBlockedTimeServiceTest(TestCase):
         start_datetime = timezone.make_aware(datetime.combine(date(2025, 1, 6), time(10, 0)))
         end_datetime = timezone.make_aware(datetime.combine(date(2025, 1, 6), time(12, 0)))
         BlockedTime.objects.create(
-            title="Uni-Vorlesung", start_datetime=start_datetime, end_datetime=end_datetime
+            user=self.user,
+            title="Uni-Vorlesung",
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
         )
 
         result = RecurringBlockedTimeService.generate_blocked_times(
@@ -178,13 +197,19 @@ class RecurringBlockedTimeServiceTest(TestCase):
 class BlockedTimeCalendarIntegrationTest(TestCase):
     """Tests für Blockzeiten im Kalender."""
 
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+
     def test_single_day_blocked_time(self):
         """Test: Einzelne Blockzeit an einem Tag."""
         start_datetime = timezone.make_aware(datetime.combine(date(2025, 1, 15), time(10, 0)))
         end_datetime = timezone.make_aware(datetime.combine(date(2025, 1, 15), time(12, 0)))
 
         blocked_time = BlockedTime.objects.create(
-            title="Uni-Vorlesung", start_datetime=start_datetime, end_datetime=end_datetime
+            user=self.user,
+            title="Uni-Vorlesung",
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
         )
 
         # Prüfe, dass Blockzeit am richtigen Tag ist
@@ -196,7 +221,7 @@ class BlockedTimeCalendarIntegrationTest(TestCase):
         end_datetime = timezone.make_aware(datetime.combine(date(2025, 1, 17), time(23, 59)))
 
         blocked_time = BlockedTime.objects.create(
-            title="Urlaub", start_datetime=start_datetime, end_datetime=end_datetime
+            user=self.user, title="Urlaub", start_datetime=start_datetime, end_datetime=end_datetime
         )
 
         # Prüfe, dass Blockzeit mehrere Tage umfasst

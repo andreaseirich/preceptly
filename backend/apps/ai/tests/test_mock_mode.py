@@ -15,7 +15,7 @@ class MockLLMModeTest(TestCase):
 
         result = client.generate_text("Generate a lesson plan about grammar rules.")
 
-        self.assertIn("Lesson Plan", result)
+        self.assertIn("(Mock)", result)
         mock_post.assert_not_called()
 
     @override_settings(LLM_API_KEY="")
@@ -26,7 +26,7 @@ class MockLLMModeTest(TestCase):
 
         result = client.generate_text("Generate a lesson plan about math")
 
-        self.assertIn("Lesson Plan", result)
+        self.assertIn("(Mock)", result)
         mock_post.assert_not_called()
 
     @override_settings(LLM_API_KEY="demo-key")

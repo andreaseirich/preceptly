@@ -14,6 +14,7 @@ from apps.lessons.recurring_utils import (
 )
 from apps.lessons.services import LessonConflictService, recalculate_conflicts_for_affected_lessons
 from apps.lessons.status_service import LessonStatusService
+from apps.core.feature_flags import is_premium_user
 from apps.lessons.views_calendar import get_last_calendar_url
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -77,6 +78,7 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         context["conflicts"] = conflicts
         context["conflict_lessons"] = conflict_lessons
         context["has_conflicts"] = len(conflicts) > 0
+        context["is_premium"] = is_premium_user(self.request.user)
         return context
 
 

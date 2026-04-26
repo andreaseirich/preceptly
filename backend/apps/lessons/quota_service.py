@@ -55,6 +55,10 @@ class ContractQuotaService:
             if plan.year < lesson_year or (plan.year == lesson_year and plan.month <= lesson_month):
                 relevant_plans.append(plan)
 
+        # If no monthly plans exist for this period, there is no quota restriction
+        if not relevant_plans:
+            return None
+
         # Calculate planned total units up to and including this month
         planned_total = sum(plan.planned_units for plan in relevant_plans)
 

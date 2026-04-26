@@ -138,6 +138,7 @@ class L10nTestCase(TestCase):
 
     def test_invoice_currency_formatting_german(self):
         """Test that invoice amounts are formatted correctly in German."""
+        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
         activate("de")
 
         # Create invoice

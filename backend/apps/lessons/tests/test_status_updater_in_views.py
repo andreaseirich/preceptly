@@ -22,7 +22,7 @@ class StatusUpdaterInViewsTest(TestCase):
         self.client.login(username="testuser", password="testpass123")
 
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,

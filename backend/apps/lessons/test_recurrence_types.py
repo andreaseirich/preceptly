@@ -12,14 +12,16 @@ from apps.lessons.recurring_service import RecurringLessonService
 from apps.students.models import Student
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class WeeklyRecurrenceTest(TestCase):
     """Tests für wöchentliche Wiederholung (wie bisher)."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Max", last_name="Mustermann", email="max@example.com"
+            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -57,8 +59,9 @@ class BiweeklyRecurrenceTest(TestCase):
     """Tests für zweiwöchentliche Wiederholung."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Lisa", last_name="Müller", email="lisa@example.com"
+            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -102,8 +105,9 @@ class MonthlyRecurrenceTest(TestCase):
     """Tests für monatliche Wiederholung."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Tom", last_name="Schmidt", email="tom@example.com"
+            user=self.user, first_name="Tom", last_name="Schmidt", email="tom@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
@@ -174,8 +178,9 @@ class RecurrenceStatusAutomationTest(TestCase):
     """Tests für automatische Status-Setzung bei verschiedenen Wiederholungsmustern."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.student = Student.objects.create(
-            first_name="Anna", last_name="Weber", email="anna@example.com"
+            user=self.user, first_name="Anna", last_name="Weber", email="anna@example.com"
         )
         self.contract = Contract.objects.create(
             student=self.student,
