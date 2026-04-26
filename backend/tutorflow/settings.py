@@ -340,7 +340,8 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
 
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@tutorflow.local")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="contact@andicode.de")
+INVOICE_FROM_EMAIL = env("INVOICE_FROM_EMAIL", default="rechnung@andicode.de")
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 
 # Email timeout configuration (for TimeoutSMTPEmailBackend)
@@ -349,6 +350,7 @@ EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", default="10"))  # 10 seconds default
 
 # Email notification settings
 NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")
+ADMIN_NOTIFICATION_EMAIL = env("ADMIN_NOTIFICATION_EMAIL", default="contact@andicode.de")
 
 # Stripe (subscription payments for Premium)
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")

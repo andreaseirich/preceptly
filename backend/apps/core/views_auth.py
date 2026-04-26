@@ -2,8 +2,12 @@
 Authentication views for login, logout, and registration.
 """
 
+import logging
+
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -12,6 +16,8 @@ from apps.core.auth_throttle import throttle_login, throttle_register
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.utils_booking import ensure_public_booking_token
+
+logger = logging.getLogger(__name__)
 
 
 class TutorFlowLoginView(LoginView):
@@ -68,4 +74,23 @@ class RegisterView(CreateView):
         profile, _ = UserProfile.objects.get_or_create(user=user, defaults={"is_premium": False})
         ensure_public_booking_token(profile)
         login(self.request, user)
+        self._notify_admin(user)
         return redirect(self.success_url)
+
+    def _notify_admin(self, user) -> None:
+        recipient = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", "")
+        if not recipient:
+            return
+        body = "Ein neuer Nutzer hat sich registriert.\n\n"
+        body += f"Benutzername: {user.username}\n"
+        body += f"E-Mail: {user.email or '(keine Angabe)'}\n"
+        try:
+            send_mail(
+                subject=f"[TutorFlow] Neue Registrierung: {user.username}",
+                message=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient],
+                fail_silently=True,
+            )
+        except Exception:
+            logger.exception("Registration notification email failed for user %s", user.username)

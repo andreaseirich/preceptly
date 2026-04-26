@@ -267,11 +267,13 @@
             {% trans "Basic" %}
         {% endif %}
     </p>
-    {% if stripe_premium_checkout_enabled %}
+    {% if is_demo_user %}
+        <span style="color: #6c757d;">{% trans "Demo account – Premium is enabled for demonstration purposes only." %}</span>
+    {% elif stripe_premium_checkout_enabled %}
         {% if is_premium and profile.stripe_customer_id %}
             <button type="button" class="btn" id="stripe-portal-btn">{% trans "Manage subscription" %}</button>
         {% elif is_premium %}
-            <span style="color: #6c757d;">{% trans "Premium (manual or demo)" %}</span>
+            <span style="color: #6c757d;">{% trans "Premium (manually activated)" %}</span>
         {% else %}
             <form method="post" action="{% url 'stripe_checkout' %}" style="display: inline;">
                 {% csrf_token %}
@@ -285,7 +287,7 @@
                 <button type="submit" class="btn">{% trans "Manage subscription" %}</button>
             </form>
         {% elif is_premium %}
-            <span style="color: #6c757d;">{% trans "Premium (manual or demo)" %}</span>
+            <span style="color: #6c757d;">{% trans "Premium (manually activated)" %}</span>
         {% else %}
             <form method="post" action="{% url 'core:subscription_checkout' %}" style="display: inline;">
                 {% csrf_token %}
@@ -293,7 +295,7 @@
             </form>
         {% endif %}
     {% else %}
-        <p style="margin: 0; color: #6c757d; font-size: 0.95em;">{% trans "Payment is not configured. Premium upgrades are currently unavailable." %}</p>
+        <p style="margin: 0; color: #6c757d; font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:contact@andicode.de">contact@andicode.de</a>.{% endblocktrans %}</p>
     {% endif %}
 </div>
 {% if stripe_premium_checkout_enabled and is_premium and profile.stripe_customer_id %}

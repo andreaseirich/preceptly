@@ -288,6 +288,7 @@ class SettingsView(LoginRequiredMixin, FormView):
         profile.refresh_from_db()
 
         context["is_premium"] = is_premium_user(self.request.user)
+        context["is_demo_user"] = self.request.user.username in ("demo_premium", "demo_user")
         context["stripe_enabled"] = getattr(settings, "STRIPE_ENABLED", False)
         context["stripe_premium_checkout_enabled"] = getattr(
             settings, "STRIPE_PREMIUM_CHECKOUT_ENABLED", False
