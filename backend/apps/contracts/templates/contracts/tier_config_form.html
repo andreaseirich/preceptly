@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Institute tier config" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% if object %}{% trans "Edit tier config" %}{% else %}{% trans "New tier config" %}{% endif %}</h1>
+
+<div class="btn-group">
+    <a href="{% url 'contracts:tier_config_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+</div>
+
+<form method="post" style="margin-top: 1.5em; max-width: 600px;">
+    {% csrf_token %}
+
+    <p>
+        <label for="id_institute_name"><strong>{% trans "Institute name" %}</strong></label><br>
+        {{ form.institute_name }}
+        {% if form.institute_name.errors %}<p style="color:#dc3545;">{{ form.institute_name.errors.0 }}</p>{% endif %}
+    </p>
+
+    <p style="margin-top: 1em;">
+        <strong>{% trans "Tier thresholds" %}</strong><br>
+        <small>{% blocktrans %}JSON list: each entry has hours_from (total hours at which this rate starts) and label. Example: [{"hours_from": 0, "label": "13 €/h"}, {"hours_from": 50, "label": "14 €/h"}]{% endblocktrans %}</small>
+    </p>
+    <p>
+        {{ form.tiers }}
+        {% if form.tiers.errors %}<p style="color:#dc3545;">{{ form.tiers.errors.0 }}</p>{% endif %}
+    </p>
+
+    {% if form.non_field_errors %}
+    <div class="message error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="btn-group" style="margin-top: 1em;">
+        <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
+        <a href="{% url 'contracts:tier_config_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+{% endblock %}

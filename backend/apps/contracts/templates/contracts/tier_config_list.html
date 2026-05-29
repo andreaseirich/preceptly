@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans Institute tier thresholds %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans Institute tier thresholds %}</h1>
+
+<div class="btn-group">
+    <a href="{% url 'contracts:tier_config_create' %}" class="btn">{% trans Add institute %}</a>
+    <a href="{% url 'contracts:list' %}" class="btn btn-secondary">{% trans Back to Contracts %}</a>
+</div>
+
+<p style="margin-top: 1em;">{% blocktrans %}Configure hour thresholds at which your pay rate increases for a given institute. TutorSpace uses built-in thresholds automatically; add a config here to override them or to set up another institute.{% endblocktrans %}</p>
+
+{% if configs %}
+<table>
+    <thead>
+        <tr>
+            <th>{% trans Institute %}</th>
+            <th>{% trans Tiers %}</th>
+            <th>{% trans Actions %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for config in configs %}
+        <tr>
+            <td><strong>{{ config.institute_name }}</strong></td>
+            <td>
+                {% for tier in config.tiers %}
+                    {% if not forloop.first %}, {% endif %}
+                    {{ tier.hours_from }}h: {{ tier.label }}
+                {% endfor %}
+            </td>
+            <td>
+                <a href="{% url 'contracts:tier_config_update' config.pk %}">{% trans Edit %}</a> |
+                <a href="{% url 'contracts:tier_config_delete' config.pk %}">{% trans Delete %}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>{% trans No custom tier configs yet. TutorSpace tiers are always available without a config. %}</p>
+</div>
+{% endif %}
+{% endblock %}

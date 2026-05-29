@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete tier config" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Delete tier config" %}</h1>
+
+<p>{% blocktrans with name=object.institute_name %}Delete tier config for "{{ name }}"?{% endblocktrans %}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="btn-group">
+        <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+        <a href="{% url 'contracts:tier_config_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+{% endblock %}

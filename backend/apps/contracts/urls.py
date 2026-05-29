@@ -14,4 +14,16 @@ urlpatterns = [
     path("create/", views.ContractCreateView.as_view(), name="create"),
     path("<int:pk>/update/", views.ContractUpdateView.as_view(), name="update"),
     path("<int:pk>/delete/", views.ContractDeleteView.as_view(), name="delete"),
+    path("tier-config/", views.TierConfigListView.as_view(), name="tier_config_list"),
+    path("tier-config/create/", views.TierConfigCreateView.as_view(), name="tier_config_create"),
+    path(
+        "tier-config/<int:pk>/update/",
+        views.TierConfigUpdateView.as_view(),
+        name="tier_config_update",
+    ),
+    path(
+        "tier-config/<int:pk>/delete/",
+        views.TierConfigDeleteView.as_view(),
+        name="tier_config_delete",
+    ),
 ]

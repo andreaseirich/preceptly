@@ -5477,3 +5477,95 @@ msgstr "Rechtliche Navigation"
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Institute tier progress"
+msgstr "Institut-Stufenfortschritt"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Total taught"
+msgstr "Gesamt unterrichtet"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Current tier"
+msgstr "Aktuelle Stufe"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "in this tier"
+msgstr "in dieser Stufe"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Next increase"
+msgstr "Nächste Erhöhung"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "in"
+msgstr "in"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Estimated date"
+msgstr "Voraussichtliches Datum"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Maximum tier reached"
+msgstr "Höchststufe erreicht"
+
+#: apps/contracts/templates/contracts/contract_list.html
+msgid "Configure thresholds"
+msgstr "Schwellenwerte konfigurieren"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Institute tier thresholds"
+msgstr "Institut-Stufenschwellenwerte"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Add institute"
+msgstr "Institut hinzufügen"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Configure hour thresholds at which your pay rate increases for a given institute. TutorSpace uses built-in thresholds automatically; add a config here to override them or to set up another institute."
+msgstr "Stundenschwellenwerte konfigurieren, ab denen sich dein Stundenlohn erhöht. TutorSpace nutzt automatisch eingebaute Schwellenwerte; hier kannst du diese überschreiben oder ein anderes Institut einrichten."
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Tiers"
+msgstr "Stufen"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "No custom tier configs yet. TutorSpace tiers are always available without a config."
+msgstr "Noch keine eigenen Stufenkonfigurationen. TutorSpace-Stufen sind immer ohne Konfiguration verfügbar."
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "Edit tier config"
+msgstr "Stufenkonfiguration bearbeiten"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "New tier config"
+msgstr "Neue Stufenkonfiguration"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "Institute name"
+msgstr "Institutname"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "Tier thresholds"
+msgstr "Stufenschwellenwerte"
+
+#: apps/contracts/templates/contracts/tier_config_confirm_delete.html
+msgid "Delete tier config"
+msgstr "Stufenkonfiguration löschen"
+
+#: apps/contracts/views.py
+msgid "Tier config saved."
+msgstr "Stufenkonfiguration gespeichert."
+
+#: apps/contracts/views.py
+msgid "Tier config deleted."
+msgstr "Stufenkonfiguration gelöscht."
+
+#: apps/contracts/models.py
+msgid "Institute tier config"
+msgstr "Institut-Stufenkonfiguration"
+
+#: apps/contracts/models.py
+msgid "Institute tier configs"
+msgstr "Institut-Stufenkonfigurationen"

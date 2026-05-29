@@ -7,6 +7,31 @@
 <h1>{% trans "Contracts" %}</h1>
 <a href="{% url 'contracts:create' %}" class="btn">{% trans "New Contract" %}</a>
 
+
+{% if institute_tier_summaries %}
+<div style="margin-bottom: 1.5em;">
+  <h2>{% trans "Institute tier progress" %}</h2>
+  <div style="display: flex; flex-wrap: wrap; gap: 1em; margin-bottom: 1em;">
+    {% for summary in institute_tier_summaries %}
+    <div style="padding: 1em; min-width: 220px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;">
+      <p><strong>{{ summary.institute_name }}</strong></p>
+      <p>{% trans "Total taught" %}: {{ summary.total_hours|floatformat:2 }} h</p>
+      <p>{% trans "Current tier" %}: {{ summary.current_tier_label }} ({{ summary.hours_in_current_tier|floatformat:2 }} h {% trans "in this tier" %})</p>
+      {% if summary.next_tier_label %}
+        <p>{% trans "Next increase" %}: {{ summary.next_tier_label }} {% trans "in" %} {{ summary.hours_until_next_tier|floatformat:2 }} h</p>
+        {% if summary.estimated_date %}
+          <p>{% trans "Estimated date" %}: {{ summary.estimated_date|date:"d.m.Y" }}</p>
+        {% endif %}
+      {% else %}
+        <p style="color: green;">{% trans "Maximum tier reached" %}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <p><a href="{% url 'contracts:tier_config_list' %}">{% trans "Configure thresholds" %}</a></p>
+</div>
+{% endif %}
+
 <table>
     <thead>
         <tr>

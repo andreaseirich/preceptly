@@ -1,6 +1,7 @@
 import secrets
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -142,3 +143,31 @@ class ContractMonthlyPlan(models.Model):
         from django.utils.translation import gettext as _
 
         return f"{self.contract} - {self.year}-{self.month:02d}: {self.planned_units} {_('units')}"
+
+
+class InstituteTierConfig(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="institute_tier_configs",
+        verbose_name=_("user"),
+    )
+    institute_name = models.CharField(max_length=200, verbose_name=_("institute name"))
+    tiers = models.JSONField(
+        default=list,
+        verbose_name=_("tiers"),
+        help_text=_(
+            'List of dicts: [{"hours_from": 0, "label": "13 €/h"}, ...], sorted by hours_from ascending'
+        ),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [("user", "institute_name")]
+        ordering = ["institute_name"]
+        verbose_name = _("Institute tier config")
+        verbose_name_plural = _("Institute tier configs")
+
+    def __str__(self):
+        return f"{self.institute_name} ({self.user.username})"
