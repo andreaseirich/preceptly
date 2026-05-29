@@ -5569,3 +5569,23 @@ msgstr "Institut-Stufenkonfiguration"
 #: apps/contracts/models.py
 msgid "Institute tier configs"
 msgstr "Institut-Stufenkonfigurationen"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "One row per pay rate. \"From hours\" is the cumulative total at which this rate starts (e.g. 0 for the first tier, 50 for the second)."
+msgstr "Eine Zeile pro Stundenlohn. \"Ab Stunden\" ist die kumulative Gesamtstundenzahl, ab der dieser Satz gilt (z.B. 0 für die erste Stufe, 50 für die zweite)."
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "From hours"
+msgstr "Ab Stunden"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "Label (e.g. 14 €/h)"
+msgstr "Bezeichnung (z.B. 14 €/h)"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "Add tier"
+msgstr "Stufe hinzufügen"
+
+#: apps/contracts/templates/contracts/tier_config_form.html
+msgid "e.g. 14 €/h"
+msgstr "z.B. 14 €/h"
