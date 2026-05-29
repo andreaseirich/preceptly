@@ -5589,3 +5589,15 @@ msgstr "Stufe hinzufügen"
 #: apps/contracts/templates/contracts/tier_config_form.html
 msgid "e.g. 14 €/h"
 msgstr "z.B. 14 €/h"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Built-in tier configs"
+msgstr "Eingebaute Stufenkonfigurationen"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Use as custom config"
+msgstr "Als benutzerdefinierte Konfiguration verwenden"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Custom config active"
+msgstr "Benutzerdefinierte Konfiguration aktiv"

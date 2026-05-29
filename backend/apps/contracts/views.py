@@ -6,9 +6,11 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.contracts.forms import ContractForm
@@ -17,6 +19,7 @@ from apps.contracts.formsets import (
     generate_monthly_plans_for_contract,
     iter_contract_months,
 )
+from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
 from apps.contracts.models import Contract, ContractMonthlyPlan, InstituteTierConfig
 from apps.contracts.services import (
     get_contract_current_month_summary,
@@ -251,6 +254,14 @@ class TierConfigListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return InstituteTierConfig.objects.filter(user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["has_tutorspace_config"] = InstituteTierConfig.objects.filter(
+            user=self.request.user,
+            institute_name__iexact=TUTORSPACE_INSTITUTE_NAME,
+        ).exists()
+        return context
+
 
 class TierConfigCreateView(LoginRequiredMixin, CreateView):
     model = InstituteTierConfig
@@ -293,3 +304,24 @@ class TierConfigDeleteView(LoginRequiredMixin, DeleteView):
         response = super().delete(request, *args, **kwargs)
         messages.success(request, _("Tier config deleted."))
         return response
+
+
+_TUTORSPACE_BUILTIN_TIERS = [
+    {"hours_from": 0, "label": "13 €/h"},
+    {"hours_from": 50, "label": "14 €/h"},
+    {"hours_from": 150, "label": "15 €/h"},
+    {"hours_from": 450, "label": "16 €/h"},
+    {"hours_from": 1000, "label": "17 €/h"},
+]
+
+
+class TierConfigCreateTutorSpaceView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        config, _ = InstituteTierConfig.objects.get_or_create(
+            user=request.user,
+            institute_name=TUTORSPACE_INSTITUTE_NAME,
+            defaults={"tiers": _TUTORSPACE_BUILTIN_TIERS},
+        )
+        return HttpResponseRedirect(
+            reverse("contracts:tier_config_update", kwargs={"pk": config.pk})
+        )

@@ -45,4 +45,28 @@
     <p>{% trans "No custom tier configs yet. TutorSpace tiers are always available without a config." %}</p>
 </div>
 {% endif %}
+
+<h2 style="margin-top: 2em;">{% trans "Built-in tier configs" %}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Institute" %}</th>
+            <th>{% trans "Tiers" %}</th>
+            <th>{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>TutorSpace</strong></td>
+            <td>0h: 13 €/h, 50h: 14 €/h, 150h: 15 €/h, 450h: 16 €/h, 1000h: 17 €/h</td>
+            <td>
+                {% if not has_tutorspace_config %}
+                <a href="{% url 'contracts:tier_config_create_tutorspace' %}" class="btn">{% trans "Use as custom config" %}</a>
+                {% else %}
+                <span style="color:#6c757d;">{% trans "Custom config active" %}</span>
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
 {% endblock %}
