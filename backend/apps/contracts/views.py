@@ -19,9 +19,9 @@ from apps.contracts.formsets import (
 )
 from apps.contracts.models import Contract, ContractMonthlyPlan, InstituteTierConfig
 from apps.contracts.services import (
-    get_institute_tier_progress,
     get_contract_current_month_summary,
     get_contract_monthly_planning_summary,
+    get_institute_tier_progress,
 )
 
 
@@ -49,7 +49,7 @@ class ContractListView(LoginRequiredMixin, ListView):
             for c in contracts
         ]
         user = self.request.user
-        institute_names = sorted(set(c.institute for c in contracts if c.institute))
+        institute_names = sorted({c.institute for c in contracts if c.institute})
         summaries = []
         for name in institute_names:
             progress = get_institute_tier_progress(user, name)

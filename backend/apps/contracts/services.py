@@ -104,9 +104,6 @@ def _compute_carried_over_before(contract: Contract, before_year: int, before_mo
     return carried
 
 
-# --- SERVICE ---
-
-
 def get_institute_tier_progress(user, institute_name: str) -> dict | None:
     from apps.contracts.tutorspace_compensation import TIERS
     from apps.core.models import UserProfile
@@ -171,85 +168,6 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
     estimated_date = None
     if daily_rate > 0 and hours_until_next_tier is not None:
         estimated_date = today + timedelta(days=ceil(hours_until_next_tier / daily_rate))
-
-    return {
-        "total_hours": total_hours,
-        "current_tier_label": current_tier["label"],
-        "hours_in_current_tier": hours_in_current_tier,
-        "next_tier_label": next_tier["label"] if next_tier else None,
-        "hours_until_next_tier": hours_until_next_tier,
-        "estimated_date": estimated_date,
-        "institute_name": institute_name,
-    }
-
-
-def get_institute_tier_progress(user, institute_name: str) -> dict | None:
-    from math import ceil
-    from datetime import date, timedelta
-
-    from django.db.models import Sum
-
-    from apps.contracts.models import InstituteTierConfig
-    from apps.contracts.tutorspace_compensation import TIERS as TUTORSPACE_TIERS
-    from apps.core.models import UserProfile
-    from apps.lessons.models import Session
-
-    config = InstituteTierConfig.objects.filter(
-        user=user, institute_name__iexact=institute_name
-    ).first()
-
-    if config:
-        tiers_data = config.tiers
-    elif institute_name.lower() == "tutorspace":
-        tiers_data = [
-            {"hours_from": t.start_hour_inclusive - 1, "label": str(t.rate_eur_per_hour) + " €/h"}
-            for t in TUTORSPACE_TIERS
-        ]
-    else:
-        return None
-
-    qs = Session.objects.filter(
-        contract__student__user=user,
-        contract__institute__iexact=institute_name,
-        status__in=["taught", "paid"],
-    )
-
-    if institute_name.lower() == "tutorspace":
-        profile = UserProfile.objects.filter(user=user).first()
-        tier_from = getattr(profile, "tutorspace_tier_count_from", None)
-        if tier_from:
-            qs = qs.filter(date__gte=tier_from)
-
-    total_minutes = qs.aggregate(total=Sum("duration_minutes"))["total"] or 0
-    total_hours = round(total_minutes / 60.0, 2)
-
-    sorted_tiers = sorted(tiers_data, key=lambda t: t["hours_from"])
-
-    current_tier = sorted_tiers[0]
-    for tier in sorted_tiers:
-        if tier["hours_from"] <= total_hours:
-            current_tier = tier
-
-    idx = sorted_tiers.index(current_tier)
-    next_tier = sorted_tiers[idx + 1] if idx + 1 < len(sorted_tiers) else None
-
-    hours_in_current_tier = round(total_hours - current_tier["hours_from"], 2)
-    hours_until_next_tier = round(next_tier["hours_from"] - total_hours, 2) if next_tier else None
-
-    ninety_days_ago = date.today() - timedelta(days=90)
-    recent_qs = Session.objects.filter(
-        contract__student__user=user,
-        contract__institute__iexact=institute_name,
-        status__in=["taught", "paid"],
-        date__gte=ninety_days_ago,
-    )
-    recent_minutes = recent_qs.aggregate(total=Sum("duration_minutes"))["total"] or 0
-    daily_rate = recent_minutes / 60.0 / 90
-    estimated_date = (
-        date.today() + timedelta(days=ceil(hours_until_next_tier / daily_rate))
-        if daily_rate > 0 and hours_until_next_tier
-        else None
-    )
 
     return {
         "total_hours": total_hours,
