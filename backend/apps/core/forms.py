@@ -228,5 +228,8 @@ class ExpenseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Ensure YYYY-MM-DD format for rendering AND parsing,
+        # independent of USE_L10N (HTML date inputs always use YYYY-MM-DD)
+        self.fields["date"].input_formats = ["%Y-%m-%d"]
         if not self.instance.pk:
             self.fields["date"].initial = timezone.localdate()
