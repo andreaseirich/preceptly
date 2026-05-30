@@ -22,8 +22,8 @@
 {% if is_premium %}
 
 <div class="tutorflow-help-box" style="margin-bottom: 24px;">
-    <strong>{% trans "Cash-basis accounting (Zufluss-Prinzip)" %}</strong><br>
-    {% blocktrans %}Only invoices with a payment date in the selected year are included. This matches the German EÜR for freelancers (§ 4 Abs. 3 EStG).{% endblocktrans %}
+    <strong>{% trans "Abrechnungszeitraum-basierte Auswertung" %}</strong><br>
+    {% blocktrans %}Rechnungen werden nach ihrem Abrechnungszeitraum (period_start) gruppiert.{% endblocktrans %}
 </div>
 
 <h2>{% trans "Monthly breakdown" %} {{ year }}</h2>
@@ -113,7 +113,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
+            <th>{% trans "Billing period" %}</th>
             <th>{% trans "Invoice number" %}</th>
             <th>{% trans "Recipient" %}</th>
             <th style="text-align:right;">{% trans "Amount" %}</th>
@@ -122,7 +122,7 @@
     <tbody>
         {% for inv in invoices %}
         <tr>
-            <td>{{ inv.paid_at|date:"d.m.Y" }}</td>
+            <td>{{ inv.period_start|date:"d.m.Y" }}{% if inv.period_end %} – {{ inv.period_end|date:"d.m.Y" }}{% endif %}</td>
             <td>{{ inv.invoice_number|default:"-" }}</td>
             <td>{{ inv.payer_name }}</td>
             <td style="text-align:right;">{{ inv.total_amount|euro }}</td>
@@ -184,7 +184,7 @@
 
 <div style="padding:30px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; margin:20px 0;">
     <h2 style="margin-top:0;">{% trans "Tax Year Overview – Premium feature" %}</h2>
-    <p>{% blocktrans %}Get a full cash-basis income summary for your tax return (EÜR): monthly breakdown, Kleinunternehmer status check, invoice list, and CSV export.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Get a full income summary for your tax return (EÜR) based on invoice billing periods: monthly breakdown, Kleinunternehmer status check, invoice list, and CSV export.{% endblocktrans %}</p>
     <p>{% trans "Upgrade to Premium for full access." %}</p>
 </div>
 

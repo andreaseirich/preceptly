@@ -5999,3 +5999,6 @@ msgstr "Diese Übersicht dient als Hilfestellung und ersetzt keine Steuerberatun
 #: apps/core/templates/core/tax_year.html
 msgid "Generate EÜR"
 msgstr "EÜR erstellen"
+#: apps/core/templates/core/tax_year.html
+msgid "Billing period"
+msgstr "Abrechnungszeitraum"

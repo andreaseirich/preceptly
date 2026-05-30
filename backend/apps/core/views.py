@@ -418,9 +418,9 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
             year = now.year
 
         available_year_dates = (
-            Invoice.objects.filter(owner=user, paid_at__isnull=False)
-            .dates("paid_at", "year")
-            .order_by("-paid_at")
+            Invoice.objects.filter(owner=user, status="paid")
+            .dates("period_start", "year")
+            .order_by("-period_start")
         )
         available_years = [d.year for d in available_year_dates]
         if year not in available_years:
@@ -433,16 +433,15 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
                 Invoice.objects.filter(
                     owner=user,
                     status="paid",
-                    paid_at__isnull=False,
-                    paid_at__year=year,
+                    period_start__year=year,
                 )
-                .order_by("paid_at")
-                .only("invoice_number", "payer_name", "paid_at", "total_amount")
+                .order_by("period_start")
+                .only("invoice_number", "payer_name", "period_start", "total_amount")
             )
             total_income = sum((inv.total_amount for inv in invoices), Decimal("0.00"))
             monthly_income = {m: Decimal("0.00") for m in range(1, 13)}
             for inv in invoices:
-                monthly_income[inv.paid_at.month] += inv.total_amount
+                monthly_income[inv.period_start.month] += inv.total_amount
         else:
             invoices = []
             total_income = Decimal("0.00")
@@ -516,7 +515,7 @@ class TaxYearCsvView(LoginRequiredMixin, View):
         writer = csv.writer(response, delimiter=";")
         writer.writerow(
             [
-                _("Date"),
+                _("Abrechnungszeitraum"),
                 _("Invoice number"),
                 _("Recipient"),
                 _("Amount (EUR)"),
@@ -527,15 +526,19 @@ class TaxYearCsvView(LoginRequiredMixin, View):
             Invoice.objects.filter(
                 owner=user,
                 status="paid",
-                paid_at__isnull=False,
-                paid_at__year=year,
+                period_start__year=year,
             )
-            .order_by("paid_at")
-            .only("invoice_number", "payer_name", "paid_at", "total_amount")
+            .order_by("period_start")
+            .only("invoice_number", "payer_name", "period_start", "period_end", "total_amount")
         ):
+            period = (
+                f"{inv.period_start.strftime('%d.%m.%Y')} – {inv.period_end.strftime('%d.%m.%Y')}"
+                if inv.period_end
+                else inv.period_start.strftime("%d.%m.%Y")
+            )
             writer.writerow(
                 [
-                    inv.paid_at.date().strftime("%d.%m.%Y"),
+                    period,
                     inv.invoice_number or "",
                     inv.payer_name,
                     str(inv.total_amount).replace(".", ","),
@@ -658,16 +661,16 @@ class EuerView(LoginRequiredMixin, TemplateView):
             year = now.year
 
         available_year_dates = (
-            Invoice.objects.filter(owner=user, paid_at__isnull=False)
-            .dates("paid_at", "year")
-            .order_by("-paid_at")
+            Invoice.objects.filter(owner=user, status="paid")
+            .dates("period_start", "year")
+            .order_by("-period_start")
         )
         available_years = [d.year for d in available_year_dates]
         if year not in available_years:
             available_years = sorted(set(available_years + [year]), reverse=True)
 
         total_income = Invoice.objects.filter(
-            owner=user, status="paid", paid_at__isnull=False, paid_at__year=year
+            owner=user, status="paid", period_start__year=year
         ).aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
 
         expenses_qs = list(Expense.objects.filter(user=user, date__year=year))
