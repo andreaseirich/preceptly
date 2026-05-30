@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Change payment date" %} – {% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Change payment date" %}</h1>
+<p>{% blocktrans with id=invoice.id payer=invoice.payer_name %}Invoice {{ id }} – {{ payer }}{% endblocktrans %}</p>
+
+<form method="post" action="">
+    {% csrf_token %}
+    <div style="margin-bottom: 16px;">
+        <label for="paid_date"><strong>{% trans "Payment date" %}</strong></label><br>
+        <input type="date" id="paid_date" name="paid_date" value="{{ current_date }}" required style="margin-top: 6px;">
+    </div>
+    <div class="btn-group">
+        <button type="submit" class="btn">✓ {% trans "Save" %}</button>
+        <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+{% endblock %}

@@ -942,6 +942,15 @@ msgstr "Rechnung ist nicht als bezahlt markiert."
 msgid "Payment status undone."
 msgstr "Zahlungsstatus zurückgesetzt."
 
+#: apps/billing/views.py
+msgid "Payment date updated."
+msgstr "Zahlungsdatum aktualisiert."
+
+
+#: apps/billing/templates/billing/invoice_set_paid_date.html
+msgid "Change payment date"
+msgstr "Zahlungsdatum ändern"
+
 #: apps/billing/views.py:346
 msgid "PDF successfully generated."
 msgstr "PDF erfolgreich erzeugt."

@@ -38,7 +38,7 @@
     {% if invoice.payer_address %}<tr><th>{% trans "Address" %}</th><td>{{ invoice.payer_address|linebreaks }}</td></tr>{% endif %}
     {% if invoice.contract %}<tr><th>{% trans "Contract" %}</th><td><a href="{% url 'contracts:detail' invoice.contract.pk %}">{{ invoice.contract }}</a></td></tr>{% endif %}
     <tr><th>{% trans "Period" %}</th><td>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{{ invoice.get_status_display }}{% if invoice.paid_at %} ({% trans "paid at" %} {{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }}){% endif %}</td></tr>
+    <tr><th>{% trans "Status" %}</th><td>{{ invoice.get_status_display }}{% if invoice.paid_at %} ({% trans "paid at" %} {{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}">✎</a>){% endif %}</td></tr>
     <tr><th>{% trans "Total Amount" %}</th><td><strong>{{ invoice.total_amount|euro }}</strong></td></tr>
     <tr><th>{% trans "Created" %}</th><td>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>

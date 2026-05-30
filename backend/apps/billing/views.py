@@ -324,6 +324,31 @@ def invoice_mark_paid(request, pk):
 
 
 @login_required
+def invoice_set_paid_date(request, pk):
+    """Change the paid_at date of an already paid invoice. GET: show form. POST: save."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.status != "paid":
+        messages.warning(request, _("Invoice is not marked as paid."))
+        return redirect("billing:invoice_detail", pk=pk)
+    if request.method == "POST":
+        paid_date = _safe_date(request.POST.get("paid_date"))
+        if paid_date is None:
+            messages.error(request, _("Invalid date."))
+            return redirect("billing:invoice_set_paid_date", pk=pk)
+        InvoiceService.mark_invoice_as_paid(invoice, paid_at=paid_date)
+        messages.success(request, _("Payment date updated."))
+        return redirect("billing:invoice_detail", pk=pk)
+    current_date = (
+        invoice.paid_at.date().isoformat() if invoice.paid_at else date.today().isoformat()
+    )
+    return render(
+        request,
+        "billing/invoice_set_paid_date.html",
+        {"invoice": invoice, "current_date": current_date},
+    )
+
+
+@login_required
 @require_POST
 def invoice_undo_paid(request, pk):
     """Undo paid status."""
