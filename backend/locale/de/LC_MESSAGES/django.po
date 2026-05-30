@@ -3667,8 +3667,6 @@ msgid ""
 msgstr ""
 "Dein Gewinn von %(total)s € überschreitet die Kleinunternehmergrenze von %(limit)s €. "
 "Du musst ggf. Umsatzsteuer ausweisen."
-"Dein Gewinn von %(total)s EUR überschreitet die Kleinunternehmergrenze von "
-"%(limit)s EUR. Du musst möglicherweise Mehrwertsteuer berechnen."
 
 #: apps/core/templates/core/tax_year.html:76
 msgid "Approaching limit"
@@ -3679,10 +3677,7 @@ msgstr "Grenze wird erreicht"
 msgid ""
 "Your profit of %(total)s EUR is close to the Kleinunternehmer limit of "
 "%(limit)s EUR."
-msgstr ""
-"Dein Gewinn von %(total)s € nähert sich der Kleinunternehmergrenze von %(limit)s €."
-"Dein Gewinn von %(total)s EUR nähert sich der Kleinunternehmergrenze von "
-"%(limit)s EUR."
+msgstr "Dein Gewinn von %(total)s € nähert sich der Kleinunternehmergrenze von %(limit)s €."
 
 #: apps/core/templates/core/tax_year.html:81
 msgid "Status: OK"
@@ -3693,10 +3688,7 @@ msgstr "Status: OK"
 msgid ""
 "Your profit of %(total)s EUR is below the Kleinunternehmer limit of "
 "%(limit)s EUR."
-msgstr ""
-"Dein Gewinn von %(total)s € liegt unterhalb der Kleinunternehmergrenze von %(limit)s €."
-"Dein Gewinn von %(total)s EUR liegt unterhalb der Kleinunternehmergrenze von "
-"%(limit)s EUR."
+msgstr "Dein Gewinn von %(total)s € liegt unterhalb der Kleinunternehmergrenze von %(limit)s €."
 
 #: apps/core/templates/core/tax_year.html:89
 msgid "Limit (§ 19 UStG)"
