@@ -5675,3 +5675,94 @@ msgstr "Empfänger"
 #: apps/core/templates/core/tax_year.html
 msgid "Upgrade to Premium for full access."
 msgstr "Upgrade auf Premium für den vollen Zugang."
+
+#: apps/core/models.py
+msgid "Expense"
+msgstr "Ausgabe"
+
+#: apps/core/models.py
+msgid "Expenses"
+msgstr "Ausgaben"
+
+#: apps/core/models.py
+msgid "Work materials"
+msgstr "Arbeitsmittel"
+
+#: apps/core/models.py
+msgid "Travel"
+msgstr "Fahrtkosten"
+
+#: apps/core/models.py
+msgid "Education"
+msgstr "Fortbildung"
+
+#: apps/core/models.py
+msgid "Office"
+msgstr "Büro/Arbeitszimmer"
+
+#: apps/core/models.py
+msgid "Communication"
+msgstr "Kommunikation"
+
+#: apps/core/models.py
+msgid "Other"
+msgstr "Sonstiges"
+
+#: apps/core/templates/core/expense_list.html
+msgid "My expenses"
+msgstr "Meine Ausgaben"
+
+#: apps/core/templates/core/expense_list.html
+msgid "New expense"
+msgstr "Neue Ausgabe"
+
+#: apps/core/templates/core/expense_list.html
+msgid "Category"
+msgstr "Kategorie"
+
+#: apps/core/templates/core/expense_list.html
+msgid "Total expenses"
+msgstr "Gesamtausgaben"
+
+#: apps/core/templates/core/expense_list.html
+msgid "No expenses for this year."
+msgstr "Keine Ausgaben für dieses Jahr."
+
+#: apps/core/templates/core/expense_list.html
+msgid "Tax year overview"
+msgstr "Steuerübersicht"
+
+#: apps/core/templates/core/expense_form.html
+msgid "Edit expense"
+msgstr "Ausgabe bearbeiten"
+
+
+#: apps/core/templates/core/expense_form.html
+msgid "Save expense"
+msgstr "Ausgabe speichern"
+
+#: apps/core/templates/core/expense_confirm_delete.html
+msgid "Delete expense"
+msgstr "Ausgabe löschen"
+
+
+#: apps/core/templates/core/tax_year.html
+msgid "No expenses recorded for this year."
+msgstr "Keine Ausgaben für dieses Jahr erfasst."
+
+
+#: apps/core/templates/core/tax_year.html
+msgid "Profit (income minus expenses)"
+msgstr "Gewinn (Einnahmen minus Ausgaben)"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Manage expenses"
+msgstr "Ausgaben verwalten"
+
+#: apps/core/views.py
+msgid "Expense saved."
+msgstr "Ausgabe gespeichert."
+
+#: apps/core/views.py
+msgid "Expense deleted."
+msgstr "Ausgabe gelöscht."

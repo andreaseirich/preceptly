@@ -128,6 +128,45 @@
 <p>{% trans "No paid invoices for this year." %}</p>
 {% endif %}
 
+<!-- # START EXPENSES SECTION -->
+<h2 style="margin-top:32px;">{% trans "Expenses" %} {{ year }}</h2>
+
+{% if expenses_by_category %}
+<table class="table" style="max-width:520px;">
+    <thead>
+        <tr>
+            <th>{% trans "Category" %}</th>
+            <th style="text-align:right;">{% trans "Amount" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category_label, total in expenses_by_category.items %}
+        <tr>
+            <td>{{ category_label }}</td>
+            <td style="text-align:right;">{{ total|euro }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr style="border-top:2px solid var(--border-color);">
+            <td>{% trans "Total expenses" %}</td>
+            <td style="text-align:right;">{{ total_expenses|euro }}</td>
+        </tr>
+        <tr style="font-weight:bold;">
+            <td>{% trans "Profit (income − expenses)" %}</td>
+            <td style="text-align:right;">{{ profit|euro }}</td>
+        </tr>
+    </tfoot>
+</table>
+{% else %}
+<p>{% trans "No expenses recorded for this year." %}</p>
+{% endif %}
+
+<div style="margin-top:12px;">
+    <a href="{% url 'core:expense_list' %}?year={{ year }}" class="btn btn-secondary">{% trans "Manage expenses" %}</a>
+</div>
+<!-- # END EXPENSES SECTION -->
+
 <div style="margin-top:20px;">
     <a href="{% url 'core:tax_year_csv' %}?year={{ year }}" class="btn">
         &#8595; {% blocktrans with y=year %}Download CSV {{ y }}{% endblocktrans %}

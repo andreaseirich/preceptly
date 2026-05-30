@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete expense" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Delete expense" %}</h1>
+
+<div style="padding:20px; background:#f8d7da; border:1px solid #f5c6cb; border-radius:8px; margin-bottom:24px; max-width:520px;">
+    <p>{% blocktrans with desc=object.description date=object.date|date:"d.m.Y" amount=object.amount %}
+        Are you sure you want to delete the expense <strong>{{ desc }}</strong> ({{ date }}, {{ amount }} €)?
+        This action cannot be undone.
+    {% endblocktrans %}</p>
+</div>
+
+<form method="post" style="display:flex; gap:12px;">
+    {% csrf_token %}
+    <button type="submit" class="btn" style="background:#c0392b;">{% trans "Yes, delete" %}</button>
+    <a href="{% url 'core:expense_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+</form>
+{% endblock %}

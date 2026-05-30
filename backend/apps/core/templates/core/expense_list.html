@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% load currency %}
+
+{% block title %}{% trans "Expenses" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Expenses" %}</h1>
+
+<div style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+    <form method="get" action="" style="display: flex; gap: 10px; align-items: center;">
+        <label for="year">{% trans "Year" %}:</label>
+        <select id="year" name="year">
+            {% for y in available_years %}
+            <option value="{{ y }}" {% if y == year_filter %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">{% trans "Apply" %}</button>
+    </form>
+    <a href="{% url 'core:expense_create' %}" class="btn">+ {% trans "New expense" %}</a>
+</div>
+
+{% if expenses %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Category" %}</th>
+            <th>{% trans "Description" %}</th>
+            <th style="text-align:right;">{% trans "Amount" %}</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.date|date:"d.m.Y" }}</td>
+            <td>{{ expense.get_category_display }}</td>
+            <td>{{ expense.description }}</td>
+            <td style="text-align:right;">{{ expense.amount|euro }}</td>
+            <td style="white-space:nowrap;">
+                <a href="{% url 'core:expense_update' expense.pk %}">{% trans "Edit" %}</a>
+                &nbsp;
+                <a href="{% url 'core:expense_delete' expense.pk %}" style="color:#c0392b;">{% trans "Delete" %}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr style="font-weight:bold; border-top:2px solid var(--border-color);">
+            <td colspan="3">{% trans "Total expenses" %}</td>
+            <td style="text-align:right;">{{ total_expense|euro }}</td>
+            <td></td>
+        </tr>
+    </tfoot>
+</table>
+{% else %}
+<p>{% trans "No expenses for this year." %}</p>
+{% endif %}
+
+<div style="margin-top:20px;">
+    <a href="{% url 'core:tax_year' %}?year={{ year_filter }}" class="btn btn-secondary">&#8592; {% trans "Tax year overview" %}</a>
+</div>
+{% endblock %}

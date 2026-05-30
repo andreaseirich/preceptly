@@ -1,4 +1,8 @@
+from decimal import Decimal
+
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -117,3 +121,41 @@ class StripeWebhookEvent(models.Model):
     class Meta:
         verbose_name = _("Stripe Webhook Event")
         verbose_name_plural = _("Stripe Webhook Events")
+
+
+class Expense(models.Model):
+    """Business expense for tax return (EÜR)."""
+
+    CATEGORY_CHOICES = [
+        ("work_materials", _("Work materials")),
+        ("travel", _("Travel")),
+        ("education", _("Education")),
+        ("office", _("Office")),
+        ("communication", _("Communication")),
+        ("other", _("Other")),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="expenses",
+    )
+    date = models.DateField()
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    description = models.CharField(max_length=300)
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = _("Expense")
+        verbose_name_plural = _("Expenses")
+
+    def __str__(self):
+        return f"{self.date} – {self.description} ({self.amount} €)"

@@ -7,13 +7,21 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import FormView, TemplateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from apps.billing.models import Invoice
 from apps.core.forms import (
@@ -23,7 +31,7 @@ from apps.core.forms import (
     UserEmailForm,
     WorkingHoursForm,
 )
-from apps.core.models import UserProfile
+from apps.core.models import Expense, UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.core.utils_booking import ensure_public_booking_token
 from apps.lessons.services import LessonConflictService, SessionQueryService
@@ -441,6 +449,21 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
             monthly_breakdown = [{"month": m, "income": Decimal("0.00")} for m in range(1, 13)]
 
         remaining = max(Decimal("0.00"), limit - total_income)
+
+        expenses_qs = Expense.objects.filter(user=user, date__year=year)
+        total_expenses = expenses_qs.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+        profit = total_income - total_expenses
+
+        category_sums = (
+            expenses_qs.values("category").annotate(total=Sum("amount")).order_by("category")
+        )
+        category_labels = dict(Expense.CATEGORY_CHOICES)
+        expenses_by_category = {
+            category_labels[row["category"]]: row["total"]
+            for row in category_sums
+            if row["total"] and row["total"] > 0
+        }
+
         context.update(
             {
                 "year": year,
@@ -453,6 +476,11 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
                 "kleinunternehmer_warning": total_income >= limit * Decimal("0.8"),
                 "kleinunternehmer_remaining": remaining,
                 "is_premium": is_premium,
+                "total_expenses": total_expenses,
+                "profit": profit,
+                "expenses_by_category": expenses_by_category,
+                "expense_list": list(expenses_qs.order_by("date")),
+                "expense_category_choices": [label for _, label in Expense.CATEGORY_CHOICES],
             }
         )
         return context
@@ -502,4 +530,101 @@ class TaxYearCsvView(LoginRequiredMixin, View):
                 ]
             )
 
+        writer.writerow([])
+        writer.writerow([_("Expenses")])
+        writer.writerow([_("Date"), _("Category"), _("Description"), _("Amount (EUR)")])
+
+        category_labels = dict(Expense.CATEGORY_CHOICES)
+        for exp in Expense.objects.filter(user=user, date__year=year).order_by("date"):
+            writer.writerow(
+                [
+                    exp.date.strftime("%d.%m.%Y"),
+                    str(category_labels.get(exp.category, exp.category)),
+                    exp.description,
+                    str(exp.amount).replace(".", ","),
+                ]
+            )
+
         return response
+
+
+class ExpenseListView(LoginRequiredMixin, ListView):
+    model = Expense
+    template_name = "core/expense_list.html"
+    context_object_name = "expenses"
+
+    def get_queryset(self):
+        qs = Expense.objects.filter(user=self.request.user)
+        year = self.request.GET.get("year")
+        if year:
+            try:
+                qs = qs.filter(date__year=int(year))
+            except (ValueError, TypeError):
+                pass
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        year_param = self.request.GET.get("year")
+        try:
+            year_filter = int(year_param) if year_param else now.year
+        except (ValueError, TypeError):
+            year_filter = now.year
+
+        total_expense = Expense.objects.filter(
+            user=self.request.user, date__year=year_filter
+        ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+
+        existing_years = list(
+            Expense.objects.filter(user=self.request.user)
+            .dates("date", "year")
+            .values_list("date__year", flat=True)
+            .order_by("-date__year")
+        )
+        if now.year not in existing_years:
+            existing_years = sorted(set(existing_years + [now.year]), reverse=True)
+
+        context["year_filter"] = year_filter
+        context["total_expense"] = total_expense
+        context["available_years"] = existing_years
+        return context
+
+
+class ExpenseCreateView(LoginRequiredMixin, CreateView):
+    model = Expense
+    fields = ["date", "amount", "category", "description", "notes"]
+    template_name = "core/expense_form.html"
+    success_url = reverse_lazy("core:expense_list")
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, _("Expense saved."))
+        return super().form_valid(form)
+
+
+class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
+    model = Expense
+    fields = ["date", "amount", "category", "description", "notes"]
+    template_name = "core/expense_form.html"
+    success_url = reverse_lazy("core:expense_list")
+
+    def get_queryset(self):
+        return Expense.objects.filter(user=self.request.user)
+
+    def form_valid(self, form):
+        messages.success(self.request, _("Expense updated."))
+        return super().form_valid(form)
+
+
+class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
+    model = Expense
+    template_name = "core/expense_confirm_delete.html"
+    success_url = reverse_lazy("core:expense_list")
+
+    def get_queryset(self):
+        return Expense.objects.filter(user=self.request.user)
+
+    def form_valid(self, form):
+        messages.success(self.request, _("Expense deleted."))
+        return super().form_valid(form)

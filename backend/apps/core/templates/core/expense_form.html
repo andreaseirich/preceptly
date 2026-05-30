@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% if object %}{% trans "Edit expense" %}{% else %}{% trans "New expense" %}{% endif %}
+ - TutorFlow
+{% endblock %}
+
+{% block content %}
+<h1>
+    {% if object %}{% trans "Edit expense" %}{% else %}{% trans "New expense" %}{% endif %}
+</h1>
+
+<form method="post" style="max-width:520px;">
+    {% csrf_token %}
+    {% for field in form %}
+    <div style="margin-bottom: 16px;">
+        <label for="{{ field.id_for_label }}" style="display:block; margin-bottom:4px; font-weight:500;">
+            {{ field.label }}{% if field.field.required %} *{% endif %}
+        </label>
+        {{ field }}
+        {% if field.errors %}
+        <ul style="color:#c0392b; margin:4px 0 0; padding-left:16px;">
+            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        {% if field.help_text %}
+        <small style="color:var(--text-secondary);">{{ field.help_text }}</small>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <div style="display:flex; gap:12px; margin-top:24px;">
+        <button type="submit" class="btn">
+            {% if object %}{% trans "Save changes" %}{% else %}{% trans "Save expense" %}{% endif %}
+        </button>
+        <a href="{% url 'core:expense_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+{% endblock %}

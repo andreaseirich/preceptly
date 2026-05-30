@@ -5,7 +5,14 @@ URL-Konfiguration für Core-App (Dashboard, Einnahmen, Authentication).
 from django.urls import path
 
 from apps.core import views
-from apps.core.views import TaxYearCsvView, TaxYearView
+from apps.core.views import (
+    ExpenseCreateView,
+    ExpenseDeleteView,
+    ExpenseListView,
+    ExpenseUpdateView,
+    TaxYearCsvView,
+    TaxYearView,
+)
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_email_test import test_email
 from apps.core.views_health import health_status
@@ -48,4 +55,8 @@ urlpatterns = [
     path("sw.js", service_worker_view, name="service_worker"),
     path("tax-year/", TaxYearView.as_view(), name="tax_year"),
     path("tax-year/csv/", TaxYearCsvView.as_view(), name="tax_year_csv"),
+    path("expenses/", ExpenseListView.as_view(), name="expense_list"),
+    path("expenses/new/", ExpenseCreateView.as_view(), name="expense_create"),
+    path("expenses/<int:pk>/edit/", ExpenseUpdateView.as_view(), name="expense_update"),
+    path("expenses/<int:pk>/delete/", ExpenseDeleteView.as_view(), name="expense_delete"),
 ]
