@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-25 09:19+0200\n"
+"POT-Creation-Date: 2026-05-30 16:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,11 +40,14 @@ msgstr "Unerwarteter Fehler: Maximale Wiederholungen überschritten ohne Fehler"
 #: apps/ai/client.py:132
 #, python-brace-format
 msgid "Mock mode is active, but no mock samples are available (key: {key})."
-msgstr "Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar (Schlüssel: {key})."
+msgstr "Der Mock-Modus ist aktiv, aber es sind keine Mock-Beispiele verfügbar (Schlüssel: {key})."
+"Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar (Schlüssel: {key})."
 
 #: apps/ai/client.py:157
 msgid "Mock mode is disabled. Call generate_text() with real prompts instead."
-msgstr "Mock-Modus ist deaktiviert. Rufen Sie generate_text() stattdessen mit echten Prompts auf."
+msgstr "Der Mock-Modus ist deaktiviert. Rufe stattdessen generate_text() mit echten Prompts auf."
+"Mock-Modus ist deaktiviert. Rufen Sie generate_text() stattdessen mit echten "
+"Prompts auf."
 
 #: apps/ai/client.py:167
 msgid "Mock mode is active, but no mock samples are available."
@@ -52,7 +55,9 @@ msgstr "Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar."
 
 #: apps/ai/client.py:250 apps/ai/client.py:308
 msgid "API rate limit exceeded. Please try again in a few minutes."
-msgstr "API-Rate-Limit überschritten. Bitte versuchen Sie es in ein paar Minuten erneut."
+msgstr "API-Anfragelimit überschritten. Bitte versuche es in einigen Minuten erneut."
+"API-Rate-Limit überschritten. Bitte versuchen Sie es in ein paar Minuten "
+"erneut."
 
 #: apps/ai/client.py:252
 #, python-brace-format
@@ -61,7 +66,9 @@ msgstr "API-Rate-Limit überschritten: {details}"
 
 #: apps/ai/client.py:258
 msgid "Invalid API key. Please check your LLM_API_KEY configuration."
-msgstr "Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihre LLM_API_KEY-Konfiguration."
+msgstr "Ungültiger API-Schlüssel. Überprüfe deine LLM_API_KEY-Konfiguration."
+"Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihre LLM_API_KEY-"
+"Konfiguration."
 
 #: apps/ai/client.py:260
 #, python-brace-format
@@ -110,31 +117,31 @@ msgstr "API-Fehler: {error}"
 msgid "Error parsing API response: {error}"
 msgstr "Fehler beim Parsen der API-Antwort: {error}"
 
-#: apps/ai/services.py:109
+#: apps/ai/services.py:110
 #, python-brace-format
 msgid "LLM error: {error}"
 msgstr "LLM-Fehler: {error}"
 
-#: apps/ai/services.py:119
+#: apps/ai/services.py:120
 #, python-brace-format
 msgid "Lesson plan for {date}"
 msgstr "Lektionsplan für {date}"
 
-#: apps/ai/views.py:26
+#: apps/ai/views.py:27
 msgid "This function is only available for premium users."
 msgstr "Diese Funktion ist nur für Premium-Benutzer verfügbar."
 
-#: apps/ai/views.py:39
+#: apps/ai/views.py:40
 #, python-brace-format
 msgid "Lesson plan successfully generated! Model: {model}"
 msgstr "Lektionsplan erfolgreich generiert! Modell: {model}"
 
-#: apps/ai/views.py:45
+#: apps/ai/views.py:46
 #, python-brace-format
 msgid "The lesson plan could not be generated: {error}"
 msgstr "Der Lektionsplan konnte nicht generiert werden: {error}"
 
-#: apps/ai/views.py:61
+#: apps/ai/views.py:62
 #, python-brace-format
 msgid ""
 "An unexpected error occurred: {error}. Please check the logs or try again "
@@ -143,45 +150,48 @@ msgstr ""
 "Ein unerwarteter Fehler ist aufgetreten: {error}. Bitte überprüfen Sie die "
 "Logs oder versuchen Sie es später erneut."
 
-#: apps/billing/admin.py:43 apps/billing/admin.py:56
+#: apps/billing/admin.py:44 apps/billing/admin.py:57
 #: apps/billing/templates/billing/invoice_detail.html:39
-#: apps/contracts/admin.py:54 apps/contracts/models.py:83
+#: apps/contracts/admin.py:54 apps/contracts/models.py:89
 #: apps/lessons/admin.py:30 apps/lessons/admin.py:85
-#: apps/lessons/recurring_forms.py:42
+#: apps/lessons/recurring_forms.py:43
 #: apps/lessons/templates/lessons/email_booking_notification.html:18
 #: apps/lessons/templates/lessons/email_booking_notification.txt:10
 msgid "Contract"
 msgstr "Vertrag"
 
-#: apps/billing/admin.py:44
+#: apps/billing/admin.py:45
 msgid "Payer Information"
 msgstr "Zahlerinformationen"
 
-#: apps/billing/admin.py:45
+#: apps/billing/admin.py:46
 #: apps/billing/templates/billing/invoice_detail.html:40
 #: apps/billing/templates/billing/invoice_list.html:33
 #: apps/contracts/admin.py:35 apps/contracts/admin.py:55
 msgid "Period"
 msgstr "Zeitraum"
 
-#: apps/billing/admin.py:46
+#: apps/billing/admin.py:47
 #: apps/billing/templates/billing/invoice_create.html:79
 #: apps/billing/templates/billing/invoice_detail.html:54
 #: apps/billing/templates/billing/invoice_document.html:127
 #: apps/billing/templates/billing/invoice_list.html:34
+#: apps/core/templates/core/expense_list.html:30
 #: apps/core/templates/core/income_overview.html:29
 #: apps/core/templates/core/income_overview.html:108
 #: apps/core/templates/core/reports.html:104
+#: apps/core/templates/core/tax_year.html:113
+#: apps/core/templates/core/tax_year.html:139
 msgid "Amount"
 msgstr "Betrag"
 
-#: apps/billing/admin.py:47
+#: apps/billing/admin.py:48
 #: apps/billing/templates/billing/invoice_detail.html:41
 #: apps/billing/templates/billing/invoice_list.html:35
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:26
 #: apps/contracts/templates/contracts/contract_detail.html:23
 #: apps/contracts/templates/contracts/contract_detail.html:65
-#: apps/contracts/templates/contracts/contract_list.html:19
+#: apps/contracts/templates/contracts/contract_list.html:44
 #: apps/core/templates/core/dashboard.html:17
 #: apps/core/templates/core/dashboard.html:50
 #: apps/core/templates/core/income_overview.html:27
@@ -196,22 +206,22 @@ msgstr "Betrag"
 msgid "Status"
 msgstr "Status"
 
-#: apps/billing/admin.py:48 apps/blocked_times/admin.py:25
+#: apps/billing/admin.py:49 apps/blocked_times/admin.py:25
 #: apps/contracts/admin.py:37 apps/contracts/admin.py:57 apps/core/admin.py:43
 #: apps/lesson_plans/admin.py:20 apps/lessons/admin.py:39
 #: apps/lessons/admin.py:108 apps/students/admin.py:18
 msgid "Timestamps"
 msgstr "Zeitstempel"
 
-#: apps/billing/admin.py:62
+#: apps/billing/admin.py:63
 msgid "Items"
 msgstr "Posten"
 
-#: apps/billing/admin.py:91
+#: apps/billing/admin.py:92
 #: apps/billing/templates/billing/invoice_create.html:77
 #: apps/contracts/admin.py:33 apps/contracts/admin.py:63
 #: apps/contracts/templates/contracts/contract_detail.html:17
-#: apps/contracts/templates/contracts/contract_list.html:13
+#: apps/contracts/templates/contracts/contract_list.html:38
 #: apps/core/templates/core/dashboard.html:16
 #: apps/core/templates/core/dashboard.html:49
 #: apps/core/templates/core/reports.html:102 apps/lessons/admin.py:45
@@ -226,23 +236,23 @@ msgstr "Posten"
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:23
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:17
 #: apps/lessons/templates/lessons/recurringlesson_list.html:16
-#: apps/students/models.py:53
+#: apps/students/models.py:58
 msgid "Student"
 msgstr "Schüler"
 
-#: apps/billing/forms.py:15 apps/billing/forms.py:23 apps/billing/forms.py:46
+#: apps/billing/forms.py:16 apps/billing/forms.py:24 apps/billing/forms.py:47
 msgid "All institutes"
 msgstr "Alle Institute"
 
-#: apps/billing/forms.py:37
+#: apps/billing/forms.py:38
 msgid "Start of the billing period"
 msgstr "Beginn des Abrechnungszeitraums"
 
-#: apps/billing/forms.py:41
+#: apps/billing/forms.py:42
 msgid "End of the billing period"
 msgstr "Ende des Abrechnungszeitraums"
 
-#: apps/billing/forms.py:48
+#: apps/billing/forms.py:49
 msgid ""
 "Optional: Filter by institute (only lessons from contracts with this "
 "institute)"
@@ -250,142 +260,143 @@ msgstr ""
 "Optional: Nach Institut filtern (nur Unterrichtsstunden von Verträgen mit "
 "diesem Institut)"
 
-#: apps/billing/forms.py:56
+#: apps/billing/forms.py:57
 msgid ""
 "Optional: Filter by contract (only lessons from this contract will be billed)"
 msgstr ""
 "Optional: Nach Vertrag filtern (nur Unterrichtsstunden aus diesem Vertrag "
 "werden abgerechnet)"
 
-#: apps/billing/forms.py:78
+#: apps/billing/forms.py:79
 msgid "The end date must not be before the start date."
 msgstr "Das Enddatum darf nicht vor dem Startdatum liegen."
 
-#: apps/billing/models.py:24
+#: apps/billing/models.py:25
 #: apps/billing/templates/billing/invoice_list.html:19
 msgid "Draft"
 msgstr "Entwurf"
 
-#: apps/billing/models.py:25
+#: apps/billing/models.py:26
 #: apps/billing/templates/billing/invoice_list.html:20
 msgid "Sent"
 msgstr "Versendet"
 
-#: apps/billing/models.py:26
+#: apps/billing/models.py:27
 #: apps/billing/templates/billing/invoice_list.html:21
-#: apps/lessons/models.py:17 apps/lessons/templates/lessons/week.html:117
+#: apps/lessons/models.py:18 apps/lessons/templates/lessons/week.html:117
 msgid "Paid"
 msgstr "Bezahlt"
 
-#: apps/billing/models.py:34
+#: apps/billing/models.py:35
 msgid "Tutor who owns this invoice"
 msgstr "Tutor, dem diese Rechnung gehört"
 
-#: apps/billing/models.py:41
+#: apps/billing/models.py:42
 msgid "Sequential invoice number (Premium). INV-<id> fallback for Basic."
-msgstr ""
+msgstr "Fortlaufende Rechnungsnummer (Premium). INV-<id> als Fallback für Basic."
 "Fortlaufende Rechnungsnummer (Premium). INV-<id> als Fallback für Basic."
 
-#: apps/billing/models.py:43
+#: apps/billing/models.py:44
 msgid "Name of the payer"
 msgstr "Name des Zahlungspflichtigen"
 
-#: apps/billing/models.py:44
+#: apps/billing/models.py:45
 msgid "Address of the payer"
 msgstr "Adresse des Zahlungspflichtigen"
 
-#: apps/billing/models.py:51
+#: apps/billing/models.py:52
 msgid "Associated contract (optional)"
 msgstr "Zugehöriger Vertrag (optional)"
 
-#: apps/billing/models.py:53
+#: apps/billing/models.py:54
 msgid "Billing period start"
 msgstr "Beginn des Abrechnungszeitraums"
 
-#: apps/billing/models.py:54
+#: apps/billing/models.py:55
 msgid "Billing period end"
 msgstr "Ende des Abrechnungszeitraums"
 
-#: apps/billing/models.py:56
+#: apps/billing/models.py:57
 msgid "Invoice status"
 msgstr "Status der Rechnung"
 
-#: apps/billing/models.py:58
+#: apps/billing/models.py:59
 msgid "When marked as sent"
 msgstr "Zeitpunkt der Versendung"
 
-#: apps/billing/models.py:59
+#: apps/billing/models.py:60
 msgid "When marked as paid"
 msgstr "Zeitpunkt der Bezahlung"
 
-#: apps/billing/models.py:64
+#: apps/billing/models.py:65
 msgid "Total invoice amount (may be negative if items include deductions)."
-msgstr ""
+msgstr "Gesamtbetrag der Rechnung (kann negativ sein, wenn Positionen Abzüge enthalten)."
 "Gesamtbetrag der Rechnung (kann negativ sein, wenn Positionen Abzüge "
 "enthalten)."
 
-#: apps/billing/models.py:70
+#: apps/billing/models.py:71
 msgid "Generated invoice document (HTML/PDF)"
 msgstr "Generiertes Rechnungsdokument (HTML/PDF)"
 
-#: apps/billing/models.py:76
+#: apps/billing/models.py:77
 msgid "Generated PDF document"
 msgstr "Generiertes PDF-Dokument"
 
-#: apps/billing/models.py:84
+#: apps/billing/models.py:85
 #: apps/billing/templates/billing/invoice_document.html:102
 msgid "Invoice"
 msgstr "Rechnung"
 
-#: apps/billing/models.py:85 apps/billing/templates/billing/invoice_list.html:5
+#: apps/billing/models.py:86 apps/billing/templates/billing/invoice_list.html:5
 #: apps/billing/templates/billing/invoice_list.html:8
 #: apps/core/templates/core/base.html:345
 #: apps/core/templates/core/reports.html:57
 msgid "Invoices"
 msgstr "Rechnungen"
 
-#: apps/billing/models.py:165
+#: apps/billing/models.py:166
 msgid "Associated invoice"
 msgstr "Zugehörige Rechnung"
 
-#: apps/billing/models.py:173
+#: apps/billing/models.py:174
 msgid "Associated lesson (may be deleted later)"
 msgstr "Zugehörige Lesson (kann später gelöscht werden)"
 
-#: apps/billing/models.py:175
+#: apps/billing/models.py:176
 msgid "Item description"
 msgstr "Beschreibung des Postens"
 
-#: apps/billing/models.py:176
+#: apps/billing/models.py:177
 msgid "Lesson date (copy)"
 msgstr "Datum der Unterrichtsstunde (Kopie)"
 
-#: apps/billing/models.py:177
+#: apps/billing/models.py:178
 msgid "Duration in minutes (copy)"
 msgstr "Dauer in Minuten (Kopie)"
 
-#: apps/billing/models.py:181
+#: apps/billing/models.py:182
 msgid ""
 "Amount for this item (negative for deductions, e.g. TutorSpace no-show)."
 msgstr ""
 "Betrag für diese Position (negativ für Abzüge, z. B. TutorSpace-Ausfall)."
 
-#: apps/billing/models.py:187
+#: apps/billing/models.py:188
 msgid "Invoice Item"
 msgstr "Rechnungsposten"
 
-#: apps/billing/models.py:188
+#: apps/billing/models.py:189
 #: apps/billing/templates/billing/invoice_detail.html:46
 #: apps/billing/templates/billing/invoice_document.html:120
 msgid "Invoice Items"
 msgstr "Rechnungsposten"
 
-#: apps/billing/services.py:88
+#: apps/billing/services.py:89
 #: apps/billing/templates/billing/invoice_create.html:100
 msgid "No billable lessons found in the specified period."
-msgstr "Keine abrechenbaren Unterrichtsstunden im angegebenen Zeitraum gefunden."
+msgstr "Im angegebenen Zeitraum wurden keine abrechenbaren Stunden gefunden."
+"Keine abrechenbaren Unterrichtsstunden im angegebenen Zeitraum gefunden."
 
-#: apps/billing/services.py:151
+#: apps/billing/services.py:152
 #, python-brace-format
 msgid "Lesson {date} {time} - {student}"
 msgstr "Unterrichtsstunde {date} {time} - {student}"
@@ -434,6 +445,7 @@ msgstr ""
 "zurückgesetzt, wenn sie nicht in anderen Rechnungen enthalten sind."
 
 #: apps/billing/templates/billing/invoice_confirm_delete.html:23
+#: apps/core/templates/core/expense_confirm_delete.html:18
 msgid "Yes, delete"
 msgstr "Ja, löschen"
 
@@ -446,7 +458,12 @@ msgstr "Ja, löschen"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_generate.html:21
 #: apps/contracts/templates/contracts/contract_confirm_delete.html:16
 #: apps/contracts/templates/contracts/contract_form.html:50
-#: apps/core/templates/core/base.html:401
+#: apps/contracts/templates/contracts/tier_config_confirm_delete.html:15
+#: apps/contracts/templates/contracts/tier_config_form.html:10
+#: apps/contracts/templates/contracts/tier_config_form.html:55
+#: apps/core/templates/core/base.html:402
+#: apps/core/templates/core/expense_confirm_delete.html:19
+#: apps/core/templates/core/expense_form.html:37
 #: apps/core/templates/core/settings.html:169
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:46
 #: apps/lessons/templates/lessons/lesson_form.html:177
@@ -490,7 +507,7 @@ msgid "Period:"
 msgstr "Zeitraum:"
 
 #: apps/billing/templates/billing/invoice_create.html:24
-#: apps/core/templates/core/base.html:424
+#: apps/core/templates/core/base.html:425
 #: apps/lessons/templates/lessons/student_booking.html:399
 #: apps/lessons/templates/lessons/week.html:39
 #: apps/lessons/templates/lessons/week.html:165
@@ -514,7 +531,9 @@ msgstr "Zugehöriger Vertrag (optional)"
 
 #: apps/billing/templates/billing/invoice_create.html:44
 msgid "If selected, only lessons from this contract will be billed."
-msgstr "Wenn ausgewählt, werden nur Unterrichtsstunden aus diesem Vertrag abgerechnet."
+msgstr "Wenn ausgewählt, werden nur Stunden aus diesem Vertrag abgerechnet."
+"Wenn ausgewählt, werden nur Unterrichtsstunden aus diesem Vertrag "
+"abgerechnet."
 
 #: apps/billing/templates/billing/invoice_create.html:47
 msgid "Show Preview"
@@ -577,13 +596,17 @@ msgstr[1] "Verfügbare Unterrichtsstunden (%(counter)s)"
 
 #: apps/billing/templates/billing/invoice_create.html:70
 msgid "These lessons will be automatically included in the invoice:"
-msgstr "Diese Unterrichtsstunden werden automatisch in die Rechnung aufgenommen:"
+msgstr "Diese Stunden werden automatisch in die Rechnung aufgenommen:"
+"Diese Unterrichtsstunden werden automatisch in die Rechnung aufgenommen:"
 
 #: apps/billing/templates/billing/invoice_create.html:75
 #: apps/billing/templates/billing/invoice_detail.html:51
 #: apps/billing/templates/billing/invoice_document.html:124
 #: apps/contracts/templates/contracts/contract_detail.html:63
 #: apps/core/templates/core/dashboard.html:47
+#: apps/core/templates/core/expense_list.html:27
+#: apps/core/templates/core/tax_year.html:110 apps/core/views.py:507
+#: apps/core/views.py:535
 #: apps/lessons/templates/lessons/conflict_detail.html:39
 #: apps/lessons/templates/lessons/email_booking_notification.html:15
 #: apps/lessons/templates/lessons/email_booking_notification.txt:7
@@ -618,7 +641,7 @@ msgstr "Zeit"
 #: apps/billing/templates/billing/invoice_detail.html:53
 #: apps/billing/templates/billing/invoice_document.html:126
 #: apps/blocked_times/admin.py:35
-#: apps/contracts/templates/contracts/contract_list.html:16
+#: apps/contracts/templates/contracts/contract_list.html:41
 #: apps/lessons/templates/lessons/email_booking_notification.html:17
 #: apps/lessons/templates/lessons/email_booking_notification.txt:9
 #: apps/lessons/templates/lessons/lesson_list.html:16
@@ -630,7 +653,7 @@ msgstr "Dauer"
 #: apps/billing/templates/billing/invoice_create.html:88
 #: apps/billing/templates/billing/invoice_detail.html:62
 #: apps/billing/templates/billing/invoice_document.html:135
-#: apps/contracts/templates/contracts/contract_list.html:31
+#: apps/contracts/templates/contracts/contract_list.html:56
 #: apps/students/templates/students/student_detail.html:95
 #, python-format
 msgid "%(minutes)s Min."
@@ -650,7 +673,9 @@ msgstr "Es gibt Unterrichtsstunden mit Status 'unterrichtet' im Zeitraum"
 
 #: apps/billing/templates/billing/invoice_create.html:105
 msgid "These lessons are not already included in another invoice"
-msgstr "Diese Unterrichtsstunden sind nicht bereits in einer anderen Rechnung enthalten"
+msgstr "Diese Stunden sind noch nicht in einer anderen Rechnung enthalten"
+"Diese Unterrichtsstunden sind nicht bereits in einer anderen Rechnung "
+"enthalten"
 
 #: apps/billing/templates/billing/invoice_create.html:113
 msgid "Create Invoice"
@@ -683,7 +708,7 @@ msgid "View Document"
 msgstr "Dokument anzeigen"
 
 #: apps/billing/templates/billing/invoice_detail.html:19
-#: apps/core/templates/core/base.html:414
+#: apps/core/templates/core/base.html:415
 msgid "Generate PDF"
 msgstr "PDF erzeugen"
 
@@ -696,17 +721,17 @@ msgid "PDF generated"
 msgstr "PDF erzeugt"
 
 #: apps/billing/templates/billing/invoice_detail.html:24
-#: apps/core/templates/core/base.html:416
+#: apps/core/templates/core/base.html:417
 msgid "Mark as sent"
 msgstr "Als gesendet markieren"
 
 #: apps/billing/templates/billing/invoice_detail.html:27
-#: apps/core/templates/core/base.html:417
+#: apps/core/templates/core/base.html:418
 msgid "Mark as paid"
 msgstr "Als bezahlt markieren"
 
 #: apps/billing/templates/billing/invoice_detail.html:30
-#: apps/core/templates/core/base.html:418
+#: apps/core/templates/core/base.html:419
 msgid "Undo payment"
 msgstr "Bezahlung rückgängig"
 
@@ -715,8 +740,11 @@ msgstr "Bezahlung rückgängig"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:11
 #: apps/contracts/templates/contracts/contract_confirm_delete.html:15
 #: apps/contracts/templates/contracts/contract_detail.html:11
-#: apps/contracts/templates/contracts/contract_list.html:49
-#: apps/core/templates/core/base.html:402
+#: apps/contracts/templates/contracts/contract_list.html:74
+#: apps/contracts/templates/contracts/tier_config_confirm_delete.html:14
+#: apps/contracts/templates/contracts/tier_config_list.html:37
+#: apps/core/templates/core/base.html:403
+#: apps/core/templates/core/expense_list.html:44
 #: apps/lessons/templates/lessons/lesson_detail.html:12
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:11
 #: apps/students/templates/students/student_confirm_delete.html:15
@@ -732,7 +760,7 @@ msgstr "Löschen"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:15
 #: apps/contracts/templates/contracts/contract_detail.html:15
 #: apps/contracts/templates/contracts/contract_detail.html:75
-#: apps/contracts/templates/contracts/contract_list.html:47
+#: apps/contracts/templates/contracts/contract_list.html:72
 #: apps/lessons/templates/lessons/calendar.html:67
 #: apps/lessons/templates/lessons/lesson_detail.html:16
 #: apps/lessons/templates/lessons/lesson_list.html:50
@@ -772,9 +800,10 @@ msgstr "Erstellt"
 
 #: apps/billing/templates/billing/invoice_detail.html:52
 #: apps/billing/templates/billing/invoice_document.html:125
-#: apps/blocked_times/recurring_forms.py:34
+#: apps/blocked_times/recurring_forms.py:35
 #: apps/blocked_times/templates/blocked_times/blockedtime_detail.html:19
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:19
+#: apps/core/templates/core/expense_list.html:29 apps/core/views.py:535
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -816,7 +845,9 @@ msgid "All"
 msgstr "Alle"
 
 #: apps/billing/templates/billing/invoice_list.html:23
+#: apps/core/templates/core/expense_list.html:18
 #: apps/core/templates/core/reports.html:39
+#: apps/core/templates/core/tax_year.html:18
 msgid "Apply"
 msgstr "Anwenden"
 
@@ -827,7 +858,9 @@ msgstr "ID"
 #: apps/billing/templates/billing/invoice_list.html:37
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:42
 #: apps/contracts/templates/contracts/contract_detail.html:66
-#: apps/contracts/templates/contracts/contract_list.html:21
+#: apps/contracts/templates/contracts/contract_list.html:46
+#: apps/contracts/templates/contracts/tier_config_list.html:22
+#: apps/contracts/templates/contracts/tier_config_list.html:55
 #: apps/core/templates/core/income_overview.html:71
 #: apps/lessons/templates/lessons/lesson_list.html:21
 #: apps/lessons/templates/lessons/lesson_month.html:18
@@ -842,14 +875,14 @@ msgstr "Aktionen"
 msgid "No invoices available."
 msgstr "Keine Rechnungen vorhanden."
 
-#: apps/billing/views.py:217
+#: apps/billing/views.py:218
 #, python-brace-format
 msgid "Invoice {id} successfully created with {count} lesson."
 msgid_plural "Invoice {id} successfully created with {count} lessons."
 msgstr[0] "Rechnung {id} erfolgreich erstellt mit {count} Unterrichtsstunde."
 msgstr[1] "Rechnung {id} erfolgreich erstellt mit {count} Unterrichtsstunden."
 
-#: apps/billing/views.py:247
+#: apps/billing/views.py:248
 #, python-brace-format
 msgid "Invoice deleted. {count} lesson was reset to \"taught\"."
 msgid_plural "Invoice deleted. {count} lessons were reset to \"taught\"."
@@ -860,68 +893,68 @@ msgstr[1] ""
 "Rechnung gelöscht. {count} Unterrichtsstunden wurden auf \"unterrichtet\" "
 "zurückgesetzt."
 
-#: apps/billing/views.py:253
+#: apps/billing/views.py:254
 msgid "Invoice successfully deleted."
 msgstr "Rechnung erfolgreich gelöscht."
 
-#: apps/billing/views.py:265
+#: apps/billing/views.py:266
 msgid "Invoice document successfully generated."
 msgstr "Rechnungsdokument erfolgreich generiert."
 
-#: apps/billing/views.py:267
+#: apps/billing/views.py:268
 #, python-brace-format
 msgid "Error generating document: {error}"
 msgstr "Fehler beim Generieren des Dokuments: {error}"
 
-#: apps/billing/views.py:280
+#: apps/billing/views.py:281
 msgid "Invoice document not found."
 msgstr "Rechnungsdokument nicht gefunden."
 
-#: apps/billing/views.py:285
+#: apps/billing/views.py:286
 msgid "Invoice document file not found."
 msgstr "Rechnungsdokumentdatei nicht gefunden."
 
-#: apps/billing/views.py:299
+#: apps/billing/views.py:300
 msgid "Invoice is already marked as sent or paid."
 msgstr "Rechnung ist bereits als versendet oder bezahlt markiert."
 
-#: apps/billing/views.py:302
+#: apps/billing/views.py:303
 msgid "Invoice marked as sent."
 msgstr "Rechnung als versendet markiert."
 
-#: apps/billing/views.py:312
+#: apps/billing/views.py:313
 msgid "Invoice is already marked as paid."
 msgstr "Rechnung ist bereits als bezahlt markiert."
 
-#: apps/billing/views.py:315
+#: apps/billing/views.py:316
 msgid "Invoice marked as paid."
 msgstr "Rechnung als bezahlt markiert."
 
-#: apps/billing/views.py:325
+#: apps/billing/views.py:326
 msgid "Invoice is not marked as paid."
 msgstr "Rechnung ist nicht als bezahlt markiert."
 
-#: apps/billing/views.py:328
+#: apps/billing/views.py:329
 msgid "Payment status undone."
 msgstr "Zahlungsstatus zurückgesetzt."
 
-#: apps/billing/views.py:343
+#: apps/billing/views.py:346
 msgid "PDF successfully generated."
 msgstr "PDF erfolgreich erzeugt."
 
-#: apps/billing/views.py:345
+#: apps/billing/views.py:348
 msgid "Error generating PDF. Please try again."
 msgstr "Fehler beim PDF-Erzeugen. Bitte erneut versuchen."
 
-#: apps/billing/views.py:362
+#: apps/billing/views.py:367
 msgid "Could not generate PDF."
 msgstr "PDF konnte nicht erzeugt werden."
 
-#: apps/billing/views.py:364
+#: apps/billing/views.py:369
 msgid "Invoice PDF not found."
 msgstr "Rechnungs-PDF nicht gefunden."
 
-#: apps/billing/views.py:373
+#: apps/billing/views.py:378
 msgid "Invoice PDF file not found."
 msgstr "Rechnungs-PDF-Datei nicht gefunden."
 
@@ -934,149 +967,149 @@ msgstr "Rechnungs-PDF-Datei nicht gefunden."
 msgid "Recurrence"
 msgstr "Wiederholung"
 
-#: apps/blocked_times/forms.py:18
+#: apps/blocked_times/forms.py:19
 msgid "Edit only this blocked time"
 msgstr "Nur diese Sperrzeit bearbeiten"
 
-#: apps/blocked_times/forms.py:19 apps/lessons/forms.py:19
+#: apps/blocked_times/forms.py:20 apps/lessons/forms.py:20
 msgid "Edit entire series"
 msgstr "Gesamte Serie bearbeiten"
 
-#: apps/blocked_times/forms.py:21 apps/lessons/forms.py:21
+#: apps/blocked_times/forms.py:22 apps/lessons/forms.py:22
 msgid "Edit scope"
 msgstr "Bearbeitungsumfang"
 
-#: apps/blocked_times/forms.py:28
+#: apps/blocked_times/forms.py:29
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:75
 msgid "Repeat this blocked time"
 msgstr "Diese Sperrzeit wiederholen"
 
-#: apps/blocked_times/forms.py:29
+#: apps/blocked_times/forms.py:30
 msgid "Create a recurring series instead of a single blocked time"
-msgstr ""
+msgstr "Eine wiederkehrende Serie statt eines einzelnen blockierten Termins erstellen"
 "Serie mit wiederkehrender Sperrzeit statt einzelner Sperrzeit erstellen"
 
-#: apps/blocked_times/forms.py:37 apps/blocked_times/recurring_models.py:88
-#: apps/lessons/forms.py:37 apps/lessons/recurring_models.py:102
+#: apps/blocked_times/forms.py:38 apps/blocked_times/recurring_models.py:88
+#: apps/lessons/forms.py:38 apps/lessons/recurring_models.py:103
 msgid "None"
 msgstr "Keine"
 
-#: apps/blocked_times/forms.py:38 apps/blocked_times/recurring_models.py:32
-#: apps/lessons/forms.py:38 apps/lessons/recurring_models.py:36
+#: apps/blocked_times/forms.py:39 apps/blocked_times/recurring_models.py:32
+#: apps/lessons/forms.py:39 apps/lessons/recurring_models.py:37
 #: apps/lessons/templates/lessons/student_booking.html:226
 msgid "Weekly"
 msgstr "Wöchentlich"
 
-#: apps/blocked_times/forms.py:39 apps/lessons/forms.py:39
+#: apps/blocked_times/forms.py:40 apps/lessons/forms.py:40
 msgid "Every 2 Weeks"
 msgstr "Alle 2 Wochen"
 
-#: apps/blocked_times/forms.py:40 apps/blocked_times/recurring_models.py:34
-#: apps/lessons/forms.py:40 apps/lessons/recurring_models.py:38
+#: apps/blocked_times/forms.py:41 apps/blocked_times/recurring_models.py:34
+#: apps/lessons/forms.py:41 apps/lessons/recurring_models.py:39
 #: apps/lessons/templates/lessons/student_booking.html:228
 msgid "Monthly"
 msgstr "Monatlich"
 
-#: apps/blocked_times/forms.py:42 apps/lessons/forms.py:42
+#: apps/blocked_times/forms.py:43 apps/lessons/forms.py:43
 msgid "Repeat pattern"
 msgstr "Wiederholungsmuster"
 
-#: apps/blocked_times/forms.py:47 apps/lessons/forms.py:47
+#: apps/blocked_times/forms.py:48 apps/lessons/forms.py:48
 msgid "End date"
 msgstr "Enddatum"
 
-#: apps/blocked_times/forms.py:48 apps/lessons/forms.py:48
+#: apps/blocked_times/forms.py:49 apps/lessons/forms.py:49
 msgid "When should the series end? (optional)"
 msgstr "Wann soll die Serie enden? (optional)"
 
-#: apps/blocked_times/forms.py:56 apps/blocked_times/recurring_forms.py:40
+#: apps/blocked_times/forms.py:57 apps/blocked_times/recurring_forms.py:41
 #: apps/blocked_times/recurring_models.py:43
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:134
 #: apps/core/forms.py:59 apps/core/templates/core/settings.html:21
-#: apps/lessons/forms.py:56 apps/lessons/recurring_forms.py:50
-#: apps/lessons/recurring_models.py:47
+#: apps/lessons/forms.py:57 apps/lessons/recurring_forms.py:51
+#: apps/lessons/recurring_models.py:48
 #: apps/lessons/templates/lessons/lesson_form.html:140
 #: apps/lessons/templates/lessons/student_booking.html:234
-#: apps/lessons/views_calendar.py:92 apps/lessons/views_calendar.py:267
+#: apps/lessons/views_calendar.py:93 apps/lessons/views_calendar.py:268
 msgid "Monday"
 msgstr "Montag"
 
-#: apps/blocked_times/forms.py:57 apps/blocked_times/recurring_forms.py:41
+#: apps/blocked_times/forms.py:58 apps/blocked_times/recurring_forms.py:42
 #: apps/blocked_times/recurring_models.py:44
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:138
 #: apps/core/forms.py:60 apps/core/templates/core/settings.html:41
-#: apps/lessons/forms.py:57 apps/lessons/recurring_forms.py:51
-#: apps/lessons/recurring_models.py:48
+#: apps/lessons/forms.py:58 apps/lessons/recurring_forms.py:52
+#: apps/lessons/recurring_models.py:49
 #: apps/lessons/templates/lessons/lesson_form.html:144
 #: apps/lessons/templates/lessons/student_booking.html:235
-#: apps/lessons/views_calendar.py:93 apps/lessons/views_calendar.py:268
+#: apps/lessons/views_calendar.py:94 apps/lessons/views_calendar.py:269
 msgid "Tuesday"
 msgstr "Dienstag"
 
-#: apps/blocked_times/forms.py:58 apps/blocked_times/recurring_forms.py:42
+#: apps/blocked_times/forms.py:59 apps/blocked_times/recurring_forms.py:43
 #: apps/blocked_times/recurring_models.py:45
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:142
 #: apps/core/forms.py:61 apps/core/templates/core/settings.html:61
-#: apps/lessons/forms.py:58 apps/lessons/recurring_forms.py:52
-#: apps/lessons/recurring_models.py:49
+#: apps/lessons/forms.py:59 apps/lessons/recurring_forms.py:53
+#: apps/lessons/recurring_models.py:50
 #: apps/lessons/templates/lessons/lesson_form.html:148
 #: apps/lessons/templates/lessons/student_booking.html:236
-#: apps/lessons/views_calendar.py:94 apps/lessons/views_calendar.py:269
+#: apps/lessons/views_calendar.py:95 apps/lessons/views_calendar.py:270
 msgid "Wednesday"
 msgstr "Mittwoch"
 
-#: apps/blocked_times/forms.py:59 apps/blocked_times/recurring_forms.py:43
+#: apps/blocked_times/forms.py:60 apps/blocked_times/recurring_forms.py:44
 #: apps/blocked_times/recurring_models.py:46
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:146
 #: apps/core/forms.py:62 apps/core/templates/core/settings.html:81
-#: apps/lessons/forms.py:59 apps/lessons/recurring_forms.py:53
-#: apps/lessons/recurring_models.py:50
+#: apps/lessons/forms.py:60 apps/lessons/recurring_forms.py:54
+#: apps/lessons/recurring_models.py:51
 #: apps/lessons/templates/lessons/lesson_form.html:152
 #: apps/lessons/templates/lessons/student_booking.html:237
-#: apps/lessons/views_calendar.py:95 apps/lessons/views_calendar.py:270
+#: apps/lessons/views_calendar.py:96 apps/lessons/views_calendar.py:271
 msgid "Thursday"
 msgstr "Donnerstag"
 
-#: apps/blocked_times/forms.py:60 apps/blocked_times/recurring_forms.py:44
+#: apps/blocked_times/forms.py:61 apps/blocked_times/recurring_forms.py:45
 #: apps/blocked_times/recurring_models.py:47
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:150
 #: apps/core/forms.py:63 apps/core/templates/core/settings.html:101
-#: apps/lessons/forms.py:60 apps/lessons/recurring_forms.py:54
-#: apps/lessons/recurring_models.py:51
+#: apps/lessons/forms.py:61 apps/lessons/recurring_forms.py:55
+#: apps/lessons/recurring_models.py:52
 #: apps/lessons/templates/lessons/lesson_form.html:156
 #: apps/lessons/templates/lessons/student_booking.html:238
-#: apps/lessons/views_calendar.py:96 apps/lessons/views_calendar.py:271
+#: apps/lessons/views_calendar.py:97 apps/lessons/views_calendar.py:272
 msgid "Friday"
 msgstr "Freitag"
 
-#: apps/blocked_times/forms.py:61 apps/blocked_times/recurring_forms.py:45
+#: apps/blocked_times/forms.py:62 apps/blocked_times/recurring_forms.py:46
 #: apps/blocked_times/recurring_models.py:48
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:154
 #: apps/core/forms.py:64 apps/core/templates/core/settings.html:121
-#: apps/lessons/forms.py:61 apps/lessons/recurring_forms.py:55
-#: apps/lessons/recurring_models.py:52
+#: apps/lessons/forms.py:62 apps/lessons/recurring_forms.py:56
+#: apps/lessons/recurring_models.py:53
 #: apps/lessons/templates/lessons/lesson_form.html:160
 #: apps/lessons/templates/lessons/student_booking.html:239
-#: apps/lessons/views_calendar.py:97 apps/lessons/views_calendar.py:272
+#: apps/lessons/views_calendar.py:98 apps/lessons/views_calendar.py:273
 msgid "Saturday"
 msgstr "Samstag"
 
-#: apps/blocked_times/forms.py:62 apps/blocked_times/recurring_forms.py:46
+#: apps/blocked_times/forms.py:63 apps/blocked_times/recurring_forms.py:47
 #: apps/blocked_times/recurring_models.py:49
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:158
 #: apps/core/forms.py:65 apps/core/templates/core/settings.html:141
-#: apps/lessons/forms.py:62 apps/lessons/recurring_forms.py:56
-#: apps/lessons/recurring_models.py:53
+#: apps/lessons/forms.py:63 apps/lessons/recurring_forms.py:57
+#: apps/lessons/recurring_models.py:54
 #: apps/lessons/templates/lessons/lesson_form.html:164
 #: apps/lessons/templates/lessons/student_booking.html:240
-#: apps/lessons/views_calendar.py:98 apps/lessons/views_calendar.py:273
+#: apps/lessons/views_calendar.py:99 apps/lessons/views_calendar.py:274
 msgid "Sunday"
 msgstr "Sonntag"
 
-#: apps/blocked_times/forms.py:64
+#: apps/blocked_times/forms.py:65
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:121
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:21
-#: apps/lessons/admin.py:120 apps/lessons/forms.py:64
+#: apps/lessons/admin.py:120 apps/lessons/forms.py:65
 #: apps/lessons/templates/lessons/lesson_form.html:126
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:24
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:18
@@ -1084,15 +1117,15 @@ msgstr "Sonntag"
 msgid "Weekdays"
 msgstr "Wochentage"
 
-#: apps/blocked_times/forms.py:65
+#: apps/blocked_times/forms.py:66
 msgid "Select weekdays for the recurring blocked time"
 msgstr "Wochentage für die wiederkehrende Sperrzeit auswählen"
 
-#: apps/blocked_times/forms.py:135
+#: apps/blocked_times/forms.py:136
 msgid "Please select a repeat pattern when creating a recurring blocked time."
 msgstr "Bitte ein Wiederholungsmuster für die Sperrzeitserie auswählen."
 
-#: apps/blocked_times/forms.py:140
+#: apps/blocked_times/forms.py:141
 msgid ""
 "Please select at least one weekday when creating a recurring blocked time."
 msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
@@ -1123,7 +1156,8 @@ msgstr "Ist dies eine wiederkehrende Blockzeit?"
 
 #: apps/blocked_times/models.py:33
 msgid "Recurrence pattern (e.g., 'weekly', 'daily') - for future extension"
-msgstr "Wiederholungsmuster (z. B. 'weekly', 'daily') – für zukünftige Erweiterung"
+msgstr "Wiederholungsmuster (z. B. 'weekly', 'daily') – für zukünftige Erweiterungen"
+"Wiederholungsmuster (z. B. 'weekly', 'daily') – für zukünftige Erweiterung"
 
 #: apps/blocked_times/models.py:40
 msgid "Blocked Time"
@@ -1133,29 +1167,29 @@ msgstr "Blockzeit"
 msgid "Blocked Times"
 msgstr "Blockzeiten"
 
-#: apps/blocked_times/recurring_forms.py:33
+#: apps/blocked_times/recurring_forms.py:34
 #: apps/blocked_times/templates/blocked_times/blockedtime_detail.html:17
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:17
 msgid "Title"
 msgstr "Titel"
 
-#: apps/blocked_times/recurring_forms.py:35
+#: apps/blocked_times/recurring_forms.py:36
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:22
-#: apps/lessons/recurring_forms.py:43
+#: apps/lessons/recurring_forms.py:44
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:26
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:19
 #: apps/lessons/templates/lessons/recurringlesson_list.html:19
 msgid "Start Date"
 msgstr "Startdatum"
 
-#: apps/blocked_times/recurring_forms.py:36
+#: apps/blocked_times/recurring_forms.py:37
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:23
-#: apps/lessons/recurring_forms.py:44
+#: apps/lessons/recurring_forms.py:45
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:20
 msgid "End Date"
 msgstr "Enddatum"
 
-#: apps/blocked_times/recurring_forms.py:37
+#: apps/blocked_times/recurring_forms.py:38
 #: apps/blocked_times/recurring_models.py:28
 #: apps/core/templates/core/settings.html:30
 #: apps/core/templates/core/settings.html:50
@@ -1163,12 +1197,12 @@ msgstr "Enddatum"
 #: apps/core/templates/core/settings.html:90
 #: apps/core/templates/core/settings.html:110
 #: apps/core/templates/core/settings.html:130
-#: apps/core/templates/core/settings.html:150 apps/lessons/models.py:27
-#: apps/lessons/recurring_forms.py:45 apps/lessons/recurring_models.py:24
+#: apps/core/templates/core/settings.html:150 apps/lessons/models.py:28
+#: apps/lessons/recurring_forms.py:46 apps/lessons/recurring_models.py:25
 msgid "Start time"
 msgstr "Startzeit"
 
-#: apps/blocked_times/recurring_forms.py:38
+#: apps/blocked_times/recurring_forms.py:39
 #: apps/blocked_times/recurring_models.py:29
 #: apps/core/templates/core/settings.html:34
 #: apps/core/templates/core/settings.html:54
@@ -1180,18 +1214,18 @@ msgstr "Startzeit"
 msgid "End time"
 msgstr "Endzeit"
 
-#: apps/blocked_times/recurring_forms.py:39
+#: apps/blocked_times/recurring_forms.py:40
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:120
-#: apps/lessons/recurring_forms.py:49
+#: apps/lessons/recurring_forms.py:50
 #: apps/lessons/templates/lessons/lesson_form.html:125
 msgid "Recurrence type"
 msgstr "Wiederholungstyp"
 
-#: apps/blocked_times/recurring_forms.py:47
+#: apps/blocked_times/recurring_forms.py:48
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:26
 #: apps/contracts/templates/contracts/contract_detail.html:23
-#: apps/contracts/templates/contracts/contract_list.html:34
-#: apps/lessons/recurring_forms.py:57
+#: apps/contracts/templates/contracts/contract_list.html:59
+#: apps/lessons/recurring_forms.py:58
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:40
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:23
 #: apps/lessons/templates/lessons/recurringlesson_list.html:31
@@ -1204,7 +1238,7 @@ msgid "User who owns this recurring blocked time"
 msgstr "Benutzer, dem diese Sperrzeitserie gehört"
 
 #: apps/blocked_times/recurring_models.py:26
-#: apps/lessons/recurring_models.py:20
+#: apps/lessons/recurring_models.py:21
 msgid "Series start date"
 msgstr "Serienstartdatum"
 
@@ -1213,18 +1247,18 @@ msgid "Series end date (optional)"
 msgstr "Serienenddatum (optional)"
 
 #: apps/blocked_times/recurring_models.py:33
-#: apps/lessons/recurring_models.py:37
+#: apps/lessons/recurring_models.py:38
 #: apps/lessons/templates/lessons/student_booking.html:227
 msgid "Bi-weekly"
 msgstr "Zweiwöchentlich"
 
 #: apps/blocked_times/recurring_models.py:40
-#: apps/lessons/recurring_models.py:44
+#: apps/lessons/recurring_models.py:45
 msgid "Recurrence type: Weekly, bi-weekly, or monthly"
 msgstr "Wiederholungstyp: Wöchentlich, zweiwöchentlich oder monatlich"
 
 #: apps/blocked_times/recurring_models.py:50
-#: apps/lessons/recurring_models.py:54
+#: apps/lessons/recurring_models.py:55
 msgid "Is the series active?"
 msgstr "Ist die Serie aktiv?"
 
@@ -1238,59 +1272,59 @@ msgid "Recurring Blocked Times"
 msgstr "Wiederkehrende Blockzeiten"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:93
+#: apps/lessons/recurring_models.py:94
 msgid "Mo"
 msgstr "Mo"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:94
+#: apps/lessons/recurring_models.py:95
 msgid "Tu"
 msgstr "Di"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:95
+#: apps/lessons/recurring_models.py:96
 msgid "We"
 msgstr "Mi"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:96
+#: apps/lessons/recurring_models.py:97
 msgid "Th"
 msgstr "Do"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:97
+#: apps/lessons/recurring_models.py:98
 msgid "Fr"
 msgstr "Fr"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:98
+#: apps/lessons/recurring_models.py:99
 msgid "Sa"
 msgstr "Sa"
 
 #: apps/blocked_times/recurring_models.py:86
-#: apps/lessons/recurring_models.py:99
+#: apps/lessons/recurring_models.py:100
 msgid "Su"
 msgstr "So"
 
-#: apps/blocked_times/recurring_service.py:302
-#: apps/lessons/conflict_service.py:147
+#: apps/blocked_times/recurring_service.py:303
+#: apps/lessons/conflict_service.py:148
 #, python-brace-format
 msgid "Overlap with lesson for {student} ({time})"
 msgstr "Überschneidung mit Unterrichtsstunde für {student} ({time})"
 
-#: apps/blocked_times/recurring_views.py:44
+#: apps/blocked_times/recurring_views.py:45
 msgid "Recurring blocked time successfully created."
 msgstr "Wiederkehrende Blockzeit erfolgreich erstellt."
 
-#: apps/blocked_times/recurring_views.py:73
+#: apps/blocked_times/recurring_views.py:74
 msgid "Recurring blocked time successfully updated."
 msgstr "Wiederkehrende Blockzeit erfolgreich aktualisiert."
 
-#: apps/blocked_times/recurring_views.py:94
+#: apps/blocked_times/recurring_views.py:95
 msgid "Recurring blocked time successfully deleted."
 msgstr "Wiederkehrende Blockzeit erfolgreich gelöscht."
 
-#: apps/blocked_times/recurring_views.py:119
+#: apps/blocked_times/recurring_views.py:120
 #, python-brace-format
 msgid ""
 "{created} blocked time created, {skipped} skipped, {conflicts} conflict "
@@ -1305,7 +1339,7 @@ msgstr[1] ""
 "{created} Sperrzeiten erstellt, {skipped} übersprungen, {conflicts} "
 "Konflikte erkannt!"
 
-#: apps/blocked_times/recurring_views.py:132
+#: apps/blocked_times/recurring_views.py:133
 #, python-brace-format
 msgid "{created} blocked time successfully created, {skipped} skipped."
 msgid_plural "{created} blocked times successfully created, {skipped} skipped."
@@ -1348,7 +1382,7 @@ msgstr "Serienzeitraum:"
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:15
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:122
 #: apps/contracts/templates/contracts/contract_detail.html:22
-#: apps/contracts/templates/contracts/contract_list.html:33
+#: apps/contracts/templates/contracts/contract_list.html:58
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:21
 #: apps/lessons/templates/lessons/lesson_form.html:17
 #: apps/lessons/templates/lessons/lesson_form.html:127
@@ -1391,8 +1425,10 @@ msgstr "Löschen bestätigen"
 #: apps/blocked_times/templates/blocked_times/blockedtime_detail.html:10
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:10
 #: apps/contracts/templates/contracts/contract_detail.html:10
-#: apps/contracts/templates/contracts/contract_list.html:48
-#: apps/core/templates/core/base.html:403
+#: apps/contracts/templates/contracts/contract_list.html:73
+#: apps/contracts/templates/contracts/tier_config_list.html:36
+#: apps/core/templates/core/base.html:404
+#: apps/core/templates/core/expense_list.html:42
 #: apps/lessons/templates/lessons/conflict_detail.html:53
 #: apps/lessons/templates/lessons/lesson_detail.html:11
 #: apps/lessons/templates/lessons/lesson_detail.html:110
@@ -1547,7 +1583,8 @@ msgstr ""
 #: apps/blocked_times/templates/blocked_times/blockedtime_form.html:176
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_form.html:36
 #: apps/contracts/templates/contracts/contract_form.html:49
-#: apps/core/templates/core/base.html:400
+#: apps/contracts/templates/contracts/tier_config_form.html:54
+#: apps/core/templates/core/base.html:401
 #: apps/core/templates/core/settings.html:256
 #: apps/lessons/templates/lessons/lesson_form.html:176
 #: apps/students/templates/students/student_form.html:13
@@ -1583,7 +1620,7 @@ msgstr "Wiederholungstyp"
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:26
 #: apps/contracts/templates/contracts/contract_detail.html:23
-#: apps/contracts/templates/contracts/contract_list.html:34
+#: apps/contracts/templates/contracts/contract_list.html:59
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:40
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:23
 #: apps/lessons/templates/lessons/recurringlesson_list.html:31
@@ -1592,7 +1629,7 @@ msgid "Inactive"
 msgstr "Inaktiv"
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:31
-#: apps/core/templates/core/base.html:415
+#: apps/core/templates/core/base.html:416
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:29
 msgid "Preview"
 msgstr "Vorschau"
@@ -1702,7 +1739,7 @@ msgstr "Blockzeiten aus Serie generieren"
 msgid "Do you want to generate blocked times from the series \"%(title)s\"?"
 msgstr "Möchten Sie Blockzeiten aus der Serie \"%(title)s\" generieren?"
 
-#: apps/blocked_times/views.py:179
+#: apps/blocked_times/views.py:181
 #, python-brace-format
 msgid ""
 "Recurring blocked time series created and {count} blocked time generated."
@@ -1711,7 +1748,7 @@ msgid_plural ""
 msgstr[0] "Sperrzeitserie erstellt und {count} Sperrzeit generiert."
 msgstr[1] "Sperrzeitserie erstellt und {count} Sperrzeiten generiert."
 
-#: apps/blocked_times/views.py:188
+#: apps/blocked_times/views.py:190
 msgid ""
 "Recurring blocked time series created, but no new blocked times were "
 "generated (they may already exist)."
@@ -1719,28 +1756,28 @@ msgstr ""
 "Sperrzeitserie erstellt, aber keine neuen Sperrzeiten generiert "
 "(möglicherweise existieren bereits alle)."
 
-#: apps/blocked_times/views.py:197
+#: apps/blocked_times/views.py:199
 #, python-brace-format
 msgid "{count} blocked time with conflicts detected."
 msgid_plural "{count} blocked times with conflicts detected."
 msgstr[0] "{count} Sperrzeit mit Konflikten erkannt."
 msgstr[1] "{count} Sperrzeiten mit Konflikten erkannt."
 
-#: apps/blocked_times/views.py:254
+#: apps/blocked_times/views.py:256
 #, python-brace-format
 msgid "Blocked time created, but {count} conflict(s) detected!"
 msgstr "Sperrzeit erstellt, aber {count} Konflikt(e) erkannt!"
 
-#: apps/blocked_times/views.py:259
+#: apps/blocked_times/views.py:261
 msgid "Blocked time successfully created."
 msgstr "Blockzeit erfolgreich erstellt."
 
-#: apps/blocked_times/views.py:389
+#: apps/blocked_times/views.py:392
 #, python-brace-format
 msgid "{count} conflict(s) detected in generated blocked times."
 msgstr "{count} Konflikt(e) in generierten Sperrzeiten erkannt."
 
-#: apps/blocked_times/views.py:397
+#: apps/blocked_times/views.py:400
 #, python-brace-format
 msgid ""
 "Series updated. {deleted} blocked time(s) deleted, {created} new blocked "
@@ -1749,23 +1786,23 @@ msgstr ""
 "Serie aktualisiert. {deleted} Sperrzeit(en) gelöscht, {created} neue "
 "Sperrzeit(en) erstellt, {updated} Sperrzeit(en) aktualisiert."
 
-#: apps/blocked_times/views.py:424
+#: apps/blocked_times/views.py:427
 #, python-brace-format
 msgid "Series updated. {count} blocked time(s) updated."
 msgstr "Serie aktualisiert. {count} Sperrzeit(en) aktualisiert."
 
-#: apps/blocked_times/views.py:438
+#: apps/blocked_times/views.py:441
 msgid "Blocked time successfully updated."
 msgstr "Blockzeit erfolgreich aktualisiert."
 
-#: apps/blocked_times/views.py:541
+#: apps/blocked_times/views.py:545
 #, python-brace-format
 msgid "Series deleted. {count} blocked time deleted."
 msgid_plural "Series deleted. {count} blocked times deleted."
 msgstr[0] "Serie gelöscht. {count} Sperrzeit gelöscht."
 msgstr[1] "Serie gelöscht. {count} Sperrzeiten gelöscht."
 
-#: apps/blocked_times/views.py:552
+#: apps/blocked_times/views.py:556
 msgid "Blocked time successfully deleted."
 msgstr "Blockzeit erfolgreich gelöscht."
 
@@ -1791,11 +1828,11 @@ msgstr "Unterrichtsstunden"
 msgid "Planning"
 msgstr "Geplant"
 
-#: apps/contracts/forms.py:21
+#: apps/contracts/forms.py:22
 msgid "Monthly planning with planned units"
 msgstr "Monatliche Planung mit geplanten Einheiten"
 
-#: apps/contracts/forms.py:23
+#: apps/contracts/forms.py:24
 msgid ""
 "If checked, you must enter planned units for each month. If unchecked, no "
 "maximum number of units is planned."
@@ -1803,81 +1840,75 @@ msgstr ""
 "Wenn aktiviert, müssen Sie geplante Einheiten für jeden Monat eingeben. Wenn "
 "deaktiviert, wird keine maximale Anzahl von Einheiten geplant."
 
-#: apps/contracts/forms.py:61 apps/lessons/recurring_forms.py:102
+#: apps/contracts/forms.py:62 apps/lessons/recurring_forms.py:103
 msgid "End date must not be before start date."
 msgstr "Das Enddatum darf nicht vor dem Startdatum liegen."
 
-#: apps/contracts/models.py:18
+#: apps/contracts/models.py:20
 #, fuzzy
 #| msgid "Student"
 msgid "student"
 msgstr "Schüler"
 
-#: apps/contracts/models.py:19
+#: apps/contracts/models.py:21
 msgid "Student for whom the contract applies"
 msgstr "Schüler, für den der Vertrag gilt"
 
-#: apps/contracts/models.py:23
+#: apps/contracts/models.py:27
 #, fuzzy
 #| msgid "Institute"
 msgid "institute"
 msgstr "Institut"
 
-#: apps/contracts/models.py:24
+#: apps/contracts/models.py:28
 msgid "Institute name (if applicable)"
 msgstr "Name des Instituts (falls zutreffend)"
 
-#: apps/contracts/models.py:30
-#| msgid "hours taught"
+#: apps/contracts/models.py:34
 msgid "hourly rate"
 msgstr "Stundensatz"
 
-#: apps/contracts/models.py:31
+#: apps/contracts/models.py:35
 msgid "Rate per unit in EUR"
 msgstr "Satz pro Einheit in EUR"
 
-#: apps/contracts/models.py:35
-#| msgid "Duration (minutes)"
+#: apps/contracts/models.py:39
 msgid "unit duration (minutes)"
 msgstr "Einheitsdauer (Minuten)"
 
-#: apps/contracts/models.py:36
+#: apps/contracts/models.py:40
 msgid "Duration of one unit in minutes"
 msgstr "Dauer einer Einheit in Minuten"
 
-#: apps/contracts/models.py:39
-#| msgid "New start date:"
+#: apps/contracts/models.py:43
 msgid "start date"
 msgstr "Startdatum"
 
-#: apps/contracts/models.py:40
+#: apps/contracts/models.py:44
 msgid "Contract start date"
 msgstr "Vertragsstartdatum"
 
-#: apps/contracts/models.py:44
-#| msgid "End date"
+#: apps/contracts/models.py:49
 msgid "end date"
 msgstr "Enddatum"
 
-#: apps/contracts/models.py:45
+#: apps/contracts/models.py:50
 msgid "Contract end date (optional, empty = unlimited)"
 msgstr "Vertragsendedatum (optional, leer = unbegrenzt)"
 
-#: apps/contracts/models.py:49
-#| msgid "Inactive"
+#: apps/contracts/models.py:54
 msgid "active"
 msgstr "Aktiv"
 
-#: apps/contracts/models.py:50
+#: apps/contracts/models.py:55
 msgid "Is the contract active?"
 msgstr "Ist der Vertrag aktiv?"
 
-#: apps/contracts/models.py:54
-#| msgid "Monthly Planning"
+#: apps/contracts/models.py:59
 msgid "monthly planning limit"
 msgstr "Monatliche Planung"
 
-#: apps/contracts/models.py:56
+#: apps/contracts/models.py:61
 msgid ""
 "If checked, monthly planning with planned units is required. If unchecked, "
 "no maximum number of units is planned."
@@ -1886,21 +1917,20 @@ msgstr ""
 "erforderlich. Wenn deaktiviert, wird keine maximale Anzahl von Einheiten "
 "geplant."
 
-#: apps/contracts/models.py:61 apps/students/models.py:38
-#| msgid "Notes"
+#: apps/contracts/models.py:67 apps/students/models.py:43
 msgid "notes"
 msgstr "Notizen"
 
-#: apps/contracts/models.py:62
+#: apps/contracts/models.py:68
 msgid "Additional notes about the contract"
 msgstr "Zusätzliche Notizen zum Vertrag"
 
-#: apps/contracts/models.py:69
+#: apps/contracts/models.py:75
 msgid "Token for external booking link (auto-generated if empty)"
-msgstr ""
+msgstr "Token für den externen Buchungslink (wird automatisch generiert, wenn leer)"
 "Token für externen Buchungslink (wird automatisch generiert, wenn leer)"
 
-#: apps/contracts/models.py:75
+#: apps/contracts/models.py:81
 msgid ""
 "Working hours for booking page (format: {'monday': [{'start': '09:00', "
 "'end': '17:00'}], ...})"
@@ -1908,7 +1938,7 @@ msgstr ""
 "Arbeitszeiten für die Buchungsseite (Format: {'monday': [{'start': '09:00', "
 "'end': '17:00'}], ...})"
 
-#: apps/contracts/models.py:84
+#: apps/contracts/models.py:90
 #: apps/contracts/templates/contracts/contract_list.html:4
 #: apps/contracts/templates/contracts/contract_list.html:7
 #: apps/core/templates/core/base.html:343 apps/students/admin.py:24
@@ -1916,32 +1946,64 @@ msgstr ""
 msgid "Contracts"
 msgstr "Verträge"
 
-#: apps/contracts/models.py:113 apps/lessons/models.py:24
-#: apps/lessons/recurring_models.py:18
+#: apps/contracts/models.py:119 apps/lessons/models.py:25
+#: apps/lessons/recurring_models.py:19
 msgid "Associated contract"
 msgstr "Zugehöriger Vertrag"
 
-#: apps/contracts/models.py:115
+#: apps/contracts/models.py:121
 #: apps/contracts/templates/contracts/contract_form.html:21
+#: apps/core/templates/core/expense_list.html:12
 #: apps/core/templates/core/reports.html:22
+#: apps/core/templates/core/tax_year.html:12
 msgid "Year"
 msgstr "Jahr"
 
-#: apps/contracts/models.py:117
+#: apps/contracts/models.py:123
 msgid "Month (1-12)"
 msgstr "Monat (1-12)"
 
-#: apps/contracts/models.py:120
+#: apps/contracts/models.py:126
 msgid "Planned units for this month"
 msgstr "Geplante Einheiten für diesen Monat"
 
-#: apps/contracts/models.py:133
+#: apps/contracts/models.py:139
 msgid "Contract Monthly Plan"
 msgstr "Vertragsmonatsplan"
 
-#: apps/contracts/models.py:134
+#: apps/contracts/models.py:140
 msgid "Contract Monthly Plans"
 msgstr "Vertragsmonatspläne"
+
+#: apps/contracts/models.py:153
+msgid "user"
+msgstr "Nutzer"
+
+#: apps/contracts/models.py:155
+#, fuzzy
+#| msgid "Institute name"
+msgid "institute name"
+msgstr "Institutname"
+
+#: apps/contracts/models.py:158
+#, fuzzy
+#| msgid "Tiers"
+msgid "tiers"
+msgstr "Stufen"
+
+#: apps/contracts/models.py:160
+msgid ""
+"List of dicts: [{\"hours_from\": 0, \"label\": \"13 €/h\"}, ...], sorted by "
+"hours_from ascending"
+msgstr ""
+
+#: apps/contracts/models.py:169
+msgid "Institute tier config"
+msgstr "Institut-Stufenkonfiguration"
+
+#: apps/contracts/models.py:170
+msgid "Institute tier configs"
+msgstr "Institut-Stufenkonfigurationen"
 
 #: apps/contracts/templates/contracts/contract_confirm_delete.html:4
 #: apps/contracts/templates/contracts/contract_confirm_delete.html:7
@@ -1962,7 +2024,9 @@ msgid "This action cannot be undone."
 msgstr "Diese Aktion kann nicht rückgängig gemacht werden."
 
 #: apps/contracts/templates/contracts/contract_detail.html:18
-#: apps/contracts/templates/contracts/contract_list.html:14
+#: apps/contracts/templates/contracts/contract_list.html:39
+#: apps/contracts/templates/contracts/tier_config_list.html:20
+#: apps/contracts/templates/contracts/tier_config_list.html:53
 #: apps/core/templates/core/reports.html:122
 #: apps/core/templates/core/reports.html:133
 #: apps/lessons/templates/lessons/email_booking_notification.html:20
@@ -1973,7 +2037,7 @@ msgid "Institute"
 msgstr "Institut"
 
 #: apps/contracts/templates/contracts/contract_detail.html:19
-#: apps/contracts/templates/contracts/contract_list.html:15
+#: apps/contracts/templates/contracts/contract_list.html:40
 #: apps/students/templates/students/student_detail.html:83
 msgid "Rate"
 msgstr "Satz"
@@ -2002,7 +2066,7 @@ msgid "Contract end"
 msgstr "Vertragsende"
 
 #: apps/contracts/templates/contracts/contract_detail.html:24
-#: apps/lessons/recurring_forms.py:58
+#: apps/lessons/recurring_forms.py:59
 #: apps/lessons/templates/lessons/public_booking.html:284
 #: apps/lessons/templates/lessons/public_booking.html:707
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:25
@@ -2024,16 +2088,17 @@ msgstr ""
 
 #: apps/contracts/templates/contracts/contract_detail.html:35
 #: apps/contracts/templates/contracts/contract_form.html:22
-#: apps/core/templates/core/base.html:428
+#: apps/core/templates/core/base.html:429
 #: apps/core/templates/core/income_overview.html:68
 #: apps/core/templates/core/reports.html:24
 #: apps/core/templates/core/reports.html:78
 #: apps/core/templates/core/reports.html:88
+#: apps/core/templates/core/tax_year.html:33
 msgid "Month"
 msgstr "Monat"
 
 #: apps/contracts/templates/contracts/contract_detail.html:36
-#: apps/lessons/models.py:14
+#: apps/lessons/models.py:15
 msgid "Planned"
 msgstr "Geplant"
 
@@ -2042,7 +2107,7 @@ msgid "Carried over"
 msgstr "Übertrag"
 
 #: apps/contracts/templates/contracts/contract_detail.html:38
-#: apps/lessons/models.py:15
+#: apps/lessons/models.py:16
 msgid "Taught"
 msgstr "Unterrichtet"
 
@@ -2075,7 +2140,8 @@ msgstr "Monatliche Planung"
 
 #: apps/contracts/templates/contracts/contract_form.html:15
 msgid "Enter the planned units for each month in the contract period."
-msgstr "Geben Sie die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
+msgstr "Gib die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
+"Geben Sie die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
 
 #: apps/contracts/templates/contracts/contract_form.html:23
 msgid "Planned Units"
@@ -2089,23 +2155,59 @@ msgstr ""
 "Keine monatliche Planung erforderlich. Dieser Vertrag hat keine maximale "
 "Anzahl von geplanten Einheiten."
 
-#: apps/contracts/templates/contracts/contract_list.html:17
-#: apps/core/templates/core/base.html:423
+#: apps/contracts/templates/contracts/contract_list.html:13
+msgid "Institute tier progress"
+msgstr "Institut-Stufenfortschritt"
+
+#: apps/contracts/templates/contracts/contract_list.html:18
+msgid "Total taught"
+msgstr "Gesamt unterrichtet"
+
+#: apps/contracts/templates/contracts/contract_list.html:19
+msgid "Current tier"
+msgstr "Aktuelle Stufe"
+
+#: apps/contracts/templates/contracts/contract_list.html:19
+msgid "in this tier"
+msgstr "in dieser Stufe"
+
+#: apps/contracts/templates/contracts/contract_list.html:21
+msgid "Next increase"
+msgstr "Nächste Erhöhung"
+
+#: apps/contracts/templates/contracts/contract_list.html:21
+msgid "in"
+msgstr "in"
+
+#: apps/contracts/templates/contracts/contract_list.html:23
+msgid "Estimated date"
+msgstr "Voraussichtliches Datum"
+
+#: apps/contracts/templates/contracts/contract_list.html:26
+msgid "Maximum tier reached"
+msgstr "Höchststufe erreicht"
+
+#: apps/contracts/templates/contracts/contract_list.html:31
+msgid "Configure thresholds"
+msgstr "Schwellenwerte konfigurieren"
+
+#: apps/contracts/templates/contracts/contract_list.html:42
+#: apps/core/templates/core/base.html:424
 #: apps/lessons/templates/lessons/week.html:38
 #: apps/students/templates/students/student_detail.html:85
 msgid "From"
 msgstr "Von"
 
-#: apps/contracts/templates/contracts/contract_list.html:18
+#: apps/contracts/templates/contracts/contract_list.html:43
 #: apps/students/templates/students/student_detail.html:86
 msgid "To"
 msgstr "Bis"
 
-#: apps/contracts/templates/contracts/contract_list.html:20
+#: apps/contracts/templates/contracts/contract_list.html:45
 msgid "This month (planned / taught / remaining)"
 msgstr "Dieser Monat (geplant / erteilt / noch übrig)"
 
-#: apps/contracts/templates/contracts/contract_list.html:38
+#: apps/contracts/templates/contracts/contract_list.html:63
 #, python-format
 msgid ""
 "Planned: %(planned)s+%(carried)s · Taught: %(taught)s · Remaining: "
@@ -2114,35 +2216,143 @@ msgstr ""
 "Geplant: %(planned)s+%(carried)s · Erteilt: %(taught)s · Noch übrig: "
 "%(remaining)s"
 
-#: apps/contracts/templates/contracts/contract_list.html:40
+#: apps/contracts/templates/contracts/contract_list.html:65
 #, python-format
 msgid "Planned: %(planned)s · Taught: %(taught)s · Remaining: %(remaining)s"
 msgstr "Geplant: %(planned)s · Erteilt: %(taught)s · Noch übrig: %(remaining)s"
 
-#: apps/contracts/templates/contracts/contract_list.html:54
+#: apps/contracts/templates/contracts/contract_list.html:79
 #: apps/students/templates/students/student_detail.html:105
 msgid "No contracts available."
 msgstr "Keine Verträge vorhanden."
 
-#: apps/contracts/views.py:114
-msgid "Contract created. Please enter the planned units per month."
-msgstr "Vertrag erstellt. Bitte geben Sie die geplanten Einheiten pro Monat ein."
+#: apps/contracts/templates/contracts/tier_config_confirm_delete.html:4
+#: apps/contracts/templates/contracts/tier_config_confirm_delete.html:7
+msgid "Delete tier config"
+msgstr "Stufenkonfiguration löschen"
 
-#: apps/contracts/views.py:118
+#: apps/contracts/templates/contracts/tier_config_confirm_delete.html:9
+#, fuzzy, python-format
+#| msgid "Delete tier config"
+msgid "Delete tier config for \"%(name)s\"?"
+msgstr "Stufenkonfiguration löschen"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:4
+#: apps/contracts/templates/contracts/tier_config_form.html:7
+msgid "Edit tier config"
+msgstr "Stufenkonfiguration bearbeiten"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:4
+#: apps/contracts/templates/contracts/tier_config_form.html:7
+msgid "New tier config"
+msgstr "Neue Stufenkonfiguration"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:17
+msgid "Institute name"
+msgstr "Institutname"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:30
+msgid "Tier thresholds"
+msgstr "Stufenschwellenwerte"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:32
+msgid "One row per pay rate. \\"
+msgstr "Eine Zeile pro Vergütungssatz. \\"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:38
+msgid "From hours"
+msgstr "Ab Stunden"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:39
+msgid "Label (e.g. 14 €/h)"
+msgstr "Bezeichnung (z.B. 14 €/h)"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:46
+msgid "Add tier"
+msgstr "Stufe hinzufügen"
+
+#: apps/contracts/templates/contracts/tier_config_form.html:81
+msgid "e.g. 14 €/h"
+msgstr "z.B. 14 €/h"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:4
+#: apps/contracts/templates/contracts/tier_config_list.html:7
+msgid "Institute tier thresholds"
+msgstr "Institut-Stufenschwellenwerte"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:10
+msgid "Add institute"
+msgstr "Institut hinzufügen"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:11
+#, fuzzy
+#| msgid "Contracts"
+msgid "Back to Contracts"
+msgstr "Verträge"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:14
+msgid ""
+"Configure hour thresholds at which your pay rate increases for a given "
+"institute. TutorSpace uses built-in thresholds automatically; add a config "
+"here to override them or to set up another institute."
+msgstr ""
+"Stundenschwellenwerte konfigurieren, ab denen sich dein Stundenlohn erhöht. "
+"TutorSpace nutzt automatisch eingebaute Schwellenwerte; hier kannst du diese "
+"überschreiben oder ein anderes Institut einrichten."
+
+#: apps/contracts/templates/contracts/tier_config_list.html:21
+#: apps/contracts/templates/contracts/tier_config_list.html:54
+msgid "Tiers"
+msgstr "Stufen"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:45
+msgid ""
+"No custom tier configs yet. TutorSpace tiers are always available without a "
+"config."
+msgstr ""
+"Noch keine eigenen Stufenkonfigurationen. TutorSpace-Stufen sind immer ohne "
+"Konfiguration verfügbar."
+
+#: apps/contracts/templates/contracts/tier_config_list.html:49
+msgid "Built-in tier configs"
+msgstr "Eingebaute Stufenkonfigurationen"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:64
+msgid "Use as custom config"
+msgstr "Als benutzerdefinierte Konfiguration verwenden"
+
+#: apps/contracts/templates/contracts/tier_config_list.html:66
+msgid "Custom config active"
+msgstr "Benutzerdefinierte Konfiguration aktiv"
+
+#: apps/contracts/views.py:127
+msgid "Contract created. Please enter the planned units per month."
+msgstr "Vertrag erstellt. Bitte gib die geplanten Einheiten pro Monat ein."
+"Vertrag erstellt. Bitte geben Sie die geplanten Einheiten pro Monat ein."
+
+#: apps/contracts/views.py:131
 msgid "Contract successfully created."
 msgstr "Vertrag erfolgreich erstellt."
 
-#: apps/contracts/views.py:204 apps/contracts/views.py:217
+#: apps/contracts/views.py:217 apps/contracts/views.py:230
 msgid "Contract successfully updated."
 msgstr "Vertrag erfolgreich aktualisiert."
 
-#: apps/contracts/views.py:208
+#: apps/contracts/views.py:221
 msgid "Please correct the errors in the monthly planning."
 msgstr "Bitte korrigieren Sie die Fehler in der monatlichen Planung."
 
-#: apps/contracts/views.py:232
+#: apps/contracts/views.py:245
 msgid "Contract successfully deleted."
 msgstr "Vertrag erfolgreich gelöscht."
+
+#: apps/contracts/views.py:275 apps/contracts/views.py:291
+msgid "Tier config saved."
+msgstr "Stufenkonfiguration gespeichert."
+
+#: apps/contracts/views.py:305
+msgid "Tier config deleted."
+msgstr "Stufenkonfiguration gelöscht."
 
 #: apps/core/admin.py:12
 msgid "Profile"
@@ -2152,6 +2362,7 @@ msgstr "Profil"
 #: apps/core/templates/core/login.html:41
 #: apps/core/templates/core/reports.html:8
 #: apps/core/templates/core/settings.html:265
+#: apps/core/templates/core/tax_year.html:8
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:126
 #: apps/lessons/templates/lessons/lesson_detail.html:185
 msgid "Premium"
@@ -2181,7 +2392,7 @@ msgstr "Zu viele Versuche. Bitte später erneut versuchen."
 msgid "Too many registration attempts. Please try again later."
 msgstr "Zu viele Registrierungsversuche. Bitte später erneut versuchen."
 
-#: apps/core/feature_flags.py:114
+#: apps/core/feature_flags.py:115
 msgid "This feature requires Premium. Upgrade to access."
 msgstr "Diese Funktion erfordert Premium. Upgrade für vollen Zugang."
 
@@ -2282,19 +2493,19 @@ msgstr ""
 "aussehen, weil viele ältere Stunden einbezogen werden – nur Stunden ab "
 "diesem Datum werden gezählt."
 
-#: apps/core/models.py:13
+#: apps/core/models.py:17
 msgid "Associated Django user"
 msgstr "Zugehöriger Django-Benutzer"
 
-#: apps/core/models.py:16
+#: apps/core/models.py:20
 msgid "Does the user have premium access?"
 msgstr "Hat der Benutzer Premium-Zugang?"
 
-#: apps/core/models.py:19
+#: apps/core/models.py:23
 msgid "Since when is the user a premium member?"
 msgstr "Seit wann ist der Benutzer Premium-Mitglied?"
 
-#: apps/core/models.py:25
+#: apps/core/models.py:29
 msgid ""
 "Default working hours for booking pages (format: {'monday': [{'start': "
 "'09:00', 'end': '17:00'}], ...}). Used as fallback when contract has no "
@@ -2304,15 +2515,15 @@ msgstr ""
 "'09:00', 'end': '17:00'}], ...}). Wird als Fallback verwendet, wenn der "
 "Vertrag keine Arbeitszeiten hat."
 
-#: apps/core/models.py:33
+#: apps/core/models.py:37
 msgid "Token for public booking URL (e.g. /public-booking/<token>/)"
 msgstr "Token für öffentliche Buchungs-URL (z. B. /public-booking/<token>/)"
 
-#: apps/core/models.py:37
+#: apps/core/models.py:41
 msgid "Next sequential invoice number (Premium only)."
 msgstr "Nächste fortlaufende Rechnungsnummer (nur Premium)."
 
-#: apps/core/models.py:43
+#: apps/core/models.py:47
 msgid ""
 "Time-dependent travel policy for on-site booking: enabled, buffer_rules "
 "(weekday, start_time, end_time, buffer_minutes), no_go_windows. Weekday "
@@ -2322,36 +2533,36 @@ msgstr ""
 "(Wochentag, Startzeit, Endzeit, Pufferminuten), no_go_windows. Wochentag "
 "0=Montag."
 
-#: apps/core/models.py:51
+#: apps/core/models.py:55
 msgid ""
 "Default appointment type for public booking; vor_ort applies travel policy."
 msgstr ""
 "Standard-Terminart für öffentliche Buchungen; vor_ort wendet die "
 "Fahrtrichtlinie an."
 
-#: apps/core/models.py:59
+#: apps/core/models.py:63
 msgid "Stripe Customer ID"
 msgstr "Stripe-Kunden-ID"
 
-#: apps/core/models.py:62
+#: apps/core/models.py:66
 msgid "Stripe Subscription ID"
 msgstr "Stripe-Abonnement-ID"
 
-#: apps/core/models.py:65
+#: apps/core/models.py:69
 msgid "Stripe Price ID for current plan"
 msgstr "Stripe-Preis-ID für den aktuellen Tarif"
 
-#: apps/core/models.py:71
+#: apps/core/models.py:75
 msgid "Source of premium: 'stripe', 'manual', or null"
 msgstr "Quelle des Premium-Status: 'stripe', 'manual' oder null"
 
-#: apps/core/models.py:77
+#: apps/core/models.py:81
 msgid "Last email synced to Stripe Customer (skip modify if unchanged)"
-msgstr ""
+msgstr "Zuletzt mit dem Stripe-Kunden synchronisierte E-Mail-Adresse (Änderung überspringen, falls unverändert)"
 "Zuletzt mit Stripe-Kunden synchronisierte E-Mail (Änderung überspringen, "
 "wenn unverändert)"
 
-#: apps/core/models.py:82
+#: apps/core/models.py:86
 #, python-format
 msgid ""
 "TutorSpace, session marked 'tutor did not show (student waited)': share of "
@@ -2365,7 +2576,7 @@ msgstr ""
 "Prozentsatz)% der üblichen Vergütung). 0 %% = voller Abzug (−100 %% der "
 "üblichen Vergütung); 100 %% = volle übliche Vergütung (kein Abzug)."
 
-#: apps/core/models.py:92
+#: apps/core/models.py:96
 msgid ""
 "TutorSpace pay tiers (13/14 € …): if set, only lessons on or after this date "
 "count toward cumulative hours. Empty = all past TutorSpace lessons count "
@@ -2376,21 +2587,55 @@ msgstr ""
 "Stunden zählen (kann die Vorschau ‚zu hoch“ erscheinen lassen, wenn viele "
 "ältere Stunden vorhanden sind)."
 
-#: apps/core/models.py:101
+#: apps/core/models.py:105
 msgid "User Profile"
 msgstr "Benutzerprofil"
 
-#: apps/core/models.py:102
+#: apps/core/models.py:106
 msgid "User Profiles"
 msgstr "Benutzerprofile"
 
-#: apps/core/models.py:118
+#: apps/core/models.py:122
 msgid "Stripe Webhook Event"
 msgstr "Stripe-Webhook-Ereignis"
 
-#: apps/core/models.py:119
+#: apps/core/models.py:123
 msgid "Stripe Webhook Events"
 msgstr "Stripe-Webhook-Ereignisse"
+
+#: apps/core/models.py:130
+msgid "Work materials"
+msgstr "Arbeitsmittel"
+
+#: apps/core/models.py:131
+msgid "Travel"
+msgstr "Fahrtkosten"
+
+#: apps/core/models.py:132
+msgid "Education"
+msgstr "Fortbildung"
+
+#: apps/core/models.py:133
+msgid "Office"
+msgstr "Büro/Arbeitszimmer"
+
+#: apps/core/models.py:134
+msgid "Communication"
+msgstr "Kommunikation"
+
+#: apps/core/models.py:135
+msgid "Other"
+msgstr "Sonstiges"
+
+#: apps/core/models.py:157
+msgid "Expense"
+msgstr "Ausgabe"
+
+#: apps/core/models.py:158 apps/core/templates/core/expense_list.html:5
+#: apps/core/templates/core/expense_list.html:8
+#: apps/core/templates/core/tax_year.html:132 apps/core/views.py:534
+msgid "Expenses"
+msgstr "Ausgaben"
 
 #: apps/core/templates/core/base.html:339
 msgid "Toggle menu"
@@ -2403,7 +2648,7 @@ msgid "Dashboard"
 msgstr "Dashboard"
 
 #: apps/core/templates/core/base.html:342
-#: apps/core/templates/core/landing.html:51 apps/students/models.py:54
+#: apps/core/templates/core/landing.html:51 apps/students/models.py:59
 #: apps/students/templates/students/student_list.html:4
 #: apps/students/templates/students/student_list.html:7
 msgid "Students"
@@ -2415,6 +2660,7 @@ msgstr "Kalender"
 
 #: apps/core/templates/core/base.html:346
 #: apps/core/templates/core/dashboard.html:76
+#: apps/core/templates/core/tax_year.html:34
 msgid "Income"
 msgstr "Einnahmen"
 
@@ -2425,43 +2671,47 @@ msgid "Reports"
 msgstr "Berichte"
 
 #: apps/core/templates/core/base.html:348
+msgid "Tax"
+msgstr "Steuer"
+
+#: apps/core/templates/core/base.html:349
 #: apps/core/templates/core/settings.html:4
 #: apps/core/templates/core/settings.html:7
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: apps/core/templates/core/base.html:351
+#: apps/core/templates/core/base.html:352
 msgid "Toggle dark mode"
 msgstr "Dunkelmodus umschalten"
 
-#: apps/core/templates/core/base.html:357
+#: apps/core/templates/core/base.html:358
 msgid "Logout"
 msgstr "Abmelden"
 
-#: apps/core/templates/core/base.html:361
+#: apps/core/templates/core/base.html:362
 msgid "Home"
 msgstr "Startseite"
 
-#: apps/core/templates/core/base.html:362
-#: apps/core/templates/core/base.html:364 apps/core/templates/core/login.html:4
+#: apps/core/templates/core/base.html:363
+#: apps/core/templates/core/base.html:365 apps/core/templates/core/login.html:4
 #: apps/core/templates/core/login.html:35
 msgid "Login"
 msgstr "Anmelden"
 
-#: apps/core/templates/core/base.html:372
+#: apps/core/templates/core/base.html:373
 msgid "Change language"
 msgstr "Sprache ändern"
 
-#: apps/core/templates/core/base.html:404
+#: apps/core/templates/core/base.html:405
 #: apps/lessons/templates/lessons/week.html:194
 msgid "Create"
 msgstr "Erstellen"
 
-#: apps/core/templates/core/base.html:405
+#: apps/core/templates/core/base.html:406
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: apps/core/templates/core/base.html:406
+#: apps/core/templates/core/base.html:407
 #: apps/lessons/templates/lessons/public_booking.html:230
 #: apps/lessons/templates/lessons/public_booking.html:270
 #: apps/lessons/templates/lessons/public_booking.html:292
@@ -2470,77 +2720,77 @@ msgstr "Aktualisieren"
 msgid "Back"
 msgstr "Zurück"
 
-#: apps/core/templates/core/base.html:407
+#: apps/core/templates/core/base.html:408
 msgid "Next"
 msgstr "Weiter"
 
-#: apps/core/templates/core/base.html:408
+#: apps/core/templates/core/base.html:409
 #: apps/lessons/templates/lessons/public_booking.html:198
 msgid "Confirm"
 msgstr "Bestätigen"
 
-#: apps/core/templates/core/base.html:409
+#: apps/core/templates/core/base.html:410
 msgid "Search"
 msgstr "Suchen"
 
-#: apps/core/templates/core/base.html:410
+#: apps/core/templates/core/base.html:411
 #: apps/lessons/templates/lessons/public_booking.html:227
 msgid "Verify"
 msgstr "Prüfen"
 
-#: apps/core/templates/core/base.html:411
+#: apps/core/templates/core/base.html:412
 msgid "Reschedule"
 msgstr "Umbuchen"
 
-#: apps/core/templates/core/base.html:412
+#: apps/core/templates/core/base.html:413
 msgid "Book"
 msgstr "Buchen"
 
-#: apps/core/templates/core/base.html:413
+#: apps/core/templates/core/base.html:414
 msgid "Download"
 msgstr "Herunterladen"
 
-#: apps/core/templates/core/base.html:419
+#: apps/core/templates/core/base.html:420
 #: apps/lessons/templates/lessons/public_booking.html:335
 #: apps/lessons/templates/lessons/student_booking.html:262
 msgid "Loading..."
 msgstr "Laden..."
 
-#: apps/core/templates/core/base.html:420
+#: apps/core/templates/core/base.html:421
 msgid "No data"
 msgstr "Keine Daten"
 
-#: apps/core/templates/core/base.html:421
+#: apps/core/templates/core/base.html:422
 msgid "Error"
 msgstr "Fehler"
 
-#: apps/core/templates/core/base.html:422
+#: apps/core/templates/core/base.html:423
 #: apps/lessons/templates/lessons/public_booking.html:806
 msgid "Network error: Please check your internet connection."
 msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
 
-#: apps/core/templates/core/base.html:425
+#: apps/core/templates/core/base.html:426
 #: apps/lessons/templates/lessons/week.html:40
 msgid "on"
 msgstr "am"
 
-#: apps/core/templates/core/base.html:426
+#: apps/core/templates/core/base.html:427
 #: apps/lessons/templates/lessons/public_booking.html:314
 msgid "Today"
 msgstr "Heute"
 
-#: apps/core/templates/core/base.html:427
+#: apps/core/templates/core/base.html:428
 msgid "Week"
 msgstr "Woche"
 
-#: apps/core/templates/core/base.html:429
+#: apps/core/templates/core/base.html:430
 #: apps/lessons/templates/lessons/public_booking.html:316
 #: apps/lessons/templates/lessons/student_booking.html:199
 #: apps/lessons/templates/lessons/week.html:18
 msgid "Jump to date:"
 msgstr "Zum Datum springen:"
 
-#: apps/core/templates/core/base.html:430
+#: apps/core/templates/core/base.html:431
 #: apps/lessons/templates/lessons/public_booking.html:816
 msgid "Reload"
 msgstr "Neu laden"
@@ -2621,6 +2871,60 @@ msgid "%(counter)s conflict in upcoming lessons!"
 msgid_plural "%(counter)s conflicts in upcoming lessons!"
 msgstr[0] "%(counter)s Konflikt in kommenden Unterrichtsstunden!"
 msgstr[1] "%(counter)s Konflikte in kommenden Unterrichtsstunden!"
+
+#: apps/core/templates/core/expense_confirm_delete.html:4
+#: apps/core/templates/core/expense_confirm_delete.html:7
+msgid "Delete expense"
+msgstr "Ausgabe löschen"
+
+#: apps/core/templates/core/expense_confirm_delete.html:10
+#, python-format
+msgid ""
+"\n"
+"        Are you sure you want to delete the expense <strong>%(desc)s</"
+"strong> (%(date)s, %(amount)s €)?\n"
+"        This action cannot be undone.\n"
+"    "
+msgstr ""
+
+#: apps/core/templates/core/expense_form.html:5
+#: apps/core/templates/core/expense_form.html:11
+msgid "Edit expense"
+msgstr "Ausgabe bearbeiten"
+
+#: apps/core/templates/core/expense_form.html:5
+#: apps/core/templates/core/expense_form.html:11
+#: apps/core/templates/core/expense_list.html:20
+msgid "New expense"
+msgstr "Neue Ausgabe"
+
+#: apps/core/templates/core/expense_form.html:35
+#, fuzzy
+#| msgid "Save Changes"
+msgid "Save changes"
+msgstr "Änderungen speichern"
+
+#: apps/core/templates/core/expense_form.html:35
+msgid "Save expense"
+msgstr "Ausgabe speichern"
+
+#: apps/core/templates/core/expense_list.html:28
+#: apps/core/templates/core/tax_year.html:138 apps/core/views.py:535
+msgid "Category"
+msgstr "Kategorie"
+
+#: apps/core/templates/core/expense_list.html:51
+#: apps/core/templates/core/tax_year.html:152
+msgid "Total expenses"
+msgstr "Gesamtausgaben"
+
+#: apps/core/templates/core/expense_list.html:58
+msgid "No expenses for this year."
+msgstr "Keine Ausgaben für dieses Jahr."
+
+#: apps/core/templates/core/expense_list.html:62
+msgid "Tax year overview"
+msgstr "Steuerübersicht"
 
 #: apps/core/templates/core/income_overview.html:5
 #: apps/core/templates/core/income_overview.html:8
@@ -2747,62 +3051,74 @@ msgid "Recognized revenue"
 msgstr "Realisierte Einnahmen"
 
 #: apps/core/templates/core/income_overview.html:78
-#: apps/core/templates/core/reports.html:26 apps/lessons/views_calendar.py:253
+#: apps/core/templates/core/reports.html:26
+#: apps/core/templates/core/tax_year.html:41 apps/lessons/views_calendar.py:254
 msgid "January"
 msgstr "Januar"
 
 #: apps/core/templates/core/income_overview.html:79
-#: apps/core/templates/core/reports.html:27 apps/lessons/views_calendar.py:254
+#: apps/core/templates/core/reports.html:27
+#: apps/core/templates/core/tax_year.html:42 apps/lessons/views_calendar.py:255
 msgid "February"
 msgstr "Februar"
 
 #: apps/core/templates/core/income_overview.html:80
-#: apps/core/templates/core/reports.html:28 apps/lessons/views_calendar.py:255
+#: apps/core/templates/core/reports.html:28
+#: apps/core/templates/core/tax_year.html:43 apps/lessons/views_calendar.py:256
 msgid "March"
 msgstr "März"
 
 #: apps/core/templates/core/income_overview.html:81
-#: apps/core/templates/core/reports.html:29 apps/lessons/views_calendar.py:256
+#: apps/core/templates/core/reports.html:29
+#: apps/core/templates/core/tax_year.html:44 apps/lessons/views_calendar.py:257
 msgid "April"
 msgstr "April"
 
 #: apps/core/templates/core/income_overview.html:82
-#: apps/core/templates/core/reports.html:30 apps/lessons/views_calendar.py:257
+#: apps/core/templates/core/reports.html:30
+#: apps/core/templates/core/tax_year.html:45 apps/lessons/views_calendar.py:258
 msgid "May"
 msgstr "Mai"
 
 #: apps/core/templates/core/income_overview.html:83
-#: apps/core/templates/core/reports.html:31 apps/lessons/views_calendar.py:258
+#: apps/core/templates/core/reports.html:31
+#: apps/core/templates/core/tax_year.html:46 apps/lessons/views_calendar.py:259
 msgid "June"
 msgstr "Juni"
 
 #: apps/core/templates/core/income_overview.html:84
-#: apps/core/templates/core/reports.html:32 apps/lessons/views_calendar.py:259
+#: apps/core/templates/core/reports.html:32
+#: apps/core/templates/core/tax_year.html:47 apps/lessons/views_calendar.py:260
 msgid "July"
 msgstr "Juli"
 
 #: apps/core/templates/core/income_overview.html:85
-#: apps/core/templates/core/reports.html:33 apps/lessons/views_calendar.py:260
+#: apps/core/templates/core/reports.html:33
+#: apps/core/templates/core/tax_year.html:48 apps/lessons/views_calendar.py:261
 msgid "August"
 msgstr "August"
 
 #: apps/core/templates/core/income_overview.html:86
-#: apps/core/templates/core/reports.html:34 apps/lessons/views_calendar.py:261
+#: apps/core/templates/core/reports.html:34
+#: apps/core/templates/core/tax_year.html:49 apps/lessons/views_calendar.py:262
 msgid "September"
 msgstr "September"
 
 #: apps/core/templates/core/income_overview.html:87
-#: apps/core/templates/core/reports.html:35 apps/lessons/views_calendar.py:262
+#: apps/core/templates/core/reports.html:35
+#: apps/core/templates/core/tax_year.html:50 apps/lessons/views_calendar.py:263
 msgid "October"
 msgstr "Oktober"
 
 #: apps/core/templates/core/income_overview.html:88
-#: apps/core/templates/core/reports.html:36 apps/lessons/views_calendar.py:263
+#: apps/core/templates/core/reports.html:36
+#: apps/core/templates/core/tax_year.html:51 apps/lessons/views_calendar.py:264
 msgid "November"
 msgstr "November"
 
 #: apps/core/templates/core/income_overview.html:89
-#: apps/core/templates/core/reports.html:37 apps/lessons/views_calendar.py:264
+#: apps/core/templates/core/reports.html:37
+#: apps/core/templates/core/tax_year.html:52 apps/lessons/views_calendar.py:265
 msgid "December"
 msgstr "Dezember"
 
@@ -2847,7 +3163,7 @@ msgstr "Demo-Modus ausprobieren"
 
 #: apps/core/templates/core/landing.html:17
 msgid "Explore TutorFlow with pre-loaded demo data. No registration required."
-msgstr ""
+msgstr "Entdecke TutorFlow mit vorgeladenen Demo-Daten. Keine Registrierung erforderlich."
 "TutorFlow mit vorgeladenen Demo-Daten erkunden. Keine Registrierung "
 "erforderlich."
 
@@ -3183,7 +3499,8 @@ msgstr ""
 
 #: apps/core/templates/core/settings.html:247
 msgid "For invoices and Stripe we recommend adding an email address."
-msgstr "Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
+msgstr "Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse hinzuzufügen."
+"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
 
 #: apps/core/templates/core/settings.html:251
 msgid "Optional. Used for invoices and Stripe billing notifications."
@@ -3209,37 +3526,45 @@ msgstr "Aktueller Plan"
 msgid "Basic"
 msgstr "Basis"
 
-#: apps/core/templates/core/settings.html:272
-#: apps/core/templates/core/settings.html:285
+#: apps/core/templates/core/settings.html:271
+msgid "Demo account – Premium is enabled for demonstration purposes only."
+msgstr "Demo-Konto – Premium ist nur zu Demonstrationszwecken aktiviert."
+
+#: apps/core/templates/core/settings.html:274
+#: apps/core/templates/core/settings.html:287
 msgid "Manage subscription"
 msgstr "Abonnement verwalten"
 
-#: apps/core/templates/core/settings.html:274
-#: apps/core/templates/core/settings.html:288
-msgid "Premium (manual or demo)"
+#: apps/core/templates/core/settings.html:276
+#: apps/core/templates/core/settings.html:290
+#, fuzzy
+#| msgid "Premium (manual or demo)"
+msgid "Premium (manually activated)"
 msgstr "Premium (manuell oder Demo)"
 
-#: apps/core/templates/core/settings.html:278
+#: apps/core/templates/core/settings.html:280
 msgid "Activate Premium"
 msgstr "Premium aktivieren"
 
-#: apps/core/templates/core/settings.html:292
+#: apps/core/templates/core/settings.html:294
 msgid "Upgrade to Premium"
 msgstr "Auf Premium upgraden"
 
-#: apps/core/templates/core/settings.html:296
-msgid "Payment is not configured. Premium upgrades are currently unavailable."
-msgstr "Zahlung ist nicht konfiguriert. Premium-Upgrades sind derzeit nicht verfügbar."
+#: apps/core/templates/core/settings.html:298
+msgid ""
+"To access Premium, please contact <a href=\"mailto:contact@andicode."
+"de\">contact@andicode.de</a>."
+msgstr ""
 
-#: apps/core/templates/core/settings.html:317
+#: apps/core/templates/core/settings.html:319
 msgid "Could not open billing portal."
 msgstr "Abrechnungsportal konnte nicht geöffnet werden."
 
-#: apps/core/templates/core/settings.html:324
+#: apps/core/templates/core/settings.html:326
 msgid "Your Booking Links"
 msgstr "Deine Buchungslinks"
 
-#: apps/core/templates/core/settings.html:325
+#: apps/core/templates/core/settings.html:327
 msgid ""
 "Each user has their own booking links. Share only your links with your "
 "students."
@@ -3247,19 +3572,19 @@ msgstr ""
 "Jeder Nutzer hat eigene Buchungslinks. Nur die eigenen Links mit Schülern "
 "teilen."
 
-#: apps/core/templates/core/settings.html:328
+#: apps/core/templates/core/settings.html:330
 msgid "Public Booking Link (your personal link)"
 msgstr "Öffentlicher Buchungslink (dein persönlicher Link)"
 
-#: apps/core/templates/core/settings.html:335
-#: apps/core/templates/core/settings.html:355
-#: apps/core/templates/core/settings.html:379
-#: apps/core/templates/core/settings.html:385
+#: apps/core/templates/core/settings.html:337
+#: apps/core/templates/core/settings.html:357
+#: apps/core/templates/core/settings.html:381
+#: apps/core/templates/core/settings.html:387
 #: apps/students/templates/students/student_detail.html:39
 msgid "Copy"
 msgstr "Kopieren"
 
-#: apps/core/templates/core/settings.html:338
+#: apps/core/templates/core/settings.html:340
 msgid ""
 "Share this link with new students. They can enter their name and book "
 "lessons."
@@ -3267,11 +3592,11 @@ msgstr ""
 "Diesen Link mit neuen Schülern teilen. Sie können ihren Namen eingeben und "
 "Stunden buchen."
 
-#: apps/core/templates/core/settings.html:343
+#: apps/core/templates/core/settings.html:345
 msgid "Contract Booking Links (per student)"
 msgstr "Vertragsbuchungslinks (je Schüler)"
 
-#: apps/core/templates/core/settings.html:344
+#: apps/core/templates/core/settings.html:346
 msgid ""
 "Each contract has its own link. Share the link with the respective student "
 "for direct booking."
@@ -3279,51 +3604,204 @@ msgstr ""
 "Jeder Vertrag hat seinen eigenen Link. Den Link mit dem jeweiligen Schüler "
 "für direkte Buchungen teilen."
 
-#: apps/core/templates/core/settings.html:370
-#: apps/core/templates/core/settings.html:379
-#: apps/core/templates/core/settings.html:385
+#: apps/core/templates/core/settings.html:372
+#: apps/core/templates/core/settings.html:381
+#: apps/core/templates/core/settings.html:387
 msgid "Copied!"
 msgstr "Kopiert!"
 
-#: apps/core/views.py:208
+#: apps/core/templates/core/tax_year.html:5
+#: apps/core/templates/core/tax_year.html:8
+msgid "Tax Year Overview"
+msgstr "Steuerübersicht"
+
+#: apps/core/templates/core/tax_year.html:25
+msgid "Cash-basis accounting (Zufluss-Prinzip)"
+msgstr "Einnahmen nach Zufluss-Prinzip"
+
+#: apps/core/templates/core/tax_year.html:26
+msgid ""
+"Only invoices with a payment date in the selected year are included. This "
+"matches the German EÜR for freelancers (§ 4 Abs. 3 EStG)."
+msgstr ""
+"Es werden nur Rechnungen berücksichtigt, bei denen das Zahlungsdatum im "
+"gewählten Jahr liegt. Dies entspricht der deutschen EÜR für Freiberufler (§ "
+"4 Abs. 3 EStG)."
+
+#: apps/core/templates/core/tax_year.html:29
+msgid "Monthly breakdown"
+msgstr "Monatliche Aufschlüsselung"
+
+#: apps/core/templates/core/tax_year.html:61
+#, fuzzy
+#| msgid "Total:"
+msgid "Total"
+msgstr "Gesamt:"
+
+#: apps/core/templates/core/tax_year.html:67
+msgid "Kleinunternehmer status (§ 19 UStG)"
+msgstr "Kleinunternehmerstatus (§ 19 UStG)"
+
+#: apps/core/templates/core/tax_year.html:71
+msgid "Limit exceeded"
+msgstr "Grenze überschritten"
+
+#: apps/core/templates/core/tax_year.html:72
+#, python-format
+msgid ""
+"Your income of %(total)s EUR exceeds the Kleinunternehmer limit of %(limit)s "
+"EUR. You may need to charge VAT."
+msgstr ""
+
+#: apps/core/templates/core/tax_year.html:76
+msgid "Approaching limit"
+msgstr "Grenze wird erreicht"
+
+#: apps/core/templates/core/tax_year.html:77
+#, python-format
+msgid ""
+"Your income of %(total)s EUR is close to the Kleinunternehmer limit of "
+"%(limit)s EUR."
+msgstr ""
+
+#: apps/core/templates/core/tax_year.html:81
+msgid "Status: OK"
+msgstr "Status: OK"
+
+#: apps/core/templates/core/tax_year.html:82
+#, python-format
+msgid ""
+"Your income of %(total)s EUR is below the Kleinunternehmer limit of "
+"%(limit)s EUR."
+msgstr ""
+
+#: apps/core/templates/core/tax_year.html:89
+msgid "Limit (§ 19 UStG)"
+msgstr "Grenze (§ 19 UStG)"
+
+#: apps/core/templates/core/tax_year.html:93
+msgid "Current income"
+msgstr "Bisherige Einnahmen"
+
+#: apps/core/templates/core/tax_year.html:97
+msgid "Remaining until limit"
+msgstr "Verbleibend bis zur Grenze"
+
+#: apps/core/templates/core/tax_year.html:105
+msgid "Paid invoices"
+msgstr "Bezahlte Rechnungen"
+
+#: apps/core/templates/core/tax_year.html:111 apps/core/views.py:508
+msgid "Invoice number"
+msgstr "Rechnungsnummer"
+
+#: apps/core/templates/core/tax_year.html:112 apps/core/views.py:509
+msgid "Recipient"
+msgstr "Empfänger"
+
+#: apps/core/templates/core/tax_year.html:128
+msgid "No paid invoices for this year."
+msgstr "Keine bezahlten Rechnungen für dieses Jahr."
+
+#: apps/core/templates/core/tax_year.html:156
+#, fuzzy
+#| msgid "Profit (income minus expenses)"
+msgid "Profit (income − expenses)"
+msgstr "Gewinn (Einnahmen minus Ausgaben)"
+
+#: apps/core/templates/core/tax_year.html:162
+msgid "No expenses recorded for this year."
+msgstr "Keine Ausgaben für dieses Jahr erfasst."
+
+#: apps/core/templates/core/tax_year.html:166
+msgid "Manage expenses"
+msgstr "Ausgaben verwalten"
+
+#: apps/core/templates/core/tax_year.html:172
+#, fuzzy, python-format
+#| msgid "Download"
+msgid "Download CSV %(y)s"
+msgstr "Herunterladen"
+
+#: apps/core/templates/core/tax_year.html:179
+msgid "Tax Year Overview – Premium feature"
+msgstr "Steuerübersicht – Premium-Funktion"
+
+#: apps/core/templates/core/tax_year.html:180
+msgid ""
+"Get a full cash-basis income summary for your tax return (EÜR): monthly "
+"breakdown, Kleinunternehmer status check, invoice list, and CSV export."
+msgstr ""
+
+#: apps/core/templates/core/tax_year.html:181
+msgid "Upgrade to Premium for full access."
+msgstr "Upgrade auf Premium für den vollen Zugang."
+
+#: apps/core/views.py:223
 msgid "Default working hours updated successfully."
 msgstr "Standard-Arbeitszeiten erfolgreich aktualisiert."
 
-#: apps/core/views.py:217
+#: apps/core/views.py:232
 msgid "Email updated successfully."
 msgstr "E-Mail wurde erfolgreich aktualisiert."
 
-#: apps/core/views.py:236
+#: apps/core/views.py:251
 msgid "Travel mode for on-site appointments updated."
 msgstr "Anreise-Modus für Vor-Ort-Termine wurde aktualisiert."
 
-#: apps/core/views.py:252
+#: apps/core/views.py:267
 msgid "TutorSpace: pay when you missed (student waited) saved."
-msgstr ""
+msgstr "TutorSpace: Bezahlung bei Versäumnis (Schüler hat gewartet) gespeichert."
 "TutorSpace: Vergütung bei verpasster Stunde (Schüler wartete) wurde "
 "gespeichert."
 
-#: apps/core/views.py:268
+#: apps/core/views.py:283
 msgid "TutorSpace tier counting start date saved."
 msgstr "TutorSpace-Stufen-Startdatum gespeichert."
 
-#: apps/core/views_stripe.py:58
-msgid "Could not start checkout. Please try again in a moment."
-msgstr "Checkout konnte nicht gestartet werden. Bitte in einem Moment erneut versuchen."
+#: apps/core/views.py:510 apps/core/views.py:535
+#, fuzzy
+#| msgid "Amount"
+msgid "Amount (EUR)"
+msgstr "Betrag"
 
-#: apps/core/views_stripe.py:74 apps/core/views_stripe.py:139
-#: apps/core/views_stripe.py:211 apps/core/views_stripe.py:217
-#: apps/core/views_stripe.py:276
+#: apps/core/views.py:602
+msgid "Expense saved."
+msgstr "Ausgabe gespeichert."
+
+#: apps/core/views.py:616
+#, fuzzy
+#| msgid "Expense deleted."
+msgid "Expense updated."
+msgstr "Ausgabe gelöscht."
+
+#: apps/core/views.py:629
+msgid "Expense deleted."
+msgstr "Ausgabe gelöscht."
+
+#: apps/core/views_stripe.py:59
+msgid "Could not start checkout. Please try again in a moment."
+msgstr "Checkout konnte nicht gestartet werden. Bitte versuche es gleich erneut."
+"Checkout konnte nicht gestartet werden. Bitte in einem Moment erneut "
+"versuchen."
+
+#: apps/core/views_stripe.py:75 apps/core/views_stripe.py:140
+#: apps/core/views_stripe.py:212 apps/core/views_stripe.py:218
+#: apps/core/views_stripe.py:277
 msgid "Payment is not configured. Please contact support."
 msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
 
-#: apps/core/views_stripe.py:159 apps/core/views_stripe.py:303
+#: apps/core/views_stripe.py:160 apps/core/views_stripe.py:304
 msgid "Could not open billing portal. Please try again."
-msgstr "Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
+msgstr "Das Abrechnungsportal konnte nicht geöffnet werden. Bitte versuche es erneut."
+"Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es "
+"erneut."
 
-#: apps/core/views_stripe.py:284
+#: apps/core/views_stripe.py:285
 msgid "No billing customer found. Subscribe first to manage your subscription."
-msgstr "Kein Abrechnungskunde gefunden. Bitte zuerst ein Abo abschließen, um es zu verwalten."
+msgstr "Kein Abrechnungskunde gefunden. Bitte abonniere zuerst, um dein Abonnement zu verwalten."
+"Kein Abrechnungskunde gefunden. Bitte zuerst ein Abo abschließen, um es zu "
+"verwalten."
 
 #: apps/lesson_plans/admin.py:16
 msgid "Student & Lesson"
@@ -3341,45 +3819,45 @@ msgstr "Inhalt"
 msgid "AI Metadata"
 msgstr "KI-Metadaten"
 
-#: apps/lesson_plans/models.py:14
+#: apps/lesson_plans/models.py:15
 msgid "Student for whom the plan was created"
 msgstr "Schüler, für den der Plan erstellt wurde"
 
-#: apps/lesson_plans/models.py:22
+#: apps/lesson_plans/models.py:23
 msgid "Associated session (optional)"
 msgstr "Zugehörige Stunde (optional)"
 
-#: apps/lesson_plans/models.py:25
+#: apps/lesson_plans/models.py:26
 msgid "Topic of the lesson plan"
 msgstr "Thema des Lektionsplans"
 
-#: apps/lesson_plans/models.py:26
+#: apps/lesson_plans/models.py:27
 msgid "Subject (e.g., 'Math', 'German')"
 msgstr "Fach (z.B. 'Mathe', 'Deutsch')"
 
-#: apps/lesson_plans/models.py:27
+#: apps/lesson_plans/models.py:28
 msgid "AI-generated lesson plan (text)"
 msgstr "KI-generierter Lektionsplan (Text)"
 
-#: apps/lesson_plans/models.py:29
+#: apps/lesson_plans/models.py:30
 msgid "Grade level (e.g., '10th grade')"
 msgstr "Klassenstufe (z.B. '10. Klasse')"
 
-#: apps/lesson_plans/models.py:32
+#: apps/lesson_plans/models.py:33
 msgid "Planned duration in minutes"
 msgstr "Geplante Dauer in Minuten"
 
-#: apps/lesson_plans/models.py:38
+#: apps/lesson_plans/models.py:39
 msgid "Used LLM model (e.g., 'gpt-4', 'claude-3')"
 msgstr "Verwendetes LLM-Modell (z.B. 'gpt-4', 'claude-3')"
 
-#: apps/lesson_plans/models.py:45
+#: apps/lesson_plans/models.py:46
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:7
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:79
 msgid "Lesson Plan"
 msgstr "Lektionsplan"
 
-#: apps/lesson_plans/models.py:46
+#: apps/lesson_plans/models.py:47
 msgid "Lesson Plans"
 msgstr "Lektionspläne"
 
@@ -3513,7 +3991,8 @@ msgstr ""
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:110
 msgid "Generate an AI-powered lesson plan for this lesson."
-msgstr "Einen KI-gestützten Lektionsplan für diese Unterrichtsstunde generieren."
+msgstr "Erstelle einen KI-gestützten Unterrichtsplan für diese Stunde."
+"Einen KI-gestützten Lektionsplan für diese Unterrichtsstunde generieren."
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:117
 #: apps/lessons/templates/lessons/lesson_detail.html:176
@@ -3530,7 +4009,8 @@ msgstr "KI-Unterrichtsplan generieren"
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:127
 #: apps/lessons/templates/lessons/lesson_detail.html:186
 msgid "AI-powered lesson plan generation is only available for premium users."
-msgstr "KI-gestützte Lektionsplangenerierung ist nur für Premium-Benutzer verfügbar."
+msgstr "Die KI-gestützte Unterrichtsplanerstellung ist nur für Premium-Nutzer verfügbar."
+"KI-gestützte Lektionsplangenerierung ist nur für Premium-Benutzer verfügbar."
 
 #: apps/lessons/admin.py:31 apps/lessons/admin.py:86
 msgid "Schedule"
@@ -3544,75 +4024,75 @@ msgstr "Fahrzeiten"
 msgid "Has Conflicts"
 msgstr "Hat Konflikte"
 
-#: apps/lessons/conflict_service.py:176
+#: apps/lessons/conflict_service.py:177
 #, python-brace-format
 msgid "Overlap with blocked time: {title}"
 msgstr "Überschneidung mit Blockzeit: {title}"
 
-#: apps/lessons/email_service.py:57
+#: apps/lessons/email_service.py:58
 #, python-brace-format
 msgid "New Lesson Booking: {student} - {date}"
 msgstr "Neue Stundenbuchung: {student} - {date}"
 
-#: apps/lessons/forms.py:18
+#: apps/lessons/forms.py:19
 msgid "Edit only this session"
 msgstr "Nur diese Stunde bearbeiten"
 
-#: apps/lessons/forms.py:28
+#: apps/lessons/forms.py:29
 msgid "Repeat this session"
 msgstr "Diese Stunde wiederholen"
 
-#: apps/lessons/forms.py:29
+#: apps/lessons/forms.py:30
 msgid "Create a recurring series instead of a single session"
 msgstr "Serie statt einzelner Stunde erstellen"
 
-#: apps/lessons/forms.py:65
+#: apps/lessons/forms.py:66
 msgid "Select weekdays for the recurring session"
 msgstr "Wochentage für die Serienstunde auswählen"
 
-#: apps/lessons/forms.py:96
+#: apps/lessons/forms.py:97
 msgid "I did not attend; student was waiting (TutorSpace / Abacus)"
 msgstr "Ich bin nicht erschienen; Schüler wartete (TutorSpace / Abacus)"
 
-#: apps/lessons/forms.py:153
+#: apps/lessons/forms.py:154
 msgid "Inactive contracts cannot be used for new sessions."
 msgstr "Inaktive Verträge können nicht für neue Stunden verwendet werden."
 
-#: apps/lessons/forms.py:167
+#: apps/lessons/forms.py:168
 msgid "Please select a repeat pattern when creating a recurring session."
 msgstr "Bitte ein Wiederholungsmuster für den Serientermin auswählen."
 
-#: apps/lessons/forms.py:172
+#: apps/lessons/forms.py:173
 msgid "Please select at least one weekday when creating a recurring session."
 msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
 
-#: apps/lessons/forms.py:192
+#: apps/lessons/forms.py:193
 msgid "Optional: Document name"
 msgstr "Optional: Dokumentname"
 
-#: apps/lessons/forms.py:204
+#: apps/lessons/forms.py:205
 #, python-brace-format
 msgid "File size must be less than 10 MB. Current size: {size} MB"
 msgstr "Dateigröße muss unter 10 MB liegen. Aktuelle Größe: {size} MB"
 
-#: apps/lessons/forms.py:214
+#: apps/lessons/forms.py:215
 msgid "File type not allowed. Allowed types: PDF, DOC, DOCX, TXT, JPG, PNG"
 msgstr "Dateityp nicht erlaubt. Erlaubte Typen: PDF, DOC, DOCX, TXT, JPG, PNG"
 
-#: apps/lessons/forms.py:241
+#: apps/lessons/forms.py:242
 msgid "You can upload multiple files at once"
 msgstr "Mehrere Dateien können gleichzeitig hochgeladen werden"
 
-#: apps/lessons/forms.py:248
+#: apps/lessons/forms.py:249
 msgid "Please select at least one file."
 msgstr "Bitte mindestens eine Datei auswählen."
 
-#: apps/lessons/forms.py:256
+#: apps/lessons/forms.py:257
 #, python-brace-format
 msgid "File '{name}' is too large. Maximum size: 10 MB"
 msgstr "Datei '{name}' ist zu groß. Maximalgröße: 10 MB"
 
-#: apps/lessons/forms.py:263
+#: apps/lessons/forms.py:264
 #, python-brace-format
 msgid ""
 "File '{name}' has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, JPG, "
@@ -3621,35 +4101,35 @@ msgstr ""
 "Datei '{name}' hat einen ungültigen Typ. Erlaubte Typen: PDF, DOC, DOCX, "
 "TXT, JPG, PNG"
 
-#: apps/lessons/models.py:16
+#: apps/lessons/models.py:17
 msgid "Cancelled"
 msgstr "Ausgefallen"
 
-#: apps/lessons/models.py:26
+#: apps/lessons/models.py:27
 msgid "Session date"
 msgstr "Datum der Unterrichtsstunde"
 
-#: apps/lessons/models.py:29 apps/lessons/recurring_models.py:26
+#: apps/lessons/models.py:30 apps/lessons/recurring_models.py:27
 msgid "Duration in minutes"
 msgstr "Dauer in Minuten"
 
-#: apps/lessons/models.py:32
+#: apps/lessons/models.py:33
 msgid "Session status"
 msgstr "Status der Unterrichtsstunde"
 
-#: apps/lessons/models.py:35 apps/lessons/recurring_models.py:29
+#: apps/lessons/models.py:36 apps/lessons/recurring_models.py:30
 msgid "Travel time before in minutes"
 msgstr "Fahrtzeit vorher in Minuten"
 
-#: apps/lessons/models.py:38 apps/lessons/recurring_models.py:32
+#: apps/lessons/models.py:39 apps/lessons/recurring_models.py:33
 msgid "Travel time after in minutes"
 msgstr "Fahrtzeit nachher in Minuten"
 
-#: apps/lessons/models.py:40
+#: apps/lessons/models.py:41
 msgid "Notes for the session"
 msgstr "Notizen zur Unterrichtsstunde"
 
-#: apps/lessons/models.py:44
+#: apps/lessons/models.py:45
 msgid ""
 "Tutor did not attend while the student was waiting. TutorSpace: pay/"
 "deduction per your settings. Abacus: lesson is not billed (0). Other "
@@ -3659,47 +4139,47 @@ msgstr ""
 "TutorSpace: Vergütung/Abzug gemäß Ihren Einstellungen. Abacus: Stunde wird "
 "nicht verrechnet (0 €). Andere Verträge: keine Auswirkung auf den Betrag."
 
-#: apps/lessons/models.py:55
+#: apps/lessons/models.py:56
 msgid "Recurring series this session was generated from"
 msgstr "Serientermin, aus dem diese Stunde generiert wurde"
 
-#: apps/lessons/models.py:62
+#: apps/lessons/models.py:63
 msgid "Source: public_booking, contract_booking, or tutor"
 msgstr "Quelle: public_booking, contract_booking oder tutor"
 
-#: apps/lessons/models.py:70
+#: apps/lessons/models.py:71
 msgid "Session"
 msgstr "Stunde"
 
-#: apps/lessons/models.py:71
+#: apps/lessons/models.py:72
 msgid "Sessions"
 msgstr "Stunden"
 
-#: apps/lessons/models.py:118
+#: apps/lessons/models.py:119
 msgid "Associated session"
 msgstr "Zugehörige Stunde"
 
-#: apps/lessons/models.py:123
+#: apps/lessons/models.py:124
 msgid "Document file"
 msgstr "Dokumentdatei"
 
-#: apps/lessons/models.py:129
+#: apps/lessons/models.py:130
 msgid "Optional name/description for the document"
 msgstr "Optionaler Name/Beschreibung für das Dokument"
 
-#: apps/lessons/models.py:131
+#: apps/lessons/models.py:132
 msgid "Upload timestamp"
 msgstr "Hochladezeitpunkt"
 
-#: apps/lessons/models.py:136
+#: apps/lessons/models.py:137
 msgid "Session Document"
 msgstr "Stundendokument"
 
-#: apps/lessons/models.py:137
+#: apps/lessons/models.py:138
 msgid "Session Documents"
 msgstr "Stundendokumente"
 
-#: apps/lessons/quota_service.py:84
+#: apps/lessons/quota_service.py:89
 #, python-brace-format
 msgid ""
 "Contract quota exceeded: By the end of {month:02d}.{year}, {planned} units "
@@ -3708,91 +4188,91 @@ msgstr ""
 "Vertragskontingent überschritten: Bis Ende {month:02d}.{year} sind {planned} "
 "Einheiten geplant, aber {actual} Stunden vorhanden/geplant."
 
-#: apps/lessons/recurring_forms.py:46
+#: apps/lessons/recurring_forms.py:47
 msgid "Duration (minutes)"
 msgstr "Dauer (Minuten)"
 
-#: apps/lessons/recurring_forms.py:47
+#: apps/lessons/recurring_forms.py:48
 msgid "Travel time before (minutes)"
 msgstr "Fahrzeit davor (Minuten)"
 
-#: apps/lessons/recurring_forms.py:48
+#: apps/lessons/recurring_forms.py:49
 msgid "Travel time after (minutes)"
 msgstr "Fahrzeit danach (Minuten)"
 
-#: apps/lessons/recurring_forms.py:98 apps/lessons/views_booking.py:328
-#: apps/lessons/views_booking.py:586
+#: apps/lessons/recurring_forms.py:99 apps/lessons/views_booking.py:329
+#: apps/lessons/views_booking.py:587
 msgid "At least one weekday must be selected."
 msgstr "Mindestens ein Wochentag muss ausgewählt werden."
 
-#: apps/lessons/recurring_models.py:22
+#: apps/lessons/recurring_models.py:23
 msgid "Series end date (optional, empty = until contract end)"
 msgstr "Serienenddatum (optional, leer = bis Vertragsende)"
 
-#: apps/lessons/recurring_models.py:55
+#: apps/lessons/recurring_models.py:56
 msgid "Notes for the series"
 msgstr "Notizen zur Serie"
 
-#: apps/lessons/recurring_models.py:62
+#: apps/lessons/recurring_models.py:63
 msgid "Recurring Session"
 msgstr "Wiederkehrende Unterrichtsstunde"
 
-#: apps/lessons/recurring_models.py:63
+#: apps/lessons/recurring_models.py:64
 msgid "Recurring Sessions"
 msgstr "Wiederkehrende Unterrichtsstunden"
 
-#: apps/lessons/recurring_views.py:89
+#: apps/lessons/recurring_views.py:90
 #, python-brace-format
 msgid "Recurring lesson created and {count} lesson generated."
 msgid_plural "Recurring lesson created and {count} lessons generated."
 msgstr[0] "Serientermin erstellt und {count} Stunde generiert."
 msgstr[1] "Serientermin erstellt und {count} Stunden generiert."
 
-#: apps/lessons/recurring_views.py:100 apps/lessons/recurring_views.py:169
-#: apps/lessons/views_crud.py:225
+#: apps/lessons/recurring_views.py:101 apps/lessons/recurring_views.py:170
+#: apps/lessons/views_crud.py:228
 #, python-brace-format
 msgid "{count} lesson with conflicts detected."
 msgid_plural "{count} lessons with conflicts detected."
 msgstr[0] "{count} Unterrichtsstunde mit Konflikten erkannt."
 msgstr[1] "{count} Unterrichtsstunden mit Konflikten erkannt."
 
-#: apps/lessons/recurring_views.py:109
+#: apps/lessons/recurring_views.py:110
 msgid "Recurring lesson successfully created."
 msgstr "Wiederkehrende Unterrichtsstunde erfolgreich erstellt."
 
-#: apps/lessons/recurring_views.py:156
+#: apps/lessons/recurring_views.py:157
 #, python-brace-format
 msgid "Recurring lesson updated and {count} lesson regenerated."
 msgid_plural "Recurring lesson updated and {count} lessons regenerated."
 msgstr[0] "Serientermin aktualisiert und {count} Stunde neu generiert."
 msgstr[1] "Serientermin aktualisiert und {count} Stunden neu generiert."
 
-#: apps/lessons/recurring_views.py:162
+#: apps/lessons/recurring_views.py:163
 msgid "Recurring lesson successfully updated."
 msgstr "Wiederkehrende Unterrichtsstunde erfolgreich aktualisiert."
 
-#: apps/lessons/recurring_views.py:212
+#: apps/lessons/recurring_views.py:213
 #, python-brace-format
 msgid "Recurring lesson and {count} generated lesson deleted."
 msgid_plural "Recurring lesson and {count} generated lessons deleted."
 msgstr[0] "Serientermin und {count} generierte Stunde gelöscht."
 msgstr[1] "Serientermin und {count} generierte Stunden gelöscht."
 
-#: apps/lessons/recurring_views.py:233
+#: apps/lessons/recurring_views.py:234
 #, python-brace-format
 msgid "{count} lesson successfully created."
 msgid_plural "{count} lessons successfully created."
 msgstr[0] "{count} Unterrichtsstunde erfolgreich erstellt."
 msgstr[1] "{count} Unterrichtsstunden erfolgreich erstellt."
 
-#: apps/lessons/recurring_views.py:243
+#: apps/lessons/recurring_views.py:244
 #, python-brace-format
 msgid "{count} lesson skipped (already exists)."
 msgid_plural "{count} lessons skipped (already exist)."
 msgstr[0] "{count} Unterrichtsstunde übersprungen (bereits vorhanden)."
 msgstr[1] "{count} Unterrichtsstunden übersprungen (bereits vorhanden)."
 
-#: apps/lessons/recurring_views.py:254
+#: apps/lessons/recurring_views.py:255
 #, python-brace-format
 msgid "{count} lesson with conflicts detected. Please check the details."
 msgid_plural ""
@@ -3804,47 +4284,47 @@ msgstr[1] ""
 "{count} Unterrichtsstunden mit Konflikten erkannt. Bitte überprüfen Sie die "
 "Details."
 
-#: apps/lessons/recurring_views.py:292
+#: apps/lessons/recurring_views.py:293
 msgid "Please select at least one recurring lesson."
 msgstr "Bitte mindestens einen Serientermin auswählen."
 
-#: apps/lessons/recurring_views.py:314
+#: apps/lessons/recurring_views.py:315
 #, python-brace-format
 msgid "{count} recurring lesson successfully deleted."
 msgid_plural "{count} recurring lessons successfully deleted."
 msgstr[0] "{count} Serientermin erfolgreich gelöscht."
 msgstr[1] "{count} Serientermine erfolgreich gelöscht."
 
-#: apps/lessons/recurring_views.py:324
+#: apps/lessons/recurring_views.py:325
 #, python-brace-format
 msgid "{count} recurring lesson activated."
 msgid_plural "{count} recurring lessons activated."
 msgstr[0] "{count} Serientermin aktiviert."
 msgstr[1] "{count} Serientermine aktiviert."
 
-#: apps/lessons/recurring_views.py:334
+#: apps/lessons/recurring_views.py:335
 #, python-brace-format
 msgid "{count} recurring lesson deactivated."
 msgid_plural "{count} recurring lessons deactivated."
 msgstr[0] "{count} Serientermin deaktiviert."
 msgstr[1] "{count} Serientermine deaktiviert."
 
-#: apps/lessons/recurring_views.py:344
+#: apps/lessons/recurring_views.py:345
 msgid "Please provide a new start date."
 msgstr "Bitte ein neues Startdatum angeben."
 
-#: apps/lessons/recurring_views.py:355
+#: apps/lessons/recurring_views.py:356
 msgid "Invalid date format."
 msgstr "Ungültiges Datumsformat."
 
-#: apps/lessons/recurring_views.py:369
+#: apps/lessons/recurring_views.py:370
 #, python-brace-format
 msgid "{count} recurring lesson updated."
 msgid_plural "{count} recurring lessons updated."
 msgstr[0] "{count} Serientermin aktualisiert."
 msgstr[1] "{count} Serientermine aktualisiert."
 
-#: apps/lessons/recurring_views.py:375
+#: apps/lessons/recurring_views.py:376
 msgid "Invalid action."
 msgstr "Ungültige Aktion."
 
@@ -4018,7 +4498,7 @@ msgstr "Minuten"
 #: apps/lessons/templates/lessons/email_booking_notification.html:24
 #: apps/lessons/templates/lessons/email_booking_notification.txt:13
 msgid "You can view and manage this lesson in your TutorFlow dashboard."
-msgstr ""
+msgstr "Du kannst diese Stunde in deinem TutorFlow-Dashboard ansehen und verwalten."
 "Diese Stunde kann im TutorFlow-Dashboard eingesehen und verwaltet werden."
 
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:4
@@ -4340,7 +4820,7 @@ msgid "Upgrade to Premium for unlimited bookings."
 msgstr "Upgrade auf Premium für unbegrenzte Buchungen."
 
 #: apps/lessons/templates/lessons/public_booking.html:308
-#: apps/lessons/views_public_booking.py:608
+#: apps/lessons/views_public_booking.py:609
 msgid ""
 "Public booking limit reached. Upgrade to Premium for unlimited bookings."
 msgstr ""
@@ -4443,7 +4923,7 @@ msgid "Enter the code for"
 msgstr "Code eingeben für"
 
 #: apps/lessons/templates/lessons/public_booking.html:479
-#: apps/lessons/views_public_booking.py:279
+#: apps/lessons/views_public_booking.py:280
 msgid "Please enter the booking code."
 msgstr "Bitte Buchungscode eingeben."
 
@@ -4453,7 +4933,7 @@ msgstr "Bitte Namen eingeben oder Schüler auswählen."
 
 #: apps/lessons/templates/lessons/public_booking.html:497
 #: apps/lessons/templates/lessons/public_booking.html:501
-#: apps/lessons/views_public_booking.py:204
+#: apps/lessons/views_public_booking.py:205
 msgid "Invalid name or code. Please try again."
 msgstr "Ungültiger Name oder Code. Bitte erneut versuchen."
 
@@ -4479,7 +4959,7 @@ msgid "Error. Please try again."
 msgstr "Fehler. Bitte erneut versuchen."
 
 #: apps/lessons/templates/lessons/public_booking.html:596
-#: apps/lessons/views_public_booking.py:345
+#: apps/lessons/views_public_booking.py:346
 msgid "First name and last name are required."
 msgstr "Vorname und Nachname sind erforderlich."
 
@@ -4513,7 +4993,9 @@ msgstr "Bitte vervollständigen Sie alle Schritte."
 
 #: apps/lessons/templates/lessons/public_booking.html:724
 msgid "Booking code is required. Please go back and verify again."
-msgstr "Buchungscode erforderlich. Bitte gehen Sie zurück und verifizieren Sie erneut."
+msgstr "Ein Buchungscode ist erforderlich. Bitte geh zurück und überprüfe noch einmal."
+"Buchungscode erforderlich. Bitte gehen Sie zurück und verifizieren Sie "
+"erneut."
 
 #: apps/lessons/templates/lessons/public_booking.html:737
 #: apps/lessons/templates/lessons/student_booking.html:391
@@ -4539,7 +5021,9 @@ msgstr "Woche konnte nicht geladen werden. Bitte erneut versuchen."
 
 #: apps/lessons/templates/lessons/public_booking.html:849
 msgid "Could not load week. Please check your connection and try again."
-msgstr "Woche konnte nicht geladen werden. Bitte Verbindung prüfen und erneut versuchen."
+msgstr "Die Woche konnte nicht geladen werden. Bitte überprüfe deine Verbindung und versuche es erneut."
+"Woche konnte nicht geladen werden. Bitte Verbindung prüfen und erneut "
+"versuchen."
 
 #: apps/lessons/templates/lessons/public_booking.html:866
 msgid "Reschedule: select a new time slot below."
@@ -4769,7 +5253,7 @@ msgstr "Diese Stunde stornieren?"
 
 #: apps/lessons/templates/lessons/student_booking.html:594
 msgid "Cancel the entire series? All future planned lessons will be deleted."
-msgstr ""
+msgstr "Die gesamte Serie abbrechen? Alle zukünftig geplanten Stunden werden gelöscht."
 "Gesamte Serie stornieren? Alle zukünftigen geplanten Stunden werden gelöscht."
 
 #: apps/lessons/templates/lessons/student_booking.html:607
@@ -4832,42 +5316,42 @@ msgstr "Blockzeit/anderer Termin"
 msgid "Create Lesson"
 msgstr "Stunde erstellen"
 
-#: apps/lessons/views_booking.py:43 apps/lessons/views_booking.py:94
+#: apps/lessons/views_booking.py:44 apps/lessons/views_booking.py:95
 msgid "Booking link not found or contract is inactive."
 msgstr "Buchungslink nicht gefunden oder Vertrag ist inaktiv."
 
-#: apps/lessons/views_booking.py:116 apps/lessons/views_booking.py:268
-#: apps/lessons/views_public_booking.py:458
-#: apps/lessons/views_public_booking.py:757
+#: apps/lessons/views_booking.py:117 apps/lessons/views_booking.py:269
+#: apps/lessons/views_public_booking.py:459
+#: apps/lessons/views_public_booking.py:758
 msgid "Invalid date or time format."
 msgstr "Ungültiges Datum- oder Zeitformat."
 
-#: apps/lessons/views_booking.py:127 apps/lessons/views_booking.py:277
-#: apps/lessons/views_public_booking.py:467
+#: apps/lessons/views_booking.py:128 apps/lessons/views_booking.py:278
+#: apps/lessons/views_public_booking.py:468
 msgid "Invalid end time format."
 msgstr "Ungültiges Endzeit-Format."
 
-#: apps/lessons/views_booking.py:144 apps/lessons/views_booking.py:294
-#: apps/lessons/views_public_booking.py:483
+#: apps/lessons/views_booking.py:145 apps/lessons/views_booking.py:295
+#: apps/lessons/views_public_booking.py:484
 msgid "Start time must be on a 30-minute interval."
 msgstr "Startzeit muss auf einem 30-Minuten-Intervall liegen."
 
-#: apps/lessons/views_booking.py:152 apps/lessons/views_booking.py:302
-#: apps/lessons/views_public_booking.py:491
+#: apps/lessons/views_booking.py:153 apps/lessons/views_booking.py:303
+#: apps/lessons/views_public_booking.py:492
 msgid "End time must be on a 30-minute interval."
 msgstr "Endzeit muss auf einem 30-Minuten-Intervall liegen."
 
-#: apps/lessons/views_booking.py:160 apps/lessons/views_booking.py:310
-#: apps/lessons/views_booking.py:578 apps/lessons/views_public_booking.py:499
+#: apps/lessons/views_booking.py:161 apps/lessons/views_booking.py:311
+#: apps/lessons/views_booking.py:579 apps/lessons/views_public_booking.py:500
 msgid "End time must be after start time."
 msgstr "Endzeit muss nach der Startzeit liegen."
 
-#: apps/lessons/views_booking.py:167 apps/lessons/views_public_booking.py:512
+#: apps/lessons/views_booking.py:168 apps/lessons/views_public_booking.py:513
 msgid "Invalid booking duration."
 msgstr "Ungültige Buchungsdauer."
 
-#: apps/lessons/views_booking.py:184 apps/lessons/views_booking.py:343
-#: apps/lessons/views_public_booking.py:524
+#: apps/lessons/views_booking.py:185 apps/lessons/views_booking.py:344
+#: apps/lessons/views_public_booking.py:525
 msgid ""
 "Bookings must be at least 30 minutes in advance. Past time slots cannot be "
 "booked."
@@ -4875,122 +5359,122 @@ msgstr ""
 "Buchungen müssen mindestens 30 Minuten im Voraus erfolgen. Vergangene "
 "Zeitslots können nicht gebucht werden."
 
-#: apps/lessons/views_booking.py:208 apps/lessons/views_public_booking.py:546
+#: apps/lessons/views_booking.py:209 apps/lessons/views_public_booking.py:547
 msgid "Date not found."
 msgstr "Datum nicht gefunden."
 
-#: apps/lessons/views_booking.py:220 apps/lessons/views_public_booking.py:557
+#: apps/lessons/views_booking.py:221 apps/lessons/views_public_booking.py:558
 msgid "Time slot is already booked."
 msgstr "Zeitslot ist bereits gebucht."
 
-#: apps/lessons/views_booking.py:249 apps/lessons/views_public_booking.py:657
+#: apps/lessons/views_booking.py:250 apps/lessons/views_public_booking.py:658
 msgid "Lesson successfully booked."
 msgstr "Stunde erfolgreich gebucht."
 
-#: apps/lessons/views_booking.py:320
+#: apps/lessons/views_booking.py:321
 msgid "Duration must be a multiple of 30 minutes."
 msgstr "Dauer muss ein Vielfaches von 30 Minuten sein."
 
-#: apps/lessons/views_booking.py:356 apps/lessons/views_booking.py:622
+#: apps/lessons/views_booking.py:357 apps/lessons/views_booking.py:623
 msgid "Invalid end date format."
 msgstr "Ungültiges Enddatum-Format."
 
-#: apps/lessons/views_booking.py:417
+#: apps/lessons/views_booking.py:418
 #, python-brace-format
 msgid ""
 "Recurring lesson series successfully created. {count} lesson(s) generated."
 msgstr "Serientermin-Serie erfolgreich erstellt. {count} Stunde(n) generiert."
 
-#: apps/lessons/views_booking.py:430 apps/lessons/views_booking.py:450
-#: apps/lessons/views_booking.py:494 apps/lessons/views_booking.py:549
+#: apps/lessons/views_booking.py:431 apps/lessons/views_booking.py:451
+#: apps/lessons/views_booking.py:495 apps/lessons/views_booking.py:550
 msgid "Lesson not found."
 msgstr "Stunde nicht gefunden."
 
-#: apps/lessons/views_booking.py:437
+#: apps/lessons/views_booking.py:438
 msgid "Only future planned lessons can be cancelled."
 msgstr "Es können nur zukünftige geplante Stunden storniert werden."
 
-#: apps/lessons/views_booking.py:442
+#: apps/lessons/views_booking.py:443
 msgid "Lesson cancelled."
 msgstr "Stunde storniert."
 
-#: apps/lessons/views_booking.py:457 apps/lessons/views_booking.py:501
-#: apps/lessons/views_booking.py:556 apps/lessons/views_public_booking.py:810
+#: apps/lessons/views_booking.py:458 apps/lessons/views_booking.py:502
+#: apps/lessons/views_booking.py:557 apps/lessons/views_public_booking.py:811
 msgid "This lesson is not part of a series."
 msgstr "Diese Stunde ist kein Teil einer Serie."
 
-#: apps/lessons/views_booking.py:481
+#: apps/lessons/views_booking.py:482
 #, python-brace-format
 msgid "Series cancelled. {count} lesson cancelled."
 msgid_plural "Series cancelled. {count} lessons cancelled."
 msgstr[0] "Serie storniert. {count} Stunde storniert."
 msgstr[1] "Serie storniert. {count} Stunden storniert."
 
-#: apps/lessons/views_booking.py:570
+#: apps/lessons/views_booking.py:571
 msgid "Invalid time format."
 msgstr "Ungültiges Zeitformat."
 
-#: apps/lessons/views_booking.py:633
+#: apps/lessons/views_booking.py:634
 #, python-brace-format
 msgid "Series updated. {count} lesson generated."
 msgid_plural "Series updated. {count} lessons generated."
 msgstr[0] "Serie aktualisiert. {count} Stunde generiert."
 msgstr[1] "Serie aktualisiert. {count} Stunden generiert."
 
-#: apps/lessons/views_booking.py:641 apps/lessons/views_public_booking.py:383
+#: apps/lessons/views_booking.py:642 apps/lessons/views_public_booking.py:384
 msgid "Invalid JSON data."
 msgstr "Ungültige JSON-Daten."
 
-#: apps/lessons/views_booking.py:643
+#: apps/lessons/views_booking.py:644
 msgid "Unknown action."
 msgstr "Unbekannte Aktion."
 
-#: apps/lessons/views_booking.py:688
+#: apps/lessons/views_booking.py:689
 msgid "Booking link not found."
 msgstr "Buchungslink nicht gefunden."
 
-#: apps/lessons/views_booking.py:695 apps/lessons/views_public_booking.py:168
-#: apps/lessons/views_public_booking.py:174
-#: apps/lessons/views_public_booking.py:198
+#: apps/lessons/views_booking.py:696 apps/lessons/views_public_booking.py:169
+#: apps/lessons/views_public_booking.py:175
+#: apps/lessons/views_public_booking.py:199
 msgid "Invalid date."
 msgstr "Ungültiges Datum."
 
-#: apps/lessons/views_calendar.py:101
+#: apps/lessons/views_calendar.py:102
 msgid "Mon"
 msgstr "Mo"
 
-#: apps/lessons/views_calendar.py:102
+#: apps/lessons/views_calendar.py:103
 msgid "Tue"
 msgstr "Di"
 
-#: apps/lessons/views_calendar.py:103
+#: apps/lessons/views_calendar.py:104
 msgid "Wed"
 msgstr "Mi"
 
-#: apps/lessons/views_calendar.py:104
+#: apps/lessons/views_calendar.py:105
 msgid "Thu"
 msgstr "Do"
 
-#: apps/lessons/views_calendar.py:105
+#: apps/lessons/views_calendar.py:106
 msgid "Fri"
 msgstr "Fr"
 
-#: apps/lessons/views_calendar.py:106
+#: apps/lessons/views_calendar.py:107
 msgid "Sat"
 msgstr "Sa"
 
-#: apps/lessons/views_calendar.py:107
+#: apps/lessons/views_calendar.py:108
 msgid "Sun"
 msgstr "So"
 
-#: apps/lessons/views_crud.py:207
+#: apps/lessons/views_crud.py:210
 #, python-brace-format
 msgid "Recurring lesson series created and {count} lesson generated."
 msgid_plural "Recurring lesson series created and {count} lessons generated."
 msgstr[0] "Unterrichtsserie erstellt und {count} Stunde generiert."
 msgstr[1] "Unterrichtsserie erstellt und {count} Stunden generiert."
 
-#: apps/lessons/views_crud.py:216
+#: apps/lessons/views_crud.py:219
 msgid ""
 "Recurring lesson series created, but no new lessons were generated (they may "
 "already exist)."
@@ -4998,21 +5482,21 @@ msgstr ""
 "Serientermin erstellt, aber keine neuen Stunden generiert (möglicherweise "
 "existieren bereits alle)."
 
-#: apps/lessons/views_crud.py:262
+#: apps/lessons/views_crud.py:265
 #, python-brace-format
 msgid "Lesson created, but {count} conflict(s) detected!"
 msgstr "Unterrichtsstunde erstellt, aber {count} Konflikt(e) erkannt!"
 
-#: apps/lessons/views_crud.py:267
+#: apps/lessons/views_crud.py:270
 msgid "Lesson successfully created."
 msgstr "Unterrichtsstunde erfolgreich erstellt."
 
-#: apps/lessons/views_crud.py:377
+#: apps/lessons/views_crud.py:380
 #, python-brace-format
 msgid "{count} conflict(s) detected. No changes were made."
 msgstr "{count} Konflikt(e) erkannt. Keine Änderungen vorgenommen."
 
-#: apps/lessons/views_crud.py:386
+#: apps/lessons/views_crud.py:389
 #, python-brace-format
 msgid ""
 "Series updated. {deleted} lesson(s) deleted, {created} new lesson(s) "
@@ -5021,102 +5505,102 @@ msgstr ""
 "Serie aktualisiert. {deleted} Stunde(n) gelöscht, {created} neue Stunde(n) "
 "erstellt, {updated} Stunde(n) aktualisiert."
 
-#: apps/lessons/views_crud.py:416
+#: apps/lessons/views_crud.py:419
 #, python-brace-format
 msgid "Conflict detected for {date} at {time}. No changes were made."
-msgstr ""
+msgstr "Konflikt erkannt für {date} um {time}. Es wurden keine Änderungen vorgenommen."
 "Konflikt erkannt für {date} um {time}. Es wurden keine Änderungen "
 "vorgenommen."
 
-#: apps/lessons/views_crud.py:425
+#: apps/lessons/views_crud.py:428
 #, python-brace-format
 msgid "Series updated. {count} lesson(s) updated."
 msgstr "Serie aktualisiert. {count} Stunde(n) aktualisiert."
 
-#: apps/lessons/views_crud.py:456
+#: apps/lessons/views_crud.py:459
 #, python-brace-format
 msgid "Lesson updated, but {count} conflict(s) detected!"
 msgstr "Unterrichtsstunde aktualisiert, aber {count} Konflikt(e) erkannt!"
 
-#: apps/lessons/views_crud.py:461
+#: apps/lessons/views_crud.py:464
 msgid "Lesson successfully updated."
 msgstr "Unterrichtsstunde erfolgreich aktualisiert."
 
-#: apps/lessons/views_crud.py:509
+#: apps/lessons/views_crud.py:512
 #, python-brace-format
 msgid "Series deleted. {count} lesson deleted."
 msgid_plural "Series deleted. {count} lessons deleted."
 msgstr[0] "Serie gelöscht. {count} Stunde gelöscht."
 msgstr[1] "Serie gelöscht. {count} Stunden gelöscht."
 
-#: apps/lessons/views_crud.py:517
+#: apps/lessons/views_crud.py:520
 msgid "Lesson successfully deleted."
 msgstr "Unterrichtsstunde erfolgreich gelöscht."
 
-#: apps/lessons/views_public_booking.py:71
+#: apps/lessons/views_public_booking.py:72
 msgid ""
 "Booking link invalid or expired. Please use the link shared by your tutor."
 msgstr ""
 "Buchungslink ungültig oder abgelaufen. Bitte den vom Tutor geteilten Link "
 "verwenden."
 
-#: apps/lessons/views_public_booking.py:150
+#: apps/lessons/views_public_booking.py:151
 msgid "Booking link invalid or expired."
 msgstr "Buchungslink ungültig oder abgelaufen."
 
-#: apps/lessons/views_public_booking.py:220
+#: apps/lessons/views_public_booking.py:221
 msgid "Please enter a name."
 msgstr "Bitte geben Sie einen Namen ein."
 
-#: apps/lessons/views_public_booking.py:226
+#: apps/lessons/views_public_booking.py:227
 msgid "Booking link invalid."
 msgstr "Buchungslink ungültig."
 
-#: apps/lessons/views_public_booking.py:230
+#: apps/lessons/views_public_booking.py:231
 msgid "Too many attempts."
 msgstr "Zu viele Versuche."
 
-#: apps/lessons/views_public_booking.py:259
-#: apps/lessons/views_public_booking.py:325
+#: apps/lessons/views_public_booking.py:260
+#: apps/lessons/views_public_booking.py:326
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
-#: apps/lessons/views_public_booking.py:352
-#: apps/lessons/views_public_booking.py:423
+#: apps/lessons/views_public_booking.py:353
+#: apps/lessons/views_public_booking.py:424
 msgid "Booking is not available."
 msgstr "Buchung nicht verfügbar."
 
-#: apps/lessons/views_public_booking.py:371
+#: apps/lessons/views_public_booking.py:372
 msgid "Student created successfully."
 msgstr "Schüler erfolgreich erstellt."
 
-#: apps/lessons/views_public_booking.py:386
-#: apps/lessons/views_public_booking.py:671
-#: apps/lessons/views_public_booking.py:922
+#: apps/lessons/views_public_booking.py:387
+#: apps/lessons/views_public_booking.py:672
+#: apps/lessons/views_public_booking.py:923
 msgid "An error occurred. Please try again."
 msgstr "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
 
-#: apps/lessons/views_public_booking.py:429
+#: apps/lessons/views_public_booking.py:430
 msgid "Student ID is required."
 msgstr "Schüler-ID ist erforderlich."
 
-#: apps/lessons/views_public_booking.py:435
+#: apps/lessons/views_public_booking.py:436
 msgid "Booking code is required."
 msgstr "Buchungscode ist erforderlich."
 
-#: apps/lessons/views_public_booking.py:441 apps/students/views.py:92
+#: apps/lessons/views_public_booking.py:442 apps/students/views.py:93
 msgid "Student not found."
 msgstr "Schüler nicht gefunden."
 
-#: apps/lessons/views_public_booking.py:445
+#: apps/lessons/views_public_booking.py:446
 msgid "Invalid booking code."
 msgstr "Ungültiger Buchungscode."
 
-#: apps/lessons/views_public_booking.py:450
+#: apps/lessons/views_public_booking.py:451
 msgid "Date and start time are required."
 msgstr "Datum und Startzeit sind erforderlich."
 
-#: apps/lessons/views_public_booking.py:576
+#: apps/lessons/views_public_booking.py:577
 msgid ""
 "This time is not available due to travel time rules. Please choose another "
 "slot."
@@ -5124,35 +5608,36 @@ msgstr ""
 "Dieser Termin ist wegen der Fahrzeit-Regeln nicht möglich. Bitte wählen Sie "
 "einen anderen Slot."
 
-#: apps/lessons/views_public_booking.py:665
+#: apps/lessons/views_public_booking.py:666
 msgid "Invalid data format."
 msgstr "Ungültiges Datenformat."
 
-#: apps/lessons/views_public_booking.py:675
+#: apps/lessons/views_public_booking.py:676
 msgid "Reschedule not possible. Please try again."
 msgstr "Umbuchung nicht möglich. Bitte versuchen Sie es erneut."
 
-#: apps/lessons/views_public_booking.py:707
+#: apps/lessons/views_public_booking.py:708
 msgid "Rescheduling entire series requires Premium. Upgrade to access."
-msgstr "Umbuchung der gesamten Serie erfordert Premium. Upgrade für vollen Zugang."
+msgstr "Das Umplanen der gesamten Serie erfordert Premium. Upgrade, um Zugang zu erhalten."
+"Umbuchung der gesamten Serie erfordert Premium. Upgrade für vollen Zugang."
 
-#: apps/lessons/views_public_booking.py:717
+#: apps/lessons/views_public_booking.py:718
 msgid "Rescheduling requires Premium. Upgrade to access."
 msgstr "Umbuchung erfordert Premium. Upgrade für vollen Zugang."
 
-#: apps/lessons/views_public_booking.py:844
+#: apps/lessons/views_public_booking.py:845
 msgid "Cannot reschedule series: a time slot is already booked."
 msgstr "Serie kann nicht umgebucht werden: Ein Zeitslot ist bereits belegt."
 
-#: apps/lessons/views_public_booking.py:877
+#: apps/lessons/views_public_booking.py:878
 msgid "Series rescheduled successfully."
 msgstr "Serie erfolgreich umgebucht."
 
-#: apps/lessons/views_public_booking.py:912
+#: apps/lessons/views_public_booking.py:913
 msgid "Lesson rescheduled successfully."
 msgstr "Stunde erfolgreich umgebucht."
 
-#: apps/lessons/views_public_booking.py:918
+#: apps/lessons/views_public_booking.py:919
 msgid "Invalid data."
 msgstr "Ungültige Daten."
 
@@ -5169,59 +5654,52 @@ msgid "Tutor who owns this student data"
 msgstr "Tutor, dem diese Schülerdaten gehören"
 
 #: apps/students/models.py:15
-#| msgid "First Name"
 msgid "first name"
 msgstr "Vorname"
 
 #: apps/students/models.py:16
-#| msgid "Last Name"
 msgid "last name"
 msgstr "Nachname"
 
 #: apps/students/models.py:17
-#| msgid "Email"
 msgid "email"
 msgstr "E-Mail"
 
 #: apps/students/models.py:18
-#| msgid "Phone"
 msgid "phone"
 msgstr "Telefon"
 
-#: apps/students/models.py:21
-#| msgid "School"
+#: apps/students/models.py:23
 msgid "school"
 msgstr "Schule"
 
-#: apps/students/models.py:22
+#: apps/students/models.py:24
 msgid "School name"
 msgstr "Schulname"
 
-#: apps/students/models.py:26
-#| msgid "Grade"
+#: apps/students/models.py:30
 msgid "grade"
 msgstr "Klasse/Stufe"
 
-#: apps/students/models.py:27
+#: apps/students/models.py:31
 msgid "Grade/Level (e.g., '10th grade', 'Q1')"
 msgstr "Klasse/Stufe (z.B. '10. Klasse', 'Q1')"
 
-#: apps/students/models.py:33
-#| msgid "Subjects"
+#: apps/students/models.py:37
 msgid "subjects"
 msgstr "Fächer"
 
-#: apps/students/models.py:34
+#: apps/students/models.py:38
 msgid "Subjects (comma-separated, e.g., 'Math, German, English')"
 msgstr "Fächer (kommagetrennt, z.B. 'Mathe, Deutsch, Englisch')"
 
-#: apps/students/models.py:39
+#: apps/students/models.py:44
 msgid "Additional notes about the student"
 msgstr "Zusätzliche Notizen zum Schüler"
 
-#: apps/students/models.py:46
+#: apps/students/models.py:51
 msgid "SHA-256 hash of the public booking code (never store plaintext)"
-msgstr ""
+msgstr "SHA-256-Hash des öffentlichen Buchungscodes (niemals als Klartext speichern)"
 "SHA-256-Hash des öffentlichen Buchungscodes (niemals im Klartext speichern)"
 
 #: apps/students/templates/students/student_confirm_delete.html:4
@@ -5288,15 +5766,15 @@ msgstr "Code setzen (Neu generieren)"
 msgid "No students available."
 msgstr "Keine Schüler vorhanden."
 
-#: apps/students/views.py:50
+#: apps/students/views.py:51
 msgid "Student successfully created."
 msgstr "Schüler erfolgreich erstellt."
 
-#: apps/students/views.py:66
+#: apps/students/views.py:67
 msgid "Student successfully updated."
 msgstr "Schüler erfolgreich aktualisiert."
 
-#: apps/students/views.py:81
+#: apps/students/views.py:82
 msgid "Student successfully deleted."
 msgstr "Schüler erfolgreich gelöscht."
 
@@ -5343,7 +5821,7 @@ msgstr ""
 
 #: templates/legal/about.html:25
 msgid "TutorFlow is actively operated and developed for productive use."
-msgstr ""
+msgstr "TutorFlow wird aktiv betrieben und für den produktiven Einsatz weiterentwickelt."
 "TutorFlow wird aktiv betrieben und fur den produktiven Einsatz "
 "weiterentwickelt."
 
@@ -5477,292 +5955,3 @@ msgstr "Rechtliche Navigation"
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Institute tier progress"
-msgstr "Institut-Stufenfortschritt"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Total taught"
-msgstr "Gesamt unterrichtet"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Current tier"
-msgstr "Aktuelle Stufe"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "in this tier"
-msgstr "in dieser Stufe"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Next increase"
-msgstr "Nächste Erhöhung"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "in"
-msgstr "in"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Estimated date"
-msgstr "Voraussichtliches Datum"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Maximum tier reached"
-msgstr "Höchststufe erreicht"
-
-#: apps/contracts/templates/contracts/contract_list.html
-msgid "Configure thresholds"
-msgstr "Schwellenwerte konfigurieren"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Institute tier thresholds"
-msgstr "Institut-Stufenschwellenwerte"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Add institute"
-msgstr "Institut hinzufügen"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Configure hour thresholds at which your pay rate increases for a given institute. TutorSpace uses built-in thresholds automatically; add a config here to override them or to set up another institute."
-msgstr "Stundenschwellenwerte konfigurieren, ab denen sich dein Stundenlohn erhöht. TutorSpace nutzt automatisch eingebaute Schwellenwerte; hier kannst du diese überschreiben oder ein anderes Institut einrichten."
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Tiers"
-msgstr "Stufen"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "No custom tier configs yet. TutorSpace tiers are always available without a config."
-msgstr "Noch keine eigenen Stufenkonfigurationen. TutorSpace-Stufen sind immer ohne Konfiguration verfügbar."
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "Edit tier config"
-msgstr "Stufenkonfiguration bearbeiten"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "New tier config"
-msgstr "Neue Stufenkonfiguration"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "Institute name"
-msgstr "Institutname"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "Tier thresholds"
-msgstr "Stufenschwellenwerte"
-
-#: apps/contracts/templates/contracts/tier_config_confirm_delete.html
-msgid "Delete tier config"
-msgstr "Stufenkonfiguration löschen"
-
-#: apps/contracts/views.py
-msgid "Tier config saved."
-msgstr "Stufenkonfiguration gespeichert."
-
-#: apps/contracts/views.py
-msgid "Tier config deleted."
-msgstr "Stufenkonfiguration gelöscht."
-
-#: apps/contracts/models.py
-msgid "Institute tier config"
-msgstr "Institut-Stufenkonfiguration"
-
-#: apps/contracts/models.py
-msgid "Institute tier configs"
-msgstr "Institut-Stufenkonfigurationen"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "One row per pay rate. \"From hours\" is the cumulative total at which this rate starts (e.g. 0 for the first tier, 50 for the second)."
-msgstr "Eine Zeile pro Stundenlohn. \"Ab Stunden\" ist die kumulative Gesamtstundenzahl, ab der dieser Satz gilt (z.B. 0 für die erste Stufe, 50 für die zweite)."
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "From hours"
-msgstr "Ab Stunden"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "Label (e.g. 14 €/h)"
-msgstr "Bezeichnung (z.B. 14 €/h)"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "Add tier"
-msgstr "Stufe hinzufügen"
-
-#: apps/contracts/templates/contracts/tier_config_form.html
-msgid "e.g. 14 €/h"
-msgstr "z.B. 14 €/h"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Built-in tier configs"
-msgstr "Eingebaute Stufenkonfigurationen"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Use as custom config"
-msgstr "Als benutzerdefinierte Konfiguration verwenden"
-
-#: apps/contracts/templates/contracts/tier_config_list.html
-msgid "Custom config active"
-msgstr "Benutzerdefinierte Konfiguration aktiv"
-
-#: apps/core/templates/core/base.html
-msgid "Tax"
-msgstr "Steuer"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Tax Year Overview"
-msgstr "Steuerübersicht"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Tax Year Overview – Premium feature"
-msgstr "Steuerübersicht – Premium-Funktion"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Cash-basis accounting (Zufluss-Prinzip)"
-msgstr "Einnahmen nach Zufluss-Prinzip"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Only invoices with a payment date in the selected year are included. This matches the German EÜR for freelancers (§ 4 Abs. 3 EStG)."
-msgstr "Es werden nur Rechnungen berücksichtigt, bei denen das Zahlungsdatum im gewählten Jahr liegt. Dies entspricht der deutschen EÜR für Freiberufler (§ 4 Abs. 3 EStG)."
-
-#: apps/core/templates/core/tax_year.html
-msgid "Monthly breakdown"
-msgstr "Monatliche Aufschlüsselung"
-
-
-#: apps/core/templates/core/tax_year.html
-msgid "Kleinunternehmer status (§ 19 UStG)"
-msgstr "Kleinunternehmerstatus (§ 19 UStG)"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Limit (§ 19 UStG)"
-msgstr "Grenze (§ 19 UStG)"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Current income"
-msgstr "Bisherige Einnahmen"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Remaining until limit"
-msgstr "Verbleibend bis zur Grenze"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Status: OK"
-msgstr "Status: OK"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Approaching limit"
-msgstr "Grenze wird erreicht"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Limit exceeded"
-msgstr "Grenze überschritten"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Paid invoices"
-msgstr "Bezahlte Rechnungen"
-
-#: apps/core/templates/core/tax_year.html
-msgid "No paid invoices for this year."
-msgstr "Keine bezahlten Rechnungen für dieses Jahr."
-
-#: apps/core/templates/core/tax_year.html
-msgid "Invoice number"
-msgstr "Rechnungsnummer"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Recipient"
-msgstr "Empfänger"
-
-
-#: apps/core/templates/core/tax_year.html
-msgid "Upgrade to Premium for full access."
-msgstr "Upgrade auf Premium für den vollen Zugang."
-
-#: apps/core/models.py
-msgid "Expense"
-msgstr "Ausgabe"
-
-#: apps/core/models.py
-msgid "Expenses"
-msgstr "Ausgaben"
-
-#: apps/core/models.py
-msgid "Work materials"
-msgstr "Arbeitsmittel"
-
-#: apps/core/models.py
-msgid "Travel"
-msgstr "Fahrtkosten"
-
-#: apps/core/models.py
-msgid "Education"
-msgstr "Fortbildung"
-
-#: apps/core/models.py
-msgid "Office"
-msgstr "Büro/Arbeitszimmer"
-
-#: apps/core/models.py
-msgid "Communication"
-msgstr "Kommunikation"
-
-#: apps/core/models.py
-msgid "Other"
-msgstr "Sonstiges"
-
-#: apps/core/templates/core/expense_list.html
-msgid "My expenses"
-msgstr "Meine Ausgaben"
-
-#: apps/core/templates/core/expense_list.html
-msgid "New expense"
-msgstr "Neue Ausgabe"
-
-#: apps/core/templates/core/expense_list.html
-msgid "Category"
-msgstr "Kategorie"
-
-#: apps/core/templates/core/expense_list.html
-msgid "Total expenses"
-msgstr "Gesamtausgaben"
-
-#: apps/core/templates/core/expense_list.html
-msgid "No expenses for this year."
-msgstr "Keine Ausgaben für dieses Jahr."
-
-#: apps/core/templates/core/expense_list.html
-msgid "Tax year overview"
-msgstr "Steuerübersicht"
-
-#: apps/core/templates/core/expense_form.html
-msgid "Edit expense"
-msgstr "Ausgabe bearbeiten"
-
-
-#: apps/core/templates/core/expense_form.html
-msgid "Save expense"
-msgstr "Ausgabe speichern"
-
-#: apps/core/templates/core/expense_confirm_delete.html
-msgid "Delete expense"
-msgstr "Ausgabe löschen"
-
-
-#: apps/core/templates/core/tax_year.html
-msgid "No expenses recorded for this year."
-msgstr "Keine Ausgaben für dieses Jahr erfasst."
-
-
-#: apps/core/templates/core/tax_year.html
-msgid "Profit (income minus expenses)"
-msgstr "Gewinn (Einnahmen minus Ausgaben)"
-
-#: apps/core/templates/core/tax_year.html
-msgid "Manage expenses"
-msgstr "Ausgaben verwalten"
-
-#: apps/core/views.py
-msgid "Expense saved."
-msgstr "Ausgabe gespeichert."
-
-#: apps/core/views.py
-msgid "Expense deleted."
-msgstr "Ausgabe gelöscht."
