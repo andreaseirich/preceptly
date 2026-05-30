@@ -1,0 +1,146 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% load currency %}
+
+{% block title %}{% trans "Tax Year Overview" %} - TutorFlow{% endblock %}
+
+{% block content %}
+<h1>{% trans "Tax Year Overview" %}{% if is_premium %} <span class="premium-badge">{% trans "Premium" %}</span>{% endif %}</h1>
+
+<div style="margin-bottom: 24px;">
+    <form method="get" action="" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <label for="year">{% trans "Year" %}:</label>
+        <select id="year" name="year">
+            {% for y in available_years %}
+            <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">{% trans "Apply" %}</button>
+    </form>
+</div>
+
+{% if is_premium %}
+
+<div class="tutorflow-help-box" style="margin-bottom: 24px;">
+    <strong>{% trans "Cash-basis accounting (Zufluss-Prinzip)" %}</strong><br>
+    {% blocktrans %}Only invoices with a payment date in the selected year are included. This matches the German EÜR for freelancers (§ 4 Abs. 3 EStG).{% endblocktrans %}
+</div>
+
+<h2>{% trans "Monthly breakdown" %} {{ year }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans "Month" %}</th>
+            <th style="text-align:right;">{% trans "Income" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in monthly_breakdown %}
+        <tr {% if row.income %}style="font-weight:500;"{% endif %}>
+            <td>
+                {% if row.month == 1 %}{% trans "January" %}
+                {% elif row.month == 2 %}{% trans "February" %}
+                {% elif row.month == 3 %}{% trans "March" %}
+                {% elif row.month == 4 %}{% trans "April" %}
+                {% elif row.month == 5 %}{% trans "May" %}
+                {% elif row.month == 6 %}{% trans "June" %}
+                {% elif row.month == 7 %}{% trans "July" %}
+                {% elif row.month == 8 %}{% trans "August" %}
+                {% elif row.month == 9 %}{% trans "September" %}
+                {% elif row.month == 10 %}{% trans "October" %}
+                {% elif row.month == 11 %}{% trans "November" %}
+                {% elif row.month == 12 %}{% trans "December" %}
+                {% endif %}
+            </td>
+            <td style="text-align:right;">{{ row.income|euro }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr style="font-weight:bold; border-top:2px solid var(--border-color);">
+            <td>{% trans "Total" %}</td>
+            <td style="text-align:right;">{{ total_income|euro }}</td>
+        </tr>
+    </tfoot>
+</table>
+
+<h2 style="margin-top:32px;">{% trans "Kleinunternehmer status (§ 19 UStG)" %}</h2>
+
+{% if not kleinunternehmer_ok %}
+<div style="padding:16px; background:#f8d7da; border:1px solid #f5c6cb; border-radius:8px; margin-bottom:24px;">
+    <strong style="color:#721c24;">&#10007; {% trans "Limit exceeded" %}</strong><br>
+    {% blocktrans with limit=kleinunternehmer_limit total=total_income %}Your income of {{ total }} EUR exceeds the Kleinunternehmer limit of {{ limit }} EUR. You may need to charge VAT.{% endblocktrans %}
+</div>
+{% elif kleinunternehmer_warning %}
+<div style="padding:16px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; margin-bottom:24px;">
+    <strong style="color:#856404;">&#9888; {% trans "Approaching limit" %}</strong><br>
+    {% blocktrans with limit=kleinunternehmer_limit total=total_income %}Your income of {{ total }} EUR is close to the Kleinunternehmer limit of {{ limit }} EUR.{% endblocktrans %}
+</div>
+{% else %}
+<div style="padding:16px; background:#d4edda; border:1px solid #c3e6cb; border-radius:8px; margin-bottom:24px;">
+    <strong style="color:#155724;">&#10003; {% trans "Status: OK" %}</strong><br>
+    {% blocktrans with limit=kleinunternehmer_limit total=total_income %}Your income of {{ total }} EUR is below the Kleinunternehmer limit of {{ limit }} EUR.{% endblocktrans %}
+</div>
+{% endif %}
+
+<table class="table" style="max-width:420px; margin-bottom:32px;">
+    <tbody>
+        <tr>
+            <td>{% trans "Limit (§ 19 UStG)" %}</td>
+            <td style="text-align:right;">{{ kleinunternehmer_limit|euro }}</td>
+        </tr>
+        <tr>
+            <td>{% trans "Current income" %}</td>
+            <td style="text-align:right;">{{ total_income|euro }}</td>
+        </tr>
+        <tr>
+            <td>{% trans "Remaining until limit" %}</td>
+            <td style="text-align:right;">
+                {% if kleinunternehmer_ok %}{{ kleinunternehmer_remaining|euro }}{% else %}&mdash;{% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>{% trans "Paid invoices" %} {{ year }}</h2>
+{% if invoices %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Invoice number" %}</th>
+            <th>{% trans "Recipient" %}</th>
+            <th style="text-align:right;">{% trans "Amount" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inv in invoices %}
+        <tr>
+            <td>{{ inv.paid_at|date:"d.m.Y" }}</td>
+            <td>{{ inv.invoice_number|default:"-" }}</td>
+            <td>{{ inv.payer_name }}</td>
+            <td style="text-align:right;">{{ inv.total_amount|euro }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>{% trans "No paid invoices for this year." %}</p>
+{% endif %}
+
+<div style="margin-top:20px;">
+    <a href="{% url 'core:tax_year_csv' %}?year={{ year }}" class="btn">
+        &#8595; {% blocktrans with y=year %}Download CSV {{ y }}{% endblocktrans %}
+    </a>
+</div>
+
+{% else %}
+
+<div style="padding:30px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; margin:20px 0;">
+    <h2 style="margin-top:0;">{% trans "Tax Year Overview – Premium feature" %}</h2>
+    <p>{% blocktrans %}Get a full cash-basis income summary for your tax return (EÜR): monthly breakdown, Kleinunternehmer status check, invoice list, and CSV export.{% endblocktrans %}</p>
+    <p>{% trans "Upgrade to Premium for full access." %}</p>
+</div>
+
+{% endif %}
+{% endblock %}

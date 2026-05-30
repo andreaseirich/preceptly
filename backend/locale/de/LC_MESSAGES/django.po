@@ -5601,3 +5601,77 @@ msgstr "Als benutzerdefinierte Konfiguration verwenden"
 #: apps/contracts/templates/contracts/tier_config_list.html
 msgid "Custom config active"
 msgstr "Benutzerdefinierte Konfiguration aktiv"
+
+#: apps/core/templates/core/base.html
+msgid "Tax"
+msgstr "Steuer"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Tax Year Overview"
+msgstr "Steuerübersicht"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Tax Year Overview – Premium feature"
+msgstr "Steuerübersicht – Premium-Funktion"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Cash-basis accounting (Zufluss-Prinzip)"
+msgstr "Einnahmen nach Zufluss-Prinzip"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Only invoices with a payment date in the selected year are included. This matches the German EÜR for freelancers (§ 4 Abs. 3 EStG)."
+msgstr "Es werden nur Rechnungen berücksichtigt, bei denen das Zahlungsdatum im gewählten Jahr liegt. Dies entspricht der deutschen EÜR für Freiberufler (§ 4 Abs. 3 EStG)."
+
+#: apps/core/templates/core/tax_year.html
+msgid "Monthly breakdown"
+msgstr "Monatliche Aufschlüsselung"
+
+
+#: apps/core/templates/core/tax_year.html
+msgid "Kleinunternehmer status (§ 19 UStG)"
+msgstr "Kleinunternehmerstatus (§ 19 UStG)"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Limit (§ 19 UStG)"
+msgstr "Grenze (§ 19 UStG)"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Current income"
+msgstr "Bisherige Einnahmen"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Remaining until limit"
+msgstr "Verbleibend bis zur Grenze"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Status: OK"
+msgstr "Status: OK"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Approaching limit"
+msgstr "Grenze wird erreicht"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Limit exceeded"
+msgstr "Grenze überschritten"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Paid invoices"
+msgstr "Bezahlte Rechnungen"
+
+#: apps/core/templates/core/tax_year.html
+msgid "No paid invoices for this year."
+msgstr "Keine bezahlten Rechnungen für dieses Jahr."
+
+#: apps/core/templates/core/tax_year.html
+msgid "Invoice number"
+msgstr "Rechnungsnummer"
+
+#: apps/core/templates/core/tax_year.html
+msgid "Recipient"
+msgstr "Empfänger"
+
+
+#: apps/core/templates/core/tax_year.html
+msgid "Upgrade to Premium for full access."
+msgstr "Upgrade auf Premium für den vollen Zugang."

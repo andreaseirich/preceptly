@@ -2,14 +2,20 @@
 Views for dashboard and income overview.
 """
 
+import csv
+from decimal import Decimal
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.generic import FormView, TemplateView
 
+from apps.billing.models import Invoice
 from apps.core.forms import (
     TravelPolicyForm,
     TutorNoShowPayForm,
@@ -381,3 +387,119 @@ class LegalAboutView(LegalPageView):
     """About page."""
 
     template_name = "legal/about.html"
+
+
+class TaxYearView(LoginRequiredMixin, TemplateView):
+    """Tax year overview based on cash-basis accounting (Zufluss-Prinzip / EÜR)."""
+
+    template_name = "core/tax_year.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        now = timezone.now()
+
+        from apps.core.feature_flags import is_premium_user
+
+        is_premium = is_premium_user(user)
+
+        try:
+            year = int(self.request.GET.get("year", now.year))
+        except (ValueError, TypeError):
+            year = now.year
+
+        available_year_dates = (
+            Invoice.objects.filter(owner=user, paid_at__isnull=False)
+            .dates("paid_at", "year")
+            .order_by("-paid_at")
+        )
+        available_years = [d.year for d in available_year_dates]
+        if year not in available_years:
+            available_years = sorted(set(available_years + [year]), reverse=True)
+
+        limit = Decimal("25000.00") if year >= 2025 else Decimal("22000.00")
+
+        if is_premium:
+            invoices = list(
+                Invoice.objects.filter(
+                    owner=user,
+                    status="paid",
+                    paid_at__isnull=False,
+                    paid_at__year=year,
+                )
+                .order_by("paid_at")
+                .only("invoice_number", "payer_name", "paid_at", "total_amount")
+            )
+            total_income = sum((inv.total_amount for inv in invoices), Decimal("0.00"))
+            monthly_totals = {m: Decimal("0.00") for m in range(1, 13)}
+            for inv in invoices:
+                monthly_totals[inv.paid_at.month] += inv.total_amount
+            monthly_breakdown = [{"month": m, "income": monthly_totals[m]} for m in range(1, 13)]
+        else:
+            invoices = []
+            total_income = Decimal("0.00")
+            monthly_breakdown = [{"month": m, "income": Decimal("0.00")} for m in range(1, 13)]
+
+        remaining = max(Decimal("0.00"), limit - total_income)
+        context.update(
+            {
+                "year": year,
+                "available_years": available_years,
+                "invoices": invoices,
+                "total_income": total_income,
+                "monthly_breakdown": monthly_breakdown,
+                "kleinunternehmer_limit": limit,
+                "kleinunternehmer_ok": total_income <= limit,
+                "kleinunternehmer_warning": total_income >= limit * Decimal("0.8"),
+                "kleinunternehmer_remaining": remaining,
+                "is_premium": is_premium,
+            }
+        )
+        return context
+
+
+class TaxYearCsvView(LoginRequiredMixin, View):
+    """CSV export of paid invoices for a tax year (cash-basis / Zufluss-Prinzip)."""
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        now = timezone.now()
+        try:
+            year = int(request.GET.get("year", now.year))
+        except (ValueError, TypeError):
+            year = now.year
+
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="tutorflow-einnahmen-{year}.csv"'
+        response.write("\ufeff")  # BOM for Excel UTF-8
+
+        writer = csv.writer(response, delimiter=";")
+        writer.writerow(
+            [
+                _("Date"),
+                _("Invoice number"),
+                _("Recipient"),
+                _("Amount (EUR)"),
+            ]
+        )
+
+        for inv in (
+            Invoice.objects.filter(
+                owner=user,
+                status="paid",
+                paid_at__isnull=False,
+                paid_at__year=year,
+            )
+            .order_by("paid_at")
+            .only("invoice_number", "payer_name", "paid_at", "total_amount")
+        ):
+            writer.writerow(
+                [
+                    inv.paid_at.date().strftime("%d.%m.%Y"),
+                    inv.invoice_number or "",
+                    inv.payer_name,
+                    str(inv.total_amount).replace(".", ","),
+                ]
+            )
+
+        return response
