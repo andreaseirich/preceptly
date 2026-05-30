@@ -930,6 +930,10 @@ msgstr "Rechnung ist bereits als bezahlt markiert."
 msgid "Invoice marked as paid."
 msgstr "Rechnung als bezahlt markiert."
 
+#: apps/billing/templates/billing/invoice_mark_paid.html
+msgid "Payment date"
+msgstr "Zahlungseingang"
+
 #: apps/billing/views.py:326
 msgid "Invoice is not marked as paid."
 msgstr "Rechnung ist nicht als bezahlt markiert."

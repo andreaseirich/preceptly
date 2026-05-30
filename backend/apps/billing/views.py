@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.http import FileResponse, Http404, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -305,16 +305,22 @@ def invoice_mark_sent(request, pk):
 
 
 @login_required
-@require_POST
 def invoice_mark_paid(request, pk):
-    """Mark invoice as paid."""
+    """Mark invoice as paid. GET: show date form. POST: save."""
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
-    if invoice.status == "paid":
-        messages.warning(request, _("Invoice is already marked as paid."))
-    else:
-        InvoiceService.mark_invoice_as_paid(invoice)
-        messages.success(request, _("Invoice marked as paid."))
-    return redirect("billing:invoice_detail", pk=pk)
+    if request.method == "POST":
+        if invoice.status == "paid":
+            messages.warning(request, _("Invoice is already marked as paid."))
+        else:
+            paid_date = _safe_date(request.POST.get("paid_date"))
+            InvoiceService.mark_invoice_as_paid(invoice, paid_at=paid_date)
+            messages.success(request, _("Invoice marked as paid."))
+        return redirect("billing:invoice_detail", pk=pk)
+    return render(
+        request,
+        "billing/invoice_mark_paid.html",
+        {"invoice": invoice, "today": date.today().isoformat()},
+    )
 
 
 @login_required

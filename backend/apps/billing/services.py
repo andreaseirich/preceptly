@@ -207,11 +207,17 @@ class InvoiceService:
         invoice.save(update_fields=["status", "sent_at", "updated_at"])
 
     @staticmethod
-    def mark_invoice_as_paid(invoice: Invoice) -> None:
-        """Mark invoice as paid. Sets status=paid, paid_at=now. Updates lessons: a lesson is
+    def mark_invoice_as_paid(invoice: Invoice, paid_at=None) -> None:
+        """Mark invoice as paid. Sets status=paid, paid_at. Updates lessons: a lesson is
         paid only if ALL invoices containing it have status=paid."""
+        from datetime import datetime
+        from datetime import time as dt_time
+
         invoice.status = "paid"
-        invoice.paid_at = timezone.now()
+        if paid_at is not None:
+            invoice.paid_at = timezone.make_aware(datetime.combine(paid_at, dt_time.min))
+        else:
+            invoice.paid_at = timezone.now()
         invoice.save(update_fields=["status", "paid_at", "updated_at"])
         PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
 
