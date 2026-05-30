@@ -25,6 +25,7 @@ from django.views.generic import (
 
 from apps.billing.models import Invoice
 from apps.core.forms import (
+    ExpenseForm,
     TravelPolicyForm,
     TutorNoShowPayForm,
     TutorSpaceTierCountFromForm,
@@ -593,7 +594,7 @@ class ExpenseListView(LoginRequiredMixin, ListView):
 
 class ExpenseCreateView(LoginRequiredMixin, CreateView):
     model = Expense
-    fields = ["date", "amount", "category", "description", "notes"]
+    form_class = ExpenseForm
     template_name = "core/expense_form.html"
     success_url = reverse_lazy("core:expense_list")
 
@@ -605,7 +606,7 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
 
 class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     model = Expense
-    fields = ["date", "amount", "category", "description", "notes"]
+    form_class = ExpenseForm
     template_name = "core/expense_form.html"
     success_url = reverse_lazy("core:expense_list")
 

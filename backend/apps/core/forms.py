@@ -5,7 +5,10 @@ Forms for core app.
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.models import Expense
 
 
 class UserEmailForm(forms.ModelForm):
@@ -203,3 +206,24 @@ class TutorSpaceTierCountFromForm(forms.Form):
             "lessons are included—only lessons on or after this date will count."
         ),
     )
+
+
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = ["date", "amount", "category", "description", "notes"]
+        widgets = {
+            "date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"},
+                format="%Y-%m-%d",
+            ),
+            "amount": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "category": forms.Select(attrs={"class": "form-control"}),
+            "description": forms.TextInput(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.fields["date"].initial = timezone.localdate()
