@@ -37,7 +37,13 @@
             <td>{{ expense.date|date:"d.m.Y" }}</td>
             <td>{{ expense.get_category_display }}</td>
             <td>{{ expense.description }}</td>
-            <td style="text-align:right;">{{ expense.amount|euro }}</td>
+            <td style="text-align:right;">
+                {% if expense.business_use_percent < 100 %}
+                    {{ expense.effective_amount|euro }} <span style="color:var(--text-secondary); font-size:.9em;">({{ expense.business_use_percent }}%)</span>
+                {% else %}
+                    {{ expense.amount|euro }}
+                {% endif %}
+            </td>
             <td style="white-space:nowrap;">
                 <a href="{% url 'core:expense_update' expense.pk %}">{% trans "Edit" %}</a>
                 &nbsp;

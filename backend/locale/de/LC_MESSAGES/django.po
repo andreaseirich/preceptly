@@ -5955,3 +5955,47 @@ msgstr "Rechtliche Navigation"
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+#: apps/core/models.py
+msgid "Business use (%)"
+msgstr "Betriebliche Nutzung (%)"
+
+#: apps/core/models.py
+msgid "Percentage of this expense used for business purposes (1–100)."
+msgstr "Prozentualer Anteil dieser Ausgabe für betriebliche Zwecke (1–100)."
+
+#: apps/core/templates/core/euer.html
+msgid "Income Surplus Statement (EÜR)"
+msgstr "Einnahmenüberschussrechnung (EÜR)"
+
+#: apps/core/templates/core/euer.html
+msgid "Operating income"
+msgstr "Betriebseinnahmen"
+
+#: apps/core/templates/core/euer.html
+msgid "Total operating income"
+msgstr "Summe Betriebseinnahmen"
+
+#: apps/core/templates/core/euer.html
+msgid "Operating expenses"
+msgstr "Betriebsausgaben"
+
+#: apps/core/templates/core/euer.html
+msgid "Total operating expenses"
+msgstr "Summe Betriebsausgaben"
+
+#: apps/core/templates/core/euer.html
+msgid "Profit"
+msgstr "Gewinn"
+
+#: apps/core/templates/core/euer.html
+msgid "Print"
+msgstr "Drucken"
+
+#: apps/core/templates/core/euer.html
+msgid "This overview is for guidance only and does not replace tax advice."
+msgstr "Diese Übersicht dient als Hilfestellung und ersetzt keine Steuerberatung."
+
+#: apps/core/templates/core/tax_year.html
+msgid "Generate EÜR"
+msgstr "EÜR erstellen"

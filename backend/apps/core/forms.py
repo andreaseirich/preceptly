@@ -211,7 +211,7 @@ class TutorSpaceTierCountFromForm(forms.Form):
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
-        fields = ["date", "amount", "category", "description", "notes"]
+        fields = ["date", "amount", "category", "description", "notes", "business_use_percent"]
         widgets = {
             "date": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"},
@@ -221,6 +221,9 @@ class ExpenseForm(forms.ModelForm):
             "category": forms.Select(attrs={"class": "form-control"}),
             "description": forms.TextInput(attrs={"class": "form-control"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "business_use_percent": forms.NumberInput(
+                attrs={"class": "form-control", "min": 1, "max": 100, "step": 1}
+            ),
         }
 
     def __init__(self, *args, **kwargs):

@@ -440,30 +440,41 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
                 .only("invoice_number", "payer_name", "paid_at", "total_amount")
             )
             total_income = sum((inv.total_amount for inv in invoices), Decimal("0.00"))
-            monthly_totals = {m: Decimal("0.00") for m in range(1, 13)}
+            monthly_income = {m: Decimal("0.00") for m in range(1, 13)}
             for inv in invoices:
-                monthly_totals[inv.paid_at.month] += inv.total_amount
-            monthly_breakdown = [{"month": m, "income": monthly_totals[m]} for m in range(1, 13)]
+                monthly_income[inv.paid_at.month] += inv.total_amount
         else:
             invoices = []
             total_income = Decimal("0.00")
-            monthly_breakdown = [{"month": m, "income": Decimal("0.00")} for m in range(1, 13)]
+            monthly_income = {m: Decimal("0.00") for m in range(1, 13)}
 
         remaining = max(Decimal("0.00"), limit - total_income)
 
-        expenses_qs = Expense.objects.filter(user=user, date__year=year)
-        total_expenses = expenses_qs.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-        profit = total_income - total_expenses
+        expenses_qs = list(Expense.objects.filter(user=user, date__year=year))
+        total_expenses = sum((e.effective_amount for e in expenses_qs), Decimal("0.00"))
 
-        category_sums = (
-            expenses_qs.values("category").annotate(total=Sum("amount")).order_by("category")
-        )
+        monthly_expense_totals = {m: Decimal("0.00") for m in range(1, 13)}
+        for e in expenses_qs:
+            monthly_expense_totals[e.date.month] += e.effective_amount
+
+        monthly_breakdown = [
+            {
+                "month": m,
+                "income": monthly_income[m],
+                "expenses": monthly_expense_totals[m],
+                "profit": monthly_income[m] - monthly_expense_totals[m],
+            }
+            for m in range(1, 13)
+        ]
+
+        total_profit = total_income - total_expenses
+
         category_labels = dict(Expense.CATEGORY_CHOICES)
-        expenses_by_category = {
-            category_labels[row["category"]]: row["total"]
-            for row in category_sums
-            if row["total"] and row["total"] > 0
-        }
+        category_sums: dict = {}
+        for e in expenses_qs:
+            label = category_labels.get(e.category, e.category)
+            category_sums[label] = category_sums.get(label, Decimal("0.00")) + e.effective_amount
+        expenses_by_category = {k: v for k, v in category_sums.items() if v > 0}
 
         context.update(
             {
@@ -478,10 +489,10 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
                 "kleinunternehmer_remaining": remaining,
                 "is_premium": is_premium,
                 "total_expenses": total_expenses,
-                "profit": profit,
+                "profit": total_profit,
+                "total_profit": total_profit,
                 "expenses_by_category": expenses_by_category,
-                "expense_list": list(expenses_qs.order_by("date")),
-                "expense_category_choices": [label for _, label in Expense.CATEGORY_CHOICES],
+                "expense_list": expenses_qs,
             }
         )
         return context
@@ -629,3 +640,54 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, _("Expense deleted."))
         return super().form_valid(form)
+
+
+class EuerView(LoginRequiredMixin, TemplateView):
+    """EÜR – Einnahmenüberschussrechnung nach §4 Abs.3 EStG."""
+
+    template_name = "core/euer.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        now = timezone.now()
+
+        try:
+            year = int(self.request.GET.get("year", now.year))
+        except (ValueError, TypeError):
+            year = now.year
+
+        available_year_dates = (
+            Invoice.objects.filter(owner=user, paid_at__isnull=False)
+            .dates("paid_at", "year")
+            .order_by("-paid_at")
+        )
+        available_years = [d.year for d in available_year_dates]
+        if year not in available_years:
+            available_years = sorted(set(available_years + [year]), reverse=True)
+
+        total_income = Invoice.objects.filter(
+            owner=user, status="paid", paid_at__isnull=False, paid_at__year=year
+        ).aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
+
+        expenses_qs = list(Expense.objects.filter(user=user, date__year=year))
+        total_expenses = sum((e.effective_amount for e in expenses_qs), Decimal("0.00"))
+
+        category_labels = dict(Expense.CATEGORY_CHOICES)
+        category_sums: dict = {}
+        for e in expenses_qs:
+            label = category_labels.get(e.category, e.category)
+            category_sums[label] = category_sums.get(label, Decimal("0.00")) + e.effective_amount
+        expenses_by_category = {k: v for k, v in sorted(category_sums.items()) if v > 0}
+
+        context.update(
+            {
+                "year": year,
+                "available_years": available_years,
+                "total_income": total_income,
+                "expenses_by_category": expenses_by_category,
+                "total_expenses": total_expenses,
+                "profit": total_income - total_expenses,
+            }
+        )
+        return context

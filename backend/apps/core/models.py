@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -149,6 +149,12 @@ class Expense(models.Model):
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     description = models.CharField(max_length=300)
     notes = models.TextField(blank=True, null=True)
+    business_use_percent = models.PositiveSmallIntegerField(
+        default=100,
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        verbose_name=_("Business use (%)"),
+        help_text=_("Percentage of this expense used for business purposes (1\u2013100)."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -156,6 +162,11 @@ class Expense(models.Model):
         ordering = ["-date"]
         verbose_name = _("Expense")
         verbose_name_plural = _("Expenses")
+
+    @property
+    def effective_amount(self) -> Decimal:
+        """Amount after applying business use percentage."""
+        return round(self.amount * Decimal(self.business_use_percent) / Decimal("100"), 2)
 
     def __str__(self):
         return f"{self.date} – {self.description} ({self.amount} €)"

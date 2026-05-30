@@ -1,0 +1,94 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% load currency %}
+
+{% block title %}{% trans "Income Surplus Statement (EÜR)" %} {{ year }} - TutorFlow{% endblock %}
+
+{% block extra_head %}
+<style>
+@media print {
+    nav, .no-print { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .table th, .table td { border: 1px solid #ccc; padding: 6px 10px; }
+    .table { border-collapse: collapse; width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px;" class="no-print">
+    <h1 style="margin:0;">{% trans "Income Surplus Statement (EÜR)" %} {{ year }}</h1>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <form method="get" action="" style="display:flex; gap:8px; align-items:center;">
+            <label for="year">{% trans "Year" %}:</label>
+            <select id="year" name="year">
+                {% for y in available_years %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn">{% trans "Apply" %}</button>
+        </form>
+        <button class="btn" onclick="window.print()">🖨 {% trans "Print" %}</button>
+        <a href="{% url 'core:tax_year' %}?year={{ year }}" class="btn btn-secondary">&#8592; {% trans "Tax year overview" %}</a>
+    </div>
+</div>
+
+<h1 class="print-only" style="display:none;">{% trans "Income Surplus Statement (EÜR)" %} {{ year }}</h1>
+
+<table class="table" style="max-width:600px;">
+    <thead>
+        <tr style="background:var(--table-header-bg);">
+            <th colspan="2">{% trans "Operating income" %} (§ 4 Abs. 3 EStG)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{% trans "Paid invoices" %}</td>
+            <td style="text-align:right;">{{ total_income|euro }}</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr style="font-weight:bold; border-top:2px solid var(--border-color);">
+            <td>{% trans "Total operating income" %}</td>
+            <td style="text-align:right;">{{ total_income|euro }}</td>
+        </tr>
+    </tfoot>
+</table>
+
+<table class="table" style="max-width:600px; margin-top:24px;">
+    <thead>
+        <tr style="background:var(--table-header-bg);">
+            <th colspan="2">{% trans "Operating expenses" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category, amount in expenses_by_category.items %}
+        <tr>
+            <td>{{ category }}</td>
+            <td style="text-align:right;">{{ amount|euro }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:var(--text-secondary);">{% trans "No expenses for this year." %}</td></tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr style="font-weight:bold; border-top:2px solid var(--border-color);">
+            <td>{% trans "Total operating expenses" %}</td>
+            <td style="text-align:right;">{{ total_expenses|euro }}</td>
+        </tr>
+    </tfoot>
+</table>
+
+<table class="table" style="max-width:600px; margin-top:24px;">
+    <tbody>
+        <tr style="font-weight:bold; font-size:1.15em;">
+            <td>{% trans "Profit" %} (§ 4 Abs. 3 EStG)</td>
+            <td style="text-align:right; {% if profit < 0 %}color:#c0392b;{% endif %}">{{ profit|euro }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p style="margin-top:32px; padding:12px 16px; background:var(--table-header-bg); border-left:4px solid var(--border-color); font-size:0.9em; max-width:600px;">
+    ⚠ {% trans "This overview is for guidance only and does not replace tax advice." %}
+</p>
+{% endblock %}

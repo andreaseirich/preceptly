@@ -6,6 +6,7 @@ from django.urls import path
 
 from apps.core import views
 from apps.core.views import (
+    EuerView,
     ExpenseCreateView,
     ExpenseDeleteView,
     ExpenseListView,
@@ -59,4 +60,5 @@ urlpatterns = [
     path("expenses/new/", ExpenseCreateView.as_view(), name="expense_create"),
     path("expenses/<int:pk>/edit/", ExpenseUpdateView.as_view(), name="expense_update"),
     path("expenses/<int:pk>/delete/", ExpenseDeleteView.as_view(), name="expense_delete"),
+    path("tax-year/euer/", EuerView.as_view(), name="euer"),
 ]

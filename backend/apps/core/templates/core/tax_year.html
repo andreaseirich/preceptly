@@ -32,11 +32,13 @@
         <tr>
             <th>{% trans "Month" %}</th>
             <th style="text-align:right;">{% trans "Income" %}</th>
+            <th style="text-align:right;">{% trans "Expenses" %}</th>
+            <th style="text-align:right;">{% trans "Profit" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for row in monthly_breakdown %}
-        <tr {% if row.income %}style="font-weight:500;"{% endif %}>
+        <tr {% if row.income or row.expenses %}style="font-weight:500;"{% endif %}>
             <td>
                 {% if row.month == 1 %}{% trans "January" %}
                 {% elif row.month == 2 %}{% trans "February" %}
@@ -53,6 +55,8 @@
                 {% endif %}
             </td>
             <td style="text-align:right;">{{ row.income|euro }}</td>
+            <td style="text-align:right;">{{ row.expenses|euro }}</td>
+            <td style="text-align:right;">{{ row.profit|euro }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -60,6 +64,8 @@
         <tr style="font-weight:bold; border-top:2px solid var(--border-color);">
             <td>{% trans "Total" %}</td>
             <td style="text-align:right;">{{ total_income|euro }}</td>
+            <td style="text-align:right;">{{ total_expenses|euro }}</td>
+            <td style="text-align:right;">{{ total_profit|euro }}</td>
         </tr>
     </tfoot>
 </table>
@@ -162,8 +168,9 @@
 <p>{% trans "No expenses recorded for this year." %}</p>
 {% endif %}
 
-<div style="margin-top:12px;">
+<div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
     <a href="{% url 'core:expense_list' %}?year={{ year }}" class="btn btn-secondary">{% trans "Manage expenses" %}</a>
+    <a href="{% url 'core:euer' %}?year={{ year }}" class="btn">{% trans "Generate EÜR" %}</a>
 </div>
 <!-- # END EXPENSES SECTION -->
 
