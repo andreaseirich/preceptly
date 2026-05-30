@@ -3662,9 +3662,13 @@ msgstr "Grenze überschritten"
 #: apps/core/templates/core/tax_year.html:72
 #, python-format
 msgid ""
-"Your income of %(total)s EUR exceeds the Kleinunternehmer limit of %(limit)s "
+"Your profit of %(total)s EUR exceeds the Kleinunternehmer limit of %(limit)s "
 "EUR. You may need to charge VAT."
 msgstr ""
+"Dein Gewinn von %(total)s € überschreitet die Kleinunternehmergrenze von %(limit)s €. "
+"Du musst ggf. Umsatzsteuer ausweisen."
+"Dein Gewinn von %(total)s EUR überschreitet die Kleinunternehmergrenze von "
+"%(limit)s EUR. Du musst möglicherweise Mehrwertsteuer berechnen."
 
 #: apps/core/templates/core/tax_year.html:76
 msgid "Approaching limit"
@@ -3673,9 +3677,12 @@ msgstr "Grenze wird erreicht"
 #: apps/core/templates/core/tax_year.html:77
 #, python-format
 msgid ""
-"Your income of %(total)s EUR is close to the Kleinunternehmer limit of "
+"Your profit of %(total)s EUR is close to the Kleinunternehmer limit of "
 "%(limit)s EUR."
 msgstr ""
+"Dein Gewinn von %(total)s € nähert sich der Kleinunternehmergrenze von %(limit)s €."
+"Dein Gewinn von %(total)s EUR nähert sich der Kleinunternehmergrenze von "
+"%(limit)s EUR."
 
 #: apps/core/templates/core/tax_year.html:81
 msgid "Status: OK"
@@ -3684,17 +3691,20 @@ msgstr "Status: OK"
 #: apps/core/templates/core/tax_year.html:82
 #, python-format
 msgid ""
-"Your income of %(total)s EUR is below the Kleinunternehmer limit of "
+"Your profit of %(total)s EUR is below the Kleinunternehmer limit of "
 "%(limit)s EUR."
 msgstr ""
+"Dein Gewinn von %(total)s € liegt unterhalb der Kleinunternehmergrenze von %(limit)s €."
+"Dein Gewinn von %(total)s EUR liegt unterhalb der Kleinunternehmergrenze von "
+"%(limit)s EUR."
 
 #: apps/core/templates/core/tax_year.html:89
 msgid "Limit (§ 19 UStG)"
 msgstr "Grenze (§ 19 UStG)"
 
 #: apps/core/templates/core/tax_year.html:93
-msgid "Current income"
-msgstr "Bisherige Einnahmen"
+msgid "Current profit"
+msgstr "Aktueller Gewinn"
 
 #: apps/core/templates/core/tax_year.html:97
 msgid "Remaining until limit"

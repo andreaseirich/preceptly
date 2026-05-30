@@ -75,17 +75,17 @@
 {% if not kleinunternehmer_ok %}
 <div style="padding:16px; background:#f8d7da; border:1px solid #f5c6cb; border-radius:8px; margin-bottom:24px;">
     <strong style="color:#721c24;">&#10007; {% trans "Limit exceeded" %}</strong><br>
-    {% blocktrans with limit=kleinunternehmer_limit total=total_income %}Your income of {{ total }} EUR exceeds the Kleinunternehmer limit of {{ limit }} EUR. You may need to charge VAT.{% endblocktrans %}
+    {% blocktrans with limit=kleinunternehmer_limit total=total_profit %}Your profit of {{ total }} EUR exceeds the Kleinunternehmer limit of {{ limit }} EUR. You may need to charge VAT.{% endblocktrans %}
 </div>
 {% elif kleinunternehmer_warning %}
 <div style="padding:16px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; margin-bottom:24px;">
     <strong style="color:#856404;">&#9888; {% trans "Approaching limit" %}</strong><br>
-    {% blocktrans with limit=kleinunternehmer_limit total=total_income %}Your income of {{ total }} EUR is close to the Kleinunternehmer limit of {{ limit }} EUR.{% endblocktrans %}
+    {% blocktrans with limit=kleinunternehmer_limit total=total_profit %}Your profit of {{ total }} EUR is close to the Kleinunternehmer limit of {{ limit }} EUR.{% endblocktrans %}
 </div>
 {% else %}
 <div style="padding:16px; background:#d4edda; border:1px solid #c3e6cb; border-radius:8px; margin-bottom:24px;">
     <strong style="color:#155724;">&#10003; {% trans "Status: OK" %}</strong><br>
-    {% blocktrans with limit=kleinunternehmer_limit total=total_income %}Your income of {{ total }} EUR is below the Kleinunternehmer limit of {{ limit }} EUR.{% endblocktrans %}
+    {% blocktrans with limit=kleinunternehmer_limit total=total_profit %}Your profit of {{ total }} EUR is below the Kleinunternehmer limit of {{ limit }} EUR.{% endblocktrans %}
 </div>
 {% endif %}
 
@@ -96,8 +96,8 @@
             <td style="text-align:right;">{{ kleinunternehmer_limit|euro }}</td>
         </tr>
         <tr>
-            <td>{% trans "Current income" %}</td>
-            <td style="text-align:right;">{{ total_income|euro }}</td>
+            <td>{% trans "Current profit" %}</td>
+            <td style="text-align:right;">{{ total_profit|euro }}</td>
         </tr>
         <tr>
             <td>{% trans "Remaining until limit" %}</td>

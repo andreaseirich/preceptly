@@ -448,8 +448,6 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
             total_income = Decimal("0.00")
             monthly_income = {m: Decimal("0.00") for m in range(1, 13)}
 
-        remaining = max(Decimal("0.00"), limit - total_income)
-
         expenses_qs = list(Expense.objects.filter(user=user, date__year=year))
         total_expenses = sum((e.effective_amount for e in expenses_qs), Decimal("0.00"))
 
@@ -484,9 +482,9 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
                 "total_income": total_income,
                 "monthly_breakdown": monthly_breakdown,
                 "kleinunternehmer_limit": limit,
-                "kleinunternehmer_ok": total_income <= limit,
-                "kleinunternehmer_warning": total_income >= limit * Decimal("0.8"),
-                "kleinunternehmer_remaining": remaining,
+                "kleinunternehmer_ok": total_profit <= limit,
+                "kleinunternehmer_warning": total_profit >= limit * Decimal("0.8"),
+                "kleinunternehmer_remaining": max(Decimal("0.00"), limit - total_profit),
                 "is_premium": is_premium,
                 "total_expenses": total_expenses,
                 "profit": total_profit,
