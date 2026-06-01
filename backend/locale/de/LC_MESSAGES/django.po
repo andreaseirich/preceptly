@@ -6137,3 +6137,9 @@ msgstr "Demo öffnen"
 
 msgid "Password"
 msgstr "Passwort"
+
+msgid "Withdrawal"
+msgstr "Widerrufsbelehrung"
+
+msgid "Withdrawal Notice"
+msgstr "Widerrufsbelehrung"
