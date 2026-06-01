@@ -5,6 +5,11 @@
 {% block title %}{% trans "Income Overview" %} - Preceptly{% endblock %}
 
 {% block content %}
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border-color);padding-bottom:12px;">
+  <a href="{% url 'core:income' %}" class="btn{% if request.resolver_match.url_name == 'income' %} btn-primary{% else %} btn-secondary{% endif %}" style="text-decoration:none;">💰 {% trans "Income" %}</a>
+  <a href="{% url 'core:reports' %}" class="btn btn-secondary" style="text-decoration:none;">📈 {% trans "Reports" %}{% if not is_premium %} 🔒{% endif %}</a>
+  <a href="{% url 'core:tax_year' %}" class="btn btn-secondary" style="text-decoration:none;">🧾 {% trans "Tax / EÜR" %}{% if not is_premium %} 🔒{% endif %}</a>
+</div>
 <h1>{% trans "Income Overview" %}</h1>
 
 {% if view_type == 'month' %}
