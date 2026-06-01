@@ -3,10 +3,10 @@ e-recht24 Rechtstexte API — fetches imprint and privacy policy HTML.
 Results are cached for 24 hours; on error the last known HTML is returned.
 """
 
-import logging
-from urllib.request import Request, urlopen
-from urllib.error import URLError
 import json
+import logging
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from django.conf import settings
 from django.core.cache import cache
