@@ -2426,9 +2426,6 @@ msgstr "Benutzername"
 
 #: apps/core/forms.py:37 apps/core/templates/core/login.html:27
 #: apps/core/templates/core/register.html:34
-msgid "Password"
-msgstr "Passwort"
-
 #: apps/core/forms.py:38 apps/core/templates/core/register.html:46
 msgid "Password confirmation"
 msgstr "Passwort bestätigen"
@@ -6017,3 +6014,126 @@ msgstr "EÜR erstellen"
 #: apps/core/templates/core/tax_year.html
 msgid "Billing period"
 msgstr "Abrechnungszeitraum"
+
+msgid "The complete workspace for private tutors"
+msgstr "Der komplette Arbeitsplatz für Nachhilfelehrer"
+
+msgid "Students, appointments, contracts, invoices — everything in one place. No more administrative chaos."
+msgstr "Schüler, Termine, Verträge, Rechnungen — alles in einer App. Kein Verwaltungschaos mehr."
+
+msgid "Sign Up for Free"
+msgstr "Kostenlos registrieren"
+
+msgid "Try Demo"
+msgstr "Demo ausprobieren"
+
+msgid "Does this sound familiar?"
+msgstr "Kommt dir das bekannt vor?"
+
+msgid "Private tutors lose 2–3 hours every week to administrative tasks alone."
+msgstr "Nachhilfelehrer verlieren jede Woche 2–3 Stunden allein für Verwaltungsaufgaben."
+
+msgid "Double bookings and scheduling conflicts with multiple students or institutes"
+msgstr "Doppelbuchungen und Terminüberschneidungen bei mehreren Schülern oder Instituten"
+
+msgid "Invoices are created manually in Word or Excel — error-prone and time-consuming"
+msgstr "Rechnungen werden manuell in Word oder Excel erstellt — fehleranfällig und zeitraubend"
+
+msgid "Student data, contracts and lesson notes scattered across different tools"
+msgstr "Schülerdaten, Verträge und Stundennotizen verteilt auf verschiedene Tools"
+
+msgid "No clear overview of actual income — especially with multiple employers"
+msgstr "Kein klarer Überblick über das tatsächliche Einkommen — besonders bei mehreren Auftraggebern"
+
+msgid "Everything in one place"
+msgstr "Alles an einem Ort"
+
+msgid "Preceptly handles your entire tutoring workflow — from scheduling to tax statements."
+msgstr "Preceptly übernimmt deinen gesamten Nachhilfe-Workflow — von der Terminplanung bis zur Steuererklärung."
+
+msgid "Smart Scheduling"
+msgstr "Intelligente Terminplanung"
+
+msgid "Automatic conflict detection for time overlaps, travel times, and contract quotas. Never double-book again."
+msgstr "Automatische Konflikterkennung für Zeitüberschneidungen, Fahrzeiten und Vertragsquoten. Nie wieder Doppelbuchungen."
+
+msgid "Students & Contracts"
+msgstr "Schüler & Verträge"
+
+msgid "Manage student profiles, lesson rates, contract periods and monthly quotas in one place."
+msgstr "Schülerprofile, Stundensätze, Vertragslaufzeiten und monatliche Quoten zentral verwalten."
+
+msgid "Invoices & Billing"
+msgstr "Rechnungen & Abrechnung"
+
+msgid "Generate PDF invoices directly from taught lessons. Track payment status and send reminders."
+msgstr "PDF-Rechnungen direkt aus gehaltenen Stunden generieren. Zahlungsstatus verfolgen."
+
+msgid "Income & Tax Overview"
+msgstr "Einnahmen & Steuerübersicht"
+
+msgid "Monthly and yearly income overview, expense tracking, and EÜR export for your tax return."
+msgstr "Monats- und Jahresübersicht, Ausgabenverfolgung und EÜR-Export für die Steuererklärung."
+
+msgid "Public Booking Page"
+msgstr "Öffentliche Buchungsseite"
+
+msgid "Students book their own sessions via a personal link — including reschedule support."
+msgstr "Schüler buchen Stunden selbst über einen persönlichen Link — inklusive Umbuchungsfunktion."
+
+msgid "AI Lesson Plans"
+msgstr "KI-gestützte Stundenplanung"
+
+msgid "Generate structured lesson plans with AI — privacy-first, student data stays on your device."
+msgstr "Strukturierte Stundenpläne mit KI erstellen — datenschutzkonform, Schülerdaten bleiben lokal."
+
+msgid "Simple, transparent pricing"
+msgstr "Einfache, transparente Preise"
+
+msgid "Start for free. Upgrade when you need more."
+msgstr "Kostenlos starten. Upgraden, wenn du mehr brauchst."
+
+msgid "No credit card required"
+msgstr "Keine Kreditkarte erforderlich"
+
+msgid "Scheduling & conflict detection"
+msgstr "Terminplanung & Konflikterkennung"
+
+msgid "Students & contracts"
+msgstr "Schüler & Verträge"
+
+msgid "Invoices & billing"
+msgstr "Rechnungen & Abrechnung"
+
+msgid "Income overview & EÜR"
+msgstr "Einnahmenübersicht & EÜR"
+
+msgid "Coming soon"
+msgstr "Bald verfügbar"
+
+msgid "Everything in Basic"
+msgstr "Alles aus Basic"
+
+msgid "Public booking page"
+msgstr "Öffentliche Buchungsseite"
+
+msgid "AI lesson plans"
+msgstr "KI-Stundenplanung"
+
+msgid "Priority support"
+msgstr "Vorrangiger Support"
+
+msgid "Get Started"
+msgstr "Jetzt starten"
+
+msgid "Try it now — no sign-up needed"
+msgstr "Jetzt ausprobieren — ohne Registrierung"
+
+msgid "Log in with demo credentials to explore all features with pre-loaded data."
+msgstr "Mit Demo-Zugangsdaten einloggen und alle Funktionen mit vorgeladenen Daten erkunden."
+
+msgid "Open Demo"
+msgstr "Demo öffnen"
+
+msgid "Password"
+msgstr "Passwort"
