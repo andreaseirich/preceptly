@@ -1,33 +1,33 @@
-{% extends 'core/base.html' %}
+{% extends "core/base.html" %}
 {% load i18n %}
 
 {% block title %}{% trans "Privacy Policy" %} - Preceptly{% endblock %}
 
 {% block content %}
-{% include 'legal/_style.html' %}
+{% include "legal/_style.html" %}
 <div class="legal-page">
     <h1>{% trans "Privacy Policy" %}</h1>
-    <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
-
-    <div class="legal-placeholder-box">
-        <strong>{% trans "Controller" %}:</strong>
-        <p>andicode, Inhaber Andreas Eirich, Birkenweg 7, 49577 Ankum, <a href="mailto:impressum@andicode.de">impressum@andicode.de</a></p>
-    </div>
-
-    <div class="legal-section">
-        <h2>{% trans "1. General information" %}</h2>
-        <p>{% trans "We process personal data only as far as necessary to provide Preceptly (student management, contracts, lessons, billing, and communication)." %}</p>
-    </div>
-
-    <div class="legal-section">
-        <h2>{% trans "2. Data we process" %}</h2>
-        <p>{% trans "Typical categories: account data, student master data, contract and lesson data, invoice/payment data, and technical logs required for secure operation." %}</p>
-    </div>
-
-    <div class="legal-section">
-        <h2>{% trans "3. Rights of users" %}</h2>
-        <p>{% trans "You can request information, correction, deletion, restriction, data portability, and object to processing where applicable." %}</p>
-        <p>{% trans "For privacy requests, contact" %}: <a href="mailto:contact@andicode.de">contact@andicode.de</a></p>
-    </div>
+    {% if erecht24_html %}
+        {{ erecht24_html|safe }}
+    {% else %}
+        <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
+        <div class="legal-placeholder-box">
+            <strong>{% trans "Controller" %}:</strong>
+            <p>andicode / Preceptly, Inhaber Andreas Eirich, Birkenweg 7, 49577 Ankum, <a href="mailto:impressum@andicode.de">impressum@andicode.de</a></p>
+        </div>
+        <div class="legal-section">
+            <h2>{% trans "1. General information" %}</h2>
+            <p>{% trans "We process personal data only as far as necessary to provide Preceptly (student management, contracts, lessons, billing, and communication)." %}</p>
+        </div>
+        <div class="legal-section">
+            <h2>{% trans "2. Data we process" %}</h2>
+            <p>{% trans "Typical categories: account data, student master data, contract and lesson data, invoice/payment data, and technical logs required for secure operation." %}</p>
+        </div>
+        <div class="legal-section">
+            <h2>{% trans "3. Rights of users" %}</h2>
+            <p>{% trans "You can request information, correction, deletion, restriction, data portability, and object to processing where applicable." %}</p>
+            <p>{% trans "For privacy requests, contact" %}: <a href="mailto:contact@andicode.de">contact@andicode.de</a></p>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
