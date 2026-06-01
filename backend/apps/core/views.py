@@ -380,15 +380,31 @@ class LegalPageView(TemplateView):
 
 
 class LegalImprintView(LegalPageView):
-    """Imprint page."""
+    """Imprint — fetched from e-recht24 API with fallback to static template."""
 
     template_name = "legal/imprint.html"
 
+    def get_context_data(self, **kwargs):
+        from apps.core.erecht24_service import get_imprint
+
+        context = super().get_context_data(**kwargs)
+        lang = self.request.LANGUAGE_CODE[:2] if hasattr(self.request, "LANGUAGE_CODE") else "de"
+        context["erecht24_html"] = get_imprint(lang)
+        return context
+
 
 class LegalPrivacyView(LegalPageView):
-    """Privacy policy page."""
+    """Privacy policy — fetched from e-recht24 API with fallback to static template."""
 
     template_name = "legal/privacy.html"
+
+    def get_context_data(self, **kwargs):
+        from apps.core.erecht24_service import get_privacy_policy
+
+        context = super().get_context_data(**kwargs)
+        lang = self.request.LANGUAGE_CODE[:2] if hasattr(self.request, "LANGUAGE_CODE") else "de"
+        context["erecht24_html"] = get_privacy_policy(lang)
+        return context
 
 
 class LegalTermsView(LegalPageView):
