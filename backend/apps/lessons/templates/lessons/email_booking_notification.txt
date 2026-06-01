@@ -10,4 +10,4 @@
 {% trans "Contract" %}: {{ lesson.contract }}
 {% if lesson.contract.institute %}{% trans "Institute" %}: {{ lesson.contract.institute }}{% endif %}
 
-{% trans "You can view and manage this lesson in your TutorFlow dashboard." %}
+{% trans "You can view and manage this lesson in your Preceptly dashboard." %}
