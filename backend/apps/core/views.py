@@ -42,9 +42,14 @@ LEGAL_LAST_UPDATED = "08.04.2026"
 
 
 class LandingPageView(TemplateView):
-    """Landing page with demo mode and public booking options."""
+    """Landing page -- redirects authenticated users to dashboard."""
 
     template_name = "core/landing.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("core:dashboard")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

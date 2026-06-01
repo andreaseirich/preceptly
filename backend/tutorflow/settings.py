@@ -198,7 +198,7 @@ TIME_ZONE = "Europe/Berlin"
 
 # Authentication
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 USE_I18N = True
