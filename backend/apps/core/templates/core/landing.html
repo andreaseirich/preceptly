@@ -1,11 +1,11 @@
 {% extends "core/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Welcome to TutorFlow" %} - TutorFlow{% endblock %}
+{% block title %}{% trans "Welcome to Preceptly" %} - Preceptly{% endblock %}
 
 {% block content %}
 <div style="max-width: 800px; margin: 50px auto; padding: 40px; text-align: center;">
-    <h1 style="color: var(--text-primary); margin-bottom: 20px;">{% trans "Welcome to TutorFlow" %}</h1>
+    <h1 style="color: var(--text-primary); margin-bottom: 20px;">{% trans "Welcome to Preceptly" %}</h1>
     <p style="font-size: 1.2em; color: var(--text-secondary); margin-bottom: 40px;">
         {% trans "Your comprehensive tutoring management system" %}
     </p>
@@ -14,7 +14,7 @@
         <div style="flex: 1; min-width: 250px; padding: 30px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow);">
             <h2 style="color: var(--text-primary); margin-bottom: 15px;">{% trans "Try Demo Mode" %}</h2>
             <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                {% trans "Explore TutorFlow with pre-loaded demo data. No registration required." %}
+                {% trans "Explore Preceptly with pre-loaded demo data. No registration required." %}
             </p>
             <a href="{% url 'core:login' %}" class="btn" style="display: inline-block; padding: 12px 24px; text-decoration: none;">
                 {% trans "Start Demo" %}

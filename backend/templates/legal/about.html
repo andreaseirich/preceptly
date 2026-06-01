@@ -1,28 +1,28 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "About TutorFlow" %} - TutorFlow{% endblock %}
+{% block title %}{% trans "About Preceptly" %} - Preceptly{% endblock %}
 
 {% block content %}
 {% include 'legal/_style.html' %}
 <div class="legal-page">
-    <h1>{% trans "About TutorFlow" %}</h1>
+    <h1>{% trans "About Preceptly" %}</h1>
     <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
 
     <div class="legal-placeholder-box">
         <strong>{% trans "andicode" %}</strong>
-        <p>{% trans "TutorFlow is operated as part of the andicode business." %}</p>
+        <p>{% trans "Preceptly is operated as part of the andicode business." %}</p>
         <p><a href="https://andicode.de" rel="noopener">andicode.de</a> · <a href="mailto:contact@andicode.de">contact@andicode.de</a></p>
     </div>
 
     <div class="legal-section">
         <h2>{% trans "Our mission" %}</h2>
-        <p>{% trans "TutorFlow helps tutors manage lessons, contracts and billing efficiently." %}</p>
+        <p>{% trans "Preceptly helps tutors manage lessons, contracts and billing efficiently." %}</p>
     </div>
 
     <div class="legal-section">
         <h2>{% trans "Status" %}</h2>
-        <p>{% trans "TutorFlow is actively operated and developed for productive use." %}</p>
+        <p>{% trans "Preceptly is actively operated and developed for productive use." %}</p>
     </div>
 </div>
 {% endblock %}

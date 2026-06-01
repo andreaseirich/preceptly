@@ -833,8 +833,8 @@ msgid "Total Amount:"
 msgstr "Gesamtbetrag:"
 
 #: apps/billing/templates/billing/invoice_document.html:147
-msgid "Created with TutorFlow"
-msgstr "Erstellt mit TutorFlow"
+msgid "Created with Preceptly"
+msgstr "Erstellt mit Preceptly"
 
 #: apps/billing/templates/billing/invoice_list.html:16
 msgid "Filter by status"
@@ -3163,8 +3163,8 @@ msgstr ""
 
 #: apps/core/templates/core/landing.html:4
 #: apps/core/templates/core/landing.html:8
-msgid "Welcome to TutorFlow"
-msgstr "Willkommen bei TutorFlow"
+msgid "Welcome to Preceptly"
+msgstr "Willkommen bei Preceptly"
 
 #: apps/core/templates/core/landing.html:10
 msgid "Your comprehensive tutoring management system"
@@ -3175,9 +3175,9 @@ msgid "Try Demo Mode"
 msgstr "Demo-Modus ausprobieren"
 
 #: apps/core/templates/core/landing.html:17
-msgid "Explore TutorFlow with pre-loaded demo data. No registration required."
-msgstr "Entdecke TutorFlow mit vorgeladenen Demo-Daten. Keine Registrierung erforderlich."
-"TutorFlow mit vorgeladenen Demo-Daten erkunden. Keine Registrierung "
+msgid "Explore Preceptly with pre-loaded demo data. No registration required."
+msgstr "Entdecke Preceptly mit vorgeladenen Demo-Daten. Keine Registrierung erforderlich."
+"Preceptly mit vorgeladenen Demo-Daten erkunden. Keine Registrierung "
 "erforderlich."
 
 #: apps/core/templates/core/landing.html:20
@@ -3237,8 +3237,8 @@ msgid "AI-powered lesson plan generation (Premium)"
 msgstr "KI-gestützte Unterrichtsplanung (Premium)"
 
 #: apps/core/templates/core/login.html:8
-msgid "Login to TutorFlow"
-msgstr "Bei TutorFlow anmelden"
+msgid "Login to Preceptly"
+msgstr "Bei Preceptly anmelden"
 
 #: apps/core/templates/core/login.html:14
 msgid "Invalid username or password. Please try again."
@@ -4512,9 +4512,9 @@ msgstr "Minuten"
 
 #: apps/lessons/templates/lessons/email_booking_notification.html:24
 #: apps/lessons/templates/lessons/email_booking_notification.txt:13
-msgid "You can view and manage this lesson in your TutorFlow dashboard."
-msgstr "Du kannst diese Stunde in deinem TutorFlow-Dashboard ansehen und verwalten."
-"Diese Stunde kann im TutorFlow-Dashboard eingesehen und verwaltet werden."
+msgid "You can view and manage this lesson in your Preceptly dashboard."
+msgstr "Du kannst diese Stunde in deinem Preceptly-Dashboard ansehen und verwalten."
+"Diese Stunde kann im Preceptly-Dashboard eingesehen und verwaltet werden."
 
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:4
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:7
@@ -5806,8 +5806,8 @@ msgid "Back to Home"
 msgstr "Zurück zur Startseite"
 
 #: templates/legal/about.html:4 templates/legal/about.html:9
-msgid "About TutorFlow"
-msgstr "Über TutorFlow"
+msgid "About Preceptly"
+msgstr "Über Preceptly"
 
 #: templates/legal/about.html:10 templates/legal/imprint.html:10
 #: templates/legal/privacy.html:10 templates/legal/terms.html:10
@@ -5820,8 +5820,8 @@ msgid "andicode"
 msgstr "andicode"
 
 #: templates/legal/about.html:14
-msgid "TutorFlow is operated as part of the andicode business."
-msgstr "TutorFlow wird als Teil des Unternehmens andicode betrieben."
+msgid "Preceptly is operated as part of the andicode business."
+msgstr "Preceptly wird als Teil des Unternehmens andicode betrieben."
 
 #: templates/legal/about.html:19
 msgid "Our mission"
@@ -5829,15 +5829,15 @@ msgstr "Unsere Mission"
 
 #: templates/legal/about.html:20
 msgid ""
-"TutorFlow helps tutors manage lessons, contracts and billing efficiently."
+"Preceptly helps tutors manage lessons, contracts and billing efficiently."
 msgstr ""
-"TutorFlow hilft Nachhilfelehrern, Unterricht, Verträge und Abrechnung "
+"Preceptly hilft Nachhilfelehrern, Unterricht, Verträge und Abrechnung "
 "effizient zu verwalten."
 
 #: templates/legal/about.html:25
-msgid "TutorFlow is actively operated and developed for productive use."
-msgstr "TutorFlow wird aktiv betrieben und für den produktiven Einsatz weiterentwickelt."
-"TutorFlow wird aktiv betrieben und fur den produktiven Einsatz "
+msgid "Preceptly is actively operated and developed for productive use."
+msgstr "Preceptly wird aktiv betrieben und für den produktiven Einsatz weiterentwickelt."
+"Preceptly wird aktiv betrieben und fur den produktiven Einsatz "
 "weiterentwickelt."
 
 #: templates/legal/imprint.html:4 templates/legal/imprint.html:9
@@ -5850,8 +5850,8 @@ msgid "Business details"
 msgstr "Unternehmensangaben"
 
 #: templates/legal/imprint.html:14
-msgid "This legal notice applies to andicode and TutorFlow."
-msgstr "Dieses Impressum gilt fur andicode und TutorFlow."
+msgid "This legal notice applies to andicode and Preceptly."
+msgstr "Dieses Impressum gilt fur andicode und Preceptly."
 
 #: templates/legal/imprint.html:18
 msgid "Responsible according to §5 TMG"
@@ -5880,10 +5880,10 @@ msgstr "1. Allgemeine Hinweise"
 
 #: templates/legal/privacy.html:19
 msgid ""
-"We process personal data only as far as necessary to provide TutorFlow "
+"We process personal data only as far as necessary to provide Preceptly "
 "(student management, contracts, lessons, billing, and communication)."
 msgstr ""
-"Wir verarbeiten personenbezogene Daten nur soweit erforderlich, um TutorFlow "
+"Wir verarbeiten personenbezogene Daten nur soweit erforderlich, um Preceptly "
 "bereitzustellen (Schulerverwaltung, Vertrage, Unterrichtsstunden, Abrechnung "
 "und Kommunikation)."
 
@@ -5932,22 +5932,22 @@ msgstr "1. Geltungsbereich"
 
 #: templates/legal/terms.html:19
 msgid ""
-"These terms apply to use of TutorFlow by registered users and invited "
+"These terms apply to use of Preceptly by registered users and invited "
 "participants."
 msgstr ""
-"Diese Bedingungen gelten fur die Nutzung von TutorFlow durch registrierte "
+"Diese Bedingungen gelten fur die Nutzung von Preceptly durch registrierte "
 "Nutzer und eingeladene Teilnehmer."
 
 #: templates/legal/terms.html:23
-msgid "2. Services of TutorFlow"
-msgstr "2. Leistungen von TutorFlow"
+msgid "2. Services of Preceptly"
+msgstr "2. Leistungen von Preceptly"
 
 #: templates/legal/terms.html:24
 msgid ""
-"TutorFlow provides software features for lesson planning, student and "
+"Preceptly provides software features for lesson planning, student and "
 "contract management, booking, and billing support."
 msgstr ""
-"TutorFlow stellt Software-Funktionen fur Unterrichtsplanung, Schuler- und "
+"Preceptly stellt Software-Funktionen fur Unterrichtsplanung, Schuler- und "
 "Vertragsverwaltung, Buchung sowie Abrechnungsunterstutzung bereit."
 
 #: templates/legal/terms.html:28
