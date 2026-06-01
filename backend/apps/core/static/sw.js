@@ -1,7 +1,7 @@
-// Service Worker for TutorFlow PWA
-const CACHE_NAME = 'tutorflow-v1';
-const STATIC_CACHE_NAME = 'tutorflow-static-v1';
-const DYNAMIC_CACHE_NAME = 'tutorflow-dynamic-v1';
+// Service Worker for Preceptly PWA
+const CACHE_NAME = 'preceptly-v1';
+const STATIC_CACHE_NAME = 'preceptly-static-v1';
+const DYNAMIC_CACHE_NAME = 'preceptly-dynamic-v1';
 
 // Files to cache on installation
 const STATIC_FILES = [
