@@ -419,6 +419,12 @@ class LegalAboutView(LegalPageView):
     template_name = "legal/about.html"
 
 
+class LegalWithdrawalView(LegalPageView):
+    """Withdrawal notice page."""
+
+    template_name = "legal/withdrawal.html"
+
+
 class TaxYearView(LoginRequiredMixin, TemplateView):
     """Tax year overview based on cash-basis accounting (Zufluss-Prinzip / EÜR)."""
 

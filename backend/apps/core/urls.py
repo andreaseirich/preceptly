@@ -53,6 +53,7 @@ urlpatterns = [
     path("legal/privacy/", views.LegalPrivacyView.as_view(), name="legal_privacy"),
     path("legal/terms/", views.LegalTermsView.as_view(), name="legal_terms"),
     path("legal/about/", views.LegalAboutView.as_view(), name="legal_about"),
+    path("legal/withdrawal/", views.LegalWithdrawalView.as_view(), name="legal_withdrawal"),
     # PWA routes
     path("manifest.json", manifest_view, name="manifest"),
     path("sw.js", service_worker_view, name="service_worker"),
