@@ -1,11 +1,13 @@
 {% extends "core/base.html" %}
 {% load i18n %}
 
-{% block title %}Widerrufsbelehrung - Preceptly{% endblock %}
+{% block title %}{% trans "Withdrawal Notice" %} - Preceptly{% endblock %}
 
 {% block content %}
 {% include "legal/_style.html" %}
+{% get_current_language as LANGUAGE_CODE %}
 <div class="legal-page">
+{% if LANGUAGE_CODE == "de" %}
 <h1>Widerrufsbelehrung</h1>
 <h2>Widerrufsrecht für Verbraucher</h2>
 <p><em>Verbraucher ist jede natürliche Person, die ein Rechtsgeschäft zu Zwecken abschließt, die überwiegend weder ihrer gewerblichen noch ihrer selbständigen beruflichen Tätigkeit zugerechnet werden können.</em></p>
@@ -16,8 +18,7 @@
 <p>Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben, einschließlich der Lieferkosten (mit Ausnahme der zusätzlichen Kosten, die sich daraus ergeben, dass Sie eine andere Art der Lieferung als die von uns angebotene, günstigste Standardlieferung gewählt haben), unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über Ihren Widerruf dieses Vertrags bei uns eingegangen ist. Für diese Rückzahlung verwenden wir dasselbe Zahlungsmittel, das Sie bei der ursprünglichen Transaktion eingesetzt haben, es sei denn, mit Ihnen wurde ausdrücklich etwas anderes vereinbart; in keinem Fall werden Ihnen wegen dieser Rückzahlung Entgelte berechnet.</p>
 <h2>Muster-Widerrufsformular</h2>
 <p>Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte dieses Formular aus und senden Sie es zurück.</p>
-<p>An</p>
-<p>andicode<br>Preceptly<br>Birkenweg 7<br>49577 Ankum<br>E-Mail: impressum@andicode.de</p>
+<p>An<br>andicode, Preceptly<br>Birkenweg 7<br>49577 Ankum<br>E-Mail: impressum@andicode.de</p>
 <p>Hiermit widerrufe(n) ich/wir den von mir/uns abgeschlossenen Vertrag über die Bereitstellung des Zugangs zu folgenden digitalen Inhalten (Bezeichnung, ggf. Bestellnummer und Preis):</p>
 <p>..............................................................................</p>
 <p>..............................................................................</p>
@@ -27,5 +28,29 @@
 <p>.............................<br>.............................<br>.............................<br>.............................</p>
 <p>Datum: ....................................................</p>
 <p>Unterschrift Kunde (nur bei schriftlichem Widerruf): ....................................................</p>
+
+{% else %}
+<h1>Right of Withdrawal</h1>
+<h2>Withdrawal Right for Consumers</h2>
+<p><em>A consumer is any natural person who concludes a legal transaction for purposes that are predominantly neither commercial nor self-employed in nature.</em></p>
+<p>You have the right to withdraw from this contract within 14 days without giving any reason. The withdrawal period is 14 days from the date of conclusion of the contract.</p>
+<p>To exercise your right of withdrawal, you must inform us (andicode, Preceptly, Birkenweg 7, 49577 Ankum, Germany, Phone: +49 177 1963614, E-Mail: impressum@andicode.de) by means of a clear declaration (e.g. a letter sent by post or an e-mail) of your decision to withdraw from this contract. You may use the attached model withdrawal form, but this is not mandatory.</p>
+<p>To meet the withdrawal deadline, it is sufficient for you to send your communication concerning your exercise of the right of withdrawal before the withdrawal period has expired.</p>
+<h2>Consequences of Withdrawal</h2>
+<p>If you withdraw from this contract, we shall reimburse to you all payments received from you, including the costs of delivery (with the exception of the supplementary costs resulting from your choice of a type of delivery other than the least expensive type of standard delivery offered by us), without undue delay and not later than 14 days from the day on which we are informed about your decision to withdraw from this contract. We will carry out such reimbursement using the same means of payment as you used for the initial transaction, unless you have expressly agreed otherwise; in any event, you will not incur any fees as a result of such reimbursement.</p>
+<h2>Model Withdrawal Form</h2>
+<p>If you want to withdraw from this contract, please complete and return this form.</p>
+<p>To<br>andicode, Preceptly<br>Birkenweg 7<br>49577 Ankum, Germany<br>E-Mail: impressum@andicode.de</p>
+<p>I/We (*) hereby give notice that I/we (*) withdraw from my/our (*) contract for the provision of access to the following digital content:</p>
+<p>..............................................................................</p>
+<p>..............................................................................</p>
+<p>Ordered on (*): .............................</p>
+<p>Received on (*): .............................</p>
+<p>Name of consumer(s):</p>
+<p>.............................<br>.............................<br>.............................<br>.............................</p>
+<p>Date: ....................................................</p>
+<p>Signature of consumer(s) (only if this form is notified on paper): ....................................................</p>
+<p><em>(*) Delete as appropriate.</em></p>
+{% endif %}
 </div>
 {% endblock %}
