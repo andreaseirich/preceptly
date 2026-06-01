@@ -16,6 +16,7 @@ from apps.core.views import (
 )
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_email_test import test_email
+from apps.core.views_erecht24 import Erecht24PushView
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
 from apps.core.views_pwa import manifest_view, service_worker_view
@@ -25,6 +26,7 @@ from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalV
 app_name = "core"
 
 urlpatterns = [
+    path("erecht24/push/", Erecht24PushView.as_view(), name="erecht24_push"),
     path("health/", health_status, name="health"),
     path("test-logs/", test_logs, name="test_logs"),
     path("test-email/", test_email, name="test_email"),
