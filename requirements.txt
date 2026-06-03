@@ -4,10 +4,10 @@ Pygments @ git+https://github.com/pygments/pygments.git@24b8aa76c6cd6d70f39c6dd6
 asgiref==3.11.1
 certifi==2026.5.20
 charset-normalizer==3.4.7
-Django==6.0.5
+Django==6.0.6
 dj-database-url==3.1.2
 gunicorn==25.3.0
-idna==3.17
+idna==3.18
 psycopg2-binary==2.9.12
 requests==2.34.2
 sqlparse==0.5.5
