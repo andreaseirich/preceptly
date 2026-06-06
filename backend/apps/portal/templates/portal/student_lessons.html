@@ -1,0 +1,47 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Lessons" %} – Preceptly Portal{% endblock %}
+
+{% block content %}
+<h1>{% trans "My Lessons" %}</h1>
+
+<a class="btn-sm btn-sm-secondary" href="{% url portal:student_home %}" style="margin-bottom:20px; display:inline-block;">
+    &larr; {% trans "Back to Dashboard" %}
+</a>
+
+{% if lessons %}
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Time" %}</th>
+            <th>{% trans "Duration" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Homework" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for lesson in lessons %}
+    <tr>
+        <td>{{ lesson.scheduled_at|date:"N j, Y" }}</td>
+        <td>{{ lesson.scheduled_at|time:"H:i" }}</td>
+        <td>{{ lesson.duration_minutes }} {% trans "min" %}</td>
+        <td>
+            <span style="font-size:0.85em;">{{ lesson.get_status_display }}</span>
+        </td>
+        <td>
+            {% if lesson.homework %}
+            <span title="{{ lesson.homework }}">{{ lesson.homework|truncatechars:80 }}</span>
+            {% else %}
+            <span style="color:var(--text-secondary);">–</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state"><p>{% trans "No lessons found." %}</p></div>
+{% endif %}
+{% endblock %}

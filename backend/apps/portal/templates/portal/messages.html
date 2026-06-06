@@ -1,0 +1,140 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Messages" %} – Preceptly Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-bottom: 24px;
+        max-height: 520px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+        background: var(--bg-secondary);
+    }
+    .chat-msg {
+        display: flex;
+        flex-direction: column;
+        max-width: 72%;
+        margin-bottom: 14px;
+    }
+    .chat-msg.tutor {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+    .chat-msg.portal-user {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+    .chat-bubble {
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 0.93em;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .chat-msg.tutor .chat-bubble {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-bottom-right-radius: 4px;
+    }
+    .chat-msg.portal-user .chat-bubble {
+        background: rgba(0,123,255,0.10);
+        border: 1px solid rgba(0,123,255,0.22);
+        color: var(--text-primary);
+        border-bottom-left-radius: 4px;
+    }
+    .chat-meta {
+        font-size: 0.76em;
+        color: var(--text-secondary);
+        margin-top: 3px;
+        padding: 0 4px;
+    }
+    .compose-box {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .compose-box textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 0.95em;
+        resize: vertical;
+        min-height: 80px;
+        margin-bottom: 10px;
+        font-family: inherit;
+    }
+    .compose-box textarea:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--input-focus);
+        border-color: #007bff;
+    }
+    .btn-send {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 20px;
+        font-size: 0.95em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .btn-send:hover { background: #0069d9; }
+</style>
+{% endblock %}
+
+{% block content %}
+<a class="btn-sm btn-sm-secondary" href="javascript:history.back()" style="margin-bottom:20px; display:inline-block;">
+    &larr; {% trans "Back" %}
+</a>
+
+<h1>{% trans "Messages" %}{% if student %}: {{ student.full_name }}{% endif %}</h1>
+
+<div class="chat-wrapper" id="chat-wrapper">
+{% if messages %}
+    {% for msg in messages %}
+    <div class="chat-msg {% if msg.sender_type == tutor %}tutor{% else %}portal-user{% endif %}">
+        <div class="chat-bubble">{{ msg.body }}</div>
+        <div class="chat-meta">
+            {{ msg.sender_name }} &middot; {{ msg.created_at|time:"H:i" }}, {{ msg.created_at|date:"N j" }}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state" style="border:none; padding:40px 0;">
+        <p>{% trans "No messages yet. Send the first one!" %}</p>
+    </div>
+{% endif %}
+</div>
+
+<div class="compose-box">
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_body">{% trans "New message" %}</label>
+        <textarea id="id_body" name="body" placeholder="{% trans Write your message… %}" required></textarea>
+        <button type="submit" class="btn-send">{% trans "Send" %}</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        var w = document.getElementById("chat-wrapper");
+        if (w) { w.scrollTop = w.scrollHeight; }
+    })();
+</script>
+{% endblock %}

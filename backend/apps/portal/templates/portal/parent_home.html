@@ -1,0 +1,58 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Parent Dashboard" %} – Preceptly Portal{% endblock %}
+
+{% block content %}
+<h1>{% trans "Your Children" %}</h1>
+
+{% if students_data %}
+<div style="display:grid; gap:20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+{% for sd in students_data %}
+<div class="box-section" style="position:relative;">
+    {% if sd.unread_messages > 0 %}
+    <span style="
+        position:absolute; top:12px; right:12px;
+        background:#dc3545; color:#fff;
+        font-size:0.75em; font-weight:700;
+        padding:2px 7px; border-radius:10px;
+        line-height:1.6;
+    ">{{ sd.unread_messages }}</span>
+    {% endif %}
+
+    <h3 style="margin-top:0; margin-bottom:12px;">{{ sd.student.full_name }}</h3>
+
+    {% if sd.next_lesson %}
+    <p style="margin:0 0 6px; font-size:0.9em; color:var(--text-secondary);">
+        {% trans "Next lesson:" %}
+        <strong style="color:var(--text-primary);">
+            {{ sd.next_lesson.scheduled_at|date:"N j" }}, {{ sd.next_lesson.scheduled_at|time:"H:i" }}
+        </strong>
+    </p>
+    {% if sd.next_lesson.meeting_url %}
+    <a class="btn-sm btn-sm-primary" href="{{ sd.next_lesson.meeting_url }}" target="_blank" rel="noopener" style="margin-bottom:12px;">
+        {% trans "Join Meeting" %}
+    </a>
+    {% endif %}
+    {% else %}
+    <p style="margin:0 0 12px; font-size:0.88em; color:var(--text-secondary);">{% trans "No upcoming lesson." %}</p>
+    {% endif %}
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+        <a class="btn-sm btn-sm-secondary" href="{% url portal:parent_student_detail sd.student.pk %}">
+            {% trans "Details" %}
+        </a>
+        <a class="btn-sm btn-sm-secondary" href="{% url portal:messages sd.student.pk %}">
+            {% trans "Messages" %}
+            {% if sd.unread_messages > 0 %}
+            <span style="background:#dc3545; color:#fff; border-radius:8px; padding:0 5px; font-size:0.78em; margin-left:4px;">{{ sd.unread_messages }}</span>
+            {% endif %}
+        </a>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><p>{% trans "No students linked to your account." %}</p></div>
+{% endif %}
+{% endblock %}
