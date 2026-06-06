@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="lesson",
+            model_name="session",
             name="homework",
             field=models.TextField(
                 blank=True,
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="lesson",
+            model_name="session",
             name="meeting_url",
             field=models.CharField(
                 max_length=500,
