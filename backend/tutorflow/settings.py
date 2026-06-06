@@ -106,6 +106,7 @@ INSTALLED_APPS = [
     "apps.lesson_plans",
     "apps.ai",
     "apps.billing",
+    "apps.portal",
 ]
 
 MIDDLEWARE = [

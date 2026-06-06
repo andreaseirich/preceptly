@@ -29,6 +29,7 @@ urlpatterns = [
     path("billing/", include("apps.billing.urls")),
     path("ai/", include("apps.ai.urls")),
     path("lesson-plans/", include("apps.lesson_plans.urls")),
+    path("portal/", include("apps.portal.urls")),
 ]
 
 # Serve static and media files in development
