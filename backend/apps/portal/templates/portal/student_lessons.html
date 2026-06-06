@@ -18,6 +18,7 @@
             <th>Dauer</th>
             <th>Status</th>
             <th>Hausaufgaben</th>
+            <th>Meeting</th>
             <th></th>
         </tr>
     </thead>
@@ -38,7 +39,14 @@
             {% endif %}
         </td>
         <td>
-            <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-primary">Details</a>
+            {% if lesson.meeting_url %}
+            <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">▶ Beitreten</a>
+            {% else %}
+            <span style="color:var(--text-secondary);">–</span>
+            {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-secondary">Details</a>
         </td>
     </tr>
     {% endfor %}

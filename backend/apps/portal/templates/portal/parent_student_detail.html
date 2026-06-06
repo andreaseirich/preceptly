@@ -19,6 +19,7 @@
             <th>Dauer</th>
             <th>Status</th>
             <th>Hausaufgaben</th>
+            <th>Meeting</th>
         </tr>
     </thead>
     <tbody>
@@ -31,6 +32,13 @@
         <td>
             {% if lesson.homework %}
             <span title="{{ lesson.homework }}" style="font-size:0.88em;">{{ lesson.homework|truncatechars:60 }}</span>
+            {% else %}
+            <span style="color:var(--text-secondary);">–</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if lesson.meeting_url %}
+            <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">▶ Beitreten</a>
             {% else %}
             <span style="color:var(--text-secondary);">–</span>
             {% endif %}
