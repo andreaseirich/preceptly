@@ -1,0 +1,54 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ lesson.date|date:"d.m.Y" }} – {{ student.full_name }} – Preceptly Portal{% endblock %}
+
+{% block content %}
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+    <h1 style="margin:0;">{{ lesson.date|date:"d.m.Y" }} – {{ student.full_name }}</h1>
+    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:student_lessons' %}">&larr; {% trans "Back to Lessons" %}</a>
+</div>
+
+<div class="box-section">
+    <table>
+        <tbody>
+            <tr>
+                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500; width:140px;">{% trans "Date" %}</th>
+                <td>{{ lesson.date|date:"d.m.Y" }}</td>
+            </tr>
+            <tr>
+                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">{% trans "Time" %}</th>
+                <td>{{ lesson.start_time|time:"H:i" }}</td>
+            </tr>
+            <tr>
+                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">{% trans "Duration" %}</th>
+                <td>{{ lesson.duration_minutes }} Min.</td>
+            </tr>
+            <tr>
+                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">{% trans "Status" %}</th>
+                <td>{{ lesson.get_status_display }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% if lesson.meeting_url %}
+<div class="alert-info" style="margin-top:16px;">
+    🔗 <a href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">Join Meeting</a>
+</div>
+{% endif %}
+
+{% if lesson.homework %}
+<div class="alert-info" style="margin-top:16px;">
+    📚 <strong>{% trans "Homework:" %}</strong> {{ lesson.homework }}
+</div>
+{% endif %}
+
+{% if lesson.notes %}
+<div class="box-section" style="margin-top:16px;">
+    <h3 style="margin-top:0;">{% trans "Notes" %}</h3>
+    <p style="margin:0;">{{ lesson.notes }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -19,6 +19,7 @@
             <th>{% trans "Duration" %}</th>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Homework" %}</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +37,9 @@
             {% else %}
             <span style="color:var(--text-secondary);">–</span>
             {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a>
         </td>
     </tr>
     {% endfor %}
