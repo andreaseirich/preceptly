@@ -4,6 +4,7 @@ Views for student CRUD operations.
 
 import uuid
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -62,6 +63,12 @@ class StudentDetailView(LoginRequiredMixin, DetailView):
         context["unread_messages"] = PortalMessage.objects.filter(
             student=student, read_by_tutor=False
         ).count()
+        portal_link = context.get("portal_link")
+        if portal_link:
+            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            context["student_activation_url"] = (
+                f"{site_url}/portal/activate/{portal_link.invite_token}/"
+            )
         return context
 
 
@@ -135,6 +142,12 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                 student=student,
                 invite_token=uuid.uuid4().hex,
             )
+            # Send invitation email if student has email
+            from apps.portal.email_service import send_portal_invite
+
+            if student.email:
+                spl = StudentPortalLink.objects.get(portal_user=portal_user)
+                send_portal_invite(student, spl, student.email, role="student")
 
         return redirect("students:detail", pk=pk)
 
@@ -156,8 +169,11 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         password_temp = _secrets.token_hex(8)
         user = User.objects.create_user(username=username, password=password_temp)
         portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
-        spl = SPL.objects.create(portal_user=portal_user, student=student, is_active=False)  # noqa: F841
+        spl = SPL.objects.create(portal_user=portal_user, student=student, is_active=False)
         ParentStudentLink.objects.get_or_create(parent=portal_user, student=student)
+        from apps.portal.email_service import send_portal_invite
+
+        send_portal_invite(student, spl, parent_email, role="parent")
         return redirect("students:detail", pk=pk)
 
 
