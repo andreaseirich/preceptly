@@ -1,0 +1,78 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Serientermin erstellen – Preceptly Portal{% endblock %}
+
+{% block content %}
+<h1>Neuen Serientermin erstellen</h1>
+<p style="color:var(--text-secondary);">Schüler: <strong>{{ student.full_name }}</strong></p>
+
+{% if not contract %}
+<div class="alert-warning">Kein aktiver Vertrag vorhanden.</div>
+{% else %}
+<div class="box-section">
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; margin-bottom:6px; color:var(--text-secondary); font-size:0.88em;">Wochentage</label>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        {% for field, label in weekday_fields %}
+        <label style="display:flex; align-items:center; gap:5px; cursor:pointer; font-size:0.95em;">
+          <input type="checkbox" name="{{ field }}" value="1" style="width:16px; height:16px;">
+          {{ label }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div>
+        <label for="id_start_time" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Uhrzeit</label>
+        <input type="time" id="id_start_time" name="start_time" required
+          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+      </div>
+      <div>
+        <label for="id_recurrence_type" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Wiederholung</label>
+        <select id="id_recurrence_type" name="recurrence_type"
+          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+          <option value="weekly">Wöchentlich</option>
+          <option value="biweekly">Zweiwöchentlich</option>
+          <option value="monthly">Monatlich</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div>
+        <label for="id_start_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Startdatum</label>
+        <input type="date" id="id_start_date" name="start_date" min="{{ today }}" required
+          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+      </div>
+      <div>
+        <label for="id_end_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Enddatum (optional)</label>
+        <input type="date" id="id_end_date" name="end_date" min="{{ today }}"
+          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label for="id_topic" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Thema / Notizen (optional)</label>
+      <input type="text" id="id_topic" name="topic" placeholder="z. B. Mathematik"
+        style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+    </div>
+
+    <div style="font-size:0.88em; color:var(--text-secondary); margin-bottom:16px;">
+      Dauer je Termin: <strong>{{ contract.unit_duration_minutes }} Min.</strong>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button type="submit"
+        style="padding:9px 24px; background:#007bff; color:#fff; border:none; border-radius:4px; font-size:0.95em; font-weight:600; cursor:pointer;">
+        Serie erstellen
+      </button>
+      <a href="{% url 'portal:recurring_manage' student.pk %}" class="btn-sm btn-sm-secondary" style="padding:9px 16px;">Abbrechen</a>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

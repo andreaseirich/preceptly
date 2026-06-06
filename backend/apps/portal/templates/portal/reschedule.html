@@ -1,0 +1,86 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Termin verschieben – Preceptly Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.slot-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
+.slot-btn { padding:7px 16px; border:1px solid var(--border-color); border-radius:4px;
+    background:var(--bg-secondary); color:var(--text-primary); cursor:pointer; font-size:0.9em; }
+.slot-btn:hover, .slot-btn.selected { background:#007bff; color:#fff; border-color:#007bff; }
+.slot-empty { color:var(--text-secondary); font-size:0.9em; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Termin verschieben</h1>
+<p style="color:var(--text-secondary);">
+  Aktuell: <strong>{{ session.date|date:"d.m.Y" }}</strong> um <strong>{{ session.start_time|time:"H:i" }} Uhr</strong>
+  ({{ session.duration_minutes }} Min.)
+</p>
+
+{% if error %}<div class="alert-danger">{{ error }}</div>{% endif %}
+
+<div class="box-section">
+  <form method="post">
+    {% csrf_token %}
+    <div style="margin-bottom:16px;">
+      <label for="id_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neues Datum</label>
+      <input type="date" id="id_date" name="date" min="{{ today }}" required
+        style="padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary); font-size:0.95em;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neue Uhrzeit</label>
+      <div class="slot-grid" id="slot-grid">
+        <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
+      </div>
+      <input type="hidden" id="id_start_time" name="start_time" required>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button type="submit" id="submit-btn" disabled
+        style="padding:9px 24px; background:#007bff; color:#fff; border:none; border-radius:4px; font-size:0.95em; font-weight:600; cursor:pointer;">
+        Termin verschieben
+      </button>
+      <a href="javascript:history.back()" class="btn-sm btn-sm-secondary" style="padding:9px 16px;">Abbrechen</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var dateInput = document.getElementById('id_date');
+  var slotGrid  = document.getElementById('slot-grid');
+  var timeInput = document.getElementById('id_start_time');
+  var submitBtn = document.getElementById('submit-btn');
+  if (!dateInput) return;
+  dateInput.addEventListener('change', function() {
+    var date = dateInput.value;
+    if (!date) return;
+    slotGrid.innerHTML = '<span class="slot-empty">Lade …</span>';
+    timeInput.value = ''; submitBtn.disabled = true;
+    fetch('/portal/availability/{{ student.pk }}/?date=' + date)
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        slotGrid.innerHTML = '';
+        if (!data.slots || !data.slots.length) {
+          slotGrid.innerHTML = '<span class="slot-empty">Keine freien Slots.</span>';
+          return;
+        }
+        data.slots.forEach(function(slot) {
+          var btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'slot-btn';
+          btn.textContent = slot + ' Uhr';
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            timeInput.value = slot; submitBtn.disabled = false;
+          });
+          slotGrid.appendChild(btn);
+        });
+      });
+  });
+})();
+</script>
+{% endblock %}

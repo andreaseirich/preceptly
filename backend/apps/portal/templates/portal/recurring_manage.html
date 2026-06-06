@@ -1,0 +1,46 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Serientermine – Preceptly Portal{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+  <h1 style="margin:0;">Serientermine</h1>
+  <a href="{% url 'portal:recurring_create' student.pk %}" class="btn-sm btn-sm-primary">+ Neue Serie</a>
+</div>
+<p style="color:var(--text-secondary);">Schüler: <strong>{{ student.full_name }}</strong></p>
+
+{% if series %}
+{% for rs in series %}
+<div class="box-section" style="margin-bottom:12px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+    <div>
+      <strong>{{ rs.start_time|time:"H:i" }} Uhr</strong>
+      &middot; {{ rs.duration_minutes }} Min.
+      &middot; <span style="color:var(--text-secondary); font-size:0.88em;">
+        {% if rs.recurrence_type == "weekly" %}Wöchentlich
+        {% elif rs.recurrence_type == "biweekly" %}Zweiwöchentlich
+        {% else %}Monatlich{% endif %}
+      </span><br>
+      <small style="color:var(--text-secondary);">
+        {{ rs.get_active_weekdays_display }}
+        &middot; ab {{ rs.start_date|date:"d.m.Y" }}
+        {% if rs.end_date %} bis {{ rs.end_date|date:"d.m.Y" }}{% endif %}
+      </small>
+      {% if rs.notes %}<p style="margin:6px 0 0; font-size:0.88em;">{{ rs.notes }}</p>{% endif %}
+    </div>
+    <form method="post" action="{% url 'portal:recurring_cancel' rs.pk %}"
+      onsubmit="return confirm('Serientermin wirklich beenden und alle zukünftigen Termine absagen?')">
+      {% csrf_token %}
+      <button type="submit" class="btn-sm btn-sm-danger">Serie beenden</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state"><p>Keine aktiven Serientermine.</p></div>
+{% endif %}
+
+<div style="margin-top:20px;">
+  <a href="{% url 'portal:book' student.pk %}" class="btn-sm btn-sm-secondary">&larr; Einzeltermin buchen</a>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Termin buchen – Preceptly Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.slot-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
+.slot-btn {
+    padding: 7px 16px; border: 1px solid var(--border-color);
+    border-radius: 4px; background: var(--bg-secondary); color: var(--text-primary);
+    cursor: pointer; font-size: 0.9em; transition: background 0.15s;
+}
+.slot-btn:hover, .slot-btn.selected { background: #007bff; color: #fff; border-color: #007bff; }
+.slot-empty { color: var(--text-secondary); font-size: 0.9em; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Termin buchen</h1>
+<p style="color:var(--text-secondary);">Schüler: <strong>{{ student.full_name }}</strong>
+{% if contract %} &middot; Einheit: {{ contract.unit_duration_minutes }} Min.{% endif %}</p>
+
+{% if error %}<div class="alert-danger">{{ error }}</div>{% endif %}
+{% if success %}<div class="alert-success">{{ success }}</div>{% endif %}
+
+{% if not contract %}
+<div class="alert-warning">Kein aktiver Vertrag vorhanden. Bitte den Nachhilfelehrer kontaktieren.</div>
+{% else %}
+<div class="box-section">
+  <form method="post" id="booking-form">
+    {% csrf_token %}
+    <div style="margin-bottom:16px;">
+      <label for="id_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Datum wählen</label>
+      <input type="date" id="id_date" name="date" min="{{ today }}" required
+        style="padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary); font-size:0.95em;">
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Freie Zeitslots</label>
+      <div class="slot-grid" id="slot-grid">
+        <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
+      </div>
+      <input type="hidden" id="id_start_time" name="start_time" required>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label for="id_topic" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Thema / Nachricht (optional)</label>
+      <input type="text" id="id_topic" name="topic" placeholder="z. B. Quadratische Gleichungen"
+        style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary); font-size:0.95em;">
+    </div>
+
+    <button type="submit" class="btn-login" id="submit-btn" disabled>Termin buchen</button>
+  </form>
+</div>
+
+<div style="margin-top:16px;">
+  <a href="{% url 'portal:recurring_create' student.pk %}" class="btn-sm btn-sm-secondary">↻ Serientermin erstellen</a>
+  <a href="{% url 'portal:recurring_manage' student.pk %}" class="btn-sm btn-sm-secondary" style="margin-left:8px;">Serientermine verwalten</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var dateInput = document.getElementById('id_date');
+  var slotGrid  = document.getElementById('slot-grid');
+  var timeInput = document.getElementById('id_start_time');
+  var submitBtn = document.getElementById('submit-btn');
+  if (!dateInput) return;
+
+  dateInput.addEventListener('change', function() {
+    var date = dateInput.value;
+    if (!date) return;
+    slotGrid.innerHTML = '<span class="slot-empty">Lade Zeitslots …</span>';
+    timeInput.value = '';
+    submitBtn.disabled = true;
+
+    fetch('/portal/availability/{{ student.pk }}/?date=' + date)
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        slotGrid.innerHTML = '';
+        if (!data.slots || data.slots.length === 0) {
+          slotGrid.innerHTML = '<span class="slot-empty">Keine freien Zeitslots an diesem Tag.</span>';
+          return;
+        }
+        data.slots.forEach(function(slot) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'slot-btn';
+          btn.textContent = slot + ' Uhr';
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            timeInput.value = slot;
+            submitBtn.disabled = false;
+          });
+          slotGrid.appendChild(btn);
+        });
+      })
+      .catch(function() {
+        slotGrid.innerHTML = '<span class="slot-empty">Fehler beim Laden der Slots.</span>';
+      });
+  });
+})();
+</script>
+{% endblock %}

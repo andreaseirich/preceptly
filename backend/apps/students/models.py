@@ -70,3 +70,44 @@ class Student(models.Model):
     def full_name(self):
         """Full name of the student."""
         return f"{self.first_name} {self.last_name}"
+
+
+class StudentDocument(models.Model):
+    """Unterrichtsmaterial / Dokument – von Tutor oder Schüler/Eltern hochgeladen."""
+
+    student = models.ForeignKey(
+        "students.Student",
+        on_delete=models.CASCADE,
+        related_name="documents",
+        verbose_name=_("Schüler"),
+    )
+    file = models.FileField(
+        upload_to="student_documents/",
+        verbose_name=_("Datei"),
+    )
+    name = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name=_("Bezeichnung"),
+        help_text=_("Optionaler Anzeigename"),
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by_portal_user = models.ForeignKey(
+        "portal.PortalUser",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="uploaded_documents",
+    )
+    uploaded_by_tutor = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = _("Schülerdokument")
+        verbose_name_plural = _("Schülerdokumente")
+
+    def display_name(self):
+        return self.name or self.file.name.split("/")[-1]
+
+    def __str__(self):
+        return f"{self.student.full_name} – {self.display_name()}"

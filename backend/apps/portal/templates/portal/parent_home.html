@@ -38,8 +38,14 @@
     {% endif %}
 
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+        <a class="btn-sm btn-sm-primary" href="{% url 'portal:book' sd.student.pk %}">
+            Termin buchen
+        </a>
         <a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_student_detail' sd.student.pk %}">
             Details
+        </a>
+        <a class="btn-sm btn-sm-secondary" href="{% url 'portal:documents' sd.student.pk %}">
+            Dokumente
         </a>
         <a class="btn-sm btn-sm-secondary" href="{% url 'portal:messages' sd.student.pk %}">
             Nachrichten

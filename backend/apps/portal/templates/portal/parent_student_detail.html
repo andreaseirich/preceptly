@@ -20,6 +20,7 @@
             <th>Status</th>
             <th>Hausaufgaben</th>
             <th>Meeting</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -41,6 +42,16 @@
             <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">▶ Beitreten</a>
             {% else %}
             <span style="color:var(--text-secondary);">–</span>
+            {% endif %}
+        </td>
+        <td style="white-space:nowrap;">
+            {% if lesson.status == 'planned' %}
+            <a href="{% url 'portal:session_reschedule' lesson.pk %}" class="btn-sm btn-sm-secondary">Verschieben</a>
+            <form method="post" action="{% url 'portal:session_cancel' lesson.pk %}" style="display:inline"
+              onsubmit="return confirm('Termin wirklich absagen?')">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm btn-sm-danger">Absagen</button>
+            </form>
             {% endif %}
         </td>
     </tr>

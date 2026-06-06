@@ -311,3 +311,53 @@ class StudentRegenerateBookingCodeView(LoginRequiredMixin, View):
 
         new_code = set_booking_code(student)
         return JsonResponse({"success": True, "booking_code": new_code})
+
+
+class StudentDocumentListView(LoginRequiredMixin, View):
+    """Dokumente eines Schülers – Tutor-Seite."""
+
+    def get(self, request, pk):
+        from apps.students.models import StudentDocument
+
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+        docs = StudentDocument.objects.filter(student=student)
+        return render(
+            request,
+            "students/student_documents.html",
+            {
+                "student": student,
+                "documents": docs,
+            },
+        )
+
+    def post(self, request, pk):
+        from apps.students.models import StudentDocument
+
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            messages.warning(request, "Keine Datei ausgewählt.")
+            return redirect("students:documents", pk=pk)
+        name = request.POST.get("name", "").strip()
+        StudentDocument.objects.create(
+            student=student,
+            file=uploaded_file,
+            name=name,
+            uploaded_by_tutor=True,
+        )
+        messages.success(request, f"Datei hochgeladen.")
+        return redirect("students:documents", pk=pk)
+
+
+class StudentDocumentDeleteView(LoginRequiredMixin, View):
+    """Dokument löschen – Tutor-Seite."""
+
+    def post(self, request, pk, doc_pk):
+        from apps.students.models import StudentDocument
+
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+        doc = get_object_or_404(StudentDocument, pk=doc_pk, student=student)
+        doc.file.delete(save=False)
+        doc.delete()
+        messages.success(request, "Dokument gelöscht.")
+        return redirect("students:documents", pk=pk)

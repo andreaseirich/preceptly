@@ -45,8 +45,16 @@
             <span style="color:var(--text-secondary);">–</span>
             {% endif %}
         </td>
-        <td>
+        <td style="white-space:nowrap;">
             <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-secondary">Details</a>
+            {% if lesson.status == 'planned' %}
+            <a href="{% url 'portal:session_reschedule' lesson.pk %}" class="btn-sm btn-sm-secondary">Verschieben</a>
+            <form method="post" action="{% url 'portal:session_cancel' lesson.pk %}" style="display:inline"
+              onsubmit="return confirm('Termin wirklich absagen?')">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm btn-sm-danger">Absagen</button>
+            </form>
+            {% endif %}
         </td>
     </tr>
     {% endfor %}

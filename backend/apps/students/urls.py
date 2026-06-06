@@ -39,4 +39,10 @@ urlpatterns = [
         views.PortalInviteResendView.as_view(),
         name="portal_invite_resend",
     ),
+    path("<int:pk>/documents/", views.StudentDocumentListView.as_view(), name="documents"),
+    path(
+        "<int:pk>/documents/<int:doc_pk>/delete/",
+        views.StudentDocumentDeleteView.as_view(),
+        name="document_delete",
+    ),
 ]

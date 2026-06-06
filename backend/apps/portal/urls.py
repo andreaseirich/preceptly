@@ -24,4 +24,44 @@ urlpatterns = [
         views.StudentLessonDetailView.as_view(),
         name="student_lesson_detail",
     ),
+    # Terminbuchung
+    path("book/<int:student_pk>/", views.PortalBookingView.as_view(), name="book"),
+    path(
+        "session/<int:session_pk>/cancel/",
+        views.PortalSessionCancelView.as_view(),
+        name="session_cancel",
+    ),
+    path(
+        "session/<int:session_pk>/reschedule/",
+        views.PortalSessionRescheduleView.as_view(),
+        name="session_reschedule",
+    ),
+    path(
+        "availability/<int:student_pk>/",
+        views.PortalAvailabilityView.as_view(),
+        name="availability",
+    ),
+    # Serientermine
+    path(
+        "recurring/<int:student_pk>/",
+        views.PortalRecurringManageView.as_view(),
+        name="recurring_manage",
+    ),
+    path(
+        "recurring/create/<int:student_pk>/",
+        views.PortalRecurringCreateView.as_view(),
+        name="recurring_create",
+    ),
+    path(
+        "recurring/<int:recurring_pk>/cancel/",
+        views.PortalRecurringCancelView.as_view(),
+        name="recurring_cancel",
+    ),
+    # Dokumente
+    path("documents/<int:student_pk>/", views.PortalDocumentsView.as_view(), name="documents"),
+    path(
+        "documents/<int:student_pk>/<int:doc_pk>/download/",
+        views.PortalDocumentDownloadView.as_view(),
+        name="document_download",
+    ),
 ]

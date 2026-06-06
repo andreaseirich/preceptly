@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}Dokumente – {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="box-section">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+    <h2 style="margin:0;">Dokumente: {{ student.full_name }}</h2>
+    <a href="{% url 'students:detail' student.pk %}" class="btn-sm btn-sm-secondary">&larr; Zum Schüler</a>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:24px;">
+    {% csrf_token %}
+    <div style="flex:1; min-width:160px;">
+      <label for="id_name" style="display:block; font-size:0.88em; color:var(--text-secondary); margin-bottom:4px;">Bezeichnung (optional)</label>
+      <input type="text" id="id_name" name="name" class="form-control" placeholder="z. B. Hausaufgaben KW23">
+    </div>
+    <div style="flex:2; min-width:200px;">
+      <label for="id_file" style="display:block; font-size:0.88em; color:var(--text-secondary); margin-bottom:4px;">Datei</label>
+      <input type="file" id="id_file" name="file" required class="form-control">
+    </div>
+    <button type="submit" class="btn-sm btn-sm-primary" style="white-space:nowrap;">Hochladen</button>
+  </form>
+
+  {% if documents %}
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--border-color);">
+        <th style="text-align:left; padding:8px 0; color:var(--text-secondary); font-weight:500;">Datei</th>
+        <th style="text-align:left; padding:8px 0; color:var(--text-secondary); font-weight:500;">Hochgeladen von</th>
+        <th style="text-align:left; padding:8px 0; color:var(--text-secondary); font-weight:500;">Datum</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for doc in documents %}
+    <tr style="border-bottom:1px solid var(--border-color);">
+      <td style="padding:8px 0;">{{ doc.display_name }}</td>
+      <td style="padding:8px 0; font-size:0.88em; color:var(--text-secondary);">
+        {% if doc.uploaded_by_tutor %}Du (Tutor){% else %}{{ doc.uploaded_by_portal_user.user.username }}{% endif %}
+      </td>
+      <td style="padding:8px 0; font-size:0.88em; color:var(--text-secondary);">{{ doc.uploaded_at|date:"d.m.Y H:i" }}</td>
+      <td style="padding:8px 0; text-align:right;">
+        <a href="{{ doc.file.url }}" class="btn-sm btn-sm-secondary" download>⬇</a>
+        <form method="post" action="{% url 'students:document_delete' student.pk doc.pk %}"
+          style="display:inline" onsubmit="return confirm('Dokument löschen?')">
+          {% csrf_token %}
+          <button type="submit" class="btn-sm btn-sm-danger">✕</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--text-secondary);">Noch keine Dokumente.</p>
+  {% endif %}
+</div>
+{% endblock %}

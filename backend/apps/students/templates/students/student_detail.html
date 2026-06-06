@@ -7,7 +7,8 @@
 <h1>{{ student.full_name }}</h1>
 
 <div class="btn-group">
-    <a href="{% url 'students:update' student.pk %}" class="btn">{% trans "Edit" %}</a>
+    <a href="{% url 'students:documents' student.pk %}" class="btn-sm btn-sm-secondary">Dokumente</a>
+  <a href="{% url 'students:update' student.pk %}" class="btn">{% trans "Edit" %}</a>
     <a href="{% url 'students:delete' student.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
     <a href="{% url 'students:list' %}" class="btn btn-secondary">{% trans "Back to List" %}</a>
 </div>
@@ -103,7 +104,8 @@
   {% else %}
   <p style="font-size: 0.9em; color: var(--text-secondary); margin: 0;">
     Kein Eltern-Zugang (erwachsener Schüler).
-    <a href="{% url 'students:update' student.pk %}" style="color: var(--text-secondary);">Ändern</a>
+    <a href="{% url 'students:documents' student.pk %}" class="btn-sm btn-sm-secondary">Dokumente</a>
+  <a href="{% url 'students:update' student.pk %}" style="color: var(--text-secondary);">Ändern</a>
   </p>
   {% endif %}
   <div style="margin-top: 0.75em;">
