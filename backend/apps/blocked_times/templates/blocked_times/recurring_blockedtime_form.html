@@ -6,7 +6,7 @@
 {% block content %}
 <h1>{% if object %}{% trans "Edit Recurring Blocked Time" %}{% else %}{% trans "New Recurring Blocked Time" %}{% endif %}</h1>
 
-<div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+<div class="alert-warning" style="margin-bottom: 20px;">
     <strong>💡 {% trans "What are recurring blocked times?" %}</strong>
     <p style="margin: 5px 0 0 0; font-size: 0.9em;">
         {% trans "Recurring blocked times allow you to create repeating blocked times (e.g., 'every Tuesday 6-8 PM'). After saving, you can generate the blocked times for the specified period." %}

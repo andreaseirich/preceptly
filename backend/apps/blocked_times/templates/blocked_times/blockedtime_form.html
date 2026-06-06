@@ -7,7 +7,7 @@
 <h1>{% if object %}{% trans "Edit Blocked Time" %}{% else %}{% trans "New Blocked Time" %}{% endif %}</h1>
 
 {% if object and matching_recurring %}
-<div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px; border: 1px solid #2196f3;">
+<div class="alert-info" style="margin-bottom: 20px;">
     <h3>{% trans "This blocked time is part of a series" %}</h3>
     <p><strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
     ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})</p>
@@ -67,7 +67,7 @@
     </div>
     
     {% if not object %}
-    <div id="recurrence-section" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; border: 1px solid #ddd;">
+    <div id="recurrence-section" class="box-section" style="margin-bottom: 20px;">
         <h3>{% trans "Recurrence (Optional)" %}</h3>
         <p>
             <label for="{{ form.is_recurring.id_for_label }}" style="display: flex; align-items: center; gap: 8px;">
@@ -110,7 +110,7 @@
     {% endif %}
     
     {% if object and matching_recurring %}
-    <div id="series-info" style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107; display: none;">
+    <div id="series-info" class="alert-warning" style="margin-top: 20px; display: none;">
         <h3>{% trans "Series Settings" %}</h3>
         <p><em>{% trans "When editing the entire series, changes to the following fields will be applied to all blocked times in the series:" %}</em></p>
         

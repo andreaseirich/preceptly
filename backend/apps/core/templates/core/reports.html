@@ -65,14 +65,14 @@
 </div>
 
 {% if taught_not_invoiced.count %}
-<div style="padding: 15px; background: #e8f4fd; border-radius: 8px; margin-bottom: 20px;">
+<div class="alert-info">
     <strong>{% trans "Taught but not yet invoiced" %}:</strong> {{ taught_not_invoiced.count }} {% trans "lessons" %}, {{ taught_not_invoiced.value|euro }}
     <p class="tutorflow-kpi-hint" style="margin-bottom: 0;">{% trans "Euro amount = what billing would produce today (TutorSpace includes cumulative tier rules)." %}</p>
 </div>
 {% endif %}
 
 {% if unpaid_invoices.count %}
-<div style="padding: 15px; background: #fff3cd; border-radius: 8px; margin-bottom: 20px;">
+<div class="alert-warning">
     <strong>{% trans "Unpaid invoices" %}:</strong> {{ unpaid_invoices.count }} {% trans "invoices" %}, {{ unpaid_invoices.amount|euro }}
 </div>
 {% endif %}

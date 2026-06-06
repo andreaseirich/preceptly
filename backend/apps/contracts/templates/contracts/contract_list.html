@@ -28,7 +28,7 @@
     </div>
     {% endfor %}
   </div>
-  <p><a href="{% url 'contracts:tier_config_list' %}">{% trans "Configure thresholds" %}</a></p>
+  <p><a href="{% url 'contracts:tier_config_list' %}" class="btn-sm btn-sm-secondary">{% trans "Configure thresholds" %}</a></p>
 </div>
 {% endif %}
 
@@ -78,7 +78,7 @@
                     {% else %}
                     <button type="submit" class="btn-sm btn-sm-success">{% trans "Activate" %}</button>
                     {% endif %}
-                </form> |
+                </form>
                 <a href="{% url 'contracts:delete' contract.pk %}" class="btn-sm btn-sm-danger">{% trans "Delete" %}</a></div>
             </td>
         </tr>

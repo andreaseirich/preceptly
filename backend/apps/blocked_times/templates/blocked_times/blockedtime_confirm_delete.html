@@ -8,7 +8,7 @@
 <p>{% blocktrans with title=object.title datetime=object.start_datetime|date:"d.m.Y H:i" %}Are you sure you want to delete the blocked time "{{ title }}" ({{ datetime }})?{% endblocktrans %}</p>
 
 {% if matching_recurring %}
-<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0;">
+<div class="alert-warning" style="margin: 20px 0;">
     <h3 style="margin-top: 0; color: #856404;">⚠️ {% trans "This blocked time is part of a series" %}</h3>
     <p>
         <strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
