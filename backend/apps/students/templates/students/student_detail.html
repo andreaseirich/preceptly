@@ -13,13 +13,22 @@
       <button type="submit" class="btn-sm btn-sm-primary">{% trans "Create Portal Account" %}</button>
     </form>
   {% endif %}
+  <hr style="border-color: var(--border-color); margin: 1em 0;">
+  <h4 style="margin: 0 0 0.5em;">{% trans "Parent Access" %}</h4>
   {% if parent_links %}
-    <p style="margin-top: 0.5em;">{% trans "Parent accounts:" %}
-      {% for pl in parent_links %}
-        <span class="btn-sm btn-sm-secondary" style="margin-right: 4px;">{{ pl.parent.user.username }}</span>
-      {% endfor %}
-    </p>
+    {% for pl in parent_links %}
+      <span class="btn-sm btn-sm-secondary" style="margin-right: 4px; margin-bottom: 4px; display: inline-block;">
+        {{ pl.parent.user.username }}
+      </span>
+    {% endfor %}
+    <br style="margin-bottom: 0.5em;">
   {% endif %}
+  <form method="post" action="{% url 'students:portal_invite_parent' student.pk %}" style="display: flex; gap: 6px; margin-top: 0.5em; flex-wrap: wrap;">
+    {% csrf_token %}
+    <input type="email" name="parent_email" placeholder="{% trans 'Parent email (optional)' %}"
+      style="padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); font-size: 0.9em; flex: 1; min-width: 160px;">
+    <button type="submit" class="btn-sm btn-sm-primary">{% trans "Add Parent Account" %}</button>
+  </form>
   {% if unread_messages %}
     <a href="{% url 'core:tutor_messages' student.pk %}" class="btn-sm btn-sm-warning">
       {% blocktrans with n=unread_messages %}{{ n }} unread message(s){% endblocktrans %}
