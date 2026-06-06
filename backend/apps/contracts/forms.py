@@ -14,16 +14,24 @@ class ContractForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
+            from django.db.models import Q
+
             from apps.contracts.models import Contract
 
             students_with_active_contract = Contract.objects.filter(
                 student__user=user, is_active=True
             ).values_list("student_id", flat=True)
-            self.fields["student"].queryset = (
-                self.fields["student"]
-                .queryset.filter(user=user)
-                .exclude(pk__in=students_with_active_contract)
-            )
+            base_qs = self.fields["student"].queryset.filter(user=user)
+            if self.instance and self.instance.pk:
+                # Update-Formular: aktuellen Schüler immer anzeigen
+                self.fields["student"].queryset = base_qs.filter(
+                    Q(pk=self.instance.student_id) | ~Q(pk__in=students_with_active_contract)
+                )
+            else:
+                # Create-Formular: nur Schüler ohne aktiven Vertrag
+                self.fields["student"].queryset = base_qs.exclude(
+                    pk__in=students_with_active_contract
+                )
 
     has_monthly_planning_limit = forms.BooleanField(
         required=False,

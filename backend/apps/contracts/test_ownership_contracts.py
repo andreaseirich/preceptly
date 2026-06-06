@@ -50,6 +50,13 @@ class ContractOwnershipIsolationTest(TestCase):
             is_active=True,
         )
 
+        # Schüler ohne Vertrag für Dropdown-Tests
+        self.student_a_free = Student.objects.create(
+            user=self.tutor_a,
+            first_name="Anna",
+            last_name="AStudentFree",
+        )
+
     def test_tutor_a_list_shows_only_own_contracts(self):
         self.client.force_login(self.tutor_a)
         response = self.client.get(reverse("contracts:list"))
@@ -96,14 +103,17 @@ class ContractOwnershipIsolationTest(TestCase):
         self.assertTrue(Contract.objects.filter(pk=self.contract_a.pk).exists())
 
     def test_create_form_student_dropdown_only_contains_own_students(self):
-        """Contract create form: student field queryset must be filtered by user."""
+        """Contract create form: nur eigene Schüler ohne aktiven Vertrag anzeigen."""
         self.client.force_login(self.tutor_a)
         response = self.client.get(reverse("contracts:create"))
         self.assertEqual(response.status_code, 200)
-        # Student B must not appear as option (B belongs to tutor_b)
         content = response.content.decode()
-        self.assertIn("Alice", content)
-        self.assertIn("AStudent", content)
+        # student_a_free (kein Vertrag) muss erscheinen
+        self.assertIn("Anna", content)
+        self.assertIn("AStudentFree", content)
+        # student_a hat aktiven Vertrag → darf nicht erscheinen
+        self.assertNotIn("Alice", content)
+        # Schüler von tutor_b darf niemals erscheinen
         self.assertNotIn("Bob", content)
         self.assertNotIn("BStudent", content)
 
