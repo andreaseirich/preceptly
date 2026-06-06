@@ -1,7 +1,51 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{{ student.full_name }} - Preceptly{% endblock %}
+{% block title %}{{ student.full_name }} - Preceptly
+<div class="box-section" style="margin-top: 2em;">
+  <h3>{% trans "Portal Access" %}</h3>
+  {% if portal_link %}
+    <p>{% trans "Student portal active." %}
+       <small style="color: var(--text-secondary);">{{ portal_link.portal_user.user.username }}</small></p>
+  {% else %}
+    <form method="post" action="{% url 'students:portal_invite_create' student.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-sm btn-sm-primary">{% trans "Create Portal Account" %}</button>
+    </form>
+  {% endif %}
+  {% if parent_links %}
+    <p style="margin-top: 0.5em;">{% trans "Parent accounts:" %}
+      {% for pl in parent_links %}
+        <span class="btn-sm btn-sm-secondary" style="margin-right: 4px;">{{ pl.parent.user.username }}</span>
+      {% endfor %}
+    </p>
+  {% endif %}
+  {% if unread_messages %}
+    <a href="{% url 'core:tutor_messages' student.pk %}" class="btn-sm btn-sm-warning">
+      {% blocktrans with n=unread_messages %}{{ n }} unread message(s){% endblocktrans %}
+    </a>
+  {% else %}
+    <a href="{% url 'core:tutor_messages' student.pk %}" class="btn-sm btn-sm-secondary">{% trans "Messages" %}</a>
+  {% endif %}
+</div>
+
+<div class="box-section" style="margin-top: 1.5em;">
+  <h3>{% trans "Progress Notes" %}</h3>
+  {% for note in progress_notes %}
+    <div style="border-bottom: 1px solid var(--border-color); padding: 8px 0;">
+      <small style="color: var(--text-secondary);">{{ note.date }}</small>
+      <p style="margin: 4px 0;">{{ note.text }}</p>
+    </div>
+  {% empty %}
+    <p style="color: var(--text-secondary);">{% trans "No progress notes yet." %}</p>
+  {% endfor %}
+  <form method="post" action="{% url 'students:progress_note_create' student.pk %}" style="margin-top: 1em;">
+    {% csrf_token %}
+    <textarea name="text" rows="3" style="width: 100%; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); resize: vertical;" placeholder="{% trans 'Add progress note...' %}"></textarea>
+    <button type="submit" class="btn-sm btn-sm-primary" style="margin-top: 6px;">{% trans "Save Note" %}</button>
+  </form>
+</div>
+{% endblock %}
 
 {% block content %}
 <h1>{{ student.full_name }}</h1>

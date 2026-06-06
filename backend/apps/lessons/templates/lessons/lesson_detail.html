@@ -52,6 +52,17 @@
     </table>
 </div>
 
+{% if lesson.meeting_url %}
+<div class="alert-info" style="margin-bottom: 1em;">
+  🔗 <strong>{% trans "Meeting" %}:</strong>
+  <a href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">{{ lesson.meeting_url }}</a>
+</div>
+{% endif %}
+{% if lesson.homework %}
+<div class="alert-info" style="margin-bottom: 1em;">
+  📚 <strong>{% trans "Homework" %}:</strong> {{ lesson.homework }}
+</div>
+{% endif %}
 {% if has_conflicts %}
 <div class="alert-warning" style="margin-bottom: 20px; border-left: 4px solid #dc3545;">
     <h2 style="color: #dc3545; margin-top: 0;">⚠ {% trans "Conflicts" %}</h2>
