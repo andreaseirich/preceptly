@@ -324,9 +324,9 @@ else:
     EMAIL_BACKEND = email_backend_setting
 
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.mail.me.com")
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
+EMAIL_PORT = int(env("EMAIL_PORT", default="587"))
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", default=False)
 
 # Validate that TLS and SSL are not both enabled
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
