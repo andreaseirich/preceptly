@@ -1,12 +1,12 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Delete Contract" %} - Preceptly{% endblock %}
+{% block title %}Schüler löschen - Preceptly{% endblock %}
 
 {% block content %}
-<h1>{% trans "Delete Contract" %}</h1>
+<h1>Schüler löschen</h1>
 
-<p>{% blocktrans with contract_str=contract %}Are you sure you want to delete the contract <strong>{{ contract_str }}</strong>?{% endblocktrans %}</p>
+<p>Schüler <strong>{{ contract }}</strong> wirklich löschen?</p>
 <p>{% trans "This action cannot be undone." %}</p>
 
 <form method="post">

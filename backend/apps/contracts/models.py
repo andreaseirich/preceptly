@@ -63,8 +63,8 @@ class Contract(models.Model):
 
     class Meta:
         ordering = ["-start_date", "last_name", "first_name"]
-        verbose_name = _("Contract")
-        verbose_name_plural = _("Contracts")
+        verbose_name = _("Schüler")
+        verbose_name_plural = _("Schüler")
 
     def save(self, *args, **kwargs):
         if self.pk:

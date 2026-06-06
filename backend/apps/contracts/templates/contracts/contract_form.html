@@ -1,10 +1,10 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% if object %}{% trans "Edit Contract" %}{% else %}{% trans "New Contract" %}{% endif %} - Preceptly{% endblock %}
+{% block title %}{% if object %}Schüler bearbeiten{% else %}Neuer Schüler{% endif %} - Preceptly{% endblock %}
 
 {% block content %}
-<h1>{% if object %}{% trans "Edit Contract" %}{% else %}{% trans "New Contract" %}{% endif %}</h1>
+<h1>{% if object %}Schüler bearbeiten{% else %}Neuer Schüler{% endif %}</h1>
 
 <form method="post">
     {% csrf_token %}

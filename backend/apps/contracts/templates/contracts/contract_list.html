@@ -1,11 +1,11 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Contracts" %} - Preceptly{% endblock %}
+{% block title %}Schüler - Preceptly{% endblock %}
 
 {% block content %}
-<h1>{% trans "Contracts" %}</h1>
-<a href="{% url 'contracts:create' %}" class="btn">{% trans "New Contract" %}</a>
+<h1>Schüler</h1>
+<a href="{% url 'contracts:create' %}" class="btn">Neuer Schüler</a>
 
 
 {% if institute_tier_summaries %}
@@ -84,7 +84,7 @@
         </tr>
         {% endwith %}
         {% empty %}
-        <tr><td colspan="9">{% trans "No contracts available." %}</td></tr>
+        <tr><td colspan="9">Keine Schüler vorhanden.</td></tr>
         {% endfor %}
     </tbody>
 </table>
