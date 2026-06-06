@@ -133,6 +133,6 @@ Eigener Base-Template: `portal/base.html` (minimales Layout, kein Tutor-Menü)
 | Phase | Status | Commits |
 |-------|--------|---------|
 | Phase 1 — Portal-App + Modelle | ✅ DONE | d1da54e, 021135b |
-| Phase 2 — Tutor-seitige UI | 🔄 IN PROGRESS | — |
+| Phase 2 — Tutor-seitige UI | ✅ DONE | — |
 | Phase 3 — Portal-Templates | ⏳ PENDING | — |
 | Phase 4 — Nachrichten + Feinschliff | ⏳ PENDING | — |

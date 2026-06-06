@@ -44,16 +44,18 @@ Das Eltern/Schüler-Portal gibt Eltern und Schülern einen dedizierten, sicheren
 - [x] PortalUser, StudentPortalLink, ParentStudentLink, ProgressNote, PortalMessage
 - [x] Session homework/meeting_url Felder + Migrationen
 - [x] App-Struktur (urls.py, views.py, settings.py Integration)
-- [ ] PortalLoginView + Authentication
-- [ ] Student/Parent HomeViews + Templates
-- [ ] Nachrichten-Views + Templates
-- [ ] Tutor-seitige UI (Einladungslinks, ProgressNotes, Session-Formular)
+- [x] PortalLoginView + Authentication (Stub vorhanden)
+- [x] Student/Parent HomeViews + Templates
+- [x] Nachrichten-Views + Templates
+- [x] Tutor-seitige UI (Einladungslinks, ProgressNotes, Session-Formular)
+- [x] TutorMessageView + Template
+- [x] Ungelesene-Nachrichten-Badge im Tutor-Menü
+- [ ] Einladungs-E-Mail (Token-Versand)
 - [ ] Sicherheitstests (Cross-Tutor-Zugriff)
-- [ ] Deployment
+- [ ] Deployment-Test auf Railway
 
 ## Offene Punkte / TODOs
 
 - Einladungs-E-Mail-Template und Versand
-- Ungelesene-Nachrichten-Badge im Tutor-Menü
 - Mobile Responsive Design für Portal-Templates
 - Datenschutz: Eltern-Zugriff auf Schüler-Daten (Einwilligung dokumentieren)
