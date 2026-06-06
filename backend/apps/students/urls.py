@@ -29,4 +29,9 @@ urlpatterns = [
         views.ProgressNoteCreateView.as_view(),
         name="progress_note_create",
     ),
+    path(
+        "<int:pk>/portal-invite-parent/",
+        views.PortalInviteParentView.as_view(),
+        name="portal_invite_parent",
+    ),
 ]

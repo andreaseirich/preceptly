@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from apps.portal.models import ProgressNote
+from apps.portal.models import ParentStudentLink, PortalUser, ProgressNote
 from apps.students.booking_code_service import set_booking_code
 from apps.students.forms import StudentForm
 from apps.students.models import Student
@@ -136,6 +136,28 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                 invite_token=uuid.uuid4().hex,
             )
 
+        return redirect("students:detail", pk=pk)
+
+
+class PortalInviteParentView(LoginRequiredMixin, View):
+    """Create a parent portal account and link to student."""
+
+    def post(self, request, pk):
+        import secrets as _secrets
+
+        from apps.portal.models import StudentPortalLink as SPL
+
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+        parent_email = request.POST.get("parent_email", "").strip()
+        if not parent_email:
+            return redirect("students:detail", pk=pk)
+        User = get_user_model()
+        username = f"parent_{student.pk}_{_secrets.token_hex(4)}"
+        password_temp = _secrets.token_hex(8)
+        user = User.objects.create_user(username=username, password=password_temp)
+        portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
+        spl = SPL.objects.create(portal_user=portal_user, student=student, is_active=False)  # noqa: F841
+        ParentStudentLink.objects.get_or_create(parent=portal_user, student=student)
         return redirect("students:detail", pk=pk)
 
 

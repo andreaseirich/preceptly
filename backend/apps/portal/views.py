@@ -67,6 +67,8 @@ class StudentHomeView(View):
         if not portal_user or portal_user.role != "student":
             return redirect("portal:login")
         link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
+        if link.student.user != portal_user.tutor:
+            return HttpResponseForbidden()
         student = link.student
         import datetime
 
@@ -107,6 +109,8 @@ class StudentLessonListView(View):
         if not portal_user or portal_user.role != "student":
             return redirect("portal:login")
         link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
+        if link.student.user != portal_user.tutor:
+            return HttpResponseForbidden()
         from apps.lessons.models import Lesson
 
         lessons = Lesson.objects.filter(
@@ -207,11 +211,15 @@ class PortalMessageView(View):
             link = StudentPortalLink.objects.filter(
                 portal_user=portal_user, is_active=True, student_id=student_pk
             ).first()
+            if link and link.student.user != portal_user.tutor:
+                return None
             return link.student if link else None
         else:
             link = ParentStudentLink.objects.filter(
                 parent=portal_user, student_id=student_pk
             ).first()
+            if link and link.student.user != portal_user.tutor:
+                return None
             return link.student if link else None
 
     def get(self, request, student_pk):
@@ -251,3 +259,48 @@ class PortalMessageView(View):
                 text=text,
             )
         return redirect("portal:messages", student_pk=student_pk)
+
+
+class PortalActivateView(View):
+    """Token-based activation: user sets own password, link becomes active."""
+
+    template_name = "portal/activate.html"
+
+    def get(self, request, token):
+        link = get_object_or_404(StudentPortalLink, invite_token=token)
+        if link.is_active:
+            return redirect("portal:login")
+        return render(request, self.template_name, {"token": token, "student": link.student})
+
+    def post(self, request, token):
+        link = get_object_or_404(StudentPortalLink, invite_token=token)
+        if link.is_active:
+            return redirect("portal:login")
+        password = request.POST.get("password", "").strip()
+        password2 = request.POST.get("password2", "").strip()
+        if len(password) < 8:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "student": link.student,
+                    "error": "Password must be at least 8 characters.",
+                },
+            )
+        if password != password2:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "student": link.student,
+                    "error": "Passwords do not match.",
+                },
+            )
+        link.portal_user.user.set_password(password)
+        link.portal_user.user.save()
+        link.is_active = True
+        link.save()
+        request.session["portal_user_id"] = link.portal_user.pk
+        return redirect("portal:home")

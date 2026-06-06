@@ -17,4 +17,5 @@ urlpatterns = [
         name="parent_student_detail",
     ),
     path("messages/<int:student_pk>/", views.PortalMessageView.as_view(), name="messages"),
+    path("activate/<str:token>/", views.PortalActivateView.as_view(), name="activate"),
 ]
