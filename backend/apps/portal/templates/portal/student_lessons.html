@@ -1,33 +1,32 @@
 {% extends "portal/base.html" %}
-{% load i18n %}
 
-{% block title %}{% trans "My Lessons" %} – Preceptly Portal{% endblock %}
+{% block title %}Meine Stunden – Preceptly Portal{% endblock %}
 
 {% block content %}
-<h1>{% trans "My Lessons" %}</h1>
+<h1>Meine Stunden</h1>
 
-<a class="btn-sm btn-sm-secondary" href="{% url portal:student_home %}" style="margin-bottom:20px; display:inline-block;">
-    &larr; {% trans "Back to Dashboard" %}
+<a class="btn-sm btn-sm-secondary" href="{% url 'portal:student_home' %}" style="margin-bottom:20px; display:inline-block;">
+    &larr; Zurück zum Dashboard
 </a>
 
 {% if lessons %}
 <table>
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Duration" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Homework" %}</th>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
+            <th>Dauer</th>
+            <th>Status</th>
+            <th>Hausaufgaben</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
     {% for lesson in lessons %}
     <tr>
-        <td>{{ lesson.scheduled_at|date:"N j, Y" }}</td>
-        <td>{{ lesson.scheduled_at|time:"H:i" }}</td>
-        <td>{{ lesson.duration_minutes }} {% trans "min" %}</td>
+        <td>{{ lesson.date|date:"d.m.Y" }}</td>
+        <td>{{ lesson.start_time|time:"H:i" }}</td>
+        <td>{{ lesson.duration_minutes }} Min.</td>
         <td>
             <span style="font-size:0.85em;">{{ lesson.get_status_display }}</span>
         </td>
@@ -39,13 +38,13 @@
             {% endif %}
         </td>
         <td>
-            <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a>
+            <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-primary">Details</a>
         </td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
 {% else %}
-<div class="empty-state"><p>{% trans "No lessons found." %}</p></div>
+<div class="empty-state"><p>Keine Stunden gefunden.</p></div>
 {% endif %}
 {% endblock %}

@@ -1,38 +1,35 @@
 {% extends "portal/base.html" %}
-{% load i18n %}
 
-{% block title %}{% trans "My Dashboard" %} – Preceptly Portal{% endblock %}
+{% block title %}Mein Dashboard – Preceptly Portal{% endblock %}
 
 {% block content %}
-{% blocktrans with name=student.full_name %}
-<h1>Welcome, {{ name }}</h1>
-{% endblocktrans %}
+<h1>Hallo, {{ student.full_name }}!</h1>
 
 <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
-    <a class="btn-sm btn-sm-primary" href="{% url portal:student_lessons %}">{% trans "All Lessons" %}</a>
-    <a class="btn-sm btn-sm-secondary" href="{% url portal:messages student.pk %}">{% trans "Messages" %}</a>
+    <a class="btn-sm btn-sm-primary" href="{% url 'portal:student_lessons' %}">Alle Stunden</a>
+    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:messages' student.pk %}">Nachrichten</a>
 </div>
 
-<h2>{% trans "Upcoming Lessons" %}</h2>
+<h2>Nächste Stunden</h2>
 {% if upcoming %}
 <table>
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Duration" %}</th>
-            <th>{% trans "Join" %}</th>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
+            <th>Dauer</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
     {% for lesson in upcoming %}
     <tr>
-        <td>{{ lesson.scheduled_at|date:"N j, Y" }}</td>
-        <td>{{ lesson.scheduled_at|time:"H:i" }}</td>
-        <td>{{ lesson.duration_minutes }} {% trans "min" %}</td>
+        <td>{{ lesson.date|date:"d.m.Y" }}</td>
+        <td>{{ lesson.start_time|time:"H:i" }}</td>
+        <td>{{ lesson.duration_minutes }} min</td>
         <td>
             {% if lesson.meeting_url %}
-            <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">{% trans "Join" %}</a>
+            <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">Beitreten</a>
             {% else %}
             <span style="color:var(--text-secondary); font-size:0.85em;">–</span>
             {% endif %}
@@ -42,28 +39,28 @@
     </tbody>
 </table>
 {% else %}
-<div class="empty-state"><p>{% trans "No upcoming lessons scheduled." %}</p></div>
+<div class="empty-state"><p>Keine kommenden Stunden geplant.</p></div>
 {% endif %}
 
-<h2>{% trans "Recent Lessons" %}</h2>
+<h2>Letzte Stunden</h2>
 {% if recent %}
 {% for lesson in recent %}
 <div class="box-section">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
         <div>
-            <strong>{{ lesson.scheduled_at|date:"N j, Y" }}</strong>
-            <span style="color:var(--text-secondary); font-size:0.88em; margin-left:10px;">{{ lesson.scheduled_at|time:"H:i" }}</span>
+            <strong>{{ lesson.date|date:"d.m.Y" }}</strong>
+            <span style="color:var(--text-secondary); font-size:0.88em; margin-left:10px;">{{ lesson.start_time|time:"H:i" }} Uhr</span>
         </div>
         <span style="font-size:0.82em; color:var(--text-secondary);">{{ lesson.get_status_display }}</span>
     </div>
     {% if lesson.homework %}
     <div class="alert-info" style="margin-top:12px; margin-bottom:0;">
-        <strong>{% trans "Homework:" %}</strong> {{ lesson.homework }}
+        <strong>Hausaufgaben:</strong> {{ lesson.homework }}
     </div>
     {% endif %}
 </div>
 {% endfor %}
 {% else %}
-<div class="empty-state"><p>{% trans "No recent lessons yet." %}</p></div>
+<div class="empty-state"><p>Noch keine vergangenen Stunden.</p></div>
 {% endif %}
 {% endblock %}

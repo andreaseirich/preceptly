@@ -1,7 +1,7 @@
 {% extends "portal/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Messages" %} – Preceptly Portal{% endblock %}
+{% block title %}Nachrichten – Preceptly Portal{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -98,10 +98,10 @@
 
 {% block content %}
 <a class="btn-sm btn-sm-secondary" href="javascript:history.back()" style="margin-bottom:20px; display:inline-block;">
-    &larr; {% trans "Back" %}
+    &larr; Zurück
 </a>
 
-<h1>{% trans "Messages" %}{% if student %}: {{ student.full_name }}{% endif %}</h1>
+<h1>Nachrichten{% if student %}: {{ student.full_name }}{% endif %}</h1>
 
 <div class="chat-wrapper" id="chat-wrapper">
 {% if messages %}
@@ -115,7 +115,7 @@
     {% endfor %}
 {% else %}
     <div class="empty-state" style="border:none; padding:40px 0;">
-        <p>{% trans "No messages yet. Send the first one!" %}</p>
+        <p>Noch keine Nachrichten. Schreibe die erste!</p>
     </div>
 {% endif %}
 </div>
@@ -123,9 +123,9 @@
 <div class="compose-box">
     <form method="post">
         {% csrf_token %}
-        <label for="id_body">{% trans "New message" %}</label>
+        <label for="id_body">Neue Nachricht</label>
         <textarea id="id_body" name="body" placeholder="Nachricht eingeben …" required></textarea>
-        <button type="submit" class="btn-send">{% trans "Send" %}</button>
+        <button type="submit" class="btn-send">Senden</button>
     </form>
 </div>
 {% endblock %}

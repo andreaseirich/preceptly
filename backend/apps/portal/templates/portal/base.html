@@ -152,9 +152,9 @@
     <div class="header-right">
         {% if portal_user %}
         <span class="header-username">{{ portal_user.user.username }}</span>
-        <form class="logout-form" method="post" action="{% url portal:logout %}">
+        <form class="logout-form" method="post" action="{% url 'portal:logout' %}">
             {% csrf_token %}
-            <button type="submit" class="btn-logout">{% load i18n %}{% trans "Logout" %}</button>
+            <button type="submit" class="btn-logout">Abmelden</button>
         </form>
         {% endif %}
     </div>
