@@ -300,7 +300,7 @@ class PortalActivateView(View):
         if link.is_active:
             return redirect("portal:login")
         password = request.POST.get("password", "").strip()
-        password2 = request.POST.get("password2", "").strip()
+        password2 = request.POST.get("password_confirm", "").strip()
         if len(password) < 8:
             return render(
                 request,
