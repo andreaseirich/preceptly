@@ -14,6 +14,7 @@ from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.core.feature_flags import is_premium_user
+from apps.lesson_plans.models import LessonPlan
 from apps.lessons.forms import LessonForm
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
@@ -80,6 +81,15 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         context["conflict_lessons"] = conflict_lessons
         context["has_conflicts"] = len(conflicts) > 0
         context["is_premium"] = is_premium_user(self.request.user)
+        # Lesson plan context
+        lesson_plans = LessonPlan.objects.filter(lesson=lesson).order_by("-created_at")
+        context["lesson_plans"] = lesson_plans
+        context["has_lesson_plan"] = lesson_plans.exists()
+        context["latest_lesson_plan"] = lesson_plans.first()
+        # Calendar params for back-link
+        context["year"] = self.request.GET.get("year", lesson.date.year)
+        context["month"] = self.request.GET.get("month", lesson.date.month)
+        context["day"] = self.request.GET.get("day", lesson.date.day)
         return context
 
 
