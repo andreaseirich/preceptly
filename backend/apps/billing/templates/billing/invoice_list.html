@@ -47,7 +47,7 @@
             <td>{{ invoice.get_status_display }}</td>
             <td>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>
-                <a href="{% url 'billing:invoice_detail' invoice.pk %}">{% trans "Details" %}</a>
+                <div class="table-actions"><a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a></div>
             </td>
         </tr>
         {% endfor %}

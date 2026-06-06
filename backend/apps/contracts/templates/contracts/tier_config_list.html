@@ -33,8 +33,7 @@
                 {% endfor %}
             </td>
             <td>
-                <a href="{% url 'contracts:tier_config_update' config.pk %}">{% trans "Edit" %}</a> |
-                <a href="{% url 'contracts:tier_config_delete' config.pk %}">{% trans "Delete" %}</a>
+                <div class="table-actions"><a href="{% url 'contracts:tier_config_update' config.pk %}" class="btn-sm btn-sm-secondary">{% trans "Edit" %}</a><a href="{% url 'contracts:tier_config_delete' config.pk %}" class="btn-sm btn-sm-danger">{% trans "Delete" %}</a></div>
             </td>
         </tr>
         {% endfor %}

@@ -33,8 +33,7 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'lessons:detail' lesson.pk %}">{% trans "Details" %}</a> |
-                <a href="{% url 'lessons:update' lesson.pk %}">{% trans "Edit" %}</a>
+                <div class="table-actions"><a href="{% url 'lessons:detail' lesson.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a><a href="{% url 'lessons:update' lesson.pk %}" class="btn-sm btn-sm-secondary">{% trans "Edit" %}</a></div>
             </td>
         </tr>
         {% empty %}
