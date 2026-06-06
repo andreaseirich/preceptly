@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -304,3 +306,76 @@ class PortalActivateView(View):
         link.save()
         request.session["portal_user_id"] = link.portal_user.pk
         return redirect("portal:home")
+
+
+class PortalPasswordResetRequestView(View):
+    template_name = "portal/password_reset.html"
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        username = request.POST.get("username", "").strip()
+        try:
+            user = User.objects.get(username=username)
+            portal_user = PortalUser.objects.get(user=user)
+            # Reuse invite_token mechanism for reset
+            if portal_user.role == "student":
+                link = StudentPortalLink.objects.get(portal_user=portal_user)
+            else:
+                # Parent: use any of their StudentPortalLinks
+                link = StudentPortalLink.objects.filter(portal_user=portal_user).first()
+            if link:
+                link.invite_token = uuid.uuid4().hex
+                link.save()
+                # Get recipient email: user.email if available, else student.email
+                recipient = user.email or link.student.email
+                if recipient:
+                    from django.conf import settings
+                    from django.core.mail import send_mail
+                    from django.template.loader import render_to_string
+
+                    site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+                    reset_url = f"{site_url}/portal/activate/{link.invite_token}/"
+                    context = {
+                        "student": link.student,
+                        "reset_url": reset_url,
+                        "site_url": site_url,
+                    }
+                    html = render_to_string("portal/email/password_reset.html", context)
+                    plain = render_to_string("portal/email/password_reset.txt", context)
+                    send_mail(
+                        subject="Reset your Preceptly Portal password",
+                        message=plain,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[recipient],
+                        html_message=html,
+                        fail_silently=True,
+                    )
+        except (User.DoesNotExist, PortalUser.DoesNotExist, StudentPortalLink.DoesNotExist):
+            pass  # Don't reveal if user exists
+        return render(request, self.template_name, {"sent": True})
+
+
+class StudentLessonDetailView(View):
+    template_name = "portal/student_lesson_detail.html"
+
+    def get(self, request, pk):
+        portal_user = get_portal_user(request)
+        if not portal_user or portal_user.role != "student":
+            return redirect("portal:login")
+        link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
+        if link.student.user != portal_user.tutor:
+            return HttpResponseForbidden()
+        from apps.lessons.models import Lesson
+
+        lesson = get_object_or_404(Lesson, pk=pk, contract__student=link.student)
+        return render(
+            request,
+            self.template_name,
+            {
+                "lesson": lesson,
+                "student": link.student,
+                "portal_user": portal_user,
+            },
+        )

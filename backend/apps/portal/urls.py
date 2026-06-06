@@ -18,4 +18,10 @@ urlpatterns = [
     ),
     path("messages/<int:student_pk>/", views.PortalMessageView.as_view(), name="messages"),
     path("activate/<str:token>/", views.PortalActivateView.as_view(), name="activate"),
+    path("password-reset/", views.PortalPasswordResetRequestView.as_view(), name="password_reset"),
+    path(
+        "student/lessons/<int:pk>/",
+        views.StudentLessonDetailView.as_view(),
+        name="student_lesson_detail",
+    ),
 ]

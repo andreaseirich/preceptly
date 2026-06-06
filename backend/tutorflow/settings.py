@@ -323,10 +323,10 @@ if email_backend_setting == "django.core.mail.backends.smtp.EmailBackend":
 else:
     EMAIL_BACKEND = email_backend_setting
 
-EMAIL_HOST = env("EMAIL_HOST", default="localhost")
-EMAIL_PORT = int(env("EMAIL_PORT", default="587"))
-EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
-EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", default=False)
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.mail.me.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 
 # Validate that TLS and SSL are not both enabled
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
@@ -342,7 +342,7 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
 
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@preceptly.app")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="andreaseirich2004@icloud.com")
 INVOICE_FROM_EMAIL = env("INVOICE_FROM_EMAIL", default="rechnung@andicode.de")
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 
