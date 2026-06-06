@@ -77,10 +77,17 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         lesson = context["lesson"]
         conflicts = LessonConflictService.check_conflicts(lesson, exclude_self=True)
         conflict_lessons = [c["object"] for c in conflicts if c["type"] in ("lesson", "session")]
+        conflict_blocked_times = [c["object"] for c in conflicts if c["type"] == "blocked_time"]
+        quota_conflicts = [c for c in conflicts if c["type"] == "quota"]
         context["conflicts"] = conflicts
         context["conflict_lessons"] = conflict_lessons
+        context["conflict_blocked_times"] = conflict_blocked_times
+        context["quota_conflicts"] = quota_conflicts
         context["has_conflicts"] = len(conflicts) > 0
         context["is_premium"] = is_premium_user(self.request.user)
+        # Contract and lesson meta
+        context["contract"] = lesson.contract
+        context["tutor_no_show"] = lesson.tutor_no_show
         # Lesson plan context
         lesson_plans = LessonPlan.objects.filter(lesson=lesson).order_by("-created_at")
         context["lesson_plans"] = lesson_plans

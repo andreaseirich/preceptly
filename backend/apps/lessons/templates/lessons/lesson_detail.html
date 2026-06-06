@@ -12,16 +12,22 @@
     <a href="{% url 'lessons:delete' lesson.pk %}" class="btn-sm btn-sm-danger">🗑️ {% trans "Delete" %}</a>
 </div>
 
+{% if tutor_no_show %}
+<div class="alert-warning" style="margin-bottom: 1em; border-left: 4px solid #f59e0b;">
+    ⚠️ <strong>{% trans "Tutor absence:" %}</strong> {% trans "This lesson was marked as a tutor absence." %}
+</div>
+{% endif %}
+
 <div class="box-section" style="margin-bottom: 20px;">
     <h2>{% trans "Details" %}</h2>
     <table style="width: 100%;">
         <tr>
-            <td style="padding: 8px; font-weight: bold;">{% trans "Date:" %}</td>
-            <td style="padding: 8px;">{{ lesson.date|date:"d.m.Y" }}</td>
+            <td style="padding: 8px; color: var(--text-secondary); width: 35%;">{% trans "Date:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">{{ lesson.date|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px; font-weight: bold;">{% trans "Time:" %}</td>
-            <td style="padding: 8px;">
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Time / Duration:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">
                 {% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}
                 {% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}
                 <br><small style="color: var(--text-secondary);">
@@ -34,19 +40,46 @@
             </td>
         </tr>
         <tr>
-            <td style="padding: 8px; font-weight: bold;">{% trans "Student:" %}</td>
-            <td style="padding: 8px;">
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Student:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">
                 <a href="{% url 'students:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a>
             </td>
         </tr>
         <tr>
-            <td style="padding: 8px; font-weight: bold;">{% trans "Status:" %}</td>
-            <td style="padding: 8px;">{{ lesson.get_status_display }}</td>
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Contract / Institute:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {% if contract.institute %}
+                    {{ contract.institute }}
+                {% else %}
+                    <span style="color: var(--text-secondary);">–</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Hourly rate:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {{ contract.hourly_rate|floatformat:2 }} €
+                {% if contract.unit_duration_minutes != 60 %}
+                <small style="color: var(--text-secondary);">({% blocktrans with minutes=contract.unit_duration_minutes %}per {{ minutes }} Min. unit{% endblocktrans %})</small>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Status:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">{{ lesson.get_status_display }}</td>
         </tr>
         {% if lesson.notes %}
         <tr>
-            <td style="padding: 8px; font-weight: bold;">{% trans "Notes:" %}</td>
-            <td style="padding: 8px;">{{ lesson.notes }}</td>
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Notes:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">{{ lesson.notes }}</td>
+        </tr>
+        {% endif %}
+        {% if lesson.recurring_session %}
+        <tr>
+            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Series:" %}</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                <small>🔁 {% trans "Part of a recurring series" %}</small>
+            </td>
         </tr>
         {% endif %}
     </table>
