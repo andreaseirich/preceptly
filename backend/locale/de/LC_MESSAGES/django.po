@@ -6149,3 +6149,15 @@ msgstr "Finanzen"
 
 msgid "Tax / EÜR"
 msgstr "Steuer / EÜR"
+
+msgid "Contract activated."
+msgstr "Vertrag aktiviert."
+
+msgid "Contract deactivated."
+msgstr "Vertrag deaktiviert."
+
+msgid "Deactivate"
+msgstr "Deaktivieren"
+
+msgid "Activate"
+msgstr "Aktivieren"

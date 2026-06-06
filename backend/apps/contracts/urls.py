@@ -9,6 +9,7 @@ from apps.contracts import views
 app_name = "contracts"
 
 urlpatterns = [
+    path("<int:pk>/toggle-active/", views.ContractToggleActiveView.as_view(), name="toggle_active"),
     path("", views.ContractListView.as_view(), name="list"),
     path("<int:pk>/", views.ContractDetailView.as_view(), name="detail"),
     path("create/", views.ContractCreateView.as_view(), name="create"),

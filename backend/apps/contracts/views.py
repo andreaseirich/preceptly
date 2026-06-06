@@ -7,7 +7,7 @@ from datetime import date
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -325,3 +325,19 @@ class TierConfigCreateTutorSpaceView(LoginRequiredMixin, View):
         return HttpResponseRedirect(
             reverse("contracts:tier_config_update", kwargs={"pk": config.pk})
         )
+
+
+class ContractToggleActiveView(LoginRequiredMixin, View):
+    """Toggle a contract's is_active flag without entering the edit form."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        contract.is_active = not contract.is_active
+        contract.save(update_fields=["is_active"])
+        if contract.is_active:
+            messages.success(request, _("Contract activated."))
+        else:
+            messages.success(request, _("Contract deactivated."))
+        return redirect(reverse("contracts:list"))
