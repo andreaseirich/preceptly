@@ -264,18 +264,39 @@ class PortalMessageView(View):
 
 
 class PortalActivateView(View):
-    """Token-based activation: user sets own password, link becomes active."""
+    """Token-based activation: user sets own password, link becomes active.
+
+    Works for both StudentPortalLink (student) and ParentStudentLink (parent).
+    """
 
     template_name = "portal/activate.html"
 
+    def _get_link(self, token):
+        """Return (link, portal_user) for the given token, from either link model."""
+        link = StudentPortalLink.objects.filter(invite_token=token).first()
+        if link:
+            return link, link.portal_user
+        link = ParentStudentLink.objects.filter(invite_token=token).first()
+        if link:
+            return link, link.parent
+        return None, None
+
     def get(self, request, token):
-        link = get_object_or_404(StudentPortalLink, invite_token=token)
+        link, portal_user = self._get_link(token)
+        if link is None:
+            from django.http import Http404
+
+            raise Http404
         if link.is_active:
             return redirect("portal:login")
         return render(request, self.template_name, {"token": token, "student": link.student})
 
     def post(self, request, token):
-        link = get_object_or_404(StudentPortalLink, invite_token=token)
+        link, portal_user = self._get_link(token)
+        if link is None:
+            from django.http import Http404
+
+            raise Http404
         if link.is_active:
             return redirect("portal:login")
         password = request.POST.get("password", "").strip()
@@ -300,11 +321,11 @@ class PortalActivateView(View):
                     "error": "Passwords do not match.",
                 },
             )
-        link.portal_user.user.set_password(password)
-        link.portal_user.user.save()
+        portal_user.user.set_password(password)
+        portal_user.user.save()
         link.is_active = True
         link.save()
-        request.session["portal_user_id"] = link.portal_user.pk
+        request.session["portal_user_id"] = portal_user.pk
         return redirect("portal:home")
 
 

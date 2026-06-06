@@ -158,8 +158,6 @@ class PortalInviteParentView(LoginRequiredMixin, View):
     def post(self, request, pk):
         import secrets as _secrets
 
-        from apps.portal.models import StudentPortalLink as SPL
-
         student = get_object_or_404(Student, pk=pk, user=request.user)
         parent_email = request.POST.get("parent_email", "").strip()
         if not parent_email:
@@ -169,11 +167,12 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         password_temp = _secrets.token_hex(8)
         user = User.objects.create_user(username=username, password=password_temp)
         portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
-        spl = SPL.objects.create(portal_user=portal_user, student=student, is_active=False)
-        ParentStudentLink.objects.get_or_create(parent=portal_user, student=student)
+        parent_link, _ = ParentStudentLink.objects.get_or_create(
+            parent=portal_user, student=student
+        )
         from apps.portal.email_service import send_portal_invite
 
-        send_portal_invite(student, spl, parent_email, role="parent")
+        send_portal_invite(student, parent_link, parent_email, role="parent")
         return redirect("students:detail", pk=pk)
 
 

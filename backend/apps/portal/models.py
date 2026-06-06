@@ -71,11 +71,18 @@ class ParentStudentLink(models.Model):
         on_delete=models.CASCADE,
         related_name="parent_links",
     )
+    invite_token = models.CharField(max_length=64, unique=True, blank=True)
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         unique_together = [("parent", "student")]
         verbose_name = _("Parent-Student Link")
         verbose_name_plural = _("Parent-Student Links")
+
+    def save(self, *args, **kwargs):
+        if not self.invite_token:
+            self.invite_token = uuid.uuid4().hex
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.parent} → {self.student.full_name}"

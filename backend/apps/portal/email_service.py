@@ -5,12 +5,16 @@ from django.utils.translation import gettext as _
 
 
 def send_portal_invite(student, portal_link, recipient_email, role="student"):
-    """Send activation email to student or parent."""
+    """Send activation email to student or parent.
+
+    portal_link may be a StudentPortalLink (student) or a ParentStudentLink (parent).
+    Both have invite_token. The tutor is accessed via portal_user (student) or parent (parent).
+    """
     site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
     activate_url = f"{site_url}/portal/activate/{portal_link.invite_token}/"
-    tutor_name = (
-        portal_link.portal_user.tutor.get_full_name() or portal_link.portal_user.tutor.username
-    )
+    # StudentPortalLink exposes portal_user; ParentStudentLink exposes parent (a PortalUser)
+    portal_user = getattr(portal_link, "portal_user", None) or portal_link.parent
+    tutor_name = portal_user.tutor.get_full_name() or portal_user.tutor.username
 
     context = {
         "student": student,

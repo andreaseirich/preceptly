@@ -13,7 +13,7 @@ from apps.students.models import Student
 class TutorMessageView(LoginRequiredMixin, TemplateView):
     """Nachrichten-Thread zwischen Tutor und Schüler (Portal)."""
 
-    template_name = "core/portal_messages.html"
+    template_name = "core/tutor_messages.html"
 
     def get_student(self):
         return get_object_or_404(Student, pk=self.kwargs["pk"], user=self.request.user)
