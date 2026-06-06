@@ -147,7 +147,12 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
 
             if student.email:
                 spl = StudentPortalLink.objects.get(portal_user=portal_user)
-                send_portal_invite(student, spl, student.email, role="student")
+                try:
+                    send_portal_invite(student, spl, student.email, role="student")
+                except Exception as exc:
+                    import logging
+
+                    logging.getLogger(__name__).error("Portal invite email failed: %s", exc)
 
         return redirect("students:detail", pk=pk)
 
@@ -172,7 +177,12 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         )
         from apps.portal.email_service import send_portal_invite
 
-        send_portal_invite(student, parent_link, parent_email, role="parent")
+        try:
+            send_portal_invite(student, parent_link, parent_email, role="parent")
+        except Exception as exc:
+            import logging
+
+            logging.getLogger(__name__).error("Parent invite email failed: %s", exc)
         return redirect("students:detail", pk=pk)
 
 
