@@ -142,17 +142,41 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                 student=student,
                 invite_token=uuid.uuid4().hex,
             )
-            # Send invitation email if student has email
             from apps.portal.email_service import send_portal_invite
 
+            spl = StudentPortalLink.objects.get(portal_user=portal_user)
+            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
             if student.email:
-                spl = StudentPortalLink.objects.get(portal_user=portal_user)
                 try:
                     send_portal_invite(student, spl, student.email, role="student")
+                    messages.success(
+                        request,
+                        f"Portal-Einladung gesendet an {student.email}. "
+                        f"Aktivierungslink: {activation_url}",
+                    )
                 except Exception as exc:
                     import logging
 
                     logging.getLogger(__name__).error("Portal invite email failed: %s", exc)
+                    messages.warning(
+                        request,
+                        f"Portal-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. "
+                        f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                    )
+            else:
+                messages.info(
+                    request,
+                    f"Portal-Account erstellt. Schüler hat keine E-Mail-Adresse. "
+                    f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                )
+        else:
+            spl = StudentPortalLink.objects.get(student=student)
+            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
+            messages.info(
+                request, f"Portal-Zugang bereits vorhanden. Aktivierungslink: {activation_url}"
+            )
 
         return redirect("students:detail", pk=pk)
 
@@ -177,12 +201,23 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         )
         from apps.portal.email_service import send_portal_invite
 
+        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+        activation_url = f"{site_url}/portal/activate/{parent_link.invite_token}/"
         try:
             send_portal_invite(student, parent_link, parent_email, role="parent")
+            messages.success(
+                request,
+                f"Eltern-Einladung gesendet an {parent_email}. Aktivierungslink: {activation_url}",
+            )
         except Exception as exc:
             import logging
 
             logging.getLogger(__name__).error("Parent invite email failed: %s", exc)
+            messages.warning(
+                request,
+                f"Eltern-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. "
+                f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+            )
         return redirect("students:detail", pk=pk)
 
 
