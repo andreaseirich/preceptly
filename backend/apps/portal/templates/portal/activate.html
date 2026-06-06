@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     {% load i18n %}
-    <title>Activate Portal Account – Preceptly Portal</title>
+    <title>Konto aktivieren – Preceptly Portal</title>
     <style>
         :root {
             --bg-primary: #f5f5f5;
@@ -113,7 +113,7 @@
 <body>
 <div class="login-card">
     <div class="login-brand">Preceptly Portal</div>
-    <div class="login-subtitle">Welcome, {{ student.full_name }}! Set your password to activate your account.</div>
+    <div class="login-subtitle">Willkommen, {{ student.full_name }}! Lege dein Passwort fest, um dein Konto zu aktivieren.</div>
 
     {% if error %}
     <div class="alert-warning">{{ error }}</div>
@@ -121,13 +121,13 @@
 
     <form method="post">
         {% csrf_token %}
-        <label for="id_password">Password</label>
+        <label for="id_password">Passwort</label>
         <input type="password" id="id_password" name="password" minlength="8" autocomplete="new-password" autofocus required>
 
-        <label for="id_password_confirm">Confirm Password</label>
+        <label for="id_password_confirm">Passwort bestätigen</label>
         <input type="password" id="id_password_confirm" name="password_confirm" minlength="8" autocomplete="new-password" required>
 
-        <button type="submit" class="btn-login">Activate Account</button>
+        <button type="submit" class="btn-login">Konto aktivieren</button>
     </form>
 </div>
 </body>

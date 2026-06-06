@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     {% load i18n %}
-    <title>{% trans "Login" %} – Preceptly Portal</title>
+    <title>Anmelden – Preceptly Portal</title>
     <style>
         :root {
             --bg-primary: #f5f5f5;
@@ -113,7 +113,7 @@
 <body>
 <div class="login-card">
     <div class="login-brand">Preceptly Portal</div>
-    <div class="login-subtitle">{% trans "Your learning hub" %}</div>
+    <div class="login-subtitle">Deine Lernplattform</div>
 
     {% if error %}
     <div class="alert-warning">{{ error }}</div>
@@ -121,18 +121,18 @@
 
     <form method="post">
         {% csrf_token %}
-        <label for="id_username">{% trans "Username" %}</label>
+        <label for="id_username">Benutzername</label>
         <input type="text" id="id_username" name="username" autocomplete="username" autofocus required>
 
-        <label for="id_password">{% trans "Password" %}</label>
+        <label for="id_password">Passwort</label>
         <input type="password" id="id_password" name="password" autocomplete="current-password" required>
 
-        <button type="submit" class="btn-login">{% trans "Login" %}</button>
+        <button type="submit" class="btn-login">Anmelden</button>
     </form>
-    <p style="text-align:center; margin-top: 1em; font-size: 0.9em;"><a href="/portal/password-reset/" style="color: var(--text-secondary, #666);">Forgot password?</a></p>
+    <p style="text-align:center; margin-top: 1em; font-size: 0.9em;"><a href="/portal/password-reset/" style="color: var(--text-secondary, #666);">Passwort vergessen?</a></p>
 </div>
 <p style="margin-top: 1.5em; font-size: 0.9em; color: var(--text-secondary, #666); text-align: center;">
-  First time? Use the activation link your tutor sent you.
+  Erstes Mal? Nutze den Aktivierungslink, den dein Nachhilfelehrer dir geschickt hat.
 </p>
 </div>
 </body>

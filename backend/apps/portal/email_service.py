@@ -34,5 +34,5 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[recipient_email],
         html_message=html_message,
-        fail_silently=True,
+        fail_silently=False,
     )

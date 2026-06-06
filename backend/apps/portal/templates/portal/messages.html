@@ -124,7 +124,7 @@
     <form method="post">
         {% csrf_token %}
         <label for="id_body">{% trans "New message" %}</label>
-        <textarea id="id_body" name="body" placeholder="{% trans Write your message… %}" required></textarea>
+        <textarea id="id_body" name="body" placeholder="Nachricht eingeben …" required></textarea>
         <button type="submit" class="btn-send">{% trans "Send" %}</button>
     </form>
 </div>
