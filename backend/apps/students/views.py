@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from apps.portal.models import ProgressNote
 from apps.students.booking_code_service import set_booking_code
 from apps.students.forms import StudentForm
 from apps.students.models import Student
@@ -135,6 +136,15 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                 invite_token=uuid.uuid4().hex,
             )
 
+        return redirect("students:detail", pk=pk)
+
+
+class ProgressNoteCreateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+        text = request.POST.get("text", "").strip()
+        if text:
+            ProgressNote.objects.create(student=student, tutor=request.user, text=text)
         return redirect("students:detail", pk=pk)
 
 
