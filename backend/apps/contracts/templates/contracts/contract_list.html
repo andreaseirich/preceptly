@@ -74,9 +74,9 @@
                 <form method="post" action="{% url 'contracts:toggle_active' contract.pk %}" style="display:inline;">
                     {% csrf_token %}
                     {% if contract.is_active %}
-                    <button type="submit" class="btn btn-secondary" style="padding:2px 8px;font-size:0.85em;">{% trans "Deactivate" %}</button>
+                    <button type="submit" style="background:none;border:none;padding:0;color:#6c757d;cursor:pointer;font-size:inherit;text-decoration:underline;">{% trans "Deactivate" %}</button>
                     {% else %}
-                    <button type="submit" class="btn btn-success" style="padding:2px 8px;font-size:0.85em;">{% trans "Activate" %}</button>
+                    <button type="submit" style="background:none;border:none;padding:0;color:#28a745;cursor:pointer;font-size:inherit;text-decoration:underline;">{% trans "Activate" %}</button>
                     {% endif %}
                 </form> |
                 <a href="{% url 'contracts:delete' contract.pk %}">{% trans "Delete" %}</a>
