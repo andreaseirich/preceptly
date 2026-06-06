@@ -331,6 +331,21 @@
             background: var(--bg-nav);
             color: var(--text-nav);
         }
+
+        /* Small outline buttons for table actions */
+        .btn-sm { display: inline-block; padding: 3px 9px; border-radius: 3px; border: 1px solid; font-size: 0.82em; cursor: pointer; text-decoration: none !important; background: transparent; transition: background 0.15s, color 0.15s; white-space: nowrap; line-height: 1.5; }
+        .btn-sm:active { transform: scale(0.97); }
+        .btn-sm-primary   { color: #007bff; border-color: #007bff; }
+        .btn-sm-primary:hover   { background: #007bff; color: #fff; }
+        .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
+        .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
+        .btn-sm-success   { color: #28a745; border-color: #28a745; }
+        .btn-sm-success:hover   { background: #28a745; color: #fff; }
+        .btn-sm-warning   { color: #d97706; border-color: #d97706; }
+        .btn-sm-warning:hover   { background: #d97706; color: #fff; }
+        .btn-sm-danger    { color: #dc3545; border-color: #dc3545; }
+        .btn-sm-danger:hover    { background: #dc3545; color: #fff; }
+        .table-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
     </style>
 </head>
 <body>

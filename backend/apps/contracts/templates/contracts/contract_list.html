@@ -69,17 +69,17 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'contracts:detail' contract.pk %}">{% trans "Details" %}</a> |
-                <a href="{% url 'contracts:update' contract.pk %}">{% trans "Edit" %}</a> |
+                <div class="table-actions"><a href="{% url 'contracts:detail' contract.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a>
+                <a href="{% url 'contracts:update' contract.pk %}" class="btn-sm btn-sm-secondary">{% trans "Edit" %}</a>
                 <form method="post" action="{% url 'contracts:toggle_active' contract.pk %}" style="display:inline;">
                     {% csrf_token %}
                     {% if contract.is_active %}
-                    <button type="submit" style="background:none;border:none;padding:0;color:#6c757d;cursor:pointer;font-size:inherit;text-decoration:underline;">{% trans "Deactivate" %}</button>
+                    <button type="submit" class="btn-sm btn-sm-warning">{% trans "Deactivate" %}</button>
                     {% else %}
-                    <button type="submit" style="background:none;border:none;padding:0;color:#28a745;cursor:pointer;font-size:inherit;text-decoration:underline;">{% trans "Activate" %}</button>
+                    <button type="submit" class="btn-sm btn-sm-success">{% trans "Activate" %}</button>
                     {% endif %}
                 </form> |
-                <a href="{% url 'contracts:delete' contract.pk %}">{% trans "Delete" %}</a>
+                <a href="{% url 'contracts:delete' contract.pk %}" class="btn-sm btn-sm-danger">{% trans "Delete" %}</a></div>
             </td>
         </tr>
         {% endwith %}

@@ -30,9 +30,9 @@
             <td>{{ recurring.start_date }}</td>
             <td>{% if recurring.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
             <td>
-                <a href="{% url 'lessons:recurring_detail' recurring.pk %}">{% trans "Details" %}</a> |
+                <div class="table-actions"><a href="{% url 'lessons:recurring_detail' recurring.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a>
                 <a href="{% url 'lessons:recurring_update' recurring.pk %}">{% trans "Edit" %}</a>
-            </td>
+            </div></td>
         </tr>
         {% empty %}
         <tr><td colspan="6">{% trans "No recurring lessons available." %}</td></tr>

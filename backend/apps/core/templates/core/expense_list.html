@@ -45,9 +45,9 @@
                 {% endif %}
             </td>
             <td style="white-space:nowrap;">
-                <a href="{% url 'core:expense_update' expense.pk %}">{% trans "Edit" %}</a>
+                <div class="table-actions"><a href="{% url 'core:expense_update' expense.pk %}" class="btn-sm btn-sm-secondary">{% trans "Edit" %}</a>
                 &nbsp;
-                <a href="{% url 'core:expense_delete' expense.pk %}" style="color:#c0392b;">{% trans "Delete" %}</a>
+                <a href="{% url 'core:expense_delete' expense.pk %}" class="btn-sm btn-sm-danger">{% trans "Delete" %}</a></div>
             </td>
         </tr>
         {% endfor %}
