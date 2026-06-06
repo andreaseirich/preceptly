@@ -14,7 +14,16 @@ class ContractForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
-            self.fields["student"].queryset = self.fields["student"].queryset.filter(user=user)
+            from apps.contracts.models import Contract
+
+            students_with_active_contract = Contract.objects.filter(
+                student__user=user, is_active=True
+            ).values_list("student_id", flat=True)
+            self.fields["student"].queryset = (
+                self.fields["student"]
+                .queryset.filter(user=user)
+                .exclude(pk__in=students_with_active_contract)
+            )
 
     has_monthly_planning_limit = forms.BooleanField(
         required=False,

@@ -113,7 +113,31 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
         return super().get_queryset().filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, _("Student successfully deleted."))
+        from apps.portal.models import ParentStudentLink, StudentPortalLink
+
+        student = self.get_object()
+
+        # Schüler-PortalUser + Django-User löschen
+        spl = StudentPortalLink.objects.filter(student=student).first()
+        if spl:
+            django_user = spl.portal_user.user
+            spl.portal_user.delete()  # cascades to StudentPortalLink
+            django_user.delete()
+
+        # Eltern-PortalUser + Django-User löschen, falls keine weiteren Schüler verknüpft
+        for plink in ParentStudentLink.objects.filter(student=student).select_related(
+            "parent__user"
+        ):
+            parent_portal = plink.parent
+            other_links = ParentStudentLink.objects.filter(parent=parent_portal).exclude(
+                student=student
+            )
+            if not other_links.exists():
+                django_user = parent_portal.user
+                parent_portal.delete()  # cascades to ParentStudentLink
+                django_user.delete()
+
+        messages.success(self.request, "Schüler erfolgreich gelöscht.")
         return super().delete(request, *args, **kwargs)
 
 
