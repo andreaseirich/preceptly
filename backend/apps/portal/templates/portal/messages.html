@@ -106,10 +106,10 @@
 <div class="chat-wrapper" id="chat-wrapper">
 {% if messages %}
     {% for msg in messages %}
-    <div class="chat-msg {% if msg.sender_type == tutor %}tutor{% else %}portal-user{% endif %}">
-        <div class="chat-bubble">{{ msg.body }}</div>
+    <div class="chat-msg {% if msg.sender_is_tutor %}tutor{% else %}portal-user{% endif %}">
+        <div class="chat-bubble">{{ msg.text }}</div>
         <div class="chat-meta">
-            {{ msg.sender_name }} &middot; {{ msg.created_at|time:"H:i" }}, {{ msg.created_at|date:"N j" }}
+            {% if msg.sender_is_tutor %}Nachhilfelehrer{% else %}{{ msg.sender_portal_user.user.username }}{% endif %} &middot; {{ msg.created_at|date:"d.m.Y" }}, {{ msg.created_at|time:"H:i" }} Uhr
         </div>
     </div>
     {% endfor %}
@@ -123,8 +123,8 @@
 <div class="compose-box">
     <form method="post">
         {% csrf_token %}
-        <label for="id_body">Neue Nachricht</label>
-        <textarea id="id_body" name="body" placeholder="Nachricht eingeben …" required></textarea>
+        <label for="id_text">Neue Nachricht</label>
+        <textarea id="id_text" name="text" placeholder="Nachricht eingeben …" required></textarea>
         <button type="submit" class="btn-send">Senden</button>
     </form>
 </div>
