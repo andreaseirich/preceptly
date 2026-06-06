@@ -7,6 +7,12 @@
   {% if portal_link %}
     <p>{% trans "Student portal active." %}
        <small style="color: var(--text-secondary);">{{ portal_link.portal_user.user.username }}</small></p>
+    {% if student_activation_url %}
+    <div style="margin-top: 0.5em;">
+      <small style="color: var(--text-secondary);">{% trans "Activation link:" %}</small><br>
+      <code style="font-size: 0.8em; word-break: break-all; color: var(--text-primary);">{{ student_activation_url }}</code>
+    </div>
+    {% endif %}
   {% else %}
     <form method="post" action="{% url 'students:portal_invite_create' student.pk %}">
       {% csrf_token %}

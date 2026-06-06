@@ -1,0 +1,14 @@
+Preceptly — Portal Invitation
+==============================
+
+{% if role == "parent" %}You've been invited to follow {{ student.full_name }}'s progress.
+
+{{ tutor_name }} has created a parent portal account for you.{% else %}Your student portal account is ready.
+
+{{ tutor_name }} has created an account for you on Preceptly.{% endif %}
+
+Activate your account here:
+{{ activate_url }}
+
+---
+Preceptly — {{ site_url }}

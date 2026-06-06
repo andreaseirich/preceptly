@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Preceptly Portal Invitation</title></head>
+<body style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #007bff; font-size: 24px;">Preceptly</h1>
+  </div>
+  <h2>{% if role == "parent" %}You've been invited to follow {{ student.full_name }}'s progress{% else %}Your portal account is ready{% endif %}</h2>
+  <p>
+    {% if role == "parent" %}
+      {{ tutor_name }} has created a parent portal account for you to follow {{ student.full_name }}'s tutoring sessions, progress, and homework.
+    {% else %}
+      {{ tutor_name }} has created a student portal account for you on Preceptly. You can view your upcoming lessons, homework, and communicate with your tutor.
+    {% endif %}
+  </p>
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="{{ activate_url }}"
+       style="background: #007bff; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block;">
+      Activate Your Account
+    </a>
+  </div>
+  <p style="color: #666; font-size: 14px;">Or copy this link into your browser:<br>
+    <a href="{{ activate_url }}" style="color: #007bff;">{{ activate_url }}</a>
+  </p>
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+  <p style="color: #999; font-size: 12px; text-align: center;">
+    Preceptly — Tutoring Management<br>
+    <a href="{{ site_url }}" style="color: #999;">{{ site_url }}</a>
+  </p>
+</body>
+</html>
