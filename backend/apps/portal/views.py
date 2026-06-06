@@ -1,8 +1,10 @@
-from django.db import models
+import datetime as _dt
 import uuid
 
+from django.contrib import messages
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden
+from django.db import models
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -407,10 +409,6 @@ class StudentLessonDetailView(View):
 # Portal Booking / Scheduling / Documents
 # ════════════════════════════════════════════════════════════════════════
 
-import datetime as _dt
-from django.http import JsonResponse
-from django.core.files.storage import default_storage
-
 
 def _get_portal_student(portal_user, student_pk):
     """Gibt den Schüler zurück, falls portal_user Zugriff hat, sonst None."""
@@ -430,8 +428,6 @@ def _get_portal_student(portal_user, student_pk):
 
 def _get_active_contract(student):
     """Gibt den neuesten aktiven Vertrag des Schülers zurück."""
-    from apps.contracts.models import Contract
-
     today = _dt.date.today()
     return (
         student.contracts.filter(is_active=True)
@@ -799,7 +795,7 @@ class PortalRecurringCreateView(View):
                 "student": student,
                 "contract": contract,
                 "portal_user": portal_user,
-                "weekday_fields": list(zip(self.WEEKDAY_FIELDS, self.WEEKDAY_LABELS)),
+                "weekday_fields": list(zip(self.WEEKDAY_FIELDS, self.WEEKDAY_LABELS, strict=True)),
                 "today": _dt.date.today().isoformat(),
             },
         )
@@ -864,8 +860,8 @@ class PortalRecurringCancelView(View):
     """Serientermin deaktivieren und alle zukünftigen Einzeltermine absagen."""
 
     def post(self, request, recurring_pk):
-        from apps.lessons.recurring_models import RecurringSession
         from apps.lessons.models import Session as _Session
+        from apps.lessons.recurring_models import RecurringSession
 
         portal_user = get_portal_user(request)
         if not portal_user:
@@ -944,8 +940,9 @@ class PortalDocumentDownloadView(View):
     """Datei herunterladen."""
 
     def get(self, request, student_pk, doc_pk):
-        from apps.students.models import StudentDocument
         from django.http import FileResponse
+
+        from apps.students.models import StudentDocument
 
         portal_user = get_portal_user(request)
         if not portal_user:

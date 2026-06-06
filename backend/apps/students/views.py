@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -345,7 +345,7 @@ class StudentDocumentListView(LoginRequiredMixin, View):
             name=name,
             uploaded_by_tutor=True,
         )
-        messages.success(request, f"Datei hochgeladen.")
+        messages.success(request, "Datei hochgeladen.")
         return redirect("students:documents", pk=pk)
 
 
