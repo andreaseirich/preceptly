@@ -34,4 +34,9 @@ urlpatterns = [
         views.PortalInviteParentView.as_view(),
         name="portal_invite_parent",
     ),
+    path(
+        "<int:pk>/portal-invite-resend/",
+        views.PortalInviteResendView.as_view(),
+        name="portal_invite_resend",
+    ),
 ]

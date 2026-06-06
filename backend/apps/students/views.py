@@ -221,6 +221,43 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         return redirect("students:detail", pk=pk)
 
 
+class PortalInviteResendView(LoginRequiredMixin, View):
+    """Sendet die Portal-Einladungs-E-Mail erneut."""
+
+    def post(self, request, pk):
+        from apps.portal.email_service import send_portal_invite
+        from apps.portal.models import StudentPortalLink
+
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+        spl = get_object_or_404(StudentPortalLink, student=student)
+        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+        activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
+        if student.email:
+            try:
+                send_portal_invite(student, spl, student.email, role="student")
+                messages.success(
+                    request,
+                    f"Einladung erneut gesendet an {student.email}. "
+                    f"Aktivierungslink: {activation_url}",
+                )
+            except Exception as exc:
+                import logging
+
+                logging.getLogger(__name__).error("Portal resend email failed: %s", exc)
+                messages.warning(
+                    request,
+                    f"E-Mail-Versand fehlgeschlagen: {exc}. "
+                    f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                )
+        else:
+            messages.info(
+                request,
+                f"Kein E-Mail-Versand möglich: Schüler hat keine E-Mail-Adresse. "
+                f"Aktivierungslink: {activation_url}",
+            )
+        return redirect("students:detail", pk=pk)
+
+
 class ProgressNoteCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
         student = get_object_or_404(Student, pk=pk, user=request.user)
