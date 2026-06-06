@@ -62,7 +62,7 @@
                 {% if not has_tutorspace_config %}
                 <a href="{% url 'contracts:tier_config_create_tutorspace' %}" class="btn">{% trans "Use as custom config" %}</a>
                 {% else %}
-                <span style="color:#6c757d;">{% trans "Custom config active" %}</span>
+                <span style="color:var(--text-secondary);">{% trans "Custom config active" %}</span>
                 {% endif %}
             </td>
         </tr>

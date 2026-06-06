@@ -6,7 +6,7 @@
 {% block content %}
 <h1>{% trans "Delete expense" %}</h1>
 
-<div style="padding:20px; background:#f8d7da; border:1px solid #f5c6cb; border-radius:8px; margin-bottom:24px; max-width:520px;">
+<div class="alert-danger" style="max-width:520px;">
     <p>{% blocktrans with desc=object.description date=object.date|date:"d.m.Y" amount=object.amount %}
         Are you sure you want to delete the expense <strong>{{ desc }}</strong> ({{ date }}, {{ amount }} €)?
         This action cannot be undone.

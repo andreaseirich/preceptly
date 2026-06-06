@@ -75,7 +75,7 @@
                 <strong>{% trans "Repeat this blocked time" %}</strong>
             </label>
             {% if form.is_recurring.help_text %}
-            <small style="display: block; margin-left: 28px; color: #666;">{{ form.is_recurring.help_text }}</small>
+            <small style="display: block; margin-left: 28px; color: var(--text-secondary);">{{ form.is_recurring.help_text }}</small>
             {% endif %}
         </p>
         
@@ -88,7 +88,7 @@
                 <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans "End date (optional):" %}</label>
                 {{ form.recurrence_end_date }}
                 {% if form.recurrence_end_date.help_text %}
-                <small style="display: block; color: #666;">{{ form.recurrence_end_date.help_text }}</small>
+                <small style="display: block; color: var(--text-secondary);">{{ form.recurrence_end_date.help_text }}</small>
                 {% endif %}
             </p>
             <p>
@@ -102,7 +102,7 @@
                     {% endfor %}
                 </div>
                 {% if form.recurrence_weekdays.help_text %}
-                <small style="display: block; color: #666;">{{ form.recurrence_weekdays.help_text }}</small>
+                <small style="display: block; color: var(--text-secondary);">{{ form.recurrence_weekdays.help_text }}</small>
                 {% endif %}
             </p>
         </div>
@@ -160,7 +160,7 @@
                         {% endwith %}
                     {% endif %}
                 </div>
-                <small style="display: block; color: #666; margin-top: 10px;">{% trans "Select the weekdays for this series. Blocked times on deselected weekdays will be deleted, and new blocked times will be created for newly selected weekdays." %}</small>
+                <small style="display: block; color: var(--text-secondary); margin-top: 10px;">{% trans "Select the weekdays for this series. Blocked times on deselected weekdays will be deleted, and new blocked times will be created for newly selected weekdays." %}</small>
             </p>
         </div>
     </div>

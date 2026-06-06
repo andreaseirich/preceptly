@@ -11,7 +11,7 @@
     {% csrf_token %}
     {% if matching_recurring %}
     <div class="alert-warning" style="margin: 20px 0;">
-        <h3 style="margin-top: 0; color: #856404;">⚠️ {% trans "This lesson is part of a series" %}</h3>
+        <h3 style="margin-top: 0; color: var(--text-primary);">⚠️ {% trans "This lesson is part of a series" %}</h3>
         <p>
             <strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }}
             ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})
@@ -29,11 +29,11 @@
                 <strong>{% trans "What do you want to delete?" %}</strong>
             </label>
             <div style="margin-top: 10px;">
-                <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: var(--bg-secondary); border-radius: 4px; border: 2px solid #dc3545;">
                     <input type="radio" name="delete_series" value="false" checked style="margin-right: 8px;">
                     <span>{% trans "Only this lesson" %} ({{ object.date|date:"d.m.Y" }} {{ object.start_time|time:"H:i" }})</span>
                 </label>
-                <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: var(--bg-secondary); border-radius: 4px; border: 2px solid #dc3545;">
                     <input type="radio" name="delete_series" value="true" style="margin-right: 8px;">
                     <span>{% trans "Entire series" %} ({% blocktrans count count=series_lessons_count %}{{ count }} lesson{% plural %}{{ count }} lessons{% endblocktrans %})</span>
                 </label>

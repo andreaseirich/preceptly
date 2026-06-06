@@ -20,7 +20,7 @@
         </label>
         {{ field }}
         {% if field.errors %}
-        <ul style="color:#c0392b; margin:4px 0 0; padding-left:16px;">
+        <ul style="color:#dc3545; margin:4px 0 0; padding-left:16px;">
             {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
         </ul>
         {% endif %}

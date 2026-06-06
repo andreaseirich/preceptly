@@ -145,7 +145,7 @@
 {% endif %}
 
 {% else %}
-<div style="padding: 30px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; margin: 20px 0;">
+<div class="alert-warning" style="padding: 30px; margin: 20px 0;">
     <h2 style="margin-top: 0;">{% trans "Reports – Premium feature" %}</h2>
     <p>{% trans "Get detailed monthly reports: taught hours, recognized revenue, invoice count, revenue by month, top students, and breakdown by institute." %}</p>
     <p><strong>{% trans "This month teaser" %}:</strong> {{ lesson_count }} {% trans "lessons" %}, {{ taught_hours|floatformat:1 }} {% trans "hours taught" %}, {{ paid_amount|euro }} {% trans "recognized revenue" %}, {{ invoice_count }} {% trans "invoices" %}.</p>

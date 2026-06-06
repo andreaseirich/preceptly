@@ -31,7 +31,7 @@
     <button type="button" class="btn btn-secondary" id="regenerate-code-btn" onclick="regenerateBookingCode()">{% trans "Regenerate" %}</button>
 </div>
 <div id="regenerate-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 8px; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+    <div style="background: var(--bg-secondary); padding: 25px; border-radius: 8px; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
         <h3 style="margin-top: 0;">{% trans "New Booking Code" %}</h3>
         <p>{% trans "Copy this code and share it with the parents. It will not be shown again." %}</p>
         <div style="display: flex; gap: 10px; align-items: center; margin: 15px 0;">
@@ -95,7 +95,7 @@ function closeRegenerateModal() {
             <td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} Min.{% endblocktrans %}</td>
             <td>{{ contract.start_date }}</td>
             <td>{{ contract.end_date|default:_("unlimited") }}</td>
-            <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
+            <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -7,23 +7,43 @@
     <title>{% trans "Book Lesson" %} - {{ student.full_name }}</title>
     <style>
         * { box-sizing: border-box; }
+        :root {
+            --bg-page: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #ddd;
+            --h2-border: #ecf0f1;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #1a1a1a;
+                --bg-card: #2d2d2d;
+                --bg-secondary: #3a3a3a;
+                --text-primary: #e0e0e0;
+                --text-secondary: #b0b0b0;
+                --border-color: #555;
+                --h2-border: #444;
+            }
+        }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
             margin: 0; 
             padding: 20px; 
-            background: #f5f5f5; 
-            color: #2c3e50; 
+            background: var(--bg-page); 
+            color: var(--text-primary); 
         }
         .container { 
             max-width: 1400px; 
             margin: 0 auto; 
-            background: white; 
+            background: var(--bg-card); 
             padding: 30px; 
             border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
         }
-        h1 { color: #2c3e50; margin-top: 0; }
-        h2 { color: #34495e; margin-top: 30px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        h1 { color: var(--text-primary); margin-top: 0; }
+        h2 { color: var(--text-primary); margin-top: 30px; border-bottom: 2px solid var(--h2-border); padding-bottom: 10px; }
         .btn { 
             display: inline-block; 
             padding: 10px 20px; 
@@ -49,10 +69,10 @@
             border-radius: 4px; 
             border-left: 4px solid; 
         }
-        .message.success { background: #d4edda; color: #155724; border-color: #28a745; }
-        .message.error { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+        .message.success { background: rgba(40, 167, 69, 0.15); color: var(--text-primary); border-color: #28a745; }
+        .message.error { background: rgba(220, 53, 69, 0.15); color: var(--text-primary); border-color: #dc3545; }
         .working-hours-config { 
-            background: #f8f9fa; 
+            background: var(--bg-secondary); 
             padding: 20px; 
             border-radius: 4px; 
             margin-bottom: 30px; 
@@ -60,11 +80,11 @@
         .day-config { 
             margin-bottom: 15px; 
             padding: 15px; 
-            background: white; 
+            background: var(--bg-card); 
             border-radius: 4px; 
-            border: 1px solid #ddd; 
+            border: 1px solid var(--border-color); 
         }
-        .day-config h3 { margin-top: 0; color: #34495e; }
+        .day-config h3 { margin-top: 0; color: var(--text-primary); }
         .time-range { 
             display: flex; 
             align-items: center; 
@@ -73,7 +93,7 @@
         }
         .time-range input[type="time"] { 
             padding: 8px; 
-            border: 1px solid #ddd; 
+            border: 1px solid var(--border-color); 
             border-radius: 4px; 
         }
         .time-range button { 
@@ -98,16 +118,16 @@
         }
         .day-column { 
             margin-bottom: 20px; 
-            border: 1px solid #ddd; 
+            border: 1px solid var(--border-color); 
             border-radius: 4px; 
             padding: 15px; 
-            background: white; 
+            background: var(--bg-card); 
         }
         .day-header { 
             font-weight: bold; 
             font-size: 1.1em; 
             margin-bottom: 15px; 
-            color: #2c3e50; 
+            color: var(--text-primary); 
         }
         .time-slots { 
             display: grid; 
@@ -121,41 +141,41 @@
             text-align: center; 
             cursor: pointer; 
             transition: all 0.2s; 
-            background: white; 
+            background: var(--bg-card); 
         }
         .time-slot:hover { 
-            background: #e3f2fd; 
+            background: rgba(33, 150, 243, 0.15); 
             transform: scale(1.05); 
         }
         .time-slot.occupied { 
-            background: #f8d7da; 
+            background: rgba(220, 53, 69, 0.15); 
             border-color: #dc3545; 
             cursor: not-allowed; 
             opacity: 0.6; 
         }
         .time-slot.occupied:hover { 
-            background: #f8d7da; 
+            background: rgba(220, 53, 69, 0.15); 
             transform: none; 
         }
         .time-slot.own-lesson { 
-            background: #d4edda; 
+            background: rgba(40, 167, 69, 0.15); 
             border-color: #28a745; 
         }
         .time-slot.booked { 
-            background: #d4edda; 
+            background: rgba(40, 167, 69, 0.15); 
             border-color: #28a745; 
         }
         .time-slot.selected { 
-            background: #fff3cd; 
+            background: rgba(255, 193, 7, 0.2); 
             border-color: #ffc107; 
             border-width: 3px; 
         }
         .time-slot.selected:hover { 
-            background: #ffe69c; 
+            background: rgba(255, 193, 7, 0.35); 
         }
         .time-slot-label { 
             font-weight: bold; 
-            color: #2c3e50; 
+            color: var(--text-primary); 
         }
         .occupied-label { 
             color: #dc3545; 
@@ -164,7 +184,7 @@
         .loading {
             text-align: center;
             padding: 20px;
-            color: #6c757d;
+            color: var(--text-secondary);
         }
         .btn-danger { background: #dc3545; }
         .btn-danger:hover { background: #c82333; }
@@ -183,7 +203,7 @@
         .btn-action.btn-secondary-sm { background: #6c757d; }
         .btn-action.btn-secondary-sm:hover { background: #5a6268; }
         .btn-action.btn-outline-danger { background: transparent; color: #dc3545; border: 1px solid #dc3545; }
-        .btn-action.btn-outline-danger:hover { background: #f8d7da; }
+        .btn-action.btn-outline-danger:hover { background: rgba(220, 53, 69, 0.15); }
     </style>
 </head>
 <body>
@@ -206,7 +226,7 @@
         
         <!-- Modal für Serientermin-Buchung -->
         <div id="recurring-booking-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); padding: 30px; border-radius: 8px; max-width: 500px; width: 90%;">
                 <h2>{% trans "Book Recurring Lesson" %}</h2>
                 <div style="margin: 20px 0;">
                     <label style="display: block; margin-bottom: 5px;"><strong>{% trans "Start Date:" %}</strong></label>
@@ -254,7 +274,7 @@
         <div class="week-calendar">
             <h2>{% trans "Available Time Slots" %}</h2>
             <p>{% trans "Click on a time slot to select one lesson block (duration from your contract)." %}</p>
-            <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: #fff3cd; border-radius: 4px; display: none;">
+            <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: rgba(255, 193, 7, 0.2); border-radius: 4px; display: none;">
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
                 <button class="btn btn-success" onclick="confirmBooking()" style="margin-left: 15px;">{% trans "Book Selected Slots" %}</button>
                 <button class="btn btn-secondary" onclick="clearSelection()" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
@@ -309,7 +329,7 @@
                         {% endif %}
                     </div>
                 {% else %}
-                    <p style="color: #6c757d;">{% trans "No working hours configured for this day." %}</p>
+                    <p style="color: var(--text-secondary);">{% trans "No working hours configured for this day." %}</p>
                 {% endif %}
             </div>
             {% endfor %}
@@ -501,7 +521,7 @@
                     }
                     html += '</div>';
                 } else {
-                    html += `<p style="color: #6c757d;">${noWorkingHours}</p>`;
+                    html += `<p style="color: var(--text-secondary);">${noWorkingHours}</p>`;
                 }
                 html += '</div>';
             }

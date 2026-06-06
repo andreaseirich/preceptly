@@ -12,7 +12,7 @@
     <a href="{% url 'lessons:detail' lesson.pk %}" class="btn btn-secondary">📋 {% trans "Lesson Details" %}</a>
 </div>
 
-<div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+<div style="background: var(--bg-secondary); padding: 20px; border-radius: 5px; margin-bottom: 20px;">
     <h2>{% trans "Lesson Information" %}</h2>
     <table style="width: 100%;">
         <tr>
@@ -37,7 +37,7 @@
 </div>
 
 {% if has_conflicts %}
-<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
+<div class="alert-danger" style="margin-bottom: 20px;">
     <h2 style="color: #dc3545; margin-top: 0;">⚠ {% trans "Conflicts" %}</h2>
     <p style="margin-bottom: 15px;">
         <a href="{% url 'lessons:conflicts' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn" style="background: #dc3545; color: white;">
@@ -79,9 +79,9 @@
     <h2 style="color: #007bff; margin-top: 0;">📚 {% trans "Lesson Plan" %}</h2>
     
     {% for lesson_plan in lesson_plans %}
-    <div style="background: white; padding: 15px; border-radius: 3px; margin-top: 15px; {% if not forloop.first %}opacity: 0.7;{% endif %}">
+    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 3px; margin-top: 15px; {% if not forloop.first %}opacity: 0.7;{% endif %}">
         {% if not forloop.first %}
-        <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+        <p style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 10px;">
             <em>{% trans "Previous version" %} - {{ lesson_plan.created_at|date:"SHORT_DATETIME_FORMAT" }}</em>
         </p>
         {% endif %}
@@ -92,7 +92,7 @@
         {% endif %}
         <div style="margin-top: 15px; white-space: pre-wrap; line-height: 1.6;">{{ lesson_plan.content }}</div>
         {% if lesson_plan.llm_model %}
-        <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+        <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
             <em>{% blocktrans with model=lesson_plan.llm_model %}Generated with {{ model }}{% endblocktrans %} - {{ lesson_plan.created_at|date:"SHORT_DATETIME_FORMAT" }}</em>
         </p>
         {% endif %}
@@ -122,7 +122,7 @@
     </form>
 </div>
 {% else %}
-<div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #6c757d; margin-bottom: 20px;">
+<div class="box-section" style="margin-bottom: 20px; border-left: 4px solid var(--border-color);">
     <h2 style="color: #6c757d; margin-top: 0;">🤖 {% trans "AI Lesson Plan" %} <span class="premium-badge">{% trans "Premium" %}</span></h2>
     <p>{% trans "AI-powered lesson plan generation is only available for premium users." %}</p>
     <button type="button" class="btn" style="background: #6c757d; color: white; cursor: not-allowed; opacity: 0.6;" disabled>

@@ -6,7 +6,7 @@
 {% block content %}
 <h1>{% trans "Delete Invoice" %}</h1>
 
-<div style="background: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
+<div class="alert-danger" style="margin-bottom: 20px;">
     <h2 style="color: #dc3545; margin-top: 0;">⚠ {% trans "Warning" %}</h2>
     <p>{% trans "Do you really want to delete this invoice?" %}</p>
     <p><strong>{% trans "Invoice:" %}</strong> {{ object.payer_name }} ({{ object.period_start }} - {{ object.period_end }})</p>

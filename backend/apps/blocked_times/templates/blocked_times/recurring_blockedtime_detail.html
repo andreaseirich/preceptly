@@ -23,7 +23,7 @@
     <tr><th>{% trans "End Date" %}</th><td>{{ recurring_blocked_time.end_date|default:_("Not set") }}</td></tr>
     <tr><th>{% trans "Time" %}</th><td>{{ recurring_blocked_time.start_time }} - {{ recurring_blocked_time.end_time }}</td></tr>
     <tr><th>{% trans "Recurrence Type" %}</th><td>{{ recurring_blocked_time.get_recurrence_type_display }}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{% if recurring_blocked_time.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td></tr>
+    <tr><th>{% trans "Status" %}</th><td>{% if recurring_blocked_time.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     <tr><th>{% trans "Created" %}</th><td>{{ recurring_blocked_time.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
     <tr><th>{% trans "Last updated" %}</th><td>{{ recurring_blocked_time.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>

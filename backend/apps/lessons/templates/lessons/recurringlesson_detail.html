@@ -20,7 +20,7 @@
     <tr><th>{% trans "End Date" %}</th><td>{{ recurring_lesson.end_date|default:_("Until contract end") }}</td></tr>
     <tr><th>{% trans "Time" %}</th><td>{{ recurring_lesson.start_time }}</td></tr>
     <tr><th>{% trans "Duration" %}</th><td>{% blocktrans with minutes=recurring_lesson.duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{% if recurring_lesson.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td></tr>
+    <tr><th>{% trans "Status" %}</th><td>{% if recurring_lesson.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     {% if recurring_lesson.notes %}
     <tr><th>{% trans "Notes" %}</th><td>{{ recurring_lesson.notes }}</td></tr>
     {% endif %}

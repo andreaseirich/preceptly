@@ -10,23 +10,45 @@
     <title>{% trans "Book Lesson" %}</title>
     <style>
         * { box-sizing: border-box; }
+        :root {
+            --bg-page: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #ddd;
+            --h2-border: #ecf0f1;
+            --table-header-bg: #f5f5f5;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #1a1a1a;
+                --bg-card: #2d2d2d;
+                --bg-secondary: #3a3a3a;
+                --text-primary: #e0e0e0;
+                --text-secondary: #b0b0b0;
+                --border-color: #555;
+                --h2-border: #444;
+                --table-header-bg: #3a3a3a;
+            }
+        }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
             margin: 0; 
             padding: 20px; 
-            background: #f5f5f5; 
-            color: #2c3e50; 
+            background: var(--bg-page); 
+            color: var(--text-primary); 
         }
         .container { 
             max-width: 1000px; 
             margin: 0 auto; 
-            background: white; 
+            background: var(--bg-card); 
             padding: 30px; 
             border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
         }
-        h1 { color: #2c3e50; margin-top: 0; }
-        h2 { color: #34495e; margin-top: 30px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        h1 { color: var(--text-primary); margin-top: 0; }
+        h2 { color: var(--text-primary); margin-top: 30px; border-bottom: 2px solid var(--h2-border); padding-bottom: 10px; }
         .btn { 
             display: inline-block; 
             padding: 10px 20px; 
@@ -50,8 +72,8 @@
             border-radius: 4px; 
             border-left: 4px solid; 
         }
-        .message.success { background: #d4edda; color: #155724; border-color: #28a745; }
-        .message.error { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+        .message.success { background: rgba(40, 167, 69, 0.15); color: var(--text-primary); border-color: #28a745; }
+        .message.error { background: rgba(220, 53, 69, 0.15); color: var(--text-primary); border-color: #dc3545; }
         .step { 
             display: none; 
             margin: 20px 0; 
@@ -68,7 +90,7 @@
         .form-group input, .form-group textarea, .form-group select { 
             width: 100%; 
             padding: 8px; 
-            border: 1px solid #ddd; 
+            border: 1px solid var(--border-color); 
             border-radius: 4px; 
             font-size: 14px; 
         }
@@ -78,20 +100,20 @@
         .similar-students { 
             margin: 15px 0; 
             padding: 15px; 
-            background: #f8f9fa; 
+            background: var(--bg-secondary); 
             border-radius: 4px; 
         }
         .similar-student { 
             padding: 10px; 
             margin: 5px 0; 
-            background: white; 
-            border: 1px solid #ddd; 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-color); 
             border-radius: 4px; 
             cursor: pointer; 
             transition: background 0.2s; 
         }
         .similar-student:hover { 
-            background: #e3f2fd; 
+            background: rgba(33, 150, 243, 0.15); 
         }
         .time-slots { 
             display: grid; 
@@ -106,20 +128,20 @@
             text-align: center; 
             cursor: pointer; 
             transition: all 0.2s; 
-            background: white; 
+            background: var(--bg-card); 
         }
         .time-slot:hover { 
-            background: #e3f2fd; 
+            background: rgba(33, 150, 243, 0.15); 
             transform: scale(1.05); 
         }
         .time-slot.occupied { 
-            background: #f8d7da; 
+            background: rgba(220, 53, 69, 0.15); 
             border-color: #dc3545; 
             cursor: not-allowed; 
             opacity: 0.6; 
         }
         .time-slot.own-lesson { 
-            background: #d4edda; 
+            background: rgba(40, 167, 69, 0.15); 
             border-color: #28a745; 
         }
         .time-slot.reschedulable { 
@@ -134,22 +156,22 @@
             box-shadow: 0 0 0 2px #ffc107; 
         }
         .time-slot.selected { 
-            background: #fff3cd; 
+            background: rgba(255, 193, 7, 0.2); 
             border-color: #ffc107; 
             border-width: 3px; 
         }
         .day-column { 
             margin-bottom: 20px; 
-            border: 1px solid #ddd; 
+            border: 1px solid var(--border-color); 
             border-radius: 4px; 
             padding: 15px; 
-            background: white; 
+            background: var(--bg-card); 
         }
         .day-header { 
             font-weight: bold; 
             font-size: 1.1em; 
             margin-bottom: 15px; 
-            color: #2c3e50; 
+            color: var(--text-primary); 
         }
         .progress-indicator {
             display: flex;
@@ -161,7 +183,7 @@
             flex: 1;
             text-align: center;
             padding: 10px;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             border-radius: 4px;
             margin: 0 5px;
         }
@@ -207,7 +229,7 @@
             </div>
             <div id="step-1-search-result" style="display: none;">
                 <div id="step-1-suggestions" class="similar-students" style="margin: 15px 0; display: none;"></div>
-                <div id="step-1-no-match" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; display: none;">
+                <div id="step-1-no-match" style="margin: 15px 0; padding: 15px; background: var(--bg-secondary); border-radius: 4px; display: none;">
                     <p>{% trans "No matching student found." %}</p>
                     <button type="button" class="btn" onclick="goToCreateNew()">{% trans "Create new student profile" %}</button>
                     <button type="button" class="btn btn-secondary" onclick="clearSearchResult()">{% trans "Try again" %}</button>
@@ -298,7 +320,7 @@
         <div class="step" id="step-3">
             <h2>{% trans "Select Time Slot" %}</h2>
             {% if not is_premium %}
-            <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 0.9em;">
+            <div style="margin-bottom: 15px; padding: 10px; background: rgba(33, 150, 243, 0.12); border-radius: 4px; font-size: 0.9em;">
                 {% blocktrans with count=public_booking_count limit=public_booking_limit %}Public bookings this month: {{ count }}/{{ limit }}.{% endblocktrans %}
                 <a href="{% url 'core:settings' %}" style="margin-left: 8px;">{% trans "Upgrade to Premium for unlimited bookings." %}</a>
             </div>
@@ -319,11 +341,11 @@
                            onchange="jumpToDate(this.value)">
                 </label>
             </div>
-            <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: #fff3cd; border-radius: 4px; display: none;">
+            <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: rgba(255, 193, 7, 0.15); border-radius: 4px; display: none;">
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
                 <button class="btn btn-secondary" onclick="clearSelection()" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
             </div>
-            <div id="inline-reschedule-banner" style="margin: 15px 0; padding: 12px; background: #e3f2fd; border-radius: 4px; border: 1px solid #2196f3; display: none;">
+            <div id="inline-reschedule-banner" style="margin: 15px 0; padding: 12px; background: rgba(33, 150, 243, 0.12); border-radius: 4px; border: 1px solid rgba(33, 150, 243, 0.4); display: none;">
                 <p id="inline-reschedule-text" style="margin: 0 0 8px 0;"></p>
                 <div id="inline-reschedule-scope" style="margin: 10px 0; display: none;">
                     <label><input type="radio" name="reschedule-scope" value="single" checked> {% trans "Reschedule this lesson only" %}</label>
@@ -332,9 +354,9 @@
                 <button type="button" class="btn btn-success" id="inline-reschedule-confirm-btn" onclick="confirmInlineReschedule()" style="display: none; margin-right: 8px;">{% trans "Confirm Reschedule" %}</button>
                 <button type="button" class="btn btn-secondary" onclick="cancelInlineReschedule()">{% trans "Cancel" %}</button>
             </div>
-            <div id="public-week-loading" style="display: none; text-align: center; padding: 20px; color: #6c757d;">{% trans "Loading..." %}</div>
+            <div id="public-week-loading" style="display: none; text-align: center; padding: 20px; color: var(--text-secondary);">{% trans "Loading..." %}</div>
             {% if travel_policy_active %}
-            <p class="message" style="background: #e7f3ff; border-color: #0066cc; color: #004085; margin-bottom: 15px;">
+            <p class="message" style="background: rgba(33, 150, 243, 0.12); border-color: rgba(33, 150, 243, 0.5); color: var(--text-primary); margin-bottom: 15px;">
                 {% trans "On-site appointments: Only time slots that are realistic considering travel times are shown. Times that are not possible due to travel time rules cannot be booked." %}
             </p>
             {% endif %}
@@ -380,7 +402,7 @@
                             {% endif %}
                         </div>
                     {% else %}
-                        <p style="color: #6c757d;">{% trans "No working hours configured for this day." %}</p>
+                        <p style="color: var(--text-secondary);">{% trans "No working hours configured for this day." %}</p>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -696,7 +718,7 @@
                 institute: document.getElementById('institute') ? document.getElementById('institute').value.trim() : ''
             };
             
-            let html = '<div style="background: #f8f9fa; padding: 20px; border-radius: 4px;">';
+            let html = '<div style="background: var(--bg-secondary); padding: 20px; border-radius: 4px;">';
             html += `<p><strong>{% trans "Student" %}:</strong> ${currentStudent.full_name}</p>`;
             html += `<p><strong>{% trans "Date" %}:</strong> ${firstSlot.date}</p>`;
             html += `<p><strong>{% trans "Time" %}:</strong> ${firstSlot.startTime} - ${lastSlot.endTime}</p>`;
@@ -956,7 +978,7 @@
                     }
                     html += '</div>';
                 } else {
-                    html += '<p style="color: #6c757d;">' + noWorkingHours + '</p>';
+                    html += '<p style="color: var(--text-secondary);">' + noWorkingHours + '</p>';
                 }
                 html += '</div>';
             }

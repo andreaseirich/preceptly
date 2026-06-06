@@ -14,7 +14,7 @@
 </div>
 
 
-<p class="calendar-note" style="margin-top: 10px; color: #495057; font-size: 0.9em;">
+<p class="calendar-note" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Click on a day to create a new lesson. Click on an existing lesson to edit it." %}
 </p>
 
@@ -39,7 +39,7 @@
                         {{ day.date.day }}
                     </a>
                     <a href="{% url 'blocked_times:create' %}?date={{ day.date|date:'Y-m-d' }}&year={{ year }}&month={{ month }}" 
-                       style="color: #856404; text-decoration: none; margin-left: 5px; font-size: 0.8em;"
+                       style="color: var(--text-secondary); text-decoration: none; margin-left: 5px; font-size: 0.8em;"
                        title="{% trans 'Add blocked time' %}">
                         🚫
                     </a>
@@ -76,9 +76,9 @@
                 {% if day.blocked_times %}
                 <div>
                     {% for blocked_time in day.blocked_times %}
-                    <div class="blocked-time" style="background: rgba(255, 193, 7, 0.2); padding: 3px; margin-bottom: 2px; font-size: 0.85em; color: #856404; border-left: 3px solid #ffc107;">
+                    <div class="blocked-time" style="background: rgba(255, 193, 7, 0.2); padding: 3px; margin-bottom: 2px; font-size: 0.85em; color: var(--text-primary); border-left: 3px solid #ffc107;">
                         <a href="{% url 'blocked_times:detail' blocked_time.pk %}?year={{ year }}&month={{ month }}" 
-                           style="text-decoration: none; color: #856404; display: block;"
+                           style="text-decoration: none; color: var(--text-secondary); display: block;"
                            title="{% trans 'View/edit blocked time' %}">
                             🚫 <strong>{{ blocked_time.start_datetime|time:"H:i" }}</strong> {{ blocked_time.title }}
                         </a>
@@ -93,11 +93,11 @@
     </tbody>
 </table>
 
-<div class="calendar-legend" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+<div class="calendar-legend" style="margin-top: 20px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
     <strong>{% trans "Legend:" %}</strong>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33, 150, 243, 0.2); border-left: 3px solid #2196f3; color: var(--text-primary);">{% trans "Lesson (clickable to edit)" %}</span>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33, 150, 243, 0.2); border-left: 3px solid #dc3545; color: var(--text-primary);">⚠ {% trans "Conflict" %}</span>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(255, 193, 7, 0.2); border-left: 3px solid #ffc107; color: #856404;">🚫 {% trans "Blocked Time (clickable to edit)" %}</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(255, 193, 7, 0.2); border-left: 3px solid #ffc107; color: var(--text-primary);">🚫 {% trans "Blocked Time (clickable to edit)" %}</span>
     <span style="display: inline-block; margin-left: 10px; color: #007bff; border-bottom: 1px dashed #007bff;">{% trans "Days (clickable to create)" %}</span>
 </div>
 {% endblock %}

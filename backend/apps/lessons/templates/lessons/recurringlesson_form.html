@@ -6,7 +6,7 @@
 {% block content %}
 <h1>{% if object %}{% trans "Edit Recurring Lesson" %}{% else %}{% trans "New Recurring Lesson" %}{% endif %}</h1>
 
-<div style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+<div class="alert-info" style="margin-bottom: 20px;">
     <strong>💡 {% trans "What are recurring lessons?" %}</strong>
     <p style="margin: 5px 0 0 0; font-size: 0.9em;">
         {% trans "Recurring lessons allow you to create repeating lessons (e.g., 'every Monday at 2 PM'). After saving, all lessons for the specified period will be automatically generated." %}

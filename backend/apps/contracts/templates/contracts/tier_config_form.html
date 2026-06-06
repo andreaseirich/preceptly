@@ -28,13 +28,13 @@
 
   <div style="margin-bottom: 1.2em;">
     <label><strong>{% trans "Tier thresholds" %}</strong></label>
-    <p style="color:#6c757d; font-size:.9em; margin:.3em 0 .8em;">
+    <p style="color:var(--text-secondary); font-size:.9em; margin:.3em 0 .8em;">
       {% trans "One row per pay rate. \"From hours\" is the cumulative total at which this rate starts (e.g. 0 for the first tier, 50 for the second)." %}
     </p>
 
     <table id="tier-table" style="width:100%; border-collapse:collapse; margin-bottom:.8em;">
       <thead>
-        <tr style="border-bottom:2px solid #dee2e6;">
+        <tr style="border-bottom:2px solid var(--border-color);">
           <th style="padding:6px 10px; text-align:left; width:160px;">{% trans "From hours" %}</th>
           <th style="padding:6px 10px; text-align:left;">{% trans "Label (e.g. 14 €/h)" %}</th>
           <th style="width:44px;"></th>
@@ -59,7 +59,7 @@
 <style>
   .tier-input-error { border-color: #dc3545 !important; }
   #tier-table td { padding: 5px 10px; vertical-align: middle; }
-  #tier-table tr { border-bottom: 1px solid #f0f0f0; }
+  #tier-table tr { border-bottom: 1px solid var(--border-color); }
   #tier-table input[type=number] { width: 120px; }
   #tier-table input[type=text] { width: 100%; }
 </style>

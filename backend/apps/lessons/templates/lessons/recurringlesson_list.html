@@ -28,7 +28,7 @@
             <td>{{ recurring.get_active_weekdays_display }}</td>
             <td>{{ recurring.start_time }}</td>
             <td>{{ recurring.start_date }}</td>
-            <td>{% if recurring.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
+            <td>{% if recurring.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td>
             <td>
                 <div class="table-actions"><a href="{% url 'lessons:recurring_detail' recurring.pk %}" class="btn-sm btn-sm-primary">{% trans "Details" %}</a>
                 <a href="{% url 'lessons:recurring_update' recurring.pk %}" class="btn-sm btn-sm-secondary">{% trans "Edit" %}</a>

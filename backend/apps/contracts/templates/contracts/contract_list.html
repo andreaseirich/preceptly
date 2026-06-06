@@ -23,7 +23,7 @@
           <p>{% trans "Estimated date" %}: {{ summary.estimated_date|date:"d.m.Y" }}</p>
         {% endif %}
       {% else %}
-        <p style="color: green;">{% trans "Maximum tier reached" %}</p>
+        <p style="color: #28a745;">{% trans "Maximum tier reached" %}</p>
       {% endif %}
     </div>
     {% endfor %}
@@ -56,7 +56,7 @@
             <td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} Min.{% endblocktrans %}</td>
             <td>{{ contract.start_date }}</td>
             <td>{{ contract.end_date|default:_("unlimited") }}</td>
-            <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: #495057;">{% trans "Inactive" %}</span>{% endif %}</td>
+            <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td>
             <td>
                 {% if summary %}
                 {% if summary.carried_over_units %}

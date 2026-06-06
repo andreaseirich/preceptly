@@ -24,7 +24,7 @@
             <td style="padding: 8px;">
                 {% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}
                 {% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}
-                <br><small style="color: #666;">
+                <br><small style="color: var(--text-secondary);">
                     {% if lesson.travel_time_before_minutes > 0 %}🚗 {% trans "Before:" %} {{ lesson.travel_time_before_minutes }} {% trans "Min." %}{% endif %}
                     {% if lesson.travel_time_before_minutes > 0 and lesson.travel_time_after_minutes > 0 %} | {% endif %}
                     {% if lesson.travel_time_after_minutes > 0 %}🚗 {% trans "After:" %} {{ lesson.travel_time_after_minutes }} {% trans "Min." %}{% endif %}
@@ -103,20 +103,20 @@
     <h3>{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h3>
     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
         <thead>
-            <tr style="background: #f5f5f5;">
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Date" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Time" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Student" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">{% trans "Action" %}</th>
+            <tr style="background: var(--table-header-bg);">
+                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Date" %}</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Time" %}</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Student" %}</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Action" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for conflict_lesson in conflict_lessons %}
             <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.date|date:"d.m.Y" }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.start_time|time:"H:i" }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ conflict_lesson.contract.student.full_name }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
+                <td style="padding: 8px; border: 1px solid var(--border-color);">{{ conflict_lesson.date|date:"d.m.Y" }}</td>
+                <td style="padding: 8px; border: 1px solid var(--border-color);">{{ conflict_lesson.start_time|time:"H:i" }}</td>
+                <td style="padding: 8px; border: 1px solid var(--border-color);">{{ conflict_lesson.contract.student.full_name }}</td>
+                <td style="padding: 8px; border: 1px solid var(--border-color);">
                     <a href="{% url 'lessons:detail' conflict_lesson.pk %}" class="btn" style="font-size: 0.9em;">{% trans "View" %}</a>
                     <a href="{% url 'lessons:update' conflict_lesson.pk %}" class="btn btn-primary" style="font-size: 0.9em;">{% trans "Edit" %}</a>
                 </td>
@@ -143,16 +143,16 @@
     
     {% if quota_conflicts %}
     <h3 style="margin-top: 20px; color: #dc3545;">⚠ {% blocktrans count counter=quota_conflicts|length %}Contract Quota Exceeded{% plural %}Contract Quota Exceeded ({{ counter }}){% endblocktrans %}</h3>
-    <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin-top: 10px;">
+    <div class="alert-danger" style="margin-top: 10px;">
         {% for quota_conflict in quota_conflicts %}
-        <p style="margin: 5px 0; color: #721c24;">
+        <p style="margin: 5px 0; color: #dc3545;">
             <strong>{{ quota_conflict.message }}</strong><br>
             <small>
                 {% blocktrans with planned=quota_conflict.planned_total actual=quota_conflict.actual_total %}Planned: {{ planned }} units | Actual: {{ actual }} hours{% endblocktrans %}
             </small>
         </p>
         {% endfor %}
-        <p style="margin-top: 10px; font-size: 0.9em; color: #721c24;">
+        <p style="margin-top: 10px; font-size: 0.9em; color: #dc3545;">
             <strong>{% trans "Note:" %}</strong> {% blocktrans with month=quota_conflicts.0.month|stringformat:"02d" year=quota_conflicts.0.year %}This lesson exceeds the planned quota until the end of {{ month }}.{{ year }}. Catching up is allowed, but pre-work is not.{% endblocktrans %}
         </p>
     </div>
@@ -175,7 +175,7 @@
             {% endif %}
             <div style="margin-top: 10px; white-space: pre-wrap;">{{ latest_lesson_plan.content }}</div>
             {% if latest_lesson_plan.llm_model %}
-            <p style="margin-top: 10px; font-size: 0.9em; color: #666;"><em>{% blocktrans with model=latest_lesson_plan.llm_model %}Generated with {{ model }}{% endblocktrans %}</em></p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);"><em>{% blocktrans with model=latest_lesson_plan.llm_model %}Generated with {{ model }}{% endblocktrans %}</em></p>
             {% endif %}
         </div>
     </div>
