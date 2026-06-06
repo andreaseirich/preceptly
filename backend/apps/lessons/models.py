@@ -39,6 +39,19 @@ class Session(models.Model):
         default=0, help_text=_("Travel time after in minutes")
     )
     notes = models.TextField(blank=True, null=True, help_text=_("Notes for the session"))
+    homework = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Homework"),
+        help_text=_("Homework assigned for next session"),
+    )
+    meeting_url = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name=_("Meeting URL"),
+        help_text=_("Zoom/Meet link for this session"),
+    )
     tutor_no_show = models.BooleanField(
         default=False,
         help_text=_(
