@@ -21,11 +21,11 @@
 <div class="box-section" style="margin-bottom: 20px;">
     <h2>Details</h2>
     <table style="width: 100%;">
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary); width: 35%;">{% trans "Date:" %}</td>
             <td style="padding: 8px; color: var(--text-primary);">{{ lesson.date|date:"d.m.Y" }}</td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary);">Zeit / Dauer:</td>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}
@@ -39,13 +39,13 @@
                 {% endif %}
             </td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary);">{% trans "Student:" %}</td>
             <td style="padding: 8px; color: var(--text-primary);">
                 <a href="{% url 'students:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a>
             </td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary);">Vertrag / Institut:</td>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% if contract.institute %}
@@ -55,27 +55,68 @@
                 {% endif %}
             </td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary);">Stundensatz:</td>
             <td style="padding: 8px; color: var(--text-primary);">
                 {{ contract.hourly_rate|floatformat:2 }} €
                 {% if contract.unit_duration_minutes != 60 %}
-                <small style="color: var(--text-secondary);">(je {{ contract.unit_duration_minutes }} Min.)</small>
+                <small style="color: var(--text-secondary);">(je {{ contract.unit_duration_minutes }} Min.)</small>
                 {% endif %}
             </td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary);">{% trans "Status:" %}</td>
             <td style="padding: 8px; color: var(--text-primary);">{{ lesson.get_status_display }}</td>
         </tr>
-        {% if lesson.notes %}
-        <tr>
-            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Notes:" %}</td>
-            <td style="padding: 8px; color: var(--text-primary);">{{ lesson.notes }}</td>
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; color: var(--text-secondary);">Notizen:</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {% if lesson.notes %}{{ lesson.notes }}{% else %}<span style="color: var(--text-secondary);">–</span>{% endif %}
+            </td>
         </tr>
-        {% endif %}
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; color: var(--text-secondary);">Hausaufgaben:</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {% if lesson.homework %}{{ lesson.homework }}{% else %}<span style="color: var(--text-secondary);">–</span>{% endif %}
+            </td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; color: var(--text-secondary);">Meeting-URL:</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {% if lesson.meeting_url %}
+                    <a href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">{{ lesson.meeting_url }}</a>
+                    &nbsp;
+                    <a href="{{ lesson.meeting_url }}" target="_blank" rel="noopener" class="btn-sm btn-sm-secondary">Beitreten</a>
+                {% else %}
+                    <span style="color: var(--text-secondary);">–</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; color: var(--text-secondary);">Vertragslaufzeit:</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {{ contract.start_date|date:"d.m.Y" }} –
+                {% if contract.end_date %}{{ contract.end_date|date:"d.m.Y" }}{% else %}unbefristet{% endif %}
+            </td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; color: var(--text-secondary);">Vertrag aktiv:</td>
+            <td style="padding: 8px;">
+                {% if contract.is_active %}
+                    <span style="color: #16a34a;">✓ Aktiv</span>
+                {% else %}
+                    <span style="color: var(--text-secondary);">✗ Inaktiv</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; color: var(--text-secondary);">Vertragsnotizen:</td>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {% if contract.notes %}{{ contract.notes }}{% else %}<span style="color: var(--text-secondary);">–</span>{% endif %}
+            </td>
+        </tr>
         {% if lesson.recurring_session %}
-        <tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 8px; color: var(--text-secondary);">Serie:</td>
             <td style="padding: 8px; color: var(--text-primary);">
                 <small>🔁 Teil einer Wiederholungsserie</small>
@@ -85,17 +126,6 @@
     </table>
 </div>
 
-{% if lesson.meeting_url %}
-<div class="alert-info" style="margin-bottom: 1em;">
-  🔗 <strong>Meeting:</strong>
-  <a href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">{{ lesson.meeting_url }}</a>
-</div>
-{% endif %}
-{% if lesson.homework %}
-<div class="alert-info" style="margin-bottom: 1em;">
-  📚 <strong>Hausaufgaben:</strong> {{ lesson.homework }}
-</div>
-{% endif %}
 {% if has_conflicts %}
 <div class="alert-warning" style="margin-bottom: 20px; border-left: 4px solid #dc3545;">
     <h2 style="color: #dc3545; margin-top: 0;">⚠ Konflikte</h2>
