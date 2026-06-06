@@ -308,7 +308,7 @@ class PortalActivateView(View):
                 {
                     "token": token,
                     "student": link.student,
-                    "error": "Password must be at least 8 characters.",
+                    "error": "Das Passwort muss mindestens 8 Zeichen lang sein.",
                 },
             )
         if password != password2:
@@ -318,7 +318,7 @@ class PortalActivateView(View):
                 {
                     "token": token,
                     "student": link.student,
-                    "error": "Passwords do not match.",
+                    "error": "Die Passwörter stimmen nicht überein.",
                 },
             )
         portal_user.user.set_password(password)
