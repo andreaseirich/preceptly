@@ -50,6 +50,11 @@ class Student(models.Model):
         db_index=True,
         help_text=_("SHA-256 hash of the public booking code (never store plaintext)"),
     )
+    is_adult = models.BooleanField(
+        default=False,
+        verbose_name=_("Erwachsener Schüler"),
+        help_text=_("Wenn aktiviert, wird kein Eltern-Portal-Zugang angeboten."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

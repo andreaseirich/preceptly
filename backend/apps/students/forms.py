@@ -21,6 +21,7 @@ class StudentForm(forms.ModelForm):
             "grade",
             "subjects",
             "notes",
+            "is_adult",
         ]
         widgets = {
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -31,4 +32,5 @@ class StudentForm(forms.ModelForm):
             "grade": forms.TextInput(attrs={"class": "form-control"}),
             "subjects": forms.TextInput(attrs={"class": "form-control"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "is_adult": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }

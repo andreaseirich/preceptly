@@ -191,10 +191,43 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         parent_email = request.POST.get("parent_email", "").strip()
         if not parent_email:
             return redirect("students:detail", pk=pk)
+
+        # Kollisions-Check: E-Mail bereits in einem Portal-Konto?
         User = get_user_model()
+        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+        existing_user = User.objects.filter(email__iexact=parent_email).first()
+        if existing_user and hasattr(existing_user, "portal_profile"):
+            existing_portal = existing_user.portal_profile
+            # Prüfen ob bereits eine Eltern-Verknüpfung für diesen Schüler existiert
+            existing_link = ParentStudentLink.objects.filter(
+                parent=existing_portal, student=student
+            ).first()
+            if existing_link:
+                activation_url = f"{site_url}/portal/activate/{existing_link.invite_token}/"
+                messages.info(
+                    request,
+                    f"Dieses Konto ({parent_email}) ist bereits als Elternteil verknüpft. "
+                    f"Aktivierungslink: {activation_url}",
+                )
+            else:
+                # Bestehendes Portal-Konto als Elternteil verknüpfen (kein Duplikat)
+                parent_link, _ = ParentStudentLink.objects.get_or_create(
+                    parent=existing_portal, student=student
+                )
+                activation_url = f"{site_url}/portal/activate/{parent_link.invite_token}/"
+                messages.warning(
+                    request,
+                    f"Hinweis: {parent_email} hat bereits ein Portal-Konto. "
+                    f"Es wurde kein neues Konto erstellt – das bestehende Konto wurde verknüpft. "
+                    f"Aktivierungslink: {activation_url}",
+                )
+            return redirect("students:detail", pk=pk)
+
         username = f"parent_{student.pk}_{_secrets.token_hex(4)}"
         password_temp = _secrets.token_hex(8)
-        user = User.objects.create_user(username=username, password=password_temp)
+        user = User.objects.create_user(
+            username=username, email=parent_email, password=password_temp
+        )
         portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
         parent_link, _ = ParentStudentLink.objects.get_or_create(
             parent=portal_user, student=student

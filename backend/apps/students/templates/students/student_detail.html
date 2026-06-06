@@ -84,7 +84,8 @@
     </form>
   {% endif %}
   <hr style="border-color: var(--border-color); margin: 1em 0;">
-  <h4 style="margin: 0 0 0.5em;">{% trans "Eltern-Zugang" %}</h4>
+  {% if not student.is_adult %}
+  <h4 style="margin: 0 0 0.5em;">Eltern-Zugang</h4>
   {% if parent_links %}
     {% for pl in parent_links %}
       <span class="btn-sm btn-sm-secondary" style="margin-right: 4px; margin-bottom: 4px; display: inline-block;">
@@ -95,10 +96,16 @@
   {% endif %}
   <form method="post" action="{% url 'students:portal_invite_parent' student.pk %}" style="display: flex; gap: 6px; margin-top: 0.5em; flex-wrap: wrap;">
     {% csrf_token %}
-    <input type="email" name="parent_email" placeholder="{% trans 'E-Mail der Eltern (optional)' %}"
+    <input type="email" name="parent_email" placeholder="E-Mail der Eltern"
       class="form-control" style="flex: 1; min-width: 160px; font-size: 0.9em;">
-    <button type="submit" class="btn-sm btn-sm-secondary">{% trans "Eltern einladen" %}</button>
+    <button type="submit" class="btn-sm btn-sm-secondary">Eltern einladen</button>
   </form>
+  {% else %}
+  <p style="font-size: 0.9em; color: var(--text-secondary); margin: 0;">
+    Kein Eltern-Zugang (erwachsener Schüler).
+    <a href="{% url 'students:update' student.pk %}" style="color: var(--text-secondary);">Ändern</a>
+  </p>
+  {% endif %}
   <div style="margin-top: 0.75em;">
     {% if unread_messages %}
       <a href="{% url 'core:tutor_messages' student.pk %}" class="btn-sm btn-sm-warning">
