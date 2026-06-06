@@ -62,6 +62,8 @@ Das Eltern/Schüler-Portal gibt Eltern und Schülern einen dedizierten, sicheren
 
 ## E-Mail-Einladungsflow
 
+> **Railway-Konfiguration:** Siehe [docs/operations/railway-env-vars.md](../operations/railway-env-vars.md)
+
 1. Tutor erstellt Portal-Account (Schüler oder Elternteil) auf der Schüler-Detailseite
 2. System generiert `invite_token` (UUID) in `StudentPortalLink`
 3. E-Mail wird automatisch an die eingegebene Adresse gesendet (via `portal/email_service.py`)
