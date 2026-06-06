@@ -19,4 +19,9 @@ urlpatterns = [
         views.StudentRegenerateBookingCodeView.as_view(),
         name="regenerate_booking_code",
     ),
+    path(
+        "<int:pk>/portal-invite/",
+        views.PortalInviteCreateView.as_view(),
+        name="portal_invite_create",
+    ),
 ]

@@ -77,6 +77,8 @@ class SessionForm(forms.ModelForm):
             "travel_time_before_minutes",
             "travel_time_after_minutes",
             "notes",
+            "homework",
+            "meeting_url",
             "tutor_no_show",
         ]
         widgets = {
@@ -91,9 +93,13 @@ class SessionForm(forms.ModelForm):
             "travel_time_before_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "travel_time_after_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "homework": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "meeting_url": forms.URLInput(attrs={"class": "form-control"}),
             "tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         labels = {
+            "homework": _("Hausaufgaben für nächste Stunde"),
+            "meeting_url": _("Meeting-URL (Zoom/Meet)"),
             "tutor_no_show": _("I did not attend; student was waiting (TutorSpace / Abacus)"),
         }
 

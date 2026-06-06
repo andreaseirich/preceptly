@@ -2,9 +2,13 @@
 Views for student CRUD operations.
 """
 
+import uuid
+
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -36,6 +40,28 @@ class StudentDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        from apps.portal.models import (
+            ParentStudentLink,
+            PortalMessage,
+            ProgressNote,
+            StudentPortalLink,
+        )
+
+        context = super().get_context_data(**kwargs)
+        student = self.object
+        context["portal_link"] = StudentPortalLink.objects.filter(student=student).first()
+        context["parent_links"] = ParentStudentLink.objects.filter(student=student).select_related(
+            "parent"
+        )
+        context["progress_notes"] = ProgressNote.objects.filter(student=student).order_by(
+            "-created_at"
+        )[:10]
+        context["unread_messages"] = PortalMessage.objects.filter(
+            student=student, read_by_tutor=False
+        ).count()
+        return context
 
 
 class StudentCreateView(LoginRequiredMixin, CreateView):
@@ -81,6 +107,35 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, _("Student successfully deleted."))
         return super().delete(request, *args, **kwargs)
+
+
+class PortalInviteCreateView(LoginRequiredMixin, View):
+    """Erstellt PortalUser + StudentPortalLink und generiert Invite-Token."""
+
+    def post(self, request, pk):
+        from apps.portal.models import PortalUser, StudentPortalLink
+
+        student = get_object_or_404(Student, pk=pk, user=request.user)
+
+        if not StudentPortalLink.objects.filter(student=student).exists():
+            User = get_user_model()
+            username = f"portal_student_{student.pk}_{uuid.uuid4().hex[:8]}"
+            portal_django_user = User.objects.create_user(
+                username=username,
+                password=uuid.uuid4().hex,
+            )
+            portal_user = PortalUser.objects.create(
+                user=portal_django_user,
+                role="student",
+                tutor=request.user,
+            )
+            StudentPortalLink.objects.create(
+                portal_user=portal_user,
+                student=student,
+                invite_token=uuid.uuid4().hex,
+            )
+
+        return redirect("students:detail", pk=pk)
 
 
 class StudentRegenerateBookingCodeView(LoginRequiredMixin, View):

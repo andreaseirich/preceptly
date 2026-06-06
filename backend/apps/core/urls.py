@@ -19,6 +19,7 @@ from apps.core.views_email_test import test_email
 from apps.core.views_erecht24 import Erecht24PushView
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
+from apps.core.views_portal import TutorMessageView
 from apps.core.views_pwa import manifest_view, service_worker_view
 from apps.core.views_reports import ReportsView
 from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalView
@@ -64,4 +65,5 @@ urlpatterns = [
     path("expenses/<int:pk>/edit/", ExpenseUpdateView.as_view(), name="expense_update"),
     path("expenses/<int:pk>/delete/", ExpenseDeleteView.as_view(), name="expense_delete"),
     path("tax-year/euer/", EuerView.as_view(), name="euer"),
+    path("students/<int:pk>/messages/", TutorMessageView.as_view(), name="tutor_messages"),
 ]
