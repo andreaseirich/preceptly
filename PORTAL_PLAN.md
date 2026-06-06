@@ -134,5 +134,17 @@ Eigener Base-Template: `portal/base.html` (minimales Layout, kein Tutor-Menü)
 |-------|--------|---------|
 | Phase 1 — Portal-App + Modelle | ✅ DONE | d1da54e, 021135b |
 | Phase 2 — Tutor-seitige UI | ✅ DONE | — |
-| Phase 3 — Portal-Templates | ⏳ PENDING | — |
-| Phase 4 — Nachrichten + Feinschliff | ⏳ PENDING | — |
+| Phase 3 — Portal-Templates | ✅ DONE | Sprint 3 |
+| Phase 4 — Nachrichten + Feinschliff | ✅ DONE | Sprint 4 |
+
+### Phase 5 — E-Mail-Einladungen ✅ DONE
+**Commit:** Sprint 4
+
+- [x] email_service.py mit send_portal_invite()
+- [x] HTML + Plain-Text E-Mail-Templates
+- [x] Automatischer Versand bei Einladungserstellung
+- [x] Aktivierungslink in student_detail sichtbar
+
+### Offene Punkte
+- [ ] Einladungs-E-Mail auch bei Parent-Einladung mit Parent-spezifischem Text
+- [ ] E-Mail-Konfiguration in Railway-Dokumentation festhalten

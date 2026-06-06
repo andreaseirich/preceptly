@@ -50,7 +50,7 @@ Das Eltern/Schüler-Portal gibt Eltern und Schülern einen dedizierten, sicheren
 - [x] Tutor-seitige UI (Einladungslinks, ProgressNotes, Session-Formular)
 - [x] TutorMessageView + Template
 - [x] Ungelesene-Nachrichten-Badge im Tutor-Menü
-- [ ] Einladungs-E-Mail (Token-Versand)
+- [x] Einladungs-E-Mail (Token-Versand)
 - [ ] Sicherheitstests (Cross-Tutor-Zugriff)
 - [ ] Deployment-Test auf Railway
 
@@ -59,3 +59,23 @@ Das Eltern/Schüler-Portal gibt Eltern und Schülern einen dedizierten, sicheren
 - Einladungs-E-Mail-Template und Versand
 - Mobile Responsive Design für Portal-Templates
 - Datenschutz: Eltern-Zugriff auf Schüler-Daten (Einwilligung dokumentieren)
+
+## E-Mail-Einladungsflow
+
+1. Tutor erstellt Portal-Account (Schüler oder Elternteil) auf der Schüler-Detailseite
+2. System generiert `invite_token` (UUID) in `StudentPortalLink`
+3. E-Mail wird automatisch an die eingegebene Adresse gesendet (via `portal/email_service.py`)
+4. Empfänger klickt Aktivierungslink: `/portal/activate/<token>/`
+5. Empfänger setzt eigenes Passwort -> Account wird aktiv
+6. Sofort eingeloggt, Weiterleitung zum Portal-Dashboard
+
+**Umgebungsvariablen für E-Mail (Railway):**
+| Variable | Beispiel |
+|----------|---------|
+| `EMAIL_HOST` | `smtp.gmail.com` |
+| `EMAIL_PORT` | `587` |
+| `EMAIL_USE_TLS` | `True` |
+| `EMAIL_HOST_USER` | `deine@email.de` |
+| `EMAIL_HOST_PASSWORD` | `app-passwort` |
+| `DEFAULT_FROM_EMAIL` | `noreply@preceptly.app` |
+| `SITE_URL` | `https://preceptly.up.railway.app` |
