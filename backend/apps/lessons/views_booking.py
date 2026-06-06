@@ -57,7 +57,7 @@ class StudentBookingView(TemplateView):
         if not working_hours:
             from apps.core.models import UserProfile
 
-            profile = UserProfile.objects.filter(user=contract.student.user).first()
+            profile = UserProfile.objects.filter(user=contract.user).first()
             if profile and profile.default_working_hours:
                 working_hours = profile.default_working_hours
 
@@ -69,7 +69,7 @@ class StudentBookingView(TemplateView):
         context.update(
             {
                 "contract": contract,
-                "student": contract.student,
+                "student": contract,
                 "week_data": week_data,
                 "working_hours": working_hours,
                 "current_date": target_date,
@@ -650,7 +650,7 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
     if not working_hours:
         from apps.core.models import UserProfile
 
-        profile = UserProfile.objects.filter(user=contract.student.user).first()
+        profile = UserProfile.objects.filter(user=contract.user).first()
         if profile and profile.default_working_hours:
             working_hours = profile.default_working_hours
 

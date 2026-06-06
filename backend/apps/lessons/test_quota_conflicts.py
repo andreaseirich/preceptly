@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests für Kontingent-Konflikte (ContractQuotaService).
 """
@@ -10,7 +12,6 @@ from django.test import TestCase
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lessons.models import Lesson
 from apps.lessons.quota_service import ContractQuotaService
-from apps.students.models import Student
 
 
 class ContractQuotaServiceTest(TestCase):
@@ -19,14 +20,10 @@ class ContractQuotaServiceTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Setzt Testdaten auf."""
-        self.student = Student.objects.create(
+        self.contract = Contract.objects.create(
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
-        )
-
-        self.contract = Contract.objects.create(
-            student=self.student,
             hourly_rate=30.00,
             start_date=date(2025, 8, 1),
             end_date=date(2025, 9, 30),

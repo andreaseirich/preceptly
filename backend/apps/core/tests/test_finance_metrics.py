@@ -19,7 +19,6 @@ from apps.core.finance_metrics import (
 )
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class FinanceMetricsOwnerIsolationTest(TestCase):
@@ -28,16 +27,18 @@ class FinanceMetricsOwnerIsolationTest(TestCase):
     def setUp(self):
         self.user_a = User.objects.create_user(username="a", password="test")
         self.user_b = User.objects.create_user(username="b", password="test")
-        sa = Student.objects.create(user=self.user_a, first_name="A", last_name="X")
-        sb = Student.objects.create(user=self.user_b, first_name="B", last_name="Y")
         ca = Contract.objects.create(
-            student=sa,
+            user=self.user_a,
+            first_name="A",
+            last_name="X",
             hourly_rate=Decimal("25"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
         )
         cb = Contract.objects.create(
-            student=sb,
+            user=self.user_b,
+            first_name="B",
+            last_name="Y",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -86,9 +87,10 @@ class FinanceMetricsStatusTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        s = Student.objects.create(user=self.user, first_name="S", last_name="T")
         c = Contract.objects.create(
-            student=s,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -129,9 +131,10 @@ class ReportsIncomeConsistencyTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        s = Student.objects.create(user=self.user, first_name="S", last_name="T")
         c = Contract.objects.create(
-            student=s,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -163,17 +166,19 @@ class InstituteBreakdownTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        s1 = Student.objects.create(user=self.user, first_name="S1", last_name="T")
-        s2 = Student.objects.create(user=self.user, first_name="S2", last_name="T")
         c1 = Contract.objects.create(
-            student=s1,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("20"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             institute="InstA",
         )
         c2 = Contract.objects.create(
-            student=s2,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

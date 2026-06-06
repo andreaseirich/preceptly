@@ -1,3 +1,6 @@
+from datetime import date
+from decimal import Decimal
+
 """
 Tests for Public Booking authentication (name + code verification).
 """
@@ -9,6 +12,8 @@ from django.core.cache import cache
 from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
+from apps.contracts.models import Contract
+
 from apps.core.models import UserProfile
 from apps.lessons.throttle import (
     THROTTLE_IP_LIMIT,
@@ -16,7 +21,6 @@ from apps.lessons.throttle import (
     record_public_booking_attempt,
 )
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
-from apps.students.models import Student
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
@@ -30,19 +34,31 @@ class PublicBookingAuthTest(TestCase):
         self.profile.public_booking_token = "test-token-123"
         self.profile.save()
 
-        self.student1 = Student.objects.create(
-            user=self.tutor, first_name="Max", last_name="Mustermann"
+        self.student1 = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.tutor,
+            first_name="Max",
+            last_name="Mustermann",
         )
         self.code1 = set_booking_code(self.student1)
 
-        self.student2 = Student.objects.create(
-            user=self.tutor, first_name="Anna", last_name="Schmidt"
+        self.student2 = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.tutor,
+            first_name="Anna",
+            last_name="Schmidt",
         )
         self.code2 = set_booking_code(self.student2)
 
         self.other_tutor = User.objects.create_user(username="other", password="test")
-        self.other_student = Student.objects.create(
-            user=self.other_tutor, first_name="Other", last_name="Student"
+        self.other_student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.other_tutor,
+            first_name="Other",
+            last_name="Student",
         )
         set_booking_code(self.other_student)
 

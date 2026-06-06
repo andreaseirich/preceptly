@@ -13,7 +13,6 @@ from apps.contracts.models import Contract
 from apps.lessons.calendar_service import CalendarService
 from apps.lessons.models import Lesson
 from apps.lessons.views import CalendarView
-from apps.students.models import Student
 
 
 class ConflictDetailTest(TestCase):
@@ -21,14 +20,26 @@ class ConflictDetailTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student1 = Student.objects.create(
-            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
+        self.student1 = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
         )
-        self.student2 = Student.objects.create(
-            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
+        self.student2 = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Lisa",
+            last_name="Müller",
+            email="lisa@example.com",
         )
         self.contract1 = Contract.objects.create(
-            student=self.student1,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -36,7 +47,9 @@ class ConflictDetailTest(TestCase):
             is_active=True,
         )
         self.contract2 = Contract.objects.create(
-            student=self.student2,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -96,11 +109,18 @@ class CalendarPastLessonsTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Test", last_name="Student", email="test@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+            email="test@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

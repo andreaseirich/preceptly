@@ -126,7 +126,7 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
         return None
 
     qs = Session.objects.filter(
-        contract__student__user=user,
+        contract__user=user,
         contract__institute__iexact=institute_name,
         status__in=["taught", "paid"],
     )
@@ -157,7 +157,7 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
 
     today = date.today()
     recent_qs = Session.objects.filter(
-        contract__student__user=user,
+        contract__user=user,
         contract__institute__iexact=institute_name,
         status__in=["taught", "paid"],
         date__gte=today - timedelta(days=90),

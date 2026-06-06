@@ -33,24 +33,20 @@ class SessionQueryService:
 
         qs = (
             Session.objects.filter(date__gte=start_date, date__lt=end_date)
-            .select_related("contract", "contract__student")
+            .select_related("contract")
             .order_by("date", "start_time")
         )
         if user:
-            qs = qs.filter(contract__student__user=user)
+            qs = qs.filter(contract__user=user)
         return qs
 
     @staticmethod
     def get_today_sessions(user: User = None) -> list[Session]:
         """Returns all sessions for today."""
         today = timezone.now().date()
-        qs = (
-            Session.objects.filter(date=today)
-            .select_related("contract", "contract__student")
-            .order_by("start_time")
-        )
+        qs = Session.objects.filter(date=today).select_related("contract").order_by("start_time")
         if user:
-            qs = qs.filter(contract__student__user=user)
+            qs = qs.filter(contract__user=user)
         return qs
 
     @staticmethod
@@ -73,11 +69,11 @@ class SessionQueryService:
         # Only sessions from tomorrow (date > today), not today
         qs = (
             Session.objects.filter(date__gt=today, date__lte=end_date)
-            .select_related("contract", "contract__student")
+            .select_related("contract")
             .order_by("date", "start_time")
         )
         if user:
-            qs = qs.filter(contract__student__user=user)
+            qs = qs.filter(contract__user=user)
         return qs[:10]
 
 

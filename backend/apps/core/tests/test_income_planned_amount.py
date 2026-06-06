@@ -7,17 +7,23 @@ from django.test import TestCase
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class IncomeSelectorPlannedAmountTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Planned", last_name="Test", email="planned@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Planned",
+            last_name="Test",
+            email="planned@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("20.00"),
             unit_duration_minutes=45,
             start_date=date(2025, 1, 1),

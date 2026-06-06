@@ -93,7 +93,7 @@ def taught_hours(user: User, year: int, month: int) -> float:
     start_d, end_d = _month_range(year, month)
     mins = (
         Lesson.objects.filter(
-            contract__student__user=user,
+            contract__user=user,
             date__gte=start_d,
             date__lt=end_d,
             status__in=("taught", "paid"),
@@ -108,7 +108,7 @@ def paid_hours(user: User, year: int, month: int) -> float:
     start_d, end_d = _month_range(year, month)
     mins = (
         Lesson.objects.filter(
-            contract__student__user=user,
+            contract__user=user,
             date__gte=start_d,
             date__lt=end_d,
             status=InvoiceStatus.PAID,
@@ -122,7 +122,7 @@ def lesson_count_taught_or_paid(user: User, year: int, month: int) -> int:
     """Count of lessons with status in (taught, paid). Owner-scoped."""
     start_d, end_d = _month_range(year, month)
     return Lesson.objects.filter(
-        contract__student__user=user,
+        contract__user=user,
         date__gte=start_d,
         date__lt=end_d,
         status__in=("taught", "paid"),
@@ -202,7 +202,7 @@ def taught_not_invoiced(user: User, year: int, month: int) -> dict:
 
     start_d, end_d = _month_range(year, month)
     taught = Lesson.objects.filter(
-        contract__student__user=user,
+        contract__user=user,
         date__gte=start_d,
         date__lt=end_d,
         status__in=("taught", "paid"),
@@ -227,7 +227,7 @@ def top_students_by_recognized_revenue(
     invs = (
         _invoices_for_month(user, year, month, [InvoiceStatus.PAID])
         .filter(contract__isnull=False)
-        .select_related("contract", "contract__student")
+        .select_related("contract")
     )
     by_contract = {}
     for inv in invs:

@@ -1,3 +1,6 @@
+from datetime import date
+from decimal import Decimal
+
 """
 Tests for Public Booking step 1: name search with suggestions.
 """
@@ -9,8 +12,9 @@ from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
+from apps.contracts.models import Contract
+
 from apps.core.models import UserProfile
-from apps.students.models import Student
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
@@ -35,14 +39,26 @@ class PublicBookingSearchSuggestionsTest(TestCase):
         prof_b.public_booking_token = "tok-b"
         prof_b.save()
 
-        self.student_max = Student.objects.create(
-            user=self.tutor_a, first_name="Max", last_name="Mustermann"
+        self.student_max = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.tutor_a,
+            first_name="Max",
+            last_name="Mustermann",
         )
-        self.student_anna = Student.objects.create(
-            user=self.tutor_a, first_name="Anna", last_name="Schmidt"
+        self.student_anna = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.tutor_a,
+            first_name="Anna",
+            last_name="Schmidt",
         )
-        self.student_other = Student.objects.create(
-            user=self.tutor_b, first_name="Max", last_name="Other"
+        self.student_other = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.tutor_b,
+            first_name="Max",
+            last_name="Other",
         )
 
         self.client = Client(enforce_csrf_checks=True)

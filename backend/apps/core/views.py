@@ -342,10 +342,8 @@ class SettingsView(LoginRequiredMixin, FormView):
             }
         )
 
-        contracts = (
-            Contract.objects.filter(is_active=True, student__user=self.request.user)
-            .select_related("student")
-            .order_by("student__last_name", "student__first_name")
+        contracts = Contract.objects.filter(is_active=True, user=self.request.user).order_by(
+            "last_name", "first_name"
         )
         context["profile"] = profile
         context["current_working_hours"] = profile.default_working_hours or {}

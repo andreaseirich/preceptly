@@ -1,7 +1,10 @@
+from datetime import date
+from decimal import Decimal
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from apps.students.models import Student
+from apps.contracts.models import Contract
 
 
 class StudentModelTest(TestCase):
@@ -12,7 +15,9 @@ class StudentModelTest(TestCase):
 
     def test_create_student(self):
         """Test: Student kann erstellt werden."""
-        student = Student.objects.create(
+        student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
@@ -22,4 +27,4 @@ class StudentModelTest(TestCase):
             subjects="Mathe, Deutsch",
         )
         self.assertEqual(student.full_name, "Max Mustermann")
-        self.assertEqual(str(student), "Max Mustermann")
+        self.assertIn("Max Mustermann", str(student))

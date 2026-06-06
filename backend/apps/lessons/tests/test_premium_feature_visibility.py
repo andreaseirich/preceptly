@@ -12,7 +12,6 @@ from django.urls import reverse
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class PremiumFeatureVisibilityTest(TestCase):
@@ -29,14 +28,11 @@ class PremiumFeatureVisibilityTest(TestCase):
         self.non_premium_user = User.objects.create_user(username="regular", password="password")
         UserProfile.objects.create(user=self.non_premium_user, is_premium=False)
 
-        # Student and lesson for premium user
-        self.student = Student.objects.create(
+        # Contract and lesson for premium user
+        self.contract = Contract.objects.create(
             user=self.premium_user,
             first_name="Test",
             last_name="Student",
-        )
-        self.contract = Contract.objects.create(
-            student=self.student,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),
@@ -49,14 +45,11 @@ class PremiumFeatureVisibilityTest(TestCase):
             status="planned",
         )
 
-        # Student and lesson for non-premium user
-        self.non_premium_student = Student.objects.create(
+        # Contract and lesson for non-premium user
+        self.non_premium_contract = Contract.objects.create(
             user=self.non_premium_user,
             first_name="Regular",
             last_name="Student",
-        )
-        self.non_premium_contract = Contract.objects.create(
-            student=self.non_premium_student,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),

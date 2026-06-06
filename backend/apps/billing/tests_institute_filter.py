@@ -13,7 +13,6 @@ from apps.billing.forms import InvoiceCreateForm, _get_institute_choices_for_use
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InstituteFilterTest(TestCase):
@@ -21,20 +20,26 @@ class InstituteFilterTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student_a = Student.objects.create(
+        self.student_a = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Anna",
             last_name="Schmidt",
             email="anna@example.com",
         )
-        self.student_b = Student.objects.create(
+        self.student_b = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mueller",
             email="max@example.com",
         )
         self.contract_a = Contract.objects.create(
-            student=self.student_a,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             institute="Institut Alpha",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
@@ -43,7 +48,9 @@ class InstituteFilterTest(TestCase):
             is_active=True,
         )
         self.contract_b = Contract.objects.create(
-            student=self.student_b,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             institute="Institut Beta",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
@@ -52,7 +59,9 @@ class InstituteFilterTest(TestCase):
             is_active=True,
         )
         self.contract_private = Contract.objects.create(
-            student=self.student_a,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             institute=None,
             hourly_rate=Decimal("20.00"),
             unit_duration_minutes=60,

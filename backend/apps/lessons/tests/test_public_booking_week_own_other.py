@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for Public Booking week calendar: own vs other slot display.
 """
@@ -13,7 +15,6 @@ from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 
 
 class PublicBookingWeekOwnOtherTest(TestCase):
@@ -29,28 +30,25 @@ class PublicBookingWeekOwnOtherTest(TestCase):
         }
         self.profile.save()
 
-        self.student1 = Student.objects.create(
-            user=self.tutor, first_name="Max", last_name="Mustermann"
+        self.student1 = contract1 = Contract.objects.create(
+            user=self.tutor,
+            first_name="Max",
+            last_name="Mustermann",
+            hourly_rate=30,
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
         )
         self.code1 = set_booking_code(self.student1)
 
-        self.student2 = Student.objects.create(
-            user=self.tutor, first_name="Anna", last_name="Schmidt"
+        self.student2 = contract2 = Contract.objects.create(
+            user=self.tutor,
+            first_name="Anna",
+            last_name="Schmidt",
+            hourly_rate=30,
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
         )
         set_booking_code(self.student2)
-
-        contract1 = Contract.objects.create(
-            student=self.student1,
-            hourly_rate=30,
-            unit_duration_minutes=60,
-            start_date=date(2025, 1, 1),
-        )
-        contract2 = Contract.objects.create(
-            student=self.student2,
-            hourly_rate=30,
-            unit_duration_minutes=60,
-            start_date=date(2025, 1, 1),
-        )
 
         # Lesson for student1: Mon 2025-01-06 10:00
         Lesson.objects.create(

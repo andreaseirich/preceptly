@@ -13,7 +13,6 @@ from apps.contracts.formsets import generate_monthly_plans_for_contract, iter_co
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class ContractMonthlyPlanTest(TestCase):
@@ -21,11 +20,18 @@ class ContractMonthlyPlanTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -60,14 +66,21 @@ class GenerateMonthlyPlansTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Anna", last_name="Schmidt", email="anna@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Anna",
+            last_name="Schmidt",
+            email="anna@example.com",
         )
 
     def test_generate_plans_for_date_range(self):
         """Test: Generierung von Plänen für einen Zeitraum."""
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             start_date=date(2025, 1, 15),
             end_date=date(2025, 3, 15),
@@ -86,7 +99,9 @@ class GenerateMonthlyPlansTest(TestCase):
     def test_generate_plans_unlimited_contract(self):
         """Test: Generierung für unbefristeten Vertrag (1 Jahr voraus)."""
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             start_date=date(2025, 1, 1),
             end_date=None,
@@ -101,7 +116,9 @@ class GenerateMonthlyPlansTest(TestCase):
     def test_generate_plans_preserves_existing(self):
         """Test: Vorhandene Pläne werden nicht überschrieben."""
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             start_date=date(2025, 1, 1),
             end_date=date(2025, 2, 28),
@@ -126,11 +143,18 @@ class IncomeSelectorPlannedVsActualTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Tom", last_name="Weber", email="tom@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Tom",
+            last_name="Weber",
+            email="tom@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("28.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -233,15 +257,22 @@ class MonthlyPlanningDateRangeTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Lisa",
+            last_name="Müller",
+            email="lisa@example.com",
         )
 
     def test_future_contract_all_months(self):
         """Test: Vertrag mit Zeitraum in der Zukunft - alle Monate bis Vertragsende."""
         # Vertrag für nächstes Jahr (2026)
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             start_date=date(2026, 1, 1),
             end_date=date(2026, 6, 30),
@@ -266,7 +297,9 @@ class MonthlyPlanningDateRangeTest(TestCase):
         """Test: Vertrag, der in der Vergangenheit begonnen hat und in der Zukunft endet."""
         # Vertrag von 2024 bis 2026
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             start_date=date(2024, 10, 1),
             end_date=date(2026, 3, 31),
@@ -287,7 +320,9 @@ class MonthlyPlanningDateRangeTest(TestCase):
         """Test: Vertrag, der komplett in der Vergangenheit liegt."""
         # Vertrag von 2023
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("20.00"),
             start_date=date(2023, 5, 1),
             end_date=date(2023, 8, 31),
@@ -326,7 +361,9 @@ class MonthlyPlanningDateRangeTest(TestCase):
     def test_future_contract_formset_editable(self):
         """Test: Formset für zukünftigen Vertrag zeigt alle Monate als editierbar."""
         contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             start_date=date(2027, 1, 1),
             end_date=date(2027, 12, 31),

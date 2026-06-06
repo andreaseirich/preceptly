@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for Public Booking week navigation: drift fix and week param.
 """
@@ -11,7 +13,6 @@ from django.test import Client, TestCase
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.booking_service import BookingService
-from apps.students.models import Student
 
 
 class PublicBookingWeekNavigationTest(TestCase):
@@ -23,9 +24,10 @@ class PublicBookingWeekNavigationTest(TestCase):
         self.profile.public_booking_token = "tok-nav"
         self.profile.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
         self.profile.save()
-        self.student = Student.objects.create(user=self.tutor, first_name="A", last_name="B")
-        Contract.objects.create(
-            student=self.student,
+        self.student = Contract.objects.create(
+            user=self.tutor,
+            first_name="A",
+            last_name="B",
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

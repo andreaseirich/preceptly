@@ -106,7 +106,7 @@ class SessionForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
-            contract_qs = self.fields["contract"].queryset.filter(student__user=user)
+            contract_qs = self.fields["contract"].queryset.filter(user=user)
             # Creating new sessions: only active contracts are selectable.
             # Editing existing sessions: keep current contract selectable even if it became inactive.
             if self.instance and self.instance.pk:

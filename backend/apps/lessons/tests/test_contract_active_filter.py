@@ -7,22 +7,31 @@ from django.test import TestCase
 from apps.contracts.models import Contract
 from apps.lessons.forms import SessionForm
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class SessionFormContractActiveFilterTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tutor_form", password="x")
-        self.student = Student.objects.create(user=self.user, first_name="A", last_name="B")
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="A",
+            last_name="B",
+        )
         self.active_contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             is_active=True,
         )
         self.inactive_contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

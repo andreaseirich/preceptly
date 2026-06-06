@@ -152,7 +152,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
             parsed_contract_id = _safe_int(contract_id)
             if parsed_contract_id is not None:
                 contract = Contract.objects.filter(
-                    pk=parsed_contract_id, student__user=self.request.user
+                    pk=parsed_contract_id, user=self.request.user
                 ).first()
 
             billable_lessons = InvoiceService.get_billable_lessons(
@@ -180,7 +180,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                 profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
                 tier_from = profile.tutorspace_tier_count_from
                 prior_qs = Lesson.objects.filter(
-                    contract__student__user=self.request.user,
+                    contract__user=self.request.user,
                     contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
                     status__in=["taught", "paid"],
                     tutor_no_show=False,

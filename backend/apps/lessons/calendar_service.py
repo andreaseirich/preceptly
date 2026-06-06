@@ -42,11 +42,11 @@ class CalendarService:
         # Lade Lessons - alle Lessons im Monatsbereich (Vergangenheit und Zukunft)
         lessons_qs = (
             Lesson.objects.filter(date__gte=start_date, date__lt=end_date)
-            .select_related("contract", "contract__student")
+            .select_related("contract")
             .order_by("date", "start_time")
         )
         if user:
-            lessons_qs = lessons_qs.filter(contract__student__user=user)
+            lessons_qs = lessons_qs.filter(contract__user=user)
         lessons = lessons_qs
 
         # Lade Blockzeiten im Monatsbereich

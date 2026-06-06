@@ -90,9 +90,7 @@ class Session(models.Model):
         ]
 
     def __str__(self):
-        return (
-            f"{self.contract.student} - {self.date} {self.start_time} ({self.get_status_display()})"
-        )
+        return f"{self.contract} - {self.date} {self.start_time} ({self.get_status_display()})"
 
     @property
     def total_time_minutes(self):

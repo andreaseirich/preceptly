@@ -6,7 +6,7 @@ import unicodedata
 from difflib import SequenceMatcher
 from typing import List, Tuple
 
-from apps.students.models import Student
+from apps.contracts.models import Contract
 
 
 def _normalize_name(s: str) -> str:
@@ -37,7 +37,9 @@ class StudentSearchService:
         return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
     @staticmethod
-    def search_by_name(name: str, threshold: float = 0.7, user=None) -> List[Tuple[Student, float]]:
+    def search_by_name(
+        name: str, threshold: float = 0.7, user=None
+    ) -> List[Tuple[Contract, float]]:
         """
         Search for students by name using fuzzy matching.
 
@@ -56,7 +58,7 @@ class StudentSearchService:
         results = []
 
         # Get students (optionally filtered by user)
-        all_students = Student.objects.all()
+        all_students = Contract.objects.all()
         if user:
             all_students = all_students.filter(user=user)
 
@@ -97,7 +99,7 @@ class StudentSearchService:
         return results
 
     @staticmethod
-    def find_exact_match(name: str, user=None) -> Student | None:
+    def find_exact_match(name: str, user=None) -> Contract | None:
         """
         Find exact match for a student name.
 
@@ -114,7 +116,7 @@ class StudentSearchService:
         name_lower = name.strip().lower()
 
         # Try exact match on full name
-        students_qs = Student.objects.all()
+        students_qs = Contract.objects.all()
         if user:
             students_qs = students_qs.filter(user=user)
         for student in students_qs:
@@ -137,7 +139,7 @@ class StudentSearchService:
         norm = _normalize_name(name)
         norm_tokens = set(norm.split())
 
-        students_qs = Student.objects.filter(user=user) if user else Student.objects.none()
+        students_qs = Contract.objects.filter(user=user) if user else Contract.objects.none()
         if not user:
             return None, []
 

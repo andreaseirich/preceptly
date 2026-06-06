@@ -39,7 +39,7 @@ class BookingService:
 
         # Load all lessons in the period (including from other contracts, as travel times are relevant)
         lessons = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
-            "contract", "contract__student"
+            "contract", "contract"
         )
 
         for lesson in lessons:
@@ -229,10 +229,10 @@ class BookingService:
         student_id = None
         owner_user = None
         unit_duration = 60
-        contract = Contract.objects.select_related("student").filter(pk=contract_id).first()
+        contract = Contract.objects.filter(pk=contract_id).first()
         if contract:
-            student_id = contract.student_id
-            owner_user = contract.student.user_id
+            student_id = contract.pk
+            owner_user = contract.user_id
             unit_duration = contract.unit_duration_minutes
 
         busy_per_day = (
@@ -300,8 +300,8 @@ class BookingService:
             return dict(result)
 
         lessons_qs = Lesson.objects.filter(
-            date__gte=week_start, date__lte=week_end, contract__student__user=user
-        ).select_related("contract", "contract__student")
+            date__gte=week_start, date__lte=week_end, contract__user=user
+        ).select_related("contract")
         if exclude_lesson_id:
             lessons_qs = lessons_qs.exclude(pk=exclude_lesson_id)
         lessons = lessons_qs
@@ -311,10 +311,10 @@ class BookingService:
             start_dt, end_dt = LessonConflictService.calculate_time_block(lesson)
             start_str = start_dt.time().strftime("%H:%M")
             end_str = end_dt.time().strftime("%H:%M")
-            is_own = student_id is not None and lesson.contract.student_id == student_id
+            is_own = student_id is not None and lesson.contract_id == student_id
             interval = {"start": start_str, "end": end_str, "own": is_own}
             if is_own:
-                interval["label"] = lesson.contract.student.full_name
+                interval["label"] = lesson.contract.full_name
                 interval["lesson_id"] = lesson.id
                 can_reschedule = lesson.status == "planned" and lesson.date >= today
                 from apps.core.feature_flags import Feature, user_has_feature
@@ -422,7 +422,7 @@ class BookingService:
         unit_duration = 60
         if student_id and user:
             contract = (
-                Contract.objects.filter(student_id=student_id, student__user=user, is_active=True)
+                Contract.objects.filter(pk=student_id, user=user, is_active=True)
                 .order_by("-start_date")
                 .first()
             )
@@ -524,10 +524,10 @@ class BookingService:
 
         # Load all lessons in the period
         lessons_qs = Lesson.objects.filter(date__gte=start_date, date__lte=end_date).select_related(
-            "contract", "contract__student"
+            "contract", "contract"
         )
         if user:
-            lessons_qs = lessons_qs.filter(contract__student__user=user)
+            lessons_qs = lessons_qs.filter(contract__user=user)
         if exclude_lesson_id:
             lessons_qs = lessons_qs.exclude(pk=exclude_lesson_id)
         lessons = lessons_qs

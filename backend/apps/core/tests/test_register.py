@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for registration flow and premium default.
 """
@@ -85,11 +87,11 @@ class PremiumGuardTest(TestCase):
 
         from apps.contracts.models import Contract
         from apps.lessons.models import Session
-        from apps.students.models import Student
 
-        student = Student.objects.create(user=self.non_premium, first_name="A", last_name="B")
         contract = Contract.objects.create(
-            student=student,
+            user=self.non_premium,
+            first_name="A",
+            last_name="B",
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

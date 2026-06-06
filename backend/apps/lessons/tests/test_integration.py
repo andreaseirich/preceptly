@@ -18,7 +18,6 @@ from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.services import LessonConflictService
-from apps.students.models import Student
 
 
 class RecurringLessonIntegrationTest(TestCase):
@@ -30,13 +29,17 @@ class RecurringLessonIntegrationTest(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Test",
             last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),
@@ -111,13 +114,17 @@ class ConflictDetectionIntegrationTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Set up test data."""
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Test",
             last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),
@@ -192,13 +199,17 @@ class BillingIntegrationTest(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Test",
             last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),
@@ -282,13 +293,17 @@ class WeeklyCalendarIntegrationTest(TestCase):
         self.client = Client()
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Test",
             last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),

@@ -6,21 +6,13 @@ from django.utils.translation import gettext_lazy as _
 
 
 class PortalUser(models.Model):
-    ROLE_CHOICES = [
-        ("parent", _("Parent")),
-        ("student", _("Student")),
-    ]
-
+    ROLE_CHOICES = [("parent", _("Parent")), ("student", _("Student"))]
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="portal_profile",
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="portal_profile"
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     tutor = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="portal_users",
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="portal_users"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -34,14 +26,10 @@ class PortalUser(models.Model):
 
 class StudentPortalLink(models.Model):
     portal_user = models.OneToOneField(
-        PortalUser,
-        on_delete=models.CASCADE,
-        related_name="student_link",
+        PortalUser, on_delete=models.CASCADE, related_name="student_link"
     )
-    student = models.OneToOneField(
-        "students.Student",
-        on_delete=models.CASCADE,
-        related_name="portal_link",
+    contract = models.OneToOneField(
+        "contracts.Contract", on_delete=models.CASCADE, related_name="portal_link"
     )
     invite_token = models.CharField(max_length=64, unique=True, blank=True)
     is_active = models.BooleanField(default=False)
@@ -56,7 +44,7 @@ class StudentPortalLink(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.student.full_name
+        return self.contract.full_name
 
 
 class ParentStudentLink(models.Model):
@@ -66,16 +54,14 @@ class ParentStudentLink(models.Model):
         related_name="child_links",
         limit_choices_to={"role": "parent"},
     )
-    student = models.ForeignKey(
-        "students.Student",
-        on_delete=models.CASCADE,
-        related_name="parent_links",
+    contract = models.ForeignKey(
+        "contracts.Contract", on_delete=models.CASCADE, related_name="parent_links"
     )
     invite_token = models.CharField(max_length=64, unique=True, blank=True)
     is_active = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = [("parent", "student")]
+        unique_together = [("parent", "contract")]
         verbose_name = _("Parent-Student Link")
         verbose_name_plural = _("Parent-Student Links")
 
@@ -85,19 +71,15 @@ class ParentStudentLink(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.parent} → {self.student.full_name}"
+        return f"{self.parent} → {self.contract.full_name}"
 
 
 class ProgressNote(models.Model):
-    student = models.ForeignKey(
-        "students.Student",
-        on_delete=models.CASCADE,
-        related_name="progress_notes",
+    contract = models.ForeignKey(
+        "contracts.Contract", on_delete=models.CASCADE, related_name="progress_notes"
     )
     tutor = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="progress_notes",
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="progress_notes"
     )
     text = models.TextField(verbose_name=_("Note"))
     date = models.DateField(auto_now_add=True)
@@ -109,22 +91,16 @@ class ProgressNote(models.Model):
         verbose_name_plural = _("Progress Notes")
 
     def __str__(self):
-        return f"{self.date} – {self.student.full_name}"
+        return f"{self.date} – {self.contract.full_name}"
 
 
 class PortalMessage(models.Model):
     sender_portal_user = models.ForeignKey(
-        PortalUser,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="sent_messages",
+        PortalUser, null=True, blank=True, on_delete=models.SET_NULL, related_name="sent_messages"
     )
     sender_is_tutor = models.BooleanField(default=False)
-    student = models.ForeignKey(
-        "students.Student",
-        on_delete=models.CASCADE,
-        related_name="portal_messages",
+    contract = models.ForeignKey(
+        "contracts.Contract", on_delete=models.CASCADE, related_name="portal_messages"
     )
     text = models.TextField(verbose_name=_("Message"))
     created_at = models.DateTimeField(auto_now_add=True)

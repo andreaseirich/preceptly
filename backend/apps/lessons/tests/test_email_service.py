@@ -13,7 +13,6 @@ from django.test import TestCase, override_settings
 from apps.contracts.models import Contract
 from apps.lessons.email_service import send_booking_notification
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class SendBookingNotificationTest(TestCase):
@@ -21,11 +20,17 @@ class SendBookingNotificationTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Test", last_name="Student"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2024, 1, 1),

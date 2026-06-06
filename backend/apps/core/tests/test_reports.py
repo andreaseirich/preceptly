@@ -13,7 +13,6 @@ from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class ReportsPremiumGatingTest(TestCase):
@@ -24,11 +23,10 @@ class ReportsPremiumGatingTest(TestCase):
         UserProfile.objects.create(user=self.basic, is_premium=False)
         self.premium = User.objects.create_user(username="premium", password="test")
         UserProfile.objects.create(user=self.premium, is_premium=True)
-        self.student_a = Student.objects.create(
-            user=self.premium, first_name="A", last_name="Student"
-        )
         self.contract = Contract.objects.create(
-            student=self.student_a,
+            user=self.premium,
+            first_name="A",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -78,16 +76,18 @@ class ReportsMultiUserIsolationTest(TestCase):
         UserProfile.objects.create(user=self.user_a, is_premium=True)
         self.user_b = User.objects.create_user(username="b", password="test")
         UserProfile.objects.create(user=self.user_b, is_premium=True)
-        student_a = Student.objects.create(user=self.user_a, first_name="A", last_name="X")
-        student_b = Student.objects.create(user=self.user_b, first_name="B", last_name="Y")
         contract_a = Contract.objects.create(
-            student=student_a,
+            user=self.user_a,
+            first_name="A",
+            last_name="X",
             hourly_rate=Decimal("25"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
         )
         contract_b = Contract.objects.create(
-            student=student_b,
+            user=self.user_b,
+            first_name="B",
+            last_name="Y",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

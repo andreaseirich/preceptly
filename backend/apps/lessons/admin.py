@@ -17,12 +17,12 @@ class LessonAdmin(admin.ModelAdmin):
         "contract",
     ]
     search_fields = [
-        "contract__student__first_name",
-        "contract__student__last_name",
-        "contract__student__email",
+        "contract__first_name",
+        "contract__last_name",
+        "contract__email",
         "notes",
     ]
-    list_filter = ["status", "date", "contract__institute", "contract__student"]
+    list_filter = ["status", "date", "contract__institute", "contract"]
     raw_id_fields = ["contract"]
     date_hierarchy = "date"
     readonly_fields = ["created_at", "updated_at", "has_conflicts_display"]
@@ -43,7 +43,7 @@ class LessonAdmin(admin.ModelAdmin):
         return obj.contract.student.full_name
 
     get_student_name.short_description = _("Student")
-    get_student_name.admin_order_field = "contract__student__last_name"
+    get_student_name.admin_order_field = "contract__last_name"
 
     def has_conflicts_display(self, obj):
         if obj.has_conflicts:
@@ -65,7 +65,7 @@ class RecurringLessonAdmin(admin.ModelAdmin):
         "end_date",
         "is_active",
     ]
-    search_fields = ["contract__student__first_name", "contract__student__last_name", "notes"]
+    search_fields = ["contract__first_name", "contract__last_name", "notes"]
     list_filter = [
         "is_active",
         "start_date",
@@ -112,7 +112,7 @@ class RecurringLessonAdmin(admin.ModelAdmin):
         return obj.contract.student.full_name
 
     get_student_name.short_description = _("Student")
-    get_student_name.admin_order_field = "contract__student__last_name"
+    get_student_name.admin_order_field = "contract__last_name"
 
     def get_weekdays_display(self, obj):
         return obj.get_active_weekdays_display()

@@ -12,7 +12,6 @@ from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InvoiceModelTest(TestCase):
@@ -20,14 +19,11 @@ class InvoiceModelTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
+        self.student = self.contract = Contract.objects.create(
             user=self.user,
             first_name="Lisa",
             last_name="Müller",
             email="lisa@example.com",
-        )
-        self.contract = Contract.objects.create(
-            student=self.student,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -86,14 +82,11 @@ class InvoiceServiceTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
+        self.student = self.contract = Contract.objects.create(
             user=self.user,
             first_name="Tom",
             last_name="Weber",
             email="tom@example.com",
-        )
-        self.contract = Contract.objects.create(
-            student=self.student,
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -259,14 +252,11 @@ class InvoiceServiceTest(TestCase):
         self.assertEqual(invoice1.payer_name, self.student.full_name)
 
         # Contract mit Institut - sollte Institut als Zahler verwenden
-        student2 = Student.objects.create(
+        contract_with_institute = Contract.objects.create(
             user=self.user,
             first_name="Anna",
             last_name="Schmidt",
             email="anna@example.com",
-        )
-        contract_with_institute = Contract.objects.create(
-            student=student2,
             institute="Nachhilfe-Institut ABC",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,

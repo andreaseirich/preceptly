@@ -11,7 +11,6 @@ from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class Command(BaseCommand):
@@ -75,11 +74,6 @@ class Command(BaseCommand):
         contracts_count = Contract.objects.count()
         Contract.objects.all().delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {contracts_count} contracts"))
-
-        # 10. Delete Students
-        students_count = Student.objects.count()
-        Student.objects.all().delete()
-        self.stdout.write(self.style.SUCCESS(f"Deleted {students_count} students"))
 
         # Keep admin users - don't delete them
         admin_users = User.objects.filter(is_staff=True)

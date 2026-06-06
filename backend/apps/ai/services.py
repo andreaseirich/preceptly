@@ -42,11 +42,11 @@ class LessonPlanService:
         Returns:
             Dict with context information
         """
-        student = session.contract.student
+        student = session.contract
 
         # Get previous sessions (max. 5, sorted by date)
         previous_sessions = Session.objects.filter(
-            contract__student=student, date__lt=session.date
+            contract=student, date__lt=session.date
         ).order_by("-date")[:5]
 
         previous_sessions_data = [
@@ -110,13 +110,13 @@ class LessonPlanService:
             raise LessonPlanGenerationError(_("LLM error: {error}").format(error=str(e))) from e
 
         # Create or update LessonPlan
-        student = session.contract.student
+        student = session.contract
         subject = extract_subject_from_student(student)
 
         lesson_plan, created = LessonPlan.objects.update_or_create(
             lesson=session,
             defaults={
-                "student": student,
+                "contract": student,
                 "topic": _("Lesson plan for {date}").format(date=session.date),
                 "subject": subject,
                 "content": generated_content,

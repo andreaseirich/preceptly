@@ -13,7 +13,6 @@ from apps.billing.services import InvoiceService
 from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InvoiceCalculationTest(TestCase):
@@ -21,7 +20,9 @@ class InvoiceCalculationTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
@@ -29,7 +30,9 @@ class InvoiceCalculationTest(TestCase):
         )
         # Vertrag: 45 Min/Einheit, 12€/Einheit
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("12.00"),
             unit_duration_minutes=45,
             start_date=date(2025, 1, 1),
@@ -105,14 +108,18 @@ class InvoiceStatusTransitionTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Lisa",
             last_name="Müller",
             email="lisa@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -238,9 +245,10 @@ class TutorSpaceInvoiceOwnerFallbackTest(TestCase):
 
     def test_tutorspace_line_amount_uses_contract_tutor_when_user_none(self):
         tutor = User.objects.create_user(username="ts_tutor", password="test")
-        student = Student.objects.create(user=tutor, first_name="A", last_name="S")
         contract = Contract.objects.create(
-            student=student,
+            user=tutor,
+            first_name="Test",
+            last_name="Student",
             institute=TUTORSPACE_INSTITUTE_NAME,
             hourly_rate=Decimal("13.00"),
             unit_duration_minutes=60,

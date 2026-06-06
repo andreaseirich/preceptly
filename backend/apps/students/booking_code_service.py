@@ -8,7 +8,7 @@ Uses constant-time comparison to prevent timing attacks.
 import hashlib
 import secrets
 
-from apps.students.models import Student
+from apps.contracts.models import Contract
 
 # Alphabet without easily confused chars: no 0,O,1,l,I,2,Z,5,S,8,B
 _BOOKING_CODE_ALPHABET = "ACDEFGHJKMNPQRTVWXY34679"
@@ -40,7 +40,7 @@ def _constant_time_compare(a: str, b: str) -> bool:
     return result == 0
 
 
-def verify_booking_code(student: Student, plain_code: str) -> bool:
+def verify_booking_code(student: Contract, plain_code: str) -> bool:
     """
     Verify a booking code against a student's stored hash.
 
@@ -52,7 +52,7 @@ def verify_booking_code(student: Student, plain_code: str) -> bool:
     return _constant_time_compare(student.booking_code_hash, input_hash)
 
 
-def set_booking_code(student: Student) -> str:
+def set_booking_code(student: Contract) -> str:
     """
     Generate a new booking code, store its hash, return plaintext.
 
@@ -65,7 +65,7 @@ def set_booking_code(student: Student) -> str:
     return plain_code
 
 
-def ensure_booking_code(student: Student) -> str | None:
+def ensure_booking_code(student: Contract) -> str | None:
     """
     Ensure student has a booking code. If not, generate one and return it.
 

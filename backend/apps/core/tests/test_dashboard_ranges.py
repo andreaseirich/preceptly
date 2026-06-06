@@ -12,7 +12,6 @@ from django.utils import timezone
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonQueryService
-from apps.students.models import Student
 
 
 class DashboardRangesTest(TestCase):
@@ -23,11 +22,11 @@ class DashboardRangesTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.client.login(username="testuser", password="testpass123")
 
-        self.student = Student.objects.create(
-            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
-        )
-        self.contract = Contract.objects.create(
-            student=self.student,
+        self.student = self.contract = Contract.objects.create(
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

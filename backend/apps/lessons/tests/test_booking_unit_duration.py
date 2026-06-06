@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for booking with contract unit_duration_minutes.
 """
@@ -15,7 +17,6 @@ from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.booking_service import BookingService
 from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
@@ -39,11 +40,10 @@ class BookingUnitDurationTest(TestCase):
         prof.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
         prof.save()
 
-        self.student = Student.objects.create(user=self.tutor, first_name="Max", last_name="Test")
-        self.booking_code = set_booking_code(self.student)
-
-        self.contract_45 = Contract.objects.create(
-            student=self.student,
+        self.student = self.contract_45 = Contract.objects.create(
+            user=self.tutor,
+            first_name="Max",
+            last_name="Test",
             hourly_rate=30,
             unit_duration_minutes=45,
             start_date=date(2025, 1, 1),
@@ -51,12 +51,15 @@ class BookingUnitDurationTest(TestCase):
             working_hours={"monday": [{"start": "09:00", "end": "17:00"}]},
         )
         self.contract_60 = Contract.objects.create(
-            student=self.student,
+            user=self.tutor,
+            first_name="Max",
+            last_name="Test2",
             hourly_rate=35,
             unit_duration_minutes=60,
             start_date=date(2025, 2, 1),
             is_active=True,
         )
+        self.booking_code = set_booking_code(self.student)
 
         self.client = Client(enforce_csrf_checks=True)
 

@@ -12,7 +12,6 @@ from apps.billing.views import InvoiceCreateView
 from apps.contracts.models import Contract
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InvoicePreviewFormValuesTest(TestCase):
@@ -23,11 +22,18 @@ class InvoicePreviewFormValuesTest(TestCase):
         self.client = Client()
         self.client.force_login(self.user)
         self.factory = RequestFactory()
-        self.student = Student.objects.create(
-            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -131,11 +137,11 @@ class InvoicePreviewFormValuesTest(TestCase):
     def test_preview_amount_matches_invoice_calculation(self):
         """Vorschau-Beträge = IncomeSelector (wie create_invoice_from_lessons), nicht widthratio."""
         user = User.objects.create_user(username="preview_amount_user", password="test")
-        student = Student.objects.create(
-            user=user, first_name="Max", last_name="Mustermann", email="max@example.com"
-        )
         contract = Contract.objects.create(
-            student=student,
+            user=user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
             hourly_rate=Decimal("12.00"),
             unit_duration_minutes=45,
             start_date=date(2025, 1, 1),

@@ -12,7 +12,6 @@ from django.urls import reverse
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
-from apps.students.models import Student
 
 
 class RecurrenceInWeekViewTest(TestCase):
@@ -23,13 +22,17 @@ class RecurrenceInWeekViewTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Test",
             last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),

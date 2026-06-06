@@ -1,5 +1,5 @@
 """
-Views for student CRUD operations.
+Views for student management (now backed by Contract model).
 """
 
 import uuid
@@ -13,55 +13,46 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import DeleteView, DetailView, ListView
 
+from apps.contracts.forms import ContractForm
+from apps.contracts.models import Contract
 from apps.portal.models import ParentStudentLink, PortalUser, ProgressNote
 from apps.students.booking_code_service import set_booking_code
-from apps.students.forms import StudentForm
-from apps.students.models import Student
 
 
 class StudentListView(LoginRequiredMixin, ListView):
-    """List of all students for the current user."""
-
-    model = Student
+    model = Contract
     template_name = "students/student_list.html"
     context_object_name = "students"
     paginate_by = 20
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return Contract.objects.filter(user=self.request.user)
 
 
 class StudentDetailView(LoginRequiredMixin, DetailView):
-    """Detail view of a student."""
-
-    model = Student
+    model = Contract
     template_name = "students/student_detail.html"
     context_object_name = "student"
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return Contract.objects.filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
-        from apps.portal.models import (
-            ParentStudentLink,
-            PortalMessage,
-            ProgressNote,
-            StudentPortalLink,
-        )
+        from apps.portal.models import PortalMessage, StudentPortalLink
 
         context = super().get_context_data(**kwargs)
-        student = self.object
-        context["portal_link"] = StudentPortalLink.objects.filter(student=student).first()
-        context["parent_links"] = ParentStudentLink.objects.filter(student=student).select_related(
+        student = self.object  # Contract object
+        context["portal_link"] = StudentPortalLink.objects.filter(contract=student).first()
+        context["parent_links"] = ParentStudentLink.objects.filter(contract=student).select_related(
             "parent"
         )
-        context["progress_notes"] = ProgressNote.objects.filter(student=student).order_by(
+        context["progress_notes"] = ProgressNote.objects.filter(contract=student).order_by(
             "-created_at"
         )[:10]
         context["unread_messages"] = PortalMessage.objects.filter(
-            student=student, read_by_tutor=False
+            contract=student, read_by_tutor=False
         ).count()
         portal_link = context.get("portal_link")
         if portal_link:
@@ -72,112 +63,110 @@ class StudentDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class StudentCreateView(LoginRequiredMixin, CreateView):
-    """Create a new student."""
+class StudentCreateView(LoginRequiredMixin, View):
+    """Create new student = create new contract with student fields."""
 
-    model = Student
-    form_class = StudentForm
-    template_name = "students/student_form.html"
-    success_url = reverse_lazy("students:list")
+    def get(self, request):
+        form = ContractForm(user=request.user)
+        return render(request, "students/student_form.html", {"form": form, "is_create": True})
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        messages.success(self.request, _("Student successfully created."))
-        return super().form_valid(form)
+    def post(self, request):
+        form = ContractForm(request.POST, user=request.user)
+        if form.is_valid():
+            contract = form.save(commit=False)
+            contract.user = request.user
+            contract.save()
+            messages.success(request, _("Student successfully created."))
+            return redirect("students:detail", pk=contract.pk)
+        return render(request, "students/student_form.html", {"form": form, "is_create": True})
 
 
-class StudentUpdateView(LoginRequiredMixin, UpdateView):
-    """Update a student."""
+class StudentUpdateView(LoginRequiredMixin, View):
+    """Update student info (= update contract)."""
 
-    model = Student
-    form_class = StudentForm
-    template_name = "students/student_form.html"
-    success_url = reverse_lazy("students:list")
+    def get_object(self, request, pk):
+        return get_object_or_404(Contract, pk=pk, user=request.user)
 
-    def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+    def get(self, request, pk):
+        contract = self.get_object(request, pk)
+        form = ContractForm(instance=contract, user=request.user)
+        return render(request, "students/student_form.html", {"form": form, "object": contract})
 
-    def form_valid(self, form):
-        messages.success(self.request, _("Student successfully updated."))
-        return super().form_valid(form)
+    def post(self, request, pk):
+        contract = self.get_object(request, pk)
+        form = ContractForm(request.POST, instance=contract, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Student successfully updated."))
+            return redirect("students:detail", pk=contract.pk)
+        return render(request, "students/student_form.html", {"form": form, "object": contract})
 
 
 class StudentDeleteView(LoginRequiredMixin, DeleteView):
-    """Delete a student."""
-
-    model = Student
+    model = Contract
     template_name = "students/student_confirm_delete.html"
     success_url = reverse_lazy("students:list")
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return Contract.objects.filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
-        from apps.portal.models import ParentStudentLink, StudentPortalLink
+        from apps.portal.models import StudentPortalLink
 
-        student = self.get_object()
+        contract = self.get_object()
 
-        # Schüler-PortalUser + Django-User löschen
-        spl = StudentPortalLink.objects.filter(student=student).first()
+        # Student portal account
+        spl = StudentPortalLink.objects.filter(contract=contract).first()
         if spl:
             django_user = spl.portal_user.user
-            spl.portal_user.delete()  # cascades to StudentPortalLink
+            spl.portal_user.delete()
             django_user.delete()
 
-        # Eltern-PortalUser + Django-User löschen, falls keine weiteren Schüler verknüpft
-        for plink in ParentStudentLink.objects.filter(student=student).select_related(
+        # Parent portal accounts (only if no other children)
+        for plink in ParentStudentLink.objects.filter(contract=contract).select_related(
             "parent__user"
         ):
             parent_portal = plink.parent
-            other_links = ParentStudentLink.objects.filter(parent=parent_portal).exclude(
-                student=student
-            )
-            if not other_links.exists():
+            if (
+                not ParentStudentLink.objects.filter(parent=parent_portal)
+                .exclude(contract=contract)
+                .exists()
+            ):
                 django_user = parent_portal.user
-                parent_portal.delete()  # cascades to ParentStudentLink
+                parent_portal.delete()
                 django_user.delete()
 
-        messages.success(self.request, "Schüler erfolgreich gelöscht.")
+        messages.success(request, "Schüler erfolgreich gelöscht.")
         return super().delete(request, *args, **kwargs)
 
 
 class PortalInviteCreateView(LoginRequiredMixin, View):
-    """Erstellt PortalUser + StudentPortalLink und generiert Invite-Token."""
-
     def post(self, request, pk):
-        from apps.portal.models import PortalUser, StudentPortalLink
+        from apps.portal.models import StudentPortalLink
+        from apps.portal.email_service import send_portal_invite
 
-        student = get_object_or_404(Student, pk=pk, user=request.user)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
 
-        if not StudentPortalLink.objects.filter(student=student).exists():
+        if not StudentPortalLink.objects.filter(contract=contract).exists():
             User = get_user_model()
-            username = f"portal_student_{student.pk}_{uuid.uuid4().hex[:8]}"
+            username = f"portal_student_{contract.pk}_{uuid.uuid4().hex[:8]}"
             portal_django_user = User.objects.create_user(
-                username=username,
-                password=uuid.uuid4().hex,
+                username=username, password=uuid.uuid4().hex
             )
             portal_user = PortalUser.objects.create(
-                user=portal_django_user,
-                role="student",
-                tutor=request.user,
+                user=portal_django_user, role="student", tutor=request.user
             )
-            StudentPortalLink.objects.create(
-                portal_user=portal_user,
-                student=student,
-                invite_token=uuid.uuid4().hex,
+            spl = StudentPortalLink.objects.create(
+                portal_user=portal_user, contract=contract, invite_token=uuid.uuid4().hex
             )
-            from apps.portal.email_service import send_portal_invite
-
-            spl = StudentPortalLink.objects.get(portal_user=portal_user)
-            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
             activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
-            if student.email:
+            if contract.email:
                 try:
-                    send_portal_invite(student, spl, student.email, role="student")
+                    send_portal_invite(contract, spl, contract.email, role="student")
                     messages.success(
                         request,
-                        f"Portal-Einladung gesendet an {student.email}. "
-                        f"Aktivierungslink: {activation_url}",
+                        f"Portal-Einladung gesendet an {contract.email}. Aktivierungslink: {activation_url}",
                     )
                 except Exception as exc:
                     import logging
@@ -185,18 +174,15 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                     logging.getLogger(__name__).error("Portal invite email failed: %s", exc)
                     messages.warning(
                         request,
-                        f"Portal-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. "
-                        f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                        f"Portal-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. Aktivierungslink: {activation_url}",
                     )
             else:
                 messages.info(
                     request,
-                    f"Portal-Account erstellt. Schüler hat keine E-Mail-Adresse. "
-                    f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                    f"Portal-Account erstellt. Kein E-Mail-Versand. Aktivierungslink: {activation_url}",
                 )
         else:
-            spl = StudentPortalLink.objects.get(student=student)
-            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            spl = StudentPortalLink.objects.get(contract=contract)
             activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
             messages.info(
                 request, f"Portal-Zugang bereits vorhanden. Aktivierungslink: {activation_url}"
@@ -206,62 +192,52 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
 
 
 class PortalInviteParentView(LoginRequiredMixin, View):
-    """Create a parent portal account and link to student."""
-
     def post(self, request, pk):
         import secrets as _secrets
+        from apps.portal.email_service import send_portal_invite
 
-        student = get_object_or_404(Student, pk=pk, user=request.user)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
         parent_email = request.POST.get("parent_email", "").strip()
         if not parent_email:
             return redirect("students:detail", pk=pk)
 
-        # Kollisions-Check: E-Mail bereits in einem Portal-Konto?
         User = get_user_model()
         site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
         existing_user = User.objects.filter(email__iexact=parent_email).first()
         if existing_user and hasattr(existing_user, "portal_profile"):
             existing_portal = existing_user.portal_profile
-            # Prüfen ob bereits eine Eltern-Verknüpfung für diesen Schüler existiert
             existing_link = ParentStudentLink.objects.filter(
-                parent=existing_portal, student=student
+                parent=existing_portal, contract=contract
             ).first()
             if existing_link:
                 activation_url = f"{site_url}/portal/activate/{existing_link.invite_token}/"
                 messages.info(
                     request,
-                    f"Dieses Konto ({parent_email}) ist bereits als Elternteil verknüpft. "
-                    f"Aktivierungslink: {activation_url}",
+                    f"Dieses Konto ({parent_email}) ist bereits als Elternteil verknüpft. Aktivierungslink: {activation_url}",
                 )
             else:
-                # Bestehendes Portal-Konto als Elternteil verknüpfen (kein Duplikat)
                 parent_link, _ = ParentStudentLink.objects.get_or_create(
-                    parent=existing_portal, student=student
+                    parent=existing_portal, contract=contract
                 )
                 activation_url = f"{site_url}/portal/activate/{parent_link.invite_token}/"
                 messages.warning(
                     request,
-                    f"Hinweis: {parent_email} hat bereits ein Portal-Konto. "
-                    f"Es wurde kein neues Konto erstellt – das bestehende Konto wurde verknüpft. "
-                    f"Aktivierungslink: {activation_url}",
+                    f"Hinweis: {parent_email} hat bereits ein Portal-Konto. Aktivierungslink: {activation_url}",
                 )
             return redirect("students:detail", pk=pk)
 
-        username = f"parent_{student.pk}_{_secrets.token_hex(4)}"
+        username = f"parent_{contract.pk}_{_secrets.token_hex(4)}"
         password_temp = _secrets.token_hex(8)
         user = User.objects.create_user(
             username=username, email=parent_email, password=password_temp
         )
         portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
         parent_link, _ = ParentStudentLink.objects.get_or_create(
-            parent=portal_user, student=student
+            parent=portal_user, contract=contract
         )
-        from apps.portal.email_service import send_portal_invite
-
-        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
         activation_url = f"{site_url}/portal/activate/{parent_link.invite_token}/"
         try:
-            send_portal_invite(student, parent_link, parent_email, role="parent")
+            send_portal_invite(contract, parent_link, parent_email, role="parent")
             messages.success(
                 request,
                 f"Eltern-Einladung gesendet an {parent_email}. Aktivierungslink: {activation_url}",
@@ -272,30 +248,26 @@ class PortalInviteParentView(LoginRequiredMixin, View):
             logging.getLogger(__name__).error("Parent invite email failed: %s", exc)
             messages.warning(
                 request,
-                f"Eltern-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. "
-                f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                f"Eltern-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. Aktivierungslink: {activation_url}",
             )
         return redirect("students:detail", pk=pk)
 
 
 class PortalInviteResendView(LoginRequiredMixin, View):
-    """Sendet die Portal-Einladungs-E-Mail erneut."""
-
     def post(self, request, pk):
         from apps.portal.email_service import send_portal_invite
         from apps.portal.models import StudentPortalLink
 
-        student = get_object_or_404(Student, pk=pk, user=request.user)
-        spl = get_object_or_404(StudentPortalLink, student=student)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        spl = get_object_or_404(StudentPortalLink, contract=contract)
         site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
         activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
-        if student.email:
+        if contract.email:
             try:
-                send_portal_invite(student, spl, student.email, role="student")
+                send_portal_invite(contract, spl, contract.email, role="student")
                 messages.success(
                     request,
-                    f"Einladung erneut gesendet an {student.email}. "
-                    f"Aktivierungslink: {activation_url}",
+                    f"Einladung erneut gesendet an {contract.email}. Aktivierungslink: {activation_url}",
                 )
             except Exception as exc:
                 import logging
@@ -303,84 +275,66 @@ class PortalInviteResendView(LoginRequiredMixin, View):
                 logging.getLogger(__name__).error("Portal resend email failed: %s", exc)
                 messages.warning(
                     request,
-                    f"E-Mail-Versand fehlgeschlagen: {exc}. "
-                    f"Aktivierungslink zum manuellen Teilen: {activation_url}",
+                    f"E-Mail-Versand fehlgeschlagen: {exc}. Aktivierungslink: {activation_url}",
                 )
         else:
             messages.info(
-                request,
-                f"Kein E-Mail-Versand möglich: Schüler hat keine E-Mail-Adresse. "
-                f"Aktivierungslink: {activation_url}",
+                request, f"Kein E-Mail-Versand möglich. Aktivierungslink: {activation_url}"
             )
         return redirect("students:detail", pk=pk)
 
 
 class ProgressNoteCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        student = get_object_or_404(Student, pk=pk, user=request.user)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
         text = request.POST.get("text", "").strip()
         if text:
-            ProgressNote.objects.create(student=student, tutor=request.user, text=text)
+            ProgressNote.objects.create(contract=contract, tutor=request.user, text=text)
         return redirect("students:detail", pk=pk)
 
 
 class StudentRegenerateBookingCodeView(LoginRequiredMixin, View):
-    """Regenerate booking code for a student. Returns new code once (never stored)."""
-
     def post(self, request, pk):
         try:
-            student = Student.objects.get(pk=pk, user=request.user)
-        except Student.DoesNotExist:
+            contract = Contract.objects.get(pk=pk, user=request.user)
+        except Contract.DoesNotExist:
             return JsonResponse({"success": False, "message": _("Student not found.")}, status=404)
-
-        new_code = set_booking_code(student)
+        new_code = set_booking_code(contract)
         return JsonResponse({"success": True, "booking_code": new_code})
 
 
 class StudentDocumentListView(LoginRequiredMixin, View):
-    """Dokumente eines Schülers – Tutor-Seite."""
-
     def get(self, request, pk):
         from apps.students.models import StudentDocument
 
-        student = get_object_or_404(Student, pk=pk, user=request.user)
-        docs = StudentDocument.objects.filter(student=student)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        docs = StudentDocument.objects.filter(student=contract)
         return render(
-            request,
-            "students/student_documents.html",
-            {
-                "student": student,
-                "documents": docs,
-            },
+            request, "students/student_documents.html", {"student": contract, "documents": docs}
         )
 
     def post(self, request, pk):
         from apps.students.models import StudentDocument
 
-        student = get_object_or_404(Student, pk=pk, user=request.user)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
             return redirect("students:documents", pk=pk)
         name = request.POST.get("name", "").strip()
         StudentDocument.objects.create(
-            student=student,
-            file=uploaded_file,
-            name=name,
-            uploaded_by_tutor=True,
+            student=contract, file=uploaded_file, name=name, uploaded_by_tutor=True
         )
         messages.success(request, "Datei hochgeladen.")
         return redirect("students:documents", pk=pk)
 
 
 class StudentDocumentDeleteView(LoginRequiredMixin, View):
-    """Dokument löschen – Tutor-Seite."""
-
     def post(self, request, pk, doc_pk):
         from apps.students.models import StudentDocument
 
-        student = get_object_or_404(Student, pk=pk, user=request.user)
-        doc = get_object_or_404(StudentDocument, pk=doc_pk, student=student)
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        doc = get_object_or_404(StudentDocument, pk=doc_pk, student=contract)
         doc.file.delete(save=False)
         doc.delete()
         messages.success(request, "Dokument gelöscht.")

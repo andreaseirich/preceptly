@@ -12,7 +12,6 @@ from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class BillingProTest(TestCase):
@@ -25,9 +24,10 @@ class BillingProTest(TestCase):
         UserProfile.objects.create(user=self.premium_user, is_premium=True)
 
         for user in (self.basic_user, self.premium_user):
-            student = Student.objects.create(user=user, first_name="A", last_name="B")
             contract = Contract.objects.create(
-                student=student,
+                user=user,
+                first_name="A",
+                last_name="B",
                 hourly_rate=Decimal("30"),
                 unit_duration_minutes=60,
                 start_date=date(2025, 1, 1),

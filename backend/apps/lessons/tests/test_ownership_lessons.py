@@ -12,7 +12,6 @@ from django.urls import reverse
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
-from apps.students.models import Student
 
 
 class LessonOwnershipIsolationTest(TestCase):
@@ -23,19 +22,10 @@ class LessonOwnershipIsolationTest(TestCase):
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
 
-        self.student_a = Student.objects.create(
+        self.contract_a = Contract.objects.create(
             user=self.tutor_a,
             first_name="Alice",
             last_name="AStudent",
-        )
-        self.student_b = Student.objects.create(
-            user=self.tutor_b,
-            first_name="Bob",
-            last_name="BStudent",
-        )
-
-        self.contract_a = Contract.objects.create(
-            student=self.student_a,
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -43,7 +33,9 @@ class LessonOwnershipIsolationTest(TestCase):
             is_active=True,
         )
         self.contract_b = Contract.objects.create(
-            student=self.student_b,
+            user=self.tutor_b,
+            first_name="Bob",
+            last_name="BStudent",
             hourly_rate=25,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -144,19 +136,10 @@ class RecurringLessonOwnershipIsolationTest(TestCase):
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
 
-        self.student_a = Student.objects.create(
+        self.contract_a = Contract.objects.create(
             user=self.tutor_a,
             first_name="Alice",
             last_name="AStudent",
-        )
-        self.student_b = Student.objects.create(
-            user=self.tutor_b,
-            first_name="Bob",
-            last_name="BStudent",
-        )
-
-        self.contract_a = Contract.objects.create(
-            student=self.student_a,
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -164,7 +147,9 @@ class RecurringLessonOwnershipIsolationTest(TestCase):
             is_active=True,
         )
         self.contract_b = Contract.objects.create(
-            student=self.student_b,
+            user=self.tutor_b,
+            first_name="Bob",
+            last_name="BStudent",
             hourly_rate=25,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

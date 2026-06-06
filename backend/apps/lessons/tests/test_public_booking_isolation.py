@@ -15,7 +15,6 @@ from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 
 
 class PublicBookingTutorTokenIsolationTest(TestCase):
@@ -40,36 +39,28 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
         }
         prof_b.save()
 
-        self.student_a = Student.objects.create(
+        self.student_a = self.contract_a = Contract.objects.create(
             user=self.tutor_a,
             first_name="Alice",
             last_name="AStudent",
-        )
-        self.code_a = set_booking_code(self.student_a)
-
-        self.student_b = Student.objects.create(
-            user=self.tutor_b,
-            first_name="Bob",
-            last_name="BStudent",
-        )
-        self.code_b = set_booking_code(self.student_b)
-
-        self.contract_a = Contract.objects.create(
-            student=self.student_a,
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             end_date=date(2025, 12, 31),
             is_active=True,
         )
-        self.contract_b = Contract.objects.create(
-            student=self.student_b,
+        self.student_b = self.contract_b = Contract.objects.create(
+            user=self.tutor_b,
+            first_name="Bob",
+            last_name="BStudent",
             hourly_rate=25,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             end_date=date(2025, 12, 31),
             is_active=True,
         )
+        self.code_a = set_booking_code(self.student_a)
+        self.code_b = set_booking_code(self.student_b)
 
         self.lesson_a = Lesson.objects.create(
             contract=self.contract_a,

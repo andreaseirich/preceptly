@@ -14,7 +14,6 @@ from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.status_service import LessonStatusService
-from apps.students.models import Student
 
 
 class RecurringLessonStatusAutomationTest(TestCase):
@@ -22,11 +21,18 @@ class RecurringLessonStatusAutomationTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -127,11 +133,18 @@ class ManualLessonStatusAutomationTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Lisa", last_name="Müller", email="lisa@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Lisa",
+            last_name="Müller",
+            email="lisa@example.com",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

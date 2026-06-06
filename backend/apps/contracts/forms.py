@@ -1,7 +1,3 @@
-"""
-Forms für Contract-Model.
-"""
-
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -9,41 +5,25 @@ from apps.contracts.models import Contract
 
 
 class ContractForm(forms.ModelForm):
-    """Form für Contract-Erstellung und -Bearbeitung."""
-
-    def __init__(self, *args, user=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if user:
-            from django.db.models import Q
-
-            from apps.contracts.models import Contract
-
-            students_with_any_contract = Contract.objects.filter(student__user=user).values_list(
-                "student_id", flat=True
-            )
-            base_qs = self.fields["student"].queryset.filter(user=user)
-            if self.instance and self.instance.pk:
-                # Update-Formular: aktuellen Schüler immer anzeigen
-                self.fields["student"].queryset = base_qs.filter(
-                    Q(pk=self.instance.student_id) | ~Q(pk__in=students_with_any_contract)
-                )
-            else:
-                # Create-Formular: nur Schüler ohne jeglichen Vertrag
-                self.fields["student"].queryset = base_qs.exclude(pk__in=students_with_any_contract)
+    """Form für Contract-Erstellung und -Bearbeitung (inkl. Schülerdaten)."""
 
     has_monthly_planning_limit = forms.BooleanField(
         required=False,
         initial=True,
         label=_("Monthly planning with planned units"),
-        help_text=_(
-            "If checked, you must enter planned units for each month. If unchecked, no maximum number of units is planned."
-        ),
     )
 
     class Meta:
         model = Contract
         fields = [
-            "student",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "school",
+            "grade",
+            "subjects",
+            "is_adult",
             "institute",
             "hourly_rate",
             "unit_duration_minutes",
@@ -54,7 +34,14 @@ class ContractForm(forms.ModelForm):
             "notes",
         ]
         widgets = {
-            "student": forms.Select(attrs={"class": "form-control"}),
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "phone": forms.TextInput(attrs={"class": "form-control"}),
+            "school": forms.TextInput(attrs={"class": "form-control"}),
+            "grade": forms.TextInput(attrs={"class": "form-control"}),
+            "subjects": forms.TextInput(attrs={"class": "form-control"}),
+            "is_adult": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "institute": forms.TextInput(attrs={"class": "form-control"}),
             "hourly_rate": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "unit_duration_minutes": forms.NumberInput(attrs={"class": "form-control"}),
@@ -68,6 +55,18 @@ class ContractForm(forms.ModelForm):
             "has_monthly_planning_limit": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user = user
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self._user and not instance.pk:
+            instance.user = self._user
+        if commit:
+            instance.save()
+        return instance
 
     def clean(self):
         cleaned_data = super().clean()

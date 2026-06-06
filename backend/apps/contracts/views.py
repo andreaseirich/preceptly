@@ -37,7 +37,7 @@ class ContractListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return super().get_queryset().filter(student__user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,7 +70,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "contract"
 
     def get_queryset(self):
-        return super().get_queryset().filter(student__user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -139,7 +139,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ContractForm
 
     def get_queryset(self):
-        return super().get_queryset().filter(student__user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -239,7 +239,7 @@ class ContractDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("contracts:list")
 
     def get_queryset(self):
-        return super().get_queryset().filter(student__user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, _("Contract successfully deleted."))

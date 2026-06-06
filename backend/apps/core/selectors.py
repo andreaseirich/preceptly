@@ -42,7 +42,7 @@ class IncomeSelector:
         """
         contract = lesson.contract
         if is_tutorspace_institute(getattr(contract, "institute", None)):
-            tutor = contract.student.user
+            tutor = contract.user
             return calculate_tutorspace_amount_for_session(lesson, tutor=tutor)
 
         unit_duration = Decimal(str(contract.unit_duration_minutes))
@@ -117,7 +117,7 @@ class IncomeSelector:
             date__gte=start_date, date__lt=end_date, status=status
         ).select_related("contract")
         if user:
-            lessons_qs = lessons_qs.filter(contract__student__user=user)
+            lessons_qs = lessons_qs.filter(contract__user=user)
         lessons = lessons_qs
 
         total_income = Decimal("0.00")
@@ -162,7 +162,7 @@ class IncomeSelector:
         # Geplante Einheiten aus ContractMonthlyPlan
         monthly_plans_qs = ContractMonthlyPlan.objects.filter(year=year, month=month)
         if user:
-            monthly_plans_qs = monthly_plans_qs.filter(contract__student__user=user)
+            monthly_plans_qs = monthly_plans_qs.filter(contract__user=user)
         monthly_plans = monthly_plans_qs
         planned_units = sum(plan.planned_units for plan in monthly_plans)
         planned_amount = Decimal("0.00")
@@ -183,7 +183,7 @@ class IncomeSelector:
             "contract"
         )
         if user:
-            lessons_qs = lessons_qs.filter(contract__student__user=user)
+            lessons_qs = lessons_qs.filter(contract__user=user)
         lessons = lessons_qs
 
         actual_units = lessons.count()
@@ -258,7 +258,7 @@ class IncomeSelector:
 
         lessons_qs = Lesson.objects.filter(query).select_related("contract")
         if user:
-            lessons_qs = lessons_qs.filter(contract__student__user=user)
+            lessons_qs = lessons_qs.filter(contract__user=user)
         lessons = lessons_qs
 
         status_breakdown = {}
@@ -314,7 +314,7 @@ class IncomeSelector:
             query & Q(id__in=invoiced_lesson_ids)
         ).select_related("contract")
         if user:
-            invoiced_lessons_qs = invoiced_lessons_qs.filter(contract__student__user=user)
+            invoiced_lessons_qs = invoiced_lessons_qs.filter(contract__user=user)
         invoiced_lessons = invoiced_lessons_qs
 
         # Lessons without InvoiceItem with status TAUGHT (not invoiced, but taught)
@@ -324,7 +324,7 @@ class IncomeSelector:
             .select_related("contract")
         )
         if user:
-            not_invoiced_qs = not_invoiced_qs.filter(contract__student__user=user)
+            not_invoiced_qs = not_invoiced_qs.filter(contract__user=user)
         not_invoiced_lessons = not_invoiced_qs
 
         # Calculate income

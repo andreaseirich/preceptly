@@ -239,8 +239,8 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             # Check conflicts with lessons
             conflicting_lessons = Lesson.objects.filter(
                 date=blocked_time.start_datetime.date(),
-                contract__student__user=self.request.user,
-            ).select_related("contract", "contract__student")
+                contract__user=self.request.user,
+            ).select_related("contract")
 
             for lesson in conflicting_lessons:
                 lesson_start, lesson_end = LessonConflictService.calculate_time_block(lesson)

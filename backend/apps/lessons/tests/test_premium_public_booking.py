@@ -1,3 +1,6 @@
+from datetime import date
+from decimal import Decimal
+
 """
 Tests for Premium gating on Public Booking (limit, reschedule).
 """
@@ -14,7 +17,6 @@ from apps.contracts.models import Contract
 from apps.core.feature_flags import PUBLIC_BOOKING_MONTHLY_LIMIT
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class PublicBookingLimitTest(TestCase):
@@ -26,17 +28,18 @@ class PublicBookingLimitTest(TestCase):
         profile = UserProfile.objects.get(user=self.tutor)
         profile.public_booking_token = "tok-limit"
         profile.save()
-        self.student = Student.objects.create(user=self.tutor, first_name="A", last_name="B")
-        from apps.students.booking_code_service import set_booking_code
-
-        self.booking_code = set_booking_code(self.student)
-        self.contract = Contract.objects.create(
-            student=self.student,
+        self.student = self.contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="A",
+            last_name="B",
             hourly_rate=0,
             unit_duration_minutes=60,
             start_date=timezone.now().date(),
             is_active=True,
         )
+        from apps.students.booking_code_service import set_booking_code
+
+        self.booking_code = set_booking_code(self.student)
         for _ in range(PUBLIC_BOOKING_MONTHLY_LIMIT):
             Lesson.objects.create(
                 contract=self.contract,
@@ -94,19 +97,18 @@ class PublicReschedulePremiumTest(TestCase):
         prof2.public_booking_token = "tok-prem"
         prof2.save()
 
-        self.student = Student.objects.create(
-            user=self.premium_tutor, first_name="A", last_name="B"
-        )
         from apps.students.booking_code_service import set_booking_code
 
-        set_booking_code(self.student)
-        self.contract = Contract.objects.create(
-            student=self.student,
+        self.student = self.contract = Contract.objects.create(
+            user=self.premium_tutor,
+            first_name="A",
+            last_name="B",
             hourly_rate=0,
             unit_duration_minutes=60,
             start_date=timezone.now().date(),
             is_active=True,
         )
+        set_booking_code(self.student)
         self.lesson = Lesson.objects.create(
             contract=self.contract,
             date=timezone.now().date() + timedelta(days=7),
@@ -114,17 +116,16 @@ class PublicReschedulePremiumTest(TestCase):
             duration_minutes=60,
             status="planned",
         )
-        self.student_basic = Student.objects.create(
-            user=self.basic_tutor, first_name="C", last_name="D"
-        )
-        self.booking_code_basic = set_booking_code(self.student_basic)
-        self.contract_basic = Contract.objects.create(
-            student=self.student_basic,
+        self.student_basic = self.contract_basic = Contract.objects.create(
+            user=self.basic_tutor,
+            first_name="C",
+            last_name="D",
             hourly_rate=0,
             unit_duration_minutes=60,
             start_date=timezone.now().date(),
             is_active=True,
         )
+        self.booking_code_basic = set_booking_code(self.student_basic)
         self.lesson_basic = Lesson.objects.create(
             contract=self.contract_basic,
             date=timezone.now().date() + timedelta(days=7),

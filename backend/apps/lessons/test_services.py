@@ -13,7 +13,6 @@ from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService, LessonQueryService
-from apps.students.models import Student
 
 
 class LessonConflictServiceTest(TestCase):
@@ -22,21 +21,33 @@ class LessonConflictServiceTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Set up test data."""
-        self.student1 = Student.objects.create(
+        self.student1 = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
         )
-        self.student2 = Student.objects.create(
+        self.student2 = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Anna",
             last_name="Schmidt",
         )
         self.contract1 = Contract.objects.create(
-            student=self.student1, hourly_rate=Decimal("25.00"), start_date=date.today()
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
         )
         self.contract2 = Contract.objects.create(
-            student=self.student2, hourly_rate=Decimal("30.00"), start_date=date.today()
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+            hourly_rate=Decimal("30.00"),
+            start_date=date.today(),
         )
 
     def test_calculate_time_block(self):
@@ -135,13 +146,19 @@ class LessonQueryServiceTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Set up test data."""
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
         )
         self.contract = Contract.objects.create(
-            student=self.student, hourly_rate=Decimal("25.00"), start_date=date(2025, 12, 1)
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+            hourly_rate=Decimal("25.00"),
+            start_date=date(2025, 12, 1),
         )
 
     def test_get_lessons_for_month(self):

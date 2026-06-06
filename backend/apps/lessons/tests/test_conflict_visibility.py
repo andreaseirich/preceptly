@@ -12,7 +12,6 @@ from django.urls import reverse
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService
-from apps.students.models import Student
 
 
 class ConflictVisibilityTest(TestCase):
@@ -23,13 +22,10 @@ class ConflictVisibilityTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
 
-        self.student = Student.objects.create(
+        self.student = self.contract = Contract.objects.create(
             user=self.user,
             first_name="Test",
             last_name="Student",
-        )
-        self.contract = Contract.objects.create(
-            student=self.student,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2023, 1, 1),

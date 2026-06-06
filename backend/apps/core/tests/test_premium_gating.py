@@ -17,7 +17,6 @@ from apps.core.feature_flags import (
 )
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class FeatureFlagsTest(TestCase):
@@ -44,9 +43,10 @@ class FeatureFlagsTest(TestCase):
     def test_public_booking_limit_reached_basic(self):
         from datetime import date
 
-        student = Student.objects.create(user=self.basic_user, first_name="A", last_name="B")
         contract = Contract.objects.create(
-            student=student,
+            user=self.basic_user,
+            first_name="A",
+            last_name="B",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

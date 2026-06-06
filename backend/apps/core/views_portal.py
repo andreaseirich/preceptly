@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 
 from apps.portal.models import PortalMessage
-from apps.students.models import Student
+from apps.contracts.models import Contract
 
 
 class TutorMessageView(LoginRequiredMixin, TemplateView):
@@ -16,15 +16,15 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
     template_name = "core/tutor_messages.html"
 
     def get_student(self):
-        return get_object_or_404(Student, pk=self.kwargs["pk"], user=self.request.user)
+        return get_object_or_404(Contract, pk=self.kwargs["pk"], user=self.request.user)
 
     def get(self, request, *args, **kwargs):
         student = self.get_student()
-        PortalMessage.objects.filter(student=student, read_by_tutor=False).update(
+        PortalMessage.objects.filter(contract=student, read_by_tutor=False).update(
             read_by_tutor=True
         )
-        messages = PortalMessage.objects.filter(student=student)
-        unread_count = PortalMessage.objects.filter(student=student, read_by_tutor=False).count()
+        messages = PortalMessage.objects.filter(contract=student)
+        unread_count = PortalMessage.objects.filter(contract=student, read_by_tutor=False).count()
         return self.render_to_response(
             {
                 "student": student,
@@ -38,7 +38,7 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
         text = request.POST.get("text", "").strip()
         if text:
             PortalMessage.objects.create(
-                student=student,
+                contract=student,
                 sender_is_tutor=True,
                 read_by_tutor=True,
                 text=text,

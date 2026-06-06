@@ -13,7 +13,6 @@ from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
 from apps.lessons.week_service import WeekService
-from apps.students.models import Student
 
 
 class WeekServiceTest(TestCase):
@@ -22,13 +21,17 @@ class WeekServiceTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         """Setzt Testdaten auf."""
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -105,13 +108,17 @@ class WeekViewTest(TestCase):
         """Setzt Testdaten auf."""
         self.client = Client()
         self.client.force_login(self.user)
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -173,13 +180,17 @@ class LessonCreateViewWithStartEndTest(TestCase):
         """Setzt Testdaten auf."""
         self.client = Client()
         self.client.force_login(self.user)
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="Max",
             last_name="Mustermann",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

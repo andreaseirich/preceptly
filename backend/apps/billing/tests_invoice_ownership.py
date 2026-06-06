@@ -13,7 +13,6 @@ from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InvoiceOwnershipIsolationTest(TestCase):
@@ -23,27 +22,21 @@ class InvoiceOwnershipIsolationTest(TestCase):
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
 
-        self.student_a = Student.objects.create(
+        self.contract_a = Contract.objects.create(
             user=self.tutor_a,
             first_name="A",
             last_name="Student",
-        )
-        self.student_b = Student.objects.create(
-            user=self.tutor_b,
-            first_name="B",
-            last_name="Student",
-        )
-        self.contract_a = Contract.objects.create(
-            student=self.student_a,
-            hourly_rate=Decimal("30"),
+            hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             end_date=date(2025, 12, 31),
             is_active=True,
         )
         self.contract_b = Contract.objects.create(
-            student=self.student_b,
-            hourly_rate=Decimal("25"),
+            user=self.tutor_b,
+            first_name="B",
+            last_name="Student",
+            hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             end_date=date(2025, 12, 31),
@@ -113,10 +106,10 @@ class InvoiceNumberUniqueConstraintTest(TestCase):
     def setUp(self):
         self.user1 = User.objects.create_user(username="u1", password="test")
         self.user2 = User.objects.create_user(username="u2", password="test")
-        self.student1 = Student.objects.create(user=self.user1, first_name="A", last_name="B")
-        self.student2 = Student.objects.create(user=self.user2, first_name="C", last_name="D")
         self.contract1 = Contract.objects.create(
-            student=self.student1,
+            user=self.user1,
+            first_name="A",
+            last_name="B",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -124,7 +117,9 @@ class InvoiceNumberUniqueConstraintTest(TestCase):
             is_active=True,
         )
         self.contract2 = Contract.objects.create(
-            student=self.student2,
+            user=self.user2,
+            first_name="C",
+            last_name="D",
             hourly_rate=Decimal("25"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -199,13 +194,17 @@ class OwnerResolverTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="A",
             last_name="B",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

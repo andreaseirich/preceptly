@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for Public Booking reschedule (Umbuchung) functionality.
 """
@@ -15,7 +17,6 @@ from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 
 
 class RescheduleTestMixin:
@@ -28,19 +29,17 @@ class RescheduleTestMixin:
         prof.is_premium = True
         prof.save()
 
-        self.student = Student.objects.create(
-            user=self.tutor, first_name="Reschedule", last_name="Test"
-        )
-        self.booking_code = set_booking_code(self.student)
-
-        self.contract = Contract.objects.create(
-            student=self.student,
+        self.student = self.contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="Reschedule",
+            last_name="Test",
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             is_active=True,
             working_hours={"monday": [{"start": "09:00", "end": "17:00"}]},
         )
+        self.booking_code = set_booking_code(self.student)
 
         self.client = Client(enforce_csrf_checks=True)
 
@@ -173,11 +172,10 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
         self.assertEqual(resp.status_code, 401)
 
     def test_reschedule_fails_for_other_student_lesson(self):
-        other_student = Student.objects.create(
-            user=self.tutor, first_name="Other", last_name="Student"
-        )
         other_contract = Contract.objects.create(
-            student=other_student,
+            user=self.tutor,
+            first_name="Other",
+            last_name="Student",
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

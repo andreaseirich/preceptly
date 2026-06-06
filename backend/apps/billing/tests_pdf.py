@@ -15,7 +15,6 @@ from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InvoicePDFTest(TestCase):
@@ -24,11 +23,17 @@ class InvoicePDFTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
         self.other = User.objects.create_user(username="other", password="test")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Test", last_name="Student"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -115,11 +120,17 @@ class InvoicePDFCleanupTest(TestCase):
     def setUp(self):
         self.media_root = tempfile.mkdtemp()
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Test", last_name="Student"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

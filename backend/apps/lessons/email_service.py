@@ -56,7 +56,7 @@ def send_booking_notification(lesson: Lesson) -> bool:
 
     context = {"lesson": lesson, "end_time": end_time}
     subject = _("New Lesson Booking: {student} - {date}").format(
-        student=lesson.contract.student, date=lesson.date.strftime("%d.%m.%Y")
+        student=lesson.contract.full_name, date=lesson.date.strftime("%d.%m.%Y")
     )
     html_message = render_to_string("lessons/email_booking_notification.html", context)
     plain_message = render_to_string("lessons/email_booking_notification.txt", context)

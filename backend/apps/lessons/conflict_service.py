@@ -24,11 +24,11 @@ def recalculate_conflicts_for_affected_sessions(session: Session):
     Args:
         session: The session that was changed
     """
-    owner_user = session.contract.student.user
+    owner_user = session.contract.user
 
     # Find all sessions on the same date of the same user that might be affected
     affected_sessions = Session.objects.filter(
-        date=session.date, contract__student__user=owner_user
+        date=session.date, contract__user=owner_user
     ).exclude(pk=session.pk if session.pk else None)
 
     for affected_session in affected_sessions:
@@ -52,7 +52,7 @@ def recalculate_conflicts_for_blocked_time(blocked_time: BlockedTime):
     # Find sessions on the same date belonging to the same user
     affected_sessions = Session.objects.filter(
         date=blocked_time.start_datetime.date(),
-        contract__student__user=blocked_time.user,
+        contract__user=blocked_time.user,
     )
 
     for session in affected_sessions:
@@ -124,15 +124,13 @@ class SessionConflictService:
         start_datetime, end_datetime = SessionConflictService.calculate_time_block(session)
 
         # Check conflicts with other sessions (same user only - multi-tenancy)
-        owner_user = session.contract.student.user
-        query = Q(date=session.date, start_time__isnull=False, contract__student__user=owner_user)
+        owner_user = session.contract.user
+        query = Q(date=session.date, start_time__isnull=False, contract__user=owner_user)
 
         if exclude_self and session.pk:
             query &= ~Q(pk=session.pk)
 
-        other_sessions = Session.objects.filter(query).select_related(
-            "contract", "contract__student"
-        )
+        other_sessions = Session.objects.filter(query).select_related("contract", "contract")
 
         for other_session in other_sessions:
             other_start, other_end = SessionConflictService.calculate_time_block(other_session)
@@ -146,7 +144,7 @@ class SessionConflictService:
                         "type": "lesson",
                         "object": other_session,
                         "message": _("Overlap with lesson for {student} ({time})").format(
-                            student=other_session.contract.student,
+                            student=other_session.contract,
                             time=other_session.start_time.strftime("%H:%M"),
                         ),
                         "start": other_start,

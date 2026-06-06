@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for internationalization (i18n) functionality.
 """
@@ -8,12 +10,13 @@ from datetime import date
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
+
+from apps.contracts.models import Contract
 from django.utils.translation import activate
 
 from apps.billing.models import Invoice
 from apps.core.models import UserProfile
 from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 
 
 class I18nTestCase(TestCase):
@@ -218,7 +221,13 @@ class I18nTestCase(TestCase):
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
         prof.public_booking_token = "tok-csrf2"
         prof.save()
-        student = Student.objects.create(user=user, first_name="Max", last_name="Test")
+        student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=user,
+            first_name="Max",
+            last_name="Test",
+        )
         code = set_booking_code(student)
         # 1. Load booking page (gets CSRF cookie)
         self.client.get("/lessons/public-booking/tok-csrf2/")

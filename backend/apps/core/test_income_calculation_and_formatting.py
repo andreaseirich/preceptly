@@ -15,7 +15,6 @@ from apps.contracts.models import Contract
 from apps.core.selectors import IncomeSelector
 from apps.core.templatetags.currency import euro
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class IncomeCalculationTest(TestCase):
@@ -23,12 +22,19 @@ class IncomeCalculationTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
-        self.student = Student.objects.create(
-            user=self.user, first_name="Max", last_name="Mustermann", email="max@example.com"
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Max",
+            last_name="Mustermann",
+            email="max@example.com",
         )
         # Vertrag: 45 Min/Einheit, 12€/Einheit
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("12.00"),
             unit_duration_minutes=45,
             start_date=date(2025, 1, 1),
@@ -168,9 +174,17 @@ class IncomeCalculationTest(TestCase):
     def test_get_lesson_amount_sums_all_invoice_lines_for_same_lesson(self):
         """Regression: multiple InvoiceItems for one lesson must all count (not .first() only)."""
         user = User.objects.create_user(username="tutor_sum", password="x")
-        student = Student.objects.create(user=user, first_name="A", last_name="B")
+        student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=user,
+            first_name="A",
+            last_name="B",
+        )
         contract = Contract.objects.create(
-            student=student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

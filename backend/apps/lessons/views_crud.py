@@ -45,7 +45,7 @@ class LessonListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Filter lessons by user and optionally by date range."""
-        queryset = super().get_queryset().filter(contract__student__user=self.request.user)
+        queryset = super().get_queryset().filter(contract__user=self.request.user)
 
         # Filter by date range if provided
         start_date = self.request.GET.get("start_date")
@@ -67,7 +67,7 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "lesson"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -297,7 +297,7 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "lessons/lesson_form.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -490,7 +490,7 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "lessons/lesson_confirm_delete.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

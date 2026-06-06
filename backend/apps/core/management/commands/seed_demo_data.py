@@ -33,7 +33,6 @@ from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
-from apps.students.models import Student
 
 
 class Command(BaseCommand):
@@ -53,22 +52,18 @@ class Command(BaseCommand):
             return
 
         demo_user_ids = list(demo_users.values_list("id", flat=True))
-        student_ids = list(
-            Student.objects.filter(user_id__in=demo_user_ids).values_list("id", flat=True)
-        )
         contract_ids = list(
-            Contract.objects.filter(student_id__in=student_ids).values_list("id", flat=True)
+            Contract.objects.filter(user_id__in=demo_user_ids).values_list("id", flat=True)
         )
 
-        LessonPlan.objects.filter(student_id__in=student_ids).delete()
+        LessonPlan.objects.filter(contract_id__in=contract_ids).delete()
         Invoice.objects.filter(owner_id__in=demo_user_ids).delete()
         Lesson.objects.filter(contract_id__in=contract_ids).delete()
         RecurringLesson.objects.filter(contract_id__in=contract_ids).delete()
         BlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
         RecurringBlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
         ContractMonthlyPlan.objects.filter(contract_id__in=contract_ids).delete()
-        Contract.objects.filter(student_id__in=student_ids).delete()
-        Student.objects.filter(user_id__in=demo_user_ids).delete()
+        Contract.objects.filter(user_id__in=demo_user_ids).delete()
         UserProfile.objects.filter(user_id__in=demo_user_ids).delete()
         User.objects.filter(id__in=demo_user_ids).delete()
 
@@ -105,8 +100,9 @@ class Command(BaseCommand):
 
         UserProfile.objects.get_or_create(user=non_premium_user, defaults={"is_premium": False})
 
-        # Students (assigned to premium_user)
-        student1 = Student.objects.create(
+        # Contracts (contain all student info)
+        # Contract 1: With monthly quotas (for quota conflicts)
+        contract1 = Contract.objects.create(
             user=premium_user,
             first_name="Max",
             last_name="Mustermann",
@@ -115,51 +111,11 @@ class Command(BaseCommand):
             school="Gymnasium XY",
             grade="Grade 10",
             subjects="Math, Physics",
-            notes="Very motivated, needs support with algebra",
-        )
-
-        student2 = Student.objects.create(
-            user=premium_user,
-            first_name="Anna",
-            last_name="Schmidt",
-            email="anna.schmidt@example.com",
-            phone="0123-456790",
-            school="Realschule ABC",
-            grade="Grade 9",
-            subjects="German, English",
-            notes="Good student, wants to prepare for final exams",
-        )
-
-        student3 = Student.objects.create(
-            user=premium_user,
-            first_name="Tom",
-            last_name="Weber",
-            email="tom.weber@example.com",
-            school="Gymnasium XY",
-            grade="Grade 11",
-            subjects="Math, Chemistry",
-        )
-
-        student4 = Student.objects.create(
-            user=premium_user,
-            first_name="Lisa",
-            last_name="Müller",
-            email="lisa.mueller@example.com",
-            school="Gymnasium XY",
-            grade="Grade 8",
-            subjects="German, English",
-            notes="Recurring lessons every Monday and Wednesday",
-        )
-
-        # Contracts
-        # Contract 1: With monthly quotas (for quota conflicts)
-        contract1 = Contract.objects.create(
-            student=student1,
+            notes="Weekly 2x Math - with monthly quotas",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 11, 1),
             is_active=True,
-            notes="Weekly 2x Math - with monthly quotas",
         )
 
         # ContractMonthlyPlan for quota conflicts
@@ -168,33 +124,52 @@ class Command(BaseCommand):
 
         # Contract 2: With recurring lessons
         contract2 = Contract.objects.create(
-            student=student2,
+            user=premium_user,
+            first_name="Anna",
+            last_name="Schmidt",
+            email="anna.schmidt@example.com",
+            phone="0123-456790",
+            school="Realschule ABC",
+            grade="Grade 9",
+            subjects="German, English",
+            notes="Recurring lessons weekly",
             institute="Tutoring Institute ABC",
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=90,
             start_date=date(2025, 10, 15),
             is_active=True,
-            notes="Recurring lessons weekly",
         )
 
         # Contract 3: Single lessons only
         contract3 = Contract.objects.create(
-            student=student3,
+            user=premium_user,
+            first_name="Tom",
+            last_name="Weber",
+            email="tom.weber@example.com",
+            school="Gymnasium XY",
+            grade="Grade 11",
+            subjects="Math, Chemistry",
+            notes="Single lessons only",
             hourly_rate=Decimal("28.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 12, 1),
             is_active=True,
-            notes="Single lessons only",
         )
 
         # Contract 4: With recurring lessons (Mon+Wed)
         contract4 = Contract.objects.create(
-            student=student4,
+            user=premium_user,
+            first_name="Lisa",
+            last_name="Müller",
+            email="lisa.mueller@example.com",
+            school="Gymnasium XY",
+            grade="Grade 8",
+            subjects="German, English",
+            notes="Recurring lessons Monday and Wednesday",
             hourly_rate=Decimal("22.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 11, 1),
             is_active=True,
-            notes="Recurring lessons Monday and Wednesday",
         )
 
         # Lessons (with conflicts)
@@ -390,7 +365,7 @@ class Command(BaseCommand):
 
         # Demo LessonPlan 1 (for lesson1 - already existing)
         LessonPlan.objects.create(
-            student=student1,
+            contract=contract1,
             lesson=lesson1,
             topic="Linear Equations",
             subject="Math",
@@ -421,7 +396,7 @@ class Command(BaseCommand):
         if recurring_lessons.exists():
             first_recurring_lesson = recurring_lessons.first()
             LessonPlan.objects.create(
-                student=student4,
+                contract=contract4,
                 lesson=first_recurring_lesson,
                 topic="German Grammar: Sentence Components",
                 subject="German",
@@ -446,7 +421,7 @@ class Command(BaseCommand):
 
         # --- Demo data for non_premium_user (demo_user) ---
         # Standard user gets a smaller set of data for comparison
-        std_student1 = Student.objects.create(
+        std_contract1 = Contract.objects.create(
             user=non_premium_user,
             first_name="Emma",
             last_name="Braun",
@@ -455,10 +430,14 @@ class Command(BaseCommand):
             school="Gymnasium Z",
             grade="Grade 9",
             subjects="Math, English",
-            notes="Standard demo student",
+            notes="Weekly Math lessons",
+            hourly_rate=Decimal("24.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 11, 1),
+            is_active=True,
         )
 
-        std_student2 = Student.objects.create(
+        std_contract2 = Contract.objects.create(
             user=non_premium_user,
             first_name="Leon",
             last_name="Fischer",
@@ -466,24 +445,11 @@ class Command(BaseCommand):
             school="Realschule M",
             grade="Grade 8",
             subjects="German",
-        )
-
-        std_contract1 = Contract.objects.create(
-            student=std_student1,
-            hourly_rate=Decimal("24.00"),
-            unit_duration_minutes=60,
-            start_date=date(2025, 11, 1),
-            is_active=True,
-            notes="Weekly Math lessons",
-        )
-
-        std_contract2 = Contract.objects.create(
-            student=std_student2,
+            notes="German support",
             hourly_rate=Decimal("20.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 10, 20),
             is_active=True,
-            notes="German support",
         )
 
         ContractMonthlyPlan.objects.create(
@@ -570,7 +536,9 @@ class Command(BaseCommand):
             # lesson4 should now be automatically set to "paid"
 
         self.stdout.write(self.style.SUCCESS("\n✅ Demo data successfully created:"))
-        self.stdout.write(f"  - {Student.objects.count()} students")
+        self.stdout.write(
+            f"  - {Contract.objects.filter(user__username__in=['demo_premium', 'demo_user']).count()} demo contracts"
+        )
         self.stdout.write(f"  - {Contract.objects.count()} contracts")
         self.stdout.write(f"  - {ContractMonthlyPlan.objects.count()} monthly plans")
         self.stdout.write(f"  - {Lesson.objects.count()} lessons")

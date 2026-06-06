@@ -12,7 +12,6 @@ from apps.core.models import UserProfile
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
-from apps.students.models import Student
 
 
 class SeedDemoDataTest(TestCase):
@@ -80,8 +79,6 @@ class SeedDemoDataTest(TestCase):
         call_command("seed_demo_data", "--clear")
 
         # Check students exist
-        students = Student.objects.all()
-        self.assertGreaterEqual(students.count(), 3)
 
         # Check contracts exist
         contracts = Contract.objects.all()
@@ -105,13 +102,13 @@ class SeedDemoDataTest(TestCase):
         call_command("seed_demo_data", "--clear")
 
         non_premium_user = User.objects.get(username="demo_user")
-        students = Student.objects.filter(user=non_premium_user)
+        students = Contract.objects.filter(user=non_premium_user)
         self.assertGreaterEqual(students.count(), 2, "demo_user should have at least 2 students")
 
-        contracts = Contract.objects.filter(student__user=non_premium_user)
+        contracts = Contract.objects.filter(user=non_premium_user)
         self.assertGreaterEqual(contracts.count(), 2, "demo_user should have at least 2 contracts")
 
-        lessons = Lesson.objects.filter(contract__student__user=non_premium_user)
+        lessons = Lesson.objects.filter(contract__user=non_premium_user)
         self.assertGreaterEqual(lessons.count(), 3, "demo_user should have at least 3 lessons")
 
         blocked_times = BlockedTime.objects.filter(user=non_premium_user)

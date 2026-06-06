@@ -46,11 +46,11 @@ class WeekService:
         # Lade Lessons für die Woche
         lessons_qs = (
             Lesson.objects.filter(date__gte=week_start, date__lte=week_end)
-            .select_related("contract", "contract__student")
+            .select_related("contract")
             .order_by("date", "start_time")
         )
         if user:
-            lessons_qs = lessons_qs.filter(contract__student__user=user)
+            lessons_qs = lessons_qs.filter(contract__user=user)
         lessons = lessons_qs
 
         # Lade Blockzeiten für die Woche

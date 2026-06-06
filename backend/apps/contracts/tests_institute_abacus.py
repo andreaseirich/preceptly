@@ -10,7 +10,6 @@ from apps.contracts.institute_utils import ABACUS_INSTITUTE_NAME, is_abacus_inst
 from apps.contracts.models import Contract
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class InstituteUtilsTest(TestCase):
@@ -24,9 +23,17 @@ class InstituteUtilsTest(TestCase):
 class AbacusTutorNoShowBillingTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tutor_abacus_ns", password="x")
-        self.student = Student.objects.create(user=self.user, first_name="A", last_name="Student")
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="A",
+            last_name="Student",
+        )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             institute=ABACUS_INSTITUTE_NAME,
             hourly_rate=Decimal("24.00"),
             unit_duration_minutes=60,

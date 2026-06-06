@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """
 Tests for time-dependent travel policy (Vor-Ort: ÖPNV buffer + no-go windows).
 - Vor-Ort with policy: slots in no-go/buffer are not offered; book_lesson rejects them.
@@ -20,7 +22,6 @@ from apps.lessons.travel_policy import (
     is_slot_allowed_by_policy,
 )
 from apps.students.booking_code_service import set_booking_code
-from apps.students.models import Student
 
 
 def _next_monday() -> date:
@@ -150,13 +151,17 @@ class TravelPolicyBookingServiceTest(TestCase):
             "monday": [{"start": "08:00", "end": "18:00"}],
         }
         self.profile.save()
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.user,
             first_name="S",
             last_name="T",
         )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=30,
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -244,19 +249,14 @@ class TravelPolicyBookLessonAPITest(TestCase):
             ],
         }
         self.profile.save()
-        self.student = Student.objects.create(
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.tutor,
             first_name="S",
             last_name="T",
         )
         self.booking_code = set_booking_code(self.student)
-        Contract.objects.create(
-            student=self.student,
-            hourly_rate=30,
-            unit_duration_minutes=60,
-            start_date=date(2025, 1, 1),
-            is_active=True,
-        )
 
     def _csrf_headers(self):
         self.client.get(

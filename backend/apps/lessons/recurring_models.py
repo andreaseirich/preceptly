@@ -65,7 +65,7 @@ class RecurringSession(models.Model):
 
     def __str__(self):
         weekdays = self.get_active_weekdays_display()
-        return f"{self.contract.student} - {weekdays} {self.start_time} (from {self.start_date})"
+        return f"{self.contract} - {weekdays} {self.start_time} (from {self.start_date})"
 
     def get_active_weekdays(self):
         """Returns a list of active weekdays (0=Monday, 6=Sunday)."""

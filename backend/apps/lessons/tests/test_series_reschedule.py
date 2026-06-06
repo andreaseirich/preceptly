@@ -13,7 +13,6 @@ from apps.contracts.models import Contract
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.recurring_utils import get_all_lessons_for_recurring
-from apps.students.models import Student
 
 
 class SeriesRescheduleTest(TestCase):
@@ -21,9 +20,17 @@ class SeriesRescheduleTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        self.student = Student.objects.create(user=self.user, first_name="Max", last_name="Test")
+        self.student = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
+            user=self.user,
+            first_name="Max",
+            last_name="Test",
+        )
         self.contract = Contract.objects.create(
-            student=self.student,
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

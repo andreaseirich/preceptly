@@ -15,7 +15,7 @@ def _get_institute_choices_for_user(user):
     if not user:
         return [("", _("All institutes"))]
     institutes = (
-        Contract.objects.filter(student__user=user, is_active=True)
+        Contract.objects.filter(user=user, is_active=True)
         .exclude(Q(institute__isnull=True) | Q(institute=""))
         .values_list("institute", flat=True)
         .distinct()
@@ -62,7 +62,7 @@ class InvoiceCreateForm(forms.Form):
         super().__init__(*args, **kwargs)
         if user:
             self.fields["institute"].choices = _get_institute_choices_for_user(user)
-            base_contracts = Contract.objects.filter(is_active=True, student__user=user)
+            base_contracts = Contract.objects.filter(is_active=True, user=user)
             institute = self.initial.get("institute") or (
                 self.data.get("institute") if self.data else None
             )

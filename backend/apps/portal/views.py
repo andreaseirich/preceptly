@@ -72,25 +72,25 @@ class StudentHomeView(View):
         if not portal_user or portal_user.role != "student":
             return redirect("portal:login")
         link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-        if link.student.user != portal_user.tutor:
+        if link.contract.user != portal_user.tutor:
             return HttpResponseForbidden()
-        student = link.student
+        student = link.contract
         import datetime
 
         from apps.lessons.models import Lesson
 
         today = datetime.date.today()
         upcoming = Lesson.objects.filter(
-            contract__student=student,
+            contract=student,
             date__gte=today,
             status__in=["planned"],
         ).order_by("date", "start_time")[:5]
         recent = Lesson.objects.filter(
-            contract__student=student,
+            contract=student,
             date__lt=today,
         ).order_by("-date", "-start_time")[:5]
-        messages = PortalMessage.objects.filter(student=student).order_by("created_at")
-        PortalMessage.objects.filter(student=student, read_by_portal=False).update(
+        messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
+        PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
         return render(
@@ -114,18 +114,18 @@ class StudentLessonListView(View):
         if not portal_user or portal_user.role != "student":
             return redirect("portal:login")
         link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-        if link.student.user != portal_user.tutor:
+        if link.contract.user != portal_user.tutor:
             return HttpResponseForbidden()
         from apps.lessons.models import Lesson
 
         lessons = Lesson.objects.filter(
-            contract__student=link.student,
+            contract=link.contract,
         ).order_by("-date", "-start_time")
         return render(
             request,
             self.template_name,
             {
-                "student": link.student,
+                "student": link.contract,
                 "lessons": lessons,
                 "portal_user": portal_user,
             },
@@ -149,7 +149,7 @@ class ParentHomeView(View):
         for link in links:
             upcoming = (
                 Lesson.objects.filter(
-                    contract__student=link.student,
+                    contract=link.contract,
                     date__gte=today,
                     status__in=["planned"],
                 )
@@ -157,11 +157,11 @@ class ParentHomeView(View):
                 .first()
             )
             unread = PortalMessage.objects.filter(
-                student=link.student, read_by_portal=False
+                contract=link.contract, read_by_portal=False
             ).count()
             students_data.append(
                 {
-                    "student": link.student,
+                    "student": link.contract,
                     "next_lesson": upcoming,
                     "unread_messages": unread,
                 }
@@ -184,15 +184,15 @@ class ParentStudentDetailView(View):
         if not portal_user or portal_user.role != "parent":
             return redirect("portal:login")
         link = get_object_or_404(ParentStudentLink, parent=portal_user, student_id=student_pk)
-        student = link.student
+        student = link.contract
         from apps.lessons.models import Lesson
 
         lessons = Lesson.objects.filter(
-            contract__student=student,
+            contract=student,
         ).order_by("-date", "-start_time")[:20]
         progress_notes = student.progress_notes.all()[:10]
-        messages = PortalMessage.objects.filter(student=student).order_by("created_at")
-        PortalMessage.objects.filter(student=student, read_by_portal=False).update(
+        messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
+        PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
         return render(
@@ -216,16 +216,16 @@ class PortalMessageView(View):
             link = StudentPortalLink.objects.filter(
                 portal_user=portal_user, is_active=True, student_id=student_pk
             ).first()
-            if link and link.student.user != portal_user.tutor:
+            if link and link.contract.user != portal_user.tutor:
                 return None
-            return link.student if link else None
+            return link.contract if link else None
         else:
             link = ParentStudentLink.objects.filter(
                 parent=portal_user, student_id=student_pk
             ).first()
-            if link and link.student.user != portal_user.tutor:
+            if link and link.contract.user != portal_user.tutor:
                 return None
-            return link.student if link else None
+            return link.contract if link else None
 
     def get(self, request, student_pk):
         portal_user = get_portal_user(request)
@@ -234,8 +234,8 @@ class PortalMessageView(View):
         student = self._get_student_for_portal_user(portal_user, student_pk)
         if not student:
             return HttpResponseForbidden()
-        messages = PortalMessage.objects.filter(student=student).order_by("created_at")
-        PortalMessage.objects.filter(student=student, read_by_portal=False).update(
+        messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
+        PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
         return render(
@@ -260,7 +260,7 @@ class PortalMessageView(View):
             PortalMessage.objects.create(
                 sender_portal_user=portal_user,
                 sender_is_tutor=False,
-                student=student,
+                contract=student,
                 text=text,
             )
         return redirect("portal:messages", student_pk=student_pk)
@@ -292,7 +292,7 @@ class PortalActivateView(View):
             raise Http404
         if link.is_active:
             return redirect("portal:login")
-        return render(request, self.template_name, {"token": token, "student": link.student})
+        return render(request, self.template_name, {"token": token, "student": link.contract})
 
     def post(self, request, token):
         link, portal_user = self._get_link(token)
@@ -310,7 +310,7 @@ class PortalActivateView(View):
                 self.template_name,
                 {
                     "token": token,
-                    "student": link.student,
+                    "student": link.contract,
                     "error": "Das Passwort muss mindestens 8 Zeichen lang sein.",
                 },
             )
@@ -320,7 +320,7 @@ class PortalActivateView(View):
                 self.template_name,
                 {
                     "token": token,
-                    "student": link.student,
+                    "student": link.contract,
                     "error": "Die Passwörter stimmen nicht überein.",
                 },
             )
@@ -353,7 +353,7 @@ class PortalPasswordResetRequestView(View):
                 link.invite_token = uuid.uuid4().hex
                 link.save()
                 # Get recipient email: user.email if available, else student.email
-                recipient = user.email or link.student.email
+                recipient = user.email or link.contract.email
                 if recipient:
                     from django.conf import settings
                     from django.core.mail import send_mail
@@ -362,7 +362,7 @@ class PortalPasswordResetRequestView(View):
                     site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
                     reset_url = f"{site_url}/portal/activate/{link.invite_token}/"
                     context = {
-                        "student": link.student,
+                        "student": link.contract,
                         "reset_url": reset_url,
                         "site_url": site_url,
                     }
@@ -389,17 +389,17 @@ class StudentLessonDetailView(View):
         if not portal_user or portal_user.role != "student":
             return redirect("portal:login")
         link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-        if link.student.user != portal_user.tutor:
+        if link.contract.user != portal_user.tutor:
             return HttpResponseForbidden()
         from apps.lessons.models import Lesson
 
-        lesson = get_object_or_404(Lesson, pk=pk, contract__student=link.student)
+        lesson = get_object_or_404(Lesson, pk=pk, contract=link.contract)
         return render(
             request,
             self.template_name,
             {
                 "lesson": lesson,
-                "student": link.student,
+                "student": link.contract,
                 "portal_user": portal_user,
             },
         )
@@ -416,14 +416,14 @@ def _get_portal_student(portal_user, student_pk):
         link = StudentPortalLink.objects.filter(
             portal_user=portal_user, is_active=True, student_id=student_pk
         ).first()
-        if not link or link.student.user != portal_user.tutor:
+        if not link or link.contract.user != portal_user.tutor:
             return None
-        return link.student
+        return link.contract
     else:
         link = ParentStudentLink.objects.filter(parent=portal_user, student_id=student_pk).first()
-        if not link or link.student.user != portal_user.tutor:
+        if not link or link.contract.user != portal_user.tutor:
             return None
-        return link.student
+        return link.contract
 
 
 def _get_active_contract(student):
@@ -447,7 +447,7 @@ def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
     day_slots = wh.get(day_name, [])
 
     sessions = _Session.objects.filter(
-        contract__student__user=tutor,
+        contract__user=tutor,
         date=date,
         status__in=["planned", "taught", "paid"],
     )
@@ -563,7 +563,7 @@ class PortalBookingView(View):
         start_dt = _dt.datetime.combine(session_date, session_time)
         end_dt = start_dt + _dt.timedelta(minutes=duration)
         existing = _Session.objects.filter(
-            contract__student__user=student.user,
+            contract__user=student.user,
             date=session_date,
             status__in=["planned", "taught", "paid"],
         )
@@ -606,7 +606,7 @@ class PortalSessionCancelView(View):
             return redirect("portal:login")
 
         session = get_object_or_404(_Session, pk=session_pk)
-        student = _get_portal_student(portal_user, session.contract.student_id)
+        student = _get_portal_student(portal_user, session.contract_id)
         if not student:
             return HttpResponseForbidden()
         if session.status != "planned":
@@ -636,7 +636,7 @@ class PortalSessionRescheduleView(View):
         if not portal_user:
             return None, None, None
         session = get_object_or_404(_Session, pk=session_pk)
-        student = _get_portal_student(portal_user, session.contract.student_id)
+        student = _get_portal_student(portal_user, session.contract_id)
         return portal_user, session, student
 
     def get(self, request, session_pk):
@@ -706,7 +706,7 @@ class PortalSessionRescheduleView(View):
         start_dt = _dt.datetime.combine(new_date, new_time)
         end_dt = start_dt + _dt.timedelta(minutes=duration)
         conflicts = _Session.objects.filter(
-            contract__student__user=student.user,
+            contract__user=student.user,
             date=new_date,
             status__in=["planned", "taught", "paid"],
         ).exclude(pk=session.pk)
@@ -757,7 +757,7 @@ class PortalRecurringManageView(View):
             return HttpResponseForbidden()
         contract = _get_active_contract(student)
         series = RecurringSession.objects.filter(
-            contract__student=student,
+            contract=student,
             is_active=True,
         ).order_by("start_date")
         return render(
@@ -867,7 +867,7 @@ class PortalRecurringCancelView(View):
         if not portal_user:
             return redirect("portal:login")
         rs = get_object_or_404(RecurringSession, pk=recurring_pk)
-        student = _get_portal_student(portal_user, rs.contract.student_id)
+        student = _get_portal_student(portal_user, rs.contract_id)
         if not student:
             return HttpResponseForbidden()
 

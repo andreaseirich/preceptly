@@ -32,7 +32,7 @@ class InvoiceService:
             period_end: Enddatum des Zeitraums
             contract_id: Optional: Filter nach Vertrag-ID
             institute: Optional: Filter nach Institut (Contract.institute)
-            user: Optional: Filter nach Tutor (contract__student__user)
+            user: Optional: Filter nach Tutor (contract__user)
 
         Returns:
             QuerySet von Lessons mit Status TAUGHT, die noch nicht in einem InvoiceItem sind
@@ -46,7 +46,7 @@ class InvoiceService:
             .exclude(
                 invoice_items__isnull=False  # Keine Lessons, die bereits in einer Rechnung sind (1:1-Beziehung)
             )
-            .select_related("contract", "contract__student")
+            .select_related("contract")
         )
 
         if contract_id:
@@ -54,7 +54,7 @@ class InvoiceService:
         if institute:
             queryset = queryset.filter(contract__institute=institute)
         if user:
-            queryset = queryset.filter(contract__student__user=user)
+            queryset = queryset.filter(contract__user=user)
 
         return queryset.order_by("date", "start_time")
 
@@ -90,14 +90,14 @@ class InvoiceService:
 
             first_lesson = lessons.first()
             # Tutor for TutorSpace tier math must always be set (calculate_tutorspace returns 0 if None).
-            owner = user if user is not None else first_lesson.contract.student.user
+            owner = user if user is not None else first_lesson.contract.user
 
             if contract:
                 # Use tutoring institute as payer if available, otherwise student
                 if contract.institute:
                     payer_name = contract.institute
                 else:
-                    payer_name = contract.student.full_name
+                    payer_name = contract.full_name
                 payer_address = ""
             else:
                 first_contract = first_lesson.contract
@@ -105,7 +105,7 @@ class InvoiceService:
                 if first_contract.institute:
                     payer_name = first_contract.institute
                 else:
-                    payer_name = first_contract.student.full_name
+                    payer_name = first_contract.full_name
                 payer_address = ""
 
             invoice_kwargs = {
@@ -152,7 +152,7 @@ class InvoiceService:
                 desc = _("Lesson {date} {time} - {student}").format(
                     date=lesson.date,
                     time=lesson.start_time.strftime("%H:%M"),
-                    student=lesson.contract.student.full_name,
+                    student=lesson.contract.full_name,
                 )
                 if getattr(lesson, "tutor_no_show", False):
                     if is_tutorspace_institute(getattr(contract, "institute", None)):

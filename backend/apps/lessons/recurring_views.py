@@ -35,7 +35,7 @@ class RecurringLessonListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
 
 class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
@@ -46,7 +46,7 @@ class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "recurring_lesson"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -119,7 +119,7 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "lessons/recurringlesson_form.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -187,7 +187,7 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("lessons:recurring_list")
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__student__user=self.request.user)
+        return super().get_queryset().filter(contract__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -221,9 +221,7 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
 @login_required
 def generate_lessons_from_recurring(request, pk):
     """Generiert Lessons aus einer RecurringLesson."""
-    recurring_lesson = get_object_or_404(
-        RecurringLesson, pk=pk, contract__student__user=request.user
-    )
+    recurring_lesson = get_object_or_404(RecurringLesson, pk=pk, contract__user=request.user)
 
     result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 
@@ -280,8 +278,8 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["recurring_lessons"] = RecurringLesson.objects.filter(
-            contract__student__user=self.request.user
-        ).order_by("contract__student", "start_date")
+            contract__user=self.request.user
+        ).order_by("contract", "start_date")
         return context
 
     def post(self, request, *args, **kwargs):
@@ -295,7 +293,7 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
 
         recurring_lessons = RecurringLesson.objects.filter(
             pk__in=recurring_ids,
-            contract__student__user=request.user,
+            contract__user=request.user,
         )
 
         if action == "delete":

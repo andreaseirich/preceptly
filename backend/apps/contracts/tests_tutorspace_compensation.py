@@ -13,7 +13,6 @@ from apps.contracts.tutorspace_compensation import (
 )
 from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
-from apps.students.models import Student
 
 
 class TutorSpaceCompensationTierTest(TestCase):
@@ -32,10 +31,10 @@ class TutorSpaceCompensationTierTest(TestCase):
 class TutorSpaceCompensationCumulativeTest(TestCase):
     def setUp(self):
         self.tutor = User.objects.create_user(username="tutor_ts", password="x")
-        s1 = Student.objects.create(user=self.tutor, first_name="A", last_name="S")
-        s2 = Student.objects.create(user=self.tutor, first_name="B", last_name="S")
         self.c1 = Contract.objects.create(
-            student=s1,
+            user=self.tutor,
+            first_name="A",
+            last_name="S",
             institute=TUTORSPACE_INSTITUTE_NAME,
             hourly_rate=Decimal("13.00"),
             unit_duration_minutes=60,
@@ -43,7 +42,9 @@ class TutorSpaceCompensationCumulativeTest(TestCase):
             is_active=True,
         )
         self.c2 = Contract.objects.create(
-            student=s2,
+            user=self.tutor,
+            first_name="B",
+            last_name="S",
             institute=TUTORSPACE_INSTITUTE_NAME,
             hourly_rate=Decimal("13.00"),
             unit_duration_minutes=60,

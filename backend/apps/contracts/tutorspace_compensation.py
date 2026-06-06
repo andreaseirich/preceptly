@@ -116,7 +116,7 @@ def _tutorspace_minutes_before_session(session, tutor: User) -> int:
     tier_from = getattr(profile, "tutorspace_tier_count_from", None) if profile else None
 
     qs = Session.objects.filter(
-        contract__student__user=tutor,
+        contract__user=tutor,
         contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
         status__in=["taught", "paid"],
         tutor_no_show=False,

@@ -87,7 +87,7 @@ def get_public_booking_count_this_month(tutor: User | None) -> int:
 
     now = timezone.now()
     return Lesson.objects.filter(
-        contract__student__user=tutor,
+        contract__user=tutor,
         created_via="public_booking",
         created_at__year=now.year,
         created_at__month=now.month,

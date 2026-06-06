@@ -289,8 +289,8 @@ class RecurringBlockedTimeService:
 
                 # Finde alle Lessons desselben Users, die mit dieser Blockzeit kollidieren
                 conflicting_lessons = Lesson.objects.filter(
-                    date=blocked_date, contract__student__user=recurring_blocked_time.user
-                ).select_related("contract", "contract__student")
+                    date=blocked_date, contract__user=recurring_blocked_time.user
+                ).select_related("contract")
 
                 for lesson in conflicting_lessons:
                     lesson_start, lesson_end = LessonConflictService.calculate_time_block(lesson)
@@ -301,7 +301,7 @@ class RecurringBlockedTimeService:
                                 "lesson": lesson,
                                 "date": blocked_date,
                                 "message": _("Overlap with lesson for {student} ({time})").format(
-                                    student=lesson.contract.student,
+                                    student=lesson.contract,
                                     time=lesson.start_time.strftime("%H:%M"),
                                 ),
                             }

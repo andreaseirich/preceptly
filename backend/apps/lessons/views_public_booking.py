@@ -32,7 +32,6 @@ from apps.lessons.throttle import is_public_booking_throttled, record_public_boo
 from apps.lessons.travel_policy import is_slot_allowed_by_policy
 from apps.lessons.utils_dates import get_week_start
 from apps.students.booking_code_service import set_booking_code, verify_booking_code
-from apps.students.models import Student
 from apps.students.services import StudentSearchService
 
 
@@ -291,8 +290,8 @@ def verify_student_api(request):
 
         if student_id:
             try:
-                exact_match = Student.objects.get(pk=student_id, user=tutor)
-            except (Student.DoesNotExist, ValueError, TypeError):
+                exact_match = Contract.objects.get(pk=student_id, user=tutor)
+            except (Contract.DoesNotExist, ValueError, TypeError):
                 exact_match = None
         elif name:
             exact_match = StudentSearchService.find_exact_match(name, user=tutor)
@@ -353,7 +352,7 @@ def create_student_api(request):
                 {"success": False, "message": _("Booking is not available.")}, status=400
             )
 
-        student = Student.objects.create(
+        student = Contract.objects.create(
             user=tutor,
             first_name=first_name,
             last_name=last_name,
@@ -437,8 +436,8 @@ def book_lesson_api(request):
             )
 
         try:
-            student = Student.objects.get(id=student_id, user=tutor)
-        except Student.DoesNotExist:
+            student = Contract.objects.get(id=student_id, user=tutor)
+        except Contract.DoesNotExist:
             return JsonResponse({"success": False, "message": _("Student not found.")}, status=404)
 
         if not verify_booking_code(student, booking_code):
@@ -503,7 +502,7 @@ def book_lesson_api(request):
         duration_total = end_minutes - start_minutes
 
         contract = (
-            Contract.objects.filter(student=student, student__user=tutor, is_active=True)
+            Contract.objects.filter(pk=student.pk, user=tutor, is_active=True)
             .order_by("-start_date")
             .first()
         )
@@ -586,20 +585,12 @@ def book_lesson_api(request):
                     )
 
         # Find or create contract for this student (student belongs to tutor)
-        contract = Contract.objects.filter(
-            student=student, student__user=tutor, is_active=True
-        ).first()
+        contract = Contract.objects.filter(pk=student.pk, user=tutor, is_active=True).first()
 
         if not contract:
             # Create new contract with hourly_rate=0.00 (to be set later by tutor)
-            contract = Contract.objects.create(
-                student=student,
-                institute=institute if institute else None,
-                hourly_rate=Decimal("0.00"),  # Price will be set later by tutor
-                unit_duration_minutes=60,  # Default
-                start_date=timezone.now().date(),
-                is_active=True,
-            )
+            # student IS the contract (Student model was merged into Contract)
+            contract = student
 
         if public_booking_limit_reached(tutor):
             return JsonResponse(
@@ -731,8 +722,8 @@ def reschedule_lesson_api(request):
             return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=401)
 
         try:
-            student = Student.objects.get(id=student_id, user=tutor)
-        except Student.DoesNotExist:
+            student = Contract.objects.get(id=student_id, user=tutor)
+        except Contract.DoesNotExist:
             return JsonResponse({"success": False, "message": _RESCHEDULE_NEUTRAL}, status=404)
 
         if not verify_booking_code(student, booking_code):
@@ -763,8 +754,8 @@ def reschedule_lesson_api(request):
                 Lesson.objects.select_for_update()
                 .filter(
                     pk=lesson_id,
-                    contract__student_id=student_id,
-                    contract__student__user=tutor,
+                    contract_id=student_id,
+                    contract__user=tutor,
                     status="planned",
                 )
                 .select_related("contract")

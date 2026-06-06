@@ -1,3 +1,6 @@
+from datetime import date
+from decimal import Decimal
+
 """
 Ownership/tenant isolation tests for Students.
 Tutor B must never see or modify Tutor A's students. Cross-user access => 404.
@@ -7,7 +10,7 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.students.models import Student
+from apps.contracts.models import Contract
 
 
 class StudentOwnershipIsolationTest(TestCase):
@@ -18,12 +21,16 @@ class StudentOwnershipIsolationTest(TestCase):
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
 
-        self.student_a = Student.objects.create(
+        self.student_a = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.tutor_a,
             first_name="Alice",
             last_name="AStudent",
         )
-        self.student_b = Student.objects.create(
+        self.student_b = Contract.objects.create(
+            hourly_rate=Decimal("25.00"),
+            start_date=date.today(),
             user=self.tutor_b,
             first_name="Bob",
             last_name="BStudent",
@@ -82,7 +89,7 @@ class StudentOwnershipIsolationTest(TestCase):
             follow=True,
         )
         self.assertEqual(response.status_code, 404)
-        self.assertTrue(Student.objects.filter(pk=self.student_a.pk).exists())
+        self.assertTrue(Contract.objects.filter(pk=self.student_a.pk).exists())
 
     def test_tutor_b_gets_404_for_regenerate_booking_code_on_tutor_a_student(self):
         self.client.force_login(self.tutor_b)
