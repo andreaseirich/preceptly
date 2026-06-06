@@ -314,9 +314,7 @@ logs_dir.mkdir(exist_ok=True)
 
 # Email configuration
 # Use custom timeout backend for SMTP to prevent hanging
-email_backend_setting = env(
-    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
-)
+email_backend_setting = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 if email_backend_setting == "django.core.mail.backends.smtp.EmailBackend":
     # Automatically use timeout backend for SMTP
     EMAIL_BACKEND = "apps.lessons.email_backend.TimeoutSMTPEmailBackend"
