@@ -47,6 +47,9 @@
         <a class="btn-sm btn-sm-secondary" href="{% url 'portal:documents' sd.student.pk %}">
             Dokumente
         </a>
+        <a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_calendar' sd.student.pk %}">
+            📅 Kalender
+        </a>
         <a class="btn-sm btn-sm-secondary" href="{% url 'portal:messages' sd.student.pk %}">
             Nachrichten
             {% if sd.unread_messages > 0 %}

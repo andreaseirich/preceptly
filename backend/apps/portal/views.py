@@ -139,7 +139,7 @@ class ParentHomeView(View):
         portal_user = get_portal_user(request)
         if not portal_user or portal_user.role != "parent":
             return redirect("portal:login")
-        links = ParentStudentLink.objects.filter(parent=portal_user).select_related("student")
+        links = ParentStudentLink.objects.filter(parent=portal_user).select_related("contract")
         students_data = []
         import datetime
 
