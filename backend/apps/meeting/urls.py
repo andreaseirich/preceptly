@@ -7,4 +7,5 @@ app_name = "meeting"
 urlpatterns = [
     path("lessons/<int:lesson_pk>/meeting/start/", views.StartMeetingView.as_view(), name="start"),
     path("<uuid:token>/", views.MeetingRoomView.as_view(), name="room"),
+    path("<uuid:token>/end/", views.EndMeetingView.as_view(), name="end"),
 ]

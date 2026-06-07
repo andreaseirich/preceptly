@@ -19,22 +19,32 @@ from apps.portal.views import get_portal_user
 logger = logging.getLogger(__name__)
 
 
-def _get_meeting_room(lesson: Session) -> MeetingRoom:
-    """Gibt den MeetingRoom zurück oder erstellt ihn."""
-    room, _ = MeetingRoom.objects.get_or_create(lesson=lesson)
-    return room
-
-
 class StartMeetingView(LoginRequiredMixin, View):
     """Tutor startet/betritt ein Meeting für eine bestimmte Stunde."""
 
     def get(self, request, lesson_pk):
         lesson = get_object_or_404(Session, pk=lesson_pk, contract__user=request.user)
-        room = _get_meeting_room(lesson)
+        room, _ = MeetingRoom.objects.get_or_create(lesson=lesson)
+        if not room.is_active:
+            room.is_active = True
+            room.save(update_fields=["is_active"])
         return redirect("meeting:room", token=room.token)
 
     def post(self, request, lesson_pk):
         return self.get(request, lesson_pk)
+
+
+class EndMeetingView(LoginRequiredMixin, View):
+    """Tutor beendet ein Meeting (setzt is_active=False). Wird per fetch() aufgerufen."""
+
+    def post(self, request, token):
+        from django.http import JsonResponse
+
+        room = get_object_or_404(MeetingRoom, token=token, lesson__contract__user=request.user)
+        room.is_active = False
+        room.save(update_fields=["is_active"])
+        logger.info("Meeting %s beendet durch %s", token, request.user)
+        return JsonResponse({"ok": True})
 
 
 class MeetingRoomView(View):

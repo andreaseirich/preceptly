@@ -287,6 +287,9 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 // ─────────────────────────────────────────────────────────────────────────────
 const ROOM_TOKEN   = "{{ room.token }}";
 const DISPLAY_NAME = "{{ display_name|escapejs }}";
+const IS_TUTOR     = {{ is_tutor|yesno:"true,false" }};
+const BACK_URL     = "{{ back_url }}";
+const END_URL      = "{% url 'meeting:end' room.token %}";
 const WS_URL       = (window.location.protocol === "https:" ? "wss" : "ws") +
                      "://" + window.location.host + "/ws/meeting/" + ROOM_TOKEN + "/";
 
@@ -398,14 +401,24 @@ function stopScreenShare() {
     document.getElementById("btn-screen").textContent = "🖥 Teilen";
 }
 
-function hangUp() {
+async function hangUp() {
     Object.keys(peers).forEach(removePeer);
     if (ws) { try { ws.send(JSON.stringify({ type: "leave" })); } catch(e) {} ws.close(); }
-    {% if is_tutor %}
-    window.location.href = "{% url 'lessons:detail' lesson.pk %}";
-    {% else %}
-    window.location.href = "{{ back_url }}";
-    {% endif %}
+    if (IS_TUTOR) {
+        // Meeting als beendet markieren (is_active=False)
+        try {
+            await fetch(END_URL, {
+                method: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken"), "Content-Type": "application/json" },
+            });
+        } catch(e) { /* ignore, redirect anyway */ }
+    }
+    window.location.href = BACK_URL;
+}
+
+function getCookie(name) {
+    const v = document.cookie.match("(^|;) ?" + name + "=([^;]*)(;|$)");
+    return v ? v[2] : "";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

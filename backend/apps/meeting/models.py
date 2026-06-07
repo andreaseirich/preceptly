@@ -20,7 +20,7 @@ class MeetingRoom(models.Model):
         verbose_name=_("Room Token"),
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Meeting Room")
