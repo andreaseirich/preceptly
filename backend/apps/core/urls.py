@@ -19,7 +19,7 @@ from apps.core.views_email_test import test_email
 from apps.core.views_erecht24 import Erecht24PushView
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
-from apps.core.views_portal import TutorMessageView, TutorMessagesOverviewView
+from apps.core.views_portal import TutorMessagesOverviewView, TutorMessageView
 from apps.core.views_pwa import manifest_view, service_worker_view
 from apps.core.views_reports import ReportsView
 from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalView
