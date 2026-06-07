@@ -2,6 +2,7 @@
 Calendar views for lessons (Week, Month, Calendar redirect).
 """
 
+import logging
 from calendar import monthcalendar
 from datetime import date, timedelta
 
@@ -16,6 +17,8 @@ from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService, LessonQueryService
 from apps.lessons.status_service import LessonStatusUpdater
 from apps.lessons.week_service import WeekService
+
+logger = logging.getLogger(__name__)
 
 
 def get_last_calendar_url(request):
@@ -191,8 +194,8 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 date_obj = date.fromisoformat(date_param)
                 year = date_obj.year
                 month = date_obj.month
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as exc:
+                logger.debug("Invalid date param ignored: %s", exc)
 
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")
@@ -200,8 +203,8 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             try:
                 year = int(year_param)
                 month = int(month_param)
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as exc:
+                logger.debug("Invalid year/month params ignored: %s", exc)
 
         # Cache the current calendar position in the session
         self.request.session["last_calendar_view"] = "calendar"

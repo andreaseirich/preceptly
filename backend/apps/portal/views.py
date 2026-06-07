@@ -1,4 +1,5 @@
 import datetime as _dt
+import logging
 import uuid
 from calendar import monthcalendar as _monthcalendar
 
@@ -13,6 +14,8 @@ from django.views import View
 
 from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
+
+logger = logging.getLogger(__name__)
 
 
 def get_portal_user(request):
@@ -835,8 +838,8 @@ class PortalRecurringCreateView(View):
         if end_str:
             try:
                 end_date = _dt.date.fromisoformat(end_str)
-            except ValueError:
-                pass
+            except ValueError as exc:
+                logger.debug("Invalid end_date format ignored: %s", exc)
 
         weekdays = {f: (f in request.POST) for f in self.WEEKDAY_FIELDS}
         if not any(weekdays.values()):

@@ -2,6 +2,7 @@
 Views for lesson CRUD operations.
 """
 
+import logging
 from datetime import datetime
 
 from django.contrib import messages
@@ -26,6 +27,8 @@ from apps.lessons.recurring_utils import (
 from apps.lessons.services import LessonConflictService, recalculate_conflicts_for_affected_lessons
 from apps.lessons.status_service import LessonStatusService
 from apps.lessons.views_calendar import get_last_calendar_url
+
+logger = logging.getLogger(__name__)
 
 
 class LessonListView(LoginRequiredMixin, ListView):
@@ -152,14 +155,14 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                             duration_minutes = int(duration.total_seconds() / 60)
                             if duration_minutes > 0:
                                 initial["duration_minutes"] = duration_minutes
-                        except (ValueError, TypeError):
-                            pass
+                        except (ValueError, TypeError) as exc:
+                            logger.debug("Invalid end datetime format ignored: %s", exc)
                 else:
                     # Fallback: treat as date only
                     date_obj = datetime.strptime(start_str, "%Y-%m-%d").date()
                     initial["date"] = date_obj
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as exc:
+                logger.debug("Invalid start datetime format ignored: %s", exc)
 
         # Fallback: Get date from request (for backward compatibility)
         if "date" not in initial:
@@ -168,8 +171,8 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 try:
                     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
                     initial["date"] = date_obj
-                except ValueError:
-                    pass
+                except ValueError as exc:
+                    logger.debug("Invalid date string ignored: %s", exc)
 
         # Fallback: Get time from request (for backward compatibility)
         if "start_time" not in initial:
@@ -178,8 +181,8 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 try:
                     time_obj = datetime.strptime(time_str, "%H:%M").time()
                     initial["start_time"] = time_obj
-                except ValueError:
-                    pass
+                except ValueError as exc:
+                    logger.debug("Invalid time string ignored: %s", exc)
 
         return initial
 

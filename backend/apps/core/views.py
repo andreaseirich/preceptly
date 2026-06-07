@@ -3,6 +3,7 @@ Views for dashboard and income overview.
 """
 
 import csv
+import logging
 from decimal import Decimal
 
 from django.contrib import messages
@@ -37,6 +38,8 @@ from apps.core.selectors import IncomeSelector
 from apps.core.utils_booking import ensure_public_booking_token
 from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
+
+logger = logging.getLogger(__name__)
 
 LEGAL_LAST_UPDATED = "08.04.2026"
 
@@ -599,8 +602,8 @@ class ExpenseListView(LoginRequiredMixin, ListView):
         if year:
             try:
                 qs = qs.filter(date__year=int(year))
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as exc:
+                logger.debug("Invalid year filter ignored: %s", exc)
         return qs
 
     def get_context_data(self, **kwargs):

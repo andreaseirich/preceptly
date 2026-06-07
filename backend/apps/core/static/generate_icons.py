@@ -4,6 +4,7 @@ Script to generate PWA icons from SVG source.
 Requires: pip install cairosvg
 """
 
+import sys
 from pathlib import Path
 
 try:
@@ -11,7 +12,7 @@ try:
 except ImportError:
     print("Error: Please install required packages:")
     print("  pip install cairosvg")
-    exit(1)
+    sys.exit(1)
 
 # Icon sizes needed for PWA
 ICON_SIZES = [72, 96, 128, 144, 152, 192, 384, 512]
