@@ -35,7 +35,7 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         student = self.get_student()
-        text = request.POST.get("text", "").strip()
+        text = request.POST.get("body", "").strip()
         if text:
             PortalMessage.objects.create(
                 contract=student,
@@ -43,4 +43,4 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
                 read_by_tutor=True,
                 text=text,
             )
-        return redirect("students:detail", pk=student.pk)
+        return redirect("contracts:detail", pk=student.pk)

@@ -183,7 +183,7 @@ class ParentStudentDetailView(View):
         portal_user = get_portal_user(request)
         if not portal_user or portal_user.role != "parent":
             return redirect("portal:login")
-        link = get_object_or_404(ParentStudentLink, parent=portal_user, student_id=student_pk)
+        link = get_object_or_404(ParentStudentLink, parent=portal_user, contract_id=student_pk)
         student = link.contract
         from apps.lessons.models import Lesson
 
@@ -214,14 +214,14 @@ class PortalMessageView(View):
     def _get_student_for_portal_user(self, portal_user, student_pk):
         if portal_user.role == "student":
             link = StudentPortalLink.objects.filter(
-                portal_user=portal_user, is_active=True, student_id=student_pk
+                portal_user=portal_user, is_active=True, contract_id=student_pk
             ).first()
             if link and link.contract.user != portal_user.tutor:
                 return None
             return link.contract if link else None
         else:
             link = ParentStudentLink.objects.filter(
-                parent=portal_user, student_id=student_pk
+                parent=portal_user, contract_id=student_pk
             ).first()
             if link and link.contract.user != portal_user.tutor:
                 return None
@@ -414,13 +414,13 @@ def _get_portal_student(portal_user, student_pk):
     """Gibt den Schüler zurück, falls portal_user Zugriff hat, sonst None."""
     if portal_user.role == "student":
         link = StudentPortalLink.objects.filter(
-            portal_user=portal_user, is_active=True, student_id=student_pk
+            portal_user=portal_user, is_active=True, contract_id=student_pk
         ).first()
         if not link or link.contract.user != portal_user.tutor:
             return None
         return link.contract
     else:
-        link = ParentStudentLink.objects.filter(parent=portal_user, student_id=student_pk).first()
+        link = ParentStudentLink.objects.filter(parent=portal_user, contract_id=student_pk).first()
         if not link or link.contract.user != portal_user.tutor:
             return None
         return link.contract

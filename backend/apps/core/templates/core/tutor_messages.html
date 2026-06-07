@@ -40,14 +40,13 @@
         word-break: break-word;
     }
     .chat-msg.tutor .chat-bubble {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
+        background: #007bff;
+        color: #fff;
         border-bottom-right-radius: 4px;
     }
     .chat-msg.portal-user .chat-bubble {
-        background: rgba(0,123,255,0.10);
-        border: 1px solid rgba(0,123,255,0.22);
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
         color: var(--text-primary);
         border-bottom-left-radius: 4px;
     }
@@ -85,7 +84,7 @@
 {% endblock %}
 
 {% block content %}
-<a class="btn-sm btn-sm-secondary" href="{% url 'students:detail' student.pk %}" style="margin-bottom: 20px; display: inline-block;">
+<a class="btn-sm btn-sm-secondary" href="{% url 'contracts:detail' student.pk %}" style="margin-bottom: 20px; display: inline-block;">
     &larr; {% trans "Back to Student" %}
 </a>
 
@@ -95,9 +94,9 @@
 {% if messages %}
     {% for msg in messages %}
     <div class="chat-msg {% if msg.sender_is_tutor %}tutor{% else %}portal-user{% endif %}">
-        <div class="chat-bubble">{{ msg.body }}</div>
+        <div class="chat-bubble">{{ msg.text }}</div>
         <div class="chat-meta">
-            {{ msg.sender_name|default:"" }} &middot; {{ msg.created_at|time:"H:i" }}, {{ msg.created_at|date:"d.m.Y" }}
+            {% if msg.sender_is_tutor %}{% trans "You" %}{% else %}{{ msg.sender_portal_user }}{% endif %} &middot; {{ msg.created_at|time:"H:i" }}, {{ msg.created_at|date:"d.m.Y" }}
         </div>
     </div>
     {% endfor %}
