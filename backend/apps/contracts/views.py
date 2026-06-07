@@ -4,6 +4,7 @@ Views for contract CRUD operations.
 
 from datetime import date
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -73,6 +74,13 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
         return super().get_queryset().filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
+        from apps.portal.models import (
+            ParentStudentLink,
+            PortalMessage,
+            ProgressNote,
+            StudentPortalLink,
+        )
+
         context = super().get_context_data(**kwargs)
         contract = context["contract"]
         if contract.is_active and contract.has_monthly_planning_limit:
@@ -81,6 +89,22 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
             )
         else:
             context["monthly_planning_summary"] = []
+        context["portal_link"] = StudentPortalLink.objects.filter(contract=contract).first()
+        context["parent_links"] = ParentStudentLink.objects.filter(
+            contract=contract
+        ).select_related("parent")
+        context["progress_notes"] = ProgressNote.objects.filter(contract=contract).order_by(
+            "-created_at"
+        )[:10]
+        context["unread_messages"] = PortalMessage.objects.filter(
+            contract=contract, read_by_tutor=False
+        ).count()
+        portal_link = context.get("portal_link")
+        if portal_link:
+            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            context["student_activation_url"] = (
+                f"{site_url}/portal/activate/{portal_link.invite_token}/"
+            )
         return context
 
 

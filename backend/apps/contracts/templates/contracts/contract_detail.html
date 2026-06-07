@@ -1,27 +1,38 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{{ contract }} - Preceptly{% endblock %}
+{% block title %}{{ contract.full_name }} - Preceptly{% endblock %}
 
 {% block content %}
-<h1>{{ contract }}</h1>
+<h1>{{ contract.full_name }}</h1>
 
 <div class="btn-group">
+    <a href="{% url 'students:documents' contract.pk %}" class="btn-sm btn-sm-secondary">{% trans "Documents" %}</a>
     <a href="{% url 'contracts:update' contract.pk %}" class="btn">{% trans "Edit" %}</a>
     <a href="{% url 'contracts:delete' contract.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
     <a href="{% url 'contracts:list' %}" class="btn btn-secondary">{% trans "Back to List" %}</a>
 </div>
 
-<h2>{% trans "Details" %}</h2>
+<h2>{% trans "Personal Details" %}</h2>
 <table>
-    <tr><th>{% trans "Student" %}</th><td><a href="{% url 'students:detail' contract.student.pk %}">{{ contract.student.full_name }}</a></td></tr>
+    <tr><th>{% trans "First Name" %}</th><td>{{ contract.first_name }}</td></tr>
+    <tr><th>{% trans "Last Name" %}</th><td>{{ contract.last_name }}</td></tr>
+    {% if contract.email %}<tr><th>{% trans "Email" %}</th><td>{{ contract.email }}</td></tr>{% endif %}
+    {% if contract.phone %}<tr><th>{% trans "Phone" %}</th><td>{{ contract.phone }}</td></tr>{% endif %}
+    {% if contract.school %}<tr><th>{% trans "School" %}</th><td>{{ contract.school }}</td></tr>{% endif %}
+    {% if contract.grade %}<tr><th>{% trans "Grade" %}</th><td>{{ contract.grade }}</td></tr>{% endif %}
+    {% if contract.subjects %}<tr><th>{% trans "Subjects" %}</th><td>{{ contract.subjects }}</td></tr>{% endif %}
+    {% if contract.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ contract.notes }}</td></tr>{% endif %}
+</table>
+
+<h2>{% trans "Contract Details" %}</h2>
+<table>
     {% if contract.institute %}<tr><th>{% trans "Institute" %}</th><td>{{ contract.institute }}</td></tr>{% endif %}
     <tr><th>{% trans "Rate" %}</th><td>{% blocktrans with rate=contract.hourly_rate %}{{ rate }}€ per unit{% endblocktrans %}</td></tr>
     <tr><th>{% trans "Duration per unit" %}</th><td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
-        <tr><th>{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
-        <tr><th>{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
-        <tr><th>{% trans "Status" %}</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
-    {% if contract.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ contract.notes }}</td></tr>{% endif %}
+    <tr><th>{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
+    <tr><th>{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
+    <tr><th>{% trans "Status" %}</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     <tr><th>{% trans "Created" %}</th><td>{{ contract.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
     <tr><th>{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
@@ -82,5 +93,80 @@
     <p>{% trans "No lessons available for this contract." %}</p>
 </div>
 {% endif %}
-{% endblock %}
 
+<div class="box-section" style="margin-top: 2em;">
+  <h3>{% trans "Portal-Zugang" %}</h3>
+  {% if portal_link %}
+    {% if portal_link.is_active %}
+      <p style="color: #28a745;">✓ {% trans "Portal-Konto aktiv" %}
+         <small style="color: var(--text-secondary);">{{ portal_link.portal_user.user.username }}</small></p>
+    {% else %}
+      <p style="color: var(--text-secondary);">⏳ {% trans "Einladung ausstehend — noch nicht aktiviert" %}</p>
+      {% if student_activation_url %}
+      <div style="margin: 0.5em 0;">
+        <small style="color: var(--text-secondary);">{% trans "Aktivierungslink:" %}</small><br>
+        <code style="font-size: 0.8em; word-break: break-all; color: var(--text-primary);">{{ student_activation_url }}</code>
+      </div>
+      {% endif %}
+      <form method="post" action="{% url 'students:portal_invite_resend' contract.pk %}" style="margin-top: 0.5em;">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-sm-secondary">↻ {% trans "Einladung erneut senden" %}</button>
+      </form>
+    {% endif %}
+  {% else %}
+    <form method="post" action="{% url 'students:portal_invite_create' contract.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-sm btn-sm-primary">{% trans "Portal-Einladung senden" %}</button>
+    </form>
+  {% endif %}
+  <hr style="border-color: var(--border-color); margin: 1em 0;">
+  {% if not contract.is_adult %}
+  <h4 style="margin: 0 0 0.5em;">Eltern-Zugang</h4>
+  {% if parent_links %}
+    {% for pl in parent_links %}
+      <span class="btn-sm btn-sm-secondary" style="margin-right: 4px; margin-bottom: 4px; display: inline-block;">
+        {{ pl.parent.user.username }}
+      </span>
+    {% endfor %}
+    <br style="margin-bottom: 0.5em;">
+  {% endif %}
+  <form method="post" action="{% url 'students:portal_invite_parent' contract.pk %}" style="display: flex; gap: 6px; margin-top: 0.5em; flex-wrap: wrap;">
+    {% csrf_token %}
+    <input type="email" name="parent_email" placeholder="E-Mail der Eltern"
+      class="form-control" style="flex: 1; min-width: 160px; font-size: 0.9em;">
+    <button type="submit" class="btn-sm btn-sm-secondary">Eltern einladen</button>
+  </form>
+  {% else %}
+  <p style="font-size: 0.9em; color: var(--text-secondary); margin: 0;">
+    Kein Eltern-Zugang (erwachsener Schüler).
+    <a href="{% url 'students:update' contract.pk %}" style="color: var(--text-secondary);">Ändern</a>
+  </p>
+  {% endif %}
+  <div style="margin-top: 0.75em;">
+    {% if unread_messages %}
+      <a href="{% url 'core:tutor_messages' contract.pk %}" class="btn-sm btn-sm-warning">
+        {% blocktrans with n=unread_messages %}{{ n }} ungelesene Nachricht(en){% endblocktrans %}
+      </a>
+    {% else %}
+      <a href="{% url 'core:tutor_messages' contract.pk %}" class="btn-sm btn-sm-secondary">{% trans "Nachrichten ansehen" %}</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="box-section" style="margin-top: 1.5em;">
+  <h3>{% trans "Fortschrittsnotizen" %}</h3>
+  {% for note in progress_notes %}
+    <div style="border-bottom: 1px solid var(--border-color); padding: 8px 0;">
+      <small style="color: var(--text-secondary);">{{ note.date }}</small>
+      <p style="margin: 4px 0;">{{ note.text }}</p>
+    </div>
+  {% empty %}
+    <p style="color: var(--text-secondary);">{% trans "Noch keine Fortschrittsnotizen." %}</p>
+  {% endfor %}
+  <form method="post" action="{% url 'students:progress_note_create' contract.pk %}" style="margin-top: 1em;">
+    {% csrf_token %}
+    <textarea name="text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Fortschrittsnotiz hinzufügen...' %}"></textarea>
+    <button type="submit" class="btn-sm btn-sm-primary" style="margin-top: 6px;">{% trans "Speichern" %}</button>
+  </form>
+</div>
+{% endblock %}
