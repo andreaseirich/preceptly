@@ -5,45 +5,64 @@
 
 {% block extra_css %}
 <style>
-    .thread-list { display: flex; flex-direction: column; gap: 10px; }
-    .thread-item {
+    .thread-list { display: flex; flex-direction: column; gap: 8px; }
+    .thread-card {
         display: flex;
         align-items: center;
         gap: 16px;
-        padding: 14px 18px;
+        padding: 16px 20px;
         background: var(--bg-secondary);
         border: 1px solid var(--border-color);
-        border-radius: 8px;
+        border-radius: 10px;
         text-decoration: none !important;
-        color: var(--text-primary);
-        box-shadow: 0 1px 3px var(--shadow);
-        transition: box-shadow 0.15s, border-color 0.15s;
+        color: var(--text-primary) !important;
+        box-shadow: 0 1px 4px var(--shadow);
+        transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
     }
-    .thread-item:hover {
-        box-shadow: 0 3px 10px var(--shadow);
+    .thread-card:hover {
+        box-shadow: 0 4px 14px var(--shadow);
         border-color: #2980b9;
+        transform: translateY(-1px);
         text-decoration: none;
     }
     .thread-avatar {
-        width: 44px; height: 44px; border-radius: 50%;
+        width: 46px; height: 46px; border-radius: 50%;
         background: #2980b9; color: #fff;
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.1em; font-weight: 700; flex-shrink: 0;
+        font-size: 1.15em; font-weight: 700; flex-shrink: 0;
+        text-transform: uppercase;
     }
-    .thread-avatar.unread { background: #e74c3c; }
+    .thread-avatar.has-unread { background: #e74c3c; }
     .thread-body { flex: 1; min-width: 0; }
-    .thread-name { font-weight: 600; font-size: 0.97em; margin-bottom: 3px; }
+    .thread-name {
+        font-weight: 600; font-size: 0.97em;
+        color: var(--text-primary); margin-bottom: 4px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .thread-preview {
         font-size: 0.83em; color: var(--text-secondary);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        max-width: 500px;
     }
-    .thread-meta { text-align: right; flex-shrink: 0; }
+    .thread-right { text-align: right; flex-shrink: 0; }
     .thread-time { font-size: 0.76em; color: var(--text-secondary); white-space: nowrap; }
     .badge-unread {
-        display: inline-block; background: #e74c3c; color: #fff;
-        font-size: 0.75em; font-weight: 700; padding: 2px 7px;
-        border-radius: 10px; line-height: 1.6; margin-top: 4px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #e74c3c; color: #fff;
+        font-size: 0.72em; font-weight: 700;
+        min-width: 20px; height: 20px; padding: 0 5px;
+        border-radius: 10px; margin-top: 5px;
     }
+    .empty-box {
+        text-align: center; padding: 70px 30px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px; color: var(--text-secondary);
+        box-shadow: 0 1px 4px var(--shadow);
+    }
+    .empty-box .empty-icon { font-size: 2.8em; margin-bottom: 12px; }
+    .empty-box h2 { color: var(--text-secondary); border: none; margin-bottom: 10px; }
+    .empty-box p { max-width: 400px; margin: 0 auto 24px; font-size: 0.92em; line-height: 1.6; }
 </style>
 {% endblock %}
 
@@ -51,28 +70,26 @@
 <h1>💬 Nachrichten</h1>
 
 {% if threads %}
-<p style="color:var(--text-secondary); font-size:0.9em; margin-bottom:20px;">
-    Chats mit Schülern und Eltern, die im Portal registriert sind.
+<p style="color:var(--text-secondary); font-size:0.88em; margin-bottom:18px;">
+    {{ threads|length }} Chat{% if threads|length != 1 %}s{% endif %} mit Schülern und Eltern im Portal
 </p>
 <div class="thread-list">
 {% for t in threads %}
-<a class="thread-item" href="{% url 'core:tutor_messages' t.contract.pk %}">
-    <div class="thread-avatar {% if t.unread %}unread{% endif %}">
+<a class="thread-card" href="{% url 'core:tutor_messages' t.contract.pk %}">
+    <div class="thread-avatar {% if t.unread %}has-unread{% endif %}">
         {{ t.contract.full_name|slice:":1" }}
     </div>
     <div class="thread-body">
-        <div class="thread-name">
-            {{ t.contract.full_name }}
-        </div>
+        <div class="thread-name">{{ t.contract.full_name }}</div>
         <div class="thread-preview">
             {% if t.last_msg %}
-                {% if t.last_msg.sender_is_tutor %}Du: {% endif %}{{ t.last_msg.text|truncatechars:70 }}
+                {% if t.last_msg.sender_is_tutor %}<span style="color:var(--text-primary); font-weight:500;">Du:</span> {% endif %}{{ t.last_msg.text|truncatechars:80 }}
             {% else %}
-                Noch keine Nachrichten
+                <em>Noch keine Nachrichten</em>
             {% endif %}
         </div>
     </div>
-    <div class="thread-meta">
+    <div class="thread-right">
         {% if t.last_msg %}
         <div class="thread-time">{{ t.last_msg.created_at|date:"d.m.Y" }}</div>
         {% endif %}
@@ -85,14 +102,11 @@
 </div>
 
 {% else %}
-<div class="container" style="text-align:center; padding:60px 20px; color:var(--text-secondary);">
-    <p style="font-size:2em; margin-bottom:12px;">💬</p>
-    <h2 style="color:var(--text-secondary); border:none;">Noch keine Portal-Registrierungen</h2>
-    <p style="max-width:420px; margin:0 auto 24px;">
-        Sobald sich Schüler oder Eltern über einen Einladungslink im Portal anmelden,
-        erscheinen ihre Chats hier.
-    </p>
-    <a class="btn" href="{% url 'contracts:list' %}">Zu den Schülern</a>
+<div class="empty-box">
+    <div class="empty-icon">💬</div>
+    <h2>Noch keine Portal-Registrierungen</h2>
+    <p>Sobald sich Schüler oder Eltern über einen Einladungslink im Portal anmelden, erscheinen ihre Chats hier.</p>
+    <a class="btn" href="{% url 'contracts:list' %}">👤 Zu den Schülern</a>
 </div>
 {% endif %}
 {% endblock %}
