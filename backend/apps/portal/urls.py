@@ -59,7 +59,13 @@ urlpatterns = [
     ),
     # Dokumente
     path("calendar/", views.PortalCalendarView.as_view(), name="calendar"),
+    path("calendar/week/", views.PortalWeekView.as_view(), name="calendar_week"),
     path("calendar/<int:student_pk>/", views.PortalCalendarView.as_view(), name="parent_calendar"),
+    path(
+        "calendar/<int:student_pk>/week/",
+        views.PortalWeekView.as_view(),
+        name="parent_calendar_week",
+    ),
     path("documents/<int:student_pk>/", views.PortalDocumentsView.as_view(), name="documents"),
     path(
         "documents/<int:student_pk>/<int:doc_pk>/download/",

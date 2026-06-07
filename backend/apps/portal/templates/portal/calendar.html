@@ -5,12 +5,14 @@
 {% block content %}
 <h1>{% if portal_user.role == "parent" %}Kalender {{ student.first_name }} – {{ month_label }} {{ year }}{% else %}Kalender – {{ month_label }} {{ year }}{% endif %}</h1>
 
-<div class="btn-group" style="margin-bottom: 20px;">
+<div class="btn-group">
     {% if portal_user.role == "parent" %}
-    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
+    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Voriger Monat</a>
+    <a href="{% url 'portal:parent_calendar_week' student_pk %}?year={{ year }}&month={{ month }}&day=1" class="btn">📅 Wochenansicht</a>
     <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
     {% else %}
-    <a href="{% url 'portal:calendar' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
+    <a href="{% url 'portal:calendar' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Voriger Monat</a>
+    <a href="{% url 'portal:calendar_week' %}?year={{ year }}&month={{ month }}&day=1" class="btn">📅 Wochenansicht</a>
     <a href="{% url 'portal:calendar' %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
     {% endif %}
 </div>

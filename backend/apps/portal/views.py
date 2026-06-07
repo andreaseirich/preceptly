@@ -392,20 +392,32 @@ class StudentLessonDetailView(View):
 
     def get(self, request, pk):
         portal_user = get_portal_user(request)
-        if not portal_user or portal_user.role != "student":
+        if not portal_user:
             return redirect("portal:login")
-        link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-        if link.contract.user != portal_user.tutor:
-            return HttpResponseForbidden()
+
         from apps.lessons.models import Lesson
 
-        lesson = get_object_or_404(Lesson, pk=pk, contract=link.contract)
+        if portal_user.role == "student":
+            link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
+            if link.contract.user != portal_user.tutor:
+                return HttpResponseForbidden()
+            lesson = get_object_or_404(Lesson, pk=pk, contract=link.contract)
+            student = link.contract
+        elif portal_user.role == "parent":
+            # Elternteil kann Stunden aller verknüpften Kinder sehen
+            parent_links = ParentStudentLink.objects.filter(parent=portal_user)
+            contract_ids = list(parent_links.values_list("contract_id", flat=True))
+            lesson = get_object_or_404(Lesson, pk=pk, contract_id__in=contract_ids)
+            student = lesson.contract
+        else:
+            return redirect("portal:login")
+
         return render(
             request,
             self.template_name,
             {
                 "lesson": lesson,
-                "student": link.contract,
+                "student": student,
                 "portal_user": portal_user,
             },
         )
@@ -1071,7 +1083,109 @@ class PortalCalendarView(View):
             "next_year": next_year,
             "next_month": next_month,
             "today": today,
-            "weekday_names": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+            "weekday_names": [
+                "Montag",
+                "Dienstag",
+                "Mittwoch",
+                "Donnerstag",
+                "Freitag",
+                "Samstag",
+                "Sonntag",
+            ],
+        }
+
+        if portal_user.role == "parent":
+            context["student_pk"] = student_pk
+
+        return render(request, self.template_name, context)
+
+
+class PortalWeekView(View):
+    """Wochenansicht für Portal-Nutzer (Schüler und Eltern)."""
+
+    template_name = "portal/calendar_week.html"
+
+    def _get_student(self, portal_user, student_pk=None):
+        if portal_user.role == "student":
+            link = StudentPortalLink.objects.filter(portal_user=portal_user, is_active=True).first()
+            if not link:
+                return None
+            return link.contract
+        else:
+            if not student_pk:
+                return None
+            link = ParentStudentLink.objects.filter(
+                parent=portal_user, contract_id=student_pk
+            ).first()
+            return link.contract if link else None
+
+    def get(self, request, student_pk=None):
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return redirect("portal:login")
+
+        student = self._get_student(portal_user, student_pk)
+        if not student:
+            return HttpResponseForbidden()
+
+        now = timezone.now()
+        try:
+            year = int(request.GET.get("year", now.year))
+            month = int(request.GET.get("month", now.month))
+            day = int(request.GET.get("day", now.day))
+        except (ValueError, TypeError):
+            year, month, day = now.year, now.month, now.day
+
+        current_date = _dt.date(year, month, day)
+        # Montag der aktuellen Woche
+        week_start = current_date - _dt.timedelta(days=current_date.weekday())
+        week_end = week_start + _dt.timedelta(days=6)
+
+        lessons = _Lesson.objects.filter(
+            contract=student,
+            date__gte=week_start,
+            date__lte=week_end,
+        ).order_by("date", "start_time")
+
+        lessons_by_date = {}
+        for lesson in lessons:
+            lessons_by_date.setdefault(lesson.date, []).append(lesson)
+
+        weekday_names = [
+            "Montag",
+            "Dienstag",
+            "Mittwoch",
+            "Donnerstag",
+            "Freitag",
+            "Samstag",
+            "Sonntag",
+        ]
+        today = timezone.localdate()
+        weekdays = []
+        for i in range(7):
+            d = week_start + _dt.timedelta(days=i)
+            weekdays.append(
+                {
+                    "date": d,
+                    "name": weekday_names[i],
+                    "is_today": d == today,
+                    "is_past": d < today,
+                    "lessons": lessons_by_date.get(d, []),
+                }
+            )
+
+        prev_week = week_start - _dt.timedelta(days=7)
+        next_week = week_start + _dt.timedelta(days=7)
+
+        context = {
+            "student": student,
+            "portal_user": portal_user,
+            "weekdays": weekdays,
+            "week_start": week_start,
+            "week_end": week_end,
+            "prev_week": prev_week,
+            "next_week": next_week,
+            "today": today,
         }
 
         if portal_user.role == "parent":
