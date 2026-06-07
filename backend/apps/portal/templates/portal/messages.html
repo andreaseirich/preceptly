@@ -105,8 +105,8 @@
 <h1>Nachrichten{% if student %}: {{ student.full_name }}{% endif %}</h1>
 
 <div class="chat-wrapper" id="chat-wrapper">
-{% if messages %}
-    {% for msg in messages %}
+{% if chat_messages %}
+    {% for msg in chat_messages %}
     <div class="chat-msg {% if msg.sender_is_tutor %}from-tutor{% else %}from-me{% endif %}">
         <div class="chat-bubble">{{ msg.text }}</div>
         <div class="chat-meta">

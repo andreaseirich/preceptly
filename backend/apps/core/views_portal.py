@@ -23,12 +23,12 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
         PortalMessage.objects.filter(contract=student, read_by_tutor=False).update(
             read_by_tutor=True
         )
-        messages = PortalMessage.objects.filter(contract=student)
+        chat_messages = PortalMessage.objects.filter(contract=student)
         unread_count = PortalMessage.objects.filter(contract=student, read_by_tutor=False).count()
         return self.render_to_response(
             {
                 "student": student,
-                "messages": messages,
+                "chat_messages": chat_messages,
                 "unread_count": unread_count,
             }
         )

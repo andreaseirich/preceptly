@@ -91,8 +91,8 @@
 <h1>{{ student.full_name }} – {% trans "Messages" %}</h1>
 
 <div class="chat-box" id="chat-box">
-{% if messages %}
-    {% for msg in messages %}
+{% if chat_messages %}
+    {% for msg in chat_messages %}
     <div class="chat-msg {% if msg.sender_is_tutor %}tutor{% else %}portal-user{% endif %}">
         <div class="chat-bubble">{{ msg.text }}</div>
         <div class="chat-meta">

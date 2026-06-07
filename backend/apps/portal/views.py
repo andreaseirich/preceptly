@@ -95,7 +95,7 @@ class StudentHomeView(View):
             contract=student,
             date__lt=today,
         ).order_by("-date", "-start_time")[:5]
-        messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
+        chat_messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
         PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
@@ -106,7 +106,7 @@ class StudentHomeView(View):
                 "student": student,
                 "upcoming": upcoming,
                 "recent": recent,
-                "messages": messages,
+                "chat_messages": chat_messages,
                 "portal_user": portal_user,
             },
         )
@@ -197,7 +197,7 @@ class ParentStudentDetailView(View):
             contract=student,
         ).order_by("-date", "-start_time")[:20]
         progress_notes = student.progress_notes.all()[:10]
-        messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
+        chat_messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
         PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
@@ -208,7 +208,7 @@ class ParentStudentDetailView(View):
                 "student": student,
                 "lessons": lessons,
                 "progress_notes": progress_notes,
-                "messages": messages,
+                "chat_messages": chat_messages,
                 "portal_user": portal_user,
             },
         )
@@ -240,7 +240,7 @@ class PortalMessageView(View):
         student = self._get_student_for_portal_user(portal_user, student_pk)
         if not student:
             return HttpResponseForbidden()
-        messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
+        chat_messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
         PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
@@ -249,7 +249,7 @@ class PortalMessageView(View):
             self.template_name,
             {
                 "student": student,
-                "messages": messages,
+                "chat_messages": chat_messages,
                 "portal_user": portal_user,
             },
         )
