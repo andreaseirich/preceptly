@@ -3,6 +3,7 @@ Views für Meeting-Räume (Tutor + Portal-Nutzer).
 """
 
 import logging
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -40,6 +41,9 @@ class MeetingRoomView(View):
     """
     Der eigentliche Meeting-Raum.
     Zugang: Tutor (eingeloggt, Stunde gehört ihm) ODER Portal-Nutzer (Schüler/Elternteil).
+
+    Portal-Nutzer werden ZUERST geprüft, damit in Testsituationen (selber Browser,
+    Tutor + Portal gleichzeitig eingeloggt) Portal-Nutzer nicht als Tutor einsteigen.
     """
 
     template_name = "meeting/room.html"
@@ -47,29 +51,9 @@ class MeetingRoomView(View):
     def get(self, request, token):
         room = get_object_or_404(MeetingRoom, token=token, is_active=True)
         lesson = room.lesson
+        turn_servers = getattr(settings, "MEETING_ICE_SERVERS", [])
 
-        # Check tutor access
-        if (
-            request.user.is_authenticated
-            and hasattr(lesson, "contract")
-            and lesson.contract.user == request.user
-        ):
-            display_name = f"{request.user.get_full_name() or request.user.username} (Tutor)"
-            documents = lesson.documents.all()
-            return render(
-                request,
-                self.template_name,
-                {
-                    "room": room,
-                    "lesson": lesson,
-                    "display_name": display_name,
-                    "documents": documents,
-                    "is_tutor": True,
-                    "MEETING_TURN_SERVERS": getattr(settings, "MEETING_ICE_SERVERS", []),
-                },
-            )
-
-        # Check portal user access
+        # ── 1. Portal-Nutzer zuerst prüfen ────────────────────────────────────
         portal_user = get_portal_user(request)
         if portal_user:
             if portal_user.role == "student":
@@ -86,12 +70,11 @@ class MeetingRoomView(View):
                 if not has_access:
                     return HttpResponseForbidden("Kein Zugriff auf dieses Meeting.")
                 display_name = (
-                    f"{portal_user.user.get_full_name() or portal_user.user.username} (Elternteil)"
-                )
+                    portal_user.user.get_full_name() or portal_user.user.username
+                ) + " (Elternteil)"
             else:
                 return HttpResponseForbidden()
 
-            documents = lesson.documents.all()
             return render(
                 request,
                 self.template_name,
@@ -99,14 +82,27 @@ class MeetingRoomView(View):
                     "room": room,
                     "lesson": lesson,
                     "display_name": display_name,
-                    "documents": documents,
+                    "documents": lesson.documents.all(),
                     "is_tutor": False,
-                    "MEETING_TURN_SERVERS": getattr(settings, "MEETING_ICE_SERVERS", []),
+                    "MEETING_TURN_SERVERS": turn_servers,
                 },
             )
 
-        # Not authenticated — redirect to portal login with return URL
-        from urllib.parse import urlencode
+        # ── 2. Tutor-Zugang (Django-Auth) ──────────────────────────────────────
+        if request.user.is_authenticated and lesson.contract.user == request.user:
+            display_name = (request.user.get_full_name() or request.user.username) + " (Tutor)"
+            return render(
+                request,
+                self.template_name,
+                {
+                    "room": room,
+                    "lesson": lesson,
+                    "display_name": display_name,
+                    "documents": lesson.documents.all(),
+                    "is_tutor": True,
+                    "MEETING_TURN_SERVERS": turn_servers,
+                },
+            )
 
-        next_url = request.path
-        return redirect("/portal/login/?" + urlencode({"next": next_url}))
+        # ── 3. Nicht eingeloggt → Portal-Login mit Rücksprung ─────────────────
+        return redirect("/portal/login/?" + urlencode({"next": request.path}))
