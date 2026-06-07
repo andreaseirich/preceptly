@@ -4,73 +4,292 @@
 
 {% block extra_css %}
 <style>
-@keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(39,174,96,0.5); }
-    70%  { box-shadow: 0 0 0 8px rgba(39,174,96,0); }
-    100% { box-shadow: 0 0 0 0 rgba(39,174,96,0); }
+/* ── Schüler-Grid ── */
+.student-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* ── Schüler-Karte ── */
+.student-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+.student-card:hover {
+    box-shadow: 0 6px 20px var(--shadow-card);
+    transform: translateY(-2px);
+}
+
+/* Karten-Kopf mit Avatar */
+.card-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2980b9, #1a6fa8);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+}
+.card-head-info { flex: 1; min-width: 0; }
+.card-name {
+    font-weight: 700;
+    font-size: 1.05em;
+    margin: 0 0 2px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.card-subject {
+    font-size: 0.80em;
+    color: var(--text-secondary);
+    margin: 0;
+}
+.unread-badge {
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.72em;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    line-height: 1.7;
+}
+
+/* Karten-Body */
+.card-body {
+    padding: 16px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Nächste Stunde */
+.lesson-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88em;
+}
+.lesson-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    flex-shrink: 0;
+}
+.lesson-meta { color: var(--text-secondary); font-size: 0.82em; margin: 0; }
+.lesson-time { color: var(--text-primary); font-weight: 600; margin: 0; }
+
+/* Meeting-Banner */
+.meeting-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(39,174,96,0.12);
+    border: 1px solid rgba(39,174,96,0.35);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-decoration: none !important;
+    color: #1e8449 !important;
+    font-weight: 600;
+    font-size: 0.88em;
+    transition: background 0.15s;
+    animation: meeting-pulse 2.5s ease-in-out infinite;
+}
+.meeting-banner:hover {
+    background: rgba(39,174,96,0.22);
+    color: #1e8449 !important;
+}
+[data-theme="dark"] .meeting-banner {
+    color: #2ecc71 !important;
+    background: rgba(39,174,96,0.14);
+    border-color: rgba(39,174,96,0.3);
+}
+[data-theme="dark"] .meeting-banner:hover { background: rgba(39,174,96,0.25); color: #2ecc71 !important; }
+.meeting-dot {
+    width: 8px;
+    height: 8px;
+    background: #27ae60;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: live-dot 1.2s ease-in-out infinite;
+}
+.meeting-join-arrow {
+    margin-left: auto;
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+@keyframes meeting-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(39,174,96,0.2); }
+    50%  { box-shadow: 0 0 0 5px rgba(39,174,96,0); }
+}
+@keyframes live-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.4); opacity: 0.6; }
+}
+
+/* Aktions-Grid */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: auto;
+}
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary) !important;
+    text-decoration: none !important;
+    font-size: 0.82em;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.action-btn:hover {
+    background: var(--hover-bg);
+    border-color: #2980b9;
+    color: var(--text-primary) !important;
+}
+.action-btn.primary {
+    background: rgba(41,128,185,0.1);
+    border-color: rgba(41,128,185,0.4);
+    color: #2980b9 !important;
+}
+.action-btn.primary:hover {
+    background: #2980b9;
+    color: #fff !important;
+}
+.action-btn.unread-hint {
+    border-color: rgba(220,53,69,0.4);
+    color: #dc3545 !important;
+}
+.action-btn .btn-badge {
+    margin-left: auto;
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.72em;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    line-height: 1.5;
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<h1>Ihre Kinder</h1>
+<h1 style="margin-bottom: 24px;">Ihre Kinder</h1>
 
 {% if students_data %}
-<div style="display:grid; gap:20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+<div class="student-grid">
 {% for sd in students_data %}
-<div class="card" style="position:relative;">
-    {% if sd.unread_messages > 0 %}
-    <span style="
-        position:absolute; top:12px; right:12px;
-        background:#dc3545; color:#fff;
-        font-size:0.75em; font-weight:700;
-        padding:2px 7px; border-radius:10px;
-        line-height:1.6;
-    ">{{ sd.unread_messages }}</span>
-    {% endif %}
 
-    <h3 style="margin-top:0; margin-bottom:12px;">{{ sd.student.full_name }}</h3>
+{% with initials=sd.student.full_name|slice:":1" %}
+<div class="student-card">
 
-    {% if sd.next_lesson %}
-    <p style="margin:0 0 6px; font-size:0.9em; color:var(--text-secondary);">
-        Nächste Stunde:
-        <strong style="color:var(--text-primary);">
-            {{ sd.next_lesson.date|date:"d.m." }}, {{ sd.next_lesson.start_time|time:"H:i" }} Uhr
-        </strong>
-    </p>
-    {% if sd.meeting_room %}
-    <a class="btn" href="{% url 'portal:meeting_wait' sd.next_lesson.pk %}"
-       style="background:#27ae60; font-weight:700; display:block; text-align:center; margin-bottom:10px; animation:pulse 2s infinite;">
-        📹 Meeting läuft – Jetzt beitreten!
-    </a>
-    {% endif %}
-    {% else %}
-    <p style="margin:0 0 12px; font-size:0.88em; color:var(--text-secondary);">Keine kommende Stunde.</p>
-    {% endif %}
-
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-        <a class="btn-sm btn-sm-primary" href="{% url 'portal:book' sd.student.pk %}">
-            Termin buchen
-        </a>
-        <a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_student_detail' sd.student.pk %}">
-            Details
-        </a>
-        <a class="btn-sm btn-sm-secondary" href="{% url 'portal:documents' sd.student.pk %}">
-            Dokumente
-        </a>
-        <a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_calendar' sd.student.pk %}">
-            📅 Kalender
-        </a>
-        <a class="btn-sm btn-sm-secondary" href="{% url 'portal:messages' sd.student.pk %}">
-            Nachrichten
-            {% if sd.unread_messages > 0 %}
-            <span style="background:#dc3545; color:#fff; border-radius:8px; padding:0 5px; font-size:0.78em; margin-left:4px;">{{ sd.unread_messages }}</span>
-            {% endif %}
-        </a>
+    <!-- Kopf: Avatar + Name + Fach + Badge -->
+    <div class="card-head">
+        <div class="avatar">{{ initials }}</div>
+        <div class="card-head-info">
+            <p class="card-name">{{ sd.student.full_name }}</p>
+            <p class="card-subject">{{ sd.student.subject|default:"Schüler" }}</p>
+        </div>
+        {% if sd.unread_messages > 0 %}
+        <span class="unread-badge">{{ sd.unread_messages }}</span>
+        {% endif %}
     </div>
-</div>
+
+    <!-- Body -->
+    <div class="card-body">
+
+        <!-- Nächste Stunde -->
+        {% if sd.next_lesson %}
+        <div class="lesson-row">
+            <div class="lesson-icon">📅</div>
+            <div>
+                <p class="lesson-meta">Nächste Stunde</p>
+                <p class="lesson-time">{{ sd.next_lesson.date|date:"d.m.Y" }}, {{ sd.next_lesson.start_time|time:"H:i" }} Uhr</p>
+            </div>
+        </div>
+
+        <!-- Meeting-Banner wenn aktiv -->
+        {% if sd.meeting_room %}
+        <a class="meeting-banner" href="{% url 'portal:meeting_wait' sd.next_lesson.pk %}">
+            <span class="meeting-dot"></span>
+            <span>Meeting läuft – Jetzt beitreten</span>
+            <span class="meeting-join-arrow">→</span>
+        </a>
+        {% endif %}
+
+        {% else %}
+        <div class="lesson-row" style="opacity:0.55;">
+            <div class="lesson-icon">📅</div>
+            <div>
+                <p class="lesson-meta">Nächste Stunde</p>
+                <p class="lesson-time" style="font-weight:400; color:var(--text-secondary);">Keine geplant</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Aktions-Buttons -->
+        <div class="action-grid">
+            <a class="action-btn primary" href="{% url 'portal:book' sd.student.pk %}">
+                ＋ Termin buchen
+            </a>
+            <a class="action-btn" href="{% url 'portal:parent_student_detail' sd.student.pk %}">
+                ⓘ Details
+            </a>
+            <a class="action-btn" href="{% url 'portal:parent_calendar' sd.student.pk %}">
+                📅 Kalender
+            </a>
+            <a class="action-btn" href="{% url 'portal:documents' sd.student.pk %}">
+                📄 Dokumente
+            </a>
+            <a class="action-btn {% if sd.unread_messages > 0 %}unread-hint{% endif %}"
+               href="{% url 'portal:messages' sd.student.pk %}"
+               style="grid-column: 1 / -1;">
+                💬 Nachrichten
+                {% if sd.unread_messages > 0 %}
+                <span class="btn-badge">{{ sd.unread_messages }}</span>
+                {% endif %}
+            </a>
+        </div>
+
+    </div><!-- /card-body -->
+</div><!-- /student-card -->
+{% endwith %}
 {% endfor %}
 </div>
+
 {% else %}
 <div class="empty-state"><p>Keine Schüler mit Ihrem Konto verknüpft.</p></div>
 {% endif %}
