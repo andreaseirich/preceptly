@@ -7,11 +7,11 @@
 
 <div class="btn-group" style="margin-bottom: 20px;">
     {% if portal_user.role == "parent" %}
-    <a href="{% url portal:parent_calendar student_pk %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
-    <a href="{% url portal:parent_calendar student_pk %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
+    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
+    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
     {% else %}
-    <a href="{% url portal:calendar %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
-    <a href="{% url portal:calendar %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
+    <a href="{% url 'portal:calendar' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
+    <a href="{% url 'portal:calendar' %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
     {% endif %}
 </div>
 
@@ -37,9 +37,9 @@
                 <div style="margin-bottom: 5px;">
                     {% for lesson in day.lessons %}
                     <div style="display: block; background: {% if day.is_past %}rgba(255,255,255,0.05){% else %}rgba(33, 150, 243, 0.2){% endif %}; padding: 3px; margin-bottom: 2px; font-size: 0.85em; border-left: 3px solid #2196f3; {% if day.is_past %}opacity: 0.7;{% endif %}">
-                        <a href="{% url portal:student_lesson_detail lesson.pk %}"
+                        <a href="{% url 'portal:student_lesson_detail' lesson.pk %}"
                            style="text-decoration: none; color: var(--text-primary); display: block;"
-                           title="{{ lesson.start_time|time:H:i }} ({{ lesson.duration_minutes }} Min.){% if lesson.subject %} – {{ lesson.subject }}{% endif %}">
+                           title="{{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} Min.){% if lesson.contract.subjects %} – {{ lesson.contract.subjects }}{% endif %}">
                             <strong>{{ lesson.start_time|time:"H:i" }}</strong>
                             {% if lesson.contract.subjects %}<span style="opacity: 0.85;"> {{ lesson.contract.subjects }}</span>{% endif %}
                             <small style="opacity: 0.8;">({{ lesson.duration_minutes }} Min.)</small>
