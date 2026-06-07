@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 """
 Tests für Kontingent-Konflikte (ContractQuotaService).
 """

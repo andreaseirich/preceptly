@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 """
 Tests for registration flow and premium default.
 """

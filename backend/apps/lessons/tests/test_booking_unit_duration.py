@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 """
 Tests for booking with contract unit_duration_minutes.
 """

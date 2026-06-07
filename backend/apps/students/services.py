@@ -128,7 +128,7 @@ class StudentSearchService:
     @staticmethod
     def search_for_public_booking(
         name: str, user=None, max_suggestions: int = 10
-    ) -> tuple["Student | None", List[Tuple["Student", float]]]:
+    ) -> tuple["Contract | None", List[Tuple["Contract", float]]]:
         """
         Search for students by name. Returns (exact_match, suggestions).
         Used for Public Booking step 1: no code required, tutor-scoped only.
@@ -147,7 +147,7 @@ class StudentSearchService:
         if exact:
             return exact, []
 
-        scored: List[Tuple[Student, float]] = []
+        scored: List[Tuple[Contract, float]] = []
         for student in students_qs:
             fn_norm = _normalize_name(student.first_name)
             ln_norm = _normalize_name(student.last_name)

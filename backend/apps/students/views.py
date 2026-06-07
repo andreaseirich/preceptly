@@ -142,8 +142,8 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
 
 class PortalInviteCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        from apps.portal.models import StudentPortalLink
         from apps.portal.email_service import send_portal_invite
+        from apps.portal.models import StudentPortalLink
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
@@ -194,6 +194,7 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
 class PortalInviteParentView(LoginRequiredMixin, View):
     def post(self, request, pk):
         import secrets as _secrets
+
         from apps.portal.email_service import send_portal_invite
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)

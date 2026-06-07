@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 """
 Tests for Public Booking week calendar: own vs other slot display.
 """

@@ -1,11 +1,10 @@
-from datetime import date
-from decimal import Decimal
-
 """
 Tests for Public Booking step 1: name search with suggestions.
 """
 
 import json
+from datetime import date
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -13,7 +12,6 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.contracts.models import Contract
-
 from apps.core.models import UserProfile
 
 

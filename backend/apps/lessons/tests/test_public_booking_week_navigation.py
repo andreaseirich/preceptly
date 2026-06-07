@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 """
 Tests for Public Booking week navigation: drift fix and week param.
 """

@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 """
 Tests for time-dependent travel policy (Vor-Ort: ÖPNV buffer + no-go windows).
 - Vor-Ort with policy: slots in no-go/buffer are not offered; book_lesson rejects them.
@@ -8,6 +6,7 @@ Tests for time-dependent travel policy (Vor-Ort: ÖPNV buffer + no-go windows).
 
 import json
 from datetime import date, time, timedelta
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase

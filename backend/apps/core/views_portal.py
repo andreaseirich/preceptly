@@ -6,8 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 
-from apps.portal.models import PortalMessage
 from apps.contracts.models import Contract
+from apps.portal.models import PortalMessage
 
 
 class TutorMessageView(LoginRequiredMixin, TemplateView):

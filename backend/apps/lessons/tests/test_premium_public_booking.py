@@ -1,6 +1,3 @@
-from datetime import date
-from decimal import Decimal
-
 """
 Tests for Premium gating on Public Booking (limit, reschedule).
 """

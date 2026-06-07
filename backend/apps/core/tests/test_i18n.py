@@ -1,20 +1,18 @@
-from decimal import Decimal
-
 """
 Tests for internationalization (i18n) functionality.
 """
 
 import json
 from datetime import date
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from apps.contracts.models import Contract
 from django.utils.translation import activate
 
 from apps.billing.models import Invoice
+from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.students.booking_code_service import set_booking_code
 

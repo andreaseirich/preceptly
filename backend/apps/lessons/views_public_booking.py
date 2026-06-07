@@ -5,7 +5,6 @@ Views für öffentliche Buchungsseite (ohne Token).
 import json
 import logging
 from datetime import date, datetime, time, timedelta
-from decimal import Decimal
 
 from django.db import transaction
 from django.http import Http404, JsonResponse

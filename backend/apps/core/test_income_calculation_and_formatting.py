@@ -174,15 +174,8 @@ class IncomeCalculationTest(TestCase):
     def test_get_lesson_amount_sums_all_invoice_lines_for_same_lesson(self):
         """Regression: multiple InvoiceItems for one lesson must all count (not .first() only)."""
         user = User.objects.create_user(username="tutor_sum", password="x")
-        student = Contract.objects.create(
-            hourly_rate=Decimal("25.00"),
-            start_date=date.today(),
-            user=user,
-            first_name="A",
-            last_name="B",
-        )
         contract = Contract.objects.create(
-            user=self.user,
+            user=user,
             first_name="Test",
             last_name="Student",
             hourly_rate=Decimal("30.00"),
