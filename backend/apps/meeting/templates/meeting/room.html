@@ -52,6 +52,15 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     aspect-ratio: 16/9;
 }
 .video-tile.speaking { border-color: var(--green); }
+.kick-btn {
+    position: absolute; top: 6px; right: 6px;
+    background: rgba(231,76,60,0.85); color: #fff;
+    border: none; border-radius: 50%;
+    width: 22px; height: 22px; font-size: 0.7em;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s; z-index: 10;
+}
+.video-tile:hover .kick-btn { opacity: 1; }
 .video-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .video-tile .tile-label {
     position: absolute; bottom: 6px; left: 8px; background: rgba(0,0,0,0.7);
@@ -240,7 +249,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
                     <h3>Dokumente dieser Stunde</h3>
                     {% if documents %}
                     {% for doc in documents %}
-                    <a class="doc-item" href="{{ doc.file.url }}" target="_blank" rel="noopener">
+                    <a class="doc-item" href="{{ doc.file.url }}" target="_blank" rel="noopener" id="doc-{{ doc.pk }}">
                         <span class="doc-icon">📄</span>
                         <div>
                             <div class="doc-name">{{ doc.name|default:doc.file.name }}</div>
@@ -248,17 +257,29 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
                         </div>
                     </a>
                     {% endfor %}
-                    <p style="font-size:0.78em; color:#555; margin-top:12px;">Klicke auf ein Dokument, um es zu öffnen.<br>Du kannst Dokumente auch auf das Whiteboard fotografieren und zeichnen.</p>
                     {% else %}
                     <div class="no-docs">
                         📄<br><br>
-                        Keine Dokumente für diese Stunde hochgeladen.
-                        {% if is_tutor %}
-                        <br><br>
-                        <a href="{% url 'lessons:detail' lesson.pk %}" target="_blank" style="color:var(--blue);">Dokumente hinzufügen →</a>
-                        {% endif %}
+                        Noch keine Dokumente für diese Stunde.
                     </div>
                     {% endif %}
+                    <!-- Upload-Bereich (alle Teilnehmer) -->
+                    <div id="doc-upload-area" style="margin-top:14px; border-top:1px solid var(--border); padding-top:12px;">
+                        <div style="font-size:0.78em; color:var(--text2); margin-bottom:8px;">Dokument hochladen</div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <input type="file" id="doc-file-input"
+                                   style="flex:1; min-width:0; font-size:0.8em; color:var(--text);
+                                          background:var(--bg3); border:1px solid var(--border);
+                                          border-radius:4px; padding:4px 6px; cursor:pointer;">
+                            <button onclick="uploadDoc()"
+                                    style="padding:5px 12px; background:var(--blue); color:#fff;
+                                           border:none; border-radius:4px; cursor:pointer; font-size:0.82em;
+                                           white-space:nowrap;">
+                                Hochladen
+                            </button>
+                        </div>
+                        <div id="doc-upload-status" style="font-size:0.75em; color:var(--text2); margin-top:4px; min-height:1em;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -288,8 +309,10 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 const ROOM_TOKEN   = "{{ room.token }}";
 const DISPLAY_NAME = "{{ display_name|escapejs }}";
 const IS_TUTOR     = {{ is_tutor|yesno:"true,false" }};
+const USER_TOKEN   = "{{ user_token }}";
 const BACK_URL     = "{{ back_url }}";
 const END_URL      = "{% url 'meeting:end' room.token %}";
+const UPLOAD_URL   = "{% url 'meeting:upload' room.token %}";
 const WS_URL       = (window.location.protocol === "https:" ? "wss" : "ws") +
                      "://" + window.location.host + "/ws/meeting/" + ROOM_TOKEN + "/";
 
@@ -428,7 +451,7 @@ function connectWS() {
     ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
-        ws.send(JSON.stringify({ type: "join", name: DISPLAY_NAME }));
+        ws.send(JSON.stringify({ type: "join", name: DISPLAY_NAME, is_tutor: IS_TUTOR, user_token: USER_TOKEN }));
         setStatus("Verbunden – warte auf Teilnehmer …");
         document.getElementById("header-sub").textContent = "Verbunden";
     };
@@ -471,6 +494,21 @@ function connectWS() {
                 break;
             case "wb_event":
                 handleWbEvent(msg);
+                break;
+            case "kicked":
+                if (msg.by === "__reconnect__") {
+                    // Stille Trennung bei Reconnect – kein Alert
+                    Object.keys(peers).forEach(removePeer);
+                    if (ws) { ws.close(); }
+                } else {
+                    const kickedBy = msg.by ? ` von ${msg.by}` : "";
+                    alert(`Du wurdest${kickedBy} aus dem Meeting entfernt.`);
+                    hangUp();
+                }
+                break;
+            case "doc_added":
+                addDocToPanel(msg.name, msg.url, msg.date, msg.doc_id);
+                addChatLine("System", `📄 Neues Dokument: ${msg.name}`, false, true);
                 break;
             case "chat":
                 addChatLine(msg.name, msg.text, msg.peer_id === myPeerId, false);
@@ -555,6 +593,14 @@ function addVideoTile(peerId, name, stream) {
     vid.autoplay = true; vid.playsInline = true; vid.srcObject = stream;
     const label = document.createElement("div"); label.className = "tile-label"; label.textContent = name;
     const noVid = document.createElement("div"); noVid.className = "no-video"; noVid.textContent = "👤";
+    if (IS_TUTOR) {
+        const kickBtn = document.createElement("button");
+        kickBtn.className = "kick-btn";
+        kickBtn.textContent = "✕";
+        kickBtn.title = "Teilnehmer entfernen";
+        kickBtn.onclick = () => kickPeer(peerId);
+        tile.appendChild(kickBtn);
+    }
     tile.appendChild(vid); tile.appendChild(noVid); tile.appendChild(label);
     document.getElementById("videos").appendChild(tile);
     vid.onloadedmetadata = () => { noVid.style.display = "none"; };
@@ -576,6 +622,15 @@ function updatePeerStatus() {
     ps.textContent = n === 0
         ? "Warte auf Teilnehmer …"
         : `${n} Teilnehmer verbunden`;
+}
+
+function kickPeer(peerId) {
+    if (!IS_TUTOR) return;
+    const name = peers[peerId]?.name || "Teilnehmer";
+    if (!confirm(`${name} aus dem Meeting entfernen?`)) return;
+    if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "kick", target_peer_id: peerId }));
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -695,6 +750,23 @@ document.getElementById("chat-input").addEventListener("keydown", e => {
     if (e.key === "Enter") sendChat();
 });
 
+function addDocToPanel(name, url, date, docId) {
+    const panel = document.getElementById("docs-panel");
+    // Remove "keine Dokumente"-Hinweis falls vorhanden
+    const noDoc = panel.querySelector(".no-docs");
+    if (noDoc) noDoc.remove();
+    // Kein Duplikat
+    if (docId && document.getElementById(`doc-${docId}`)) return;
+    const a = document.createElement("a");
+    a.className = "doc-item";
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    if (docId) a.id = `doc-${docId}`;
+    a.innerHTML = `<span class="doc-icon">📄</span><div><div class="doc-name">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>`;
+    panel.insertBefore(a, panel.querySelector("#doc-upload-area"));
+}
+
 function addChatLine(name, text, mine, system) {
     const msgs = document.getElementById("chat-msgs");
     const line = document.createElement("div");
@@ -736,6 +808,57 @@ function switchTab(name, btn) {
 function setStatus(msg) { document.getElementById("peer-status").textContent = msg; }
 function escHtml(s) {
     return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dokument-Upload (AJAX – kein Seiten-Reload)
+// ─────────────────────────────────────────────────────────────────────────────
+async function uploadDoc() {
+    const input = document.getElementById("doc-file-input");
+    const status = document.getElementById("doc-upload-status");
+    if (!input.files.length) {
+        status.textContent = "Keine Datei ausgewählt.";
+        return;
+    }
+    const file = input.files[0];
+    if (file.size > 20 * 1024 * 1024) {
+        status.textContent = "Datei zu groß (max. 20 MB).";
+        return;
+    }
+    status.textContent = "Wird hochgeladen …";
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("name", file.name);
+    try {
+        const resp = await fetch(UPLOAD_URL, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCookie("csrftoken") },
+            body: fd,
+        });
+        const data = await resp.json();
+        if (data.ok) {
+            // Lokal hinzufügen
+            addDocToPanel(data.name, data.url, data.date, data.id);
+            // Andere Teilnehmer benachrichtigen
+            if (ws && ws.readyState === 1) {
+                ws.send(JSON.stringify({
+                    type: "doc_notify",
+                    name: data.name,
+                    url: data.url,
+                    date: data.date,
+                    doc_id: data.id,
+                }));
+            }
+            addChatLine("System", `📄 Dokument hochgeladen: ${data.name}`, false, true);
+            input.value = "";
+            status.textContent = "✓ Hochgeladen";
+            setTimeout(() => { status.textContent = ""; }, 3000);
+        } else {
+            status.textContent = `Fehler: ${data.error || "Unbekannt"}`;
+        }
+    } catch (e) {
+        status.textContent = "Netzwerkfehler beim Hochladen.";
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

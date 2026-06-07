@@ -7,11 +7,11 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
-from apps.lessons.models import Session
+from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
 from apps.portal.models import ParentStudentLink, StudentPortalLink
 from apps.portal.views import get_portal_user
@@ -32,6 +32,53 @@ class StartMeetingView(LoginRequiredMixin, View):
 
     def post(self, request, lesson_pk):
         return self.get(request, lesson_pk)
+
+
+class MeetingDocumentUploadView(View):
+    """AJAX-Dokumenten-Upload im Meeting-Raum. Für Tutor und Portal-Nutzer."""
+
+    def post(self, request, token):
+        room = get_object_or_404(MeetingRoom, token=token, is_active=True)
+        lesson = room.lesson
+
+        # Zugangsprüfung
+        portal_user = get_portal_user(request)
+        if portal_user:
+            if portal_user.role == "student":
+                ok = StudentPortalLink.objects.filter(
+                    portal_user=portal_user, is_active=True, contract=lesson.contract
+                ).exists()
+            elif portal_user.role == "parent":
+                ok = ParentStudentLink.objects.filter(
+                    parent=portal_user, contract=lesson.contract
+                ).exists()
+            else:
+                ok = False
+        elif request.user.is_authenticated and lesson.contract.user == request.user:
+            ok = True
+        else:
+            ok = False
+
+        if not ok:
+            return JsonResponse({"error": "Kein Zugriff"}, status=403)
+
+        file = request.FILES.get("file")
+        if not file:
+            return JsonResponse({"error": "Keine Datei"}, status=400)
+
+        name = request.POST.get("name", "").strip() or file.name
+        doc = SessionDocument.objects.create(session=lesson, file=file, name=name)
+        logger.info("Dokument hochgeladen: %s (lesson %s)", name, lesson.pk)
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "id": doc.pk,
+                "name": doc.name or doc.file.name,
+                "url": doc.file.url,
+                "date": doc.uploaded_at.strftime("%d.%m.%Y"),
+            }
+        )
 
 
 class EndMeetingView(LoginRequiredMixin, View):
@@ -101,6 +148,7 @@ class MeetingRoomView(View):
                     "documents": lesson.documents.all(),
                     "is_tutor": False,
                     "back_url": back_url,
+                    "user_token": f"portal_{portal_user.pk}",
                     "MEETING_TURN_SERVERS": turn_servers,
                 },
             )
@@ -118,6 +166,7 @@ class MeetingRoomView(View):
                     "documents": lesson.documents.all(),
                     "is_tutor": True,
                     "back_url": f"/lessons/{lesson.pk}/",
+                    "user_token": f"tutor_{request.user.pk}",
                     "MEETING_TURN_SERVERS": turn_servers,
                 },
             )

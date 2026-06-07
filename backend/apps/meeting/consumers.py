@@ -16,36 +16,50 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     Signaling-Server für ein einzelnes Meeting-Zimmer.
 
     Nachrichten-Typen vom Client:
-      join        – Raum betreten (name, peer_id)
+      join        – Raum betreten (name, is_tutor, user_token)
       offer       – WebRTC Offer  (sdp, target_peer_id)
       answer      – WebRTC Answer (sdp, target_peer_id)
       ice         – ICE Candidate (candidate, target_peer_id)
       wb_event    – Whiteboard-Ereignis (action, data)
       chat        – Text-Nachricht  (text)
+      kick        – Teilnehmer entfernen (target_peer_id) – nur Tutor
+      doc_notify  – Neues Dokument  (name, url, date, doc_id)
       leave       – Raum verlassen
 
-    Nachrichten vom Server (broadcastet oder direkt):
-      peer_joined   – { peer_id, name, peers: [...] }
+    Nachrichten vom Server:
+      joined        – { peer_id, peers: [...] }
+      peer_joined   – { peer_id, name }
       peer_left     – { peer_id, name }
-      offer/answer/ice – weitergeleitet an Zielpeer
+      offer/answer/ice – weitergeleitet
       wb_event      – an alle außer Sender
       chat          – an alle
+      kicked        – du wurdest entfernt
+      doc_added     – { name, url, date, doc_id }
       error         – { message }
     """
 
-    # Peers pro Raum: token -> {peer_id: name}
+    # Peers pro Raum: group_name -> {peer_id: name}
     rooms: dict[str, dict[str, str]] = {}
+    # User-Token-Dedup: group_name -> {user_token: channel_name}
+    user_channels: dict[str, dict[str, str]] = {}
 
     async def connect(self):
         self.token = str(self.scope["url_route"]["kwargs"]["token"])
         self.group_name = f"meeting_{self.token.replace('-', '')}"
         self.peer_id = str(uuid.uuid4())
         self.display_name = "Gast"
+        self.is_tutor = False
+        self.user_token = ""
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, code):
+        # Dedup-Eintrag entfernen (nur wenn noch aktuell)
+        if self.group_name in self.user_channels and self.user_token:
+            if self.user_channels[self.group_name].get(self.user_token) == self.channel_name:
+                del self.user_channels[self.group_name][self.user_token]
+
         if self.group_name in self.rooms:
             self.rooms[self.group_name].pop(self.peer_id, None)
             if not self.rooms[self.group_name]:
@@ -71,12 +85,29 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
         if msg_type == "join":
             self.display_name = data.get("name", "Gast")[:60]
+            self.is_tutor = bool(data.get("is_tutor", False))
+            self.user_token = str(data.get("user_token", ""))[:64]
+
+            # Dedup: alten Channel desselben Users kicken
+            if self.user_token:
+                if self.group_name not in self.user_channels:
+                    self.user_channels[self.group_name] = {}
+                old_channel = self.user_channels[self.group_name].get(self.user_token)
+                if old_channel and old_channel != self.channel_name:
+                    try:
+                        await self.channel_layer.send(
+                            old_channel,
+                            {"type": "force_disconnect_event"},
+                        )
+                    except Exception:  # noqa: S110 – channel evtl. bereits getrennt
+                        pass
+                self.user_channels[self.group_name][self.user_token] = self.channel_name
+
             if self.group_name not in self.rooms:
                 self.rooms[self.group_name] = {}
             existing_peers = dict(self.rooms[self.group_name])
             self.rooms[self.group_name][self.peer_id] = self.display_name
 
-            # Send back own peer_id + list of existing peers
             await self.send(
                 json.dumps(
                     {
@@ -89,7 +120,6 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 )
             )
 
-            # Notify others
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -101,7 +131,6 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             )
 
         elif msg_type in ("offer", "answer", "ice"):
-            # Forward to specific peer
             target = data.get("target_peer_id")
             if target:
                 await self.channel_layer.group_send(
@@ -116,7 +145,6 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 )
 
         elif msg_type == "wb_event":
-            # Broadcast whiteboard events to all (except sender)
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -138,6 +166,34 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 },
             )
 
+        elif msg_type == "kick":
+            target = data.get("target_peer_id")
+            if target and self.is_tutor:
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        "type": "kick_event",
+                        "target_peer_id": target,
+                        "kicked_by": self.display_name,
+                    },
+                )
+
+        elif msg_type == "doc_notify":
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    "type": "doc_event",
+                    "payload": {
+                        "type": "doc_added",
+                        "name": str(data.get("name", ""))[:200],
+                        "url": str(data.get("url", "")),
+                        "date": str(data.get("date", "")),
+                        "doc_id": int(data.get("doc_id", 0)),
+                    },
+                    "sender_channel": self.channel_name,
+                },
+            )
+
         elif msg_type == "leave":
             await self.disconnect(1000)
 
@@ -147,28 +203,15 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         if event["sender_channel"] == self.channel_name:
             return
         await self.send(
-            json.dumps(
-                {
-                    "type": "peer_joined",
-                    "peer_id": event["peer_id"],
-                    "name": event["name"],
-                }
-            )
+            json.dumps({"type": "peer_joined", "peer_id": event["peer_id"], "name": event["name"]})
         )
 
     async def peer_left_event(self, event):
         await self.send(
-            json.dumps(
-                {
-                    "type": "peer_left",
-                    "peer_id": event["peer_id"],
-                    "name": event["name"],
-                }
-            )
+            json.dumps({"type": "peer_left", "peer_id": event["peer_id"], "name": event["name"]})
         )
 
     async def relay_event(self, event):
-        # Only deliver to the target peer
         if event.get("target_peer_id") != self.peer_id:
             return
         payload = dict(event["payload"])
@@ -191,3 +234,15 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+
+    async def kick_event(self, event):
+        if event.get("target_peer_id") == self.peer_id:
+            await self.send(json.dumps({"type": "kicked", "by": event.get("kicked_by", "")}))
+
+    async def doc_event(self, event):
+        await self.send(json.dumps(event["payload"]))
+
+    async def force_disconnect_event(self, event):
+        """Erzwingt Trennung bei Dedup (gleicher User meldet sich erneut an)."""
+        await self.send(json.dumps({"type": "kicked", "by": "__reconnect__"}))
+        await self.close()
