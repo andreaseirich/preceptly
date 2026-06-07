@@ -1,14 +1,17 @@
 import datetime as _dt
 import uuid
+from calendar import monthcalendar as _monthcalendar
 
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
+from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
 
 
@@ -977,13 +980,6 @@ class PortalCalendarView(View):
             return link.contract if link else None
 
     def get(self, request, student_pk=None):
-        from calendar import monthcalendar
-        from datetime import date
-
-        from django.utils import timezone
-
-        from apps.lessons.models import Lesson
-
         portal_user = get_portal_user(request)
         if not portal_user:
             return redirect("portal:login")
@@ -1006,13 +1002,13 @@ class PortalCalendarView(View):
             month = 1
             year += 1
 
-        start_date = date(year, month, 1)
+        start_date = _dt.date(year, month, 1)
         if month == 12:
-            end_date = date(year + 1, 1, 1)
+            end_date = _dt.date(year + 1, 1, 1)
         else:
-            end_date = date(year, month + 1, 1)
+            end_date = _dt.date(year, month + 1, 1)
 
-        lessons = Lesson.objects.filter(
+        lessons = _Lesson.objects.filter(
             contract=student, date__gte=start_date, date__lt=end_date
         ).order_by("date", "start_time")
 
@@ -1020,7 +1016,7 @@ class PortalCalendarView(View):
         for lesson in lessons:
             lessons_by_date.setdefault(lesson.date, []).append(lesson)
 
-        cal = monthcalendar(year, month)
+        cal = _monthcalendar(year, month)
         today = timezone.localdate()
         weeks = []
         for week in cal:
@@ -1029,7 +1025,7 @@ class PortalCalendarView(View):
                 if day == 0:
                     week_days.append(None)
                 else:
-                    d = date(year, month, day)
+                    d = _dt.date(year, month, day)
                     week_days.append(
                         {
                             "date": d,
