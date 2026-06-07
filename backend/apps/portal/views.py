@@ -955,3 +955,127 @@ class PortalDocumentDownloadView(View):
             doc.file.open("rb"), as_attachment=True, filename=doc.display_name()
         )
         return response
+
+
+class PortalCalendarView(View):
+    """Month calendar for portal users (student and parent)."""
+
+    template_name = "portal/calendar.html"
+
+    def _get_student(self, portal_user, student_pk=None):
+        if portal_user.role == "student":
+            link = StudentPortalLink.objects.filter(portal_user=portal_user, is_active=True).first()
+            if not link:
+                return None
+            return link.contract
+        else:
+            if not student_pk:
+                return None
+            link = ParentStudentLink.objects.filter(
+                parent=portal_user, contract_id=student_pk
+            ).first()
+            return link.contract if link else None
+
+    def get(self, request, student_pk=None):
+        from calendar import monthcalendar
+        from datetime import date
+
+        from django.utils import timezone
+
+        from apps.lessons.models import Lesson
+
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return redirect("portal:login")
+
+        student = self._get_student(portal_user, student_pk)
+        if not student:
+            return HttpResponseForbidden()
+
+        now = timezone.now()
+        try:
+            year = int(request.GET.get("year", now.year))
+            month = int(request.GET.get("month", now.month))
+        except (ValueError, TypeError):
+            year, month = now.year, now.month
+
+        if month < 1:
+            month = 12
+            year -= 1
+        elif month > 12:
+            month = 1
+            year += 1
+
+        start_date = date(year, month, 1)
+        if month == 12:
+            end_date = date(year + 1, 1, 1)
+        else:
+            end_date = date(year, month + 1, 1)
+
+        lessons = Lesson.objects.filter(
+            contract=student, date__gte=start_date, date__lt=end_date
+        ).order_by("date", "start_time")
+
+        lessons_by_date = {}
+        for lesson in lessons:
+            lessons_by_date.setdefault(lesson.date, []).append(lesson)
+
+        cal = monthcalendar(year, month)
+        today = timezone.localdate()
+        weeks = []
+        for week in cal:
+            week_days = []
+            for day in week:
+                if day == 0:
+                    week_days.append(None)
+                else:
+                    d = date(year, month, day)
+                    week_days.append(
+                        {
+                            "date": d,
+                            "is_today": d == today,
+                            "is_past": d < today,
+                            "lessons": lessons_by_date.get(d, []),
+                        }
+                    )
+            weeks.append(week_days)
+
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+
+        month_names = [
+            "Januar",
+            "Februar",
+            "März",
+            "April",
+            "Mai",
+            "Juni",
+            "Juli",
+            "August",
+            "September",
+            "Oktober",
+            "November",
+            "Dezember",
+        ]
+
+        context = {
+            "student": student,
+            "portal_user": portal_user,
+            "weeks": weeks,
+            "year": year,
+            "month": month,
+            "month_label": month_names[month - 1],
+            "prev_year": prev_year,
+            "prev_month": prev_month,
+            "next_year": next_year,
+            "next_month": next_month,
+            "today": today,
+            "weekday_names": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+        }
+
+        if portal_user.role == "parent":
+            context["student_pk"] = student_pk
+
+        return render(request, self.template_name, context)

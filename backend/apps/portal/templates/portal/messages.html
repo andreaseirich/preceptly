@@ -23,11 +23,12 @@
         max-width: 72%;
         margin-bottom: 14px;
     }
-    .chat-msg.tutor {
+    /* From portal user's perspective: own messages on the right, tutor on the left */
+    .chat-msg.from-me {
         align-self: flex-end;
         align-items: flex-end;
     }
-    .chat-msg.portal-user {
+    .chat-msg.from-tutor {
         align-self: flex-start;
         align-items: flex-start;
     }
@@ -39,15 +40,14 @@
         white-space: pre-wrap;
         word-break: break-word;
     }
-    .chat-msg.tutor .chat-bubble {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
+    .chat-msg.from-me .chat-bubble {
+        background: #007bff;
+        color: #fff;
         border-bottom-right-radius: 4px;
     }
-    .chat-msg.portal-user .chat-bubble {
-        background: rgba(0,123,255,0.10);
-        border: 1px solid rgba(0,123,255,0.22);
+    .chat-msg.from-tutor .chat-bubble {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         color: var(--text-primary);
         border-bottom-left-radius: 4px;
     }
@@ -75,6 +75,7 @@
         min-height: 80px;
         margin-bottom: 10px;
         font-family: inherit;
+        box-sizing: border-box;
     }
     .compose-box textarea:focus {
         outline: none;
@@ -106,10 +107,10 @@
 <div class="chat-wrapper" id="chat-wrapper">
 {% if messages %}
     {% for msg in messages %}
-    <div class="chat-msg {% if msg.sender_is_tutor %}tutor{% else %}portal-user{% endif %}">
+    <div class="chat-msg {% if msg.sender_is_tutor %}from-tutor{% else %}from-me{% endif %}">
         <div class="chat-bubble">{{ msg.text }}</div>
         <div class="chat-meta">
-            {% if msg.sender_is_tutor %}Nachhilfelehrer{% else %}{{ msg.sender_portal_user.user.username }}{% endif %} &middot; {{ msg.created_at|date:"d.m.Y" }}, {{ msg.created_at|time:"H:i" }} Uhr
+            {% if msg.sender_is_tutor %}Nachhilfelehrer{% else %}Du{% endif %} &middot; {{ msg.created_at|date:"d.m.Y" }}, {{ msg.created_at|time:"H:i" }} Uhr
         </div>
     </div>
     {% endfor %}

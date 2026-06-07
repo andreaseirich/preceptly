@@ -7,7 +7,7 @@
 <h1>{{ contract.full_name }}</h1>
 
 <div class="btn-group">
-    <a href="{% url 'students:documents' contract.pk %}" class="btn-sm btn-sm-secondary">{% trans "Documents" %}</a>
+    <a href="{% url 'students:documents' contract.pk %}" class="btn btn-secondary">{% trans "Documents" %}</a>
     <a href="{% url 'contracts:update' contract.pk %}" class="btn">{% trans "Edit" %}</a>
     <a href="{% url 'contracts:delete' contract.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
     <a href="{% url 'contracts:list' %}" class="btn btn-secondary">{% trans "Back to List" %}</a>
