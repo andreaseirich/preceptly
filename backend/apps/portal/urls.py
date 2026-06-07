@@ -72,4 +72,15 @@ urlpatterns = [
         views.PortalDocumentDownloadView.as_view(),
         name="document_download",
     ),
+    # Meeting-Warteraum
+    path(
+        "meeting/<int:lesson_pk>/",
+        views.PortalMeetingWaitView.as_view(),
+        name="meeting_wait",
+    ),
+    path(
+        "meeting/<int:lesson_pk>/status/",
+        views.PortalMeetingStatusView.as_view(),
+        name="meeting_status",
+    ),
 ]

@@ -177,7 +177,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
         {% if is_tutor %}
         <a href="{% url 'lessons:detail' lesson.pk %}" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">📋 Zur Stunde</a>
         {% else %}
-        <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">← Zurück</a>
+        <a href="{{ back_url }}" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">← Zurück</a>
         {% endif %}
         <button onclick="hangUp()" class="ctrl-btn danger" style="font-size:0.78em;">✕ Meeting verlassen</button>
     </div>
@@ -404,7 +404,7 @@ function hangUp() {
     {% if is_tutor %}
     window.location.href = "{% url 'lessons:detail' lesson.pk %}";
     {% else %}
-    window.location.href = "{% url 'portal:student_lesson_detail' lesson.pk %}";
+    window.location.href = "{{ back_url }}";
     {% endif %}
 }
 

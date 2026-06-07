@@ -1000,6 +1000,109 @@ class PortalDocumentDownloadView(View):
         return response
 
 
+class PortalMeetingWaitView(View):
+    """
+    Warteraum für Portal-Nutzer (Schüler/Elternteil).
+    Leitet direkt weiter, wenn ein aktives Meeting existiert.
+    """
+
+    template_name = "portal/meeting_wait.html"
+
+    def _check_access(self, request, lesson_pk):
+        """Gibt (portal_user, lesson) zurück oder (None, None) bei kein Zugriff."""
+        from apps.lessons.models import Lesson
+
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return None, None
+        lesson = get_object_or_404(Lesson, pk=lesson_pk)
+        if portal_user.role == "student":
+            link = StudentPortalLink.objects.filter(
+                portal_user=portal_user,
+                is_active=True,
+                contract=lesson.contract,
+            ).first()
+            if not link:
+                return None, None
+        elif portal_user.role == "parent":
+            has_access = ParentStudentLink.objects.filter(
+                parent=portal_user,
+                contract=lesson.contract,
+            ).exists()
+            if not has_access:
+                return None, None
+        else:
+            return None, None
+        return portal_user, lesson
+
+    def get(self, request, lesson_pk):
+
+        portal_user, lesson = self._check_access(request, lesson_pk)
+        if portal_user is None:
+            next_url = request.path
+            from django.urls import reverse
+
+            login_url = reverse("portal:login")
+            return redirect(f"{login_url}?next={next_url}")
+
+        # Wenn Meeting bereits aktiv → direkt weiterleiten
+        try:
+            room = lesson.meeting_room
+            if room.is_active:
+                return redirect("meeting:room", token=room.token)
+        except Exception:  # noqa: S110 – kein MeetingRoom vorhanden
+            pass
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "lesson": lesson,
+                "portal_user": portal_user,
+                "status_url": f"/portal/meeting/{lesson_pk}/status/",
+                "room_url_base": "/meetings/",
+            },
+        )
+
+
+class PortalMeetingStatusView(View):
+    """JSON-Endpunkt: Ist ein Meeting aktiv? (für Polling im Warteraum)"""
+
+    def get(self, request, lesson_pk):
+        from django.http import JsonResponse
+
+        from apps.lessons.models import Lesson
+
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return JsonResponse({"active": False})
+        lesson = get_object_or_404(Lesson, pk=lesson_pk)
+
+        # Zugangsprüfung
+        if portal_user.role == "student":
+            ok = StudentPortalLink.objects.filter(
+                portal_user=portal_user, is_active=True, contract=lesson.contract
+            ).exists()
+        elif portal_user.role == "parent":
+            ok = ParentStudentLink.objects.filter(
+                parent=portal_user, contract=lesson.contract
+            ).exists()
+        else:
+            ok = False
+
+        if not ok:
+            return JsonResponse({"active": False})
+
+        try:
+            room = lesson.meeting_room
+            if room.is_active:
+                return JsonResponse({"active": True, "token": str(room.token)})
+        except Exception:  # noqa: S110 – kein MeetingRoom vorhanden
+            pass
+
+        return JsonResponse({"active": False})
+
+
 class PortalCalendarView(View):
     """Month calendar for portal users (student and parent)."""
 

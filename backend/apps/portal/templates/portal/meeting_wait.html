@@ -1,0 +1,104 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Warteraum – {{ lesson.date|date:"d.m.Y" }} – Preceptly Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.wait-card {
+    max-width: 520px;
+    margin: 60px auto;
+    text-align: center;
+}
+.wait-icon {
+    font-size: 3.5em;
+    margin-bottom: 16px;
+    display: block;
+}
+.wait-spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--border-color);
+    border-top-color: #2980b9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.wait-info {
+    background: var(--bg-secondary, #f0f4f8);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 20px 0;
+    font-size: 0.92em;
+    color: var(--text-secondary);
+    text-align: left;
+}
+.wait-info strong { color: var(--text-primary); }
+#wait-status {
+    font-size: 0.88em;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    min-height: 1.4em;
+}
+#wait-status.active { color: #27ae60; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wait-card card">
+    <span class="wait-icon">📹</span>
+    <h2 style="margin-top:0;">Warteraum</h2>
+    <p style="color:var(--text-secondary); margin-bottom:0;">
+        Warte darauf, dass dein Tutor das Meeting startet …
+    </p>
+
+    <div class="wait-spinner" id="spinner"></div>
+
+    <div class="wait-info">
+        <strong>Stunde:</strong> {{ lesson.date|date:"d.m.Y" }},
+        {{ lesson.start_time|time:"H:i" }} Uhr
+        ({{ lesson.duration_minutes }} Min.)<br>
+        <strong>Fach:</strong> {{ lesson.contract.subject|default:"–" }}<br>
+        <strong>Tutor:</strong> {{ lesson.contract.user.get_full_name|default:lesson.contract.user.username }}
+    </div>
+
+    <p id="wait-status">Verbinde …</p>
+
+    <a href="{% url 'portal:home' %}" class="btn btn-secondary" style="margin-top:8px;">
+        ← Zurück zum Dashboard
+    </a>
+</div>
+
+<script>
+const STATUS_URL = "{{ status_url }}";
+const ROOM_BASE  = "{{ room_url_base }}";
+
+let pollCount = 0;
+
+async function poll() {
+    pollCount++;
+    const statusEl = document.getElementById("wait-status");
+    try {
+        const resp = await fetch(STATUS_URL);
+        const data = await resp.json();
+        if (data.active && data.token) {
+            statusEl.textContent = "Meeting gefunden! Leite weiter …";
+            statusEl.className = "active";
+            document.getElementById("spinner").style.borderTopColor = "#27ae60";
+            setTimeout(() => {
+                window.location.href = ROOM_BASE + data.token + "/";
+            }, 600);
+            return; // stop polling
+        }
+        const dots = ".".repeat((pollCount % 3) + 1);
+        statusEl.textContent = `Warte auf Tutor${dots}`;
+    } catch (e) {
+        statusEl.textContent = "Verbindungsproblem – versuche erneut …";
+    }
+    setTimeout(poll, 3000);
+}
+
+// Start polling
+poll();
+</script>
+{% endblock %}

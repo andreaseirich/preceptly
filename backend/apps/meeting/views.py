@@ -75,6 +75,12 @@ class MeetingRoomView(View):
             else:
                 return HttpResponseForbidden()
 
+            # Zurück-URL rollenabhängig
+            if portal_user.role == "student":
+                back_url = f"/portal/student/lessons/{lesson.pk}/"
+            else:
+                back_url = "/portal/parent/"
+
             return render(
                 request,
                 self.template_name,
@@ -84,6 +90,7 @@ class MeetingRoomView(View):
                     "display_name": display_name,
                     "documents": lesson.documents.all(),
                     "is_tutor": False,
+                    "back_url": back_url,
                     "MEETING_TURN_SERVERS": turn_servers,
                 },
             )
@@ -100,6 +107,7 @@ class MeetingRoomView(View):
                     "display_name": display_name,
                     "documents": lesson.documents.all(),
                     "is_tutor": True,
+                    "back_url": f"/lessons/{lesson.pk}/",
                     "MEETING_TURN_SERVERS": turn_servers,
                 },
             )

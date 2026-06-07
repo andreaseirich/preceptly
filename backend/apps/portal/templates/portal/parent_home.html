@@ -39,7 +39,7 @@
         </strong>
     </p>
     {% if sd.meeting_room %}
-    <a class="btn" href="{% url 'meeting:room' sd.meeting_room.token %}"
+    <a class="btn" href="{% url 'portal:meeting_wait' sd.next_lesson.pk %}"
        style="background:#27ae60; font-weight:700; display:block; text-align:center; margin-bottom:10px; animation:pulse 2s infinite;">
         📹 Meeting läuft – Jetzt beitreten!
     </a>
