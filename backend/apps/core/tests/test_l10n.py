@@ -93,7 +93,7 @@ class L10nTestCase(TestCase):
         # English format: Dec. 5, 2023 or 12/5/2023 (depending on SHORT_DATE_FORMAT)
         content = response.content.decode("utf-8")
         self.assertIn("2023", content)  # Year should be present
-        self.assertIn("12", content) or self.assertIn("Dec", content)  # Month should be present
+        self.assertTrue("12" in content or "Dec" in content, "Month (12 or Dec) should be present")
 
     def test_date_formatting_german(self):
         """Test that dates are formatted correctly in German."""

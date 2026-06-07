@@ -121,18 +121,13 @@ class ConflictVisibilityTest(TestCase):
                 status="planned",
             )
 
-        # Access lesson plan view
+        # Lesson plan view redirects to lesson detail (where conflicts are shown)
         response = self.client.get(
             reverse("lesson_plans:lesson_plan", kwargs={"lesson_id": lesson.pk})
         )
 
-        self.assertEqual(response.status_code, 200)
-        # Should have conflicts in context
-        self.assertIn("conflicts", response.context)
-        self.assertIn("has_conflicts", response.context)
-        # Should show conflicts section if there are conflicts
-        if response.context["has_conflicts"]:
-            self.assertContains(response, "Conflicts")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f"/lessons/{lesson.pk}/", response.url)
 
     def test_lesson_detail_view_shows_quota_conflicts(self):
         """Test: Lesson detail view shows quota conflicts."""

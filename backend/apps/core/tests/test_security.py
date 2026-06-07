@@ -59,6 +59,9 @@ class AuthRateLimitTest(TestCase):
             )
             if response.status_code == 429:
                 break
+            # Logout after successful registration so next attempt reaches the throttle check
+            if response.status_code == 302:
+                self.client.logout()
         self.assertEqual(response.status_code, 429)
 
 
@@ -101,12 +104,27 @@ class SecurityHeadersTest(TestCase):
 class SecureCookiesTest(TestCase):
     """Cookies have Secure flag when DEBUG=False."""
 
-    @override_settings(DEBUG=False, SESSION_COOKIE_SECURE=True, CSRF_COOKIE_SECURE=True)
+    @override_settings(
+        DEBUG=False,
+        SESSION_COOKIE_SECURE=True,
+        CSRF_COOKIE_SECURE=True,
+        ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"],
+    )
     def test_session_cookie_secure_when_production(self):
-        response = self.client.get(reverse("core:login"))
-        set_cookie = response.get("Set-Cookie", "")
-        self.assertIn("sessionid", set_cookie)
-        self.assertIn("Secure", set_cookie)
+        from django.contrib.auth.models import User
+
+        User.objects.create_user(username="sectest", password="secpass123!")
+        # Successful login creates a session — cookie should carry the Secure flag
+        self.client.post(
+            reverse("core:login"),
+            {"username": "sectest", "password": "secpass123!"},
+            follow=False,
+        )
+        self.assertIn("sessionid", self.client.cookies)
+        self.assertTrue(
+            self.client.cookies["sessionid"]["secure"],
+            "Session cookie should have Secure flag when SESSION_COOKIE_SECURE=True",
+        )
 
 
 class LoginSessionCycleTest(TestCase):

@@ -100,12 +100,13 @@ def throttle_register(request):
     ip = request.META.get("REMOTE_ADDR", "unknown")[:64]
     allowed, retry = _throttle_check("register_ip", ip, max_attempts=5, window_seconds=600)
     if not allowed:
-        form = RegisterForm()
-        form.add_error(None, _("Too many registration attempts. Please try again later."))
         return render(
             request,
             "core/register.html",
-            {"form": form},
+            {
+                "form": RegisterForm(),
+                "error": _("Too many registration attempts. Please try again later."),
+            },
             status=429,
         )
     return None

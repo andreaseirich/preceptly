@@ -920,6 +920,7 @@ class StripeWebhookConstraintsTest(TestCase):
     STRIPE_PRICE_ID_MONTHLY="price_premium_123",
     STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
     SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO", "https"),
+    ALLOWED_HOSTS=["example.com", "testserver", "localhost"],
 )
 class StripeAbsoluteUrlsBehindProxyTest(TestCase):
     """Ensure build_absolute_uri yields https URLs when X-Forwarded-Proto is https."""

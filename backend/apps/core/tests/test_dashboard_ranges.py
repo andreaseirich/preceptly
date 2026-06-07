@@ -136,7 +136,7 @@ class DashboardRangesTest(TestCase):
         )
 
         # Rufe Dashboard-View auf
-        response = self.client.get("/")
+        response = self.client.get("/dashboard/")
 
         self.assertEqual(response.status_code, 200)
         context = response.context

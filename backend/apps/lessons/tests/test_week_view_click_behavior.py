@@ -45,13 +45,13 @@ class WeekViewClickBehaviorTest(TestCase):
         )
 
     def test_week_view_contains_lesson_plan_link(self):
-        """Test: Week view contains link to lesson plan view for lessons."""
+        """Test: Week view contains link to lesson detail view for lessons (lesson plan is integrated there)."""
         response = self.client.get(reverse("lessons:week") + "?year=2023&month=1&day=15")
 
         self.assertEqual(response.status_code, 200)
-        # Check that lesson plan URL is present
-        lesson_plan_url = reverse("lesson_plans:lesson_plan", kwargs={"lesson_id": self.lesson.pk})
-        self.assertContains(response, lesson_plan_url)
+        # Lesson plan is now integrated into the lesson detail page
+        lesson_detail_url = reverse("lessons:detail", kwargs={"pk": self.lesson.pk})
+        self.assertContains(response, lesson_detail_url)
 
     def test_week_view_contains_edit_icon_for_lesson(self):
         """Test: Week view contains edit icon/link for lessons."""
@@ -65,37 +65,33 @@ class WeekViewClickBehaviorTest(TestCase):
         self.assertContains(response, "✏️")
 
     def test_lesson_plan_view_loads_correctly(self):
-        """Test: Lesson plan view loads correctly for a lesson."""
+        """Test: Lesson plan view redirects to lesson detail page (lesson plan integrated there)."""
         response = self.client.get(
             reverse("lesson_plans:lesson_plan", kwargs={"lesson_id": self.lesson.pk})
             + "?year=2023&month=1&day=15"
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.lesson.contract.student.full_name)
-        self.assertContains(response, "Lesson Plan")
+        self.assertEqual(response.status_code, 302)
+        # Redirect target should be the lesson detail page
+        self.assertIn(f"/lessons/{self.lesson.pk}/", response.url)
 
     def test_lesson_plan_view_has_back_to_calendar_link(self):
-        """Test: Lesson plan view has link back to week view."""
+        """Test: Lesson plan view redirects to lesson detail (back link is in detail page)."""
         response = self.client.get(
             reverse("lesson_plans:lesson_plan", kwargs={"lesson_id": self.lesson.pk})
             + "?year=2023&month=1&day=15"
         )
 
-        self.assertEqual(response.status_code, 200)
-        # Check for back to calendar link
-        week_url = reverse("lessons:week") + "?year=2023&month=1&day=15"
-        self.assertContains(response, week_url)
+        self.assertEqual(response.status_code, 302)
+        # Redirect preserves year/month/day params for back navigation
+        self.assertIn(f"/lessons/{self.lesson.pk}/", response.url)
 
     def test_lesson_plan_view_has_edit_lesson_link(self):
-        """Test: Lesson plan view has link to edit lesson."""
+        """Test: Lesson plan view redirects to lesson detail page (edit link is in detail page)."""
         response = self.client.get(
             reverse("lesson_plans:lesson_plan", kwargs={"lesson_id": self.lesson.pk})
             + "?year=2023&month=1&day=15"
         )
 
-        self.assertEqual(response.status_code, 200)
-        # Check for edit lesson link
-        edit_url = reverse("lessons:update", kwargs={"pk": self.lesson.pk})
-        self.assertContains(response, edit_url)
-        self.assertContains(response, "Edit Lesson")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f"/lessons/{self.lesson.pk}/", response.url)

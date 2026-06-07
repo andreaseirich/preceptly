@@ -69,8 +69,8 @@ class PremiumFeatureVisibilityTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         # Check that premium button is present (not disabled)
-        self.assertContains(response, "Generate AI Lesson Plan")
-        self.assertNotContains(response, "only available for premium users")
+        self.assertContains(response, "KI-Lektionsplan generieren")
+        self.assertNotContains(response, "nur für Premium-Nutzer verfügbar")
 
     def test_non_premium_user_sees_disabled_button(self):
         """Test: Non-premium user sees disabled button with premium notice."""
@@ -82,7 +82,7 @@ class PremiumFeatureVisibilityTest(TestCase):
         self.assertEqual(response.status_code, 200)
         # Check that premium notice is shown
         self.assertContains(response, "Premium")
-        self.assertContains(response, "only available for premium users")
+        self.assertContains(response, "nur für Premium-Nutzer verfügbar")
 
     def test_premium_badge_in_dashboard(self):
         """Test: Premium badge is shown in dashboard for premium users."""

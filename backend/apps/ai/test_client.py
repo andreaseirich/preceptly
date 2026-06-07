@@ -23,6 +23,7 @@ class LLMClientTest(TestCase):
         """Restore original settings."""
         settings.LLM_API_KEY = self.original_key
 
+    @patch.dict("os.environ", {"MOCK_LLM": "0"})
     @patch("apps.ai.client.requests.post")
     def test_generate_text_success(self, mock_post):
         """Test: Erfolgreiche Text-Generierung."""
@@ -41,6 +42,7 @@ class LLMClientTest(TestCase):
         self.assertEqual(result, "Test generierter Text")
         mock_post.assert_called_once()
 
+    @patch.dict("os.environ", {"MOCK_LLM": "0"})
     @patch("apps.ai.client.requests.post")
     def test_generate_text_timeout(self, mock_post):
         """Test: Timeout-Fehlerbehandlung."""
@@ -55,6 +57,7 @@ class LLMClientTest(TestCase):
 
         self.assertIn("timeout", str(context.exception))
 
+    @patch.dict("os.environ", {"MOCK_LLM": "0"})
     @patch("apps.ai.client.requests.post")
     def test_generate_text_api_error(self, mock_post):
         """Test: API-Fehlerbehandlung."""

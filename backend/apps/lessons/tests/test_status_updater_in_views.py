@@ -46,7 +46,7 @@ class StatusUpdaterInViewsTest(TestCase):
         )
 
         # Rufe Dashboard-View auf
-        response = self.client.get("/")
+        response = self.client.get("/dashboard/")
 
         # Prüfe, dass die Lesson auf TAUGHT gesetzt wurde
         lesson.refresh_from_db()
@@ -106,7 +106,7 @@ class StatusUpdaterInViewsTest(TestCase):
         )
 
         # Rufe Dashboard-View auf
-        response = self.client.get("/")
+        response = self.client.get("/dashboard/")
 
         # Prüfe, dass die Lesson unverändert bleibt
         lesson.refresh_from_db()
