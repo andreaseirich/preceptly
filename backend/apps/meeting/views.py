@@ -4,6 +4,7 @@ Views für Meeting-Räume (Tutor + Portal-Nutzer).
 
 import logging
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -64,6 +65,7 @@ class MeetingRoomView(View):
                     "display_name": display_name,
                     "documents": documents,
                     "is_tutor": True,
+                    "MEETING_TURN_SERVERS": getattr(settings, "MEETING_ICE_SERVERS", []),
                 },
             )
 
@@ -99,8 +101,12 @@ class MeetingRoomView(View):
                     "display_name": display_name,
                     "documents": documents,
                     "is_tutor": False,
+                    "MEETING_TURN_SERVERS": getattr(settings, "MEETING_ICE_SERVERS", []),
                 },
             )
 
-        # Not authenticated at all — redirect to portal login
-        return redirect("portal:login")
+        # Not authenticated — redirect to portal login with return URL
+        from urllib.parse import urlencode
+
+        next_url = request.path
+        return redirect("/portal/login/?" + urlencode({"next": next_url}))

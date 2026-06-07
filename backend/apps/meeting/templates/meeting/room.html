@@ -174,7 +174,12 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
         </div>
     </div>
     <div id="header-right">
-        <a href="javascript:history.back()" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">✕ Verlassen</a>
+        {% if is_tutor %}
+        <a href="{% url 'lessons:detail' lesson.pk %}" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">📋 Zur Stunde</a>
+        {% else %}
+        <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">← Zurück</a>
+        {% endif %}
+        <button onclick="hangUp()" class="ctrl-btn danger" style="font-size:0.78em;">✕ Meeting verlassen</button>
     </div>
 </div>
 
@@ -395,8 +400,12 @@ function stopScreenShare() {
 
 function hangUp() {
     Object.keys(peers).forEach(removePeer);
-    if (ws) { ws.send(JSON.stringify({ type: "leave" })); ws.close(); }
-    window.location.href = "javascript:history.back()";
+    if (ws) { try { ws.send(JSON.stringify({ type: "leave" })); } catch(e) {} ws.close(); }
+    {% if is_tutor %}
+    window.location.href = "{% url 'lessons:detail' lesson.pk %}";
+    {% else %}
+    window.location.href = "{% url 'portal:student_lesson_detail' lesson.pk %}";
+    {% endif %}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -6,8 +6,10 @@
 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
     <h1 style="margin:0;">{{ lesson.date|date:"d.m.Y" }} – {{ student.full_name }}</h1>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        {% if lesson.meeting_room %}
-        <a class="btn" href="{% url 'meeting:room' lesson.meeting_room.token %}" style="background:#27ae60;">📹 Meeting beitreten</a>
+        {% if lesson.meeting_room and lesson.meeting_room.is_active %}
+        <a class="btn" href="{% url 'meeting:room' lesson.meeting_room.token %}" style="background:#27ae60; font-weight:600;">📹 Meeting beitreten</a>
+        {% else %}
+        <span class="btn btn-secondary" style="opacity:0.5; cursor:default;" title="Der Tutor muss das Meeting zuerst starten">📹 Kein Meeting aktiv</span>
         {% endif %}
         <a class="btn btn-secondary" href="{% url 'portal:student_lessons' %}">&larr; Zurück</a>
     </div>

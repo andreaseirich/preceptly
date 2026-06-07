@@ -121,6 +121,7 @@
 
     <form method="post">
         {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
         <label for="id_username">Benutzername</label>
         <input type="text" id="id_username" name="username" autocomplete="username" autofocus required>
 

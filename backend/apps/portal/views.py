@@ -34,8 +34,11 @@ class PortalLoginView(View):
 
     def get(self, request):
         if get_portal_user(request):
+            next_url = request.GET.get("next", "")
+            if next_url and next_url.startswith("/"):
+                return redirect(next_url)
             return redirect("portal:home")
-        return render(request, self.template_name)
+        return render(request, self.template_name, {"next": request.GET.get("next", "")})
 
     def post(self, request):
         username = request.POST.get("username", "").strip()
@@ -46,6 +49,9 @@ class PortalLoginView(View):
             if user.check_password(password):
                 portal_user = PortalUser.objects.get(user=user)
                 request.session["portal_user_id"] = portal_user.pk
+                next_url = request.POST.get("next", "")
+                if next_url and next_url.startswith("/"):
+                    return redirect(next_url)
                 return redirect("portal:home")
             else:
                 error = _("Invalid password.")
