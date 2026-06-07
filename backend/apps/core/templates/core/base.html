@@ -363,9 +363,7 @@
                 <a href="{% url 'lessons:week' %}">📅 {% trans "Calendar" %}</a>
                 <a href="{% url 'billing:invoice_list' %}">🧾 {% trans "Invoices" %}</a>
                 <a href="{% url 'core:income' %}">💰 {% trans "Finance" %}</a>
-                {% if unread_portal_count %}
-                <a href="#" class="nav-link">💬 <span style="background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.75em;">{{ unread_portal_count }}</span></a>
-                {% endif %}
+                <a href="{% url 'core:tutor_messages_overview' %}">💬 {% trans "Messages" %}{% if unread_portal_count %} <span style="background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.75em;vertical-align:middle;">{{ unread_portal_count }}</span>{% endif %}</a>
                 <a href="{% url 'core:settings' %}">⚙️ {% trans "Settings" %}</a>
             </div>
             <div class="nav-right">

@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 
 from apps.contracts.models import Contract
-from apps.portal.models import PortalMessage
+from apps.portal.models import ParentStudentLink, PortalMessage, StudentPortalLink
 
 
 class TutorMessageView(LoginRequiredMixin, TemplateView):
@@ -43,4 +43,48 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
                 read_by_tutor=True,
                 text=text,
             )
-        return redirect("contracts:detail", pk=student.pk)
+        return redirect("core:tutor_messages", pk=student.pk)
+
+
+class TutorMessagesOverviewView(LoginRequiredMixin, TemplateView):
+    """Übersicht aller Chat-Threads des Tutors (Schüler + Eltern im Portal)."""
+
+    template_name = "core/tutor_messages_overview.html"
+
+    def get(self, request, *args, **kwargs):
+        from apps.contracts.models import Contract
+
+        student_contract_ids = set(
+            StudentPortalLink.objects.filter(
+                portal_user__tutor=request.user, is_active=True
+            ).values_list("contract_id", flat=True)
+        )
+        parent_contract_ids = set(
+            ParentStudentLink.objects.filter(parent__tutor=request.user).values_list(
+                "contract_id", flat=True
+            )
+        )
+        all_ids = student_contract_ids | parent_contract_ids
+
+        threads = []
+        for contract in Contract.objects.filter(pk__in=all_ids, user=request.user):
+            unread = PortalMessage.objects.filter(contract=contract, read_by_tutor=False).count()
+            last_msg = (
+                PortalMessage.objects.filter(contract=contract).order_by("-created_at").first()
+            )
+            threads.append(
+                {
+                    "contract": contract,
+                    "unread": unread,
+                    "last_msg": last_msg,
+                }
+            )
+
+        threads.sort(
+            key=lambda t: (
+                0 if t["unread"] else 1,
+                -(t["last_msg"].created_at.timestamp() if t["last_msg"] else 0),
+            )
+        )
+
+        return self.render_to_response({"threads": threads})
