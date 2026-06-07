@@ -5,12 +5,13 @@
 {% block content %}
 <h1>Meine Stunden</h1>
 
-<a class="btn-sm btn-sm-secondary" href="{% url 'portal:student_home' %}" style="margin-bottom:20px; display:inline-block;">
-    &larr; Zurück zum Dashboard
-</a>
+<div class="btn-group">
+    <a class="btn btn-secondary" href="{% url 'portal:student_home' %}">&larr; Dashboard</a>
+</div>
 
 {% if lessons %}
-<table>
+<div class="card" style="padding:0; overflow:hidden;">
+<table style="margin-top:0; box-shadow:none; border-radius:0;">
     <thead>
         <tr>
             <th>Datum</th>
@@ -60,6 +61,7 @@
     {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <div class="empty-state"><p>Keine Stunden gefunden.</p></div>
 {% endif %}

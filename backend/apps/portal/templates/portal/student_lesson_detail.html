@@ -8,7 +8,7 @@
     <a class="btn-sm btn-sm-secondary" href="{% url 'portal:student_lessons' %}">&larr; Zurück zur Stundenübersicht</a>
 </div>
 
-<div class="box-section">
+<div class="card">
     <table>
         <tbody>
             <tr>
@@ -44,7 +44,7 @@
 {% endif %}
 
 {% if lesson.notes %}
-<div class="box-section" style="margin-top:16px;">
+<div class="card" style="margin-top:16px;">
     <h3 style="margin-top:0;">Notizen</h3>
     <p style="margin:0;">{{ lesson.notes }}</p>
 </div>

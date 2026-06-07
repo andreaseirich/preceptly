@@ -6,7 +6,7 @@
 <h1>Unterrichtsmaterial</h1>
 <p style="color:var(--text-secondary);">Schüler: <strong>{{ student.full_name }}</strong></p>
 
-<div class="box-section" style="margin-bottom:24px;">
+<div class="card">
   <h3 style="margin-top:0;">Datei hochladen</h3>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}

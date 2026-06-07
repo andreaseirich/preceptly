@@ -3,9 +3,9 @@
 {% block title %}{{ student.full_name }} – Preceptly Portal{% endblock %}
 
 {% block content %}
-<a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_home' %}" style="margin-bottom:20px; display:inline-block;">
-    &larr; Zurück zum Dashboard
-</a>
+<div class="btn-group">
+    <a class="btn btn-secondary" href="{% url 'portal:parent_home' %}">&larr; Dashboard</a>
+</div>
 
 <h1>{{ student.full_name }}</h1>
 

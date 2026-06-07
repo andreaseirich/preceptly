@@ -5,16 +5,17 @@
 {% block content %}
 <h1>Hallo, {{ student.full_name }}!</h1>
 
-<div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
-    <a class="btn-sm btn-sm-primary" href="{% url 'portal:student_lessons' %}">Alle Stunden</a>
-    <a class="btn-sm btn-sm-primary" href="{% url 'portal:book' student.pk %}">+ Termin buchen</a>
-    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:recurring_manage' student.pk %}">Serientermine</a>
-    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:documents' student.pk %}">Dokumente</a>
-    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:messages' student.pk %}">Nachrichten</a>
-    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:calendar' %}">📅 Kalender</a>
+<div class="btn-group" style="margin-bottom:28px;">
+    <a class="btn" href="{% url 'portal:calendar' %}">📅 Kalender</a>
+    <a class="btn" href="{% url 'portal:book' student.pk %}">+ Termin buchen</a>
+    <a class="btn btn-secondary" href="{% url 'portal:student_lessons' %}">Alle Stunden</a>
+    <a class="btn btn-secondary" href="{% url 'portal:recurring_manage' student.pk %}">Serientermine</a>
+    <a class="btn btn-secondary" href="{% url 'portal:documents' student.pk %}">Dokumente</a>
+    <a class="btn btn-secondary" href="{% url 'portal:messages' student.pk %}">Nachrichten</a>
 </div>
 
-<h2>Nächste Stunden</h2>
+<div class="card">
+<h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Nächste Stunden</h2>
 {% if upcoming %}
 <table>
     <thead>
@@ -45,8 +46,10 @@
 {% else %}
 <div class="empty-state"><p>Keine kommenden Stunden geplant.</p></div>
 {% endif %}
+</div>
 
-<h2>Letzte Stunden</h2>
+<div class="card">
+<h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Letzte Stunden</h2>
 {% if recent %}
 {% for lesson in recent %}
 <div class="box-section">
@@ -67,4 +70,5 @@
 {% else %}
 <div class="empty-state"><p>Noch keine vergangenen Stunden.</p></div>
 {% endif %}
+</div>
 {% endblock %}

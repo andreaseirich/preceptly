@@ -8,7 +8,7 @@
 {% if students_data %}
 <div style="display:grid; gap:20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
 {% for sd in students_data %}
-<div class="box-section" style="position:relative;">
+<div class="card" style="position:relative;">
     {% if sd.unread_messages > 0 %}
     <span style="
         position:absolute; top:12px; right:12px;
