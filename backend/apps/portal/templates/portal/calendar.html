@@ -2,81 +2,24 @@
 
 {% block title %}Kalender {{ month_label }} {{ year }} – Preceptly Portal{% endblock %}
 
-{% block extra_css %}
-<style>
-    .cal-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 16px;
-    }
-    .cal-table th {
-        padding: 8px;
-        text-align: center;
-        background: var(--table-header-bg);
-        border: 1px solid var(--border-color);
-        font-size: 0.9em;
-        color: var(--text-secondary);
-    }
-    .cal-table td {
-        border: 1px solid var(--border-color);
-        vertical-align: top;
-        padding: 6px;
-        min-height: 80px;
-        width: 14.28%;
-    }
-    .cal-day-num {
-        font-weight: 600;
-        font-size: 0.9em;
-        margin-bottom: 4px;
-        color: var(--text-secondary);
-    }
-    .cal-day-num.today {
-        color: #007bff;
-    }
-    .cal-lesson {
-        display: block;
-        background: rgba(33, 150, 243, 0.18);
-        border-left: 3px solid #2196f3;
-        border-radius: 3px;
-        padding: 3px 6px;
-        margin-bottom: 3px;
-        font-size: 0.82em;
-        color: var(--text-primary);
-        text-decoration: none;
-    }
-    .cal-lesson.past {
-        background: rgba(255,255,255,0.05);
-        border-color: var(--border-color);
-        opacity: 0.65;
-    }
-    .cal-empty {
-        background: rgba(255,255,255,0.02);
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<a class="btn-sm btn-sm-secondary" href="javascript:history.back()" style="margin-bottom:20px; display:inline-block;">
-    &larr; Zurück
-</a>
+<h1>{% if portal_user.role == "parent" %}Kalender {{ student.first_name }} – {{ month_label }} {{ year }}{% else %}Kalender – {{ month_label }} {{ year }}{% endif %}</h1>
 
-<h1>📅 Kalender – {{ month_label }} {{ year }}</h1>
-
-<div class="btn-group" style="margin-bottom: 16px;">
+<div class="btn-group" style="margin-bottom: 20px;">
     {% if portal_user.role == "parent" %}
-    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ prev_year }}&month={{ prev_month }}" class="btn-sm btn-sm-secondary">← Zurück</a>
-    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ next_year }}&month={{ next_month }}" class="btn-sm btn-sm-secondary">Vor →</a>
+    <a href="{% url portal:parent_calendar student_pk %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
+    <a href="{% url portal:parent_calendar student_pk %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
     {% else %}
-    <a href="{% url 'portal:calendar' %}?year={{ prev_year }}&month={{ prev_month }}" class="btn-sm btn-sm-secondary">← Zurück</a>
-    <a href="{% url 'portal:calendar' %}?year={{ next_year }}&month={{ next_month }}" class="btn-sm btn-sm-secondary">Vor →</a>
+    <a href="{% url portal:calendar %}?year={{ prev_year }}&month={{ prev_month }}" class="btn">← Vorheriger Monat</a>
+    <a href="{% url portal:calendar %}?year={{ next_year }}&month={{ next_month }}" class="btn">Nächster Monat →</a>
     {% endif %}
 </div>
 
-<table class="cal-table">
+<table class="calendar-table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
     <thead>
         <tr>
-            {% for name in weekday_names %}
-            <th>{{ name }}</th>
+            {% for weekday in weekday_names %}
+            <th style="border: 1px solid var(--border-color); padding: 10px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">{{ weekday }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -85,25 +28,39 @@
         <tr>
             {% for day in week %}
             {% if day %}
-            <td>
-                <div class="cal-day-num {% if day.is_today %}today{% endif %}">{{ day.date.day }}</div>
-                {% for lesson in day.lessons %}
-                {% if portal_user.role == "parent" %}
-                <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="cal-lesson {% if day.is_past %}past{% endif %}">
-                {% else %}
-                <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="cal-lesson {% if day.is_past %}past{% endif %}">
+            <td style="border: 1px solid var(--border-color); padding: 8px; vertical-align: top; min-height: 100px; width: 14.28%; position: relative;">
+                <div style="font-weight: bold; margin-bottom: 5px; {% if day.is_today %}color: #007bff;{% endif %}">
+                    {{ day.date.day }}
+                </div>
+
+                {% if day.lessons %}
+                <div style="margin-bottom: 5px;">
+                    {% for lesson in day.lessons %}
+                    <div style="display: block; background: {% if day.is_past %}rgba(255,255,255,0.05){% else %}rgba(33, 150, 243, 0.2){% endif %}; padding: 3px; margin-bottom: 2px; font-size: 0.85em; border-left: 3px solid #2196f3; {% if day.is_past %}opacity: 0.7;{% endif %}">
+                        <a href="{% url portal:student_lesson_detail lesson.pk %}"
+                           style="text-decoration: none; color: var(--text-primary); display: block;"
+                           title="{{ lesson.start_time|time:H:i }} ({{ lesson.duration_minutes }} Min.){% if lesson.subject %} – {{ lesson.subject }}{% endif %}">
+                            <strong>{{ lesson.start_time|time:"H:i" }}</strong>
+                            {% if lesson.contract.subjects %}<span style="opacity: 0.85;"> {{ lesson.contract.subjects }}</span>{% endif %}
+                            <small style="opacity: 0.8;">({{ lesson.duration_minutes }} Min.)</small>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-                    {{ lesson.start_time|time:"H:i" }}
-                    {% if lesson.duration_minutes %}<small>({{ lesson.duration_minutes }} Min.)</small>{% endif %}
-                </a>
-                {% empty %}{% endfor %}
             </td>
             {% else %}
-            <td class="cal-empty"></td>
+            <td style="border: 1px solid var(--border-color); padding: 8px; background: rgba(255,255,255,0.02);"></td>
             {% endif %}
             {% endfor %}
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<div style="margin-top: 20px; padding: 10px; background: var(--bg-secondary); border-radius: 5px; border: 1px solid var(--border-color);">
+    <strong>Legende:</strong>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33, 150, 243, 0.2); border-left: 3px solid #2196f3; color: var(--text-primary);">Unterrichtsstunde (anklicken für Details)</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(255,255,255,0.05); border-left: 3px solid #2196f3; opacity: 0.7; color: var(--text-primary);">Vergangene Stunde</span>
+</div>
 {% endblock %}

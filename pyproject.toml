@@ -36,12 +36,14 @@ exclude = [
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes (unused imports F401, unused vars F841, etc.)
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "S110", # flake8-bandit: try-except-pass (empty exception handler)
+    "S112", # flake8-bandit: try-except-continue
 ]
 ignore = [
     "E501",  # line too long (handled by black)

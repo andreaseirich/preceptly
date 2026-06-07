@@ -120,8 +120,8 @@ class Invoice(models.Model):
         if self.invoice_pdf:
             try:
                 self.invoice_pdf.delete(save=False)
-            except Exception:
-                pass  # Do not block invoice deletion on file/storage errors
+            except Exception:  # noqa: S110 - intentional: do not block invoice deletion on file/storage errors
+                pass
 
         # Sammle alle Lessons dieser Rechnung (vor dem Löschen!)
         invoice_items = list(self.items.all())

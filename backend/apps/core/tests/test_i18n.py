@@ -97,7 +97,7 @@ class I18nTestCase(TestCase):
                         response.content,
                         f"View {view_name} should contain English text '{expected_text}'",
                     )
-            except Exception:
+            except Exception:  # noqa: S110
                 # Skip if view requires authentication or other setup
                 pass
 
@@ -132,7 +132,7 @@ class I18nTestCase(TestCase):
                         response.content,
                         f"View {view_name} should contain English text '{expected_text}'",
                     )
-            except Exception:
+            except Exception:  # noqa: S110
                 # Skip if view requires authentication or other setup
                 pass
 
@@ -146,7 +146,7 @@ class I18nTestCase(TestCase):
             if response.status_code == 200:
                 # Page should render without errors
                 self.assertEqual(response.status_code, 200)
-        except Exception:
+        except Exception:  # noqa: S110
             # Skip if view requires authentication or other setup
             pass
 
