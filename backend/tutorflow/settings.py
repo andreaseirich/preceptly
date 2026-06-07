@@ -107,6 +107,22 @@ INSTALLED_APPS = [
     "apps.ai",
     "apps.billing",
     "apps.portal",
+    "apps.meeting",
+    "channels",
+]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
+
+ASGI_APPLICATION = "tutorflow.asgi.application"
+
+# ICE servers for WebRTC (add TURN credentials here for production)
+MEETING_ICE_SERVERS = [
+    {"urls": "stun:stun.l.google.com:19302"},
+    {"urls": "stun:stun1.l.google.com:19302"},
 ]
 
 MIDDLEWARE = [

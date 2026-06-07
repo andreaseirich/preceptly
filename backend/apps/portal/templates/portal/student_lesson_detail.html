@@ -5,7 +5,12 @@
 {% block content %}
 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
     <h1 style="margin:0;">{{ lesson.date|date:"d.m.Y" }} – {{ student.full_name }}</h1>
-    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:student_lessons' %}">&larr; Zurück zur Stundenübersicht</a>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        {% if lesson.meeting_room %}
+        <a class="btn" href="{% url 'meeting:room' lesson.meeting_room.token %}" style="background:#27ae60;">📹 Meeting beitreten</a>
+        {% endif %}
+        <a class="btn btn-secondary" href="{% url 'portal:student_lessons' %}">&larr; Zurück</a>
+    </div>
 </div>
 
 <div class="card">

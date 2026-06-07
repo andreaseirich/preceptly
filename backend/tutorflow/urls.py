@@ -17,6 +17,7 @@ from apps.core.views_stripe import (
 )
 
 urlpatterns = [
+    path("meetings/", include("apps.meeting.urls", namespace="meeting")),
     path("i18n/setlang/", set_language, name="set_language"),
     path("webhooks/stripe/", stripe_webhook_view, name="stripe_webhook"),
     path("stripe/checkout/", StripeCheckoutView.as_view(), name="stripe_checkout"),

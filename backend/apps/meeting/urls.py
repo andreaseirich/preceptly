@@ -1,0 +1,10 @@
+from django.urls import path
+
+from apps.meeting import views
+
+app_name = "meeting"
+
+urlpatterns = [
+    path("lessons/<int:lesson_pk>/meeting/start/", views.StartMeetingView.as_view(), name="start"),
+    path("<uuid:token>/", views.MeetingRoomView.as_view(), name="room"),
+]

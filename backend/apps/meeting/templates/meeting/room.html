@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting – {{ lesson.date|date:"d.m.Y" }} – Preceptly</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #111;
+    --bg2: #1a1a1a;
+    --bg3: #242424;
+    --border: #333;
+    --text: #e0e0e0;
+    --text2: #888;
+    --blue: #2980b9;
+    --blue2: #1a6fa8;
+    --red: #e74c3c;
+    --green: #27ae60;
+    --shadow: rgba(0,0,0,0.6);
+}
+
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── Header ── */
+#header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+#header-left { display: flex; align-items: center; gap: 12px; }
+#header-title { font-size: 0.92em; font-weight: 600; }
+#header-sub { font-size: 0.78em; color: var(--text2); }
+#header-right { display: flex; align-items: center; gap: 8px; }
+
+/* ── Main layout ── */
+#main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Video area ── */
+#video-area {
+    display: flex; flex-direction: column; width: 340px; min-width: 260px; flex-shrink: 0;
+    border-right: 1px solid var(--border); background: #0d0d0d;
+}
+#videos {
+    flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 8px; overflow-y: auto;
+}
+.video-tile {
+    position: relative; background: #000; border-radius: 8px; overflow: hidden;
+    border: 2px solid transparent; transition: border-color 0.2s;
+    aspect-ratio: 16/9;
+}
+.video-tile.speaking { border-color: var(--green); }
+.video-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.video-tile .tile-label {
+    position: absolute; bottom: 6px; left: 8px; background: rgba(0,0,0,0.7);
+    color: #fff; font-size: 0.72em; padding: 2px 6px; border-radius: 4px; pointer-events: none;
+}
+.video-tile .no-video {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; background: var(--bg3); color: var(--text2);
+    font-size: 2em;
+}
+
+/* ── Controls ── */
+#controls {
+    padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.ctrl-btn {
+    display: flex; align-items: center; gap: 5px; padding: 7px 12px;
+    border: 1px solid var(--border); border-radius: 6px; background: var(--bg3);
+    color: var(--text); cursor: pointer; font-size: 0.8em; transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+.ctrl-btn:hover { background: #2a2a2a; border-color: #555; }
+.ctrl-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ctrl-btn.danger { background: var(--red); border-color: var(--red); color: #fff; }
+.ctrl-btn.danger:hover { background: #c0392b; }
+
+/* ── Side panel ── */
+#side-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+#tabs {
+    display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    background: var(--bg2);
+}
+.tab-btn {
+    padding: 10px 20px; background: none; border: none; border-bottom: 2px solid transparent;
+    color: var(--text2); cursor: pointer; font-size: 0.88em; font-weight: 500;
+    transition: color 0.15s, border-color 0.15s; margin-bottom: -1px;
+}
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+#tab-panels { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.tab-panel.active { display: flex; }
+
+/* ── Whiteboard ── */
+#wb-container {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff;
+}
+#wb-toolbar {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+#wb-toolbar label { font-size: 0.78em; color: var(--text2); }
+#wb-canvas-wrap { flex: 1; overflow: auto; cursor: crosshair; }
+#wb-canvas { display: block; touch-action: none; }
+
+/* ── Documents ── */
+#docs-panel { padding: 16px; overflow-y: auto; flex: 1; }
+#docs-panel h3 { font-size: 0.9em; margin-bottom: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+.doc-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 8px; text-decoration: none; color: var(--text);
+    transition: border-color 0.15s;
+}
+.doc-item:hover { border-color: var(--blue); color: var(--text); text-decoration: none; }
+.doc-icon { font-size: 1.3em; flex-shrink: 0; }
+.doc-name { font-size: 0.88em; }
+.doc-date { font-size: 0.74em; color: var(--text2); margin-top: 2px; }
+.doc-preview-wrap { margin-top: 16px; }
+.doc-preview-wrap iframe, .doc-preview-wrap img {
+    width: 100%; border: 1px solid var(--border); border-radius: 6px;
+    background: #fff; max-height: 60vh;
+}
+.no-docs { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 0.9em; }
+
+/* ── Chat ── */
+#chat-panel { display: flex; flex-direction: column; }
+#chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.chat-line { font-size: 0.85em; }
+.chat-line .cn { font-weight: 600; color: var(--blue); }
+.chat-line.mine .cn { color: var(--green); }
+.chat-line .ct { color: var(--text2); font-size: 0.75em; margin-left: 6px; }
+.chat-line .cb { color: var(--text); }
+#chat-input-row { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); flex-shrink: 0; }
+#chat-input {
+    flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
+    color: var(--text); padding: 7px 10px; font-size: 0.88em; font-family: inherit;
+}
+#chat-input:focus { outline: none; border-color: var(--blue); }
+#chat-send { padding: 7px 14px; background: var(--blue); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+
+/* ── Status ── */
+#status-bar {
+    background: var(--bg2); border-top: 1px solid var(--border);
+    padding: 4px 12px; font-size: 0.72em; color: var(--text2); display: flex;
+    justify-content: space-between; flex-shrink: 0;
+}
+#peer-status { }
+#conn-status { }
+
+@media (max-width: 800px) {
+    #main { flex-direction: column; }
+    #video-area { width: 100%; height: 220px; border-right: none; border-bottom: 1px solid var(--border); }
+    #videos { flex-direction: row; }
+    .video-tile { flex: 1; aspect-ratio: 4/3; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+    <div id="header-left">
+        <span style="font-size:1.3em;">📹</span>
+        <div>
+            <div id="header-title">{{ lesson.date|date:"d.m.Y" }} – Preceptly Meeting</div>
+            <div id="header-sub" id="conn-status">Verbinde …</div>
+        </div>
+    </div>
+    <div id="header-right">
+        <a href="javascript:history.back()" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">✕ Verlassen</a>
+    </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+    <!-- Video Column -->
+    <div id="video-area">
+        <div id="videos">
+            <!-- Local video -->
+            <div class="video-tile" id="tile-local">
+                <video id="video-local" autoplay muted playsinline></video>
+                <div class="no-video" id="no-video-local">🎥</div>
+                <div class="tile-label" id="label-local">Du ({{ display_name }})</div>
+            </div>
+            <!-- Remote tiles added by JS -->
+        </div>
+        <div id="controls">
+            <button class="ctrl-btn active" id="btn-mic" onclick="toggleMic()">🎤 Mikrofon</button>
+            <button class="ctrl-btn active" id="btn-cam" onclick="toggleCam()">📷 Kamera</button>
+            <button class="ctrl-btn" id="btn-screen" onclick="toggleScreen()">🖥 Teilen</button>
+            <button class="ctrl-btn danger" id="btn-hang" onclick="hangUp()">📵 Auflegen</button>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div id="side-panel">
+        <div id="tabs">
+            <button class="tab-btn active" onclick="switchTab('whiteboard', this)">✏️ Whiteboard</button>
+            <button class="tab-btn" onclick="switchTab('docs', this)">📄 Dokumente</button>
+            <button class="tab-btn" onclick="switchTab('chat', this)" id="tab-chat-btn">💬 Chat</button>
+        </div>
+
+        <div id="tab-panels">
+
+            <!-- WHITEBOARD TAB -->
+            <div class="tab-panel active" id="tab-whiteboard">
+                <div id="wb-container">
+                    <div id="wb-toolbar">
+                        <label>Farbe:</label>
+                        <input type="color" id="wb-color" value="#000000">
+                        <label>Stärke:</label>
+                        <input type="range" id="wb-width" min="1" max="20" value="3" style="width:80px">
+                        <button class="ctrl-btn" id="wb-eraser-btn" onclick="toggleEraser()" style="padding:4px 8px; font-size:0.76em;">Radierer</button>
+                        <button class="ctrl-btn" onclick="clearWhiteboard(true)" style="padding:4px 8px; font-size:0.76em;">Löschen</button>
+                        <button class="ctrl-btn" onclick="undoWhiteboard()" style="padding:4px 8px; font-size:0.76em;">Rückgängig</button>
+                        <label style="margin-left:auto; font-size:0.72em; color:#555;">Strg+Z zum Rückgängigmachen</label>
+                    </div>
+                    <div id="wb-canvas-wrap">
+                        <canvas id="wb-canvas" width="1600" height="900"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOCUMENTS TAB -->
+            <div class="tab-panel" id="tab-docs">
+                <div id="docs-panel">
+                    <h3>Dokumente dieser Stunde</h3>
+                    {% if documents %}
+                    {% for doc in documents %}
+                    <a class="doc-item" href="{{ doc.file.url }}" target="_blank" rel="noopener">
+                        <span class="doc-icon">📄</span>
+                        <div>
+                            <div class="doc-name">{{ doc.name|default:doc.file.name }}</div>
+                            <div class="doc-date">{{ doc.uploaded_at|date:"d.m.Y" }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    <p style="font-size:0.78em; color:#555; margin-top:12px;">Klicke auf ein Dokument, um es zu öffnen.<br>Du kannst Dokumente auch auf das Whiteboard fotografieren und zeichnen.</p>
+                    {% else %}
+                    <div class="no-docs">
+                        📄<br><br>
+                        Keine Dokumente für diese Stunde hochgeladen.
+                        {% if is_tutor %}
+                        <br><br>
+                        <a href="{% url 'lessons:detail' lesson.pk %}" target="_blank" style="color:var(--blue);">Dokumente hinzufügen →</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CHAT TAB -->
+            <div class="tab-panel" id="tab-chat">
+                <div id="chat-msgs"></div>
+                <div id="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Nachricht …" maxlength="500">
+                    <button id="chat-send" onclick="sendChat()">→</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Status bar -->
+<div id="status-bar">
+    <span id="peer-status">Warte auf Verbindung …</span>
+    <span id="timer">00:00</span>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+const ROOM_TOKEN   = "{{ room.token }}";
+const DISPLAY_NAME = "{{ display_name|escapejs }}";
+const WS_URL       = (window.location.protocol === "https:" ? "wss" : "ws") +
+                     "://" + window.location.host + "/ws/meeting/" + ROOM_TOKEN + "/";
+
+const ICE_SERVERS = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    // TURN (configure in Django MEETING_ICE_SERVERS setting):
+    {% if MEETING_TURN_SERVERS %}
+    {% for s in MEETING_TURN_SERVERS %}{{ s|safe }},{% endfor %}
+    {% endif %}
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+let ws, myPeerId;
+let localStream = null;
+let screenStream = null;
+let peers = {};       // peerId → { pc: RTCPeerConnection, name, stream }
+let micActive = true;
+let camActive = true;
+let screenActive = false;
+
+// Whiteboard state
+let wbDrawing = false;
+let wbEraser  = false;
+let wbStrokes = [];   // for undo
+let wbCurrentStroke = null;
+const wbCanvas = document.getElementById("wb-canvas");
+const wbCtx    = wbCanvas.getContext("2d");
+wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
+
+// Timer
+let timerStart = Date.now();
+setInterval(() => {
+    const s = Math.floor((Date.now() - timerStart) / 1000);
+    document.getElementById("timer").textContent =
+        String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}, 1000);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Media
+// ─────────────────────────────────────────────────────────────────────────────
+async function initMedia() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const vid = document.getElementById("video-local");
+        vid.srcObject = localStream;
+        document.getElementById("no-video-local").style.display = "none";
+    } catch (e) {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (e2) {
+            localStream = new MediaStream();
+        }
+        setStatus("Kamera nicht verfügbar – nur Audio");
+    }
+}
+
+function toggleMic() {
+    micActive = !micActive;
+    localStream.getAudioTracks().forEach(t => t.enabled = micActive);
+    const btn = document.getElementById("btn-mic");
+    btn.textContent = micActive ? "🎤 Mikrofon" : "🔇 Stumm";
+    btn.classList.toggle("active", micActive);
+}
+function toggleCam() {
+    camActive = !camActive;
+    localStream.getVideoTracks().forEach(t => t.enabled = camActive);
+    const btn = document.getElementById("btn-cam");
+    btn.textContent = camActive ? "📷 Kamera" : "📷 Aus";
+    btn.classList.toggle("active", camActive);
+    document.getElementById("no-video-local").style.display = camActive ? "none" : "flex";
+}
+
+async function toggleScreen() {
+    if (!screenActive) {
+        try {
+            screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const videoTrack = screenStream.getVideoTracks()[0];
+            videoTrack.onended = () => { screenActive = false; stopScreenShare(); };
+            // Replace video track in all peer connections
+            Object.values(peers).forEach(({ pc }) => {
+                const sender = pc.getSenders().find(s => s.track && s.track.kind === "video");
+                if (sender) sender.replaceTrack(videoTrack);
+            });
+            document.getElementById("video-local").srcObject = screenStream;
+            screenActive = true;
+            document.getElementById("btn-screen").classList.add("active");
+            document.getElementById("btn-screen").textContent = "🖥 Teilen ✓";
+        } catch (e) { /* user cancelled */ }
+    } else {
+        stopScreenShare();
+    }
+}
+
+function stopScreenShare() {
+    if (screenStream) { screenStream.getTracks().forEach(t => t.stop()); }
+    const camTrack = localStream.getVideoTracks()[0];
+    if (camTrack) {
+        Object.values(peers).forEach(({ pc }) => {
+            const sender = pc.getSenders().find(s => s.track && s.track.kind === "video");
+            if (sender) sender.replaceTrack(camTrack);
+        });
+    }
+    document.getElementById("video-local").srcObject = localStream;
+    screenActive = false;
+    document.getElementById("btn-screen").classList.remove("active");
+    document.getElementById("btn-screen").textContent = "🖥 Teilen";
+}
+
+function hangUp() {
+    Object.keys(peers).forEach(removePeer);
+    if (ws) { ws.send(JSON.stringify({ type: "leave" })); ws.close(); }
+    window.location.href = "javascript:history.back()";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WebSocket + Signaling
+// ─────────────────────────────────────────────────────────────────────────────
+function connectWS() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+        ws.send(JSON.stringify({ type: "join", name: DISPLAY_NAME }));
+        setStatus("Verbunden – warte auf Teilnehmer …");
+        document.getElementById("header-sub").textContent = "Verbunden";
+    };
+
+    ws.onclose = () => {
+        setStatus("Verbindung getrennt.");
+        document.getElementById("header-sub").textContent = "Getrennt";
+    };
+
+    ws.onerror = () => setStatus("Verbindungsfehler.");
+
+    ws.onmessage = async (evt) => {
+        const msg = JSON.parse(evt.data);
+        switch (msg.type) {
+            case "joined":
+                myPeerId = msg.peer_id;
+                // Connect to all existing peers (we are the "polite" peer)
+                for (const p of msg.peers) {
+                    await createPeerConnection(p.peer_id, p.name, true);
+                }
+                break;
+            case "peer_joined":
+                await createPeerConnection(msg.peer_id, msg.name, false);
+                addChatLine("System", `${msg.name} hat den Raum betreten.`, false, true);
+                updatePeerStatus();
+                break;
+            case "peer_left":
+                removePeer(msg.peer_id);
+                addChatLine("System", `${msg.name} hat den Raum verlassen.`, false, true);
+                updatePeerStatus();
+                break;
+            case "offer":
+                await handleOffer(msg);
+                break;
+            case "answer":
+                await handleAnswer(msg);
+                break;
+            case "ice":
+                await handleIce(msg);
+                break;
+            case "wb_event":
+                handleWbEvent(msg);
+                break;
+            case "chat":
+                addChatLine(msg.name, msg.text, msg.peer_id === myPeerId, false);
+                break;
+        }
+    };
+}
+
+async function createPeerConnection(peerId, name, initiator) {
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    peers[peerId] = { pc, name, stream: null };
+
+    // Add local tracks
+    if (localStream) {
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+    }
+
+    // ICE candidates
+    pc.onicecandidate = ({ candidate }) => {
+        if (candidate) {
+            ws.send(JSON.stringify({ type: "ice", candidate, target_peer_id: peerId }));
+        }
+    };
+
+    // Remote stream
+    pc.ontrack = ({ streams }) => {
+        if (streams && streams[0]) {
+            peers[peerId].stream = streams[0];
+            addVideoTile(peerId, name, streams[0]);
+        }
+    };
+
+    pc.onconnectionstatechange = () => {
+        if (["disconnected","failed","closed"].includes(pc.connectionState)) {
+            removePeer(peerId);
+        }
+        updatePeerStatus();
+    };
+
+    if (initiator) {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({ type: "offer", sdp: pc.localDescription, target_peer_id: peerId }));
+    }
+    updatePeerStatus();
+}
+
+async function handleOffer(msg) {
+    const { sender_peer_id: peerId, sdp } = msg;
+    const name = peers[peerId]?.name || "Gast";
+    if (!peers[peerId]) await createPeerConnection(peerId, name, false);
+    const { pc } = peers[peerId];
+    await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    ws.send(JSON.stringify({ type: "answer", sdp: pc.localDescription, target_peer_id: peerId }));
+}
+
+async function handleAnswer(msg) {
+    const { sender_peer_id: peerId, sdp } = msg;
+    if (peers[peerId]) {
+        await peers[peerId].pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    }
+}
+
+async function handleIce(msg) {
+    const { sender_peer_id: peerId, candidate } = msg;
+    if (peers[peerId]) {
+        try { await peers[peerId].pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(_) {}
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Video tiles
+// ─────────────────────────────────────────────────────────────────────────────
+function addVideoTile(peerId, name, stream) {
+    const existing = document.getElementById(`tile-${peerId}`);
+    if (existing) { existing.querySelector("video").srcObject = stream; return; }
+    const tile = document.createElement("div");
+    tile.className = "video-tile"; tile.id = `tile-${peerId}`;
+    const vid = document.createElement("video");
+    vid.autoplay = true; vid.playsInline = true; vid.srcObject = stream;
+    const label = document.createElement("div"); label.className = "tile-label"; label.textContent = name;
+    const noVid = document.createElement("div"); noVid.className = "no-video"; noVid.textContent = "👤";
+    tile.appendChild(vid); tile.appendChild(noVid); tile.appendChild(label);
+    document.getElementById("videos").appendChild(tile);
+    vid.onloadedmetadata = () => { noVid.style.display = "none"; };
+}
+
+function removePeer(peerId) {
+    if (peers[peerId]) {
+        peers[peerId].pc.close();
+        delete peers[peerId];
+    }
+    const tile = document.getElementById(`tile-${peerId}`);
+    if (tile) tile.remove();
+    updatePeerStatus();
+}
+
+function updatePeerStatus() {
+    const n = Object.keys(peers).length;
+    const ps = document.getElementById("peer-status");
+    ps.textContent = n === 0
+        ? "Warte auf Teilnehmer …"
+        : `${n} Teilnehmer verbunden`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Whiteboard
+// ─────────────────────────────────────────────────────────────────────────────
+function getWbPos(e) {
+    const rect = wbCanvas.getBoundingClientRect();
+    const scaleX = wbCanvas.width / rect.width;
+    const scaleY = wbCanvas.height / rect.height;
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+}
+
+wbCanvas.addEventListener("mousedown",  e => { if (e.button !== 0) return; wbStartStroke(e); });
+wbCanvas.addEventListener("mousemove",  e => wbContinueStroke(e));
+wbCanvas.addEventListener("mouseup",    e => wbEndStroke());
+wbCanvas.addEventListener("mouseleave", e => wbEndStroke());
+wbCanvas.addEventListener("touchstart", e => { e.preventDefault(); wbStartStroke(e); });
+wbCanvas.addEventListener("touchmove",  e => { e.preventDefault(); wbContinueStroke(e); });
+wbCanvas.addEventListener("touchend",   e => wbEndStroke());
+
+function wbStartStroke(e) {
+    wbDrawing = true;
+    const pos = getWbPos(e);
+    const color = wbEraser ? "#ffffff" : document.getElementById("wb-color").value;
+    const width = parseInt(document.getElementById("wb-width").value) * (wbEraser ? 4 : 1);
+    wbCurrentStroke = { color, width, points: [pos] };
+    wbCtx.beginPath();
+    wbCtx.strokeStyle = color;
+    wbCtx.lineWidth = width;
+    wbCtx.moveTo(pos.x, pos.y);
+}
+
+function wbContinueStroke(e) {
+    if (!wbDrawing || !wbCurrentStroke) return;
+    const pos = getWbPos(e);
+    wbCurrentStroke.points.push(pos);
+    wbCtx.lineTo(pos.x, pos.y);
+    wbCtx.stroke();
+}
+
+function wbEndStroke() {
+    if (!wbDrawing || !wbCurrentStroke) return;
+    wbDrawing = false;
+    wbStrokes.push(wbCurrentStroke);
+    // Broadcast
+    if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "wb_event", action: "stroke", stroke: wbCurrentStroke }));
+    }
+    wbCurrentStroke = null;
+}
+
+function drawStroke(stroke) {
+    if (!stroke.points || stroke.points.length < 1) return;
+    wbCtx.beginPath();
+    wbCtx.strokeStyle = stroke.color;
+    wbCtx.lineWidth = stroke.width;
+    wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
+    wbCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    stroke.points.forEach(p => wbCtx.lineTo(p.x, p.y));
+    wbCtx.stroke();
+}
+
+function clearWhiteboard(broadcast) {
+    wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
+    wbStrokes = [];
+    if (broadcast && ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "wb_event", action: "clear" }));
+    }
+}
+
+function undoWhiteboard() {
+    wbStrokes.pop();
+    wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
+    wbStrokes.forEach(drawStroke);
+    if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "wb_event", action: "undo", strokes: wbStrokes }));
+    }
+}
+
+function toggleEraser() {
+    wbEraser = !wbEraser;
+    document.getElementById("wb-eraser-btn").classList.toggle("active", wbEraser);
+    document.getElementById("wb-canvas-wrap").style.cursor = wbEraser ? "cell" : "crosshair";
+}
+
+function handleWbEvent(msg) {
+    if (msg.action === "stroke") {
+        wbStrokes.push(msg.stroke);
+        drawStroke(msg.stroke);
+    } else if (msg.action === "clear") {
+        clearWhiteboard(false);
+    } else if (msg.action === "undo") {
+        wbStrokes = msg.strokes || [];
+        wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
+        wbStrokes.forEach(drawStroke);
+    }
+}
+
+document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") { e.preventDefault(); undoWhiteboard(); }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Chat
+// ─────────────────────────────────────────────────────────────────────────────
+let chatUnread = 0;
+
+function sendChat() {
+    const inp = document.getElementById("chat-input");
+    const text = inp.value.trim();
+    if (!text || !ws || ws.readyState !== 1) return;
+    ws.send(JSON.stringify({ type: "chat", text }));
+    inp.value = "";
+}
+document.getElementById("chat-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendChat();
+});
+
+function addChatLine(name, text, mine, system) {
+    const msgs = document.getElementById("chat-msgs");
+    const line = document.createElement("div");
+    line.className = "chat-line" + (mine ? " mine" : "");
+    if (system) {
+        line.innerHTML = `<span style="color:#555; font-size:0.78em; font-style:italic;">${escHtml(text)}</span>`;
+    } else {
+        const time = new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+        line.innerHTML = `<span class="cn">${escHtml(name)}</span><span class="ct">${time}</span><br><span class="cb">${escHtml(text)}</span>`;
+    }
+    msgs.appendChild(line);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // Badge if not on chat tab
+    if (!document.getElementById("tab-chat").classList.contains("active")) {
+        chatUnread++;
+        document.getElementById("tab-chat-btn").textContent = `💬 Chat (${chatUnread})`;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tabs
+// ─────────────────────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + name).classList.add("active");
+    if (name === "chat") {
+        chatUnread = 0;
+        document.getElementById("tab-chat-btn").textContent = "💬 Chat";
+        document.getElementById("chat-msgs").scrollTop = 999999;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utilities
+// ─────────────────────────────────────────────────────────────────────────────
+function setStatus(msg) { document.getElementById("peer-status").textContent = msg; }
+function escHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────────────
+(async () => {
+    await initMedia();
+    connectWS();
+})();
+</script>
+</body>
+</html>
