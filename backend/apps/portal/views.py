@@ -1160,6 +1160,7 @@ class PortalWeekView(View):
             "Samstag",
             "Sonntag",
         ]
+        weekday_names_short = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
         today = timezone.localdate()
         weekdays = []
         for i in range(7):
@@ -1168,6 +1169,7 @@ class PortalWeekView(View):
                 {
                     "date": d,
                     "name": weekday_names[i],
+                    "name_short": weekday_names_short[i],
                     "is_today": d == today,
                     "is_past": d < today,
                     "lessons": lessons_by_date.get(d, []),
@@ -1186,6 +1188,7 @@ class PortalWeekView(View):
             "prev_week": prev_week,
             "next_week": next_week,
             "today": today,
+            "hours": list(range(7, 22)),
         }
 
         if portal_user.role == "parent":
