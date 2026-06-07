@@ -105,12 +105,23 @@ class StudentHomeView(View):
         PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
         )
+        upcoming_with_meeting = []
+        for lesson in upcoming:
+            room = None
+            try:
+                if lesson.meeting_room.is_active:
+                    room = lesson.meeting_room
+            except Exception:  # noqa: S110 – RelatedObjectDoesNotExist bei fehlendem MeetingRoom
+                pass
+            upcoming_with_meeting.append({"lesson": lesson, "meeting_room": room})
+
         return render(
             request,
             self.template_name,
             {
                 "student": student,
                 "upcoming": upcoming,
+                "upcoming_with_meeting": upcoming_with_meeting,
                 "recent": recent,
                 "chat_messages": chat_messages,
                 "portal_user": portal_user,
@@ -171,11 +182,19 @@ class ParentHomeView(View):
             unread = PortalMessage.objects.filter(
                 contract=link.contract, read_by_portal=False
             ).count()
+            meeting_room = None
+            if upcoming:
+                try:
+                    if upcoming.meeting_room.is_active:
+                        meeting_room = upcoming.meeting_room
+                except Exception:  # noqa: S110 – RelatedObjectDoesNotExist bei fehlendem MeetingRoom
+                    pass
             students_data.append(
                 {
                     "student": link.contract,
                     "next_lesson": upcoming,
                     "unread_messages": unread,
+                    "meeting_room": meeting_room,
                 }
             )
         return render(

@@ -2,6 +2,16 @@
 
 {% block title %}Eltern-Dashboard – Preceptly Portal{% endblock %}
 
+{% block extra_css %}
+<style>
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(39,174,96,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(39,174,96,0); }
+    100% { box-shadow: 0 0 0 0 rgba(39,174,96,0); }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <h1>Ihre Kinder</h1>
 
@@ -28,9 +38,10 @@
             {{ sd.next_lesson.date|date:"d.m." }}, {{ sd.next_lesson.start_time|time:"H:i" }} Uhr
         </strong>
     </p>
-    {% if sd.next_lesson.meeting_url %}
-    <a class="btn-sm btn-sm-primary" href="{{ sd.next_lesson.meeting_url }}" target="_blank" rel="noopener" style="margin-bottom:12px;">
-        Meeting beitreten
+    {% if sd.meeting_room %}
+    <a class="btn" href="{% url 'meeting:room' sd.meeting_room.token %}"
+       style="background:#27ae60; font-weight:700; display:block; text-align:center; margin-bottom:10px; animation:pulse 2s infinite;">
+        📹 Meeting läuft – Jetzt beitreten!
     </a>
     {% endif %}
     {% else %}

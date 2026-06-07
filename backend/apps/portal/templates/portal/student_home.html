@@ -2,6 +2,16 @@
 
 {% block title %}Mein Dashboard – Preceptly Portal{% endblock %}
 
+{% block extra_css %}
+<style>
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(39,174,96,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(39,174,96,0); }
+    100% { box-shadow: 0 0 0 0 rgba(39,174,96,0); }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <h1>Hallo, {{ student.full_name }}!</h1>
 
@@ -16,7 +26,23 @@
 
 <div class="card">
 <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Nächste Stunden</h2>
-{% if upcoming %}
+{% if upcoming_with_meeting %}
+{% for entry in upcoming_with_meeting %}
+{% if entry.meeting_room %}
+<a href="{% url 'meeting:room' entry.meeting_room.token %}"
+   style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+          background:#eafaf1; border:2px solid #27ae60; border-radius:8px;
+          padding:12px 16px; margin-bottom:12px; text-decoration:none; color:inherit;
+          animation:pulse 2s infinite;">
+    <span style="font-weight:600; color:#1e8449;">
+        📹 Meeting läuft – {{ entry.lesson.date|date:"d.m.Y" }}, {{ entry.lesson.start_time|time:"H:i" }} Uhr
+    </span>
+    <span class="btn" style="background:#27ae60; font-weight:700; padding:6px 18px; font-size:0.95em;">
+        Jetzt beitreten →
+    </span>
+</a>
+{% endif %}
+{% endfor %}
 <table>
     <thead>
         <tr>
@@ -27,14 +53,14 @@
         </tr>
     </thead>
     <tbody>
-    {% for lesson in upcoming %}
+    {% for entry in upcoming_with_meeting %}
     <tr>
-        <td>{{ lesson.date|date:"d.m.Y" }}</td>
-        <td>{{ lesson.start_time|time:"H:i" }}</td>
-        <td>{{ lesson.duration_minutes }} min</td>
+        <td>{{ entry.lesson.date|date:"d.m.Y" }}</td>
+        <td>{{ entry.lesson.start_time|time:"H:i" }}</td>
+        <td>{{ entry.lesson.duration_minutes }} min</td>
         <td>
-            {% if lesson.meeting_url %}
-            <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">Beitreten</a>
+            {% if entry.meeting_room %}
+            <a class="btn-sm btn-sm-primary" href="{% url 'meeting:room' entry.meeting_room.token %}">📹 Meeting</a>
             {% else %}
             <span style="color:var(--text-secondary); font-size:0.85em;">–</span>
             {% endif %}
