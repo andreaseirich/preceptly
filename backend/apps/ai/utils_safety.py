@@ -9,9 +9,20 @@ from typing import Any, Dict
 PII_KEYS = {"full_name", "address", "email", "phone", "tax_id", "dob", "medical_info"}
 REDACTED = "[REDACTED]"
 
-# Simple regex patterns to catch obvious emails/phone numbers even if keys are unknown.
-EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+\-]+@(?:[A-Za-z0-9\-]+\.)+[A-Za-z]{2,7}")
-PHONE_PATTERN = re.compile(r"(?:\+?\d[\s.-]?){7,}\d")
+# Regex patterns to catch obvious emails/phone numbers in uncontrolled strings.
+# Rules to stay non-polynomial (CodeQL py/polynomial-redos):
+#   - No dot inside quantified character classes; dot appears only as a literal separator.
+#   - All repetition quantifiers are bounded.
+#   - Character sets across adjacent quantifiers are disjoint.
+EMAIL_PATTERN = re.compile(
+    r"[A-Za-z0-9_%+\-]{1,64}"  # local part (no dot in char class)
+    r"(?:\.[A-Za-z0-9_%+\-]{1,64}){0,5}"  # optional dot-separated segments
+    r"@"
+    r"[A-Za-z0-9\-]{1,63}"  # first domain label (no dot)
+    r"(?:\.[A-Za-z0-9\-]{1,63}){0,10}"  # additional labels
+    r"\.[A-Za-z]{2,7}"  # TLD
+)
+PHONE_PATTERN = re.compile(r"\+?[0-9]{1,4}(?:[\s.\-][0-9]{1,4}){2,14}")
 
 
 def _sanitize_value(value: Any) -> Any:
