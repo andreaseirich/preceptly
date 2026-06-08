@@ -194,6 +194,19 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 },
             )
 
+        elif msg_type == "doc_delete":
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    "type": "doc_event",
+                    "payload": {
+                        "type": "doc_removed",
+                        "doc_id": int(data.get("doc_id", 0)),
+                    },
+                    "sender_channel": self.channel_name,
+                },
+            )
+
         elif msg_type == "leave":
             await self.disconnect(1000)
 

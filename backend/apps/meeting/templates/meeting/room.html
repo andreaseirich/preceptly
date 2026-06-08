@@ -263,14 +263,14 @@ a.doc-item { text-decoration: none; }
                             <div class="doc-date">{{ doc.uploaded_at|date:"d.m.Y" }}</div>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:3px; flex-shrink:0;">
-                            <button onclick="openDocAsBackground('{% url "meeting:doc_serve" room.token doc.pk %}','{{ doc.name|default:doc.file.name|escapejs }}')"
+                            <button onclick="openDocAsBackground('{% url "meeting:doc_serve" room.token doc.pk %}','{{ doc.name|default:doc.file.name|escapejs }}',{{ doc.pk }})"
                                     style="padding:2px 7px; background:var(--blue); color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.74em; white-space:nowrap;">
-                                📌 Whiteboard
+                                📌 Öffnen
                             </button>
-                            <a href="{% url 'meeting:doc_serve' room.token doc.pk %}" target="_blank"
-                               style="padding:2px 7px; border:1px solid var(--border); color:var(--text2); border-radius:3px; font-size:0.74em; text-decoration:none; text-align:center; white-space:nowrap;">
-                                ⬇ Öffnen
-                            </a>
+                            <button onclick="deleteDoc({{ doc.pk }}, this)"
+                                    style="padding:2px 7px; background:#c0392b; color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.74em; white-space:nowrap;">
+                                🗑 Löschen
+                            </button>
                         </div>
                     </div>
                     {% endfor %}
@@ -402,7 +402,7 @@ async function loadBackground(url, name, broadcast) {
             const img = new Image();
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
-            wbBackground = { url, name: name || url, img };
+            wbBackground = { url, name: name || url, img, docId: docId || null };
         } catch(e) {
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
@@ -412,7 +412,7 @@ async function loadBackground(url, name, broadcast) {
         img.crossOrigin = "anonymous";
         img.src = url;
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
-        wbBackground = { url, name: name || url, img };
+        wbBackground = { url, name: name || url, img, docId: docId || null };
     } else {
         // Nicht darstellbar → in neuem Tab öffnen
         window.open(url, "_blank");
@@ -450,7 +450,7 @@ function clearWbBackground(broadcast) {
     }
 }
 
-function openDocAsBackground(url, name) {
+function openDocAsBackground(url, name, docId) {
     loadBackground(url, name, true);
 }
 
@@ -627,6 +627,10 @@ function connectWS() {
             case "doc_added":
                 addDocToPanel(msg.name, msg.url, msg.date, msg.doc_id);
                 addChatLine("System", `📄 Neues Dokument: ${msg.name}`, false, true);
+                break;
+            case "doc_removed":
+                removeDocFromPanel(msg.doc_id);
+                addChatLine("System", "🗑 Dokument wurde gelöscht.", false, true);
                 break;
             case "chat":
                 addChatLine(msg.name, msg.text, msg.peer_id === myPeerId, false);
@@ -887,14 +891,53 @@ function addDocToPanel(name, url, date, docId) {
     const div = document.createElement("div");
     div.className = "doc-item";
     if (docId) div.id = `doc-${docId}`;
+    const delBtn = docId
+        ? `<button onclick="deleteDoc(${docId}, this)" style="padding:2px 7px;background:#c0392b;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">🗑 Löschen</button>`
+        : '';
     div.innerHTML =
         `<span class="doc-icon">📄</span>` +
         `<div style="flex:1;min-width:0;"><div class="doc-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>` +
         `<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">` +
-        `<button onclick="openDocAsBackground('${serveUrl}','${escHtml(name)}')" style="padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">📌 Whiteboard</button>` +
-        `<a href="${serveUrl}" target="_blank" style="padding:2px 7px;border:1px solid var(--border);color:var(--text2);border-radius:3px;font-size:0.74em;text-decoration:none;text-align:center;white-space:nowrap;">⬇ Öffnen</a>` +
+        `<button onclick="openDocAsBackground('${serveUrl}','${escHtml(name)}',${docId || 0})" style="padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">📌 Öffnen</button>` +
+        delBtn +
         `</div>`;
     panel.insertBefore(div, panel.querySelector("#doc-upload-area"));
+}
+
+function deleteDoc(docId, btn) {
+    if (!confirm('Dokument wirklich löschen?')) return;
+    btn.disabled = true;
+    fetch(`/meetings/${ROOM_TOKEN}/doc/${docId}/delete/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+    }).then(r => r.json()).then(data => {
+        if (data.ok) {
+            removeDocFromPanel(docId);
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'doc_delete', doc_id: docId }));
+            }
+        } else {
+            alert('Löschen fehlgeschlagen.');
+            btn.disabled = false;
+        }
+    }).catch(() => { alert('Fehler beim Löschen.'); btn.disabled = false; });
+}
+
+function removeDocFromPanel(docId) {
+    const el = document.getElementById(`doc-${docId}`);
+    if (el) el.remove();
+    const panel = document.getElementById('docs-panel');
+    const items = panel.querySelectorAll('.doc-item');
+    if (items.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'no-docs';
+        empty.innerHTML = '📄<br><br>Noch keine Dokumente für diese Stunde.';
+        panel.insertBefore(empty, panel.querySelector('#doc-upload-area'));
+    }
+    // Hintergrund löschen wenn das Dokument gerade als Whiteboard-Hintergrund aktiv ist
+    if (wbBackground && wbBackground.docId === docId) {
+        clearWbBackground(false);
+    }
 }
 
 function addChatLine(name, text, mine, system) {

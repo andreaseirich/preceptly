@@ -12,4 +12,9 @@ urlpatterns = [
     path(
         "<uuid:token>/doc/<int:doc_pk>/", views.MeetingDocumentServeView.as_view(), name="doc_serve"
     ),
+    path(
+        "<uuid:token>/doc/<int:doc_pk>/delete/",
+        views.MeetingDocumentDeleteView.as_view(),
+        name="doc_delete",
+    ),
 ]

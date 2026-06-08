@@ -124,6 +124,39 @@ class MeetingDocumentServeView(View):
         return response
 
 
+class MeetingDocumentDeleteView(View):
+    """Löscht ein Meeting-Dokument. Nur für Tutor und Portal-Nutzer mit Zugriff auf die Stunde."""
+
+    def post(self, request, token, doc_pk):
+        room = get_object_or_404(MeetingRoom, token=token, is_active=True)
+        lesson = room.lesson
+
+        portal_user = get_portal_user(request)
+        if portal_user:
+            if portal_user.role == "student":
+                ok = StudentPortalLink.objects.filter(
+                    portal_user=portal_user, is_active=True, contract=lesson.contract
+                ).exists()
+            elif portal_user.role == "parent":
+                ok = ParentStudentLink.objects.filter(
+                    parent=portal_user, contract=lesson.contract
+                ).exists()
+            else:
+                ok = False
+        elif request.user.is_authenticated and lesson.contract.user == request.user:
+            ok = True
+        else:
+            ok = False
+
+        if not ok:
+            return JsonResponse({"error": "Kein Zugriff"}, status=403)
+
+        doc = get_object_or_404(SessionDocument, pk=doc_pk, session=lesson)
+        doc.file.delete(save=False)
+        doc.delete()
+        return JsonResponse({"ok": True})
+
+
 class EndMeetingView(LoginRequiredMixin, View):
     """Tutor beendet ein Meeting (setzt is_active=False). Wird per fetch() aufgerufen."""
 
