@@ -115,8 +115,19 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 #wb-toolbar label { font-size: 0.78em; color: var(--text2); }
-#wb-canvas-wrap { flex: 1; overflow: auto; cursor: crosshair; }
-#wb-canvas { display: block; touch-action: none; }
+#wb-canvas-wrap {
+    flex: 1; min-height: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff; cursor: crosshair;
+}
+#wb-canvas {
+    display: block; touch-action: none;
+    max-width: 100%; max-height: 100%;
+    cursor: crosshair;
+    /* CSS-scaled display; internal 1600x900 coordinate system stays intact.
+       getBoundingClientRect() returns the scaled rect so pointer coords
+       are mapped correctly via wbCanvas.width / rect.width. */
+}
 
 /* ── Documents ── */
 #docs-panel { padding: 16px; overflow-y: auto; flex: 1; }
@@ -361,6 +372,10 @@ let wbCurrentStroke = null;
 let wbBackground = null;      // { url: string, img: HTMLImageElement | null }
 const wbCanvas = document.getElementById("wb-canvas");
 const wbCtx    = wbCanvas.getContext("2d");
+
+// Redraw whenever the wrap resizes (window resize, sidebar toggle, etc.)
+new ResizeObserver(() => requestAnimationFrame(redrawAll))
+    .observe(document.getElementById("wb-canvas-wrap"));
 wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
 
 // PDF.js worker
@@ -970,6 +985,10 @@ function switchTab(name, btn) {
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById("tab-" + name).classList.add("active");
+    if (name === "whiteboard") {
+        // Canvas was hidden (display:none) before — needs a redraw after becoming visible
+        requestAnimationFrame(redrawAll);
+    }
     if (name === "chat") {
         chatUnread = 0;
         document.getElementById("tab-chat-btn").textContent = "💬 Chat";
