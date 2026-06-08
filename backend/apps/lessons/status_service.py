@@ -53,8 +53,8 @@ class SessionStatusUpdater:
             session.status = "taught"
             status_changed = True
 
-        # Future session (start_datetime >= now) without status → PLANNED
-        elif start_datetime >= now and (not session.status or session.status == ""):
+        # Future or in-progress session (end_datetime >= now) without status → PLANNED
+        elif end_datetime >= now and (not session.status or session.status == ""):
             session.status = "planned"
             status_changed = True
 
