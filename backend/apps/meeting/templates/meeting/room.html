@@ -383,8 +383,10 @@ function redrawAll() {
     wbStrokes.forEach(drawStroke);
 }
 
-async function loadBackground(url, name, broadcast) {
-    const ext = (url.split("?")[0].split(".").pop() || "").toLowerCase();
+async function loadBackground(url, name, broadcast, docId) {
+    // Detect file type from name (original filename) because the serve URL has no extension.
+    const extSrc = (name && name.includes(".")) ? name : url;
+    const ext = (extSrc.split("?")[0].split(".").pop() || "").toLowerCase();
     if (ext === "pdf") {
         // PDF via PDF.js – erste Seite als Bild
         if (typeof pdfjsLib === "undefined") {
@@ -402,7 +404,7 @@ async function loadBackground(url, name, broadcast) {
             const img = new Image();
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
-            wbBackground = { url, name: name || url, img, docId: docId || null };
+            wbBackground = { url, name: name || url, img, docId: docId ?? null };
         } catch(e) {
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
@@ -412,7 +414,7 @@ async function loadBackground(url, name, broadcast) {
         img.crossOrigin = "anonymous";
         img.src = url;
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
-        wbBackground = { url, name: name || url, img, docId: docId || null };
+        wbBackground = { url, name: name || url, img, docId: docId ?? null };
     } else {
         // Nicht darstellbar → in neuem Tab öffnen
         window.open(url, "_blank");
@@ -451,7 +453,7 @@ function clearWbBackground(broadcast) {
 }
 
 function openDocAsBackground(url, name, docId) {
-    loadBackground(url, name, true);
+    loadBackground(url, name, true, docId);
 }
 
 function syncWhiteboardToAll() {
