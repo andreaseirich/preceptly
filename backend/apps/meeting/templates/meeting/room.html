@@ -117,16 +117,13 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 #wb-toolbar label { font-size: 0.78em; color: var(--text2); }
 #wb-canvas-wrap {
     flex: 1; min-height: 0; overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-    background: #fff; cursor: crosshair;
+    position: relative;
+    background: #e8e8e8;
 }
 #wb-canvas {
     display: block; touch-action: none;
-    max-width: 100%; max-height: 100%;
+    position: absolute; inset: 0;
     cursor: crosshair;
-    /* CSS-scaled display; internal 1600x900 coordinate system stays intact.
-       getBoundingClientRect() returns the scaled rect so pointer coords
-       are mapped correctly via wbCanvas.width / rect.width. */
 }
 
 /* ── Documents ── */
@@ -253,10 +250,13 @@ a.doc-item { text-decoration: none; }
                         <button class="ctrl-btn" id="wb-bg-btn" onclick="clearWbBackground(true)"
                                 style="padding:4px 8px; font-size:0.76em; display:none;">🗑 Hintergrund</button>
                         <span id="wb-bg-label" style="font-size:0.72em; color:var(--text2); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
-                        <label style="margin-left:auto; font-size:0.72em; color:#555;">Strg+Z zum Rückgängigmachen</label>
+                        <button class="ctrl-btn" id="wb-pan-btn" onclick="togglePanMode()" style="padding:4px 8px; font-size:0.76em;">🖐 Pan</button>
+                        <button class="ctrl-btn" onclick="fitDocToView()" style="padding:4px 8px; font-size:0.76em;">↺ Einpassen</button>
+                        <span id="wb-zoom-label" style="font-size:0.72em; color:var(--text2); min-width:40px; text-align:right;">100%</span>
+                        <label style="margin-left:auto; font-size:0.72em; color:#555;">Rad = Zoom &nbsp; Leertaste+Ziehen = Pan &nbsp; Strg+0 = Einpassen</label>
                     </div>
                     <div id="wb-canvas-wrap">
-                        <canvas id="wb-canvas" width="1600" height="900"></canvas>
+                        <canvas id="wb-canvas"></canvas>
                     </div>
                 </div>
             </div>
@@ -369,12 +369,30 @@ let wbDrawing = false;
 let wbEraser  = false;
 let wbStrokes = [];
 let wbCurrentStroke = null;
-let wbBackground = null;      // { url: string, img: HTMLImageElement | null }
+let wbBackground = null;  // { url, img, docWidth, docHeight, docId }
+
+// View transform (world-space zoom + pan)
+let viewScale = 1.0;
+let viewOX = 0, viewOY = 0;    // canvas-pixel offset of world origin
+let wbPanMode = false;
+let wbPanning = false, panLX = 0, panLY = 0;
+let wbSpaceDown = false;
+let touchPinchLast = null;  // { midX, midY, dist }
+
 const wbCanvas = document.getElementById("wb-canvas");
 const wbCtx    = wbCanvas.getContext("2d");
 
-// Redraw whenever the wrap resizes (window resize, sidebar toggle, etc.)
-new ResizeObserver(() => requestAnimationFrame(redrawAll))
+// Resize canvas to exactly fill the wrap (pixel-perfect, no CSS scaling)
+function resizeCanvas() {
+    const wrap = document.getElementById("wb-canvas-wrap");
+    const w = wrap.clientWidth, h = wrap.clientHeight;
+    if (w > 0 && h > 0 && (wbCanvas.width !== w || wbCanvas.height !== h)) {
+        wbCanvas.width  = w;
+        wbCanvas.height = h;
+        redrawAll();
+    }
+}
+new ResizeObserver(() => requestAnimationFrame(resizeCanvas))
     .observe(document.getElementById("wb-canvas-wrap"));
 wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
 
@@ -386,16 +404,19 @@ if (typeof pdfjsLib !== "undefined") {
 
 function redrawAll() {
     wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
+    wbCtx.save();
+    wbCtx.translate(viewOX, viewOY);
+    wbCtx.scale(viewScale, viewScale);
     if (wbBackground && wbBackground.img) {
-        const { img } = wbBackground;
-        const ar = img.width / img.height;
-        const cAr = wbCanvas.width / wbCanvas.height;
-        let dx = 0, dy = 0, dw = wbCanvas.width, dh = wbCanvas.height;
-        if (ar > cAr) { dh = wbCanvas.width / ar; dy = (wbCanvas.height - dh) / 2; }
-        else           { dw = wbCanvas.height * ar; dx = (wbCanvas.width - dw) / 2; }
-        wbCtx.drawImage(img, dx, dy, dw, dh);
+        wbCtx.drawImage(wbBackground.img, 0, 0, wbBackground.docWidth, wbBackground.docHeight);
+    } else {
+        wbCtx.fillStyle = '#ffffff';
+        const w = wbCanvas.width / viewScale;
+        const h = wbCanvas.height / viewScale;
+        wbCtx.fillRect(0, 0, w, h);
     }
     wbStrokes.forEach(drawStroke);
+    wbCtx.restore();
 }
 
 async function loadBackground(url, name, broadcast, docId) {
@@ -419,7 +440,8 @@ async function loadBackground(url, name, broadcast, docId) {
             const img = new Image();
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
-            wbBackground = { url, name: name || url, img, docId: docId ?? null };
+            wbBackground = { url, name: name || url, img, docId: docId ?? null, docWidth: img.width, docHeight: img.height };
+            fitDocToView();
         } catch(e) {
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
@@ -429,7 +451,8 @@ async function loadBackground(url, name, broadcast, docId) {
         img.crossOrigin = "anonymous";
         img.src = url;
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
-        wbBackground = { url, name: name || url, img, docId: docId ?? null };
+        wbBackground = { url, name: name || url, img, docId: docId ?? null, docWidth: img.naturalWidth || img.width, docHeight: img.naturalHeight || img.height };
+        fitDocToView();
     } else {
         // Nicht darstellbar → in neuem Tab öffnen
         window.open(url, "_blank");
@@ -775,40 +798,159 @@ function kickPeer(peerId) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Whiteboard
 // ─────────────────────────────────────────────────────────────────────────────
-function getWbPos(e) {
+function getCanvasXY(e) {
     const rect = wbCanvas.getBoundingClientRect();
-    const scaleX = wbCanvas.width / rect.width;
-    const scaleY = wbCanvas.height / rect.height;
     const src = e.touches ? e.touches[0] : e;
-    return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+}
+function screenToWorld(sx, sy) {
+    return { x: (sx - viewOX) / viewScale, y: (sy - viewOY) / viewScale };
+}
+function getWbPos(e) {
+    const { x, y } = getCanvasXY(e);
+    return screenToWorld(x, y);
+}
+function zoomAround(cx, cy, factor) {
+    const MIN = 0.05, MAX = 20;
+    const newScale = Math.max(MIN, Math.min(MAX, viewScale * factor));
+    if (newScale === viewScale) return;
+    viewOX = cx - (cx - viewOX) * (newScale / viewScale);
+    viewOY = cy - (cy - viewOY) * (newScale / viewScale);
+    viewScale = newScale;
+    updateZoomLabel();
+    redrawAll();
+}
+function fitDocToView() {
+    const dw = wbBackground ? wbBackground.docWidth  : wbCanvas.width;
+    const dh = wbBackground ? wbBackground.docHeight : wbCanvas.height;
+    if (!dw || !dh) return;
+    const margin = 0.04;
+    const scale = Math.min((wbCanvas.width  * (1 - margin)) / dw,
+                           (wbCanvas.height * (1 - margin)) / dh);
+    viewScale = scale;
+    viewOX = (wbCanvas.width  - dw * scale) / 2;
+    viewOY = (wbCanvas.height - dh * scale) / 2;
+    updateZoomLabel();
+    redrawAll();
+}
+function updateZoomLabel() {
+    const el = document.getElementById('wb-zoom-label');
+    if (el) el.textContent = Math.round(viewScale * 100) + '%';
+}
+function togglePanMode() {
+    wbPanMode = !wbPanMode;
+    document.getElementById('wb-pan-btn').classList.toggle('active', wbPanMode);
+    wbCanvas.style.cursor = wbPanMode ? 'grab' : (wbEraser ? 'cell' : 'crosshair');
 }
 
-wbCanvas.addEventListener("mousedown",  e => { if (e.button !== 0) return; wbStartStroke(e); });
-wbCanvas.addEventListener("mousemove",  e => wbContinueStroke(e));
-wbCanvas.addEventListener("mouseup",    e => wbEndStroke());
-wbCanvas.addEventListener("mouseleave", e => wbEndStroke());
-wbCanvas.addEventListener("touchstart", e => { e.preventDefault(); wbStartStroke(e); });
-wbCanvas.addEventListener("touchmove",  e => { e.preventDefault(); wbContinueStroke(e); });
-wbCanvas.addEventListener("touchend",   e => wbEndStroke());
+// Mouse draw + pan
+wbCanvas.addEventListener("mousedown", e => {
+    if (e.button === 1) { e.preventDefault(); wbPanning = true; const p = getCanvasXY(e); panLX = p.x; panLY = p.y; return; }
+    if (e.button !== 0) return;
+    if (wbPanMode || wbSpaceDown) { wbPanning = true; const p = getCanvasXY(e); panLX = p.x; panLY = p.y; wbCanvas.style.cursor = 'grabbing'; return; }
+    wbStartStroke(e);
+});
+wbCanvas.addEventListener("mousemove", e => {
+    if (wbPanning) {
+        const p = getCanvasXY(e);
+        viewOX += p.x - panLX; viewOY += p.y - panLY;
+        panLX = p.x; panLY = p.y;
+        redrawAll(); return;
+    }
+    wbContinueStroke(e);
+});
+wbCanvas.addEventListener("mouseup",    e => { wbPanning = false; wbCanvas.style.cursor = wbPanMode || wbSpaceDown ? 'grab' : (wbEraser ? 'cell' : 'crosshair'); wbEndStroke(); });
+wbCanvas.addEventListener("mouseleave", e => { wbPanning = false; wbEndStroke(); });
+
+// Wheel zoom (centered on cursor)
+wbCanvas.addEventListener("wheel", e => {
+    e.preventDefault();
+    const p = getCanvasXY(e);
+    zoomAround(p.x, p.y, e.deltaY < 0 ? 1.1 : 1 / 1.1);
+}, { passive: false });
+
+// Space key = temporary pan; Ctrl+Z = undo; Ctrl+0 = fit
+window.addEventListener("keydown", e => {
+    if (e.code === 'Space' && !e.target.matches('input,textarea,select')) {
+        e.preventDefault();
+        if (!wbSpaceDown) { wbSpaceDown = true; if (!wbPanMode) wbCanvas.style.cursor = 'grab'; }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoWhiteboard(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); fitDocToView(); }
+});
+window.addEventListener("keyup", e => {
+    if (e.code === 'Space') {
+        wbSpaceDown = false; wbPanning = false;
+        wbCanvas.style.cursor = wbPanMode ? 'grab' : (wbEraser ? 'cell' : 'crosshair');
+    }
+});
+
+// Touch: 1-finger draw/pan, 2-finger pinch+pan
+wbCanvas.addEventListener("touchstart", e => {
+    e.preventDefault();
+    if (e.touches.length === 2) {
+        wbEndStroke(); wbPanning = false;
+        const t = e.touches;
+        const rect = wbCanvas.getBoundingClientRect();
+        const mx = (t[0].clientX + t[1].clientX) / 2, my = (t[0].clientY + t[1].clientY) / 2;
+        const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+        touchPinchLast = { midX: mx - rect.left, midY: my - rect.top, dist: Math.hypot(dx, dy) };
+    } else {
+        touchPinchLast = null;
+        if (wbPanMode) { wbPanning = true; const p = getCanvasXY(e); panLX = p.x; panLY = p.y; }
+        else { wbStartStroke(e); }
+    }
+}, { passive: false });
+wbCanvas.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if (e.touches.length === 2 && touchPinchLast) {
+        const t = e.touches;
+        const rect = wbCanvas.getBoundingClientRect();
+        const mx = (t[0].clientX + t[1].clientX) / 2, my = (t[0].clientY + t[1].clientY) / 2;
+        const cx = mx - rect.left, cy = my - rect.top;
+        const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        if (touchPinchLast.dist > 0) zoomAround(cx, cy, dist / touchPinchLast.dist);
+        viewOX += cx - touchPinchLast.midX; viewOY += cy - touchPinchLast.midY;
+        touchPinchLast = { midX: cx, midY: cy, dist };
+        redrawAll(); return;
+    }
+    if (wbPanning && wbPanMode) {
+        const p = getCanvasXY(e);
+        viewOX += p.x - panLX; viewOY += p.y - panLY;
+        panLX = p.x; panLY = p.y;
+        redrawAll(); return;
+    }
+    wbContinueStroke(e);
+}, { passive: false });
+wbCanvas.addEventListener("touchend", e => { touchPinchLast = null; wbPanning = false; wbEndStroke(); }, { passive: false });
 
 function wbStartStroke(e) {
     wbDrawing = true;
     const pos = getWbPos(e);
     const color = wbEraser ? "#ffffff" : document.getElementById("wb-color").value;
     const width = parseInt(document.getElementById("wb-width").value) * (wbEraser ? 4 : 1);
-    wbCurrentStroke = { color, width, points: [pos] };
-    wbCtx.beginPath();
-    wbCtx.strokeStyle = color;
-    wbCtx.lineWidth = width;
-    wbCtx.moveTo(pos.x, pos.y);
+    wbCurrentStroke = { color, width, erase: wbEraser, points: [pos] };
 }
 
 function wbContinueStroke(e) {
     if (!wbDrawing || !wbCurrentStroke) return;
     const pos = getWbPos(e);
     wbCurrentStroke.points.push(pos);
+    const s = wbCurrentStroke;
+    const pts = s.points;
+    const prev = pts.length >= 2 ? pts[pts.length - 2] : pos;
+    wbCtx.save();
+    wbCtx.translate(viewOX, viewOY); wbCtx.scale(viewScale, viewScale);
+    if (s.erase) { wbCtx.globalCompositeOperation = 'destination-out'; wbCtx.strokeStyle = 'rgba(0,0,0,1)'; }
+    else { wbCtx.globalCompositeOperation = 'source-over'; wbCtx.strokeStyle = s.color; }
+    wbCtx.lineWidth = s.width;
+    wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
+    wbCtx.beginPath();
+    wbCtx.moveTo(prev.x, prev.y);
     wbCtx.lineTo(pos.x, pos.y);
     wbCtx.stroke();
+    wbCtx.restore();
 }
 
 function wbEndStroke() {
@@ -823,14 +965,22 @@ function wbEndStroke() {
 }
 
 function drawStroke(stroke) {
+    // Called inside redrawAll's save/restore (view transform already applied)
     if (!stroke.points || stroke.points.length < 1) return;
     wbCtx.beginPath();
-    wbCtx.strokeStyle = stroke.color;
+    if (stroke.erase) {
+        wbCtx.globalCompositeOperation = 'destination-out';
+        wbCtx.strokeStyle = 'rgba(0,0,0,1)';
+    } else {
+        wbCtx.globalCompositeOperation = 'source-over';
+        wbCtx.strokeStyle = stroke.color;
+    }
     wbCtx.lineWidth = stroke.width;
     wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
     wbCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    stroke.points.forEach(p => wbCtx.lineTo(p.x, p.y));
+    stroke.points.slice(1).forEach(p => wbCtx.lineTo(p.x, p.y));
     wbCtx.stroke();
+    wbCtx.globalCompositeOperation = 'source-over';
 }
 
 function clearWhiteboard(broadcast) {
@@ -852,7 +1002,7 @@ function undoWhiteboard() {
 function toggleEraser() {
     wbEraser = !wbEraser;
     document.getElementById("wb-eraser-btn").classList.toggle("active", wbEraser);
-    document.getElementById("wb-canvas-wrap").style.cursor = wbEraser ? "cell" : "crosshair";
+    wbCanvas.style.cursor = wbPanMode || wbSpaceDown ? 'grab' : (wbEraser ? 'cell' : 'crosshair');
 }
 
 function handleWbEvent(msg) {
@@ -880,7 +1030,7 @@ function handleWbEvent(msg) {
 }
 
 document.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "z") { e.preventDefault(); undoWhiteboard(); }
+    // Ctrl+Z handled in whiteboard keydown listener
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -986,8 +1136,8 @@ function switchTab(name, btn) {
     btn.classList.add("active");
     document.getElementById("tab-" + name).classList.add("active");
     if (name === "whiteboard") {
-        // Canvas was hidden (display:none) before — needs a redraw after becoming visible
-        requestAnimationFrame(redrawAll);
+        // Canvas was hidden (display:none) — resize to fill wrap, then redraw
+        requestAnimationFrame(() => { resizeCanvas(); });
     }
     if (name === "chat") {
         chatUnread = 0;
