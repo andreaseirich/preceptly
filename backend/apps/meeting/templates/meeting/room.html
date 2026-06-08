@@ -124,10 +124,11 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .doc-item {
     display: flex; align-items: center; gap: 10px; padding: 10px 12px;
     background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
-    margin-bottom: 8px; text-decoration: none; color: var(--text);
+    margin-bottom: 8px; color: var(--text);
     transition: border-color 0.15s;
 }
-.doc-item:hover { border-color: var(--blue); color: var(--text); text-decoration: none; }
+.doc-item:hover { border-color: var(--blue); }
+a.doc-item { text-decoration: none; }
 .doc-icon { font-size: 1.3em; flex-shrink: 0; }
 .doc-name { font-size: 0.88em; }
 .doc-date { font-size: 0.74em; color: var(--text2); margin-top: 2px; }
@@ -170,6 +171,9 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     .video-tile { flex: 1; aspect-ratio: 4/3; }
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+        integrity="sha512-q+4lxwzDqpZtCCvAHKCDOOtbEqkJQlZQi52PkEuVijcQ0NhUGGQQLEBtIKhBGrdrWsUhUGpz4aq3JFXRkLig=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -235,6 +239,9 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
                         <button class="ctrl-btn" id="wb-eraser-btn" onclick="toggleEraser()" style="padding:4px 8px; font-size:0.76em;">Radierer</button>
                         <button class="ctrl-btn" onclick="clearWhiteboard(true)" style="padding:4px 8px; font-size:0.76em;">Löschen</button>
                         <button class="ctrl-btn" onclick="undoWhiteboard()" style="padding:4px 8px; font-size:0.76em;">Rückgängig</button>
+                        <button class="ctrl-btn" id="wb-bg-btn" onclick="clearWbBackground(true)"
+                                style="padding:4px 8px; font-size:0.76em; display:none;">🗑 Hintergrund</button>
+                        <span id="wb-bg-label" style="font-size:0.72em; color:var(--text2); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
                         <label style="margin-left:auto; font-size:0.72em; color:#555;">Strg+Z zum Rückgängigmachen</label>
                     </div>
                     <div id="wb-canvas-wrap">
@@ -249,13 +256,23 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
                     <h3>Dokumente dieser Stunde</h3>
                     {% if documents %}
                     {% for doc in documents %}
-                    <a class="doc-item" href="{{ doc.file.url }}" target="_blank" rel="noopener" id="doc-{{ doc.pk }}">
+                    <div class="doc-item" id="doc-{{ doc.pk }}">
                         <span class="doc-icon">📄</span>
-                        <div>
-                            <div class="doc-name">{{ doc.name|default:doc.file.name }}</div>
+                        <div style="flex:1; min-width:0;">
+                            <div class="doc-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ doc.name|default:doc.file.name }}</div>
                             <div class="doc-date">{{ doc.uploaded_at|date:"d.m.Y" }}</div>
                         </div>
-                    </a>
+                        <div style="display:flex; flex-direction:column; gap:3px; flex-shrink:0;">
+                            <button onclick="openDocAsBackground('{% url "meeting:doc_serve" room.token doc.pk %}','{{ doc.name|default:doc.file.name|escapejs }}')"
+                                    style="padding:2px 7px; background:var(--blue); color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.74em; white-space:nowrap;">
+                                📌 Whiteboard
+                            </button>
+                            <a href="{% url 'meeting:doc_serve' room.token doc.pk %}" target="_blank"
+                               style="padding:2px 7px; border:1px solid var(--border); color:var(--text2); border-radius:3px; font-size:0.74em; text-decoration:none; text-align:center; white-space:nowrap;">
+                                ⬇ Öffnen
+                            </a>
+                        </div>
+                    </div>
                     {% endfor %}
                     {% else %}
                     <div class="no-docs">
@@ -339,11 +356,110 @@ let screenActive = false;
 // Whiteboard state
 let wbDrawing = false;
 let wbEraser  = false;
-let wbStrokes = [];   // for undo
+let wbStrokes = [];
 let wbCurrentStroke = null;
+let wbBackground = null;      // { url: string, img: HTMLImageElement | null }
 const wbCanvas = document.getElementById("wb-canvas");
 const wbCtx    = wbCanvas.getContext("2d");
 wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
+
+// PDF.js worker
+if (typeof pdfjsLib !== "undefined") {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+function redrawAll() {
+    wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
+    if (wbBackground && wbBackground.img) {
+        const { img } = wbBackground;
+        const ar = img.width / img.height;
+        const cAr = wbCanvas.width / wbCanvas.height;
+        let dx = 0, dy = 0, dw = wbCanvas.width, dh = wbCanvas.height;
+        if (ar > cAr) { dh = wbCanvas.width / ar; dy = (wbCanvas.height - dh) / 2; }
+        else           { dw = wbCanvas.height * ar; dx = (wbCanvas.width - dw) / 2; }
+        wbCtx.drawImage(img, dx, dy, dw, dh);
+    }
+    wbStrokes.forEach(drawStroke);
+}
+
+async function loadBackground(url, name, broadcast) {
+    const ext = (url.split("?")[0].split(".").pop() || "").toLowerCase();
+    if (ext === "pdf") {
+        // PDF via PDF.js – erste Seite als Bild
+        if (typeof pdfjsLib === "undefined") {
+            alert("PDF.js nicht geladen – bitte Seite neu laden.");
+            return;
+        }
+        try {
+            const pdfDoc = await pdfjsLib.getDocument(url).promise;
+            const page   = await pdfDoc.getPage(1);
+            const vp     = page.getViewport({ scale: 2 });
+            const offCanvas = document.createElement("canvas");
+            offCanvas.width  = vp.width;
+            offCanvas.height = vp.height;
+            await page.render({ canvasContext: offCanvas.getContext("2d"), viewport: vp }).promise;
+            const img = new Image();
+            img.src = offCanvas.toDataURL();
+            await new Promise(r => { img.onload = r; });
+            wbBackground = { url, name: name || url, img };
+        } catch(e) {
+            alert("PDF konnte nicht geladen werden: " + e.message);
+            return;
+        }
+    } else if (["jpg","jpeg","png","gif","webp","svg"].includes(ext)) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = url;
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+        wbBackground = { url, name: name || url, img };
+    } else {
+        // Nicht darstellbar → in neuem Tab öffnen
+        window.open(url, "_blank");
+        return;
+    }
+    redrawAll();
+    const bgBtn   = document.getElementById("wb-bg-btn");
+    const bgLabel = document.getElementById("wb-bg-label");
+    if (bgBtn)   { bgBtn.style.display = ""; }
+    if (bgLabel) { bgLabel.textContent = wbBackground.name.split("/").pop().split("?")[0]; }
+    if (broadcast && ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({
+            type: "wb_event", action: "bg_set",
+            url: url, name: name || url, strokes: wbStrokes,
+        }));
+    }
+    // Zum Whiteboard wechseln
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    const wbBtn = document.querySelector(".tab-btn");
+    if (wbBtn) wbBtn.classList.add("active");
+    const wbPanel = document.getElementById("tab-whiteboard");
+    if (wbPanel) wbPanel.classList.add("active");
+}
+
+function clearWbBackground(broadcast) {
+    wbBackground = null;
+    redrawAll();
+    const bgBtn   = document.getElementById("wb-bg-btn");
+    const bgLabel = document.getElementById("wb-bg-label");
+    if (bgBtn)   { bgBtn.style.display = "none"; }
+    if (bgLabel) { bgLabel.textContent = ""; }
+    if (broadcast && ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "wb_event", action: "bg_clear" }));
+    }
+}
+
+function openDocAsBackground(url, name) {
+    loadBackground(url, name, true);
+}
+
+function syncWhiteboardToAll() {
+    if (!ws || ws.readyState !== 1) return;
+    const payload = { type: "wb_event", action: "state_sync", strokes: wbStrokes, background_url: null, background_name: null };
+    if (wbBackground) { payload.background_url = wbBackground.url; payload.background_name = wbBackground.name; }
+    ws.send(JSON.stringify(payload));
+}
 
 // Timer
 let timerStart = Date.now();
@@ -477,6 +593,8 @@ function connectWS() {
                 await createPeerConnection(msg.peer_id, msg.name, false);
                 addChatLine("System", `${msg.name} hat den Raum betreten.`, false, true);
                 updatePeerStatus();
+                // Whiteboard-Status an neuen Teilnehmer senden
+                syncWhiteboardToAll();
                 break;
             case "peer_left":
                 removePeer(msg.peer_id);
@@ -695,8 +813,8 @@ function drawStroke(stroke) {
 }
 
 function clearWhiteboard(broadcast) {
-    wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
     wbStrokes = [];
+    redrawAll();
     if (broadcast && ws && ws.readyState === 1) {
         ws.send(JSON.stringify({ type: "wb_event", action: "clear" }));
     }
@@ -704,8 +822,7 @@ function clearWhiteboard(broadcast) {
 
 function undoWhiteboard() {
     wbStrokes.pop();
-    wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
-    wbStrokes.forEach(drawStroke);
+    redrawAll();
     if (ws && ws.readyState === 1) {
         ws.send(JSON.stringify({ type: "wb_event", action: "undo", strokes: wbStrokes }));
     }
@@ -725,8 +842,19 @@ function handleWbEvent(msg) {
         clearWhiteboard(false);
     } else if (msg.action === "undo") {
         wbStrokes = msg.strokes || [];
-        wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
-        wbStrokes.forEach(drawStroke);
+        redrawAll();
+    } else if (msg.action === "bg_set") {
+        wbStrokes = msg.strokes || [];
+        loadBackground(msg.url, msg.name, false);
+    } else if (msg.action === "bg_clear") {
+        clearWbBackground(false);
+    } else if (msg.action === "state_sync") {
+        wbStrokes = msg.strokes || [];
+        if (msg.background_url) {
+            loadBackground(msg.background_url, msg.background_name || "", false);
+        } else {
+            clearWbBackground(false);
+        }
     }
 }
 
@@ -752,19 +880,21 @@ document.getElementById("chat-input").addEventListener("keydown", e => {
 
 function addDocToPanel(name, url, date, docId) {
     const panel = document.getElementById("docs-panel");
-    // Remove "keine Dokumente"-Hinweis falls vorhanden
     const noDoc = panel.querySelector(".no-docs");
     if (noDoc) noDoc.remove();
-    // Kein Duplikat
     if (docId && document.getElementById(`doc-${docId}`)) return;
-    const a = document.createElement("a");
-    a.className = "doc-item";
-    a.href = url;
-    a.target = "_blank";
-    a.rel = "noopener";
-    if (docId) a.id = `doc-${docId}`;
-    a.innerHTML = `<span class="doc-icon">📄</span><div><div class="doc-name">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>`;
-    panel.insertBefore(a, panel.querySelector("#doc-upload-area"));
+    const serveUrl = docId ? `/meetings/${ROOM_TOKEN}/doc/${docId}/` : url;
+    const div = document.createElement("div");
+    div.className = "doc-item";
+    if (docId) div.id = `doc-${docId}`;
+    div.innerHTML =
+        `<span class="doc-icon">📄</span>` +
+        `<div style="flex:1;min-width:0;"><div class="doc-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>` +
+        `<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">` +
+        `<button onclick="openDocAsBackground('${serveUrl}','${escHtml(name)}')" style="padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">📌 Whiteboard</button>` +
+        `<a href="${serveUrl}" target="_blank" style="padding:2px 7px;border:1px solid var(--border);color:var(--text2);border-radius:3px;font-size:0.74em;text-decoration:none;text-align:center;white-space:nowrap;">⬇ Öffnen</a>` +
+        `</div>`;
+    panel.insertBefore(div, panel.querySelector("#doc-upload-area"));
 }
 
 function addChatLine(name, text, mine, system) {
