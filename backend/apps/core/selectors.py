@@ -13,6 +13,11 @@ from apps.billing.models import InvoiceItem
 from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
 from apps.contracts.models import ContractMonthlyPlan
 from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
+from apps.core.finance_metrics import (
+    lesson_count_taught_or_paid,
+    recognized_revenue,
+    top_students_by_recognized_revenue,
+)
 from apps.lessons.models import Lesson
 
 
@@ -85,12 +90,6 @@ class IncomeSelector:
         lesson_count = count of lessons with status=paid (aligned with invoice workflow).
         contract_details = top students by recognized revenue from PAID invoices.
         """
-        from apps.core.finance_metrics import (
-            lesson_count_taught_or_paid,
-            recognized_revenue,
-            top_students_by_recognized_revenue,
-        )
-
         if user and status == "paid":
             total = recognized_revenue(user, year, month)
             count = lesson_count_taught_or_paid(user, year, month)

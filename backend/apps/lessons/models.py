@@ -101,18 +101,20 @@ class Session(models.Model):
     @cached_property
     def has_conflicts(self):
         """Checks if this session has conflicts (cached per instance)."""
-        from apps.lessons.services import SessionConflictService
+        import importlib
 
-        return SessionConflictService.has_conflicts(self)
+        mod = importlib.import_module("apps.lessons.conflict_service")
+        return mod.SessionConflictService.has_conflicts(self)
 
     def invalidate_conflict_cache(self):
         self.__dict__.pop("has_conflicts", None)
 
     def get_conflicts(self):
         """Returns all conflicts for this session."""
-        from apps.lessons.services import SessionConflictService
+        import importlib
 
-        return SessionConflictService.check_conflicts(self)
+        mod = importlib.import_module("apps.lessons.conflict_service")
+        return mod.SessionConflictService.check_conflicts(self)
 
     def save(self, *args, **kwargs):
         self.invalidate_conflict_cache()

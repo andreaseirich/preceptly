@@ -2,12 +2,17 @@
 Service for session queries and filtering.
 """
 
-from datetime import date, timedelta
+from __future__ import annotations
 
+from datetime import date, timedelta
+from typing import TYPE_CHECKING
+
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from apps.lessons.models import Session
+if TYPE_CHECKING:
+    from apps.lessons.models import Session
 
 
 class SessionQueryService:
@@ -31,6 +36,7 @@ class SessionQueryService:
         else:
             end_date = date(year, month + 1, 1)
 
+        Session = apps.get_model("lessons", "Session")
         qs = (
             Session.objects.filter(date__gte=start_date, date__lt=end_date)
             .select_related("contract")
@@ -44,6 +50,7 @@ class SessionQueryService:
     def get_today_sessions(user: User = None) -> list[Session]:
         """Returns all sessions for today."""
         today = timezone.now().date()
+        Session = apps.get_model("lessons", "Session")
         qs = Session.objects.filter(date=today).select_related("contract").order_by("start_time")
         if user:
             qs = qs.filter(contract__user=user)
@@ -67,6 +74,7 @@ class SessionQueryService:
         end_date = today + timedelta(days=days)
 
         # Only sessions from tomorrow (date > today), not today
+        Session = apps.get_model("lessons", "Session")
         qs = (
             Session.objects.filter(date__gt=today, date__lte=end_date)
             .select_related("contract")

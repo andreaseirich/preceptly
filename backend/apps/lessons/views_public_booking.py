@@ -406,9 +406,6 @@ def book_lesson_api(request):
             subject = ""
         notes = data.get("notes", "")
         notes = notes.strip() if isinstance(notes, str) else ""
-        institute = data.get("institute", "")
-        institute = institute.strip() if isinstance(institute, str) else ""
-
         tutor_token = data.get("tutor_token")
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:

@@ -5,6 +5,7 @@ Views for AI functions (lesson plan generation).
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -27,7 +28,9 @@ def generate_lesson_plan(request, lesson_id):
         messages.error(request, _("This function is only available for premium users."))
         # Redirect to lesson plan view if 'next' parameter is provided, otherwise to lesson detail
         next_url = request.POST.get("next") or request.GET.get("next")
-        if next_url:
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
             return redirect(next_url)
         return redirect("lessons:detail", pk=lesson_id)
 
@@ -65,6 +68,8 @@ def generate_lesson_plan(request, lesson_id):
 
     # Redirect to lesson plan view if 'next' parameter is provided, otherwise to session detail
     next_url = request.POST.get("next") or request.GET.get("next")
-    if next_url:
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
         return redirect(next_url)
     return redirect("lessons:detail", pk=lesson_id)

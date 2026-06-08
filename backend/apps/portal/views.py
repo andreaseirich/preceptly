@@ -9,6 +9,7 @@ from django.db import models
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
@@ -35,7 +36,9 @@ class PortalLoginView(View):
     def get(self, request):
         if get_portal_user(request):
             next_url = request.GET.get("next", "")
-            if next_url and next_url.startswith("/"):
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
                 return redirect(next_url)
             return redirect("portal:home")
         return render(request, self.template_name, {"next": request.GET.get("next", "")})
@@ -50,7 +53,9 @@ class PortalLoginView(View):
                 portal_user = PortalUser.objects.get(user=user)
                 request.session["portal_user_id"] = portal_user.pk
                 next_url = request.POST.get("next", "")
-                if next_url and next_url.startswith("/"):
+                if next_url and url_has_allowed_host_and_scheme(
+                    next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+                ):
                     return redirect(next_url)
                 return redirect("portal:home")
             else:
@@ -1039,11 +1044,15 @@ class PortalMeetingWaitView(View):
 
         portal_user, lesson = self._check_access(request, lesson_pk)
         if portal_user is None:
-            next_url = request.path
             from django.urls import reverse
 
             login_url = reverse("portal:login")
-            return redirect(f"{login_url}?next={next_url}")
+            next_url = request.path
+            if url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(f"{login_url}?next={next_url}")
+            return redirect(login_url)
 
         # Wenn Meeting bereits aktiv → direkt weiterleiten
         try:

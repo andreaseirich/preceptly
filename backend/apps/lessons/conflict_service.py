@@ -2,15 +2,21 @@
 Service for conflict detection and recalculation.
 """
 
-from datetime import datetime, timedelta
+from __future__ import annotations
 
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
+
+from django.apps import apps
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.blocked_times.models import BlockedTime
-from apps.lessons.models import Session
 from apps.lessons.quota_service import ContractQuotaService
+
+if TYPE_CHECKING:
+    from apps.lessons.models import Session
 
 
 def recalculate_conflicts_for_affected_sessions(session: Session):
@@ -27,6 +33,7 @@ def recalculate_conflicts_for_affected_sessions(session: Session):
     owner_user = session.contract.user
 
     # Find all sessions on the same date of the same user that might be affected
+    Session = apps.get_model("lessons", "Session")
     affected_sessions = Session.objects.filter(
         date=session.date, contract__user=owner_user
     ).exclude(pk=session.pk if session.pk else None)
@@ -50,6 +57,7 @@ def recalculate_conflicts_for_blocked_time(blocked_time: BlockedTime):
         blocked_time: The blocked time that was changed or deleted
     """
     # Find sessions on the same date belonging to the same user
+    Session = apps.get_model("lessons", "Session")
     affected_sessions = Session.objects.filter(
         date=blocked_time.start_datetime.date(),
         contract__user=blocked_time.user,
@@ -130,6 +138,7 @@ class SessionConflictService:
         if exclude_self and session.pk:
             query &= ~Q(pk=session.pk)
 
+        Session = apps.get_model("lessons", "Session")
         other_sessions = Session.objects.filter(query).select_related("contract", "contract")
 
         for other_session in other_sessions:

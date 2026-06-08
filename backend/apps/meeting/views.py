@@ -68,7 +68,8 @@ class MeetingDocumentUploadView(View):
 
         name = request.POST.get("name", "").strip() or file.name
         doc = SessionDocument.objects.create(session=lesson, file=file, name=name)
-        logger.info("Dokument hochgeladen: %s (lesson %s)", name, lesson.pk)
+        safe_name = name.replace("\n", " ").replace("\r", " ")
+        logger.info("Dokument hochgeladen: %s (lesson %s)", safe_name, lesson.pk)
 
         return JsonResponse(
             {
@@ -132,7 +133,8 @@ class EndMeetingView(LoginRequiredMixin, View):
         room = get_object_or_404(MeetingRoom, token=token, lesson__contract__user=request.user)
         room.is_active = False
         room.save(update_fields=["is_active"])
-        logger.info("Meeting %s beendet durch %s", token, request.user)
+        safe_token = str(token).replace("\n", " ").replace("\r", " ")
+        logger.info("Meeting %s beendet durch %s", safe_token, request.user)
         return JsonResponse({"ok": True})
 
 

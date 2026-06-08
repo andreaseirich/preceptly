@@ -10,7 +10,7 @@ PII_KEYS = {"full_name", "address", "email", "phone", "tax_id", "dob", "medical_
 REDACTED = "[REDACTED]"
 
 # Simple regex patterns to catch obvious emails/phone numbers even if keys are unknown.
-EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+\-]+@(?:[A-Za-z0-9\-]+\.)+[A-Za-z]{2,7}")
 PHONE_PATTERN = re.compile(r"(?:\+?\d[\s.-]?){7,}\d")
 
 
