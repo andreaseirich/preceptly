@@ -111,10 +111,32 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff;
 }
 #wb-toolbar {
-    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    display: flex; align-items: center; gap: 5px; padding: 5px 8px;
     background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    flex-wrap: wrap;
 }
-#wb-toolbar label { font-size: 0.78em; color: var(--text2); }
+.tb-group {
+    display: flex; align-items: center; gap: 2px;
+    padding-right: 7px; margin-right: 2px;
+    border-right: 1px solid #333;
+}
+.tb-group:last-child { border-right: none; padding-right: 0; }
+.wb-swatch {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid #444; cursor: pointer; padding: 0; flex-shrink: 0;
+    transition: border-color 0.12s;
+}
+.wb-swatch:hover { border-color: #888; }
+.wb-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px var(--blue); }
+#wb-text-overlay {
+    position: fixed; z-index: 9999; display: none;
+    pointer-events: auto;
+}
+#wb-text-input {
+    background: rgba(255,255,255,0.08); border: 1.5px dashed #aaa;
+    color: inherit; padding: 2px 5px; outline: none; min-width: 60px;
+    font-family: inherit; border-radius: 2px;
+}
 #wb-canvas-wrap {
     flex: 1; min-height: 0; overflow: hidden;
     position: relative;
@@ -238,20 +260,44 @@ a.doc-item { text-decoration: none; }
             <div class="tab-panel active" id="tab-whiteboard">
                 <div id="wb-container">
                     <div id="wb-toolbar">
-                        <label>Farbe:</label>
-                        <input type="color" id="wb-color" value="#000000">
-                        <label>Stärke:</label>
-                        <input type="range" id="wb-width" min="1" max="20" value="3" style="width:80px">
-                        <button class="ctrl-btn" id="wb-eraser-btn" onclick="toggleEraser()" style="padding:4px 8px; font-size:0.76em;">Radierer</button>
-                        <button class="ctrl-btn" onclick="clearWhiteboard(true)" style="padding:4px 8px; font-size:0.76em;">Löschen</button>
-                        <button class="ctrl-btn" onclick="undoWhiteboard()" style="padding:4px 8px; font-size:0.76em;">Rückgängig</button>
-                        <button class="ctrl-btn" id="wb-bg-btn" onclick="clearWbBackground(true)"
-                                style="padding:4px 8px; font-size:0.76em; display:none;">🗑 Hintergrund</button>
-                        <span id="wb-bg-label" style="font-size:0.72em; color:var(--text2); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
-                        <button class="ctrl-btn" id="wb-pan-btn" onclick="togglePanMode()" style="padding:4px 8px; font-size:0.76em;">🖐 Pan</button>
-                        <button class="ctrl-btn" onclick="fitDocToView()" style="padding:4px 8px; font-size:0.76em;">↺ Einpassen</button>
-                        <span id="wb-zoom-label" style="font-size:0.72em; color:var(--text2); min-width:40px; text-align:right;">100%</span>
-                        <label style="margin-left:auto; font-size:0.72em; color:#555;">Rad = Zoom &nbsp; Leertaste+Ziehen = Pan &nbsp; Strg+0 = Einpassen</label>
+                        <!-- Werkzeuge -->
+                        <div class="tb-group">
+                            <button class="ctrl-btn active" id="wbt-pen"    onclick="setTool('pen')"    title="Stift"      style="padding:3px 7px;font-size:0.8em;">✏️</button>
+                            <button class="ctrl-btn"        id="wbt-eraser" onclick="setTool('eraser')" title="Radierer"   style="padding:3px 7px;font-size:0.8em;">🧹</button>
+                            <button class="ctrl-btn"        id="wbt-line"   onclick="setTool('line')"   title="Linie"      style="padding:3px 8px;font-size:0.8em;">╱</button>
+                            <button class="ctrl-btn"        id="wbt-arrow"  onclick="setTool('arrow')"  title="Pfeil"      style="padding:3px 8px;font-size:0.8em;">→</button>
+                            <button class="ctrl-btn"        id="wbt-rect"   onclick="setTool('rect')"   title="Rechteck"   style="padding:3px 8px;font-size:0.8em;">▭</button>
+                            <button class="ctrl-btn"        id="wbt-circle" onclick="setTool('circle')" title="Ellipse"    style="padding:3px 8px;font-size:0.8em;">○</button>
+                            <button class="ctrl-btn"        id="wbt-text"   onclick="setTool('text')"   title="Textfeld"   style="padding:3px 8px;font-size:0.8em;font-weight:700;">T</button>
+                        </div>
+                        <!-- Farbe (per JS befüllt) -->
+                        <div class="tb-group" id="wb-colors"></div>
+                        <!-- Linienstärke -->
+                        <div class="tb-group">
+                            <button class="ctrl-btn wb-size active" onclick="setSize(2)"  data-size="2"  title="Dünn"      style="padding:3px 7px;font-size:0.8em;min-width:26px;">─</button>
+                            <button class="ctrl-btn wb-size"        onclick="setSize(4)"  data-size="4"  title="Mittel"    style="padding:3px 7px;font-size:0.85em;min-width:26px;font-weight:700;">━</button>
+                            <button class="ctrl-btn wb-size"        onclick="setSize(8)"  data-size="8"  title="Dick"      style="padding:3px 7px;font-size:0.9em;min-width:26px;">▬</button>
+                            <button class="ctrl-btn wb-size"        onclick="setSize(16)" data-size="16" title="Sehr dick" style="padding:3px 7px;font-size:0.8em;min-width:26px;">█</button>
+                        </div>
+                        <!-- Linienstil -->
+                        <div class="tb-group">
+                            <button class="ctrl-btn wb-dash active" onclick="setDash('solid')"  data-dash="solid"  title="Durchgehend" style="padding:3px 8px;font-size:0.8em;letter-spacing:1px;">———</button>
+                            <button class="ctrl-btn wb-dash"        onclick="setDash('dashed')" data-dash="dashed" title="Gestrichelt" style="padding:3px 8px;font-size:0.8em;letter-spacing:2px;">╌╌</button>
+                            <button class="ctrl-btn wb-dash"        onclick="setDash('dotted')" data-dash="dotted" title="Gepunktet"   style="padding:3px 8px;font-size:0.9em;letter-spacing:3px;">···</button>
+                        </div>
+                        <!-- Aktionen -->
+                        <div class="tb-group">
+                            <button class="ctrl-btn" onclick="undoWhiteboard()"    title="Rückgängig (Strg+Z)"       style="padding:3px 8px;font-size:0.8em;">↩</button>
+                            <button class="ctrl-btn" onclick="clearWhiteboard(true)" title="Alles löschen"           style="padding:3px 8px;font-size:0.8em;">🗑</button>
+                            <button class="ctrl-btn" id="wb-bg-btn" onclick="clearWbBackground(true)" title="Hintergrund entfernen" style="padding:3px 8px;font-size:0.8em;display:none;">📄✕</button>
+                        </div>
+                        <!-- Ansicht -->
+                        <div class="tb-group">
+                            <button class="ctrl-btn" id="wb-pan-btn" onclick="togglePanMode()" title="Verschieben (Leertaste+Ziehen)" style="padding:3px 8px;font-size:0.8em;">🖐</button>
+                            <button class="ctrl-btn" onclick="fitDocToView()" title="Einpassen (Strg+0)" style="padding:3px 8px;font-size:0.8em;">⊡</button>
+                            <span id="wb-zoom-label" style="font-size:0.72em;color:var(--text2);min-width:36px;text-align:center;">100%</span>
+                        </div>
+                        <span id="wb-bg-label" style="font-size:0.72em;color:var(--text2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
                     </div>
                     <div id="wb-canvas-wrap">
                         <canvas id="wb-canvas"></canvas>
@@ -368,6 +414,13 @@ let wbEraser  = false;
 let wbStrokes = [];
 let wbCurrentStroke = null;
 let wbBackground = null;  // { url, img, docWidth, docHeight, docId }
+
+// Active tool state
+let wbTool         = 'pen';    // 'pen'|'eraser'|'line'|'arrow'|'rect'|'circle'|'text'
+let wbColor        = '#1a1a1a';
+let wbStrokeWidth  = 3;
+let wbDash         = [];       // [] solid | [10,6] dashed | [2,6] dotted
+let wbShapeStart   = null;     // { x, y } start point for shape tools
 
 // View transform (world-space zoom + pan)
 let viewScale = 1.0;
@@ -924,31 +977,51 @@ wbCanvas.addEventListener("touchmove", e => {
 wbCanvas.addEventListener("touchend", e => { touchPinchLast = null; wbPanning = false; wbEndStroke(); }, { passive: false });
 
 function wbStartStroke(e) {
-    wbDrawing = true;
     const pos = getWbPos(e);
-    const color = wbEraser ? "#ffffff" : document.getElementById("wb-color").value;
-    const width = parseInt(document.getElementById("wb-width").value) * (wbEraser ? 4 : 1);
-    wbCurrentStroke = { color, width, erase: wbEraser, points: [pos] };
+    if (wbTool === 'text') {
+        showTextOverlay(pos);
+        return;
+    }
+    wbDrawing = true;
+    if (wbTool === 'pen' || wbTool === 'eraser') {
+        const color = wbTool === 'eraser' ? '#fff' : wbColor;
+        const width = wbTool === 'eraser' ? wbStrokeWidth * 4 : wbStrokeWidth;
+        wbCurrentStroke = { type: 'pen', color, width, dash: [], erase: wbTool === 'eraser', points: [pos] };
+    } else {
+        // shape/line/arrow
+        wbShapeStart = pos;
+        wbCurrentStroke = { type: wbTool, color: wbColor, width: wbStrokeWidth, dash: wbDash.slice(),
+                            x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y };
+    }
 }
 
 function wbContinueStroke(e) {
     if (!wbDrawing || !wbCurrentStroke) return;
     const pos = getWbPos(e);
-    wbCurrentStroke.points.push(pos);
     const s = wbCurrentStroke;
-    const pts = s.points;
-    const prev = pts.length >= 2 ? pts[pts.length - 2] : pos;
-    wbCtx.save();
-    wbCtx.translate(viewOX, viewOY); wbCtx.scale(viewScale, viewScale);
-    if (s.erase) { wbCtx.globalCompositeOperation = 'destination-out'; wbCtx.strokeStyle = 'rgba(0,0,0,1)'; }
-    else { wbCtx.globalCompositeOperation = 'source-over'; wbCtx.strokeStyle = s.color; }
-    wbCtx.lineWidth = s.width;
-    wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
-    wbCtx.beginPath();
-    wbCtx.moveTo(prev.x, prev.y);
-    wbCtx.lineTo(pos.x, pos.y);
-    wbCtx.stroke();
-    wbCtx.restore();
+    if (!s.type || s.type === 'pen') {
+        // Freehand: incremental segment
+        const pts = s.points;
+        const prev = pts.length >= 1 ? pts[pts.length - 1] : pos;
+        s.points.push(pos);
+        wbCtx.save();
+        wbCtx.translate(viewOX, viewOY); wbCtx.scale(viewScale, viewScale);
+        if (s.erase) { wbCtx.globalCompositeOperation = 'destination-out'; wbCtx.strokeStyle = 'rgba(0,0,0,1)'; }
+        else { wbCtx.globalCompositeOperation = 'source-over'; wbCtx.strokeStyle = s.color; }
+        wbCtx.lineWidth = s.width;
+        wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
+        wbCtx.beginPath(); wbCtx.moveTo(prev.x, prev.y); wbCtx.lineTo(pos.x, pos.y);
+        wbCtx.stroke();
+        wbCtx.restore();
+    } else {
+        // Shape: update endpoint, redraw all + live preview
+        s.x2 = pos.x; s.y2 = pos.y;
+        redrawAll();
+        wbCtx.save();
+        wbCtx.translate(viewOX, viewOY); wbCtx.scale(viewScale, viewScale);
+        drawStroke(s);
+        wbCtx.restore();
+    }
 }
 
 function wbEndStroke() {
@@ -963,21 +1036,82 @@ function wbEndStroke() {
 }
 
 function drawStroke(stroke) {
-    // Called inside redrawAll's save/restore (view transform already applied)
-    if (!stroke.points || stroke.points.length < 1) return;
-    wbCtx.beginPath();
+    // Called inside a save/restore block with view transform applied (from redrawAll)
+    const t = stroke.type || 'pen';
+    wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
+    wbCtx.setLineDash(stroke.dash || []);
     if (stroke.erase) {
         wbCtx.globalCompositeOperation = 'destination-out';
         wbCtx.strokeStyle = 'rgba(0,0,0,1)';
     } else {
         wbCtx.globalCompositeOperation = 'source-over';
-        wbCtx.strokeStyle = stroke.color;
+        wbCtx.strokeStyle = stroke.color || '#1a1a1a';
+        wbCtx.fillStyle  = stroke.color || '#1a1a1a';
     }
-    wbCtx.lineWidth = stroke.width;
-    wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
-    wbCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    stroke.points.slice(1).forEach(p => wbCtx.lineTo(p.x, p.y));
-    wbCtx.stroke();
+    wbCtx.lineWidth = stroke.width || 3;
+
+    if (t === 'pen' || stroke.erase) {
+        if (!stroke.points || stroke.points.length < 1) { wbCtx.setLineDash([]); return; }
+        wbCtx.beginPath();
+        wbCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        stroke.points.slice(1).forEach(p => wbCtx.lineTo(p.x, p.y));
+        wbCtx.stroke();
+
+    } else if (t === 'line') {
+        wbCtx.beginPath();
+        wbCtx.moveTo(stroke.x1, stroke.y1);
+        wbCtx.lineTo(stroke.x2, stroke.y2);
+        wbCtx.stroke();
+
+    } else if (t === 'arrow') {
+        const dx = stroke.x2 - stroke.x1, dy = stroke.y2 - stroke.y1;
+        const len = Math.hypot(dx, dy);
+        if (len < 2) { wbCtx.setLineDash([]); return; }
+        const ux = dx / len, uy = dy / len;
+        const hLen = Math.max(stroke.width * 5, 18);
+        const hAngle = 0.42;
+        // shaft
+        wbCtx.beginPath();
+        wbCtx.moveTo(stroke.x1, stroke.y1);
+        wbCtx.lineTo(stroke.x2 - ux * hLen * 0.65, stroke.y2 - uy * hLen * 0.65);
+        wbCtx.stroke();
+        // head (filled, no dash)
+        wbCtx.setLineDash([]);
+        wbCtx.beginPath();
+        wbCtx.moveTo(stroke.x2, stroke.y2);
+        wbCtx.lineTo(stroke.x2 - ux*hLen + uy*hLen*Math.tan(hAngle),
+                     stroke.y2 - uy*hLen - ux*hLen*Math.tan(hAngle));
+        wbCtx.lineTo(stroke.x2 - ux*hLen - uy*hLen*Math.tan(hAngle),
+                     stroke.y2 - uy*hLen + ux*hLen*Math.tan(hAngle));
+        wbCtx.closePath();
+        wbCtx.fill();
+
+    } else if (t === 'rect') {
+        const x = Math.min(stroke.x1, stroke.x2), y = Math.min(stroke.y1, stroke.y2);
+        const w = Math.abs(stroke.x2 - stroke.x1), h = Math.abs(stroke.y2 - stroke.y1);
+        wbCtx.beginPath();
+        wbCtx.rect(x, y, w, h);
+        wbCtx.stroke();
+
+    } else if (t === 'circle') {
+        const cx = (stroke.x1 + stroke.x2) / 2, cy = (stroke.y1 + stroke.y2) / 2;
+        const rx = Math.abs(stroke.x2 - stroke.x1) / 2, ry = Math.abs(stroke.y2 - stroke.y1) / 2;
+        if (rx < 1 || ry < 1) { wbCtx.setLineDash([]); return; }
+        wbCtx.beginPath();
+        wbCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        wbCtx.stroke();
+
+    } else if (t === 'text') {
+        wbCtx.setLineDash([]);
+        const fs = stroke.fontSize || 18;
+        wbCtx.font = `${fs}px sans-serif`;
+        wbCtx.globalCompositeOperation = 'source-over';
+        wbCtx.fillStyle = stroke.color || '#1a1a1a';
+        (stroke.text || '').split('\n').forEach((line, i) => {
+            wbCtx.fillText(line, stroke.x, stroke.y + i * fs * 1.3);
+        });
+    }
+    wbCtx.setLineDash([]);
     wbCtx.globalCompositeOperation = 'source-over';
 }
 
@@ -998,9 +1132,111 @@ function undoWhiteboard() {
 }
 
 function toggleEraser() {
-    wbEraser = !wbEraser;
-    document.getElementById("wb-eraser-btn").classList.toggle("active", wbEraser);
-    wbCanvas.style.cursor = wbPanMode || wbSpaceDown ? 'grab' : (wbEraser ? 'cell' : 'crosshair');
+    setTool(wbEraser ? 'pen' : 'eraser');
+}
+
+// ── Tool management ───────────────────────────────────────────────────────────
+function setTool(tool) {
+    wbTool = tool;
+    wbEraser = (tool === 'eraser');
+    document.querySelectorAll('[id^="wbt-"]').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('wbt-' + tool);
+    if (btn) btn.classList.add('active');
+    const cur = (wbPanMode || wbSpaceDown) ? 'grab'
+              : tool === 'eraser' ? 'cell'
+              : tool === 'text'   ? 'text'
+              : 'crosshair';
+    wbCanvas.style.cursor = cur;
+}
+
+function setColor(c) {
+    wbColor = c;
+    document.querySelectorAll('.wb-swatch').forEach(s => s.classList.remove('active'));
+    const sw = document.querySelector(`.wb-swatch[data-color="${CSS.escape(c)}"]`);
+    if (sw) sw.classList.add('active');
+    // Keep custom picker in sync
+    const cp = document.getElementById('wb-color-custom');
+    if (cp) cp.value = c.length === 7 ? c : cp.value;
+    if (wbTool === 'eraser') setTool('pen');
+}
+
+function setSize(s) {
+    wbStrokeWidth = s;
+    document.querySelectorAll('.wb-size').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.wb-size[data-size="${s}"]`);
+    if (btn) btn.classList.add('active');
+}
+
+function setDash(d) {
+    wbDash = d === 'dashed' ? [10, 6] : d === 'dotted' ? [2, 6] : [];
+    document.querySelectorAll('.wb-dash').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.wb-dash[data-dash="${d}"]`);
+    if (btn) btn.classList.add('active');
+}
+
+// Colour swatches init
+(function () {
+    const COLORS = [
+        '#1a1a1a','#555555','#aaaaaa','#ffffff',
+        '#e74c3c','#e67e22','#f1c40f','#2ecc71',
+        '#1abc9c','#3498db','#9b59b6','#e91e63'
+    ];
+    const container = document.getElementById('wb-colors');
+    if (!container) return;
+    COLORS.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'wb-swatch' + (c === wbColor ? ' active' : '');
+        btn.style.background = c;
+        btn.dataset.color = c;
+        btn.title = c;
+        btn.onclick = () => setColor(c);
+        container.appendChild(btn);
+    });
+    // Custom colour picker
+    const inp = document.createElement('input');
+    inp.type = 'color'; inp.id = 'wb-color-custom'; inp.value = '#1a1a1a';
+    inp.title = 'Eigene Farbe';
+    inp.style.cssText = 'width:22px;height:22px;border-radius:50%;border:2px solid #444;cursor:pointer;padding:0;box-sizing:border-box;overflow:hidden;flex-shrink:0;';
+    inp.addEventListener('input', e => setColor(e.target.value));
+    container.appendChild(inp);
+})();
+
+// ── Text tool overlay ─────────────────────────────────────────────────────────
+function showTextOverlay(worldPos) {
+    const overlay = document.getElementById('wb-text-overlay');
+    const input   = document.getElementById('wb-text-input');
+    if (!overlay || !input) return;
+    const rect = wbCanvas.getBoundingClientRect();
+    const sx = worldPos.x * viewScale + viewOX + rect.left;
+    const sy = worldPos.y * viewScale + viewOY + rect.top;
+    const pxSize = Math.max(12, Math.round(18 * viewScale));
+    input.style.fontSize  = pxSize + 'px';
+    input.style.color     = wbColor;
+    input.style.minWidth  = '80px';
+    overlay.style.left = sx + 'px';
+    overlay.style.top  = sy + 'px';
+    overlay.style.display = 'block';
+    input.value = '';
+    setTimeout(() => input.focus(), 0);
+
+    function commit() {
+        const text = input.value.trim();
+        overlay.style.display = 'none';
+        input.onkeydown = null; input.onblur = null;
+        if (!text) return;
+        const fs = Math.round(18 / Math.max(viewScale, 0.1));
+        const stroke = { type: 'text', text, x: worldPos.x, y: worldPos.y, color: wbColor, fontSize: fs };
+        wbStrokes.push(stroke);
+        redrawAll();
+        if (ws && ws.readyState === 1)
+            ws.send(JSON.stringify({ type: 'wb_event', action: 'stroke', stroke }));
+    }
+    input.onkeydown = e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { overlay.style.display = 'none'; input.onblur = null; }
+        e.stopPropagation();  // prevent whiteboard keyboard shortcuts while typing
+    };
+    input.onblur = commit;
 }
 
 function handleWbEvent(msg) {
@@ -1211,5 +1447,8 @@ async function uploadDoc() {
     connectWS();
 })();
 </script>
+<div id="wb-text-overlay">
+    <input id="wb-text-input" type="text" placeholder="Text …" autocomplete="off">
+</div>
 </body>
 </html>
