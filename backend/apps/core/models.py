@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -11,7 +10,7 @@ class UserProfile(models.Model):
     """Extension of Django User model with Premium flag."""
 
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="profile",
         help_text=_("Associated Django user"),
