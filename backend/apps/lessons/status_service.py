@@ -4,6 +4,7 @@ Service for automatically updating session statuses based on date/time.
 
 from datetime import datetime, timedelta
 
+import pytz
 from django.db import transaction
 from django.utils import timezone
 
@@ -37,7 +38,16 @@ class SessionStatusUpdater:
         now = timezone.now()
 
         # Calculate start_datetime and end_datetime
-        start_datetime = timezone.make_aware(datetime.combine(session.date, session.start_time))
+        try:
+            start_datetime = timezone.make_aware(datetime.combine(session.date, session.start_time))
+        except pytz.exceptions.AmbiguousTimeError:
+            start_datetime = timezone.make_aware(
+                datetime.combine(session.date, session.start_time), is_dst=False
+            )
+        except pytz.exceptions.NonExistentTimeError:
+            start_datetime = timezone.make_aware(
+                datetime.combine(session.date, session.start_time), is_dst=None
+            )
         end_datetime = start_datetime + timedelta(minutes=session.duration_minutes)
 
         # Do not overwrite PAID or CANCELLED status
@@ -94,14 +104,24 @@ class SessionStatusUpdater:
 
             for session in sessions:
                 # Calculate end_datetime (only session duration, without travel times)
-                start_datetime = timezone.make_aware(
-                    datetime.combine(session.date, session.start_time)
-                )
+                try:
+                    start_datetime = timezone.make_aware(
+                        datetime.combine(session.date, session.start_time)
+                    )
+                except pytz.exceptions.AmbiguousTimeError:
+                    start_datetime = timezone.make_aware(
+                        datetime.combine(session.date, session.start_time), is_dst=False
+                    )
+                except pytz.exceptions.NonExistentTimeError:
+                    start_datetime = timezone.make_aware(
+                        datetime.combine(session.date, session.start_time), is_dst=None
+                    )
                 end_datetime = start_datetime + timedelta(minutes=session.duration_minutes)
 
-                # If end time is in the past, mark for update
+                # If end_datetime is in the past, mark for update
                 if end_datetime < now:
                     session.status = "taught"
+                    session.updated_at = now
                     updated_sessions.append(session)
 
             # Bulk update for performance
