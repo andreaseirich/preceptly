@@ -358,6 +358,13 @@ def create_student_api(request):
         subjects = data.get("subjects", "").strip()
         tutor_token = data.get("tutor_token")
 
+        # B3: CR/LF-Bereinigung gegen Header-Injection
+        first_name = first_name.replace("\r", "").replace("\n", "")
+        last_name = last_name.replace("\r", "").replace("\n", "")
+        school = school.replace("\r", "").replace("\n", "")
+        grade = grade.replace("\r", "").replace("\n", "")
+        subjects = subjects.replace("\r", "").replace("\n", "")
+
         if is_public_booking_throttled(request, tutor_token):
             return JsonResponse({"success": False, "message": "Too many requests."}, status=429)
 
@@ -401,6 +408,19 @@ def create_student_api(request):
                 },
                 status=400,
             )
+
+        # B3: E-Mail-Validierung
+        if email:
+            from django.core.exceptions import ValidationError
+            from django.core.validators import validate_email
+
+            try:
+                validate_email(email)
+            except ValidationError:
+                return JsonResponse(
+                    {"success": False, "message": _("Invalid email address.")},
+                    status=400,
+                )
 
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:
@@ -462,6 +482,11 @@ def book_lesson_api(request):
             subject = ""
         notes = data.get("notes", "")
         notes = notes.strip() if isinstance(notes, str) else ""
+
+        # B3: CR/LF-Bereinigung gegen Header-Injection
+        subject = subject.replace("\r", "").replace("\n", "")
+        notes = notes.replace("\r", "").replace("\n", "") if notes else notes
+
         tutor_token = data.get("tutor_token")
         if is_public_booking_throttled(request, tutor_token):
             return JsonResponse({"success": False, "message": "Too many requests."}, status=429)
@@ -593,75 +618,80 @@ def book_lesson_api(request):
         if not target_day:
             return JsonResponse({"success": False, "message": _("Date not found.")}, status=400)
 
-        # Check if slot is available
-        occupied_slots = BookingService.get_all_occupied_time_slots(
-            booking_date_obj, booking_date_obj, user=tutor
-        )
-
-        if not BookingService.is_time_slot_available(
-            booking_date_obj, start_time_obj, end_time_obj, occupied_slots
-        ):
-            return JsonResponse(
-                {"success": False, "message": _("Time slot is already booked.")}, status=400
-            )
-
         profile = UserProfile.objects.filter(user=tutor).first()
-        if profile and getattr(profile, "default_booking_location", "online") == "vor_ort":
-            policy = getattr(profile, "travel_policy", None) or {}
-            if policy.get("enabled"):
-                day_working_hours = target_day.get("working_hours") or []
-                if not is_slot_allowed_by_policy(
-                    booking_date_obj,
-                    start_time_obj,
-                    end_time_obj,
-                    policy,
-                    working_hours_for_date=day_working_hours,
-                ):
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _(
-                                "This time is not available due to travel time rules. "
-                                "Please choose another slot."
-                            ),
-                            "alternative_slots": [
-                                [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")]
-                                for s in target_day.get("available_slots", [])
-                            ][:10],
-                        },
-                        status=400,
-                    )
 
-        # Find or create contract for this student (student belongs to tutor)
-        contract = Contract.objects.filter(pk=student.pk, user=tutor, is_active=True).first()
+        # B1: Atomarer Block für Verfügbarkeitsprüfung + Lesson-Erstellung (Race Condition Fix)
+        with transaction.atomic():
+            # Re-check availability inside the transaction with a lock on the student/contract
+            # to prevent concurrent double-bookings for the same tutor slot.
+            Contract.objects.select_for_update().filter(pk=student.pk)
 
-        if not contract:
-            # Create new contract with hourly_rate=0.00 (to be set later by tutor)
-            # student IS the contract (Student model was merged into Contract)
-            contract = student
-
-        if public_booking_limit_reached(tutor):
-            return JsonResponse(
-                {
-                    "success": False,
-                    "message": _(
-                        "Public booking limit reached. Upgrade to Premium for unlimited bookings."
-                    ),
-                },
-                status=403,
+            occupied_slots = BookingService.get_all_occupied_time_slots(
+                booking_date_obj, booking_date_obj, user=tutor
             )
 
-        lesson = Lesson.objects.create(
-            contract=contract,
-            date=booking_date_obj,
-            start_time=start_time_obj,
-            duration_minutes=duration_total,
-            status="planned",
-            travel_time_before_minutes=0,
-            travel_time_after_minutes=0,
-            notes=f"{_('Subject')}: {subject}\n{notes}" if subject or notes else notes,
-            created_via="public_booking",
-        )
+            if not BookingService.is_time_slot_available(
+                booking_date_obj, start_time_obj, end_time_obj, occupied_slots
+            ):
+                return JsonResponse(
+                    {"success": False, "message": _("Time slot is already booked.")}, status=400
+                )
+
+            if profile and getattr(profile, "default_booking_location", "online") == "vor_ort":
+                policy = getattr(profile, "travel_policy", None) or {}
+                if policy.get("enabled"):
+                    day_working_hours = target_day.get("working_hours") or []
+                    if not is_slot_allowed_by_policy(
+                        booking_date_obj,
+                        start_time_obj,
+                        end_time_obj,
+                        policy,
+                        working_hours_for_date=day_working_hours,
+                    ):
+                        return JsonResponse(
+                            {
+                                "success": False,
+                                "message": _(
+                                    "This time is not available due to travel time rules. "
+                                    "Please choose another slot."
+                                ),
+                                "alternative_slots": [
+                                    [s[0].strftime("%H:%M"), s[1].strftime("%H:%M")]
+                                    for s in target_day.get("available_slots", [])
+                                ][:10],
+                            },
+                            status=400,
+                        )
+
+            # Find or create contract for this student (student belongs to tutor)
+            contract = Contract.objects.filter(pk=student.pk, user=tutor, is_active=True).first()
+
+            if not contract:
+                # student IS the contract (Student model was merged into Contract)
+                contract = student
+
+            if public_booking_limit_reached(tutor):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": _(
+                            "Public booking limit reached. Upgrade to Premium for unlimited bookings."
+                        ),
+                    },
+                    status=403,
+                )
+
+            lesson = Lesson.objects.create(
+                contract=contract,
+                date=booking_date_obj,
+                start_time=start_time_obj,
+                duration_minutes=duration_total,
+                status="planned",
+                travel_time_before_minutes=0,
+                travel_time_after_minutes=0,
+                notes=f"{_('Subject')}: {subject}\n{notes}" if subject or notes else notes,
+                created_via="public_booking",
+            )
 
         try:
             from apps.lessons.email_service import send_booking_notification
@@ -717,8 +747,7 @@ _RESCHEDULE_NEUTRAL = _("Reschedule not possible. Please try again.")
 
 @require_http_methods(["POST"])
 def reschedule_lesson_api(request):
-    """
-    Reschedule a planned lesson to a new date/time.
+    """Reschedule a planned lesson to a new date/time.
     Atomic, same validation as booking. Requires session auth + booking_code.
     """
     try:

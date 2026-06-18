@@ -40,9 +40,10 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     """
 
     # Peers pro Raum: group_name -> {peer_id: name}
-    rooms: dict[str, dict[str, str]] = {}
+    _room_locks: dict = {}
+    _rooms_data: dict[str, dict[str, str]] = {}
     # User-Token-Dedup: group_name -> {user_token: channel_name}
-    user_channels: dict[str, dict[str, str]] = {}
+    _user_channels_data: dict[str, dict[str, str]] = {}
 
     @database_sync_to_async
     def _load_room_and_authorize(self, token, user):
@@ -100,15 +101,26 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, code):
-        # Dedup-Eintrag entfernen (nur wenn noch aktuell)
-        if self.group_name in self.user_channels and self.user_token:
-            if self.user_channels[self.group_name].get(self.user_token) == self.channel_name:
-                del self.user_channels[self.group_name][self.user_token]
+        cls = self.__class__
+        lock = await cls._get_room_lock(self.group_name)
+        async with lock:
+            # Dedup-Eintrag entfernen (nur wenn noch aktuell)
+            if self.group_name in cls._user_channels_data and self.user_token:
+                if (
+                    cls._user_channels_data[self.group_name].get(self.user_token)
+                    == self.channel_name
+                ):
+                    del cls._user_channels_data[self.group_name][self.user_token]
+                if not cls._user_channels_data[self.group_name]:
+                    del cls._user_channels_data[self.group_name]
 
-        if self.group_name in self.rooms:
-            self.rooms[self.group_name].pop(self.peer_id, None)
-            if not self.rooms[self.group_name]:
-                del self.rooms[self.group_name]
+            if self.group_name in cls._rooms_data:
+                cls._rooms_data[self.group_name].pop(self.peer_id, None)
+                room_empty = not cls._rooms_data[self.group_name]
+                if room_empty:
+                    del cls._rooms_data[self.group_name]
+            else:
+                room_empty = True
 
         if self._joined:
             await self.channel_layer.group_send(
@@ -121,6 +133,16 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             )
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
+        # Lock aufräumen wenn Raum leer (außerhalb des Locks, aber threadsicher genug)
+        if room_empty and self.group_name in cls._room_locks:
+            # Nur löschen wenn niemand mehr wartet (best effort)
+            try:
+                room_lock = cls._room_locks[self.group_name]
+                if not room_lock.locked():
+                    del cls._room_locks[self.group_name]
+            except KeyError:
+                pass
+
     async def receive(self, text_data):
         if len(text_data) > 65_536:
             await self.close(code=4009)
@@ -131,9 +153,13 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             return
 
         msg_type = data.get("type", "")
+        cls = self.__class__
 
-        if msg_type != "join" and self.peer_id not in self.rooms.get(self.group_name, {}):
-            return
+        if msg_type != "join":
+            lock = await cls._get_room_lock(self.group_name)
+            async with lock:
+                if self.peer_id not in cls._rooms_data.get(self.group_name, {}):
+                    return
 
         if msg_type == "join":
             if self._joined:
@@ -149,25 +175,33 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             else:
                 self.user_token = f"user_{user_pk}"
 
-            if self.user_token:
-                if self.group_name not in self.user_channels:
-                    self.user_channels[self.group_name] = {}
-                old_channel = self.user_channels[self.group_name].get(self.user_token)
-                if old_channel and old_channel != self.channel_name:
-                    try:
-                        await self.channel_layer.send(
-                            old_channel,
-                            {"type": "force_disconnect_event"},
-                        )
-                    except Exception:  # noqa: S110
-                        pass
-                self.user_channels[self.group_name][self.user_token] = self.channel_name
+            old_channel = None
+            existing_peers = {}
 
-            if self.group_name not in self.rooms:
-                self.rooms[self.group_name] = {}
-            existing_peers = dict(self.rooms[self.group_name])
-            self.rooms[self.group_name][self.peer_id] = self.display_name
-            self._joined = True
+            lock = await cls._get_room_lock(self.group_name)
+            async with lock:
+                if self.user_token:
+                    if self.group_name not in cls._user_channels_data:
+                        cls._user_channels_data[self.group_name] = {}
+                    old_channel = cls._user_channels_data[self.group_name].get(self.user_token)
+                    if old_channel == self.channel_name:
+                        old_channel = None
+                    cls._user_channels_data[self.group_name][self.user_token] = self.channel_name
+
+                if self.group_name not in cls._rooms_data:
+                    cls._rooms_data[self.group_name] = {}
+                existing_peers = dict(cls._rooms_data[self.group_name])
+                cls._rooms_data[self.group_name][self.peer_id] = self.display_name
+                self._joined = True
+
+            if old_channel:
+                try:
+                    await self.channel_layer.send(
+                        old_channel,
+                        {"type": "force_disconnect_event"},
+                    )
+                except Exception:  # noqa: S110
+                    pass
 
             await self.send(
                 json.dumps(
@@ -198,6 +232,12 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                     uuid.UUID(str(target))
                 except ValueError:
                     return
+
+                lock = await cls._get_room_lock(self.group_name)
+                async with lock:
+                    if target not in cls._rooms_data.get(self.group_name, {}):
+                        return  # Peer nicht im Raum — still drop
+
                 await self.channel_layer.group_send(
                     self.group_name,
                     {

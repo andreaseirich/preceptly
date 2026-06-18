@@ -5,7 +5,6 @@ Codes are stored hashed; plaintext is only shown at generation/regeneration.
 Uses constant-time comparison to prevent timing attacks.
 """
 
-import hashlib
 import secrets
 
 from apps.contracts.models import Contract
@@ -25,9 +24,11 @@ def generate_booking_code() -> str:
 
 
 def _hash_code(plain_code: str) -> str:
-    """Hash a code for storage. Uses SHA-256."""
+    """Hash a code for storage. Uses Django's password hashing (PBKDF2 with salt)."""
+    from django.contrib.auth.hashers import make_password
+
     normalized = plain_code.strip().upper().replace(" ", "")
-    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    return make_password(normalized)
 
 
 def _constant_time_compare(a: str, b: str) -> bool:
@@ -40,16 +41,24 @@ def _constant_time_compare(a: str, b: str) -> bool:
     return result == 0
 
 
+def _verify_code(plain_code: str, stored_hash: str) -> bool:
+    """Verify a plaintext code against a stored Django password hash. Timing-safe."""
+    from django.contrib.auth.hashers import check_password
+
+    normalized = plain_code.strip().upper().replace(" ", "")
+    return check_password(normalized, stored_hash)
+
+
 def verify_booking_code(student: Contract, plain_code: str) -> bool:
     """
     Verify a booking code against a student's stored hash.
 
-    Returns True only if the code matches. Uses constant-time comparison.
+    Returns True only if the code matches. Uses Django's check_password,
+    which is timing-safe and supports PBKDF2/Argon2/bcrypt.
     """
     if not student.booking_code_hash or not plain_code or not plain_code.strip():
         return False
-    input_hash = _hash_code(plain_code)
-    return _constant_time_compare(student.booking_code_hash, input_hash)
+    return _verify_code(plain_code, student.booking_code_hash)
 
 
 def set_booking_code(student: Contract) -> str:

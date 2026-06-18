@@ -22,6 +22,8 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
     Returns:
         PDF file bytes
     """
+    import html
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -39,7 +41,7 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
     elements.append(Paragraph("Invoice", styles["Title"]))
     elements.append(Spacer(1, 0.5 * cm))
 
-    # Issuer / business details
+    # Issuer / business details (static, safe)
     elements.append(Paragraph("<b>Issuer:</b> andicode, Inhaber Andreas Eirich", styles["Normal"]))
     elements.append(Paragraph("<b>Address:</b> Birkenweg 7, 49577 Ankum", styles["Normal"]))
     elements.append(Paragraph("<b>Tax number:</b> 367/111/08187", styles["Normal"]))
@@ -53,7 +55,9 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
 
     # Invoice number
     inv_num = invoice.invoice_number or str(invoice.id)
-    elements.append(Paragraph(f"<b>Invoice Number:</b> {inv_num}", styles["Normal"]))
+    elements.append(
+        Paragraph(f"<b>Invoice Number:</b> {html.escape(str(inv_num))}", styles["Normal"])
+    )
     elements.append(
         Paragraph(
             f"<b>Invoice Date:</b> {invoice.created_at.strftime('%d.%m.%Y')}",
@@ -70,9 +74,11 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
 
     # Payer
     elements.append(Paragraph("<b>Payer</b>", styles["Heading2"]))
-    elements.append(Paragraph(invoice.payer_name, styles["Normal"]))
+    elements.append(Paragraph(html.escape(invoice.payer_name), styles["Normal"]))
     if invoice.payer_address:
-        elements.append(Paragraph(invoice.payer_address.replace("\n", "<br/>"), styles["Normal"]))
+        elements.append(
+            Paragraph(html.escape(invoice.payer_address).replace("\n", "<br/>"), styles["Normal"])
+        )
     elements.append(Spacer(1, 0.5 * cm))
 
     # Items table
@@ -84,7 +90,7 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
         data.append(
             [
                 item.date.strftime("%d.%m.%Y"),
-                item.description,
+                html.escape(str(item.description)),
                 f"{item.duration_minutes} Min.",
                 f"{item.amount:.2f} €",
             ]
