@@ -13,9 +13,9 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
-from apps.lesson_plans.models import LessonPlan
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.core.feature_flags import Feature, user_has_feature
+from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Session
 
 logger = logging.getLogger(__name__)
