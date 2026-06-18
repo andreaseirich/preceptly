@@ -116,35 +116,38 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
         return Contract.objects.filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
+        from django.db import transaction
+
         from apps.portal.models import StudentPortalLink
 
         contract = self.get_object()
 
-        # Student portal account
-        spl = StudentPortalLink.objects.filter(contract=contract).first()
-        if spl:
-            portal_user = spl.portal_user
-            if portal_user.tutor != request.user:
-                raise PermissionDenied
-            django_user = portal_user.user
-            portal_user.delete()
-            django_user.delete()
-
-        # Parent portal accounts (only if no other children)
-        for plink in ParentStudentLink.objects.filter(contract=contract).select_related(
-            "parent__user"
-        ):
-            parent_portal = plink.parent
-            if (
-                not ParentStudentLink.objects.filter(parent=parent_portal)
-                .exclude(contract=contract)
-                .exists()
-            ):
-                if parent_portal.tutor != request.user:
+        with transaction.atomic():
+            # Student portal account
+            spl = StudentPortalLink.objects.filter(contract=contract).first()
+            if spl:
+                portal_user = spl.portal_user
+                if portal_user.tutor != request.user:
                     raise PermissionDenied
-                django_user = parent_portal.user
-                parent_portal.delete()
+                django_user = portal_user.user
+                portal_user.delete()
                 django_user.delete()
+
+            # Parent portal accounts (only if no other children)
+            for plink in ParentStudentLink.objects.filter(contract=contract).select_related(
+                "parent__user"
+            ):
+                parent_portal = plink.parent
+                if (
+                    not ParentStudentLink.objects.filter(parent=parent_portal)
+                    .exclude(contract=contract)
+                    .exists()
+                ):
+                    if parent_portal.tutor != request.user:
+                        raise PermissionDenied
+                    django_user = parent_portal.user
+                    parent_portal.delete()
+                    django_user.delete()
 
         messages.success(request, "Schüler erfolgreich gelöscht.")
         return super().delete(request, *args, **kwargs)
@@ -208,6 +211,15 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         existing_user = User.objects.filter(email__iexact=parent_email).first()
         if existing_user and hasattr(existing_user, "portal_profile"):
             existing_portal = existing_user.portal_profile
+
+            # H6 - Ownership-Check: Portal-Account muss diesem Tutor gehören
+            if existing_portal.tutor != request.user:
+                messages.error(
+                    request,
+                    f"Dieses E-Mail-Konto ({parent_email}) ist bereits bei einem anderen Tutor registriert.",
+                )
+                return redirect("students:detail", pk=pk)
+
             existing_link = ParentStudentLink.objects.filter(
                 parent=existing_portal, contract=contract
             ).first()
@@ -255,6 +267,11 @@ class PortalInviteResendView(LoginRequiredMixin, View):
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         spl = get_object_or_404(StudentPortalLink, contract=contract)
+
+        # H7 - Invite-Token nach erneutem Senden invalidieren und neu generieren
+        spl.invite_token = secrets.token_urlsafe(32)
+        spl.save(update_fields=["invite_token"])
+
         if contract.email:
             try:
                 send_portal_invite(contract, spl, contract.email, role="student")

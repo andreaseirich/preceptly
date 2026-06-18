@@ -126,6 +126,8 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         """Pre-fill form with date/time from request parameters."""
         initial = super().get_initial()
 
+        MAX_LESSON_MINUTES = 480
+
         # Support for start/end parameters from week view (ISO datetime format: YYYY-MM-DDTHH:MM)
         start_str = self.request.GET.get("start")
         end_str = self.request.GET.get("end")
@@ -157,7 +159,7 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                             # Calculate duration in minutes
                             duration = end_dt - start_dt
                             duration_minutes = int(duration.total_seconds() / 60)
-                            if duration_minutes > 0:
+                            if 0 < duration_minutes <= MAX_LESSON_MINUTES:
                                 initial["duration_minutes"] = duration_minutes
                         except (ValueError, TypeError) as exc:
                             logger.debug("Invalid end datetime format ignored: %s", exc)
@@ -322,6 +324,8 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
+        from django.core.exceptions import PermissionDenied
+
         # IMPORTANT: Get the original lesson instance from the database,
         # before we search for RecurringLesson (self.object already has the changed values)
         original_lesson = Lesson.objects.get(pk=self.object.pk)
@@ -329,6 +333,10 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         edit_scope = form.cleaned_data.get("edit_scope", "single")
         # IMPORTANT: Use original_lesson instead of self.object to find RecurringLesson
         matching_recurring = find_matching_recurring_lesson(original_lesson)
+
+        # H8: Ownership check for recurring lesson series
+        if matching_recurring and matching_recurring.contract.user != self.request.user:
+            raise PermissionDenied("Not your recurring lesson series.")
 
         if edit_scope == "series" and matching_recurring:
             try:
@@ -516,9 +524,16 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
+        from django.core.exceptions import PermissionDenied
+
         lesson = self.object
 
         matching_recurring = find_matching_recurring_lesson(lesson)
+
+        # H8: Ownership check for recurring lesson series
+        if matching_recurring and matching_recurring.contract.user != self.request.user:
+            raise PermissionDenied("Not your recurring lesson series.")
+
         delete_series = self.request.POST.get("delete_series", "false") == "true"
 
         if delete_series and matching_recurring:
@@ -527,7 +542,8 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
             pattern_ids = {s.id for s in get_all_lessons_for_recurring(matching_recurring)}
             all_ids = fk_ids | pattern_ids
             if all_ids:
-                Lesson.objects.filter(id__in=all_ids).delete()
+                # H9: Restrict bulk-delete to lessons owned by the current user
+                Lesson.objects.filter(id__in=all_ids, contract__user=self.request.user).delete()
             deleted_count = len(all_ids)
             matching_recurring.delete()
             messages.success(
