@@ -8,6 +8,8 @@ from typing import Any, Dict
 
 PII_KEYS = {"full_name", "address", "email", "phone", "tax_id", "dob", "medical_info"}
 REDACTED = "[REDACTED]"
+FILTERED = "[FILTERED]"
+MAX_CONTEXT_STRING_LEN = 2000
 
 # Regex patterns to catch obvious emails/phone numbers in uncontrolled strings.
 # Rules to stay non-polynomial (CodeQL py/polynomial-redos):
@@ -24,6 +26,30 @@ EMAIL_PATTERN = re.compile(
 )
 PHONE_PATTERN = re.compile(r"\+?[0-9]{1,4}(?:[\s.\-][0-9]{1,4}){2,14}")
 
+_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+_INJECTION_PATTERNS = re.compile(
+    r"ignore\s+(?:(?:all|previous|prior|above)\s+)?instructions"
+    r"|override\s+(?:(?:all|previous|prior)\s+)?instructions"
+    r"|^system\s*:"
+    r"|<system>"
+    r"|\[INST\]"
+    r"|\[/INST\]"
+    r"|###"
+    r"|you\s+are\s+now"
+    r"|act\s+as"
+    r"|pretend\s+(?:you\s+are|to\s+be)"
+    r"|roleplay\s+as",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def strip_injection_patterns(text: str) -> str:
+    text = text[:MAX_CONTEXT_STRING_LEN]
+    text = _CONTROL_CHARS.sub("", text)
+    text = _INJECTION_PATTERNS.sub(FILTERED, text)
+    return text
+
 
 def _sanitize_value(value: Any) -> Any:
     if isinstance(value, dict):
@@ -34,8 +60,9 @@ def _sanitize_value(value: Any) -> Any:
     if isinstance(value, list):
         return [_sanitize_value(item) for item in value]
     if isinstance(value, str):
+        masked = strip_injection_patterns(value)
         # Mask obvious email/phone occurrences inline.
-        masked = EMAIL_PATTERN.sub(REDACTED, value)
+        masked = EMAIL_PATTERN.sub(REDACTED, masked)
         masked = PHONE_PATTERN.sub(REDACTED, masked)
         return masked
     return value
