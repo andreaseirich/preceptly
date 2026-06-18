@@ -123,10 +123,12 @@ class InvoiceService:
                 profile, _created = UserProfile.objects.get_or_create(
                     user=user, defaults={"next_invoice_number": 1}
                 )
-                num = profile.next_invoice_number
-                invoice_kwargs["invoice_number"] = f"INV-{num:04d}"
-                profile.next_invoice_number = num + 1
-                profile.save(update_fields=["next_invoice_number"])
+                with transaction.atomic():
+                    profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
+                    num = profile.next_invoice_number
+                    invoice_kwargs["invoice_number"] = f"INV-{num:04d}"
+                    profile.next_invoice_number = num + 1
+                    profile.save(update_fields=["next_invoice_number"])
             else:
                 invoice_kwargs["invoice_number"] = None
 
@@ -134,18 +136,20 @@ class InvoiceService:
 
             total_amount = Decimal("0.00")
             for lesson in lessons:
-                contract = lesson.contract
+                lesson_contract = lesson.contract
 
-                if is_tutorspace_institute(getattr(contract, "institute", None)):
+                if is_tutorspace_institute(getattr(lesson_contract, "institute", None)):
                     amount = calculate_tutorspace_amount_for_session(lesson, tutor=owner)
                 else:
-                    unit_duration = Decimal(str(contract.unit_duration_minutes))
+                    unit_duration = Decimal(str(lesson_contract.unit_duration_minutes))
+                    if unit_duration == 0:
+                        raise ValueError("unit_duration_minutes darf nicht 0 sein")
                     lesson_duration = Decimal(str(lesson.duration_minutes))
                     units = lesson_duration / unit_duration
-                    rate_per_unit = contract.hourly_rate
+                    rate_per_unit = lesson_contract.hourly_rate
                     amount = units * rate_per_unit
                     if getattr(lesson, "tutor_no_show", False) and is_abacus_institute(
-                        getattr(contract, "institute", None)
+                        getattr(lesson_contract, "institute", None)
                     ):
                         amount = Decimal("0.00")
 
@@ -155,9 +159,9 @@ class InvoiceService:
                     student=lesson.contract.full_name,
                 )
                 if getattr(lesson, "tutor_no_show", False):
-                    if is_tutorspace_institute(getattr(contract, "institute", None)):
+                    if is_tutorspace_institute(getattr(lesson_contract, "institute", None)):
                         desc = f"{desc} ({_('tutor no-show / deduction')})"
-                    elif is_abacus_institute(getattr(contract, "institute", None)):
+                    elif is_abacus_institute(getattr(lesson_contract, "institute", None)):
                         desc = f"{desc} ({_('not billed — tutor no-show')})"
 
                 InvoiceItem.objects.create(
@@ -210,25 +214,27 @@ class InvoiceService:
     def mark_invoice_as_paid(invoice: Invoice, paid_at=None) -> None:
         """Mark invoice as paid. Sets status=paid, paid_at. Updates lessons: a lesson is
         paid only if ALL invoices containing it have status=paid."""
-        from datetime import datetime
-        from datetime import time as dt_time
+        with transaction.atomic():
+            from datetime import datetime
+            from datetime import time as dt_time
 
-        invoice.status = "paid"
-        if paid_at is not None:
-            invoice.paid_at = timezone.make_aware(datetime.combine(paid_at, dt_time.min))
-        else:
-            invoice.paid_at = timezone.now()
-        invoice.save(update_fields=["status", "paid_at", "updated_at"])
-        PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
+            invoice.status = "paid"
+            if paid_at is not None:
+                invoice.paid_at = timezone.make_aware(datetime.combine(paid_at, dt_time.min))
+            else:
+                invoice.paid_at = timezone.now()
+            invoice.save(update_fields=["status", "paid_at", "updated_at"])
+            PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
 
     @staticmethod
     def undo_invoice_paid(invoice: Invoice) -> None:
         """Undo paid: set status to sent (or draft if never sent), clear paid_at.
         Recomputes lesson paid flags for affected lessons."""
-        invoice.status = "sent" if invoice.sent_at else "draft"
-        invoice.paid_at = None
-        invoice.save(update_fields=["status", "paid_at", "updated_at"])
-        PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
+        with transaction.atomic():
+            invoice.status = "sent" if invoice.sent_at else "draft"
+            invoice.paid_at = None
+            invoice.save(update_fields=["status", "paid_at", "updated_at"])
+            PaymentService.recompute_lesson_paid_for_invoice_items(invoice)
 
 
 class PaymentService:

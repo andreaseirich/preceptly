@@ -5,7 +5,7 @@ Models for billing and invoices.
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -116,47 +116,46 @@ class Invoice(models.Model):
         A lesson is only reset if it is not in other invoices.
         Also deletes the invoice_pdf file from storage if present.
         """
-        # Delete PDF file before DB delete so we have the field value
-        if self.invoice_pdf:
-            try:
-                self.invoice_pdf.delete(save=False)
-            except Exception:  # noqa: S110 - intentional: do not block invoice deletion on file/storage errors
-                pass
+        with transaction.atomic():
+            # Delete PDF file before DB delete so we have the field value
+            if self.invoice_pdf:
+                try:
+                    self.invoice_pdf.delete(save=False)
+                except Exception:  # noqa: S110 - intentional: do not block invoice deletion on file/storage errors
+                    pass
 
-        # Sammle alle Lessons dieser Rechnung (vor dem Löschen!)
-        invoice_items = list(self.items.all())
-        lesson_ids = [item.lesson_id for item in invoice_items if item.lesson_id]
+            # Sammle alle Lessons dieser Rechnung (vor dem Löschen!)
+            invoice_items = list(self.items.all())
+            lesson_ids = [item.lesson_id for item in invoice_items if item.lesson_id]
 
-        # Prüfe für jede Lesson, ob sie in anderen Rechnungen ist (vor dem Löschen!)
-        lessons_to_reset = []
-        for lesson_id in lesson_ids:
-            if not lesson_id:
-                continue
+            # Prüfe für jede Lesson, ob sie in anderen Rechnungen ist (vor dem Löschen!)
+            lessons_to_reset = []
+            for lesson_id in lesson_ids:
+                if not lesson_id:
+                    continue
 
-            # Prüfe, ob Lesson in anderen Rechnungen ist
-            other_invoice_items = InvoiceItem.objects.filter(lesson_id=lesson_id).exclude(
-                invoice=self
-            )
+                # Prüfe, ob Lesson in anderen Rechnungen ist
+                other_invoice_items = InvoiceItem.objects.filter(lesson_id=lesson_id).exclude(
+                    invoice=self
+                )
 
-            # Nur zurücksetzen, wenn Lesson nicht in anderen Rechnungen ist
-            if not other_invoice_items.exists():
-                lessons_to_reset.append(lesson_id)
+                # Nur zurücksetzen, wenn Lesson nicht in anderen Rechnungen ist
+                if not other_invoice_items.exists():
+                    lessons_to_reset.append(lesson_id)
 
-        # Lösche die Invoice (CASCADE löscht automatisch alle InvoiceItems)
-        super().delete(*args, **kwargs)
+            # Lösche die Invoice (CASCADE löscht automatisch alle InvoiceItems)
+            super().delete(*args, **kwargs)
 
-        # Setze Lessons zurück auf TAUGHT
-        from apps.lessons.models import Lesson
+            # Setze Lessons zurück auf TAUGHT
+            reset_count = 0
+            for lesson_id in lessons_to_reset:
+                lesson = Lesson.objects.filter(pk=lesson_id).first()
+                if lesson and lesson.status == "paid":
+                    lesson.status = "taught"
+                    lesson.save(update_fields=["status", "updated_at"])
+                    reset_count += 1
 
-        reset_count = 0
-        for lesson_id in lessons_to_reset:
-            lesson = Lesson.objects.filter(pk=lesson_id).first()
-            if lesson and lesson.status == "paid":
-                lesson.status = "taught"
-                lesson.save(update_fields=["status", "updated_at"])
-                reset_count += 1
-
-        return reset_count
+            return reset_count
 
 
 class InvoiceItem(models.Model):
