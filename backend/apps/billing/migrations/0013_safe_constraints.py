@@ -45,6 +45,8 @@ def drop_invoiceitem_unique_constraint(apps, schema_editor):
     if schema_editor.connection.vendor != "postgresql":
         return
     with schema_editor.connection.cursor() as cursor:
+        # UniqueConstraint with condition is created as an INDEX in PostgreSQL, not a table constraint
+        cursor.execute("DROP INDEX IF EXISTS uniq_invoiceitem_invoice_lesson")
         cursor.execute(
             "ALTER TABLE billing_invoiceitem DROP CONSTRAINT IF EXISTS uniq_invoiceitem_invoice_lesson"
         )
