@@ -3,6 +3,7 @@ Views für Meeting-Räume (Tutor + Portal-Nutzer).
 """
 
 import logging
+import os
 import uuid
 from urllib.parse import urlencode
 
@@ -68,6 +69,28 @@ class MeetingDocumentUploadView(View):
         if not file:
             return JsonResponse({"error": "Keine Datei"}, status=400)
 
+        _ALLOWED_MEETING_EXTENSIONS = {
+            ".pdf",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".webp",
+            ".txt",
+            ".docx",
+            ".xlsx",
+            ".pptx",
+            ".mp3",
+            ".mp4",
+        }
+        _MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+
+        ext = os.path.splitext(file.name)[1].lower()
+        if ext not in _ALLOWED_MEETING_EXTENSIONS:
+            return JsonResponse({"error": "File type not allowed."}, status=400)
+        if file.size > _MAX_UPLOAD_SIZE:
+            return JsonResponse({"error": "File too large (max 50 MB)."}, status=400)
+
         name = request.POST.get("name", "").strip() or file.name
         doc = SessionDocument.objects.create(session=lesson, file=file, name=name)
         safe_name = name.replace("\n", " ").replace("\r", " ")
@@ -120,12 +143,17 @@ class MeetingDocumentServeView(View):
 
         doc = get_object_or_404(SessionDocument, pk=doc_pk, session=lesson)
         content_type, _ = mimetypes.guess_type(doc.file.name)
-        response = FileResponse(
-            doc.file.open("rb"),
-            content_type=content_type or "application/octet-stream",
-        )
-        safe_name = (doc.name or doc.file.name).replace('"', "")
-        response["Content-Disposition"] = f'inline; filename="{safe_name}"'
+        effective_ct = content_type or "application/octet-stream"
+        safe_name = (doc.name or doc.file.name).replace('"', "").replace("\r", "").replace("\n", "")
+        is_inline = effective_ct.startswith("image/") or effective_ct == "application/pdf"
+        if is_inline:
+            disposition = f'inline; filename="{safe_name}"'
+            serve_ct = effective_ct
+        else:
+            disposition = f'attachment; filename="{safe_name}"'
+            serve_ct = "application/octet-stream"
+        response = FileResponse(doc.file.open("rb"), content_type=serve_ct)
+        response["Content-Disposition"] = disposition
         return response
 
 
