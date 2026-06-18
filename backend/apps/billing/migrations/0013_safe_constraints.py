@@ -27,7 +27,6 @@ def fix_duplicate_invoice_items(apps, schema_editor):
         items = InvoiceItem.objects.filter(invoice_id=d["invoice"], lesson_id=d["lesson"]).order_by(
             "id"
         )
-        # Behalte den ersten, lösche den Rest
         keep = items.first()
         items.exclude(pk=keep.pk).delete()
         print(f"  Removed duplicate InvoiceItems for invoice={d['invoice']}, lesson={d['lesson']}")
@@ -45,12 +44,20 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(fix_invoice_periods, noop),
         migrations.RunPython(fix_duplicate_invoice_items, noop),
+        migrations.RunSQL(
+            "ALTER TABLE billing_invoice DROP CONSTRAINT IF EXISTS invoice_period_end_gte_start",
+            reverse_sql=migrations.RunSQL.noop,
+        ),
         migrations.AddConstraint(
             model_name="invoice",
             constraint=models.CheckConstraint(
                 condition=Q(period_end__gte=models.F("period_start")),
                 name="invoice_period_end_gte_start",
             ),
+        ),
+        migrations.RunSQL(
+            "ALTER TABLE billing_invoiceitem DROP CONSTRAINT IF EXISTS uniq_invoiceitem_invoice_lesson",
+            reverse_sql=migrations.RunSQL.noop,
         ),
         migrations.AddConstraint(
             model_name="invoiceitem",
