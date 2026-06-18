@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -364,7 +364,7 @@ class ContractToggleActiveView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, pk):
-        from django.utils import timezone
+        pass
 
 
 def _validate_tiers(tiers):

@@ -12,7 +12,6 @@ from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 
 from apps.core.auth_throttle import throttle_login, throttle_register

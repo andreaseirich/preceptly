@@ -16,7 +16,6 @@ from apps.lessons.conflict_service import LessonConflictService
 from apps.lessons.models import Lesson
 from apps.lessons.travel_policy import get_synthetic_occupied_for_date
 
-
 _BOOKING_MIN_YEAR = 2020
 _BOOKING_MAX_YEAR = 2031
 

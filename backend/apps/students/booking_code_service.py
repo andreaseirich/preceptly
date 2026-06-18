@@ -8,8 +8,9 @@ Uses constant-time comparison to prevent timing attacks.
 import hmac
 import secrets
 
-from apps.contracts.models import Contract
 from django.db import transaction
+
+from apps.contracts.models import Contract
 
 # Alphabet without easily confused chars: no 0,O,1,l,I,2,Z,5,S,8,B
 _BOOKING_CODE_ALPHABET = "ACDEFGHJKMNPQRTVWXY34679"
