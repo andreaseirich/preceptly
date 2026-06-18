@@ -63,7 +63,7 @@ class UserProfile(models.Model):
         help_text=_("Stripe Customer ID"),
     )
     stripe_subscription_id = models.CharField(
-        max_length=255, blank=True, null=True, help_text=_("Stripe Subscription ID")
+        max_length=255, blank=True, null=True, unique=True, help_text=_("Stripe Subscription ID")
     )
     stripe_price_id = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Stripe Price ID for current plan")
