@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views import View
+from django_ratelimit.decorators import ratelimit
 
 from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
@@ -57,6 +58,7 @@ class PortalLoginView(View):
             return redirect("portal:home")
         return render(request, self.template_name, {"next": request.GET.get("next", "")})
 
+    @ratelimit(key="ip", rate="10/m", method="POST", block=True)
     def post(self, request):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
@@ -388,6 +390,7 @@ class PortalPasswordResetRequestView(View):
     def get(self, request):
         return render(request, self.template_name)
 
+    @ratelimit(key="ip", rate="5/m", method="POST", block=True)
     def post(self, request):
         username = request.POST.get("username", "").strip()
         try:

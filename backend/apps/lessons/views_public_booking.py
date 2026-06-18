@@ -339,6 +339,9 @@ def create_student_api(request):
         subjects = data.get("subjects", "").strip()
         tutor_token = data.get("tutor_token")
 
+        if is_public_booking_throttled(request, tutor_token):
+            return JsonResponse({"success": False, "message": "Too many requests."}, status=429)
+
         if not first_name or not last_name:
             return JsonResponse(
                 {"success": False, "message": _("First name and last name are required.")},
@@ -407,6 +410,8 @@ def book_lesson_api(request):
         notes = data.get("notes", "")
         notes = notes.strip() if isinstance(notes, str) else ""
         tutor_token = data.get("tutor_token")
+        if is_public_booking_throttled(request, tutor_token):
+            return JsonResponse({"success": False, "message": "Too many requests."}, status=429)
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:
             return JsonResponse(
