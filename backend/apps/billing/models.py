@@ -156,7 +156,7 @@ class Invoice(models.Model):
                     lesson.save(update_fields=["status", "updated_at"])
                     reset_count += 1
 
-            return (reset_count, {"billing.Invoice": 1})
+            return reset_count
 
 
 class InvoiceItem(models.Model):
