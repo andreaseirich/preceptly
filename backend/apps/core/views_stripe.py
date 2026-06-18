@@ -103,7 +103,7 @@ class SubscriptionCheckoutView(View):
                 profile.stripe_customer_id = customer_id
                 profile.save(update_fields=["stripe_customer_id"])
             except stripe.error.StripeError as e:
-                logger.warning("Stripe Customer.create failed: %s", str(e)[:200])
+                logger.warning("Stripe Customer.create failed: %s", e.http_status)
                 return _stripe_checkout_error_response(request)
 
         try:
@@ -122,7 +122,7 @@ class SubscriptionCheckoutView(View):
                 subscription_data={"metadata": {"user_id": str(user.id)}},
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe checkout create failed: %s", str(e)[:200])
+            logger.warning("Stripe checkout create failed: %s", e.http_status)
             return _stripe_checkout_error_response(request)
 
         return redirect(session.url, status=303)
@@ -156,7 +156,7 @@ class SubscriptionPortalView(View):
                 return_url=return_url,
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe portal create failed: %s", str(e)[:200])
+            logger.warning("Stripe portal create failed: %s", e.http_status)
             msg = _("Could not open billing portal. Please try again.")
             if _wants_json(request):
                 return JsonResponse({"error": str(msg)}, status=502)
@@ -243,7 +243,7 @@ class StripeCheckoutView(View):
                     profile.stripe_customer_id = customer_id
                     profile.save(update_fields=["stripe_customer_id"])
                 except stripe.error.StripeError as e:
-                    logger.warning("Stripe Customer.create failed: %s", str(e)[:200])
+                    logger.warning("Stripe Customer.create failed: %s", e.http_status)
                     return _stripe_checkout_error_response(request)
             else:
                 _maybe_update_stripe_customer_email(profile, user)
@@ -259,7 +259,7 @@ class StripeCheckoutView(View):
                 subscription_data={"metadata": {"user_id": str(user.id)}},
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe checkout create failed: %s", str(e)[:200])
+            logger.warning("Stripe checkout create failed: %s", e.http_status)
             return _stripe_checkout_error_response(request)
 
         return redirect(session.url, status=303)
@@ -300,7 +300,7 @@ class StripePortalView(View):
                 return_url=return_url,
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe portal create failed: %s", str(e)[:200])
+            logger.warning("Stripe portal create failed: %s", e.http_status)
             msg = _("Could not open billing portal. Please try again.")
             return JsonResponse({"error": str(msg)}, status=502)
 
@@ -350,7 +350,12 @@ def stripe_webhook_view(request):
     try:
         _handle_stripe_event(event)
     except Exception as e:
-        logger.exception("Webhook handling failed for %s: %s", event_type, e)
+        logger.error(
+            "Webhook handling failed type=%s event_id=%s err=%s",
+            event_type,
+            event_id,
+            type(e).__name__,
+        )
         return HttpResponse(status=200)  # 200 to avoid Stripe retries for logic errors
 
     return HttpResponse(status=200)
@@ -395,11 +400,14 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
     if not profile:
         return
 
-    profile.stripe_customer_id = session.get("customer") or profile.stripe_customer_id
     sub_id = session.get("subscription")
-    if sub_id:
-        profile.stripe_subscription_id = sub_id
-    profile.save(update_fields=["stripe_customer_id", "stripe_subscription_id"])
+
+    with transaction.atomic():
+        profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
+        profile.stripe_customer_id = session.get("customer") or profile.stripe_customer_id
+        if sub_id:
+            profile.stripe_subscription_id = sub_id
+        profile.save(update_fields=["stripe_customer_id", "stripe_subscription_id"])
 
     if sub_id:
         try:
@@ -407,7 +415,7 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
             status = sub.get("status", "")
             _set_premium(profile, is_premium_subscription_status(status))
         except stripe.error.StripeError as e:
-            logger.warning("Stripe Subscription.retrieve failed for %s: %s", sub_id, str(e)[:100])
+            logger.warning("Stripe Subscription.retrieve failed for %s: %s", sub_id, e.http_status)
 
 
 def _handle_subscription_created_or_updated(subscription: dict) -> None:
@@ -419,7 +427,6 @@ def _handle_subscription_created_or_updated(subscription: dict) -> None:
     status = subscription.get("status", "")
     is_premium = is_premium_subscription_status(status)
 
-    # Build synthetic event for resolve_user_from_stripe_event
     synthetic_event = {"data": {"object": subscription}}
     profile = resolve_user_from_stripe_event(synthetic_event)
 
@@ -430,24 +437,29 @@ def _handle_subscription_created_or_updated(subscription: dict) -> None:
     if not profile:
         return
 
-    profile.stripe_subscription_id = sub_id
-    profile.stripe_customer_id = customer_id or profile.stripe_customer_id
+    with transaction.atomic():
+        profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
 
-    price_id = None
-    items_data = subscription.get("items") or {}
-    items_list = items_data.get("data", []) if isinstance(items_data, dict) else []
-    if items_list:
-        first_item = items_list[0]
-        price_obj = first_item.get("price")
-        if isinstance(price_obj, dict):
-            price_id = price_obj.get("id")
-        elif isinstance(price_obj, str):
-            price_id = price_obj
-    if price_id:
-        profile.stripe_price_id = price_id
+        profile.stripe_subscription_id = sub_id
+        profile.stripe_customer_id = customer_id or profile.stripe_customer_id
 
-    profile.save(update_fields=["stripe_subscription_id", "stripe_customer_id", "stripe_price_id"])
-    _set_premium(profile, is_premium)
+        price_id = None
+        items_data = subscription.get("items") or {}
+        items_list = items_data.get("data", []) if isinstance(items_data, dict) else []
+        if items_list:
+            first_item = items_list[0]
+            price_obj = first_item.get("price")
+            if isinstance(price_obj, dict):
+                price_id = price_obj.get("id")
+            elif isinstance(price_obj, str):
+                price_id = price_obj
+        if price_id:
+            profile.stripe_price_id = price_id
+
+        profile.save(
+            update_fields=["stripe_subscription_id", "stripe_customer_id", "stripe_price_id"]
+        )
+        _set_premium(profile, is_premium)
 
 
 def _handle_subscription_deleted(subscription: dict) -> None:
@@ -455,10 +467,12 @@ def _handle_subscription_deleted(subscription: dict) -> None:
     sub_id = subscription.get("id")
     profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
     if profile:
-        profile.stripe_subscription_id = None
-        profile.stripe_price_id = None
-        profile.save(update_fields=["stripe_subscription_id", "stripe_price_id"])
-        _set_premium(profile, False)
+        with transaction.atomic():
+            profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
+            profile.stripe_subscription_id = None
+            profile.stripe_price_id = None
+            profile.save(update_fields=["stripe_subscription_id", "stripe_price_id"])
+            _set_premium(profile, False)
 
 
 def _handle_invoice_payment_failed(invoice: dict) -> None:
@@ -475,7 +489,7 @@ def _handle_invoice_payment_failed(invoice: dict) -> None:
         if not is_premium_subscription_status(status):
             _set_premium(profile, False)
     except stripe.error.StripeError as e:
-        logger.warning("Stripe Subscription.retrieve failed for invoice: %s", str(e)[:100])
+        logger.warning("Stripe Subscription.retrieve failed for invoice: %s", e.http_status)
 
 
 def _handle_invoice_paid(invoice: dict) -> None:
