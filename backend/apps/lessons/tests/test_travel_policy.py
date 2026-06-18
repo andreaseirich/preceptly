@@ -235,7 +235,7 @@ class TravelPolicyBookLessonAPITest(TestCase):
         self.client = Client(enforce_csrf_checks=True)
         self.tutor = User.objects.create_user(username="tutor_tp", password="test")
         self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
-        self.profile.public_booking_token = "tok-tp"
+        self.profile.public_booking_token = "tok-tpxxxxxxxxxxxxxxxxxxxxxxxxxx"
         self.profile.default_booking_location = "vor_ort"
         self.profile.default_working_hours = {
             "monday": [{"start": "08:00", "end": "18:00"}],
@@ -273,7 +273,7 @@ class TravelPolicyBookLessonAPITest(TestCase):
                 {
                     "student_id": self.student.pk,
                     "booking_code": self.booking_code,
-                    "tutor_token": "tok-tp",
+                    "tutor_token": "tok-tpxxxxxxxxxxxxxxxxxxxxxxxxxx",
                     "date": monday.isoformat(),
                     "start_time": "14:30",
                     "end_time": "15:30",

@@ -2,6 +2,8 @@
 Helper to resolve Invoice owner from contract/items. Used by migrations and tests.
 """
 
+from django.core.exceptions import ObjectDoesNotExist
+
 
 def resolve_invoice_owner(invoice):
     """
@@ -18,7 +20,10 @@ def resolve_invoice_owner(invoice):
         ValueError: If invoice has no contract and no items with determinable owner.
     """
     if invoice.contract_id:
-        return invoice.contract.user
+        try:
+            return invoice.contract.user
+        except ObjectDoesNotExist:
+            return None
 
     first_item = (
         invoice.items.select_related("lesson__contract__user")
@@ -27,6 +32,9 @@ def resolve_invoice_owner(invoice):
         .first()
     )
     if first_item and first_item.lesson_id and first_item.lesson.contract_id:
-        return first_item.lesson.contract.user
+        try:
+            return first_item.lesson.contract.user
+        except ObjectDoesNotExist:
+            return None
 
     return None

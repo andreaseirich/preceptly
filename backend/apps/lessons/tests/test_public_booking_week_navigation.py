@@ -19,7 +19,7 @@ class PublicBookingWeekNavigationTest(TestCase):
     def setUp(self):
         self.tutor = User.objects.create_user(username="tutor", password="test")
         self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
-        self.profile.public_booking_token = "tok-nav"
+        self.profile.public_booking_token = "tok-navxxxxxxxxxxxxxxxxxxxxxxxxx"
         self.profile.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
         self.profile.save()
         self.student = Contract.objects.create(
@@ -31,7 +31,7 @@ class PublicBookingWeekNavigationTest(TestCase):
             start_date=date(2025, 1, 1),
         )
         self.client = Client()
-        self.week_url = "/lessons/public-booking/tok-nav/week/"
+        self.week_url = "/lessons/public-booking/tok-navxxxxxxxxxxxxxxxxxxxxxxxxx/week/"
 
     def _get_week_via_param(self, week_iso, param="week_start"):
         return self.client.get(self.week_url, {param: week_iso})
@@ -87,7 +87,7 @@ class PublicBookingWeekNavigationTest(TestCase):
     def test_public_booking_page_accepts_week_start_param(self):
         """Public booking page with ?week_start= renders and includes initial week in HTML."""
         resp = self.client.get(
-            "/lessons/public-booking/tok-nav/",
+            "/lessons/public-booking/tok-navxxxxxxxxxxxxxxxxxxxxxxxxx/",
             {"week_start": "2025-01-13"},
         )
         self.assertEqual(resp.status_code, 200)
@@ -129,7 +129,7 @@ class PublicBookingWeekNavigationTest(TestCase):
     def test_public_booking_page_invalid_date_does_not_500(self):
         """Page with invalid date params must not 500 (uses fallback to today)."""
         resp = self.client.get(
-            "/lessons/public-booking/tok-nav/",
+            "/lessons/public-booking/tok-navxxxxxxxxxxxxxxxxxxxxxxxxx/",
             {"week_start": "2025-02-30"},
         )
         self.assertEqual(resp.status_code, 200)

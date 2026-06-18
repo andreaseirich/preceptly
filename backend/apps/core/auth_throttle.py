@@ -5,7 +5,9 @@ Per-IP and per-username throttling; 429 on exceed.
 
 import hashlib
 import time
+import unicodedata
 
+from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import render
 from django.utils.translation import gettext as _
@@ -18,13 +20,20 @@ def _cache_key(prefix: str, value: str) -> str:
 
 
 def _get_client_ip(request) -> str:
-    """Lese die echte Client-IP, auch hinter einem Proxy (X-Forwarded-For)."""
-    xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-    if xff:
-        ip = xff.split(",")[0].strip()[:64]
-    else:
-        ip = request.META.get("REMOTE_ADDR", "unknown")[:64]
-    return ip or "unknown"
+    """Lese die echte Client-IP - nur wenn der Request durch einen bekannten
+    Reverse-Proxy lief, wird X-Forwarded-For ausgewertet."""
+    trusted_proxies = getattr(settings, "TRUSTED_PROXIES", [])
+    remote = (request.META.get("REMOTE_ADDR") or "unknown")[:64]
+    if remote in trusted_proxies:
+        xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if xff:
+            ips = [ip.strip() for ip in xff.split(",") if ip.strip()]
+            # Right-most-untrusted: von rechts nach links, erste IP die kein
+            # bekannter Proxy ist gilt als echter Client.
+            for ip in reversed(ips):
+                if ip not in trusted_proxies:
+                    return ip[:64]
+    return remote or "unknown"
 
 
 def _throttle_check(
@@ -34,33 +43,33 @@ def _throttle_check(
     window_seconds: int = 300,
 ) -> tuple[bool, int | None]:
     """
-    Prüft, ob identifier das Limit überschritten hat.
-    Gibt (allowed, retry_after_seconds) zurück.
+    Prueft, ob identifier das Limit ueberschritten hat.
+    Gibt (allowed, retry_after_seconds) zurueck.
     retry_after ist None wenn erlaubt.
 
-    Atomare Implementierung über separate Integer-Keys (cache.add + cache.incr).
+    Atomare Implementierung ueber separate Integer-Keys (cache.add + cache.incr).
     """
     now = int(time.time())
     count_key = _cache_key(prefix, identifier) + ":count"
     meta_key = _cache_key(prefix, identifier) + ":meta"
 
-    # Versuche, den Zähler neu anzulegen (nur wenn noch nicht vorhanden → atomar)
+    # Versuche, den Zaehler neu anzulegen (nur wenn noch nicht vorhanden -> atomar)
     added = cache.add(count_key, 1, timeout=window_seconds)
     if added:
         # Erster Aufruf im aktuellen Fenster
         cache.set(meta_key, {"window_start": now}, timeout=window_seconds)
         return (True, None)
 
-    # Zähler existiert bereits – atomar inkrementieren
+    # Zaehler existiert bereits - atomar inkrementieren
     try:
         count = cache.incr(count_key)
     except ValueError:
-        # Zähler ist zwischenzeitlich abgelaufen; neu anlegen
+        # Zaehler ist zwischenzeitlich abgelaufen; neu anlegen
         cache.add(count_key, 1, timeout=window_seconds)
         cache.set(meta_key, {"window_start": now}, timeout=window_seconds)
         return (True, None)
 
-    # Fensterstartzeit ermitteln, um retry_after berechnen zu können
+    # Fensterstartzeit ermitteln, um retry_after berechnen zu koennen
     meta = cache.get(meta_key) or {}
     window_start = meta.get("window_start", now)
 
@@ -74,14 +83,15 @@ def _throttle_check(
 def throttle_login(request):
     """
     Throttle Login-Versuche. Vor der Authentifizierung aufrufen.
-    Gibt eine Response mit Status 429 zurück wenn gedrosselt, sonst None.
+    Gibt eine Response mit Status 429 zurueck wenn gedrosselt, sonst None.
     """
     from django.contrib.auth.forms import AuthenticationForm
 
     ip = _get_client_ip(request)
-    username = (
-        (request.POST.get("username") or request.GET.get("username") or "").strip().lower()[:64]
-    )
+
+    # NKFC-Normalisierung + casefold verhindert Homoglyphen-/Casing-Bypass
+    username_raw = (request.POST.get("username") or request.GET.get("username") or "").strip()
+    username = unicodedata.normalize("NFKC", username_raw).casefold()[:64]
 
     allowed, retry = _throttle_check("login_ip", ip, max_attempts=10, window_seconds=300)
     if not allowed:
@@ -122,7 +132,7 @@ def throttle_login(request):
 def throttle_register(request):
     """
     Throttle Registrierungsversuche. Vor der Verarbeitung aufrufen.
-    Gibt eine Response mit Status 429 zurück wenn gedrosselt, sonst None.
+    Gibt eine Response mit Status 429 zurueck wenn gedrosselt, sonst None.
     """
     from apps.core.forms import RegisterForm
 

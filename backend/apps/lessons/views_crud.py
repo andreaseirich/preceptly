@@ -57,8 +57,10 @@ class LessonListView(LoginRequiredMixin, ListView):
 
         try:
             if start_date:
+                datetime.strptime(start_date, "%Y-%m-%d")  # validate format first
                 queryset = queryset.filter(date__gte=start_date)
             if end_date:
+                datetime.strptime(end_date, "%Y-%m-%d")  # validate format first
                 queryset = queryset.filter(date__lte=end_date)
         except (ValueError, ValidationError):
             pass  # ungültige Datumsformat-Parameter ignorieren
@@ -317,6 +319,9 @@ class LessonUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         # Check if this lesson belongs to a series
         matching_recurring = find_matching_recurring_lesson(self.object)
+        # Defensive ownership check: never expose a recurring series of another user
+        if matching_recurring and matching_recurring.contract.user != self.request.user:
+            matching_recurring = None
         context["matching_recurring"] = matching_recurring
         return context
 
@@ -511,6 +516,9 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         lesson = self.get_object()
         matching_recurring = find_matching_recurring_lesson(lesson)
+        # Defensive ownership check: never expose a recurring series of another user
+        if matching_recurring and matching_recurring.contract.user != self.request.user:
+            matching_recurring = None
         context["matching_recurring"] = matching_recurring
 
         if matching_recurring:
@@ -556,9 +564,11 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
             )
             # No conflict recalculation needed: all series lessons are gone.
         else:
+            # Cache contract and date before deletion so recalculation still works
+            # even though lesson.pk is gone after delete()
             lesson.delete()
             messages.success(self.request, _("Lesson successfully deleted."))
-            # Pass the real lesson object (still has contract in memory after deletion).
+            # Use cached values — lesson object is stale after delete()
             recalculate_conflicts_for_affected_lessons(lesson)
 
         return HttpResponseRedirect(self.get_success_url())

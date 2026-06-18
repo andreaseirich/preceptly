@@ -781,7 +781,7 @@ class StripeWebhookTest(TestCase):
             },
         }
 
-        def fake_construct(payload, sig, secret):
+        def fake_construct(payload, sig, secret, **kwargs):
             return event
 
         with patch(

@@ -360,8 +360,10 @@ class PortalActivateView(View):
         from django.db.models import Q
         from django.utils import timezone
 
-        cutoff = timezone.now() - timedelta(hours=72)
-        valid = Q(invite_token_created_at__isnull=True) | Q(invite_token_created_at__gte=cutoff)
+        cutoff = timezone.now() - timedelta(days=7)
+        # Tokens die älter als 7 Tage sind, werden abgelehnt.
+        # invite_token_created_at=NULL (Legacy-Daten) werden ebenfalls abgelehnt.
+        valid = Q(invite_token_created_at__gte=cutoff)
         link = StudentPortalLink.objects.filter(invite_token=token).filter(valid).first()
         if link:
             return link, link.portal_user
@@ -413,7 +415,9 @@ class PortalActivateView(View):
         portal_user.user.set_password(password)
         portal_user.user.save()
         link.is_active = True
-        link.invite_token = None
+        # Token nach erfolgreicher Aktivierung invalidieren
+        link.invite_token = uuid.uuid4().hex
+        link.invite_token_created_at = None
         link.save()
         # Session-Fixation-Schutz: Session-Key vor dem Setzen rotieren
         request.session.cycle_key()
@@ -527,7 +531,9 @@ def _get_portal_student(portal_user, student_pk):
             return None
         return link.contract
     else:
-        link = ParentStudentLink.objects.filter(parent=portal_user, contract_id=student_pk).first()
+        link = ParentStudentLink.objects.filter(
+            parent=portal_user, contract_id=student_pk, is_active=True
+        ).first()
         if not link or link.contract.user != portal_user.tutor:
             return None
         return link.contract
@@ -1127,6 +1133,7 @@ class PortalMeetingWaitView(View):
             has_access = ParentStudentLink.objects.filter(
                 parent=portal_user,
                 contract=lesson.contract,
+                is_active=True,
             ).exists()
             if not has_access:
                 return None, None
@@ -1188,7 +1195,7 @@ class PortalMeetingStatusView(View):
             ).exists()
         elif portal_user.role == "parent":
             ok = ParentStudentLink.objects.filter(
-                parent=portal_user, contract=lesson.contract
+                parent=portal_user, contract=lesson.contract, is_active=True
             ).exists()
         else:
             ok = False

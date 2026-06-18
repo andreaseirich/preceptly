@@ -26,14 +26,14 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
 
         prof_a, _ = UserProfile.objects.get_or_create(user=self.tutor_a)
-        prof_a.public_booking_token = "tok-a"
+        prof_a.public_booking_token = "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         prof_a.default_working_hours = {
             "monday": [{"start": "09:00", "end": "17:00"}],
         }
         prof_a.save()
 
         prof_b, _ = UserProfile.objects.get_or_create(user=self.tutor_b)
-        prof_b.public_booking_token = "tok-b"
+        prof_b.public_booking_token = "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         prof_b.default_working_hours = {
             "monday": [{"start": "09:00", "end": "17:00"}],
         }
@@ -83,9 +83,9 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
         return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
     def test_week_api_tok_a_returns_only_tutor_a_data(self):
-        """Week API with tok-a must not contain tutor B's student/lesson data."""
+        """Week API with tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa must not contain tutor B's student/lesson data."""
         r = self.client.get(
-            "/lessons/public-booking/tok-a/week/",
+            "/lessons/public-booking/tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa/week/",
             {"year": 2025, "month": 1, "day": 6},
         )
         self.assertEqual(r.status_code, 200)
@@ -100,9 +100,9 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
         self.assertNotIn("BStudent", " ".join(labels))
 
     def test_week_api_tok_b_returns_only_tutor_b_data(self):
-        """Week API with tok-b must not contain tutor A's student/lesson data."""
+        """Week API with tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb must not contain tutor A's student/lesson data."""
         r = self.client.get(
-            "/lessons/public-booking/tok-b/week/",
+            "/lessons/public-booking/tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb/week/",
             {"year": 2025, "month": 1, "day": 6},
         )
         self.assertEqual(r.status_code, 200)
@@ -117,18 +117,18 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
         self.assertNotIn("AStudent", " ".join(labels))
 
     def test_verify_tok_a_accepts_a_student_rejects_b_student_code(self):
-        """Verify with tok-a: A's student+code works; B's student+code must fail."""
+        """Verify with tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa: A's student+code works; B's student+code must fail."""
         r_ok = self.client.post(
             reverse("lessons:public_booking_verify_student"),
             data=json.dumps(
                 {
                     "name": "Alice AStudent",
                     "code": self.code_a,
-                    "tutor_token": "tok-a",
+                    "tutor_token": "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-a"),
+            **self._csrf_headers("tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
         )
         self.assertEqual(r_ok.status_code, 200)
         data_ok = json.loads(r_ok.content)
@@ -140,29 +140,29 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
                 {
                     "name": "Bob BStudent",
                     "code": self.code_b,
-                    "tutor_token": "tok-a",
+                    "tutor_token": "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-a"),
+            **self._csrf_headers("tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
         )
         self.assertEqual(r_fail.status_code, 400)
         data_fail = json.loads(r_fail.content)
         self.assertFalse(data_fail.get("success"))
 
     def test_verify_tok_b_accepts_b_student_rejects_a_student_code(self):
-        """Verify with tok-b: B's student+code works; A's student+code must fail."""
+        """Verify with tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb: B's student+code works; A's student+code must fail."""
         r_ok = self.client.post(
             reverse("lessons:public_booking_verify_student"),
             data=json.dumps(
                 {
                     "name": "Bob BStudent",
                     "code": self.code_b,
-                    "tutor_token": "tok-b",
+                    "tutor_token": "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-b"),
+            **self._csrf_headers("tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
         )
         self.assertEqual(r_ok.status_code, 200)
         self.assertTrue(json.loads(r_ok.content).get("success"))
@@ -173,11 +173,11 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
                 {
                     "name": "Alice AStudent",
                     "code": self.code_a,
-                    "tutor_token": "tok-b",
+                    "tutor_token": "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-b"),
+            **self._csrf_headers("tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
         )
         self.assertEqual(r_fail.status_code, 400)
         self.assertFalse(json.loads(r_fail.content).get("success"))
@@ -190,58 +190,60 @@ class PublicBookingTutorTokenIsolationTest(TestCase):
                 {
                     "student_id": self.student_a.pk,
                     "booking_code": self.code_a,
-                    "tutor_token": "tok-b",
+                    "tutor_token": "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                     "date": "2025-01-13",
                     "start_time": "10:00",
                     "end_time": "11:00",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-b"),
+            **self._csrf_headers("tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
         )
         self.assertIn(r.status_code, (400, 404))
         self.assertFalse(json.loads(r.content).get("success"))
 
     def test_reschedule_with_wrong_tutor_token_fails(self):
         """Reschedule with tutor_token B and lesson of A must fail (404)."""
-        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-b"]))
+        self.client.get(
+            reverse("lessons:public_booking_with_token", args=["tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+        )
         self.client.post(
             reverse("lessons:public_booking_verify_student"),
             data=json.dumps(
                 {
                     "name": "Bob BStudent",
                     "code": self.code_b,
-                    "tutor_token": "tok-b",
+                    "tutor_token": "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-b"),
+            **self._csrf_headers("tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
         )
         r = self.client.post(
             reverse("lessons:public_booking_reschedule_lesson"),
             data=json.dumps(
                 {
                     "lesson_id": self.lesson_a.pk,
-                    "tutor_token": "tok-b",
+                    "tutor_token": "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                     "booking_code": self.code_b,
                     "new_date": "2025-01-13",
                     "new_start_time": "10:00",
                 }
             ),
             content_type="application/json",
-            **self._csrf_headers("tok-b"),
+            **self._csrf_headers("tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
         )
         self.assertIn(r.status_code, (400, 401, 403, 404))
         self.assertFalse(json.loads(r.content).get("success"))
         self.assertTrue(Lesson.objects.filter(pk=self.lesson_a.pk).exists())
 
     def test_search_student_tok_a_does_not_return_tutor_b_students(self):
-        """Search with tok-a must not return tutor B's students."""
+        """Search with tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa must not return tutor B's students."""
         r = self.client.post(
             reverse("lessons:public_booking_search_student"),
-            data=json.dumps({"name": "Bob", "tutor_token": "tok-a"}),
+            data=json.dumps({"name": "Bob", "tutor_token": "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"}),
             content_type="application/json",
-            **self._csrf_headers("tok-a"),
+            **self._csrf_headers("tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
         )
         self.assertEqual(r.status_code, 200)
         data = json.loads(r.content)

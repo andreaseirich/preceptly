@@ -366,22 +366,23 @@ class ContractToggleActiveView(LoginRequiredMixin, View):
     def post(self, request, pk):
         from django.utils import timezone
 
-        contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        contract.is_active = not contract.is_active
 
-        if not contract.is_active:
-            # Wurde gerade deaktiviert – direkt speichern
-            contract.save(update_fields=["is_active"])
-            messages.success(request, _("Contract deactivated."))
-        else:
-            # Wurde gerade auf aktiv gesetzt – Validierung vor dem Speichern
-            if contract.end_date and contract.end_date < timezone.localdate():
-                messages.warning(
-                    request,
-                    _("This contract has already ended and cannot be reactivated."),
-                )
-                return redirect(reverse("students:detail", kwargs={"pk": contract.pk}))
-            contract.save(update_fields=["is_active"])
-            messages.success(request, _("Contract activated."))
-
-        return redirect(reverse("contracts:list"))
+def _validate_tiers(tiers):
+    """
+    Validiert die tiers-Datenstruktur für TierConfig.
+    Gibt None zurück wenn valide, sonst einen lokalisierten Fehlerstring.
+    """
+    if not isinstance(tiers, list) or not tiers:
+        return _("Tier list must be a non-empty list.")
+    for t in tiers:
+        if not isinstance(t, dict):
+            return _("Each tier must be an object.")
+        hours_from = t.get("hours_from")
+        if not isinstance(hours_from, (int, float)) or hours_from < 0:
+            return _("hours_from must be a non-negative number.")
+        label = t.get("label", "")
+        if not isinstance(label, str) or len(label) > 50:
+            return _("Tier label must be a string with at most 50 characters.")
+        if any(c in label for c in ("<", ">")):
+            return _("Tier label contains invalid characters.")
+    return None

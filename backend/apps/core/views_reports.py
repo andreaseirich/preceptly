@@ -24,6 +24,15 @@ from apps.core.finance_metrics import (
 )
 
 
+def _safe_int(value, default: int, lo: int, hi: int) -> int:
+    """Wandelt value in int um; liegt das Ergebnis außerhalb [lo, hi], wird default zurückgegeben."""
+    try:
+        v = int(value)
+    except (TypeError, ValueError):
+        return default
+    return v if lo <= v <= hi else default
+
+
 class ReportsView(LoginRequiredMixin, TemplateView):
     """Reports page: Premium gets full analytics, Basic gets teaser."""
 
@@ -34,11 +43,9 @@ class ReportsView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         is_premium = user_has_feature(user, Feature.FEATURE_REPORTS)
         now = timezone.now()
-        year = int(self.request.GET.get("year", now.year))
-        month = int(self.request.GET.get("month", now.month))
 
-        if not (1 <= month <= 12 and 2000 <= year <= 2100):
-            year, month = now.year, now.month
+        year = _safe_int(self.request.GET.get("year"), now.year, 2000, 2100)
+        month = _safe_int(self.request.GET.get("month"), now.month, 1, 12)
 
         lesson_count = lesson_count_taught_or_paid(user, year, month)
         taught_hours_val = taught_hours(user, year, month)

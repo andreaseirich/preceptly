@@ -22,7 +22,7 @@ class RescheduleTestMixin:
         cache.clear()
         self.tutor = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=self.tutor, defaults={})
-        prof.public_booking_token = "tok-reschedule"
+        prof.public_booking_token = "tok-reschedulexxxxxxxxxxxxxxxxxx"
         prof.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
         prof.is_premium = True
         prof.save()
@@ -42,7 +42,9 @@ class RescheduleTestMixin:
         self.client = Client(enforce_csrf_checks=True)
 
     def _csrf_headers(self):
-        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-reschedule"]))
+        self.client.get(
+            reverse("lessons:public_booking_with_token", args=["tok-reschedulexxxxxxxxxxxxxxxxxx"])
+        )
         csrf = self.client.cookies.get("csrftoken")
         return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
@@ -53,7 +55,7 @@ class RescheduleTestMixin:
                 {
                     "name": "Reschedule Test",
                     "code": self.booking_code,
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                 }
             ),
             content_type="application/json",
@@ -84,7 +86,7 @@ class WeekApiReschedulableTest(RescheduleTestMixin, TestCase):
             duration_minutes=60,
             status="planned",
         )
-        url = f"/lessons/public-booking/tok-reschedule/week/?year={future.year}&month={future.month}&day={future.day}"
+        url = f"/lessons/public-booking/tok-reschedulexxxxxxxxxxxxxxxxxx/week/?year={future.year}&month={future.month}&day={future.day}"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         data = json.loads(resp.content)
@@ -124,7 +126,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                     "lesson_id": les.id,
                     "new_date": new_date.strftime("%Y-%m-%d"),
                     "new_start_time": "14:00",
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                     "booking_code": self.booking_code,
                 }
             ),
@@ -160,7 +162,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                     "lesson_id": les.id,
                     "new_date": new_date.strftime("%Y-%m-%d"),
                     "new_start_time": "14:00",
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                     "booking_code": "wrong-code",
                 }
             ),
@@ -200,7 +202,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                     "lesson_id": other_les.id,
                     "new_date": new_date.strftime("%Y-%m-%d"),
                     "new_start_time": "14:00",
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                     "booking_code": self.booking_code,
                 }
             ),
@@ -230,7 +232,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                     "lesson_id": les.id,
                     "new_date": new_date.strftime("%Y-%m-%d"),
                     "new_start_time": "14:00",
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                     "booking_code": self.booking_code,
                 }
             ),
@@ -266,7 +268,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                     "lesson_id": les2.id,
                     "new_date": future.strftime("%Y-%m-%d"),
                     "new_start_time": "10:00",
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                     "booking_code": self.booking_code,
                 }
             ),
@@ -299,7 +301,7 @@ class RescheduleLessonApiTest(RescheduleTestMixin, TestCase):
                     "lesson_id": orig_id,
                     "new_date": new_date.strftime("%Y-%m-%d"),
                     "new_start_time": "14:00",
-                    "tutor_token": "tok-reschedule",
+                    "tutor_token": "tok-reschedulexxxxxxxxxxxxxxxxxx",
                     "booking_code": self.booking_code,
                 }
             ),

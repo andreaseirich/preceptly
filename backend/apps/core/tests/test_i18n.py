@@ -154,10 +154,10 @@ class I18nTestCase(TestCase):
         """When language is German, booking page shows German text and dd.mm format."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-i18n"
+        prof.public_booking_token = "tok-i18nxxxxxxxxxxxxxxxxxxxxxxxx"
         prof.save()
         self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-i18n/")
+        response = self.client.get("/lessons/public-booking/tok-i18nxxxxxxxxxxxxxxxxxxxxxxxx/")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Stunde buchen", response.content)
         self.assertIn(b"Daten", response.content)
@@ -168,7 +168,7 @@ class I18nTestCase(TestCase):
         """Week API returns German weekday_display when session has language=de."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-wk"
+        prof.public_booking_token = "tok-wkxxxxxxxxxxxxxxxxxxxxxxxxxx"
         prof.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
         prof.save()
         self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
@@ -176,7 +176,7 @@ class I18nTestCase(TestCase):
 
         now = timezone.now()
         r = self.client.get(
-            f"/lessons/public-booking/tok-wk/week/?year={now.year}&month={now.month}&day={now.day}"
+            f"/lessons/public-booking/tok-wkxxxxxxxxxxxxxxxxxxxxxxxxxx/week/?year={now.year}&month={now.month}&day={now.day}"
         )
         self.assertEqual(r.status_code, 200)
         data = json.loads(r.content)
@@ -197,16 +197,16 @@ class I18nTestCase(TestCase):
         """After switching language, page reloads with valid CSRF token and next is preserved."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-csrf"
+        prof.public_booking_token = "tok-csrfxxxxxxxxxxxxxxxxxxxxxxxx"
         prof.save()
         # Load booking page
-        r1 = self.client.get("/lessons/public-booking/tok-csrf/")
+        r1 = self.client.get("/lessons/public-booking/tok-csrfxxxxxxxxxxxxxxxxxxxxxxxx/")
         self.assertEqual(r1.status_code, 200)
         self.assertIn(b"csrf-token", r1.content)
         # Switch language (POST to set_language with next=current path)
         r2 = self.client.post(
             reverse("set_language"),
-            {"language": "de", "next": "/lessons/public-booking/tok-csrf/"},
+            {"language": "de", "next": "/lessons/public-booking/tok-csrfxxxxxxxxxxxxxxxxxxxxxxxx/"},
             follow=True,
         )
         self.assertEqual(r2.status_code, 200)
@@ -217,7 +217,7 @@ class I18nTestCase(TestCase):
         """After language switch, verify-student POST must work (session/cookies intact)."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-csrf2"
+        prof.public_booking_token = "tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx"
         prof.save()
         student = Contract.objects.create(
             hourly_rate=Decimal("25.00"),
@@ -228,11 +228,11 @@ class I18nTestCase(TestCase):
         )
         code = set_booking_code(student)
         # 1. Load booking page (gets CSRF cookie)
-        self.client.get("/lessons/public-booking/tok-csrf2/")
+        self.client.get("/lessons/public-booking/tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx/")
         # 2. Switch language
         self.client.post(
             reverse("set_language"),
-            {"language": "de", "next": "/lessons/public-booking/tok-csrf2/"},
+            {"language": "de", "next": "/lessons/public-booking/tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx/"},
             follow=True,
         )
         # 3. POST verify-student with CSRF token
@@ -240,7 +240,13 @@ class I18nTestCase(TestCase):
         headers = {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
         r = self.client.post(
             reverse("lessons:public_booking_verify_student"),
-            data=json.dumps({"name": "Max Test", "code": code, "tutor_token": "tok-csrf2"}),
+            data=json.dumps(
+                {
+                    "name": "Max Test",
+                    "code": code,
+                    "tutor_token": "tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx",
+                }
+            ),
             content_type="application/json",
             **headers,
         )
@@ -263,10 +269,10 @@ class I18nTestCase(TestCase):
         """Public booking page: Jump to date in German, no English when de active."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-i18n-jump"
+        prof.public_booking_token = "tok-i18n-jumpxxxxxxxxxxxxxxxxxxx"
         prof.save()
         self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-i18n-jump/")
+        response = self.client.get("/lessons/public-booking/tok-i18n-jumpxxxxxxxxxxxxxxxxxxx/")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Zum Datum springen:", response.content)
         self.assertNotIn(b"Jump to date", response.content)
@@ -305,9 +311,9 @@ class I18nTestCase(TestCase):
         """Public booking page must not render reschedule list (reschedule is inline in calendar)."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-no-list"
+        prof.public_booking_token = "tok-no-listxxxxxxxxxxxxxxxxxxxxx"
         prof.save()
-        response = self.client.get("/lessons/public-booking/tok-no-list/")
+        response = self.client.get("/lessons/public-booking/tok-no-listxxxxxxxxxxxxxxxxxxxxx/")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(b"existing-bookings-section", response.content)
         self.assertNotIn(b"loadReschedulableLessons", response.content)
@@ -327,10 +333,10 @@ class I18nTestCase(TestCase):
         """When DE is active, public booking contains German UI strings."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-de-strings"
+        prof.public_booking_token = "tok-de-stringsxxxxxxxxxxxxxxxxxx"
         prof.save()
         self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-de-strings/")
+        response = self.client.get("/lessons/public-booking/tok-de-stringsxxxxxxxxxxxxxxxxxx/")
         self.assertEqual(response.status_code, 200)
         # Must contain German strings
         self.assertIn(b"Zur\xc3\xbcck", response.content)  # Zurück
@@ -342,10 +348,10 @@ class I18nTestCase(TestCase):
         """When DE is active, public booking must NOT contain English UI strings."""
         user = User.objects.create_user(username="tutor", password="test")
         prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-de-no-en"
+        prof.public_booking_token = "tok-de-no-enxxxxxxxxxxxxxxxxxxxx"
         prof.save()
         self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-de-no-en/")
+        response = self.client.get("/lessons/public-booking/tok-de-no-enxxxxxxxxxxxxxxxxxxxx/")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(b"Jump to date", response.content)
         self.assertNotIn(b">Back<", response.content)

@@ -245,7 +245,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", default=False)
+_testing = "test" in sys.argv
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", default=not DEBUG and not _testing)
 # Production: secure cookies and HTTPOnly. Railway uses HTTPS (X-Forwarded-Proto).
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=not DEBUG)
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", default=not DEBUG)
@@ -258,7 +259,7 @@ CSRF_COOKIE_SAMESITE = "Lax"
 if not DEBUG:
     SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", default="31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", default=True)
+    SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", default=False)
     # Trust X-Forwarded-Proto so build_absolute_uri yields https behind Railway/reverse proxy
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     # Security headers (SecurityMiddleware adds X-Content-Type-Options; we add more via custom)

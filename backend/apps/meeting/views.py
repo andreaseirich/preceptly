@@ -5,7 +5,7 @@ Views für Meeting-Räume (Tutor + Portal-Nutzer).
 import logging
 import os
 import uuid
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,6 +13,8 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
+
+from django.db import transaction
 
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
@@ -37,7 +39,14 @@ def _validate_file_magic(file, ext: str) -> bool:
         ".mp4": [(4, b"ftyp")],
     }
     if ext == ".txt":
-        return True
+        # Prüfen dass die Datei valides UTF-8 enthält (kein Binär-Inhalt)
+        chunk = file.read(8192)
+        file.seek(0)
+        try:
+            chunk.decode("utf-8")
+            return True
+        except UnicodeDecodeError:
+            return False
     checks = _MAGIC.get(ext)
     if not checks:
         return False
@@ -53,10 +62,11 @@ class StartMeetingView(LoginRequiredMixin, View):
 
     def get(self, request, lesson_pk):
         lesson = get_object_or_404(Session, pk=lesson_pk, contract__user=request.user)
-        room, _ = MeetingRoom.objects.get_or_create(lesson=lesson)
-        if not room.is_active:
-            room.is_active = True
-            room.save(update_fields=["is_active"])
+        with transaction.atomic():
+            room, _ = MeetingRoom.objects.select_for_update().get_or_create(lesson=lesson)
+            if not room.is_active:
+                room.is_active = True
+                room.save(update_fields=["is_active"])
         return redirect("meeting:room", token=room.token)
 
     def post(self, request, lesson_pk):
@@ -95,7 +105,7 @@ class MeetingDocumentUploadView(View):
                 ).exists()
             elif portal_user.role == "parent":
                 ok = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract
+                    parent=portal_user, contract=lesson.contract, is_active=True
                 ).exists()
             else:
                 ok = False
@@ -166,11 +176,6 @@ class MeetingDocumentServeView(View):
         lesson = room.lesson
         portal_user = get_portal_user(request)
 
-        # Teilnehmer-Autorisierung (gleiches Muster wie Upload/Delete):
-        # Nur Tutor (Owner des Contracts) oder verlinkte Portal-Nutzer
-        # (Schüler/Elternteil) dürfen Dokumente abrufen. Das verhindert IDOR,
-        # selbst wenn ein Angreifer eine gültige doc_pk + Meeting-Token erraten
-        # würde — er muss zusätzlich autorisierter Teilnehmer sein.
         if portal_user:
             if portal_user.role == "student":
                 ok = StudentPortalLink.objects.filter(
@@ -178,7 +183,7 @@ class MeetingDocumentServeView(View):
                 ).exists()
             elif portal_user.role == "parent":
                 ok = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract
+                    parent=portal_user, contract=lesson.contract, is_active=True
                 ).exists()
             else:
                 ok = False
@@ -190,24 +195,40 @@ class MeetingDocumentServeView(View):
         if not ok:
             return HttpResponseForbidden()
 
-        # Ownership-Kette: SessionDocument ist über das Feld `session` fest an
-        # genau eine Session (lesson) gebunden. Da wir lesson aus dem Meeting-
-        # Token ableiten UND der User oben als Teilnehmer dieses Meetings
-        # verifiziert wurde, ist die Bindung doc.session == lesson hier
-        # ausreichend, um Cross-Meeting-Zugriffe auszuschließen.
         doc = get_object_or_404(SessionDocument, pk=doc_pk, session=lesson)
         content_type, _ = mimetypes.guess_type(doc.file.name)
         effective_ct = content_type or "application/octet-stream"
-        safe_name = (doc.name or doc.file.name).replace('"', "").replace("\r", "").replace("\n", "")
+
+        raw_name = doc.name or doc.file.name
+        # Sicherheitsbereinigung: Steuerzeichen und problematische Sonderzeichen entfernen
+        safe_name = (
+            raw_name.replace('"', "")
+            .replace("\r", "")
+            .replace("\n", "")
+            .replace("\\", "_")
+            .replace(";", "_")
+        )
+        # ASCII-Fallback-Name für filename-Parameter (RFC 5987)
+        ascii_name = safe_name.encode("ascii", "ignore").decode("ascii").strip()
+        ascii_name = ascii_name or "file"
+
         is_inline = effective_ct.startswith("image/") or effective_ct == "application/pdf"
-        if is_inline:
-            disposition = f'inline; filename="{safe_name}"'
-            serve_ct = effective_ct
-        else:
-            disposition = f'attachment; filename="{safe_name}"'
-            serve_ct = "application/octet-stream"
+        disposition_type = "inline" if is_inline else "attachment"
+        serve_ct = effective_ct if is_inline else "application/octet-stream"
+
+        # RFC 5987: filename* für korrekte Unicode-Unterstützung
+        disposition = (
+            f"{disposition_type}; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(safe_name)}"
+        )
+
         response = FileResponse(doc.file.open("rb"), content_type=serve_ct)
         response["Content-Disposition"] = disposition
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = (
+            "default-src 'none'; img-src 'self'; object-src 'self'"
+        )
+        response["Cache-Control"] = "private, no-store"
+        response["Referrer-Policy"] = "no-referrer"
         return response
 
 
@@ -226,7 +247,7 @@ class MeetingDocumentDeleteView(View):
                 ).exists()
             elif portal_user.role == "parent":
                 ok = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract
+                    parent=portal_user, contract=lesson.contract, is_active=True
                 ).exists()
             else:
                 ok = False
@@ -250,12 +271,19 @@ class EndMeetingView(LoginRequiredMixin, View):
     def post(self, request, token):
         from django.http import JsonResponse
 
-        room = get_object_or_404(MeetingRoom, token=token, lesson__contract__user=request.user)
-        room.is_active = False
-        room.token = uuid.uuid4()
-        room.save(update_fields=["is_active", "token"])
+        with transaction.atomic():
+            room = get_object_or_404(
+                MeetingRoom.objects.select_for_update(),
+                token=token,
+                lesson__contract__user=request.user,
+            )
+            room.is_active = False
+            room.token = uuid.uuid4()
+            room.save(update_fields=["is_active", "token"])
+
         safe_token = str(token).replace("\n", " ").replace("\r", " ")
-        logger.info("Meeting %s beendet durch %s", safe_token, request.user)
+        safe_user = str(request.user).replace("\n", " ").replace("\r", " ")
+        logger.info("Meeting %s beendet durch %s", safe_token, safe_user)
         return JsonResponse({"ok": True})
 
 
@@ -287,7 +315,7 @@ class MeetingRoomView(View):
                 display_name = lesson.contract.full_name
             elif portal_user.role == "parent":
                 has_access = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract
+                    parent=portal_user, contract=lesson.contract, is_active=True
                 ).exists()
                 if not has_access:
                     return HttpResponseForbidden("Kein Zugriff auf dieses Meeting.")
@@ -336,5 +364,15 @@ class MeetingRoomView(View):
                 },
             )
 
-        # ── 3. Nicht eingeloggt → Portal-Login mit Rücksprung ─────────────────
-        return redirect("/portal/login/?" + urlencode({"next": request.path}))
+        # ── 3. Nicht eingeloggt → Portal-Login mit validiertem Rücksprung ──────
+        next_path = request.path
+        from django.utils.http import url_has_allowed_host_and_scheme
+
+        if not url_has_allowed_host_and_scheme(
+            next_path,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            next_path = "/portal/"
+        login_url = reverse("portal:login")
+        return redirect(login_url + "?" + urlencode({"next": next_path}))

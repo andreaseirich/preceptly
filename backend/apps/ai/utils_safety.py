@@ -65,6 +65,29 @@ _INJECTION_PATTERNS = re.compile(
 )
 
 
+# Erweiterte Telefonnummer-Erkennung:
+#   - Internationales Format: +49 151 12345678
+#   - Klammer-Format: (030) 1234567, (415) 555-0123
+#   - Kompaktes DE-Format: 015123456789
+#   - Allgemeines Trennzeichen-Format: 0151-234-5678
+# Regeln gegen polynomial-ReDoS:
+#   - Keine geschachtelten Quantifizierer
+#   - Zeichenklassen über angrenzende Quantifizierer disjunkt
+#   - Alle Quantifizierer bounded
+PHONE_PATTERN = re.compile(
+    r"(?:"
+    # Klammer-Format: (030) 1234567 oder (415) 555-0123
+    r"\(\+?[0-9]{1,4}\)\s*[0-9]{3,6}(?:[\s.\-][0-9]{2,6}){0,5}"
+    r"|"
+    # Internationales Format mit optionalem +/00-Prefix
+    r"\+?(?:00)?[0-9]{1,4}(?:[\s.\-][0-9]{1,6}){2,12}"
+    r"|"
+    # Kompaktes Format ohne Trennzeichen (z. B. deutsche Mobilnummern 015x)
+    r"0[1-9][0-9]{3,13}"
+    r")"
+)
+
+
 def strip_injection_patterns(text: str) -> str:
     import unicodedata
 
@@ -118,7 +141,12 @@ def wrap_untrusted(text: str) -> str:
     if text is None:
         return "<user_provided_untrusted></user_provided_untrusted>"
     sanitized = strip_injection_patterns(str(text))
-    # Verhindere, dass der Input selbst die Tags schließt.
-    sanitized = sanitized.replace("</user_provided_untrusted>", FILTERED)
-    sanitized = sanitized.replace("<user_provided_untrusted>", FILTERED)
+    # Verhindere, dass der Input selbst die Tags schließt –
+    # case-insensitive + optionale Whitespace-Varianten (z. B. < /user_provided_untrusted >)
+    sanitized = re.sub(
+        r"<\s*/?\s*user_provided_untrusted\s*>",
+        FILTERED,
+        sanitized,
+        flags=re.IGNORECASE,
+    )
     return f"<user_provided_untrusted>\n{sanitized}\n</user_provided_untrusted>"

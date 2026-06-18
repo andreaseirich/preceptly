@@ -29,7 +29,7 @@ class PublicBookingAuthTest(TestCase):
         cache.clear()
         self.tutor = User.objects.create_user(username="tutor", password="test")
         self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
-        self.profile.public_booking_token = "test-token-123"
+        self.profile.public_booking_token = "test-token-123xxxxxxxxxxxxxxxxxx"
         self.profile.save()
 
         self.student1 = Contract.objects.create(
@@ -65,11 +65,13 @@ class PublicBookingAuthTest(TestCase):
 
     def _get_csrf_headers(self):
         """Get CSRF token by loading public booking page."""
-        self.client.get(reverse("lessons:public_booking_with_token", args=["test-token-123"]))
+        self.client.get(
+            reverse("lessons:public_booking_with_token", args=["test-token-123xxxxxxxxxxxxxxxxxx"])
+        )
         csrf = self.client.cookies.get("csrftoken")
         return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
-    def _verify(self, name: str, code: str, tutor_token: str = "test-token-123"):
+    def _verify(self, name: str, code: str, tutor_token: str = "test-token-123xxxxxxxxxxxxxxxxxx"):
         headers = self._get_csrf_headers()
         return self.client.post(
             self.verify_url,
@@ -129,9 +131,9 @@ class PublicBookingAuthTest(TestCase):
         request.META["REMOTE_ADDR"] = "192.168.1.100"
 
         for _ in range(THROTTLE_IP_LIMIT):
-            record_public_booking_attempt(request, "test-token-123")
+            record_public_booking_attempt(request, "test-token-123xxxxxxxxxxxxxxxxxx")
 
-        self.assertTrue(is_public_booking_throttled(request, "test-token-123"))
+        self.assertTrue(is_public_booking_throttled(request, "test-token-123xxxxxxxxxxxxxxxxxx"))
 
     def test_verify_booking_code_service(self):
         """Test verify_booking_code directly."""
@@ -142,7 +144,9 @@ class PublicBookingAuthTest(TestCase):
 
     def test_verify_success_cycles_session_key(self):
         """Successful verify cycles session key to reduce fixation risk."""
-        self.client.get(reverse("lessons:public_booking_with_token", args=["test-token-123"]))
+        self.client.get(
+            reverse("lessons:public_booking_with_token", args=["test-token-123xxxxxxxxxxxxxxxxxx"])
+        )
         session_key_before = self.client.session.session_key
         self.assertIsNotNone(session_key_before)
         resp = self._verify("Max Mustermann", self.code1)
