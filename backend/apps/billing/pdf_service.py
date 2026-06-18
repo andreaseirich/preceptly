@@ -2,6 +2,7 @@
 Service for generating invoice PDFs.
 """
 
+import logging as _logging
 from io import BytesIO
 
 from reportlab.lib.pagesizes import A4
@@ -10,6 +11,8 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from apps.billing.models import Invoice
+
+_pdf_logger = _logging.getLogger(__name__)
 
 
 def generate_invoice_pdf(invoice: Invoice) -> bytes:
@@ -21,101 +24,114 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
 
     Returns:
         PDF file bytes
+
+    Raises:
+        Exception: Weitergeworfene Exception nach Logging, wenn die PDF-Generierung fehlschlägt
     """
     import html
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        rightMargin=2 * cm,
-        leftMargin=2 * cm,
-        topMargin=2 * cm,
-        bottomMargin=2 * cm,
-    )
-    styles = getSampleStyleSheet()
-
-    elements = []
-
-    # Title
-    elements.append(Paragraph("Invoice", styles["Title"]))
-    elements.append(Spacer(1, 0.5 * cm))
-
-    # Issuer / business details (static, safe)
-    elements.append(Paragraph("<b>Issuer:</b> andicode, Inhaber Andreas Eirich", styles["Normal"]))
-    elements.append(Paragraph("<b>Address:</b> Birkenweg 7, 49577 Ankum", styles["Normal"]))
-    elements.append(Paragraph("<b>Tax number:</b> 367/111/08187", styles["Normal"]))
-    elements.append(
-        Paragraph(
-            "<b>Contact:</b> impressum@andicode.de · contact@andicode.de · https://andicode.de",
-            styles["Normal"],
+    try:
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=2 * cm,
+            leftMargin=2 * cm,
+            topMargin=2 * cm,
+            bottomMargin=2 * cm,
         )
-    )
-    elements.append(Spacer(1, 0.4 * cm))
+        styles = getSampleStyleSheet()
 
-    # Invoice number
-    inv_num = invoice.invoice_number or str(invoice.id)
-    elements.append(
-        Paragraph(f"<b>Invoice Number:</b> {html.escape(str(inv_num))}", styles["Normal"])
-    )
-    elements.append(
-        Paragraph(
-            f"<b>Invoice Date:</b> {invoice.created_at.strftime('%d.%m.%Y')}",
-            styles["Normal"],
-        )
-    )
-    elements.append(
-        Paragraph(
-            f"<b>Period:</b> {invoice.period_start.strftime('%d.%m.%Y')} - {invoice.period_end.strftime('%d.%m.%Y')}",
-            styles["Normal"],
-        )
-    )
-    elements.append(Spacer(1, 0.5 * cm))
+        elements = []
 
-    # Payer
-    elements.append(Paragraph("<b>Payer</b>", styles["Heading2"]))
-    elements.append(Paragraph(html.escape(invoice.payer_name), styles["Normal"]))
-    if invoice.payer_address:
+        # Title
+        elements.append(Paragraph("Invoice", styles["Title"]))
+        elements.append(Spacer(1, 0.5 * cm))
+
+        # Issuer / business details (static, safe)
         elements.append(
-            Paragraph(html.escape(invoice.payer_address).replace("\n", "<br/>"), styles["Normal"])
+            Paragraph("<b>Issuer:</b> andicode, Inhaber Andreas Eirich", styles["Normal"])
         )
-    elements.append(Spacer(1, 0.5 * cm))
-
-    # Items table
-    elements.append(Paragraph("<b>Invoice Items</b>", styles["Heading2"]))
-    data = [
-        ["Date", "Description", "Duration", "Amount"],
-    ]
-    for item in invoice.items.all():
-        data.append(
-            [
-                item.date.strftime("%d.%m.%Y"),
-                html.escape(str(item.description)),
-                f"{item.duration_minutes} Min.",
-                f"{item.amount:.2f} €",
-            ]
+        elements.append(Paragraph("<b>Address:</b> Birkenweg 7, 49577 Ankum", styles["Normal"]))
+        elements.append(Paragraph("<b>Tax number:</b> 367/111/08187", styles["Normal"]))
+        elements.append(
+            Paragraph(
+                "<b>Contact:</b> impressum@andicode.de · contact@andicode.de · https://andicode.de",
+                styles["Normal"],
+            )
         )
-    data.append(["", "", "Total:", f"{invoice.total_amount:.2f} €"])
+        elements.append(Spacer(1, 0.4 * cm))
 
-    table = Table(data, colWidths=[4 * cm, 8 * cm, 3 * cm, 3 * cm])
-    table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), "#e5e7eb"),
-                ("TEXTCOLOR", (0, 0), (-1, 0), "#111827"),
-                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                ("ALIGN", (3, 0), (3, -1), "RIGHT"),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, 0), 10),
-                ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-                ("BACKGROUND", (0, 1), (-1, -2), "#ffffff"),
-                ("BACKGROUND", (0, -1), (-1, -1), "#f3f4f6"),
-                ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
-                ("GRID", (0, 0), (-1, -1), 0.5, "#d1d5db"),
-            ]
+        # Invoice number
+        inv_num = invoice.invoice_number or str(invoice.id)
+        elements.append(
+            Paragraph(f"<b>Invoice Number:</b> {html.escape(str(inv_num))}", styles["Normal"])
         )
-    )
-    elements.append(table)
+        elements.append(
+            Paragraph(
+                f"<b>Invoice Date:</b> {invoice.created_at.strftime('%d.%m.%Y')}",
+                styles["Normal"],
+            )
+        )
+        elements.append(
+            Paragraph(
+                f"<b>Period:</b> {invoice.period_start.strftime('%d.%m.%Y')} - {invoice.period_end.strftime('%d.%m.%Y')}",
+                styles["Normal"],
+            )
+        )
+        elements.append(Spacer(1, 0.5 * cm))
 
-    doc.build(elements)
-    return buffer.getvalue()
+        # Payer
+        elements.append(Paragraph("<b>Payer</b>", styles["Heading2"]))
+        elements.append(Paragraph(html.escape(invoice.payer_name), styles["Normal"]))
+        if invoice.payer_address:
+            elements.append(
+                Paragraph(
+                    html.escape(invoice.payer_address).replace("\n", "<br/>"), styles["Normal"]
+                )
+            )
+        elements.append(Spacer(1, 0.5 * cm))
+
+        # Items table
+        elements.append(Paragraph("<b>Invoice Items</b>", styles["Heading2"]))
+        data = [
+            ["Date", "Description", "Duration", "Amount"],
+        ]
+        for item in invoice.items.all():
+            data.append(
+                [
+                    item.date.strftime("%d.%m.%Y"),
+                    html.escape(str(item.description)),
+                    f"{item.duration_minutes} Min.",
+                    f"{item.amount:.2f} €",
+                ]
+            )
+        data.append(["", "", "Total:", f"{invoice.total_amount:.2f} €"])
+
+        table = Table(data, colWidths=[4 * cm, 8 * cm, 3 * cm, 3 * cm])
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), "#e5e7eb"),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), "#111827"),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("ALIGN", (3, 0), (3, -1), "RIGHT"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, 0), 10),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+                    ("BACKGROUND", (0, 1), (-1, -2), "#ffffff"),
+                    ("BACKGROUND", (0, -1), (-1, -1), "#f3f4f6"),
+                    ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.5, "#d1d5db"),
+                ]
+            )
+        )
+        elements.append(table)
+
+        doc.build(elements)
+        return buffer.getvalue()
+    except Exception as exc:
+        _pdf_logger.error("PDF generation failed for invoice %s: %s", invoice.pk, exc)
+        raise
+    finally:
+        buffer.close()

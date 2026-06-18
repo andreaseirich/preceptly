@@ -17,6 +17,16 @@ def _cache_key(prefix: str, value: str) -> str:
     return f"auth_throttle:{prefix}:{h}"
 
 
+def _get_client_ip(request) -> str:
+    """Lese die echte Client-IP, auch hinter einem Proxy (X-Forwarded-For)."""
+    xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if xff:
+        ip = xff.split(",")[0].strip()[:64]
+    else:
+        ip = request.META.get("REMOTE_ADDR", "unknown")[:64]
+    return ip or "unknown"
+
+
 def _throttle_check(
     prefix: str,
     identifier: str,
@@ -24,45 +34,58 @@ def _throttle_check(
     window_seconds: int = 300,
 ) -> tuple[bool, int | None]:
     """
-    Check if identifier is over limit.
-    Returns (allowed, retry_after_seconds).
-    retry_after is None if allowed.
+    Prüft, ob identifier das Limit überschritten hat.
+    Gibt (allowed, retry_after_seconds) zurück.
+    retry_after ist None wenn erlaubt.
+
+    Atomare Implementierung über separate Integer-Keys (cache.add + cache.incr).
     """
-    key = _cache_key(prefix, identifier)
-    data = cache.get(key)
     now = int(time.time())
-    if data is None:
-        cache.set(key, {"count": 1, "window_start": now}, timeout=window_seconds)
+    count_key = _cache_key(prefix, identifier) + ":count"
+    meta_key = _cache_key(prefix, identifier) + ":meta"
+
+    # Versuche, den Zähler neu anzulegen (nur wenn noch nicht vorhanden → atomar)
+    added = cache.add(count_key, 1, timeout=window_seconds)
+    if added:
+        # Erster Aufruf im aktuellen Fenster
+        cache.set(meta_key, {"window_start": now}, timeout=window_seconds)
         return (True, None)
-    count = data.get("count", 0)
-    window_start = data.get("window_start", now)
-    if now - window_start >= window_seconds:
-        # Window expired, reset
-        cache.set(key, {"count": 1, "window_start": now}, timeout=window_seconds)
+
+    # Zähler existiert bereits – atomar inkrementieren
+    try:
+        count = cache.incr(count_key)
+    except ValueError:
+        # Zähler ist zwischenzeitlich abgelaufen; neu anlegen
+        cache.add(count_key, 1, timeout=window_seconds)
+        cache.set(meta_key, {"window_start": now}, timeout=window_seconds)
         return (True, None)
-    if count >= max_attempts:
+
+    # Fensterstartzeit ermitteln, um retry_after berechnen zu können
+    meta = cache.get(meta_key) or {}
+    window_start = meta.get("window_start", now)
+
+    if count > max_attempts:
         retry = window_seconds - (now - window_start)
         return (False, max(1, retry))
-    cache.set(
-        key,
-        {"count": count + 1, "window_start": window_start},
-        timeout=window_seconds,
-    )
+
     return (True, None)
 
 
 def throttle_login(request):
     """
-    Throttle login attempts. Call before authentication.
-    Returns response with 429 if throttled, else None.
+    Throttle Login-Versuche. Vor der Authentifizierung aufrufen.
+    Gibt eine Response mit Status 429 zurück wenn gedrosselt, sonst None.
     """
     from django.contrib.auth.forms import AuthenticationForm
 
-    ip = request.META.get("REMOTE_ADDR", "unknown")[:64]
-    username = (request.POST.get("username") or request.GET.get("username") or "").strip()[:64]
+    ip = _get_client_ip(request)
+    username = (
+        (request.POST.get("username") or request.GET.get("username") or "").strip().lower()[:64]
+    )
+
     allowed, retry = _throttle_check("login_ip", ip, max_attempts=10, window_seconds=300)
     if not allowed:
-        return render(
+        response = render(
             request,
             "core/login.html",
             {
@@ -72,10 +95,13 @@ def throttle_login(request):
             },
             status=429,
         )
+        response["Retry-After"] = str(retry)
+        return response
+
     if username:
         allowed, retry = _throttle_check("login_user", username, max_attempts=5, window_seconds=300)
         if not allowed:
-            return render(
+            response = render(
                 request,
                 "core/login.html",
                 {
@@ -87,20 +113,23 @@ def throttle_login(request):
                 },
                 status=429,
             )
+            response["Retry-After"] = str(retry)
+            return response
+
     return None
 
 
 def throttle_register(request):
     """
-    Throttle register attempts. Call before processing.
-    Returns response with 429 if throttled, else None.
+    Throttle Registrierungsversuche. Vor der Verarbeitung aufrufen.
+    Gibt eine Response mit Status 429 zurück wenn gedrosselt, sonst None.
     """
     from apps.core.forms import RegisterForm
 
-    ip = request.META.get("REMOTE_ADDR", "unknown")[:64]
+    ip = _get_client_ip(request)
     allowed, retry = _throttle_check("register_ip", ip, max_attempts=5, window_seconds=600)
     if not allowed:
-        return render(
+        response = render(
             request,
             "core/register.html",
             {
@@ -109,4 +138,7 @@ def throttle_register(request):
             },
             status=429,
         )
+        response["Retry-After"] = str(retry)
+        return response
+
     return None

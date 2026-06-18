@@ -39,7 +39,17 @@ class InvoiceService:
 
         Returns:
             QuerySet von Lessons mit Status TAUGHT, die noch nicht in einem InvoiceItem sind
+
+        Raises:
+            ValidationError: Wenn period_start nach period_end liegt oder der Zeitraum > 1 Jahr ist
         """
+        from django.core.exceptions import ValidationError
+
+        if period_start > period_end:
+            raise ValidationError("period_start muss vor period_end liegen.")
+        if (period_end - period_start).days > 366:
+            raise ValidationError("Zeitraum darf maximal 1 Jahr betragen.")
+
         queryset = (
             Lesson.objects.filter(
                 status="taught",  # Nur unterrichtete Lessons (nicht PLANNED oder PAID)
@@ -80,8 +90,19 @@ class InvoiceService:
 
         Returns:
             Invoice-Instanz
+
+        Raises:
+            ValidationError: Wenn der Zeitraum ungültig ist
+            ValueError: Wenn keine abrechenbaren Lessons gefunden werden
         """
-        # Lade automatisch alle abrechenbaren Lessons im Zeitraum
+        from django.core.exceptions import ValidationError
+        from django.db.models import F
+
+        if period_start > period_end:
+            raise ValidationError("period_start muss vor period_end liegen.")
+        if (period_end - period_start).days > 366:
+            raise ValidationError("Zeitraum darf maximal 1 Jahr betragen.")
+
         contract_id = contract.id if contract else None
         logger.info(
             "Creating invoice: period=%s-%s, user=%s, contract=%s",
@@ -101,11 +122,9 @@ class InvoiceService:
                 raise ValueError(_("No billable lessons found in the specified period."))
 
             first_lesson = lesson_list[0]
-            # Tutor for TutorSpace tier math must always be set (calculate_tutorspace returns 0 if None).
             owner = user if user is not None else first_lesson.contract.user
 
             if contract:
-                # Use tutoring institute as payer if available, otherwise student
                 if contract.institute:
                     payer_name = contract.institute
                 else:
@@ -113,7 +132,6 @@ class InvoiceService:
                 payer_address = ""
             else:
                 first_contract = first_lesson.contract
-                # Use tutoring institute as payer if available, otherwise student
                 if first_contract.institute:
                     payer_name = first_contract.institute
                 else:
@@ -129,18 +147,20 @@ class InvoiceService:
                 "period_end": period_end,
                 "status": "draft",
             }
+
             if user and user_has_feature(user, Feature.FEATURE_BILLING_PRO):
                 from apps.core.models import UserProfile
 
-                profile, _created = UserProfile.objects.get_or_create(
-                    user=user, defaults={"next_invoice_number": 1}
-                )
                 with transaction.atomic():
-                    profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
-                    num = profile.next_invoice_number
-                    invoice_kwargs["invoice_number"] = f"INV-{num:04d}"
-                    profile.next_invoice_number = num + 1
-                    profile.save(update_fields=["next_invoice_number"])
+                    profile, _created = UserProfile.objects.select_for_update().get_or_create(
+                        user=user,
+                        defaults={"next_invoice_number": 1},
+                    )
+                    invoice_number = profile.next_invoice_number
+                    UserProfile.objects.filter(pk=profile.pk).update(
+                        next_invoice_number=F("next_invoice_number") + 1
+                    )
+                invoice_kwargs["invoice_number"] = f"INV-{invoice_number:04d}"
             else:
                 invoice_kwargs["invoice_number"] = None
 
@@ -208,7 +228,7 @@ class InvoiceService:
             return invoice
 
     @staticmethod
-    def delete_invoice(invoice: Invoice):
+    def delete_invoice(invoice: Invoice) -> int:
         """
         Deletes an invoice and resets lessons to TAUGHT.
 
@@ -220,12 +240,12 @@ class InvoiceService:
             invoice: The invoice to delete
 
         Returns:
-            Number of reset lessons
+            Number of reset lessons (int). Returns 0 if the model's delete()
+            does not return an integer count.
         """
-        # The delete() method of the Invoice model automatically resets all
-        # lessons to TAUGHT and returns the count
-        reset_count = invoice.delete()
-        return reset_count
+        result = invoice.delete()
+        # invoice.delete() ist überschrieben und gibt int zurück (Anzahl zurückgesetzter Lessons)
+        return result if isinstance(result, int) else 0
 
     @staticmethod
     def mark_invoice_as_sent(invoice: Invoice) -> None:
@@ -267,18 +287,26 @@ class PaymentService:
     @staticmethod
     def recompute_lesson_paid_for_invoice_items(invoice: Invoice) -> None:
         """For each lesson in this invoice's items, set paid iff all invoices
-        containing that lesson have status=paid."""
+        containing that lesson have status=paid.
+
+        Verwendet eine effiziente Bulk-Query statt N+1-Schleifen.
+        """
+        lesson_ids = list(
+            invoice.items.filter(lesson__isnull=False).values_list("lesson_id", flat=True)
+        )
+
+        if not lesson_ids:
+            return
+
+        unpaid_lesson_ids = set(
+            InvoiceItem.objects.filter(lesson_id__in=lesson_ids)
+            .exclude(invoice__status="paid")
+            .values_list("lesson_id", flat=True)
+        )
+        paid_ids = set(lesson_ids) - unpaid_lesson_ids
+
         with transaction.atomic():
-            for item in invoice.items.select_related("lesson").filter(lesson__isnull=False):
-                lesson = item.lesson
-                if not lesson:
-                    continue
-                all_paid = True
-                for ii in InvoiceItem.objects.filter(lesson=lesson).select_related("invoice"):
-                    if ii.invoice.status != "paid":
-                        all_paid = False
-                        break
-                new_status = "paid" if all_paid else "taught"
-                if lesson.status != new_status:
-                    lesson.status = new_status
-                    lesson.save(update_fields=["status", "updated_at"])
+            if unpaid_lesson_ids:
+                Lesson.objects.filter(id__in=unpaid_lesson_ids).update(status="taught")
+            if paid_ids:
+                Lesson.objects.filter(id__in=paid_ids).update(status="paid")

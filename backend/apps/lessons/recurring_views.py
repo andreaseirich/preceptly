@@ -51,9 +51,12 @@ class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Vorschau der zu erzeugenden Lessons
-        preview = RecurringLessonService.preview_lessons(self.object)
-        context["preview_count"] = len(preview)
-        context["preview"] = preview[:10]  # Zeige nur erste 10
+        try:
+            preview = RecurringLessonService.preview_lessons(self.object, limit=11)
+        except TypeError:
+            preview = RecurringLessonService.preview_lessons(self.object)[:11]
+        context["preview_count"] = "10+" if len(preview) > 10 else str(len(preview))
+        context["preview"] = preview[:10]
         return context
 
 
@@ -292,7 +295,14 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """Verarbeitet Bulk-Edit-Aktionen."""
+        from django.urls import reverse
+
         recurring_ids = request.POST.getlist("recurring_ids")
+
+        if len(recurring_ids) > 100:
+            messages.error(request, _("Too many items selected (max 100)."))
+            return redirect(request.META.get("HTTP_REFERER") or reverse("lessons:recurring_list"))
+
         action = request.POST.get("action")
 
         if not recurring_ids:

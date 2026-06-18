@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 def get_last_calendar_url(request):
     """Returns the URL of the last visited calendar position from the session."""
+    import datetime as dt_mod
+
     view = request.session.get("last_calendar_view", "week")
     year = request.session.get("last_calendar_year")
     month = request.session.get("last_calendar_month")
@@ -32,6 +34,13 @@ def get_last_calendar_url(request):
     y = year or now.year
     m = month or now.month
     d = day or now.day
+
+    try:
+        y, m, d = int(y), int(m), int(d)
+        dt_mod.date(y, m, d)  # Plausibilitätscheck
+    except (ValueError, TypeError):
+        today = timezone.localdate()
+        y, m, d = today.year, today.month, today.day
 
     if view == "calendar":
         return reverse("lessons:calendar") + f"?year={y}&month={m}"
@@ -45,6 +54,7 @@ class WeekView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         import datetime as _datetime
+        import re
 
         context = super().get_context_data(**kwargs)
 
@@ -55,13 +65,21 @@ class WeekView(LoginRequiredMixin, TemplateView):
         day_param = self.request.GET.get("day")
         date_param = self.request.GET.get("date")
 
+        DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
         if date_param:
-            try:
-                date_obj = date.fromisoformat(date_param)
-                year = date_obj.year
-                month = date_obj.month
-                day = date_obj.day
-            except (ValueError, TypeError):
+            if len(date_param) <= 10 and DATE_RE.match(date_param):
+                try:
+                    date_obj = date.fromisoformat(date_param)
+                    year = date_obj.year
+                    month = date_obj.month
+                    day = date_obj.day
+                except ValueError:
+                    now = timezone.localdate()
+                    year = now.year
+                    month = now.month
+                    day = now.day
+            else:
                 now = timezone.localdate()
                 year = now.year
                 month = now.month
@@ -191,6 +209,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         import datetime as _datetime
+        import re
 
         context = super().get_context_data(**kwargs)
 
@@ -200,14 +219,19 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         year = now.year
         month = now.month
 
+        DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
         date_param = self.request.GET.get("date")
         if date_param:
-            try:
-                date_obj = date.fromisoformat(date_param)
-                year = date_obj.year
-                month = date_obj.month
-            except (ValueError, TypeError) as exc:
-                logger.debug("Invalid date param ignored: %s", exc)
+            if len(date_param) <= 10 and DATE_RE.match(date_param):
+                try:
+                    date_obj = date.fromisoformat(date_param)
+                    year = date_obj.year
+                    month = date_obj.month
+                except ValueError as exc:
+                    logger.debug("Invalid date param ignored: %s", exc)
+            else:
+                logger.debug("Invalid date param format ignored: %s", date_param)
 
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")
