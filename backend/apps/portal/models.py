@@ -104,8 +104,8 @@ class PortalMessage(models.Model):
     )
     text = models.TextField(verbose_name=_("Message"))
     created_at = models.DateTimeField(auto_now_add=True)
-    read_by_tutor = models.BooleanField(default=False)
-    read_by_portal = models.BooleanField(default=False)
+    read_by_tutor = models.BooleanField(default=False, db_index=True)
+    read_by_portal = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         ordering = ["created_at"]

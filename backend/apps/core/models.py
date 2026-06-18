@@ -16,7 +16,7 @@ class UserProfile(models.Model):
         help_text=_("Associated Django user"),
     )
     is_premium = models.BooleanField(
-        default=False, help_text=_("Does the user have premium access?")
+        default=False, db_index=True, help_text=_("Does the user have premium access?")
     )
     premium_since = models.DateTimeField(
         null=True, blank=True, help_text=_("Since when is the user a premium member?")
@@ -37,6 +37,7 @@ class UserProfile(models.Model):
     )
     next_invoice_number = models.PositiveIntegerField(
         default=1,
+        validators=[MinValueValidator(1)],
         help_text=_("Next sequential invoice number (Premium only)."),
     )
     travel_policy = models.JSONField(
@@ -81,6 +82,7 @@ class UserProfile(models.Model):
     )
     tutor_no_show_pay_percent = models.PositiveSmallIntegerField(
         default=0,
+        validators=[MaxValueValidator(100)],
         help_text=_(
             "TutorSpace, session marked 'tutor did not show (student waited)': share of the "
             "usual lesson amount you still keep. The rest is not paid, and the usual amount "
