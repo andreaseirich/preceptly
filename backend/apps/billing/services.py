@@ -2,6 +2,7 @@
 Services für Billing-Funktionalität.
 """
 
+import logging
 from decimal import Decimal
 
 from django.db import transaction
@@ -13,6 +14,8 @@ from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_in
 from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
+
+logger = logging.getLogger(__name__)
 
 
 class InvoiceService:
@@ -80,6 +83,13 @@ class InvoiceService:
         """
         # Lade automatisch alle abrechenbaren Lessons im Zeitraum
         contract_id = contract.id if contract else None
+        logger.info(
+            "Creating invoice: period=%s-%s, user=%s, contract=%s",
+            period_start,
+            period_end,
+            user,
+            contract,
+        )
         with transaction.atomic():
             lesson_list = list(
                 InvoiceService.get_billable_lessons(
@@ -141,7 +151,13 @@ class InvoiceService:
                 lesson_contract = lesson.contract
 
                 if is_tutorspace_institute(getattr(lesson_contract, "institute", None)):
-                    amount = calculate_tutorspace_amount_for_session(lesson, tutor=owner)
+                    try:
+                        amount = calculate_tutorspace_amount_for_session(lesson, tutor=owner)
+                    except (ValueError, ZeroDivisionError) as e:
+                        logger.error(
+                            "Tutorspace amount calc failed for lesson %s: %s", lesson.pk, e
+                        )
+                        raise
                 else:
                     unit_duration = Decimal(str(lesson_contract.unit_duration_minutes))
                     if unit_duration == 0:
@@ -166,14 +182,20 @@ class InvoiceService:
                     elif is_abacus_institute(getattr(lesson_contract, "institute", None)):
                         desc = f"{desc} ({_('not billed — tutor no-show')})"
 
-                InvoiceItem.objects.create(
-                    invoice=invoice,
-                    lesson=lesson,
-                    description=desc,
-                    date=lesson.date,
-                    duration_minutes=lesson.duration_minutes,
-                    amount=amount,
-                )
+                from django.db import IntegrityError
+
+                try:
+                    InvoiceItem.objects.create(
+                        invoice=invoice,
+                        lesson=lesson,
+                        description=desc,
+                        date=lesson.date,
+                        duration_minutes=lesson.duration_minutes,
+                        amount=amount,
+                    )
+                except IntegrityError as e:
+                    logger.error("Duplicate InvoiceItem for lesson %s: %s", lesson.pk, e)
+                    raise ValueError(f"Lesson {lesson.pk} already invoiced") from e
 
                 total_amount += amount
 
@@ -246,16 +268,17 @@ class PaymentService:
     def recompute_lesson_paid_for_invoice_items(invoice: Invoice) -> None:
         """For each lesson in this invoice's items, set paid iff all invoices
         containing that lesson have status=paid."""
-        for item in invoice.items.select_related("lesson").filter(lesson__isnull=False):
-            lesson = item.lesson
-            if not lesson:
-                continue
-            all_paid = True
-            for ii in InvoiceItem.objects.filter(lesson=lesson).select_related("invoice"):
-                if ii.invoice.status != "paid":
-                    all_paid = False
-                    break
-            new_status = "paid" if all_paid else "taught"
-            if lesson.status != new_status:
-                lesson.status = new_status
-                lesson.save(update_fields=["status", "updated_at"])
+        with transaction.atomic():
+            for item in invoice.items.select_related("lesson").filter(lesson__isnull=False):
+                lesson = item.lesson
+                if not lesson:
+                    continue
+                all_paid = True
+                for ii in InvoiceItem.objects.filter(lesson=lesson).select_related("invoice"):
+                    if ii.invoice.status != "paid":
+                        all_paid = False
+                        break
+                new_status = "paid" if all_paid else "taught"
+                if lesson.status != new_status:
+                    lesson.status = new_status
+                    lesson.save(update_fields=["status", "updated_at"])
