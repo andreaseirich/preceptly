@@ -30,6 +30,28 @@ from apps.core.stripe_utils import (
 
 logger = logging.getLogger(__name__)
 
+# Initialize Stripe API key once at module load time (not per-request)
+if hasattr(settings, "STRIPE_SECRET_KEY") and settings.STRIPE_SECRET_KEY:
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def _resolve_and_validate_profile(event, obj):
+    """Resolve UserProfile from Stripe event with cross-validation against obj.customer."""
+    profile = resolve_user_from_stripe_event(event)
+    if not profile:
+        return None
+    event_customer_id = obj.get("customer")
+    if event_customer_id and getattr(profile, "stripe_customer_id", None):
+        if profile.stripe_customer_id != event_customer_id:
+            logger.error(
+                "SECURITY: customer_id mismatch profile=%s expected=%s got=%s",
+                profile.pk,
+                profile.stripe_customer_id,
+                event_customer_id,
+            )
+            return None
+    return profile
+
 
 def _get_base_url(request: HttpRequest) -> str:
     """Build absolute base URL respecting X-Forwarded-Proto for Railway."""
@@ -75,7 +97,6 @@ class SubscriptionCheckoutView(View):
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
 
-        stripe.api_key = settings.STRIPE_SECRET_KEY
         user = request.user
         profile, _created = UserProfile.objects.get_or_create(
             user=user, defaults={"is_premium": False}
@@ -140,7 +161,6 @@ class SubscriptionPortalView(View):
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
 
-        stripe.api_key = settings.STRIPE_SECRET_KEY
         profile = getattr(request.user, "profile", None)
         if not profile or not profile.stripe_customer_id:
             return redirect(reverse("core:settings"))
@@ -218,7 +238,6 @@ class StripeCheckoutView(View):
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
 
-        stripe.api_key = settings.STRIPE_SECRET_KEY
         user = request.user
         success_url = getattr(
             settings, "STRIPE_CHECKOUT_SUCCESS_URL", None
@@ -288,7 +307,6 @@ class StripePortalView(View):
                 status=400,
             )
 
-        stripe.api_key = settings.STRIPE_SECRET_KEY
         _maybe_update_stripe_customer_email(profile, request.user)
         return_url = getattr(
             settings, "STRIPE_PORTAL_RETURN_URL", None
@@ -374,8 +392,6 @@ def _set_premium(profile: UserProfile, is_premium: bool) -> None:
 
 def _handle_stripe_event(event: dict) -> None:
     """Process Stripe event and update UserProfile premium status. Unknown types -> no-op (200)."""
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
     event_type = event["type"]
     data = event.get("data", {})
     obj = data.get("object", {})
@@ -396,11 +412,20 @@ def _handle_stripe_event(event: dict) -> None:
 
 def _handle_checkout_session_completed(event: dict, session: dict) -> None:
     """Handle checkout.session.completed: capture customer+subscription, set premium from status."""
-    profile = resolve_user_from_stripe_event(event)
+    profile = _resolve_and_validate_profile(event, session)
     if not profile:
         return
 
     sub_id = session.get("subscription")
+
+    # Stripe API call OUTSIDE transaction (H11)
+    sub_status = None
+    if sub_id:
+        try:
+            sub = stripe.Subscription.retrieve(sub_id)
+            sub_status = sub.get("status", "")
+        except stripe.error.StripeError as e:
+            logger.warning("Stripe Subscription.retrieve failed for %s: %s", sub_id, e.http_status)
 
     with transaction.atomic():
         profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
@@ -409,13 +434,8 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
             profile.stripe_subscription_id = sub_id
         profile.save(update_fields=["stripe_customer_id", "stripe_subscription_id"])
 
-    if sub_id:
-        try:
-            sub = stripe.Subscription.retrieve(sub_id)
-            status = sub.get("status", "")
-            _set_premium(profile, is_premium_subscription_status(status))
-        except stripe.error.StripeError as e:
-            logger.warning("Stripe Subscription.retrieve failed for %s: %s", sub_id, e.http_status)
+        if sub_status is not None:
+            _set_premium(profile, is_premium_subscription_status(sub_status))
 
 
 def _handle_subscription_created_or_updated(subscription: dict) -> None:
@@ -428,7 +448,7 @@ def _handle_subscription_created_or_updated(subscription: dict) -> None:
     is_premium = is_premium_subscription_status(status)
 
     synthetic_event = {"data": {"object": subscription}}
-    profile = resolve_user_from_stripe_event(synthetic_event)
+    profile = _resolve_and_validate_profile(synthetic_event, subscription)
 
     if not profile and customer_id:
         profile = UserProfile.objects.filter(stripe_customer_id=customer_id).first()
@@ -483,13 +503,31 @@ def _handle_invoice_payment_failed(invoice: dict) -> None:
     profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
     if not profile:
         return
+
+    # Cross-validate customer_id if present on invoice
+    invoice_customer_id = invoice.get("customer")
+    if invoice_customer_id and profile.stripe_customer_id:
+        if profile.stripe_customer_id != invoice_customer_id:
+            logger.error(
+                "SECURITY: customer_id mismatch profile=%s expected=%s got=%s",
+                profile.pk,
+                profile.stripe_customer_id,
+                invoice_customer_id,
+            )
+            return
+
+    # Stripe API call OUTSIDE transaction
     try:
         sub = stripe.Subscription.retrieve(sub_id)
         status = sub.get("status", "")
-        if not is_premium_subscription_status(status):
-            _set_premium(profile, False)
     except stripe.error.StripeError as e:
         logger.warning("Stripe Subscription.retrieve failed for invoice: %s", e.http_status)
+        return
+
+    if not is_premium_subscription_status(status):
+        with transaction.atomic():
+            profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
+            _set_premium(profile, False)
 
 
 def _handle_invoice_paid(invoice: dict) -> None:

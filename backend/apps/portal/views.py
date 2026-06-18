@@ -62,30 +62,44 @@ class PortalLoginView(View):
 
     @method_decorator(ratelimit(key="ip", rate="10/m", method="POST", block=True))
     def post(self, request):
+        from django.contrib.auth import authenticate
+        from django.contrib.auth.hashers import check_password as _check_password
+
+        _DUMMY_HASH = "pbkdf2_sha256$600000$dummy$dummyhashfortimingnoop="
+
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
         error = None
-        try:
-            user = User.objects.get(username=username)
-            if user.check_password(password) and user.is_active:
-                portal_user = PortalUser.objects.get(user=user)
-                request.session["portal_user_id"] = portal_user.pk
-                next_url = request.POST.get("next", "")
-                if next_url and url_has_allowed_host_and_scheme(
-                    next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
-                ):
-                    return redirect(next_url)
-                return redirect("portal:home")
-            else:
-                error = _("Ungültige Zugangsdaten.")
-        except (User.DoesNotExist, PortalUser.DoesNotExist):
+
+        user = authenticate(request, username=username, password=password)
+        if user is None or not user.is_active:
+            # Timing-Attack-Schutz: Dummy-Hash-Operation durchführen
+            _check_password("dummy", _DUMMY_HASH)
             error = _("Ungültige Zugangsdaten.")
-        return render(request, self.template_name, {"error": error})
+            return render(request, self.template_name, {"error": error})
+
+        try:
+            portal_user = PortalUser.objects.get(user=user)
+        except PortalUser.DoesNotExist:
+            _check_password("dummy", _DUMMY_HASH)
+            error = _("Ungültige Zugangsdaten.")
+            return render(request, self.template_name, {"error": error})
+
+        # Session-Fixation-Schutz: Session-Key vor dem Setzen rotieren
+        request.session.cycle_key()
+        request.session["portal_user_id"] = portal_user.pk
+
+        next_url = request.POST.get("next", "")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            return redirect(next_url)
+        return redirect("portal:home")
 
 
 class PortalLogoutView(View):
     def post(self, request):
-        request.session.pop("portal_user_id", None)
+        request.session.flush()
         return redirect("portal:login")
 
 
@@ -399,7 +413,10 @@ class PortalActivateView(View):
         portal_user.user.set_password(password)
         portal_user.user.save()
         link.is_active = True
+        link.invite_token = None
         link.save()
+        # Session-Fixation-Schutz: Session-Key vor dem Setzen rotieren
+        request.session.cycle_key()
         request.session["portal_user_id"] = portal_user.pk
         return redirect("portal:home")
 
@@ -696,9 +713,21 @@ class PortalSessionCancelView(View):
             return redirect("portal:login")
 
         session = get_object_or_404(_Session, pk=session_pk)
+
+        # IDOR-Schutz: Ownership-Prüfung über _get_portal_student,
+        # welches die Zugriffsrechte des portal_user auf den contract verifiziert.
         student = _get_portal_student(portal_user, session.contract_id)
         if not student:
             return HttpResponseForbidden()
+
+        # Zusätzliche Konsistenzprüfung: Session muss wirklich zum geprüften Contract gehören
+        if session.contract_id != student.pk:
+            return HttpResponseForbidden()
+
+        # Tutor-Konsistenz: contract.user muss zum portal_user.tutor passen
+        if session.contract.user_id != portal_user.tutor_id:
+            return HttpResponseForbidden()
+
         if session.status != "planned":
             messages.warning(request, "Nur geplante Termine können abgesagt werden.")
         else:
@@ -726,7 +755,18 @@ class PortalSessionRescheduleView(View):
         if not portal_user:
             return None, None, None
         session = get_object_or_404(_Session, pk=session_pk)
+
+        # IDOR-Schutz: Ownership-Prüfung über _get_portal_student
         student = _get_portal_student(portal_user, session.contract_id)
+        if not student:
+            return portal_user, session, None
+
+        # Zusätzliche Konsistenzprüfungen
+        if session.contract_id != student.pk:
+            return portal_user, session, None
+        if session.contract.user_id != portal_user.tutor_id:
+            return portal_user, session, None
+
         return portal_user, session, student
 
     def get(self, request, session_pk):

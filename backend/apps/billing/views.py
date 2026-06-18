@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
 from django.db.models import Sum
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -65,7 +65,10 @@ class InvoiceListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = _user_invoice_queryset(self.request.user)
+        qs = _user_invoice_queryset(self.request.user).prefetch_related(
+            "items",
+            "items__lesson",
+        )
         from apps.core.feature_flags import Feature, user_has_feature
 
         if user_has_feature(self.request.user, Feature.FEATURE_BILLING_PRO):
@@ -281,18 +284,19 @@ def serve_invoice_document(request, pk):
     if not invoice.document:
         raise Http404(_("Invoice document not found."))
 
-    # Check if file exists
-    file_path = invoice.document.path
-    if not os.path.exists(file_path):
-        raise Http404(_("Invoice document file not found."))
+    try:
+        file_handle = invoice.document.open("rb")
+    except (FileNotFoundError, OSError) as err:
+        raise Http404(_("Invoice document file not found.")) from err
 
-    # Serve the file
-    return FileResponse(
-        open(file_path, "rb"),
+    filename = os.path.basename(invoice.document.name)
+    response = FileResponse(
+        file_handle,
         content_type="application/octet-stream",
         as_attachment=True,
-        filename=os.path.basename(file_path),
+        filename=filename,
     )
+    return response
 
 
 @login_required
@@ -402,12 +406,11 @@ def invoice_pdf_download(request, pk):
             raise Http404(_("Could not generate PDF.")) from None
     if not invoice.invoice_pdf:
         raise Http404(_("Invoice PDF not found."))
+    fn = f"invoice-{invoice.invoice_number or invoice.id}.pdf"
     try:
-        with invoice.invoice_pdf.open("rb") as f:
-            pdf_bytes = f.read()
-        fn = f"invoice-{invoice.invoice_number or invoice.id}.pdf"
-        response = HttpResponse(pdf_bytes, content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="{fn}"'
-        return response
+        file_handle = invoice.invoice_pdf.open("rb")
     except (FileNotFoundError, OSError) as err:
         raise Http404(_("Invoice PDF file not found.")) from err
+    response = FileResponse(file_handle, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{fn}"'
+    return response
