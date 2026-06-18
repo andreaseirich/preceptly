@@ -26,6 +26,7 @@ jobs:
       DJANGO_SECRET_KEY: test-ci-secret
       SECRET_KEY: test-ci-secret
       DJANGO_DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1
       DJANGO_SETTINGS_MODULE: tutorflow.settings
     steps:
       - uses: actions/checkout@v4
