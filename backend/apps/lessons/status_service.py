@@ -4,7 +4,6 @@ Service for automatically updating session statuses based on date/time.
 
 from datetime import datetime, timedelta
 
-import pytz
 from django.db import transaction
 from django.utils import timezone
 
@@ -40,13 +39,9 @@ class SessionStatusUpdater:
         # Calculate start_datetime and end_datetime
         try:
             start_datetime = timezone.make_aware(datetime.combine(session.date, session.start_time))
-        except pytz.exceptions.AmbiguousTimeError:
+        except Exception:  # AmbiguousTimeError or NonExistentTimeError (DST transition)
             start_datetime = timezone.make_aware(
                 datetime.combine(session.date, session.start_time), is_dst=False
-            )
-        except pytz.exceptions.NonExistentTimeError:
-            start_datetime = timezone.make_aware(
-                datetime.combine(session.date, session.start_time), is_dst=None
             )
         end_datetime = start_datetime + timedelta(minutes=session.duration_minutes)
 
@@ -108,13 +103,9 @@ class SessionStatusUpdater:
                     start_datetime = timezone.make_aware(
                         datetime.combine(session.date, session.start_time)
                     )
-                except pytz.exceptions.AmbiguousTimeError:
+                except Exception:  # AmbiguousTimeError or NonExistentTimeError (DST transition)
                     start_datetime = timezone.make_aware(
                         datetime.combine(session.date, session.start_time), is_dst=False
-                    )
-                except pytz.exceptions.NonExistentTimeError:
-                    start_datetime = timezone.make_aware(
-                        datetime.combine(session.date, session.start_time), is_dst=None
                     )
                 end_datetime = start_datetime + timedelta(minutes=session.duration_minutes)
 
