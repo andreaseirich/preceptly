@@ -7,6 +7,7 @@ from calendar import monthcalendar as _monthcalendar
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -184,41 +185,55 @@ class ParentHomeView(View):
         portal_user = get_portal_user(request)
         if not portal_user or portal_user.role != "parent":
             return redirect("portal:login")
-        links = ParentStudentLink.objects.filter(parent=portal_user).select_related("contract")
-        students_data = []
-        import datetime
+        today = _dt.date.today()
+        upcoming_qs = (
+            _Lesson.objects.filter(
+                date__gte=today,
+                status__in=["planned"],
+            )
+            .order_by("date", "start_time")
+            .select_related("meeting_room")
+        )
 
-        from apps.lessons.models import Lesson
-
-        today = datetime.date.today()
-        for link in links:
-            upcoming = (
-                Lesson.objects.filter(
-                    contract=link.contract,
-                    date__gte=today,
-                    status__in=["planned"],
+        links = (
+            ParentStudentLink.objects.filter(parent=portal_user)
+            .select_related("contract")
+            .annotate(
+                unread_count=Count(
+                    "contract__portalmessage",
+                    filter=Q(contract__portalmessage__read_by_portal=False),
                 )
-                .order_by("date", "start_time")
-                .first()
             )
-            unread = PortalMessage.objects.filter(
-                contract=link.contract, read_by_portal=False
-            ).count()
-            meeting_room = None
-            if upcoming:
-                try:
-                    if upcoming.meeting_room.is_active:
-                        meeting_room = upcoming.meeting_room
-                except Exception:  # noqa: S110 – RelatedObjectDoesNotExist bei fehlendem MeetingRoom
-                    pass
-            students_data.append(
-                {
-                    "student": link.contract,
-                    "next_lesson": upcoming,
-                    "unread_messages": unread,
-                    "meeting_room": meeting_room,
-                }
+            .prefetch_related(
+                Prefetch(
+                    "contract__lesson_set",
+                    queryset=upcoming_qs,
+                    to_attr="_upcoming_lessons",
+                )
             )
+        )
+
+        def _get_upcoming(link):
+            lessons = getattr(link.contract, "_upcoming_lessons", [])
+            return lessons[0] if lessons else None
+
+        def _get_meeting_room(upcoming):
+            if not upcoming:
+                return None
+            try:
+                return upcoming.meeting_room if upcoming.meeting_room.is_active else None
+            except Exception:  # noqa: S110
+                return None
+
+        students_data = [
+            {
+                "student": link.contract,
+                "next_lesson": _get_upcoming(link),
+                "unread_messages": link.unread_count,
+                "meeting_room": _get_meeting_room(_get_upcoming(link)),
+            }
+            for link in links
+        ]
         return render(
             request,
             self.template_name,
