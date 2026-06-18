@@ -44,12 +44,12 @@ class WeekView(LoginRequiredMixin, TemplateView):
     template_name = "lessons/week.html"
 
     def get_context_data(self, **kwargs):
+        import datetime as _datetime
+
         context = super().get_context_data(**kwargs)
 
-        # Automatic status update for past lessons
         LessonStatusUpdater.update_past_lessons_to_taught()
 
-        # Year, month and day from URL parameters (fallback: current date)
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")
         day_param = self.request.GET.get("day")
@@ -62,35 +62,36 @@ class WeekView(LoginRequiredMixin, TemplateView):
                 month = date_obj.month
                 day = date_obj.day
             except (ValueError, TypeError):
-                now = timezone.now()
+                now = timezone.localdate()
                 year = now.year
                 month = now.month
                 day = now.day
         elif year_param and month_param and day_param:
-            year = int(year_param)
-            month = int(month_param)
-            day = int(day_param)
+            try:
+                year = int(year_param)
+                month = int(month_param)
+                day = int(day_param)
+                _datetime.date(year, month, day)  # Plausibilitätscheck
+            except (ValueError, TypeError):
+                today = timezone.localdate()
+                year, month, day = today.year, today.month, today.day
         else:
-            now = timezone.now()
+            now = timezone.localdate()
             year = now.year
             month = now.month
             day = now.day
 
-        # Cache the current calendar position in the session
         self.request.session["last_calendar_view"] = "week"
         self.request.session["last_calendar_year"] = year
         self.request.session["last_calendar_month"] = month
         self.request.session["last_calendar_day"] = day
 
-        # Load week data
         week_data = WeekService.get_week_data(year, month, day, user=self.request.user)
 
-        # Navigation: Previous/Next week
         week_start = week_data["week_start"]
         prev_week = week_start - timedelta(days=7)
         next_week = week_start + timedelta(days=7)
 
-        # Create weekday list
         weekdays = []
         weekday_names = [
             _("Monday"),
@@ -123,10 +124,7 @@ class WeekView(LoginRequiredMixin, TemplateView):
                 }
             )
 
-        # Today for template comparison
         today = timezone.localdate()
-
-        # Hours list for template (8-22)
         hours = list(range(8, 23))
 
         context.update(
@@ -153,17 +151,31 @@ class LessonMonthView(LoginRequiredMixin, ListView):
     context_object_name = "lessons"
 
     def get_queryset(self):
-        """Returns lessons for the specified month."""
-        year = int(self.kwargs.get("year", timezone.now().year))
-        month = int(self.kwargs.get("month", timezone.now().month))
+        now = timezone.now()
+        try:
+            year = int(self.kwargs.get("year", now.year))
+            month = int(self.kwargs.get("month", now.month))
+            import datetime as _datetime
+
+            _datetime.date(year, month, 1)  # Plausibilitätscheck
+        except (ValueError, TypeError):
+            year = now.year
+            month = now.month
         return LessonQueryService.get_lessons_for_month(year, month, user=self.request.user)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        year = int(self.kwargs.get("year", timezone.now().year))
-        month = int(self.kwargs.get("month", timezone.now().month))
+        import datetime as _datetime
 
-        # Add conflict info
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        try:
+            year = int(self.kwargs.get("year", now.year))
+            month = int(self.kwargs.get("month", now.month))
+            _datetime.date(year, month, 1)  # Plausibilitätscheck
+        except (ValueError, TypeError):
+            year = now.year
+            month = now.month
+
         for lesson in context["lessons"]:
             lesson.conflicts = LessonConflictService.check_conflicts(lesson)
 
@@ -178,12 +190,12 @@ class CalendarView(LoginRequiredMixin, TemplateView):
     template_name = "lessons/calendar.html"
 
     def get_context_data(self, **kwargs):
+        import datetime as _datetime
+
         context = super().get_context_data(**kwargs)
 
-        # Automatic status update for past lessons
         LessonStatusUpdater.update_past_lessons_to_taught()
 
-        # Year and month from URL parameters (fallback: current date)
         now = timezone.now()
         year = now.year
         month = now.month
@@ -203,18 +215,18 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             try:
                 year = int(year_param)
                 month = int(month_param)
+                _datetime.date(year, month, 1)  # Plausibilitätscheck
             except (ValueError, TypeError) as exc:
                 logger.debug("Invalid year/month params ignored: %s", exc)
+                year = now.year
+                month = now.month
 
-        # Cache the current calendar position in the session
         self.request.session["last_calendar_view"] = "calendar"
         self.request.session["last_calendar_year"] = year
         self.request.session["last_calendar_month"] = month
 
-        # Load calendar data
         calendar_data = CalendarService.get_calendar_data(year, month, user=self.request.user)
 
-        # Calculate previous and next month
         if month == 1:
             prev_year = year - 1
             prev_month = 12
@@ -229,7 +241,6 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             next_year = year
             next_month = month + 1
 
-        # Generate calendar weeks
         cal = monthcalendar(year, month)
         weeks = []
         today = timezone.localdate()

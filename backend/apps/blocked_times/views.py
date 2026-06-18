@@ -327,6 +327,10 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
         # IMPORTANT: Use original_blocked_time instead of self.object to find RecurringBlockedTime
         matching_recurring = find_matching_recurring_blocked_time(original_blocked_time)
 
+        # Security check: Ensure matching_recurring belongs to the request user
+        if matching_recurring and matching_recurring.user != self.request.user:
+            matching_recurring = None  # Treat as single edit
+
         if edit_scope == "series" and matching_recurring:
             # Edit the entire series (RecurringBlockedTime)
             recurring = matching_recurring
@@ -338,6 +342,13 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
             all_blocked_times = get_all_blocked_times_for_recurring(
                 recurring, original_start_time=original_start_time
             )
+            # Security: Filter by user
+            if hasattr(all_blocked_times, "filter"):
+                all_blocked_times = all_blocked_times.filter(user=self.request.user)
+            else:
+                all_blocked_times = [
+                    bt for bt in all_blocked_times if bt.user_id == self.request.user.id
+                ]
 
             # Check if weekdays have changed
             new_weekdays = form.cleaned_data.get("recurrence_weekdays", [])
@@ -546,6 +557,11 @@ class BlockedTimeDeleteView(LoginRequiredMixin, DeleteView):
             if all_blocked_time_ids:
                 BlockedTime.objects.filter(id__in=all_blocked_time_ids).delete()
 
+            # Security check: Ensure matching_recurring belongs to the request user
+            if matching_recurring.user != request.user:
+                from django.core.exceptions import PermissionDenied
+
+                raise PermissionDenied
             # Delete the RecurringBlockedTime
             matching_recurring.delete()
 

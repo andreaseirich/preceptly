@@ -29,24 +29,53 @@ PHONE_PATTERN = re.compile(r"\+?[0-9]{1,4}(?:[\s.\-][0-9]{1,4}){2,14}")
 _CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 _INJECTION_PATTERNS = re.compile(
+    # --- Englisch ---
     r"ignore\s+(?:(?:all|previous|prior|above)\s+){0,3}instructions"
     r"|override\s+(?:(?:all|previous|prior)\s+)?instructions"
+    r"|disregard\s+(?:(?:all|previous|prior|above)\s+){0,3}instructions"
+    r"|forget\s+(?:(?:all|previous|prior|above)\s+){0,3}(?:instructions|prompts?)"
     r"|^system\s*:"
     r"|<system>"
+    r"|<\|system\|>"
     r"|\[INST\]"
     r"|\[/INST\]"
     r"|###"
     r"|you\s+are\s+now"
     r"|act\s+as"
     r"|pretend\s+(?:you\s+are|to\s+be)"
-    r"|roleplay\s+as",
+    r"|roleplay\s+as"
+    r"|new\s+(?:task|instructions?|prompt)"
+    r"|system\s+prompt"
+    # --- Deutsch ---
+    r"|ignoriere\s+(?:(?:alle|alle\s+vorherigen|vorherige|obige|bisherige)\s+){0,3}(?:anweisungen|anleitungen|befehle|regeln)"
+    r"|anweisungen\s+ignorieren"
+    r"|vergiss\s+(?:(?:alle|alle\s+vorherigen|vorherige|obige|bisherige)\s+){0,3}(?:anweisungen|anleitungen|befehle|regeln|prompts?)"
+    r"|verwerfe\s+(?:(?:alle|alle\s+vorherigen|vorherige|obige|bisherige)\s+){0,3}(?:anweisungen|anleitungen|befehle|regeln)"
+    r"|missachte\s+(?:(?:alle|alle\s+vorherigen|vorherige|obige|bisherige)\s+){0,3}(?:anweisungen|anleitungen|befehle|regeln)"
+    r"|überschreibe\s+(?:(?:alle|alle\s+vorherigen|vorherige|obige)\s+){0,3}(?:anweisungen|anleitungen|befehle|regeln)"
+    r"|du\s+bist\s+(?:jetzt|nun|ab\s+(?:jetzt|sofort))"
+    r"|ab\s+jetzt\s+bist\s+du"
+    r"|spiele\s+(?:die\s+rolle|jetzt)"
+    r"|verhalte\s+dich\s+(?:wie|als)"
+    r"|tue\s+so,?\s+als\s+(?:ob|wärst)"
+    r"|gib\s+dich\s+als"
+    r"|neue\s+(?:aufgabe|anweisung(?:en)?|rolle)"
+    r"|system[-\s]?prompt",
     re.IGNORECASE | re.MULTILINE,
 )
 
 
 def strip_injection_patterns(text: str) -> str:
+    import unicodedata
+
     text = text[:MAX_CONTEXT_STRING_LEN]
+    # 1. Normalisiere Unicode (NFKC) — fängt Homoglyphen/Compat-Zeichen ab.
+    text = unicodedata.normalize("NFKC", text)
+    # 2. Entferne Zero-Width-Chars und bidi-Steuerzeichen.
+    text = re.sub(r"[\u200b-\u200f\u202a-\u202f\ufeff]", "", text)
+    # 3. Entferne Steuerzeichen.
     text = _CONTROL_CHARS.sub("", text)
+    # 4. Filtere bekannte Injection-Phrasen (EN + DE).
     text = _INJECTION_PATTERNS.sub(FILTERED, text)
     return text
 
@@ -77,3 +106,19 @@ def sanitize_context(ctx: Dict[str, Any]) -> Dict[str, Any]:
     """
     safe_copy = deepcopy(ctx)
     return _sanitize_value(safe_copy)
+
+
+def wrap_untrusted(text: str) -> str:
+    """
+    Bettet nicht vertrauenswürdigen User-Input in einen klar markierten Block ein,
+    damit nachgelagerte Modelle ihn nicht als System-Anweisung interpretieren.
+
+    Defense-in-Depth: zusätzlich zu strip_injection_patterns().
+    """
+    if text is None:
+        return "<user_provided_untrusted></user_provided_untrusted>"
+    sanitized = strip_injection_patterns(str(text))
+    # Verhindere, dass der Input selbst die Tags schließt.
+    sanitized = sanitized.replace("</user_provided_untrusted>", FILTERED)
+    sanitized = sanitized.replace("<user_provided_untrusted>", FILTERED)
+    return f"<user_provided_untrusted>\n{sanitized}\n</user_provided_untrusted>"

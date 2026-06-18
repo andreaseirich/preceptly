@@ -78,10 +78,12 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
         return initial
 
     def get_success_url(self):
-        """Nach Erstellen: Generiere Lessons und weiter zum Kalender."""
+        from django.db import transaction
+
         recurring_lesson = self.object
 
-        result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
+        with transaction.atomic():
+            result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 
         if result["created"] > 0:
             messages.success(
@@ -107,8 +109,12 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
         return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
-        messages.success(self.request, _("Recurring lesson successfully created."))
-        return super().form_valid(form)
+        from django.db import transaction
+
+        with transaction.atomic():
+            response = super().form_valid(form)
+            messages.success(self.request, _("Recurring lesson successfully created."))
+            return response
 
 
 class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
@@ -127,28 +133,30 @@ class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
+        from django.db import transaction
         from django.utils import timezone
 
         recurring = form.instance
         today = timezone.localdate()
-        # Only delete future planned sessions — preserve past/taught/paid records.
-        fk_ids = set(
-            recurring.generated_sessions.filter(date__gte=today, status="planned").values_list(
-                "id", flat=True
+
+        with transaction.atomic():
+            fk_ids = set(
+                recurring.generated_sessions.filter(date__gte=today, status="planned").values_list(
+                    "id", flat=True
+                )
             )
-        )
-        pattern_ids = {
-            s.id
-            for s in get_all_sessions_for_recurring(recurring)
-            if s.date >= today and s.status == "planned"
-        }
-        all_ids = fk_ids | pattern_ids
-        if all_ids:
-            Session.objects.filter(id__in=all_ids).delete()
+            pattern_ids = {
+                s.id
+                for s in get_all_sessions_for_recurring(recurring)
+                if s.date >= today and s.status == "planned"
+            }
+            all_ids = fk_ids | pattern_ids
+            if all_ids:
+                Session.objects.filter(id__in=all_ids).delete()
 
-        response = super().form_valid(form)
+            response = super().form_valid(form)
 
-        result = RecurringLessonService.generate_lessons(recurring, check_conflicts=True)
+            result = RecurringLessonService.generate_lessons(recurring, check_conflicts=True)
 
         if result["created"] > 0:
             messages.success(
