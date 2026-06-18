@@ -12,6 +12,15 @@ def fix_session_no_show(apps, schema_editor):
         print(f"  Fixed {count} sessions with inconsistent tutor_no_show + status")
 
 
+def drop_session_no_show_constraint(apps, schema_editor):
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(
+            "ALTER TABLE lessons_session DROP CONSTRAINT IF EXISTS session_no_show_only_if_not_cancelled_paid"
+        )
+
+
 def noop(apps, schema_editor):
     pass
 
@@ -23,10 +32,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(fix_session_no_show, noop),
-        migrations.RunSQL(
-            "ALTER TABLE lessons_session DROP CONSTRAINT IF EXISTS session_no_show_only_if_not_cancelled_paid",
-            reverse_sql=migrations.RunSQL.noop,
-        ),
+        migrations.RunPython(drop_session_no_show_constraint, noop),
         migrations.AddConstraint(
             model_name="session",
             constraint=models.CheckConstraint(
