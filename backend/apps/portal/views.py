@@ -1,5 +1,6 @@
 import datetime as _dt
 import logging
+import os
 import uuid
 from calendar import monthcalendar as _monthcalendar
 
@@ -17,6 +18,19 @@ from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
 
 logger = logging.getLogger(__name__)
+
+_ALLOWED_UPLOAD_EXTENSIONS = {
+    ".pdf",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".docx",
+    ".doc",
+    ".xlsx",
+    ".xls",
+    ".txt",
+}
+_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 def get_portal_user(request):
@@ -975,6 +989,18 @@ class PortalDocumentsView(View):
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
+            return redirect("portal:documents", student_pk=student_pk)
+
+        ext = os.path.splitext(uploaded_file.name)[1].lower()
+        if ext not in _ALLOWED_UPLOAD_EXTENSIONS:
+            messages.error(
+                request,
+                "Dateityp nicht erlaubt. Erlaubte Formate: PDF, PNG, JPG, JPEG, DOCX, DOC, XLSX, XLS, TXT.",
+            )
+            return redirect("portal:documents", student_pk=student_pk)
+
+        if uploaded_file.size > _MAX_UPLOAD_SIZE:
+            messages.error(request, "Die Datei ist zu groß. Maximale Dateigröße: 10 MB.")
             return redirect("portal:documents", student_pk=student_pk)
 
         name = request.POST.get("name", "").strip()
