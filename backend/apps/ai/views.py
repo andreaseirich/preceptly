@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+from django_ratelimit.decorators import ratelimit
 
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.core.feature_flags import Feature, user_has_feature
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 @require_POST
+@ratelimit(key="user", rate="20/h", method="POST", block=True)
 def generate_lesson_plan(request, lesson_id):
     """
     Generates an AI lesson plan for a session.
