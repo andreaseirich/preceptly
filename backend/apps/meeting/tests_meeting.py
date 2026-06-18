@@ -1,4 +1,6 @@
 import uuid
+from datetime import date
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -20,7 +22,13 @@ def make_user(**kwargs):
 def make_contract(user):
     from apps.contracts.models import Contract
 
-    return Contract.objects.create(user=user, first_name="Test", last_name="Student")
+    return Contract.objects.create(
+        user=user,
+        first_name="Test",
+        last_name="Student",
+        hourly_rate=Decimal("30.00"),
+        start_date=date(2025, 1, 1),
+    )
 
 
 def make_session(contract):
