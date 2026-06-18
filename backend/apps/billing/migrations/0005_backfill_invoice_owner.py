@@ -15,18 +15,10 @@ def _owner_from_first_item(apps, invoice, Contract, Student):
     """Resolve owner from first item's lesson.contract.student.user; return None on failure."""
     InvoiceItem = apps.get_model("billing", "InvoiceItem")
     Lesson = apps.get_model("lessons", "Session")
-    item = (
-        InvoiceItem.objects.filter(invoice=invoice, lesson__isnull=False)
-        .order_by("id")
-        .first()
-    )
+    item = InvoiceItem.objects.filter(invoice=invoice, lesson__isnull=False).order_by("id").first()
     if not item or not item.lesson_id:
         return None
-    lesson = (
-        Lesson.objects.filter(pk=item.lesson_id)
-        .select_related("contract__student__user")
-        .first()
-    )
+    lesson = Lesson.objects.filter(pk=item.lesson_id).select_related("contract").first()
     if not lesson or not lesson.contract_id:
         return None
     try:
@@ -41,9 +33,7 @@ def backfill_invoice_owner(apps, schema_editor):
     Student = apps.get_model("students", "Student")
 
     failed_ids = []
-    for invoice in Invoice.objects.filter(owner__isnull=True).select_related(
-        "contract__student__user"
-    ):
+    for invoice in Invoice.objects.filter(owner__isnull=True).select_related("contract"):
         owner_id = _owner_from_contract(invoice, Contract, Student)
         if owner_id is None:
             owner_id = _owner_from_first_item(apps, invoice, Contract, Student)
