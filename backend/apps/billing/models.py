@@ -96,6 +96,10 @@ class Invoice(models.Model):
                 condition=Q(invoice_number__isnull=False),
                 name="uniq_owner_invoice_number_not_null",
             ),
+            models.CheckConstraint(
+                condition=Q(period_end__gte=models.F("period_start")),
+                name="invoice_period_end_gte_start",
+            ),
         ]
 
     def __str__(self):
@@ -189,6 +193,13 @@ class InvoiceItem(models.Model):
         ordering = ["date", "description"]
         verbose_name = _("Invoice Item")
         verbose_name_plural = _("Invoice Items")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["invoice", "lesson"],
+                condition=Q(lesson__isnull=False),
+                name="uniq_invoiceitem_invoice_lesson",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.description} - {self.amount}€"
