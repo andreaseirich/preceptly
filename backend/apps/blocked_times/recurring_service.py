@@ -11,7 +11,6 @@ from django.utils.translation import gettext as _
 from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 
-
 _MAX_BLOCKED_PER_GENERATION = 1000
 
 

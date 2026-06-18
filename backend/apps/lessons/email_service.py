@@ -2,8 +2,8 @@
 Service for sending email notifications related to lessons.
 """
 
-import re
 import logging
+import re
 from datetime import datetime, timedelta
 
 from django.conf import settings

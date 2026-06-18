@@ -4,8 +4,8 @@ Stripe subscription views: Checkout, Portal, Webhook.
 Premium status is set ONLY via verified webhook events (source of truth).
 """
 
-import time
 import logging
+import time
 
 import stripe
 from django.conf import settings
@@ -74,6 +74,7 @@ def _get_base_url(request: HttpRequest) -> str:
 def _safe_stripe_redirect(request, url):
     """Redirect only to validated stripe.com HTTPS URL."""
     from urllib.parse import urlparse
+
     from django.http import HttpResponseRedirect
     from django.urls import reverse
 

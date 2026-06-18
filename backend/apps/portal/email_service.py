@@ -1,6 +1,5 @@
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
@@ -17,7 +16,7 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
     try:
         validate_email(recipient_email)
     except ValidationError:
-        raise ValueError(f"Ungültige Empfänger-E-Mail-Adresse: {recipient_email!r}")
+        raise ValueError(f"Ungültige Empfänger-E-Mail-Adresse: {recipient_email!r}") from None
 
     # SITE_URL muss explizit konfiguriert sein – kein unsicherer Fallback auf Production
     if not hasattr(settings, "SITE_URL"):

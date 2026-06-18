@@ -4,13 +4,15 @@ Views for student management (now backed by Contract model).
 
 import logging
 import os
+import re
 import secrets
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied, ValidationError
+from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -24,6 +26,8 @@ from apps.portal.models import ParentStudentLink, PortalUser, ProgressNote
 from apps.students.booking_code_service import set_booking_code
 
 logger = logging.getLogger(__name__)
+_MAX_DOC_NAME_LEN = 200
+_SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._\-\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df ]")
 
 
 class StudentListView(LoginRequiredMixin, ListView):
@@ -391,14 +395,4 @@ class StudentDocumentListView(LoginRequiredMixin, View):
 
 class StudentDocumentDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk, doc_pk):
-        from apps.students.models import StudentDocument
-
-
-import re
-from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.core.validators import validate_email
-from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST
-
-_MAX_DOC_NAME_LEN = 200
-_SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._\-äöüÄÖÜß ]")
+        pass
