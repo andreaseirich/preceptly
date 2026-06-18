@@ -63,15 +63,31 @@ class StartMeetingView(LoginRequiredMixin, View):
         return self.get(request, lesson_pk)
 
 
+def _sanitize_doc_name(raw: str) -> str:
+    import os
+    import unicodedata
+
+    from django.utils.text import get_valid_filename
+
+    raw = unicodedata.normalize("NFKC", raw)
+    raw = os.path.basename(raw)
+    raw = get_valid_filename(raw)
+    return raw[:200] or "unnamed"
+
+
 class MeetingDocumentUploadView(View):
     """AJAX-Dokumenten-Upload im Meeting-Raum. Für Tutor und Portal-Nutzer."""
 
     def post(self, request, token):
+        # Auth-Check ZUERST, bevor Datei gelesen wird (DoS-Schutz)
+        portal_user = get_portal_user(request)
+        if not portal_user and not request.user.is_authenticated:
+            return JsonResponse({"error": "Nicht authentifiziert"}, status=401)
+
         room = get_object_or_404(MeetingRoom, token=token, is_active=True)
         lesson = room.lesson
 
-        # Zugangsprüfung
-        portal_user = get_portal_user(request)
+        # Zugangsprüfung (autorisierter Teilnehmer dieses Meetings?)
         if portal_user:
             if portal_user.role == "student":
                 ok = StudentPortalLink.objects.filter(
@@ -119,7 +135,7 @@ class MeetingDocumentUploadView(View):
         if file.size > _MAX_UPLOAD_SIZE:
             return JsonResponse({"error": "File too large (max 50 MB)."}, status=400)
 
-        name = (request.POST.get("name", "").strip() or file.name)[:255]
+        name = _sanitize_doc_name(request.POST.get("name", "").strip() or file.name)
         doc = SessionDocument.objects.create(session=lesson, file=file, name=name)
         safe_name = name.replace("\n", " ").replace("\r", " ")
         logger.info("Dokument hochgeladen: %s (lesson %s)", safe_name, lesson.pk)
@@ -150,6 +166,11 @@ class MeetingDocumentServeView(View):
         lesson = room.lesson
         portal_user = get_portal_user(request)
 
+        # Teilnehmer-Autorisierung (gleiches Muster wie Upload/Delete):
+        # Nur Tutor (Owner des Contracts) oder verlinkte Portal-Nutzer
+        # (Schüler/Elternteil) dürfen Dokumente abrufen. Das verhindert IDOR,
+        # selbst wenn ein Angreifer eine gültige doc_pk + Meeting-Token erraten
+        # würde — er muss zusätzlich autorisierter Teilnehmer sein.
         if portal_user:
             if portal_user.role == "student":
                 ok = StudentPortalLink.objects.filter(
@@ -169,6 +190,11 @@ class MeetingDocumentServeView(View):
         if not ok:
             return HttpResponseForbidden()
 
+        # Ownership-Kette: SessionDocument ist über das Feld `session` fest an
+        # genau eine Session (lesson) gebunden. Da wir lesson aus dem Meeting-
+        # Token ableiten UND der User oben als Teilnehmer dieses Meetings
+        # verifiziert wurde, ist die Bindung doc.session == lesson hier
+        # ausreichend, um Cross-Meeting-Zugriffe auszuschließen.
         doc = get_object_or_404(SessionDocument, pk=doc_pk, session=lesson)
         content_type, _ = mimetypes.guess_type(doc.file.name)
         effective_ct = content_type or "application/octet-stream"

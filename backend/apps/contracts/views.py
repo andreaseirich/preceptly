@@ -7,6 +7,7 @@ from datetime import date
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -214,46 +215,51 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context["formset"]
+        with transaction.atomic():
+            # Direkt das Formset instanziieren, ohne get_context_data() aufzurufen
+            has_limit = self.request.POST.get("has_monthly_planning_limit", "on") == "on"
+            if has_limit:
+                formset = ContractMonthlyPlanFormSet(self.request.POST, instance=self.object)
+            else:
+                formset = None
 
-        # Save contract
-        self.object = form.save()
+            # Save contract
+            self.object = form.save()
 
-        # Only manage monthly plans if has_monthly_planning_limit is enabled
-        if self.object.has_monthly_planning_limit:
-            # If period was changed, generate new plans
-            if self.object.start_date:
-                generate_monthly_plans_for_contract(self.object)
+            # Only manage monthly plans if has_monthly_planning_limit is enabled
+            if self.object.has_monthly_planning_limit:
+                # If period was changed, generate new plans
+                if self.object.start_date:
+                    generate_monthly_plans_for_contract(self.object)
 
-                # Delete plans outside the new period
-                valid_months = set(
-                    iter_contract_months(self.object.start_date, self.object.end_date)
-                )
-                for plan in ContractMonthlyPlan.objects.filter(contract=self.object):
-                    if (plan.year, plan.month) not in valid_months:
-                        plan.delete()
-
-            # Update and save formset
-            if formset:
-                formset.instance = self.object
-                if formset.is_valid():
-                    formset.save()
-                    messages.success(self.request, _("Contract successfully updated."))
-                    return redirect(self.success_url)
-                else:
-                    messages.error(
-                        self.request, _("Please correct the errors in the monthly planning.")
+                    # Delete plans outside the new period
+                    valid_months = set(
+                        iter_contract_months(self.object.start_date, self.object.end_date)
                     )
-                    return self.render_to_response(
-                        self.get_context_data(form=form, formset=formset)
-                    )
-        else:
-            # If has_monthly_planning_limit is disabled, delete all existing plans
-            ContractMonthlyPlan.objects.filter(contract=self.object).delete()
+                    for plan in ContractMonthlyPlan.objects.filter(contract=self.object):
+                        if (plan.year, plan.month) not in valid_months:
+                            plan.delete()
 
-        messages.success(self.request, _("Contract successfully updated."))
-        return redirect(self.success_url)
+                # Update and save formset
+                if formset:
+                    formset.instance = self.object
+                    if formset.is_valid():
+                        formset.save()
+                        messages.success(self.request, _("Contract successfully updated."))
+                        return redirect(self.success_url)
+                    else:
+                        messages.error(
+                            self.request, _("Please correct the errors in the monthly planning.")
+                        )
+                        return self.render_to_response(
+                            self.get_context_data(form=form, formset=formset)
+                        )
+            else:
+                # If has_monthly_planning_limit is disabled, delete all existing plans
+                ContractMonthlyPlan.objects.filter(contract=self.object).delete()
+
+            messages.success(self.request, _("Contract successfully updated."))
+            return redirect(self.success_url)
 
 
 class ContractDeleteView(LoginRequiredMixin, DeleteView):
@@ -358,11 +364,24 @@ class ContractToggleActiveView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, pk):
+        from django.utils import timezone
+
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         contract.is_active = not contract.is_active
-        contract.save(update_fields=["is_active"])
-        if contract.is_active:
-            messages.success(request, _("Contract activated."))
-        else:
+
+        if not contract.is_active:
+            # Wurde gerade deaktiviert – direkt speichern
+            contract.save(update_fields=["is_active"])
             messages.success(request, _("Contract deactivated."))
+        else:
+            # Wurde gerade auf aktiv gesetzt – Validierung vor dem Speichern
+            if contract.end_date and contract.end_date < timezone.localdate():
+                messages.warning(
+                    request,
+                    _("This contract has already ended and cannot be reactivated."),
+                )
+                return redirect(reverse("students:detail", kwargs={"pk": contract.pk}))
+            contract.save(update_fields=["is_active"])
+            messages.success(request, _("Contract activated."))
+
         return redirect(reverse("contracts:list"))
