@@ -5,11 +5,10 @@ Service for recurring sessions (series appointments).
 from datetime import date, timedelta
 from typing import List
 
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 
 from apps.lessons.models import Session
 from apps.lessons.recurring_models import RecurringSession
-
 
 _MAX_SESSIONS_PER_GENERATION = 1000
 _MAX_END_DATE_YEARS_AHEAD = 2

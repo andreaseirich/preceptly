@@ -9,12 +9,11 @@ from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
-
-from django.db import transaction
 
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom

@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
+from django_ratelimit.decorators import ratelimit
 
 from apps.contracts.models import Contract
 from apps.lessons.booking_service import BookingService
@@ -21,7 +22,6 @@ from apps.lessons.email_service import send_booking_notification
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
-from django_ratelimit.decorators import ratelimit
 
 _MIN_YEAR = 2020
 _MAX_YEAR = 2031
