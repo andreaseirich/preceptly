@@ -342,7 +342,7 @@ class PortalActivateView(View):
 
     template_name = "portal/activate.html"
 
-def _get_link(self, token):
+    def _get_link(self, token):
         from datetime import timedelta
 
         from django.db.models import Q
@@ -357,6 +357,7 @@ def _get_link(self, token):
         if link:
             return link, link.parent
         return None, None
+
     def get(self, request, token):
         link, portal_user = self._get_link(token)
         if link is None:
