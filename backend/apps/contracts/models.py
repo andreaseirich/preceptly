@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -46,11 +46,12 @@ class Contract(models.Model):
     )
     unit_duration_minutes = models.PositiveIntegerField(
         default=60,
+        validators=[MinValueValidator(1)],
         verbose_name=_("unit duration (minutes)"),
     )
     start_date = models.DateField(verbose_name=_("start date"))
     end_date = models.DateField(null=True, blank=True, verbose_name=_("end date"))
-    is_active = models.BooleanField(default=True, verbose_name=_("active"))
+    is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("active"))
     has_monthly_planning_limit = models.BooleanField(
         default=True,
         verbose_name=_("monthly planning limit"),
@@ -68,12 +69,13 @@ class Contract(models.Model):
 
     def save(self, *args, **kwargs):
         if self.pk:
-            old = Contract.objects.filter(pk=self.pk).first()
-            if old and old.is_active and not self.is_active:
-                from apps.lessons.models import Lesson
+            with transaction.atomic():
+                old = Contract.objects.select_for_update().filter(pk=self.pk).first()
+                if old and old.is_active and not self.is_active:
+                    from apps.lessons.models import Lesson
 
-                today = timezone.localdate()
-                Lesson.objects.filter(contract=self, date__gte=today).delete()
+                    today = timezone.localdate()
+                    Lesson.objects.filter(contract=self, date__gte=today).delete()
         if not self.booking_token:
             self.booking_token = secrets.token_urlsafe(32)
         super().save(*args, **kwargs)

@@ -5,6 +5,7 @@ Models for billing and invoices.
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -102,7 +103,7 @@ class Invoice(models.Model):
 
     def calculate_total(self):
         """Calculates the total amount from all InvoiceItems."""
-        total = sum(item.amount for item in self.items.all())
+        total = sum((item.amount for item in self.items.all()), Decimal("0.00"))
         self.total_amount = total
         self.save(update_fields=["total_amount", "updated_at"])
         return total
@@ -155,7 +156,7 @@ class Invoice(models.Model):
                     lesson.save(update_fields=["status", "updated_at"])
                     reset_count += 1
 
-            return reset_count
+            return (reset_count, {"billing.Invoice": 1})
 
 
 class InvoiceItem(models.Model):
@@ -174,7 +175,9 @@ class InvoiceItem(models.Model):
     )
     description = models.CharField(max_length=500, help_text=_("Item description"))
     date = models.DateField(help_text=_("Lesson date (copy)"))
-    duration_minutes = models.PositiveIntegerField(help_text=_("Duration in minutes (copy)"))
+    duration_minutes = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)], help_text=_("Duration in minutes (copy)")
+    )
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
