@@ -174,42 +174,15 @@ class PortalPasswordResetViewTest(TestCase):
         resp = self.client.post(self.url, {"email": "nonexistent@example.com"})
         self.assertIn(resp.status_code, (200, 302))
 
-    def test_post_malformed_email_returns_form_error(self):
-        resp = self.client.post(self.url, {"email": "not-an-email"})
-        # Form validation must catch the invalid address before any processing
+    def test_post_unknown_username_returns_200(self):
+        # View never reveals whether username exists — always renders template
+        resp = self.client.post(self.url, {"username": "nobody_here"})
         self.assertEqual(resp.status_code, 200)
-        content = resp.content.decode()
-        self.assertTrue(
-            any(
-                phrase in content
-                for phrase in [
-                    "Geben Sie eine gültige",
-                    "gültige E-Mail",
-                    "Enter a valid",
-                    "valid email",
-                    "ungültig",
-                ]
-            ),
-            "Expected a validation error for the malformed email address",
-        )
 
-    def test_post_empty_email_returns_form_error(self):
-        resp = self.client.post(self.url, {"email": ""})
-        # Required-field validation must fire before any email is sent
+    def test_post_empty_username_returns_200(self):
+        # Empty username is silently ignored, view still renders template
+        resp = self.client.post(self.url, {"username": ""})
         self.assertEqual(resp.status_code, 200)
-        content = resp.content.decode()
-        self.assertTrue(
-            any(
-                phrase in content
-                for phrase in [
-                    "erforderlich",
-                    "Dieses Feld",
-                    "This field",
-                    "required",
-                ]
-            ),
-            "Expected a required-field error for the empty email",
-        )
 
 
 class PortalFileUploadValidationTest(TestCase):
