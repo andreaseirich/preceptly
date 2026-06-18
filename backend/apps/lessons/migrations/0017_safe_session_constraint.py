@@ -17,7 +17,7 @@ def drop_session_no_show_constraint(apps, schema_editor):
         return
     with schema_editor.connection.cursor() as cursor:
         cursor.execute(
-            "ALTER TABLE lessons_session DROP CONSTRAINT IF EXISTS session_no_show_only_if_not_cancelled_paid"
+            "ALTER TABLE lessons_lesson DROP CONSTRAINT IF EXISTS session_no_show_only_if_not_cancelled_paid"
         )
 
 
