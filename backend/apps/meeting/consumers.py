@@ -76,6 +76,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self.is_tutor = False
         self.user_token = ""
         self._portal_user = None
+        self._joined = False
 
         user = self.scope.get("user")
         if user is None or user.is_anonymous:
@@ -109,23 +110,30 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             if not self.rooms[self.group_name]:
                 del self.rooms[self.group_name]
 
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                "type": "peer_left_event",
-                "peer_id": self.peer_id,
-                "name": self.display_name,
-            },
-        )
+        if self._joined:
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    "type": "peer_left_event",
+                    "peer_id": self.peer_id,
+                    "name": self.display_name,
+                },
+            )
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
+        if len(text_data) > 65_536:
+            await self.close(code=4009)
+            return
         try:
             data = json.loads(text_data)
         except json.JSONDecodeError:
             return
 
         msg_type = data.get("type", "")
+
+        if msg_type != "join" and self.peer_id not in self.rooms.get(self.group_name, {}):
+            return
 
         if msg_type == "join":
             self.display_name = data.get("name", "Gast")[:60]
@@ -159,6 +167,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 self.rooms[self.group_name] = {}
             existing_peers = dict(self.rooms[self.group_name])
             self.rooms[self.group_name][self.peer_id] = self.display_name
+            self._joined = True
 
             await self.send(
                 json.dumps(
@@ -231,6 +240,15 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 )
 
         elif msg_type == "doc_notify":
+            if not self.is_tutor:
+                return
+            url = str(data.get("url", ""))
+            if not url.startswith("https://") or len(url) > 2048:
+                return
+            try:
+                doc_id = int(data.get("doc_id", 0))
+            except (ValueError, TypeError):
+                return
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -238,22 +256,28 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                     "payload": {
                         "type": "doc_added",
                         "name": str(data.get("name", ""))[:200],
-                        "url": str(data.get("url", "")),
+                        "url": url,
                         "date": str(data.get("date", "")),
-                        "doc_id": int(data.get("doc_id", 0)),
+                        "doc_id": doc_id,
                     },
                     "sender_channel": self.channel_name,
                 },
             )
 
         elif msg_type == "doc_delete":
+            if not self.is_tutor:
+                return
+            try:
+                doc_id = int(data.get("doc_id", 0))
+            except (ValueError, TypeError):
+                return
             await self.channel_layer.group_send(
                 self.group_name,
                 {
                     "type": "doc_event",
                     "payload": {
                         "type": "doc_removed",
-                        "doc_id": int(data.get("doc_id", 0)),
+                        "doc_id": doc_id,
                     },
                     "sender_channel": self.channel_name,
                 },
