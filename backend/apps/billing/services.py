@@ -81,14 +81,16 @@ class InvoiceService:
         # Lade automatisch alle abrechenbaren Lessons im Zeitraum
         contract_id = contract.id if contract else None
         with transaction.atomic():
-            lessons = InvoiceService.get_billable_lessons(
-                period_start, period_end, contract_id, institute=institute, user=user
-            ).select_for_update()
+            lesson_list = list(
+                InvoiceService.get_billable_lessons(
+                    period_start, period_end, contract_id, institute=institute, user=user
+                ).select_for_update()
+            )
 
-            if not lessons.exists():
+            if not lesson_list:
                 raise ValueError(_("No billable lessons found in the specified period."))
 
-            first_lesson = lessons.first()
+            first_lesson = lesson_list[0]
             # Tutor for TutorSpace tier math must always be set (calculate_tutorspace returns 0 if None).
             owner = user if user is not None else first_lesson.contract.user
 
@@ -135,7 +137,7 @@ class InvoiceService:
             invoice = Invoice.objects.create(**invoice_kwargs)
 
             total_amount = Decimal("0.00")
-            for lesson in lessons:
+            for lesson in lesson_list:
                 lesson_contract = lesson.contract
 
                 if is_tutorspace_institute(getattr(lesson_contract, "institute", None)):
