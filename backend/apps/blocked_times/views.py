@@ -117,9 +117,14 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
         """Redirect back to last used calendar view (similar to LessonCreateView)."""
         blocked_time = self.object
         # Use year/month/day from request if available, otherwise from blocked_time date
-        year = int(self.request.GET.get("year", blocked_time.start_datetime.year))
-        month = int(self.request.GET.get("month", blocked_time.start_datetime.month))
-        day = int(self.request.GET.get("day", blocked_time.start_datetime.day))
+        try:
+            year = int(self.request.GET.get("year", blocked_time.start_datetime.year))
+            month = int(self.request.GET.get("month", blocked_time.start_datetime.month))
+            day = int(self.request.GET.get("day", blocked_time.start_datetime.day))
+        except (ValueError, TypeError):
+            year = blocked_time.start_datetime.year
+            month = blocked_time.start_datetime.month
+            day = blocked_time.start_datetime.day
 
         # Get last used calendar view from session (default: week)
         last_view = self.request.session.get("last_calendar_view", "week")
@@ -287,9 +292,14 @@ class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
         """Redirect back to last used calendar view (similar to LessonUpdateView)."""
         blocked_time = self.object
         # Use year/month/day from request if available, otherwise from blocked_time date
-        year = int(self.request.GET.get("year", blocked_time.start_datetime.year))
-        month = int(self.request.GET.get("month", blocked_time.start_datetime.month))
-        day = int(self.request.GET.get("day", blocked_time.start_datetime.day))
+        try:
+            year = int(self.request.GET.get("year", blocked_time.start_datetime.year))
+            month = int(self.request.GET.get("month", blocked_time.start_datetime.month))
+            day = int(self.request.GET.get("day", blocked_time.start_datetime.day))
+        except (ValueError, TypeError):
+            year = blocked_time.start_datetime.year
+            month = blocked_time.start_datetime.month
+            day = blocked_time.start_datetime.day
 
         # Get last used calendar view from session (default: week)
         last_view = self.request.session.get("last_calendar_view", "week")

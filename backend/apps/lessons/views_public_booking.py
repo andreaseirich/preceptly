@@ -143,6 +143,9 @@ def _serialize_public_week_data(week_data):
 @require_http_methods(["GET"])
 def public_booking_week_api(request, tutor_token):
     """API for fetching public booking week data (for AJAX week navigation)."""
+    if is_public_booking_throttled(request, tutor_token):
+        return JsonResponse({"success": False, "message": _("Too many attempts.")}, status=429)
+
     tutor = get_tutor_for_booking(tutor_token)
     if not tutor:
         return JsonResponse(
@@ -200,9 +203,6 @@ def public_booking_week_api(request, tutor_token):
     return JsonResponse({"success": True, "week_data": data})
 
 
-_NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
-
-
 @require_http_methods(["POST"])
 def search_student_api(request):
     """
@@ -247,9 +247,7 @@ def search_student_api(request):
                 {
                     "success": True,
                     "result": "suggestions",
-                    "suggestions": [
-                        {"id": s.id, "display_name": s.full_name} for s, _ in suggestions
-                    ],
+                    "suggestions": [{"display_name": s.full_name} for s, _ in suggestions],
                 }
             )
         return JsonResponse({"success": True, "result": "no_match", "suggestions": []})
@@ -258,14 +256,26 @@ def search_student_api(request):
         return JsonResponse({"success": False, "message": _("Invalid request.")}, status=400)
 
 
+_NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
+
+
 @require_http_methods(["POST"])
 def verify_student_api(request):
     """
     Verify name + code for Public Booking. Never reveals if student exists.
 
     Returns student data only if both name and code are correct.
-    Rate-limited by IP and tutor_token.
+    Rate-limited by IP and tutor_token. Uses constant-time comparison to
+    prevent timing attacks that could reveal student existence.
     """
+    # Dummy hash for constant-time comparison when student doesn't exist.
+    # This is a valid bcrypt/argon2-style hash format that will always fail
+    # verification but takes similar time to a real verification.
+    _DUMMY_HASH = (
+        "pbkdf2_sha256$600000$dummysaltdummysaltdummy$"
+        "dummyhashdummyhashdummyhashdummyhashdummyhashdummyhash00="
+    )
+
     try:
         data = json.loads(request.body)
         name = data.get("name", "").strip()
@@ -280,6 +290,10 @@ def verify_student_api(request):
 
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:
+            # Still perform dummy comparison to maintain constant time
+            from django.contrib.auth.hashers import check_password
+
+            check_password(code, _DUMMY_HASH)
             return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
         if is_public_booking_throttled(request, tutor_token):
@@ -297,10 +311,15 @@ def verify_student_api(request):
         else:
             exact_match = None
 
-        if not exact_match or not verify_booking_code(exact_match, code):
+        # Always perform a hash comparison to prevent timing attacks.
+        # If no student found, run dummy comparison with same code.
+        if not exact_match or not exact_match.booking_code_hash:
+            from django.contrib.auth.hashers import check_password
+
+            check_password(code, _DUMMY_HASH)
             return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
-        if not exact_match.booking_code_hash:
+        if not verify_booking_code(exact_match, code):
             return JsonResponse({"success": False, "message": _NEUTRAL_ERROR}, status=400)
 
         request.session.cycle_key()
@@ -348,6 +367,41 @@ def create_student_api(request):
                 status=400,
             )
 
+        # Length validation to prevent abuse / DB overflows
+        if len(first_name) > 100 or len(last_name) > 100:
+            return JsonResponse(
+                {"success": False, "message": _("Name is too long (max 100 characters).")},
+                status=400,
+            )
+        if email and len(email) > 254:
+            return JsonResponse(
+                {"success": False, "message": _("Email is too long (max 254 characters).")},
+                status=400,
+            )
+        if phone and len(phone) > 32:
+            return JsonResponse(
+                {"success": False, "message": _("Phone number is too long (max 32 characters).")},
+                status=400,
+            )
+        if school and len(school) > 200:
+            return JsonResponse(
+                {"success": False, "message": _("School name is too long (max 200 characters).")},
+                status=400,
+            )
+        if grade and len(grade) > 50:
+            return JsonResponse(
+                {"success": False, "message": _("Grade is too long (max 50 characters).")},
+                status=400,
+            )
+        if subjects and len(subjects) > 500:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": _("Subjects field is too long (max 500 characters)."),
+                },
+                status=400,
+            )
+
         tutor = get_tutor_for_booking(tutor_token)
         if not tutor:
             return JsonResponse(
@@ -389,7 +443,6 @@ def create_student_api(request):
         )
 
 
-@require_http_methods(["POST"])
 def book_lesson_api(request):
     """API for booking a lesson. Requires valid student_id and booking_code."""
     try:

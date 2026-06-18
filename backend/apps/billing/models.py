@@ -133,32 +133,23 @@ class Invoice(models.Model):
             invoice_items = list(self.items.all())
             lesson_ids = [item.lesson_id for item in invoice_items if item.lesson_id]
 
-            # Prüfe für jede Lesson, ob sie in anderen Rechnungen ist (vor dem Löschen!)
-            lessons_to_reset = []
-            for lesson_id in lesson_ids:
-                if not lesson_id:
-                    continue
-
-                # Prüfe, ob Lesson in anderen Rechnungen ist
-                other_invoice_items = InvoiceItem.objects.filter(lesson_id=lesson_id).exclude(
-                    invoice=self
-                )
-
-                # Nur zurücksetzen, wenn Lesson nicht in anderen Rechnungen ist
-                if not other_invoice_items.exists():
-                    lessons_to_reset.append(lesson_id)
+            # Bulk-Query: Finde alle lesson_ids, die in anderen Rechnungen vorkommen
+            shared_ids = set(
+                InvoiceItem.objects.filter(lesson_id__in=lesson_ids)
+                .exclude(invoice=self)
+                .values_list("lesson_id", flat=True)
+            )
+            lessons_to_reset = [lid for lid in lesson_ids if lid not in shared_ids]
 
             # Lösche die Invoice (CASCADE löscht automatisch alle InvoiceItems)
             super().delete(*args, **kwargs)
 
-            # Setze Lessons zurück auf TAUGHT
-            reset_count = 0
-            for lesson_id in lessons_to_reset:
-                lesson = Lesson.objects.filter(pk=lesson_id).first()
-                if lesson and lesson.status == "paid":
-                    lesson.status = "taught"
-                    lesson.save(update_fields=["status", "updated_at"])
-                    reset_count += 1
+            # Setze Lessons zurück auf TAUGHT via Bulk-Update
+            from django.utils import timezone
+
+            reset_count = Lesson.objects.filter(pk__in=lessons_to_reset, status="paid").update(
+                status="taught", updated_at=timezone.now()
+            )
 
             return reset_count
 

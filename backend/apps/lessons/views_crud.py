@@ -5,6 +5,7 @@ Views for lesson CRUD operations.
 import logging
 from datetime import datetime
 
+from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
@@ -54,10 +55,13 @@ class LessonListView(LoginRequiredMixin, ListView):
         start_date = self.request.GET.get("start_date")
         end_date = self.request.GET.get("end_date")
 
-        if start_date:
-            queryset = queryset.filter(date__gte=start_date)
-        if end_date:
-            queryset = queryset.filter(date__lte=end_date)
+        try:
+            if start_date:
+                queryset = queryset.filter(date__gte=start_date)
+            if end_date:
+                queryset = queryset.filter(date__lte=end_date)
+        except (ValueError, ValidationError):
+            pass  # ungültige Datumsformat-Parameter ignorieren
 
         return queryset.order_by("-date", "-start_time")
 
