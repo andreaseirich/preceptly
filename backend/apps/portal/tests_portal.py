@@ -1,6 +1,7 @@
 import io
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -132,6 +133,16 @@ class PortalLoginViewTest(TestCase):
         )
         self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
 
+    # --- Inactive user ---
+
+    def test_inactive_portal_user_cannot_login(self):
+        self.student_pu.user.is_active = False
+        self.student_pu.user.save()
+        resp = self.client.post(self.url, {"username": "student_login", "password": "s3cret!"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn("portal_user_id", self.client.session)
+        self.assertContains(resp, "Ungültige Zugangsdaten")
+
 
 class PortalPasswordResetViewTest(TestCase):
     def setUp(self):
@@ -147,25 +158,62 @@ class PortalPasswordResetViewTest(TestCase):
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 200)
 
-    def test_post_valid_email_returns_200_or_redirect(self):
+    def test_post_valid_email_accepted(self):
         resp = self.client.post(self.url, {"email": "reset_user@example.com"})
-        self.assertIn(resp.status_code, (200, 302))
+        if resp.status_code == 302:
+            # Must redirect to a confirmation page, not back to login
+            self.assertNotEqual(resp["Location"], reverse("portal:login"))
+        else:
+            self.assertEqual(resp.status_code, 200)
+            # Success response must not contain a login-failure message
+            self.assertNotContains(resp, "Ungültige Zugangsdaten")
 
-    def test_post_invalid_email_does_not_crash(self):
+    def test_post_unknown_email_does_not_reveal_existence(self):
+        # Security: unknown address must behave identically to a known one
+        # (prevents email-enumeration attacks — no specific error is expected)
         resp = self.client.post(self.url, {"email": "nonexistent@example.com"})
         self.assertIn(resp.status_code, (200, 302))
 
-    def test_post_malformed_email_does_not_crash(self):
+    def test_post_malformed_email_returns_form_error(self):
         resp = self.client.post(self.url, {"email": "not-an-email"})
-        self.assertIn(resp.status_code, (200, 302))
+        # Form validation must catch the invalid address before any processing
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertTrue(
+            any(
+                phrase in content
+                for phrase in [
+                    "Geben Sie eine gültige",
+                    "gültige E-Mail",
+                    "Enter a valid",
+                    "valid email",
+                    "ungültig",
+                ]
+            ),
+            "Expected a validation error for the malformed email address",
+        )
 
-    def test_post_empty_email_does_not_crash(self):
+    def test_post_empty_email_returns_form_error(self):
         resp = self.client.post(self.url, {"email": ""})
-        self.assertIn(resp.status_code, (200, 302))
+        # Required-field validation must fire before any email is sent
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertTrue(
+            any(
+                phrase in content
+                for phrase in [
+                    "erforderlich",
+                    "Dieses Feld",
+                    "This field",
+                    "required",
+                ]
+            ),
+            "Expected a required-field error for the empty email",
+        )
 
 
 class PortalFileUploadValidationTest(TestCase):
-    """Tests the file-upload validation constants and any upload endpoint."""
+    """Tests the file-upload validation constants and the upload endpoint."""
 
     ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".docx", ".doc", ".xlsx", ".xls", ".txt"}
     MAX_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -176,7 +224,6 @@ class PortalFileUploadValidationTest(TestCase):
         self.contract = _make_contract(self.tutor)
         self.student_pu = _make_portal_user(self.tutor, "student", "upload_student", "uppass")
         _make_student_link(self.student_pu, self.contract, active=True)
-        # Log the portal user in via session
         session = self.client.session
         session["portal_user_id"] = self.student_pu.pk
         session.save()
@@ -196,7 +243,6 @@ class PortalFileUploadValidationTest(TestCase):
         self.assertEqual(_MAX_UPLOAD_SIZE, self.MAX_SIZE)
 
     def test_disallowed_extension_exe_rejected(self):
-        """Executable files must not be in the allowed set."""
         from apps.portal.views import _ALLOWED_UPLOAD_EXTENSIONS
 
         self.assertNotIn(".exe", _ALLOWED_UPLOAD_EXTENSIONS)
@@ -221,6 +267,34 @@ class PortalFileUploadValidationTest(TestCase):
     def test_file_above_max_size_exceeds_limit(self):
         size = self.MAX_SIZE + 1
         self.assertGreater(size, self.MAX_SIZE)
+
+    def test_exe_upload_rejected_via_http(self):
+        exe_file = SimpleUploadedFile(
+            "malware.exe",
+            b"MZ\x90\x00" + b"\x00" * 60,
+            content_type="application/octet-stream",
+        )
+        upload_url = reverse("portal:documents", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.post(upload_url, {"file": exe_file})
+        # A successful upload (201 or redirect to a success page) must not happen
+        self.assertNotEqual(resp.status_code, 201)
+        if resp.status_code == 200:
+            content = resp.content.decode("utf-8", errors="replace").lower()
+            rejected = any(
+                phrase in content
+                for phrase in [
+                    "nicht erlaubt",
+                    "not allowed",
+                    "ungültig",
+                    "invalid",
+                    "fehler",
+                    "error",
+                    ".exe",
+                ]
+            )
+            self.assertTrue(
+                rejected, "Expected a rejection message for the .exe upload, found none"
+            )
 
 
 class PortalAccessControlTest(TestCase):

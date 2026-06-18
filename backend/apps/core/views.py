@@ -131,12 +131,12 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
         # Year and month from URL parameters or current date
         # Default to current month view if no month specified
         try:
-            year = int(self.request.GET.get("year", now.year))
+            year = max(2000, min(int(self.request.GET.get("year", now.year)), 2100))
         except (ValueError, TypeError):
             year = now.year
         if "month" in self.request.GET:
             try:
-                month = int(self.request.GET.get("month"))
+                month = max(1, min(int(self.request.GET.get("month")), 12))
             except (ValueError, TypeError):
                 month = now.month
         elif "year" in self.request.GET:
@@ -447,7 +447,7 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
         is_premium = is_premium_user(user)
 
         try:
-            year = int(self.request.GET.get("year", now.year))
+            year = max(2000, min(int(self.request.GET.get("year", now.year)), 2100))
         except (ValueError, TypeError):
             year = now.year
 
@@ -690,7 +690,7 @@ class EuerView(LoginRequiredMixin, TemplateView):
         now = timezone.now()
 
         try:
-            year = int(self.request.GET.get("year", now.year))
+            year = max(2000, min(int(self.request.GET.get("year", now.year)), 2100))
         except (ValueError, TypeError):
             year = now.year
 

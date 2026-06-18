@@ -2,13 +2,15 @@
 Views for student management (now backed by Contract model).
 """
 
+import logging
 import os
-import uuid
+import secrets
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -20,6 +22,8 @@ from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
 from apps.portal.models import ParentStudentLink, PortalUser, ProgressNote
 from apps.students.booking_code_service import set_booking_code
+
+logger = logging.getLogger(__name__)
 
 
 class StudentListView(LoginRequiredMixin, ListView):
@@ -119,8 +123,11 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
         # Student portal account
         spl = StudentPortalLink.objects.filter(contract=contract).first()
         if spl:
-            django_user = spl.portal_user.user
-            spl.portal_user.delete()
+            portal_user = spl.portal_user
+            if portal_user.tutor != request.user:
+                raise PermissionDenied
+            django_user = portal_user.user
+            portal_user.delete()
             django_user.delete()
 
         # Parent portal accounts (only if no other children)
@@ -133,6 +140,8 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
                 .exclude(contract=contract)
                 .exists()
             ):
+                if parent_portal.tutor != request.user:
+                    raise PermissionDenied
                 django_user = parent_portal.user
                 parent_portal.delete()
                 django_user.delete()
@@ -147,55 +156,47 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
         from apps.portal.models import StudentPortalLink
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
 
         if not StudentPortalLink.objects.filter(contract=contract).exists():
             User = get_user_model()
-            username = f"portal_student_{contract.pk}_{uuid.uuid4().hex[:8]}"
+            username = f"portal_student_{contract.pk}_{secrets.token_hex(4)}"
             portal_django_user = User.objects.create_user(
-                username=username, password=uuid.uuid4().hex
+                username=username, password=secrets.token_hex(16)
             )
             portal_user = PortalUser.objects.create(
                 user=portal_django_user, role="student", tutor=request.user
             )
             spl = StudentPortalLink.objects.create(
-                portal_user=portal_user, contract=contract, invite_token=uuid.uuid4().hex
+                portal_user=portal_user,
+                contract=contract,
+                invite_token=secrets.token_urlsafe(32),
             )
-            activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
             if contract.email:
                 try:
                     send_portal_invite(contract, spl, contract.email, role="student")
                     messages.success(
                         request,
-                        f"Portal-Einladung gesendet an {contract.email}. Aktivierungslink: {activation_url}",
+                        f"Portal-Einladung gesendet an {contract.email}.",
                     )
                 except Exception as exc:
-                    import logging
-
-                    logging.getLogger(__name__).error("Portal invite email failed: %s", exc)
+                    logger.error("Portal invite email failed: %s", exc)
                     messages.warning(
                         request,
-                        f"Portal-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. Aktivierungslink: {activation_url}",
+                        "Could not send email. Please try again.",
                     )
             else:
                 messages.info(
                     request,
-                    f"Portal-Account erstellt. Kein E-Mail-Versand. Aktivierungslink: {activation_url}",
+                    "Portal-Account erstellt. Kein E-Mail-Versand möglich.",
                 )
         else:
-            spl = StudentPortalLink.objects.get(contract=contract)
-            activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
-            messages.info(
-                request, f"Portal-Zugang bereits vorhanden. Aktivierungslink: {activation_url}"
-            )
+            messages.info(request, "Portal-Zugang bereits vorhanden.")
 
         return redirect("students:detail", pk=pk)
 
 
 class PortalInviteParentView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        import secrets as _secrets
-
         from apps.portal.email_service import send_portal_invite
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
@@ -204,7 +205,6 @@ class PortalInviteParentView(LoginRequiredMixin, View):
             return redirect("students:detail", pk=pk)
 
         User = get_user_model()
-        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
         existing_user = User.objects.filter(email__iexact=parent_email).first()
         if existing_user and hasattr(existing_user, "portal_profile"):
             existing_portal = existing_user.portal_profile
@@ -212,24 +212,20 @@ class PortalInviteParentView(LoginRequiredMixin, View):
                 parent=existing_portal, contract=contract
             ).first()
             if existing_link:
-                activation_url = f"{site_url}/portal/activate/{existing_link.invite_token}/"
                 messages.info(
                     request,
-                    f"Dieses Konto ({parent_email}) ist bereits als Elternteil verknüpft. Aktivierungslink: {activation_url}",
+                    f"Dieses Konto ({parent_email}) ist bereits als Elternteil verknüpft.",
                 )
             else:
-                parent_link, _ = ParentStudentLink.objects.get_or_create(
-                    parent=existing_portal, contract=contract
-                )
-                activation_url = f"{site_url}/portal/activate/{parent_link.invite_token}/"
+                ParentStudentLink.objects.get_or_create(parent=existing_portal, contract=contract)
                 messages.warning(
                     request,
-                    f"Hinweis: {parent_email} hat bereits ein Portal-Konto. Aktivierungslink: {activation_url}",
+                    f"Hinweis: {parent_email} hat bereits ein Portal-Konto.",
                 )
             return redirect("students:detail", pk=pk)
 
-        username = f"parent_{contract.pk}_{_secrets.token_hex(4)}"
-        password_temp = _secrets.token_hex(8)
+        username = f"parent_{contract.pk}_{secrets.token_hex(4)}"
+        password_temp = secrets.token_hex(8)
         user = User.objects.create_user(
             username=username, email=parent_email, password=password_temp
         )
@@ -237,20 +233,17 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         parent_link, _ = ParentStudentLink.objects.get_or_create(
             parent=portal_user, contract=contract
         )
-        activation_url = f"{site_url}/portal/activate/{parent_link.invite_token}/"
         try:
             send_portal_invite(contract, parent_link, parent_email, role="parent")
             messages.success(
                 request,
-                f"Eltern-Einladung gesendet an {parent_email}. Aktivierungslink: {activation_url}",
+                f"Eltern-Einladung gesendet an {parent_email}.",
             )
         except Exception as exc:
-            import logging
-
-            logging.getLogger(__name__).error("Parent invite email failed: %s", exc)
+            logger.error("Parent invite email failed: %s", exc)
             messages.warning(
                 request,
-                f"Eltern-Account erstellt, aber E-Mail-Versand fehlgeschlagen: {exc}. Aktivierungslink: {activation_url}",
+                "Could not send email. Please try again.",
             )
         return redirect("students:detail", pk=pk)
 
@@ -262,27 +255,21 @@ class PortalInviteResendView(LoginRequiredMixin, View):
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         spl = get_object_or_404(StudentPortalLink, contract=contract)
-        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
-        activation_url = f"{site_url}/portal/activate/{spl.invite_token}/"
         if contract.email:
             try:
                 send_portal_invite(contract, spl, contract.email, role="student")
                 messages.success(
                     request,
-                    f"Einladung erneut gesendet an {contract.email}. Aktivierungslink: {activation_url}",
+                    f"Einladung erneut gesendet an {contract.email}.",
                 )
             except Exception as exc:
-                import logging
-
-                logging.getLogger(__name__).error("Portal resend email failed: %s", exc)
+                logger.error("Portal resend email failed: %s", exc)
                 messages.warning(
                     request,
-                    f"E-Mail-Versand fehlgeschlagen: {exc}. Aktivierungslink: {activation_url}",
+                    "Could not send email. Please try again.",
                 )
         else:
-            messages.info(
-                request, f"Kein E-Mail-Versand möglich. Aktivierungslink: {activation_url}"
-            )
+            messages.info(request, "Kein E-Mail-Versand möglich.")
         return redirect("students:detail", pk=pk)
 
 
@@ -335,13 +322,9 @@ class StudentDocumentListView(LoginRequiredMixin, View):
             max_size = 10 * 1024 * 1024  # 10 MB
             ext = os.path.splitext(uploaded_file.name)[1].lower()
             if ext not in allowed_extensions:
-                from django.contrib import messages
-
                 messages.error(request, "Dateityp nicht erlaubt.")
                 return redirect(request.path)
             if uploaded_file.size > max_size:
-                from django.contrib import messages
-
                 messages.error(request, "Datei ist zu groß (max. 10 MB).")
                 return redirect(request.path)
         if not uploaded_file:
@@ -361,7 +344,6 @@ class StudentDocumentDeleteView(LoginRequiredMixin, View):
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         doc = get_object_or_404(StudentDocument, pk=doc_pk, student=contract)
-        doc.file.delete(save=False)
         doc.delete()
-        messages.success(request, "Dokument gelöscht.")
+        messages.success(request, "Datei gelöscht.")
         return redirect("students:documents", pk=pk)
