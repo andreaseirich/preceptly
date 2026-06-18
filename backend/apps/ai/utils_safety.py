@@ -29,7 +29,7 @@ PHONE_PATTERN = re.compile(r"\+?[0-9]{1,4}(?:[\s.\-][0-9]{1,4}){2,14}")
 _CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 _INJECTION_PATTERNS = re.compile(
-    r"ignore\s+(?:(?:all|previous|prior|above)\s+)?instructions"
+    r"ignore\s+(?:(?:all|previous|prior|above)\s+){0,3}instructions"
     r"|override\s+(?:(?:all|previous|prior)\s+)?instructions"
     r"|^system\s*:"
     r"|<system>"
