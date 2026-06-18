@@ -153,8 +153,6 @@ class BookingService:
         Start times iterate on 30-min grid. A slot is only added if the full
         block (start -> start+duration) is free within working hours.
         """
-        import pytz
-
         available = []
         now = timezone.now()
         min_booking_datetime = now + timedelta(minutes=30)
@@ -178,7 +176,7 @@ class BookingService:
 
                 try:
                     slot_datetime = timezone.make_aware(datetime.combine(target_date, slot_start))
-                except (pytz.exceptions.AmbiguousTimeError, pytz.exceptions.NonExistentTimeError):
+                except Exception:  # DST ambiguous/non-existent time (pytz or zoneinfo)
                     current += timedelta(minutes=step)
                     continue
 
