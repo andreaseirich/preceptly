@@ -21,7 +21,7 @@ class PublicBookingWeekOwnOtherTest(TestCase):
     def setUp(self):
         self.tutor = User.objects.create_user(username="tutor", password="test")
         self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
-        self.profile.public_booking_token = "tok-abc"
+        self.profile.public_booking_token = "tok-abcxxxxxxxxxxxxxxxxxxxxxxxxx"
         self.profile.default_working_hours = {
             "monday": [{"start": "09:00", "end": "17:00"}],
             "tuesday": [{"start": "09:00", "end": "17:00"}],
@@ -66,20 +66,24 @@ class PublicBookingWeekOwnOtherTest(TestCase):
         )
 
         self.client = Client(enforce_csrf_checks=True)
-        self.week_url = "/lessons/public-booking/tok-abc/week/"
+        self.week_url = "/lessons/public-booking/tok-abcxxxxxxxxxxxxxxxxxxxxxxxxx/week/"
 
     def _get_week(self, year=2025, month=1, day=6):
         return self.client.get(self.week_url, {"year": year, "month": month, "day": day})
 
     def _csrf_headers(self):
-        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-abc"]))
+        self.client.get(
+            reverse("lessons:public_booking_with_token", args=["tok-abcxxxxxxxxxxxxxxxxxxxxxxxxx"])
+        )
         csrf = self.client.cookies.get("csrftoken")
         return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
     def _verify(self, name, code):
         resp = self.client.post(
             reverse("lessons:public_booking_verify_student"),
-            data=json.dumps({"name": name, "code": code, "tutor_token": "tok-abc"}),
+            data=json.dumps(
+                {"name": name, "code": code, "tutor_token": "tok-abcxxxxxxxxxxxxxxxxxxxxxxxxx"}
+            ),
             content_type="application/json",
             **self._csrf_headers(),
         )

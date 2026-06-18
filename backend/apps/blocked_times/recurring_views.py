@@ -2,6 +2,7 @@
 Views für RecurringBlockedTime-CRUD-Operationen.
 """
 
+from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -105,6 +106,7 @@ class RecurringBlockedTimeGenerateView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
 
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
         recurring_blocked_time = self.get_object()
         check_conflicts = request.POST.get("check_conflicts", "on") == "on"

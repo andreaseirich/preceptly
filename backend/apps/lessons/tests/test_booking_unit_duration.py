@@ -27,14 +27,14 @@ class BookingUnitDurationTest(TestCase):
         UserProfile.objects.get_or_create(
             user=self.tutor,
             defaults={
-                "public_booking_token": "tok-x",
+                "public_booking_token": "tok-xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 "default_working_hours": {
                     "monday": [{"start": "09:00", "end": "17:00"}],
                 },
             },
         )
         prof = UserProfile.objects.get(user=self.tutor)
-        prof.public_booking_token = "tok-x"
+        prof.public_booking_token = "tok-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         prof.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
         prof.save()
 
@@ -62,7 +62,9 @@ class BookingUnitDurationTest(TestCase):
         self.client = Client(enforce_csrf_checks=True)
 
     def _csrf_headers(self):
-        self.client.get(reverse("lessons:public_booking_with_token", args=["tok-x"]))
+        self.client.get(
+            reverse("lessons:public_booking_with_token", args=["tok-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"])
+        )
         csrf = self.client.cookies.get("csrftoken")
         return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
@@ -70,7 +72,11 @@ class BookingUnitDurationTest(TestCase):
         resp = self.client.post(
             reverse("lessons:public_booking_verify_student"),
             data=json.dumps(
-                {"name": "Max Test", "code": self.booking_code, "tutor_token": "tok-x"}
+                {
+                    "name": "Max Test",
+                    "code": self.booking_code,
+                    "tutor_token": "tok-xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                }
             ),
             content_type="application/json",
             **self._csrf_headers(),
@@ -91,7 +97,7 @@ class BookingUnitDurationTest(TestCase):
         payload = {
             "student_id": self.student.id,
             "booking_code": self.booking_code,
-            "tutor_token": "tok-x",
+            "tutor_token": "tok-xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "date": future.strftime("%Y-%m-%d"),
             "start_time": "10:00",
             "end_time": "11:00",

@@ -23,7 +23,7 @@ class PublicBookingLimitTest(TestCase):
         self.tutor = User.objects.create_user(username="tutor", password="test")
         UserProfile.objects.create(user=self.tutor, is_premium=False)
         profile = UserProfile.objects.get(user=self.tutor)
-        profile.public_booking_token = "tok-limit"
+        profile.public_booking_token = "tok-limitxxxxxxxxxxxxxxxxxxxxxxx"
         profile.save()
         self.student = self.contract = Contract.objects.create(
             user=self.tutor,
@@ -49,9 +49,11 @@ class PublicBookingLimitTest(TestCase):
 
     def test_booking_blocked_when_limit_reached(self):
         client = Client(enforce_csrf_checks=True)
-        client.get(reverse("lessons:public_booking_with_token", args=["tok-limit"]))
+        client.get(
+            reverse("lessons:public_booking_with_token", args=["tok-limitxxxxxxxxxxxxxxxxxxxxxxx"])
+        )
         session = client.session
-        session["public_booking_tutor_token"] = "tok-limit"
+        session["public_booking_tutor_token"] = "tok-limitxxxxxxxxxxxxxxxxxxxxxxx"
         session["public_booking_student_id"] = self.student.id
         session.save()
         csrf = client.cookies.get("csrftoken")
@@ -65,7 +67,7 @@ class PublicBookingLimitTest(TestCase):
                 {
                     "student_id": self.student.id,
                     "booking_code": self.booking_code,
-                    "tutor_token": "tok-limit",
+                    "tutor_token": "tok-limitxxxxxxxxxxxxxxxxxxxxxxx",
                     "date": dt_str,
                     "start_time": "14:00",
                     "end_time": "15:00",
@@ -85,13 +87,13 @@ class PublicReschedulePremiumTest(TestCase):
         self.basic_tutor = User.objects.create_user(username="basic", password="test")
         UserProfile.objects.create(user=self.basic_tutor, is_premium=False)
         prof = UserProfile.objects.get(user=self.basic_tutor)
-        prof.public_booking_token = "tok-basic"
+        prof.public_booking_token = "tok-basicxxxxxxxxxxxxxxxxxxxxxxx"
         prof.save()
 
         self.premium_tutor = User.objects.create_user(username="premium", password="test")
         UserProfile.objects.create(user=self.premium_tutor, is_premium=True)
         prof2 = UserProfile.objects.get(user=self.premium_tutor)
-        prof2.public_booking_token = "tok-prem"
+        prof2.public_booking_token = "tok-premxxxxxxxxxxxxxxxxxxxxxxxx"
         prof2.save()
 
         from apps.students.booking_code_service import set_booking_code
@@ -133,9 +135,11 @@ class PublicReschedulePremiumTest(TestCase):
 
     def test_basic_reschedule_returns_403(self):
         client = Client(enforce_csrf_checks=True)
-        client.get(reverse("lessons:public_booking_with_token", args=["tok-basic"]))
+        client.get(
+            reverse("lessons:public_booking_with_token", args=["tok-basicxxxxxxxxxxxxxxxxxxxxxxx"])
+        )
         session = client.session
-        session["public_booking_tutor_token"] = "tok-basic"
+        session["public_booking_tutor_token"] = "tok-basicxxxxxxxxxxxxxxxxxxxxxxx"
         session["public_booking_student_id"] = self.student_basic.id
         session.save()
         csrf = client.cookies.get("csrftoken")
@@ -149,7 +153,7 @@ class PublicReschedulePremiumTest(TestCase):
                     "lesson_id": self.lesson_basic.id,
                     "new_date": new_date,
                     "new_start_time": "14:00",
-                    "tutor_token": "tok-basic",
+                    "tutor_token": "tok-basicxxxxxxxxxxxxxxxxxxxxxxx",
                     "booking_code": self.booking_code_basic,
                 }
             ),

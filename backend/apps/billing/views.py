@@ -2,6 +2,8 @@
 Views für Billing-App.
 """
 
+import os
+import re
 from datetime import date
 from decimal import Decimal
 
@@ -42,13 +44,17 @@ def _safe_date(val):
 
 
 def _safe_int(val):
-    """Parse int or return None on invalid input."""
+    """Parse int oder None bei ungültiger Eingabe. Nur positive 32-Bit-Integer."""
     if val is None:
         return None
     try:
-        return int(val)
+        parsed = int(val)
     except (TypeError, ValueError):
         return None
+    # [LOW] Range-Check: nur positive 32-Bit-Integer zulassen
+    if not (0 < parsed < 2**31):
+        return None
+    return parsed
 
 
 def _user_invoice_queryset(user):
@@ -277,8 +283,6 @@ def generate_invoice_document(request, pk):
 @login_required
 def serve_invoice_document(request, pk):
     """Serviert das Rechnungsdokument für eine Invoice."""
-    import os
-
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
 
     if not invoice.document:
@@ -289,7 +293,10 @@ def serve_invoice_document(request, pk):
     except (FileNotFoundError, OSError) as err:
         raise Http404(_("Invoice document file not found.")) from err
 
-    filename = os.path.basename(invoice.document.name)
+    # [MEDIUM] Dateiname sanitizen gegen Header-Injection (CRLF, Sonderzeichen)
+    raw_name = os.path.basename(invoice.document.name)
+    filename = re.sub(r"[^A-Za-z0-9._-]", "_", raw_name)[:100]
+
     response = FileResponse(
         file_handle,
         content_type="application/octet-stream",
@@ -321,6 +328,17 @@ def invoice_mark_paid(request, pk):
             messages.warning(request, _("Invoice is already marked as paid."))
         else:
             paid_date = _safe_date(request.POST.get("paid_date"))
+            # [LOW] paid_date Plausibilitätsprüfung: nicht in der Zukunft, nicht vor period_start
+            if paid_date is not None:
+                if paid_date > date.today():
+                    messages.error(request, _("Invalid paid date: date must not be in the future."))
+                    return redirect("billing:invoice_detail", pk=pk)
+                if invoice.period_start and paid_date < invoice.period_start:
+                    messages.error(
+                        request,
+                        _("Invalid paid date: date must not be before the invoice period start."),
+                    )
+                    return redirect("billing:invoice_detail", pk=pk)
             InvoiceService.mark_invoice_as_paid(invoice, paid_at=paid_date)
             messages.success(request, _("Invoice marked as paid."))
         return redirect("billing:invoice_detail", pk=pk)
@@ -342,6 +360,16 @@ def invoice_set_paid_date(request, pk):
         paid_date = _safe_date(request.POST.get("paid_date"))
         if paid_date is None:
             messages.error(request, _("Invalid date."))
+            return redirect("billing:invoice_set_paid_date", pk=pk)
+        # [LOW] paid_date Plausibilitätsprüfung: nicht in der Zukunft, nicht vor period_start
+        if paid_date > date.today():
+            messages.error(request, _("Invalid paid date: date must not be in the future."))
+            return redirect("billing:invoice_set_paid_date", pk=pk)
+        if invoice.period_start and paid_date < invoice.period_start:
+            messages.error(
+                request,
+                _("Invalid paid date: date must not be before the invoice period start."),
+            )
             return redirect("billing:invoice_set_paid_date", pk=pk)
         InvoiceService.mark_invoice_as_paid(invoice, paid_at=paid_date)
         messages.success(request, _("Payment date updated."))
@@ -391,14 +419,13 @@ def invoice_pdf_generate(request, pk):
 @login_required
 def invoice_pdf_download(request, pk):
     """Download invoice PDF. Generates on-the-fly if missing."""
+    from django.core.files.base import ContentFile
+
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
     if not invoice.invoice_pdf:
-        # Generate on-the-fly and store
         try:
             pdf_bytes = generate_invoice_pdf(invoice)
             filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
-            if invoice.invoice_pdf:
-                invoice.invoice_pdf.delete(save=False)
             invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
             invoice.invoice_pdf_created_at = timezone.now()
             invoice.save(update_fields=["invoice_pdf_created_at"])
@@ -407,6 +434,7 @@ def invoice_pdf_download(request, pk):
     if not invoice.invoice_pdf:
         raise Http404(_("Invoice PDF not found."))
     fn = f"invoice-{invoice.invoice_number or invoice.id}.pdf"
+    fn = re.sub(r"[^A-Za-z0-9._-]", "_", fn)[:100]
     try:
         file_handle = invoice.invoice_pdf.open("rb")
     except (FileNotFoundError, OSError) as err:

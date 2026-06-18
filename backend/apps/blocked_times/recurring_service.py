@@ -12,6 +12,9 @@ from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 
 
+_MAX_BLOCKED_PER_GENERATION = 1000
+
+
 class RecurringBlockedTimeService:
     """Service für die Generierung von BlockedTime-Einträgen aus RecurringBlockedTime-Vorlagen."""
 
@@ -43,11 +46,12 @@ class RecurringBlockedTimeService:
         end_date = recurring_blocked_time.end_date
         if not end_date:
             # Falls kein Enddatum, verwende 1 Jahr nach Start
-            end_date = date(
-                recurring_blocked_time.start_date.year + 1,
-                recurring_blocked_time.start_date.month,
-                recurring_blocked_time.start_date.day,
-            )
+            from calendar import monthrange as _mrange
+
+            sd = recurring_blocked_time.start_date
+            _yr = sd.year + 1
+            _day = min(sd.day, _mrange(_yr, sd.month)[1])
+            end_date = date(_yr, sd.month, _day)
 
         # Generiere BlockedTime-Einträge basierend auf recurrence_type
         recurrence_type = recurring_blocked_time.recurrence_type
@@ -258,6 +262,7 @@ class RecurringBlockedTimeService:
 
         # Prüfe, ob bereits ein BlockedTime-Eintrag für diesen Zeitraum existiert
         existing = BlockedTime.objects.filter(
+            user=recurring_blocked_time.user,
             title=recurring_blocked_time.title,
             start_datetime=start_datetime,
             end_datetime=end_datetime,

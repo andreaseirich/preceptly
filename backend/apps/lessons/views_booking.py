@@ -21,6 +21,10 @@ from apps.lessons.email_service import send_booking_notification
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
+from django_ratelimit.decorators import ratelimit
+
+_MIN_YEAR = 2020
+_MAX_YEAR = 2031
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -493,6 +497,7 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
 
 
 @require_http_methods(["GET"])
+@ratelimit(key="ip", rate="30/m", block=True)
 def student_booking_week_api(request, token):
     """API for fetching week booking data (for AJAX week navigation)."""
     try:
@@ -504,14 +509,18 @@ def student_booking_week_api(request, token):
         year = int(request.GET.get("year", timezone.now().year))
         month = int(request.GET.get("month", timezone.now().month))
         day = int(request.GET.get("day", timezone.now().day))
+        if not (_MIN_YEAR <= year <= _MAX_YEAR and 1 <= month <= 12 and 1 <= day <= 31):
+            raise ValueError("Date out of range")
+        target_date = date(year, month, day)
     except (ValueError, TypeError):
         return JsonResponse({"success": False, "message": _("Invalid date.")}, status=400)
 
-    data = _get_week_data_json(contract, year, month, day)
+    data = _get_week_data_json(contract, target_date.year, target_date.month, target_date.day)
     return JsonResponse({"success": True, "week_data": data})
 
 
 @require_http_methods(["POST"])
+@ratelimit(key="ip", rate="10/m", block=True)
 def student_booking_api(request, token):
     """API-Endpoint für Buchungsanfragen (für AJAX)."""
     view = StudentBookingView()

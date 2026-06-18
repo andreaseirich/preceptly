@@ -125,6 +125,12 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
     else:
         return None
 
+    # Defensive type-check vor dem Sortieren (verhindert TypeError bei unvalidiertem JSONField)
+    try:
+        sorted_tiers = sorted(tiers, key=lambda t: float(t["hours_from"]))
+    except (TypeError, KeyError, ValueError):
+        return None
+
     qs = Session.objects.filter(
         contract__user=user,
         contract__institute__iexact=institute_name,
@@ -140,7 +146,6 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
     total_minutes = qs.aggregate(total=Sum("duration_minutes"))["total"] or 0
     total_hours = round(total_minutes / 60.0, 2)
 
-    sorted_tiers = sorted(tiers, key=lambda t: t["hours_from"])
     current_tier = sorted_tiers[0]
     for tier in sorted_tiers:
         if tier["hours_from"] <= total_hours:

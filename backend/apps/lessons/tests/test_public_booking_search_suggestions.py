@@ -23,18 +23,18 @@ class PublicBookingSearchSuggestionsTest(TestCase):
         cache.clear()
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
         UserProfile.objects.get_or_create(
-            user=self.tutor_a, defaults={"public_booking_token": "tok-a"}
+            user=self.tutor_a, defaults={"public_booking_token": "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
         )
         prof_a = UserProfile.objects.get(user=self.tutor_a)
-        prof_a.public_booking_token = "tok-a"
+        prof_a.public_booking_token = "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         prof_a.save()
 
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
         UserProfile.objects.get_or_create(
-            user=self.tutor_b, defaults={"public_booking_token": "tok-b"}
+            user=self.tutor_b, defaults={"public_booking_token": "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
         )
         prof_b = UserProfile.objects.get(user=self.tutor_b)
-        prof_b.public_booking_token = "tok-b"
+        prof_b.public_booking_token = "tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         prof_b.save()
 
         self.student_max = Contract.objects.create(
@@ -62,12 +62,12 @@ class PublicBookingSearchSuggestionsTest(TestCase):
         self.client = Client(enforce_csrf_checks=True)
         self.search_url = reverse("lessons:public_booking_search_student")
 
-    def _csrf_headers(self, tutor_token: str = "tok-a"):
+    def _csrf_headers(self, tutor_token: str = "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"):
         self.client.get(reverse("lessons:public_booking_with_token", args=[tutor_token]))
         csrf = self.client.cookies.get("csrftoken")
         return {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
 
-    def _search(self, name: str, tutor_token: str = "tok-a"):
+    def _search(self, name: str, tutor_token: str = "tok-aaaaaaaaaaaaaaaaaaaaaaaaaaaa"):
         return self.client.post(
             self.search_url,
             data=json.dumps({"name": name, "tutor_token": tutor_token}),
@@ -127,7 +127,7 @@ class PublicBookingSearchSuggestionsTest(TestCase):
 
     def test_tutor_scoping(self):
         """Search for tutor B returns only tutor B students."""
-        resp = self._search("Max", tutor_token="tok-b")
+        resp = self._search("Max", tutor_token="tok-bbbbbbbbbbbbbbbbbbbbbbbbbbbb")
         data = json.loads(resp.content)
         self.assertTrue(data.get("success"))
         names = [s["display_name"] for s in data.get("suggestions", [])]

@@ -5,8 +5,14 @@ Service for recurring sessions (series appointments).
 from datetime import date, timedelta
 from typing import List
 
+from django.db import IntegrityError, transaction
+
 from apps.lessons.models import Session
 from apps.lessons.recurring_models import RecurringSession
+
+
+_MAX_SESSIONS_PER_GENERATION = 1000
+_MAX_END_DATE_YEARS_AHEAD = 2
 
 
 class RecurringSessionService:
@@ -41,11 +47,19 @@ class RecurringSessionService:
             if recurring_session.contract.end_date:
                 end_date = recurring_session.contract.end_date
             else:
-                end_date = date(
-                    recurring_session.start_date.year + 1,
-                    recurring_session.start_date.month,
-                    recurring_session.start_date.day,
-                )
+                from calendar import monthrange as _monthrange
+
+                sd = recurring_session.start_date
+                cap_year = sd.year + 1
+                cap_day = min(sd.day, _monthrange(cap_year, sd.month)[1])
+                end_date = date(cap_year, sd.month, cap_day)
+
+        # Hard cap: max 2 years ahead (DoS prevention)
+        max_end = date.today() + __import__("datetime").timedelta(
+            days=365 * _MAX_END_DATE_YEARS_AHEAD
+        )
+        if end_date > max_end:
+            end_date = max_end
 
         # Generate sessions based on recurrence_type
         recurrence_type = recurring_session.recurrence_type
@@ -281,7 +295,11 @@ class RecurringSessionService:
         result = {"created": True, "skipped": False, "session": session, "conflicts": []}
 
         if not dry_run:
-            session.save()
+            try:
+                session.save()
+            except IntegrityError:
+                # Parallel request already created this session (TOCTOU protection)
+                return {"created": False, "skipped": True}
             # Set status again after saving (if necessary)
             SessionStatusUpdater.update_status_for_session(session)
             session.refresh_from_db()  # Refresh to get updated status

@@ -39,7 +39,9 @@ class FooterIntegrationTests(TestCase):
     def test_footer_links_render_on_public_booking(self):
         """Public booking page should render footer with legal links."""
         user = User.objects.create_user(username="tutor-footer", password="test123")
-        profile = UserProfile.objects.create(user=user, public_booking_token="token-footer")
+        profile = UserProfile.objects.create(
+            user=user, public_booking_token="token-footerxxxxxxxxxxxxxxxxxxxx"
+        )
 
         response = self.client.get(f"/lessons/public-booking/{profile.public_booking_token}/")
         self.assertEqual(response.status_code, 200)

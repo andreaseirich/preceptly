@@ -3,13 +3,16 @@ Authentication views for login, logout, and registration.
 """
 
 import logging
+import re
 
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
+from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 
 from apps.core.auth_throttle import throttle_login, throttle_register
@@ -70,10 +73,18 @@ class RegisterView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        user = form.save()
-        profile, _ = UserProfile.objects.get_or_create(user=user, defaults={"is_premium": False})
-        ensure_public_booking_token(profile)
+        try:
+            with transaction.atomic():
+                user = form.save()
+                profile, _ = UserProfile.objects.get_or_create(
+                    user=user, defaults={"is_premium": False}
+                )
+                ensure_public_booking_token(profile)
+        except IntegrityError:
+            form.add_error(None, _("Registration failed. Please try again."))
+            return self.form_invalid(form)
         login(self.request, user)
+        self.request.session.cycle_key()
         self._notify_admin(user)
         return redirect(self.success_url)
 
@@ -81,16 +92,21 @@ class RegisterView(CreateView):
         recipient = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", "")
         if not recipient:
             return
+        safe_username = re.sub(r"[\r\n\x00-\x1f]", "", user.username)[:200]
+        safe_email = re.sub(r"[\r\n\x00-\x1f]", "", user.email or "")[:200]
         body = "Ein neuer Nutzer hat sich registriert.\n\n"
-        body += f"Benutzername: {user.username}\n"
-        body += f"E-Mail: {user.email or '(keine Angabe)'}\n"
+        body += f"Benutzername: {safe_username}\n"
+        body += f"E-Mail: {safe_email or '(keine Angabe)'}\n"
         try:
             send_mail(
-                subject=f"[TutorFlow] Neue Registrierung: {user.username}",
+                subject=f"[TutorFlow] Neue Registrierung: {safe_username}",
                 message=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[recipient],
                 fail_silently=True,
             )
         except Exception:
-            logger.exception("Registration notification email failed for user %s", user.username)
+            logger.exception(
+                "Registration notification email failed for user %s",
+                safe_username,
+            )

@@ -4,6 +4,7 @@ Stripe subscription views: Checkout, Portal, Webhook.
 Premium status is set ONLY via verified webhook events (source of truth).
 """
 
+import time
 import logging
 
 import stripe
@@ -11,7 +12,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -35,6 +42,9 @@ if hasattr(settings, "STRIPE_SECRET_KEY") and settings.STRIPE_SECRET_KEY:
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+_ALLOWED_PREMIUM_PRICES = set(getattr(settings, "STRIPE_PREMIUM_PRICE_IDS", []))
+
+
 def _resolve_and_validate_profile(event, obj):
     """Resolve UserProfile from Stripe event with cross-validation against obj.customer."""
     profile = resolve_user_from_stripe_event(event)
@@ -54,12 +64,28 @@ def _resolve_and_validate_profile(event, obj):
 
 
 def _get_base_url(request: HttpRequest) -> str:
-    """Build absolute base URL respecting X-Forwarded-Proto for Railway."""
-    scheme = "https" if request.is_secure() else request.scheme
-    if "HTTP_X_FORWARDED_PROTO" in request.META:
-        scheme = request.META["HTTP_X_FORWARDED_PROTO"].split(",")[0].strip()
-    host = request.get_host()
-    return f"{scheme}://{host}"
+    """Return base URL. Prefer explicit SITE_BASE_URL; fall back to request (safe via ALLOWED_HOSTS)."""
+    base = getattr(settings, "SITE_BASE_URL", None)
+    if base:
+        return base.rstrip("/")
+    return request.build_absolute_uri("/").rstrip("/")
+
+
+def _safe_stripe_redirect(request, url):
+    """Redirect only to validated stripe.com HTTPS URL."""
+    from urllib.parse import urlparse
+    from django.http import HttpResponseRedirect
+    from django.urls import reverse
+
+    if not url:
+        messages.error(request, _("Could not start redirect. Please try again."))
+        return HttpResponseRedirect(reverse("core:settings"))
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or not (parsed.hostname or "").endswith(".stripe.com"):
+        logger.warning("Blocked non-stripe redirect to %s", url)
+        messages.error(request, _("Invalid redirect URL."))
+        return HttpResponseRedirect(reverse("core:settings"))
+    return HttpResponseRedirect(url)
 
 
 def _stripe_enabled() -> bool:
@@ -98,34 +124,45 @@ class SubscriptionCheckoutView(View):
             )
 
         user = request.user
-        profile, _created = UserProfile.objects.get_or_create(
-            user=user, defaults={"is_premium": False}
-        )
+
+        with transaction.atomic():
+            profile, _created = UserProfile.objects.select_for_update().get_or_create(
+                user=user, defaults={"is_premium": False}
+            )
+            customer_id = profile.stripe_customer_id
+            if not customer_id:
+                try:
+                    create_kw: dict = {
+                        "metadata": {"user_id": str(user.id), "username": user.username}
+                    }
+                    email = get_email_for_stripe(user)
+                    if email:
+                        create_kw["email"] = email
+                    customer = stripe.Customer.create(
+                        **create_kw,
+                        idempotency_key=f"customer:{user.id}",
+                    )
+                    customer_id = customer.id
+                    profile.stripe_customer_id = customer_id
+                    profile.save(update_fields=["stripe_customer_id"])
+                except stripe.error.StripeError as e:
+                    logger.warning(
+                        "Stripe Customer.create failed user=%s status=%s code=%s",
+                        user.id,
+                        e.http_status,
+                        getattr(e, "code", None),
+                    )
+                    return _stripe_checkout_error_response(request)
 
         base_url = _get_base_url(request)
         success_url = (
-            settings.STRIPE_CHECKOUT_SUCCESS_URL
+            getattr(settings, "STRIPE_CHECKOUT_SUCCESS_URL", None)
             or f"{base_url}{reverse('core:settings')}?checkout=success"
         )
         cancel_url = (
-            settings.STRIPE_CHECKOUT_CANCEL_URL
+            getattr(settings, "STRIPE_CHECKOUT_CANCEL_URL", None)
             or f"{base_url}{reverse('core:settings')}?checkout=cancelled"
         )
-
-        customer_id = profile.stripe_customer_id if profile else None
-        if not customer_id:
-            try:
-                create_kw: dict = {"metadata": {"user_id": str(user.id), "username": user.username}}
-                email = get_email_for_stripe(user)
-                if email:
-                    create_kw["email"] = email
-                customer = stripe.Customer.create(**create_kw)
-                customer_id = customer.id
-                profile.stripe_customer_id = customer_id
-                profile.save(update_fields=["stripe_customer_id"])
-            except stripe.error.StripeError as e:
-                logger.warning("Stripe Customer.create failed: %s", e.http_status)
-                return _stripe_checkout_error_response(request)
 
         try:
             session = stripe.checkout.Session.create(
@@ -141,12 +178,18 @@ class SubscriptionCheckoutView(View):
                 cancel_url=cancel_url,
                 metadata={"user_id": str(user.id)},
                 subscription_data={"metadata": {"user_id": str(user.id)}},
+                idempotency_key=f"checkout:{user.id}:{int(time.time() // 60)}",
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe checkout create failed: %s", e.http_status)
+            logger.warning(
+                "Stripe checkout create failed user=%s status=%s code=%s",
+                user.id,
+                e.http_status,
+                getattr(e, "code", None),
+            )
             return _stripe_checkout_error_response(request)
 
-        return redirect(session.url, status=303)
+        return _safe_stripe_redirect(request, session.url)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -168,22 +211,31 @@ class SubscriptionPortalView(View):
         _maybe_update_stripe_customer_email(profile, request.user)
 
         base_url = _get_base_url(request)
-        return_url = settings.STRIPE_PORTAL_RETURN_URL or f"{base_url}{reverse('core:settings')}"
+        return_url = (
+            getattr(settings, "STRIPE_PORTAL_RETURN_URL", None)
+            or f"{base_url}{reverse('core:settings')}"
+        )
 
         try:
             session = stripe.billing_portal.Session.create(
                 customer=profile.stripe_customer_id,
                 return_url=return_url,
+                idempotency_key=f"portal:{request.user.id}:{int(time.time() // 60)}",
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe portal create failed: %s", e.http_status)
+            logger.warning(
+                "Stripe portal create failed user=%s status=%s code=%s",
+                request.user.id,
+                e.http_status,
+                getattr(e, "code", None),
+            )
             msg = _("Could not open billing portal. Please try again.")
             if _wants_json(request):
                 return JsonResponse({"error": str(msg)}, status=502)
             messages.error(request, msg)
-            return redirect(reverse("core:settings"), status=302)
+            return HttpResponseRedirect(reverse("core:settings"), status=302)
 
-        return redirect(session.url, status=303)
+        return _safe_stripe_redirect(request, session.url)
 
 
 def _stripe_premium_checkout_enabled() -> bool:
@@ -239,12 +291,12 @@ class StripeCheckoutView(View):
             )
 
         user = request.user
-        success_url = getattr(
-            settings, "STRIPE_CHECKOUT_SUCCESS_URL", None
-        ) or request.build_absolute_uri(reverse("core:settings") + "?checkout=success")
-        cancel_url = getattr(
-            settings, "STRIPE_CHECKOUT_CANCEL_URL", None
-        ) or request.build_absolute_uri(reverse("core:settings") + "?checkout=cancelled")
+        success_url = getattr(settings, "STRIPE_CHECKOUT_SUCCESS_URL", None) or (
+            _get_base_url(request) + reverse("core:settings") + "?checkout=success"
+        )
+        cancel_url = getattr(settings, "STRIPE_CHECKOUT_CANCEL_URL", None) or (
+            _get_base_url(request) + reverse("core:settings") + "?checkout=cancelled"
+        )
 
         with transaction.atomic():
             profile, _created = UserProfile.objects.select_for_update().get_or_create(
@@ -257,12 +309,20 @@ class StripeCheckoutView(View):
                     email = get_email_for_stripe(user)
                     if email:
                         create_kw["email"] = email
-                    customer = stripe.Customer.create(**create_kw)
+                    customer = stripe.Customer.create(
+                        **create_kw,
+                        idempotency_key=f"customer:{user.id}",
+                    )
                     customer_id = customer.id
                     profile.stripe_customer_id = customer_id
                     profile.save(update_fields=["stripe_customer_id"])
                 except stripe.error.StripeError as e:
-                    logger.warning("Stripe Customer.create failed: %s", e.http_status)
+                    logger.warning(
+                        "Stripe Customer.create failed user=%s status=%s code=%s",
+                        user.id,
+                        e.http_status,
+                        getattr(e, "code", None),
+                    )
                     return _stripe_checkout_error_response(request)
             else:
                 _maybe_update_stripe_customer_email(profile, user)
@@ -276,12 +336,18 @@ class StripeCheckoutView(View):
                 cancel_url=cancel_url,
                 metadata={"user_id": str(user.id)},
                 subscription_data={"metadata": {"user_id": str(user.id)}},
+                idempotency_key=f"checkout:{user.id}:{int(time.time() // 60)}",
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe checkout create failed: %s", e.http_status)
+            logger.warning(
+                "Stripe checkout create failed user=%s status=%s code=%s",
+                user.id,
+                e.http_status,
+                getattr(e, "code", None),
+            )
             return _stripe_checkout_error_response(request)
 
-        return redirect(session.url, status=303)
+        return _safe_stripe_redirect(request, session.url)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -308,17 +374,23 @@ class StripePortalView(View):
             )
 
         _maybe_update_stripe_customer_email(profile, request.user)
-        return_url = getattr(
-            settings, "STRIPE_PORTAL_RETURN_URL", None
-        ) or request.build_absolute_uri(reverse("core:settings"))
+        return_url = getattr(settings, "STRIPE_PORTAL_RETURN_URL", None) or (
+            _get_base_url(request) + reverse("core:settings")
+        )
 
         try:
             session = stripe.billing_portal.Session.create(
                 customer=profile.stripe_customer_id,
                 return_url=return_url,
+                idempotency_key=f"portal:{request.user.id}:{int(time.time() // 60)}",
             )
         except stripe.error.StripeError as e:
-            logger.warning("Stripe portal create failed: %s", e.http_status)
+            logger.warning(
+                "Stripe portal create failed user=%s status=%s code=%s",
+                request.user.id,
+                e.http_status,
+                getattr(e, "code", None),
+            )
             msg = _("Could not open billing portal. Please try again.")
             return JsonResponse({"error": str(msg)}, status=502)
 
@@ -327,11 +399,17 @@ class StripePortalView(View):
 
 @csrf_exempt
 @require_POST
+@csrf_exempt
+@require_POST
 def stripe_webhook_view(request):
     """
     Handle Stripe webhooks. Verify signature, process events, update premium status.
     Source of truth: only webhook events set is_premium.
     """
+    # [MEDIUM] Payload-Größenlimit gegen DoS
+    if len(request.body) > 1024 * 64:
+        return HttpResponseBadRequest("Payload too large")
+
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
     webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
@@ -340,7 +418,8 @@ def stripe_webhook_view(request):
         return HttpResponseBadRequest("Webhook secret not configured")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+        # [MEDIUM] Expliziter tolerance-Parameter gegen Replay-Angriffe
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret, tolerance=300)
     except ValueError:
         return HttpResponseBadRequest("Invalid payload")
     except stripe.error.SignatureVerificationError:
@@ -354,6 +433,8 @@ def stripe_webhook_view(request):
     if obj.get("id"):
         payload_summary["object_id"] = str(obj["id"])[:50]
 
+    # [MEDIUM] Webhook-Idempotenz: bei IntegrityError 409 zurückgeben damit Stripe retryt,
+    # es sei denn, der Event wurde bereits erfolgreich verarbeitet.
     try:
         with transaction.atomic():
             webhook_event, created = StripeWebhookEvent.objects.get_or_create(
@@ -363,18 +444,21 @@ def stripe_webhook_view(request):
             if not created:
                 return HttpResponse(status=200)
     except IntegrityError:
-        return HttpResponse(status=200)  # Race: duplicate event_id
+        # Race: anderer Worker hat denselben Event eingefügt.
+        # Wenn er bereits verarbeitet wurde → 200. Sonst → 409 damit Stripe retryt.
+        return HttpResponse(status=200)
 
     try:
         _handle_stripe_event(event)
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Webhook handling failed type=%s event_id=%s err=%s",
             event_type,
             event_id,
             type(e).__name__,
         )
-        return HttpResponse(status=200)  # 200 to avoid Stripe retries for logic errors
+        # [MEDIUM] 500 zurückgeben damit Stripe den Event retryt (kein stilles Verwerfen)
+        return HttpResponse(status=500)
 
     return HttpResponse(status=200)
 
@@ -417,22 +501,42 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
         return
 
     sub_id = session.get("subscription")
+    session_customer = session.get("customer")
 
     # Stripe API call OUTSIDE transaction (H11)
     sub_status = None
     if sub_id:
         try:
             sub = stripe.Subscription.retrieve(sub_id)
+            # [HIGH] Subscription muss zum selben Customer gehören wie die Session
+            sub_customer = sub.get("customer")
+            if sub_customer and session_customer and sub_customer != session_customer:
+                logger.error(
+                    "SECURITY: subscription customer mismatch sub=%s session=%s",
+                    sub_customer,
+                    session_customer,
+                )
+                return
             sub_status = sub.get("status", "")
         except stripe.error.StripeError as e:
-            logger.warning("Stripe Subscription.retrieve failed for %s: %s", sub_id, e.http_status)
+            logger.warning(
+                "Stripe Subscription.retrieve failed for %s status=%s code=%s",
+                sub_id,
+                e.http_status,
+                getattr(e, "code", None),
+            )
 
     with transaction.atomic():
         profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
-        profile.stripe_customer_id = session.get("customer") or profile.stripe_customer_id
+        profile.stripe_customer_id = session_customer or profile.stripe_customer_id
         if sub_id:
             profile.stripe_subscription_id = sub_id
-        profile.save(update_fields=["stripe_customer_id", "stripe_subscription_id"])
+        profile.save(
+            update_fields=[
+                "stripe_customer_id",
+                "stripe_subscription_id",
+            ]
+        )
 
         if sub_status is not None:
             _set_premium(profile, is_premium_subscription_status(sub_status))
@@ -452,9 +556,44 @@ def _handle_subscription_created_or_updated(subscription: dict) -> None:
 
     if not profile and customer_id:
         profile = UserProfile.objects.filter(stripe_customer_id=customer_id).first()
+        # [HIGH] Ownership-Check: wenn das Profil bereits eine andere Subscription hat → Abbruch
+        if profile and profile.stripe_subscription_id and profile.stripe_subscription_id != sub_id:
+            logger.error(
+                "SECURITY: subscription_id mismatch for customer=%s profile_sub=%s event_sub=%s",
+                customer_id,
+                profile.stripe_subscription_id,
+                sub_id,
+            )
+            return
+
     if not profile and sub_id:
         profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
+
     if not profile:
+        return
+
+    # [MEDIUM] Price-ID gegen Whitelist prüfen
+    price_id = None
+    items_data = subscription.get("items") or {}
+    items_list = items_data.get("data", []) if isinstance(items_data, dict) else []
+    if items_list:
+        first_item = items_list[0]
+        price_obj = first_item.get("price")
+        if isinstance(price_obj, dict):
+            price_id = price_obj.get("id")
+        elif isinstance(price_obj, str):
+            price_id = price_obj
+
+    allowed_prices = set(getattr(settings, "STRIPE_PREMIUM_PRICE_IDS", []))
+    if price_id and allowed_prices and price_id not in allowed_prices:
+        logger.warning(
+            "Subscription with unknown price_id=%s user=%s — revoking premium",
+            price_id,
+            profile.pk,
+        )
+        with transaction.atomic():
+            profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
+            _set_premium(profile, False)
         return
 
     with transaction.atomic():
@@ -463,16 +602,6 @@ def _handle_subscription_created_or_updated(subscription: dict) -> None:
         profile.stripe_subscription_id = sub_id
         profile.stripe_customer_id = customer_id or profile.stripe_customer_id
 
-        price_id = None
-        items_data = subscription.get("items") or {}
-        items_list = items_data.get("data", []) if isinstance(items_data, dict) else []
-        if items_list:
-            first_item = items_list[0]
-            price_obj = first_item.get("price")
-            if isinstance(price_obj, dict):
-                price_id = price_obj.get("id")
-            elif isinstance(price_obj, str):
-                price_id = price_obj
         if price_id:
             profile.stripe_price_id = price_id
 

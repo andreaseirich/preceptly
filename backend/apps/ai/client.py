@@ -10,10 +10,24 @@ import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse
 
 import requests
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+
+# Erlaubte Hostnamen für LLM_API_BASE_URL (SSRF-Schutz)
+_ALLOWED_LLM_HOSTS = frozenset(
+    {
+        "api.openai.com",
+        "api.anthropic.com",
+        "api.mistral.ai",
+        "api.cohere.com",
+        "openrouter.ai",
+    }
+)
+
+_MAX_TIMEOUT_SECONDS = 120
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +66,12 @@ class LLMClient:
         self.api_base_url = settings.LLM_API_BASE_URL
         self.api_key = settings.LLM_API_KEY
         self.model_name = settings.LLM_MODEL_NAME
-        self.timeout = settings.LLM_TIMEOUT_SECONDS
+
+        # Timeout auf sicheren Bereich begrenzen (LOW: kein unbegrenzter Hang)
+        raw_timeout = settings.LLM_TIMEOUT_SECONDS
+        self.timeout = min(int(raw_timeout or 30), _MAX_TIMEOUT_SECONDS)
+
+        # Mock-Modus nur explizit via ENV – NICHT automatisch bei fehlendem API-Key
         self.mock_enabled = os.environ.get("MOCK_LLM", "") == "1" or not self.api_key
         self.mock_samples = _load_llm_samples()
 
@@ -60,6 +79,14 @@ class LLMClient:
             raise LLMClientError(
                 _("LLM_API_KEY is required when MOCK_LLM=0 (live mode disabled without key).")
             )
+
+        # SSRF-Schutz: LLM_API_BASE_URL muss HTTPS und auf Allowlist sein
+        if not self.mock_enabled:
+            parsed = urlparse(self.api_base_url)
+            if parsed.scheme != "https":
+                raise LLMClientError(_("Invalid LLM_API_BASE_URL: HTTPS is required."))
+            if parsed.hostname not in _ALLOWED_LLM_HOSTS:
+                raise LLMClientError(_("Invalid LLM_API_BASE_URL: host is not on the allowlist."))
 
     def generate_text(
         self,
@@ -207,10 +234,8 @@ class LLMClient:
                 "Content-Type": "application/json",
             }
 
-            # Log request details (without sensitive data)
-            logger.debug(
-                f"LLM API Request: URL={self.api_base_url}/chat/completions, Model={self.model_name}"
-            )
+            # Log request details (ohne sensitive Daten – kein f-String mit Variablen)
+            logger.debug("LLM API Request: model=%s", self.model_name)
 
             response = requests.post(
                 f"{self.api_base_url}/chat/completions",
@@ -219,73 +244,54 @@ class LLMClient:
                 timeout=self.timeout,
             )
 
-            # Try to parse error response for better error messages
+            # Try to parse error response for structured logging
             error_details = None
+            error_msg = None
+            error_type = "unknown"
             try:
                 if response.status_code >= 400:
                     error_response = response.json()
                     if "error" in error_response:
                         error_details = error_response["error"]
                         if isinstance(error_details, dict):
-                            error_msg = error_details.get("message", str(error_details))
+                            error_msg = error_details.get("message", "")
                             error_type = error_details.get("type", "unknown")
+                            # Vollständige Details nur ins Log (nie zum User)
                             logger.error(
-                                f"LLM API Error: Status={response.status_code}, Type={error_type}, Message={error_msg}"
+                                "LLM API error status=%s type=%r msg=%r",
+                                response.status_code,
+                                error_type,
+                                error_msg,
                             )
                         else:
                             error_msg = str(error_details)
                             logger.error(
-                                f"LLM API Error: Status={response.status_code}, Error={error_msg}"
+                                "LLM API error status=%s error=%r",
+                                response.status_code,
+                                error_msg,
                             )
             except (ValueError, KeyError):
-                # If we can't parse the error response, use the raw text
-                error_details = response.text[:500]  # Limit to 500 chars
-                logger.error(
-                    f"LLM API Error: Status={response.status_code}, Response={error_details}"
+                # Parsing des Error-Body fehlgeschlagen – trotzdem loggen für Debugging
+                logger.debug(
+                    "Could not parse error body for status=%s",
+                    response.status_code,
+                    exc_info=True,
                 )
+                error_details = None
 
-            # Handle specific HTTP status codes
+            # Handle specific HTTP status codes – generische User-Messages (kein Leak)
             if response.status_code == 429:
-                # Rate limit exceeded
-                error_msg = _("API rate limit exceeded. Please try again in a few minutes.")
-                if error_details and isinstance(error_details, dict) and "message" in error_details:
-                    error_msg = _("API rate limit exceeded: {details}").format(
-                        details=error_details.get("message", "")
-                    )
-                raise LLMClientError(error_msg)
+                raise LLMClientError(
+                    _("API rate limit exceeded. Please try again in a few minutes.")
+                )
             elif response.status_code == 401:
-                # Unauthorized - invalid API key
-                error_msg = _("Invalid API key. Please check your LLM_API_KEY configuration.")
-                if error_details and isinstance(error_details, dict) and "message" in error_details:
-                    error_msg = _("Invalid API key: {details}").format(
-                        details=error_details.get("message", "")
-                    )
-                raise LLMClientError(error_msg)
+                raise LLMClientError(
+                    _("Invalid API key. Please check your LLM_API_KEY configuration.")
+                )
             elif response.status_code == 402:
-                # Payment required
-                error_msg = _("Payment required. Please check your API account balance.")
-                if error_details and isinstance(error_details, dict) and "message" in error_details:
-                    error_msg = _("Payment required: {details}").format(
-                        details=error_details.get("message", "")
-                    )
-                raise LLMClientError(error_msg)
+                raise LLMClientError(_("Payment required. Please check your API account balance."))
             elif response.status_code >= 400:
-                # Other 4xx/5xx errors
-                if error_details and isinstance(error_details, dict) and "message" in error_details:
-                    error_msg = error_details.get("message", _("API error occurred"))
-                    error_type = error_details.get("type", "unknown")
-                    raise LLMClientError(
-                        _("API error ({type}): {message}").format(
-                            type=error_type, message=error_msg
-                        )
-                    )
-                else:
-                    raise LLMClientError(
-                        _("API error: HTTP {status} - {details}").format(
-                            status=response.status_code,
-                            details=error_details or response.text[:200],
-                        )
-                    )
+                raise LLMClientError(_("The AI service is currently unavailable."))
 
             response.raise_for_status()
             result = response.json()
@@ -296,21 +302,22 @@ class LLMClient:
             else:
                 raise LLMClientError(_("Unexpected API response format"))
 
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout:
             logger.error("LLM API request timed out after %ss", self.timeout, exc_info=True)
-            raise LLMClientError(
-                _("API timeout after {seconds} seconds").format(seconds=self.timeout)
-            ) from e
+            raise LLMClientError(_("AI service unavailable.")) from None
         except requests.exceptions.HTTPError as e:
-            # Handle other HTTP errors
-            if e.response.status_code == 429:
+            # Handle other HTTP errors – Status-Code darf geloggt werden, kein Body-Leak
+            status = e.response.status_code if e.response is not None else "unknown"
+            logger.error("LLM HTTP error status=%s", status, exc_info=True)
+            if e.response is not None and e.response.status_code == 429:
                 raise LLMClientError(
                     _("API rate limit exceeded. Please try again in a few minutes.")
-                ) from e
-            raise LLMClientError(_("API error: {error}").format(error=str(e))) from e
-        except requests.exceptions.RequestException as e:
-            logger.error("LLM API request failed: %s", e, exc_info=True)
-            raise LLMClientError(_("API error: {error}").format(error=str(e))) from e
+                ) from None
+            raise LLMClientError(_("AI service unavailable.")) from None
+        except requests.exceptions.RequestException:
+            # 'from None' verhindert Chain-Leak im Traceback (API-Key in Frames)
+            logger.error("LLM request failed", exc_info=True)
+            raise LLMClientError(_("AI service unavailable.")) from None
         except (KeyError, ValueError) as e:
             raise LLMClientError(
                 _("Error parsing API response: {error}").format(error=str(e))

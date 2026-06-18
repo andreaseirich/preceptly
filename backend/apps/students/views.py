@@ -61,7 +61,9 @@ class StudentDetailView(LoginRequiredMixin, DetailView):
         ).count()
         portal_link = context.get("portal_link")
         if portal_link:
-            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            site_url = getattr(settings, "SITE_URL", None)
+            if not site_url:
+                raise ImproperlyConfigured("SITE_URL must be set in settings.")
             context["student_activation_url"] = (
                 f"{site_url}/portal/activate/{portal_link.invite_token}/"
             )
@@ -149,18 +151,28 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
                     parent_portal.delete()
                     django_user.delete()
 
-        messages.success(request, "Schüler erfolgreich gelöscht.")
-        return super().delete(request, *args, **kwargs)
+            messages.success(request, "Schüler erfolgreich gelöscht.")
+            return super().delete(request, *args, **kwargs)
 
 
 class PortalInviteCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
+        from django.db import transaction
+
         from apps.portal.email_service import send_portal_invite
         from apps.portal.models import StudentPortalLink
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
 
-        if not StudentPortalLink.objects.filter(contract=contract).exists():
+        with transaction.atomic():
+            # select_for_update verhindert Race Condition bei parallelen Requests
+            existing = (
+                StudentPortalLink.objects.select_for_update().filter(contract=contract).first()
+            )
+            if existing:
+                messages.info(request, "Portal-Zugang bereits vorhanden.")
+                return redirect("students:detail", pk=pk)
+
             User = get_user_model()
             username = f"portal_student_{contract.pk}_{secrets.token_hex(4)}"
             portal_django_user = User.objects.create_user(
@@ -174,6 +186,7 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                 contract=contract,
                 invite_token=secrets.token_urlsafe(32),
             )
+
             if contract.email:
                 try:
                     send_portal_invite(contract, spl, contract.email, role="student")
@@ -181,30 +194,39 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                         request,
                         f"Portal-Einladung gesendet an {contract.email}.",
                     )
-                except Exception as exc:
-                    logger.error("Portal invite email failed: %s", exc)
+                except Exception:
+                    logger.exception("Portal invite email failed for contract_id=%s", contract.pk)
                     messages.warning(
                         request,
                         "Could not send email. Please try again.",
                     )
+                    raise  # Rollback: kein verwaister Account ohne E-Mail-Versand
             else:
                 messages.info(
                     request,
                     "Portal-Account erstellt. Kein E-Mail-Versand möglich.",
                 )
-        else:
-            messages.info(request, "Portal-Zugang bereits vorhanden.")
 
         return redirect("students:detail", pk=pk)
 
 
 class PortalInviteParentView(LoginRequiredMixin, View):
     def post(self, request, pk):
+        from django.db import transaction
+
         from apps.portal.email_service import send_portal_invite
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        parent_email = request.POST.get("parent_email", "").strip()
-        if not parent_email:
+
+        # E-Mail-Validierung: Längenbegrenzung + CRLF-Filter + Format-Prüfung
+        parent_email = request.POST.get("parent_email", "").strip()[:254]
+        if not parent_email or "\n" in parent_email or "\r" in parent_email:
+            messages.error(request, "Ungültige E-Mail-Adresse.")
+            return redirect("students:detail", pk=pk)
+        try:
+            validate_email(parent_email)
+        except ValidationError:
+            messages.error(request, "Ungültige E-Mail-Adresse.")
             return redirect("students:detail", pk=pk)
 
         User = get_user_model()
@@ -212,11 +234,17 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         if existing_user and hasattr(existing_user, "portal_profile"):
             existing_portal = existing_user.portal_profile
 
-            # H6 - Ownership-Check: Portal-Account muss diesem Tutor gehören
+            # Cross-Tenant-Schutz: generische Fehlermeldung, kein Info-Leak
             if existing_portal.tutor != request.user:
+                logger.warning(
+                    "Parent invite cross-tenant attempt: tutor=%s email_hash=%s",
+                    request.user.id,
+                    hash(parent_email.lower()),
+                )
                 messages.error(
                     request,
-                    f"Dieses E-Mail-Konto ({parent_email}) ist bereits bei einem anderen Tutor registriert.",
+                    "Die Einladung konnte nicht erstellt werden. "
+                    "Bitte kontaktieren Sie den Support, falls das Problem bestehen bleibt.",
                 )
                 return redirect("students:detail", pk=pk)
 
@@ -226,37 +254,39 @@ class PortalInviteParentView(LoginRequiredMixin, View):
             if existing_link:
                 messages.info(
                     request,
-                    f"Dieses Konto ({parent_email}) ist bereits als Elternteil verknüpft.",
+                    "Dieses Konto ist bereits als Elternteil verknüpft.",
                 )
             else:
                 ParentStudentLink.objects.get_or_create(parent=existing_portal, contract=contract)
                 messages.warning(
                     request,
-                    f"Hinweis: {parent_email} hat bereits ein Portal-Konto.",
+                    "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto.",
                 )
             return redirect("students:detail", pk=pk)
 
-        username = f"parent_{contract.pk}_{secrets.token_hex(4)}"
-        password_temp = secrets.token_hex(8)
-        user = User.objects.create_user(
-            username=username, email=parent_email, password=password_temp
-        )
-        portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
-        parent_link, _ = ParentStudentLink.objects.get_or_create(
-            parent=portal_user, contract=contract
-        )
-        try:
-            send_portal_invite(contract, parent_link, parent_email, role="parent")
-            messages.success(
-                request,
-                f"Eltern-Einladung gesendet an {parent_email}.",
+        with transaction.atomic():
+            username = f"parent_{contract.pk}_{secrets.token_hex(4)}"
+            user = User.objects.create_user(username=username, email=parent_email)
+            user.set_unusable_password()
+            user.save()
+            portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
+            parent_link, _ = ParentStudentLink.objects.get_or_create(
+                parent=portal_user, contract=contract
             )
-        except Exception as exc:
-            logger.error("Parent invite email failed: %s", exc)
-            messages.warning(
-                request,
-                "Could not send email. Please try again.",
-            )
+            try:
+                send_portal_invite(contract, parent_link, parent_email, role="parent")
+                messages.success(
+                    request,
+                    "Eltern-Einladung wurde gesendet.",
+                )
+            except Exception:
+                logger.exception("Parent invite email failed for contract_id=%s", contract.pk)
+                messages.warning(
+                    request,
+                    "Could not send email. Please try again.",
+                )
+                raise  # Rollback: kein verwaister Account ohne E-Mail-Versand
+
         return redirect("students:detail", pk=pk)
 
 
@@ -279,8 +309,8 @@ class PortalInviteResendView(LoginRequiredMixin, View):
                     request,
                     f"Einladung erneut gesendet an {contract.email}.",
                 )
-            except Exception as exc:
-                logger.error("Portal resend email failed: %s", exc)
+            except Exception:
+                logger.exception("Portal resend email failed for contract_id=%s", contract.pk)
                 messages.warning(
                     request,
                     "Could not send email. Please try again.",
@@ -347,7 +377,11 @@ class StudentDocumentListView(LoginRequiredMixin, View):
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
             return redirect("students:documents", pk=pk)
-        name = request.POST.get("name", "").strip()
+
+        # Name-Sanitisierung: Längenbegrenzung + nur erlaubte Zeichen
+        name = request.POST.get("name", "").strip()[:_MAX_DOC_NAME_LEN]
+        name = _SAFE_NAME_RE.sub("", name)
+
         StudentDocument.objects.create(
             student=contract, file=uploaded_file, name=name, uploaded_by_tutor=True
         )
@@ -359,8 +393,12 @@ class StudentDocumentDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk, doc_pk):
         from apps.students.models import StudentDocument
 
-        contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        doc = get_object_or_404(StudentDocument, pk=doc_pk, student=contract)
-        doc.delete()
-        messages.success(request, "Datei gelöscht.")
-        return redirect("students:documents", pk=pk)
+
+import re
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.validators import validate_email
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
+
+_MAX_DOC_NAME_LEN = 200
+_SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._\-äöüÄÖÜß ]")

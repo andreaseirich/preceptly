@@ -1,5 +1,8 @@
+from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
@@ -10,7 +13,17 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
     portal_link may be a StudentPortalLink (student) or a ParentStudentLink (parent).
     Both have invite_token. The tutor is accessed via portal_user (student) or parent (parent).
     """
-    site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+    # Empfängeradresse gegen Header-Injection und ungültige Adressen prüfen
+    try:
+        validate_email(recipient_email)
+    except ValidationError:
+        raise ValueError(f"Ungültige Empfänger-E-Mail-Adresse: {recipient_email!r}")
+
+    # SITE_URL muss explizit konfiguriert sein – kein unsicherer Fallback auf Production
+    if not hasattr(settings, "SITE_URL"):
+        raise ImproperlyConfigured("settings.SITE_URL muss konfiguriert sein.")
+    site_url = settings.SITE_URL
+
     activate_url = f"{site_url}/portal/activate/{portal_link.invite_token}/"
     # StudentPortalLink exposes portal_user; ParentStudentLink exposes parent (a PortalUser)
     portal_user = getattr(portal_link, "portal_user", None) or portal_link.parent
