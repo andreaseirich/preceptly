@@ -2,6 +2,7 @@ from functools import cached_property
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from apps.contracts.models import Contract
@@ -86,6 +87,12 @@ class Session(models.Model):
             models.Index(fields=["date", "start_time"]),
             models.Index(fields=["status"]),
             models.Index(fields=["contract", "date"], name="lessons_les_contract_date_idx"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=~Q(status__in=["cancelled", "paid"]) | Q(tutor_no_show=False),
+                name="session_no_show_only_if_not_cancelled_paid",
+            ),
         ]
 
     def __str__(self):
