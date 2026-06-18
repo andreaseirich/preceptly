@@ -2,7 +2,7 @@ import secrets
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -97,7 +97,7 @@ class Contract(models.Model):
 class ContractMonthlyPlan(models.Model):
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name="monthly_plans")
     year = models.PositiveIntegerField()
-    month = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    month = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
     planned_units = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -2,6 +2,7 @@
 Views for student management (now backed by Contract model).
 """
 
+import os
 import uuid
 
 from django.conf import settings
@@ -319,6 +320,30 @@ class StudentDocumentListView(LoginRequiredMixin, View):
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         uploaded_file = request.FILES.get("file")
+        if uploaded_file:
+            allowed_extensions = {
+                ".pdf",
+                ".png",
+                ".jpg",
+                ".jpeg",
+                ".docx",
+                ".doc",
+                ".xlsx",
+                ".xls",
+                ".txt",
+            }
+            max_size = 10 * 1024 * 1024  # 10 MB
+            ext = os.path.splitext(uploaded_file.name)[1].lower()
+            if ext not in allowed_extensions:
+                from django.contrib import messages
+
+                messages.error(request, "Dateityp nicht erlaubt.")
+                return redirect(request.path)
+            if uploaded_file.size > max_size:
+                from django.contrib import messages
+
+                messages.error(request, "Datei ist zu groß (max. 10 MB).")
+                return redirect(request.path)
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
             return redirect("students:documents", pk=pk)
