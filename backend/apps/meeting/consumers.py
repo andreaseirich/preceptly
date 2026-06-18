@@ -136,10 +136,11 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             return
 
         if msg_type == "join":
+            if self._joined:
+                return
+
             self.display_name = data.get("name", "Gast")[:60]
 
-            # is_tutor wurde bereits server-seitig in connect() gesetzt und
-            # darf NICHT vom Client überschrieben werden.
             user_pk = self.scope["user"].pk
             if self.is_tutor:
                 self.user_token = f"tutor_{user_pk}"
@@ -148,7 +149,6 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             else:
                 self.user_token = f"user_{user_pk}"
 
-            # Dedup: alten Channel desselben Users kicken
             if self.user_token:
                 if self.group_name not in self.user_channels:
                     self.user_channels[self.group_name] = {}
@@ -159,7 +159,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                             old_channel,
                             {"type": "force_disconnect_event"},
                         )
-                    except Exception:  # noqa: S110 – channel evtl. bereits getrennt
+                    except Exception:
                         pass
                 self.user_channels[self.group_name][self.user_token] = self.channel_name
 
@@ -194,6 +194,10 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         elif msg_type in ("offer", "answer", "ice"):
             target = data.get("target_peer_id")
             if target:
+                try:
+                    uuid.UUID(str(target))
+                except ValueError:
+                    return
                 await self.channel_layer.group_send(
                     self.group_name,
                     {
@@ -242,21 +246,28 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         elif msg_type == "doc_notify":
             if not self.is_tutor:
                 return
-            url = str(data.get("url", ""))
-            if not url.startswith("https://") or len(url) > 2048:
-                return
             try:
                 doc_id = int(data.get("doc_id", 0))
             except (ValueError, TypeError):
                 return
+
+            from tutorflow.meetings.models import SessionDocument
+
+            doc = await SessionDocument.objects.filter(
+                pk=doc_id,
+                session=await self._get_session(),
+            ).afirst()
+            if doc is None:
+                return
+
             await self.channel_layer.group_send(
                 self.group_name,
                 {
                     "type": "doc_event",
                     "payload": {
                         "type": "doc_added",
-                        "name": str(data.get("name", ""))[:200],
-                        "url": url,
+                        "name": doc.name,
+                        "url": doc.file.url,
                         "date": str(data.get("date", "")),
                         "doc_id": doc_id,
                     },
@@ -284,9 +295,13 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             )
 
         elif msg_type == "leave":
-            await self.disconnect(1000)
+            await self.close(code=1000)
 
-    # ── Channel layer event handlers ──────────────────────────────────────────
+    @database_sync_to_async
+    def _get_session(self):
+        from tutorflow.meetings.models import MeetingRoom
+
+        return MeetingRoom.objects.select_related("session").get(token=self.token).session
 
     async def peer_joined_event(self, event):
         if event["sender_channel"] == self.channel_name:

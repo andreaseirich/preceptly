@@ -116,13 +116,13 @@ class PublicBookingSearchSuggestionsTest(TestCase):
         self.assertEqual(data["student"]["id"], self.student_max.id)
 
     def test_suggestions_no_sensitive_data(self):
-        """Suggestions contain only display_name and id."""
+        """Suggestions enthalten nur display_name, keine IDs oder sensible Felder."""
         resp = self._search("Max")
         data = json.loads(resp.content)
         for s in data.get("suggestions", []):
             self.assertIn("display_name", s)
-            self.assertIn("id", s)
             self.assertNotIn("email", s)
+            self.assertNotIn("id", s)
             self.assertNotIn("phone", s)
 
     def test_tutor_scoping(self):

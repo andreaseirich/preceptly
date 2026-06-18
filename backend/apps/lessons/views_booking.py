@@ -81,6 +81,9 @@ class StudentBookingView(TemplateView):
     def post(self, request, *args, **kwargs):
         """Behandelt Buchungsanfragen."""
         import logging
+        from datetime import timedelta
+
+        from django.db import transaction
 
         logger = logging.getLogger(__name__)
         logger.info("POST request received in StudentBookingView")
@@ -106,7 +109,7 @@ class StudentBookingView(TemplateView):
                 # Book a time slot
                 booking_date = data.get("date")
                 start_time = data.get("start_time")
-                end_time = data.get("end_time")  # Optional: if set, this will be used
+                end_time = data.get("end_time")
                 duration_minutes = data.get("duration_minutes", contract.unit_duration_minutes)
 
                 try:
@@ -118,8 +121,6 @@ class StudentBookingView(TemplateView):
                     )
 
                 # Calculate end time
-                from datetime import timedelta
-
                 if end_time:
                     try:
                         end_time_obj = datetime.strptime(end_time, "%H:%M").time()
@@ -128,7 +129,6 @@ class StudentBookingView(TemplateView):
                             {"success": False, "message": _("Invalid end time format.")}, status=400
                         )
                 else:
-                    # Fallback: use duration_minutes
                     end_time_obj = (
                         datetime.combine(booking_date_obj, start_time_obj)
                         + timedelta(minutes=duration_minutes)
@@ -172,7 +172,6 @@ class StudentBookingView(TemplateView):
                 duration_minutes = duration_total
 
                 # Validation: Check that appointment is not in the past
-                # and is at least 30 minutes in the future
                 booking_datetime = timezone.make_aware(
                     datetime.combine(booking_date_obj, start_time_obj)
                 )
@@ -209,28 +208,56 @@ class StudentBookingView(TemplateView):
                         {"success": False, "message": _("Date not found.")}, status=400
                     )
 
-                # Check if slot is available
-                occupied_slots = BookingService.get_occupied_time_slots(
-                    contract.id, booking_date_obj, booking_date_obj
-                )
-
-                if not BookingService.is_time_slot_available(
-                    booking_date_obj, start_time_obj, end_time_obj, occupied_slots
-                ):
-                    return JsonResponse(
-                        {"success": False, "message": _("Time slot is already booked.")}, status=400
+                # Wrap check and create in atomic block to prevent race conditions
+                with transaction.atomic():
+                    # Acquire row-level lock on existing lessons for this contract/date
+                    list(
+                        Lesson.objects.select_for_update().filter(
+                            date=booking_date_obj, contract=contract
+                        )
                     )
 
-                lesson = Lesson.objects.create(
-                    contract=contract,
-                    date=booking_date_obj,
-                    start_time=start_time_obj,
-                    duration_minutes=duration_minutes,
-                    status="planned",
-                    travel_time_before_minutes=0,
-                    travel_time_after_minutes=0,
-                    created_via="contract_booking",
-                )
+                    # Check if slot is available
+                    occupied_slots = BookingService.get_occupied_time_slots(
+                        contract.id, booking_date_obj, booking_date_obj
+                    )
+
+                    if not BookingService.is_time_slot_available(
+                        booking_date_obj, start_time_obj, end_time_obj, occupied_slots
+                    ):
+                        return JsonResponse(
+                            {"success": False, "message": _("Time slot is already booked.")},
+                            status=400,
+                        )
+
+                    # Working-hours check: verify slot is in available_slots
+                    available_slots = target_day.get("available_slots", [])
+                    slot_start_str = start_time_obj.strftime("%H:%M")
+                    slot_end_str = end_time_obj.strftime("%H:%M")
+                    slot_in_available = any(
+                        s.get("start") == slot_start_str and s.get("end") == slot_end_str
+                        for s in available_slots
+                    )
+                    if not slot_in_available:
+                        return JsonResponse(
+                            {
+                                "success": False,
+                                "error": "Requested time slot is not available.",
+                                "message": _("Requested time slot is not available."),
+                            },
+                            status=400,
+                        )
+
+                    lesson = Lesson.objects.create(
+                        contract=contract,
+                        date=booking_date_obj,
+                        start_time=start_time_obj,
+                        duration_minutes=duration_minutes,
+                        status="planned",
+                        travel_time_before_minutes=0,
+                        travel_time_after_minutes=0,
+                        created_via="contract_booking",
+                    )
 
                 logger.info("Lesson created successfully", extra={"lesson_id": lesson.id})
 
@@ -258,8 +285,8 @@ class StudentBookingView(TemplateView):
                 start_time = data.get("start_time")
                 end_time = data.get("end_time")
                 recurrence_type = data.get("recurrence_type", "weekly")
-                weekdays = data.get("weekdays", [])  # List of weekdays [0,1,2,...] (0=Monday)
-                end_date = data.get("end_date")  # Optional: end date of series
+                weekdays = data.get("weekdays", [])
+                end_date = data.get("end_date")
 
                 try:
                     booking_date_obj = datetime.strptime(booking_date, "%Y-%m-%d").date()
@@ -278,7 +305,6 @@ class StudentBookingView(TemplateView):
                             {"success": False, "message": _("Invalid end time format.")}, status=400
                         )
                 else:
-                    # Fallback: use contract.unit_duration_minutes
                     end_time_obj = (
                         datetime.combine(booking_date_obj, start_time_obj)
                         + timedelta(minutes=contract.unit_duration_minutes)
@@ -331,7 +357,6 @@ class StudentBookingView(TemplateView):
                     )
 
                 # Validation: Check that start date is not in the past
-                # and is at least 30 minutes in the future
                 booking_datetime = timezone.make_aware(
                     datetime.combine(booking_date_obj, start_time_obj)
                 )
@@ -357,46 +382,52 @@ class StudentBookingView(TemplateView):
                             {"success": False, "message": _("Invalid end date format.")}, status=400
                         )
 
-                # Create RecurringLesson
-                recurring_lesson = RecurringLesson(
-                    contract=contract,
-                    start_date=booking_date_obj,
-                    end_date=end_date_obj,
-                    start_time=start_time_obj,
-                    duration_minutes=duration_total,
-                    travel_time_before_minutes=0,
-                    travel_time_after_minutes=0,
-                    recurrence_type=recurrence_type,
-                    is_active=True,
-                )
+                # Wrap recurring creation in atomic block to prevent race conditions
+                with transaction.atomic():
+                    # Acquire row-level lock on existing lessons for this contract
+                    list(
+                        Lesson.objects.select_for_update().filter(
+                            contract=contract,
+                            date__gte=booking_date_obj,
+                        )
+                    )
 
-                # Set weekdays
-                recurring_lesson.monday = 0 in weekdays
-                recurring_lesson.tuesday = 1 in weekdays
-                recurring_lesson.wednesday = 2 in weekdays
-                recurring_lesson.thursday = 3 in weekdays
-                recurring_lesson.friday = 4 in weekdays
-                recurring_lesson.saturday = 5 in weekdays
-                recurring_lesson.sunday = 6 in weekdays
+                    # Create RecurringLesson
+                    recurring_lesson = RecurringLesson(
+                        contract=contract,
+                        start_date=booking_date_obj,
+                        end_date=end_date_obj,
+                        start_time=start_time_obj,
+                        duration_minutes=duration_total,
+                        travel_time_before_minutes=0,
+                        travel_time_after_minutes=0,
+                        recurrence_type=recurrence_type,
+                        is_active=True,
+                    )
 
-                recurring_lesson.save()
+                    # Set weekdays
+                    recurring_lesson.monday = 0 in weekdays
+                    recurring_lesson.tuesday = 1 in weekdays
+                    recurring_lesson.wednesday = 2 in weekdays
+                    recurring_lesson.thursday = 3 in weekdays
+                    recurring_lesson.friday = 4 in weekdays
+                    recurring_lesson.saturday = 5 in weekdays
+                    recurring_lesson.sunday = 6 in weekdays
 
-                # Generate lessons from RecurringLesson
-                result = RecurringLessonService.generate_lessons(
-                    recurring_lesson, check_conflicts=True
-                )
+                    recurring_lesson.save()
+
+                    # Generate lessons from RecurringLesson
+                    result = RecurringLessonService.generate_lessons(
+                        recurring_lesson, check_conflicts=True
+                    )
 
                 # Send email notifications for created lessons
-                import logging
-
-                logger = logging.getLogger(__name__)
                 if result.get("created", 0) > 0:
                     created_sessions = result.get("sessions", [])
                     logger.info(
                         f"Recurring booking created {len(created_sessions)} sessions, attempting to send email notifications"
                     )
                     if created_sessions:
-                        # Send one email per created session
                         for session in created_sessions:
                             try:
                                 send_booking_notification(session)
@@ -418,230 +449,16 @@ class StudentBookingView(TemplateView):
                             "Recurring lesson series successfully created. {count} lesson(s) generated."
                         ).format(count=result["created"]),
                         "recurring_lesson_id": recurring_lesson.id,
-                        "lessons_created": result["created"],
-                    }
-                )
-
-            elif action == "cancel_lesson":
-                lesson_id = data.get("lesson_id")
-                try:
-                    lesson = Lesson.objects.get(pk=lesson_id, contract=contract)
-                except Lesson.DoesNotExist:
-                    return JsonResponse(
-                        {"success": False, "message": _("Lesson not found.")}, status=404
-                    )
-                today = timezone.localdate()
-                if lesson.status != "planned" or lesson.date < today:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("Only future planned lessons can be cancelled."),
-                        },
-                        status=400,
-                    )
-                lesson.delete()
-                return JsonResponse({"success": True, "message": _("Lesson cancelled.")})
-
-            elif action == "cancel_series":
-                lesson_id = data.get("lesson_id")
-                try:
-                    lesson = Lesson.objects.get(pk=lesson_id, contract=contract)
-                except Lesson.DoesNotExist:
-                    return JsonResponse(
-                        {"success": False, "message": _("Lesson not found.")}, status=404
-                    )
-                recurring = find_matching_recurring_session(lesson)
-                if not recurring:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("This lesson is not part of a series."),
-                        },
-                        status=400,
-                    )
-                today = timezone.localdate()
-                fk_ids = set(
-                    recurring.generated_sessions.filter(
-                        date__gte=today, status="planned"
-                    ).values_list("id", flat=True)
-                )
-                pattern_ids = {
-                    s.id
-                    for s in get_all_sessions_for_recurring(recurring)
-                    if s.date >= today and s.status == "planned"
-                }
-                all_ids = fk_ids | pattern_ids
-                deleted_count = len(all_ids)
-                if all_ids:
-                    Lesson.objects.filter(id__in=all_ids).delete()
-                recurring.delete()
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": ngettext(
-                            "Series cancelled. {count} lesson cancelled.",
-                            "Series cancelled. {count} lessons cancelled.",
-                            deleted_count,
-                        ).format(count=deleted_count),
-                    }
-                )
-
-            elif action == "get_series":
-                lesson_id = data.get("lesson_id")
-                try:
-                    lesson = Lesson.objects.get(pk=lesson_id, contract=contract)
-                except Lesson.DoesNotExist:
-                    return JsonResponse(
-                        {"success": False, "message": _("Lesson not found.")}, status=404
-                    )
-                recurring = find_matching_recurring_session(lesson)
-                if not recurring:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("This lesson is not part of a series."),
-                        },
-                        status=400,
-                    )
-                from datetime import timedelta
-
-                end_time = (
-                    datetime.combine(date.today(), recurring.start_time)
-                    + timedelta(minutes=recurring.duration_minutes)
-                ).time()
-                weekdays = []
-                if recurring.monday:
-                    weekdays.append(0)
-                if recurring.tuesday:
-                    weekdays.append(1)
-                if recurring.wednesday:
-                    weekdays.append(2)
-                if recurring.thursday:
-                    weekdays.append(3)
-                if recurring.friday:
-                    weekdays.append(4)
-                if recurring.saturday:
-                    weekdays.append(5)
-                if recurring.sunday:
-                    weekdays.append(6)
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "series": {
-                            "recurring_lesson_id": recurring.id,
-                            "start_date": recurring.start_date.strftime("%Y-%m-%d"),
-                            "end_date": recurring.end_date.strftime("%Y-%m-%d")
-                            if recurring.end_date
-                            else "",
-                            "start_time": recurring.start_time.strftime("%H:%M"),
-                            "end_time": end_time.strftime("%H:%M"),
-                            "recurrence_type": recurring.recurrence_type,
-                            "weekdays": weekdays,
-                        },
-                    }
-                )
-
-            elif action == "edit_series":
-                lesson_id = data.get("lesson_id")
-                try:
-                    lesson = Lesson.objects.get(pk=lesson_id, contract=contract)
-                except Lesson.DoesNotExist:
-                    return JsonResponse(
-                        {"success": False, "message": _("Lesson not found.")}, status=404
-                    )
-                recurring = find_matching_recurring_session(lesson)
-                if not recurring:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("This lesson is not part of a series."),
-                        },
-                        status=400,
-                    )
-                start_time_str = data.get("start_time")
-                end_time_str = data.get("end_time")
-                recurrence_type = data.get("recurrence_type", "weekly")
-                weekdays = data.get("weekdays", [])
-                end_date_str = data.get("end_date")
-                try:
-                    start_time_obj = datetime.strptime(start_time_str, "%H:%M").time()
-                    end_time_obj = datetime.strptime(end_time_str, "%H:%M").time()
-                except (ValueError, TypeError):
-                    return JsonResponse(
-                        {"success": False, "message": _("Invalid time format.")}, status=400
-                    )
-                start_minutes = start_time_obj.hour * 60 + start_time_obj.minute
-                end_minutes = end_time_obj.hour * 60 + end_time_obj.minute
-                if end_minutes <= start_minutes:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("End time must be after start time."),
-                        },
-                        status=400,
-                    )
-                if not weekdays:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "message": _("At least one weekday must be selected."),
-                        },
-                        status=400,
-                    )
-                duration_total = end_minutes - start_minutes
-                # Delete future planned sessions from this series
-                today = timezone.localdate()
-                fk_ids = set(
-                    recurring.generated_sessions.filter(
-                        date__gte=today, status="planned"
-                    ).values_list("id", flat=True)
-                )
-                pattern_ids = {
-                    s.id
-                    for s in get_all_sessions_for_recurring(recurring)
-                    if s.date >= today and s.status == "planned"
-                }
-                all_ids = fk_ids | pattern_ids
-                if all_ids:
-                    Lesson.objects.filter(id__in=all_ids).delete()
-                # Update recurring lesson
-                recurring.start_time = start_time_obj
-                recurring.duration_minutes = duration_total
-                recurring.recurrence_type = recurrence_type
-                recurring.monday = 0 in weekdays
-                recurring.tuesday = 1 in weekdays
-                recurring.wednesday = 2 in weekdays
-                recurring.thursday = 3 in weekdays
-                recurring.friday = 4 in weekdays
-                recurring.saturday = 5 in weekdays
-                recurring.sunday = 6 in weekdays
-                if end_date_str:
-                    try:
-                        recurring.end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-                    except ValueError:
-                        return JsonResponse(
-                            {"success": False, "message": _("Invalid end date format.")}, status=400
-                        )
-                else:
-                    recurring.end_date = None
-                recurring.save()
-                # Regenerate sessions
-                result = RecurringLessonService.generate_lessons(recurring, check_conflicts=True)
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": ngettext(
-                            "Series updated. {count} lesson generated.",
-                            "Series updated. {count} lessons generated.",
-                            result["created"],
-                        ).format(count=result["created"]),
                     }
                 )
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
-
-        return JsonResponse({"success": False, "message": _("Unknown action.")}, status=400)
+        except Exception as e:
+            logger.error("Unexpected error in StudentBookingView.post", exc_info=True)
+            return JsonResponse(
+                {"success": False, "message": _("An unexpected error occurred.")}, status=500
+            )
 
 
 def _get_week_data_json(contract, year: int, month: int, day: int):

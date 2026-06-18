@@ -119,7 +119,7 @@ class MeetingDocumentUploadView(View):
         if file.size > _MAX_UPLOAD_SIZE:
             return JsonResponse({"error": "File too large (max 50 MB)."}, status=400)
 
-        name = request.POST.get("name", "").strip() or file.name
+        name = (request.POST.get("name", "").strip() or file.name)[:255]
         doc = SessionDocument.objects.create(session=lesson, file=file, name=name)
         safe_name = name.replace("\n", " ").replace("\r", " ")
         logger.info("Dokument hochgeladen: %s (lesson %s)", safe_name, lesson.pk)

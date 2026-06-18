@@ -140,6 +140,7 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         # Save contract first
+        form.instance.user = self.request.user
         self.object = form.save()
 
         # Only generate monthly plans if has_monthly_planning_limit is enabled

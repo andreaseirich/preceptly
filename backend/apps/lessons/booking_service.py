@@ -49,7 +49,7 @@ class BookingService:
         # Lade Blockzeiten im Zeitraum
         start_datetime = timezone.make_aware(datetime.combine(start_date, time.min))
         end_datetime = timezone.make_aware(datetime.combine(end_date, time.max))
-        blocked_times = BlockedTime.objects.filter(
+        blocked_qs = BlockedTime.objects.filter(
             start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
         ).order_by("start_datetime")
 
@@ -60,15 +60,18 @@ class BookingService:
             start_date__lte=end_date, end_date__isnull=True, is_active=True
         )
 
-        # Füge Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten hinzu
+        # Sammle Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten
+        extra = []
         for rbt in recurring_blocked_times:
             generated_blocked_times_preview = RecurringBlockedTimeService.preview_blocked_times(rbt)
             for bt_preview in generated_blocked_times_preview:
                 # Filter nur für den Zeitraum
                 if start_date <= bt_preview.start_datetime.date() <= end_date:
-                    blocked_times = list(blocked_times) + [bt_preview]
+                    extra.append(bt_preview)
 
-        for blocked_time in blocked_times:
+        all_blocked = list(blocked_qs) + extra
+
+        for blocked_time in all_blocked:
             # Convert to local timezone for correct time extraction
             local_start_datetime = timezone.localtime(blocked_time.start_datetime)
             local_end_datetime = timezone.localtime(blocked_time.end_datetime)
@@ -150,6 +153,8 @@ class BookingService:
         Start times iterate on 30-min grid. A slot is only added if the full
         block (start -> start+duration) is free within working hours.
         """
+        import pytz
+
         available = []
         now = timezone.now()
         min_booking_datetime = now + timedelta(minutes=30)
@@ -171,7 +176,12 @@ class BookingService:
                 slot_start = current.time()
                 slot_end = (current + timedelta(minutes=slot_duration_minutes)).time()
 
-                slot_datetime = timezone.make_aware(datetime.combine(target_date, slot_start))
+                try:
+                    slot_datetime = timezone.make_aware(datetime.combine(target_date, slot_start))
+                except (pytz.exceptions.AmbiguousTimeError, pytz.exceptions.NonExistentTimeError):
+                    current += timedelta(minutes=step)
+                    continue
+
                 if slot_datetime < min_booking_datetime:
                     current += timedelta(minutes=step)
                     continue
