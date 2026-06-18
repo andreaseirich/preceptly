@@ -29,7 +29,9 @@ app_name = "core"
 urlpatterns = [
     path("erecht24/push/", Erecht24PushView.as_view(), name="erecht24_push"),
     path("health/", health_status, name="health"),
+    # TODO: Requires @staff_member_required — verify in views_log_test.py
     path("test-logs/", test_logs, name="test_logs"),
+    # TODO: Requires @staff_member_required — verify in views_email_test.py
     path("test-email/", test_email, name="test_email"),
     path("login/", TutorFlowLoginView.as_view(), name="login"),
     path("logout/", TutorFlowLogoutView.as_view(), name="logout"),
