@@ -61,8 +61,6 @@ class LessonPlanService:
         return {
             "student": {
                 "full_name": f"{student.first_name} {student.last_name}".strip(),
-                "email": student.email or "",
-                "phone": student.phone or "",
                 "address": student.school or "",
                 "tax_id": "",
                 "dob": "",
@@ -107,7 +105,9 @@ class LessonPlanService:
                 prompt=user_prompt, system_prompt=system_prompt, max_tokens=1500, temperature=0.7
             )
         except LLMClientError as e:
-            raise LessonPlanGenerationError(_("LLM error: {error}").format(error=str(e))) from e
+            raise LessonPlanGenerationError(
+                _("The lesson plan could not be generated. Please try again.")
+            ) from e
 
         # Create or update LessonPlan
         student = session.contract
