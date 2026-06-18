@@ -67,7 +67,7 @@ class PortalLoginView(View):
         error = None
         try:
             user = User.objects.get(username=username)
-            if user.check_password(password):
+            if user.check_password(password) and user.is_active:
                 portal_user = PortalUser.objects.get(user=user)
                 request.session["portal_user_id"] = portal_user.pk
                 next_url = request.POST.get("next", "")
