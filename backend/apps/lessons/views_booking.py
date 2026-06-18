@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
 
@@ -699,7 +699,6 @@ def student_booking_week_api(request, token):
     return JsonResponse({"success": True, "week_data": data})
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def student_booking_api(request, token):
     """API-Endpoint für Buchungsanfragen (für AJAX)."""
