@@ -130,9 +130,15 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
 
         # Year and month from URL parameters or current date
         # Default to current month view if no month specified
-        year = int(self.request.GET.get("year", now.year))
+        try:
+            year = int(self.request.GET.get("year", now.year))
+        except (ValueError, TypeError):
+            year = now.year
         if "month" in self.request.GET:
-            month = int(self.request.GET.get("month"))
+            try:
+                month = int(self.request.GET.get("month"))
+            except (ValueError, TypeError):
+                month = now.month
         elif "year" in self.request.GET:
             # If only year is specified, show year view
             month = None
