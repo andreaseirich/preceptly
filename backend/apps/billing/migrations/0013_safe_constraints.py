@@ -32,6 +32,24 @@ def fix_duplicate_invoice_items(apps, schema_editor):
         print(f"  Removed duplicate InvoiceItems for invoice={d['invoice']}, lesson={d['lesson']}")
 
 
+def drop_invoice_period_constraint(apps, schema_editor):
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(
+            "ALTER TABLE billing_invoice DROP CONSTRAINT IF EXISTS invoice_period_end_gte_start"
+        )
+
+
+def drop_invoiceitem_unique_constraint(apps, schema_editor):
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(
+            "ALTER TABLE billing_invoiceitem DROP CONSTRAINT IF EXISTS uniq_invoiceitem_invoice_lesson"
+        )
+
+
 def noop(apps, schema_editor):
     pass
 
@@ -44,10 +62,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(fix_invoice_periods, noop),
         migrations.RunPython(fix_duplicate_invoice_items, noop),
-        migrations.RunSQL(
-            "ALTER TABLE billing_invoice DROP CONSTRAINT IF EXISTS invoice_period_end_gte_start",
-            reverse_sql=migrations.RunSQL.noop,
-        ),
+        migrations.RunPython(drop_invoice_period_constraint, noop),
         migrations.AddConstraint(
             model_name="invoice",
             constraint=models.CheckConstraint(
@@ -55,10 +70,7 @@ class Migration(migrations.Migration):
                 name="invoice_period_end_gte_start",
             ),
         ),
-        migrations.RunSQL(
-            "ALTER TABLE billing_invoiceitem DROP CONSTRAINT IF EXISTS uniq_invoiceitem_invoice_lesson",
-            reverse_sql=migrations.RunSQL.noop,
-        ),
+        migrations.RunPython(drop_invoiceitem_unique_constraint, noop),
         migrations.AddConstraint(
             model_name="invoiceitem",
             constraint=models.UniqueConstraint(
