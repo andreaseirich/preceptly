@@ -33,73 +33,55 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
         """Pre-fill form with date/time from request parameters (similar to LessonCreateView)."""
         initial = super().get_initial()
 
+        from datetime import datetime, timedelta
+
+        from django.utils import timezone
+
         # Support for start/end parameters from week view (ISO datetime format: YYYY-MM-DDTHH:MM)
-        start_str = self.request.GET.get("start")
-        end_str = self.request.GET.get("end")
+        start_str = self.request.GET.get("start", "")
+        end_str = self.request.GET.get("end", "")
 
-        if start_str:
+        if start_str and len(start_str) <= 32:
             try:
-                from datetime import datetime, timedelta
-
-                from django.utils import timezone
-
-                # Parse ISO format: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS
                 if "T" in start_str:
-                    # ISO datetime format
-                    if len(start_str) == 16:  # YYYY-MM-DDTHH:MM
-                        start_dt = datetime.strptime(start_str, "%Y-%m-%dT%H:%M")
-                    else:  # YYYY-MM-DDTHH:MM:SS or with timezone
-                        start_dt = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-                        if start_dt.tzinfo:
-                            start_dt = timezone.make_naive(start_dt)
+                    # ISO datetime format – einheitlich über fromisoformat
+                    start_dt = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+                    if start_dt.tzinfo:
+                        start_dt = timezone.make_naive(start_dt)
+                else:
+                    # Nur Datum angegeben
+                    date_obj = datetime.strptime(start_str, "%Y-%m-%d").date()
+                    start_dt = datetime.combine(date_obj, datetime.min.time().replace(hour=9))
 
-                    # Make timezone-aware
-                    if timezone.is_naive(start_dt):
-                        start_dt = timezone.make_aware(start_dt)
+                # Timezone-aware machen
+                if timezone.is_naive(start_dt):
+                    start_dt = timezone.make_aware(start_dt)
 
-                    initial["start_datetime"] = start_dt
+                initial["start_datetime"] = start_dt
 
-                    # Calculate end_datetime from end parameter if provided
-                    if end_str:
-                        try:
-                            if len(end_str) == 16:  # YYYY-MM-DDTHH:MM
-                                end_dt = datetime.strptime(end_str, "%Y-%m-%dT%H:%M")
-                            else:  # YYYY-MM-DDTHH:MM:SS or with timezone
-                                end_dt = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
-                                if end_dt.tzinfo:
-                                    end_dt = timezone.make_naive(end_dt)
-
-                            # Make timezone-aware
-                            if timezone.is_naive(end_dt):
-                                end_dt = timezone.make_aware(end_dt)
-
-                            initial["end_datetime"] = end_dt
-                        except (ValueError, TypeError):
-                            # Fallback: use start + 1 hour
-                            initial["end_datetime"] = start_dt + timedelta(hours=1)
-                    else:
-                        # Fallback: use start + 1 hour
+                # end_datetime ermitteln
+                if end_str and len(end_str) <= 32:
+                    try:
+                        end_dt = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+                        if end_dt.tzinfo:
+                            end_dt = timezone.make_naive(end_dt)
+                        if timezone.is_naive(end_dt):
+                            end_dt = timezone.make_aware(end_dt)
+                        initial["end_datetime"] = end_dt
+                    except (ValueError, TypeError):
                         initial["end_datetime"] = start_dt + timedelta(hours=1)
                 else:
-                    # Fallback: treat as date only
-                    date_obj = datetime.strptime(start_str, "%Y-%m-%d").date()
-                    start_dt = timezone.make_aware(
-                        datetime.combine(date_obj, datetime.min.time().replace(hour=9))
-                    )
-                    initial["start_datetime"] = start_dt
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
+
             except (ValueError, TypeError):
-                # Invalid date/time format - use default values
                 pass
 
-        # Fallback: Get date from request (for backward compatibility)
+        # Fallback: date-Parameter (Rückwärtskompatibilität)
         if "start_datetime" not in initial:
-            date_str = self.request.GET.get("date")
-            if date_str:
+            date_str = self.request.GET.get("date", "")
+            if date_str and len(date_str) <= 10:
                 try:
-                    from datetime import datetime
-
-                    from django.utils import timezone
+                    from datetime import timedelta
 
                     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
                     start_dt = timezone.make_aware(
@@ -108,7 +90,6 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     initial["start_datetime"] = start_dt
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
                 except ValueError:
-                    # Invalid date format - use default values
                     pass
 
         return initial
@@ -135,6 +116,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             return reverse_lazy("lessons:calendar") + f"?year={year}&month={month}"
 
     def form_valid(self, form):
+        from django.utils import timezone
         from django.utils.translation import gettext_lazy as _
         from django.utils.translation import ngettext
 
@@ -142,10 +124,29 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
         from apps.blocked_times.recurring_service import RecurringBlockedTimeService
         from apps.lessons.services import recalculate_conflicts_for_blocked_time
 
+        # --- M1: Vergangenheitsprüfung ---
+        start_datetime = form.cleaned_data.get("start_datetime")
+        if start_datetime and start_datetime < timezone.now():
+            form.add_error("start_datetime", _("Blocked times in the past are not allowed."))
+            return self.form_invalid(form)
+
         # Check if a recurring blocked time should be created
         is_recurring = form.cleaned_data.get("is_recurring", False)
 
         if is_recurring:
+            # --- L2: Maximale Wiederholungsdauer prüfen ---
+            MAX_RECURRENCE_DAYS = 365
+            start_date = form.cleaned_data.get("start_datetime").date() if start_datetime else None
+            recurrence_end_date = form.cleaned_data.get("recurrence_end_date")
+
+            if (
+                start_date
+                and recurrence_end_date
+                and (recurrence_end_date - start_date).days > MAX_RECURRENCE_DAYS
+            ):
+                form.add_error(None, _("Recurrence period may not exceed 1 year."))
+                return self.form_invalid(form)
+
             # Create a RecurringBlockedTime instead of a single BlockedTime
             blocked_time = form.save(commit=False)  # Don't save yet
 
@@ -155,7 +156,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 title=blocked_time.title,
                 description=blocked_time.description,
                 start_date=blocked_time.start_datetime.date(),
-                end_date=form.cleaned_data.get("recurrence_end_date"),
+                end_date=recurrence_end_date,
                 start_time=blocked_time.start_datetime.time(),
                 end_time=blocked_time.end_datetime.time(),
                 recurrence_type=form.cleaned_data.get("recurrence_type", "weekly"),
@@ -208,9 +209,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 )
 
             # Set self.object for redirection
-            # Use the first created BlockedTime or the first found BlockedTime
             if result.get("created", 0) > 0:
-                # Find the first created BlockedTime
                 first_blocked_time = (
                     BlockedTime.objects.filter(
                         user=self.request.user,
@@ -223,7 +222,6 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 )
                 self.object = first_blocked_time
             else:
-                # If no BlockedTime was created, use the original BlockedTime
                 blocked_time.user = self.request.user
                 blocked_time.save()
                 recalculate_conflicts_for_blocked_time(blocked_time)
@@ -241,7 +239,6 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
             from apps.lessons.models import Lesson
             from apps.lessons.services import LessonConflictService
 
-            # Check conflicts with lessons
             conflicting_lessons = Lesson.objects.filter(
                 date=blocked_time.start_datetime.date(),
                 contract__user=self.request.user,

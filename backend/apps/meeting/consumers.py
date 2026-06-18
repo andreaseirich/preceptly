@@ -2,9 +2,12 @@
 WebSocket-Consumer für WebRTC-Signaling und Whiteboard-Synchronisation.
 """
 
+import html
 import json
 import logging
+import time
 import uuid
+from collections import deque
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -78,9 +81,14 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self.user_token = ""
         self._portal_user = None
         self._joined = False
+        self._msg_timestamps: deque = deque(maxlen=60)
 
         user = self.scope.get("user")
         if user is None or user.is_anonymous:
+            logger.warning(
+                "WS connect: Anonymer oder fehlender Benutzer token=%s",
+                self.token,
+            )
             await self.close(code=4403)
             return
 
@@ -88,9 +96,19 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             self.token, user
         )
         if room is None or not room.is_active:
+            logger.warning(
+                "WS connect: Raum nicht gefunden/inaktiv token=%s user=%s",
+                self.token,
+                user,
+            )
             await self.close(code=4404)
             return
         if not has_access:
+            logger.warning(
+                "WS connect: Kein Zugriff token=%s user=%s",
+                self.token,
+                user,
+            )
             await self.close(code=4403)
             return
 
@@ -114,6 +132,9 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 if not cls._user_channels_data[self.group_name]:
                     del cls._user_channels_data[self.group_name]
 
+            # Prüfe ob Peer tatsächlich im Raum war (Race-Condition-sicher)
+            peer_was_in_room = self.peer_id in cls._rooms_data.get(self.group_name, {})
+
             if self.group_name in cls._rooms_data:
                 cls._rooms_data[self.group_name].pop(self.peer_id, None)
                 room_empty = not cls._rooms_data[self.group_name]
@@ -122,7 +143,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             else:
                 room_empty = True
 
-        if self._joined:
+        if peer_was_in_room:
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -144,6 +165,18 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 pass
 
     async def receive(self, text_data):
+        # Rate-Limit: max. 60 Nachrichten in 10 Sekunden pro Verbindung
+        now = time.monotonic()
+        self._msg_timestamps.append(now)
+        if len(self._msg_timestamps) == 60 and (now - self._msg_timestamps[0]) < 10.0:
+            logger.warning(
+                "WS rate-limit überschritten token=%s peer_id=%s",
+                self.token,
+                self.peer_id,
+            )
+            await self.close(code=4008)
+            return
+
         if len(text_data) > 65_536:
             await self.close(code=4009)
             return
@@ -165,7 +198,8 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             if self._joined:
                 return
 
-            self.display_name = data.get("name", "Gast")[:60]
+            raw_name = str(data.get("name", "Gast"))[:60]
+            self.display_name = html.escape(raw_name)
 
             user_pk = self.scope["user"].pk
             if self.is_tutor:
@@ -250,17 +284,31 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 )
 
         elif msg_type == "wb_event":
+            # Whitelist erlaubter Whiteboard-Felder zum Schutz vor Payload-Injection
+            allowed_wb_fields = {
+                "type",
+                "action",
+                "x",
+                "y",
+                "color",
+                "size",
+                "path",
+                "shape",
+                "tool",
+                "points",
+            }
+            sanitized_payload = {k: v for k, v in data.items() if k in allowed_wb_fields}
             await self.channel_layer.group_send(
                 self.group_name,
                 {
                     "type": "wb_broadcast_event",
-                    "payload": data,
+                    "payload": sanitized_payload,
                     "sender_channel": self.channel_name,
                 },
             )
 
         elif msg_type == "chat":
-            text = str(data.get("text", ""))[:500]
+            text = html.escape(str(data.get("text", ""))[:500])
             await self.channel_layer.group_send(
                 self.group_name,
                 {

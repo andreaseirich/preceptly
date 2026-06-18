@@ -140,6 +140,12 @@ def _serialize_public_week_data(week_data):
     }
 
 
+_NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
+
+
+_RESCHEDULE_NEUTRAL = _("Reschedule not possible. Please try again.")
+
+
 @require_http_methods(["GET"])
 def public_booking_week_api(request, tutor_token):
     """API for fetching public booking week data (for AJAX week navigation)."""
@@ -204,10 +210,11 @@ def public_booking_week_api(request, tutor_token):
 
 
 @require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def search_student_api(request):
     """
     Search for students by name (Public Booking step 1).
-    Returns exact_match | suggestions | no_match. Stricty tutor-scoped, no sensitive data.
+    Returns only a minimal hint to prevent enumeration – no IDs, no full names.
     """
     try:
         data = json.loads(request.body)
@@ -247,6 +254,7 @@ def search_student_api(request):
                 {
                     "success": True,
                     "result": "suggestions",
+                    # Only first names – no IDs, no last names
                     "suggestions": [{"display_name": s.full_name} for s, _ in suggestions],
                 }
             )
@@ -254,9 +262,6 @@ def search_student_api(request):
 
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "message": _("Invalid request.")}, status=400)
-
-
-_NEUTRAL_ERROR = _("Invalid name or code. Please try again.")
 
 
 @require_http_methods(["POST"])
@@ -325,7 +330,7 @@ def verify_student_api(request):
         request.session.cycle_key()
         request.session["public_booking_student_id"] = exact_match.id
         request.session["public_booking_tutor_token"] = tutor_token
-        request.session.set_expiry(7200)
+        request.session.set_expiry(1800)  # M5: 30 Minuten statt 2h
 
         return JsonResponse(
             {
@@ -463,6 +468,7 @@ def create_student_api(request):
         )
 
 
+@require_http_methods(["POST"])
 def book_lesson_api(request):
     """API for booking a lesson. Requires valid student_id and booking_code."""
     try:
@@ -482,6 +488,9 @@ def book_lesson_api(request):
             subject = ""
         notes = data.get("notes", "")
         notes = notes.strip() if isinstance(notes, str) else ""
+
+        # L2: Maximale Länge für notes-Feld
+        notes = notes[:2000] if notes else notes
 
         # B3: CR/LF-Bereinigung gegen Header-Injection
         subject = subject.replace("\r", "").replace("\n", "")
@@ -596,6 +605,17 @@ def book_lesson_api(request):
                     "message": _(
                         "Bookings must be at least 30 minutes in advance. Past time slots cannot be booked."
                     ),
+                },
+                status=400,
+            )
+
+        # M6: Maximale Zukunftsgrenze – keine Buchungen mehr als 6 Monate im Voraus
+        max_booking = timezone.now() + timedelta(days=180)
+        if booking_datetime > max_booking:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": _("Cannot book more than 6 months in advance."),
                 },
                 status=400,
             )
@@ -740,9 +760,6 @@ def book_lesson_api(request):
         return JsonResponse(
             {"success": False, "message": _("An error occurred. Please try again.")}, status=500
         )
-
-
-_RESCHEDULE_NEUTRAL = _("Reschedule not possible. Please try again.")
 
 
 @require_http_methods(["POST"])

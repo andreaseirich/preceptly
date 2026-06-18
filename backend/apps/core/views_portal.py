@@ -34,15 +34,18 @@ class TutorMessageView(LoginRequiredMixin, TemplateView):
         )
 
     def post(self, request, *args, **kwargs):
-        student = self.get_student()
-        text = request.POST.get("body", "").strip()
-        if text:
-            PortalMessage.objects.create(
-                contract=student,
-                sender_is_tutor=True,
-                read_by_tutor=True,
-                text=text,
-            )
+        from django.db import transaction
+
+        with transaction.atomic():
+            student = self.get_student()
+            text = request.POST.get("body", "").strip()[:5000]
+            if text:
+                PortalMessage.objects.create(
+                    contract=student,
+                    sender_is_tutor=True,
+                    read_by_tutor=True,
+                    text=text,
+                )
         return redirect("core:tutor_messages", pk=student.pk)
 
 

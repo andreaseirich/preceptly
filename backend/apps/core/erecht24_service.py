@@ -31,8 +31,13 @@ CACHE_KEY_PRIVACY_EN = "erecht24_privacy_en"
 
 
 def _headers() -> dict:
+    from django.core.exceptions import ImproperlyConfigured
+
+    api_key = getattr(settings, "ERECHT24_API_KEY", "")
+    if not api_key:
+        raise ImproperlyConfigured("ERECHT24_API_KEY ist nicht gesetzt.")
     return {
-        "eRecht24-api-key": getattr(settings, "ERECHT24_API_KEY", ""),
+        "eRecht24-api-key": api_key,
         "eRecht24-plugin-key": getattr(settings, "ERECHT24_PLUGIN_KEY", ""),
         "content-type": "application/json",
     }
@@ -43,20 +48,20 @@ def _request(method: str, path: str, body: dict | None = None) -> dict | None:
     data = json.dumps(body).encode() if body else None
     req = Request(url, data=data, headers=_headers(), method=method)
     try:
-        with urlopen(req, timeout=5) as resp:
+        with urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode())
     except (URLError, Exception) as exc:
         logger.warning("e-recht24 API error [%s %s]: %s", method, path, exc)
         return None
 
 
-# ---------------------------------------------------------------------------
-# Client registration (run once via management command)
-# ---------------------------------------------------------------------------
-
-
 def register_client(push_uri: str) -> dict | None:
     """Register this app as an e-recht24 client. Returns {client_id, secret}."""
+    from urllib.parse import urlparse
+
+    parsed = urlparse(push_uri)
+    if parsed.scheme not in ("https", "http") or not parsed.netloc:
+        raise ValueError(f"Ungültige push_uri: {push_uri!r}")
     return _request(
         "POST",
         "clients",
@@ -80,9 +85,51 @@ def delete_client(client_id: int) -> dict | None:
 # ---------------------------------------------------------------------------
 
 
+ALLOWED_TAGS = [
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "ul",
+    "ol",
+    "li",
+    "a",
+    "strong",
+    "em",
+    "br",
+    "span",
+    "div",
+]
+
+
+ALLOWED_ATTRS = {"a": ["href", "title", "target"]}
+
+
+MAX_CONTENT_LENGTH = 100_000
+
+
+def _sanitize_html(raw: str) -> str:
+    if len(raw) > MAX_CONTENT_LENGTH:
+        raise ValueError(
+            f"HTML-Inhalt überschreitet maximale Länge von {MAX_CONTENT_LENGTH} Zeichen "
+            f"(erhalten: {len(raw)} Zeichen)."
+        )
+    try:
+        import bleach
+
+        return bleach.clean(raw, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+    except ImportError:
+        import html as html_lib
+
+        return html_lib.escape(raw)
+
+
 def _store(data: dict, key_de: str, key_en: str) -> str:
     html_de = data.get("html_de", "")
     html_en = data.get("html_en", html_de)
+    html_de = _sanitize_html(html_de)
+    html_en = _sanitize_html(html_en)
     cache.set(key_de, html_de, CACHE_TTL)
     cache.set(key_en, html_en, CACHE_TTL)
     return html_de
@@ -112,8 +159,12 @@ def get_imprint(lang: str = "de") -> str:
     cached = cache.get(key)
     if cached:
         return cached
-    pull_imprint()
-    return cache.get(key) or ""
+    try:
+        pull_imprint()
+        return cache.get(key) or ""
+    except Exception:
+        logger.warning("e-recht24 nicht erreichbar, kein Fallback verfügbar")
+        return ""
 
 
 def get_privacy_policy(lang: str = "de") -> str:
@@ -121,13 +172,13 @@ def get_privacy_policy(lang: str = "de") -> str:
     cached = cache.get(key)
     if cached:
         return cached
-    pull_privacy_policy()
-    return cache.get(key) or ""
+    try:
+        pull_privacy_policy()
+        return cache.get(key) or ""
+    except Exception:
+        logger.warning("e-recht24 nicht erreichbar, kein Fallback verfügbar")
+        return ""
 
-
-# ---------------------------------------------------------------------------
-# Push webhook helper (used by the webhook view)
-# ---------------------------------------------------------------------------
 
 PUSH_TYPE_PING = "ping"
 PUSH_TYPE_IMPRINT = "imprint"
