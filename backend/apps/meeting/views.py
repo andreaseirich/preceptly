@@ -3,6 +3,7 @@ Views für Meeting-Räume (Tutor + Portal-Nutzer).
 """
 
 import logging
+import uuid
 from urllib.parse import urlencode
 
 from django.conf import settings
@@ -165,7 +166,8 @@ class EndMeetingView(LoginRequiredMixin, View):
 
         room = get_object_or_404(MeetingRoom, token=token, lesson__contract__user=request.user)
         room.is_active = False
-        room.save(update_fields=["is_active"])
+        room.token = uuid.uuid4()
+        room.save(update_fields=["is_active", "token"])
         safe_token = str(token).replace("\n", " ").replace("\r", " ")
         logger.info("Meeting %s beendet durch %s", safe_token, request.user)
         return JsonResponse({"ok": True})

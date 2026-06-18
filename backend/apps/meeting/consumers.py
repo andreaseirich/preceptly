@@ -6,6 +6,7 @@ import json
 import logging
 import uuid
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     Signaling-Server für ein einzelnes Meeting-Zimmer.
 
     Nachrichten-Typen vom Client:
-      join        – Raum betreten (name, is_tutor, user_token)
+      join        – Raum betreten (name)
       offer       – WebRTC Offer  (sdp, target_peer_id)
       answer      – WebRTC Answer (sdp, target_peer_id)
       ice         – ICE Candidate (candidate, target_peer_id)
@@ -43,6 +44,30 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     # User-Token-Dedup: group_name -> {user_token: channel_name}
     user_channels: dict[str, dict[str, str]] = {}
 
+    @database_sync_to_async
+    def _load_room_and_authorize(self, token, user):
+        from tutorflow.meetings.models import MeetingRoom
+
+        try:
+            room = MeetingRoom.objects.select_related("session__contract__user").get(token=token)
+        except MeetingRoom.DoesNotExist:
+            return None, False, None, False
+
+        if not room.is_active:
+            return room, False, None, False
+
+        contract = room.session.contract
+        is_tutor = contract.user_id == user.pk
+
+        if is_tutor:
+            return room, True, None, True
+
+        portal_user = contract.portal_users.filter(user=user).first()
+        if portal_user is None:
+            return room, False, None, False
+
+        return room, True, portal_user, False
+
     async def connect(self):
         self.token = str(self.scope["url_route"]["kwargs"]["token"])
         self.group_name = f"meeting_{self.token.replace('-', '')}"
@@ -50,6 +75,25 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self.display_name = "Gast"
         self.is_tutor = False
         self.user_token = ""
+        self._portal_user = None
+
+        user = self.scope.get("user")
+        if user is None or user.is_anonymous:
+            await self.close(code=4403)
+            return
+
+        room, has_access, portal_user, is_tutor = await self._load_room_and_authorize(
+            self.token, user
+        )
+        if room is None or not room.is_active:
+            await self.close(code=4404)
+            return
+        if not has_access:
+            await self.close(code=4403)
+            return
+
+        self.is_tutor = is_tutor
+        self._portal_user = portal_user
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
@@ -85,8 +129,16 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
         if msg_type == "join":
             self.display_name = data.get("name", "Gast")[:60]
-            self.is_tutor = bool(data.get("is_tutor", False))
-            self.user_token = str(data.get("user_token", ""))[:64]
+
+            # is_tutor wurde bereits server-seitig in connect() gesetzt und
+            # darf NICHT vom Client überschrieben werden.
+            user_pk = self.scope["user"].pk
+            if self.is_tutor:
+                self.user_token = f"tutor_{user_pk}"
+            elif self._portal_user is not None:
+                self.user_token = f"portal_{self._portal_user.pk}"
+            else:
+                self.user_token = f"user_{user_pk}"
 
             # Dedup: alten Channel desselben Users kicken
             if self.user_token:
