@@ -101,7 +101,7 @@ INSTALLED_APPS = [
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # TODO: replace with channels_redis.core.RedisChannelLayer in production (multi-process unsafe)
     }
 }
 

@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views import View
 
 from apps.lessons.models import Session, SessionDocument
@@ -77,7 +78,10 @@ class MeetingDocumentUploadView(View):
                 "ok": True,
                 "id": doc.pk,
                 "name": doc.name or doc.file.name,
-                "url": doc.file.url,
+                "url": reverse(
+                    "meeting:doc_serve",
+                    kwargs={"token": str(lesson.meeting_room.token), "doc_pk": doc.pk},
+                ),
                 "date": doc.uploaded_at.strftime("%d.%m.%Y"),
             }
         )
