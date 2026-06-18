@@ -2,6 +2,8 @@
 Views for AI functions (lesson plan generation).
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
@@ -12,6 +14,8 @@ from django.views.decorators.http import require_POST
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Session
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -45,26 +49,11 @@ def generate_lesson_plan(request, lesson_id):
             ),
         )
     except LessonPlanGenerationError as e:
-        messages.error(
-            request, _("The lesson plan could not be generated: {error}").format(error=str(e))
-        )
-        # Log the error for debugging
-        import logging
-
-        logger = logging.getLogger(__name__)
+        messages.error(request, _("Ein Fehler ist aufgetreten. Bitte versuche es erneut."))
         logger.error(f"Lesson plan generation failed: {str(e)}", exc_info=True)
     except Exception as e:
-        # Log unexpected errors with full traceback
-        import logging
-
-        logger = logging.getLogger(__name__)
+        messages.error(request, _("Ein Fehler ist aufgetreten. Bitte versuche es erneut."))
         logger.error(f"Unexpected error during lesson plan generation: {str(e)}", exc_info=True)
-        messages.error(
-            request,
-            _(
-                "An unexpected error occurred: {error}. Please check the logs or try again later."
-            ).format(error=str(e)),
-        )
 
     # Redirect to lesson plan view if 'next' parameter is provided, otherwise to session detail
     next_url = request.POST.get("next") or request.GET.get("next")
