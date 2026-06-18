@@ -38,3 +38,4 @@ build/
 
 # Misc
 fix_settings.py
+*.db

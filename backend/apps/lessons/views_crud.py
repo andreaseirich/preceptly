@@ -5,9 +5,9 @@ Views for lesson CRUD operations.
 import logging
 from datetime import datetime
 
-from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.utils import timezone
