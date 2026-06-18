@@ -22,23 +22,19 @@ from apps.portal.views import get_portal_user
 logger = logging.getLogger(__name__)
 
 
-
-
 def _validate_file_magic(file, ext: str) -> bool:
     _MAGIC = {
-        ".pdf":  [(0, b"%PDF")],
-        ".jpg":  [(0, b"ÿØÿ")],
-        ".jpeg": [(0, b"ÿØÿ")],
-        ".png":  [(0, b"PNG
-
-")],
-        ".gif":  [(0, b"GIF87a"), (0, b"GIF89a")],
+        ".pdf": [(0, b"%PDF")],
+        ".jpg": [(0, b"\xff\xd8\xff")],
+        ".jpeg": [(0, b"\xff\xd8\xff")],
+        ".png": [(0, b"\x89PNG\r\n\x1a\n")],
+        ".gif": [(0, b"GIF87a"), (0, b"GIF89a")],
         ".webp": [(0, b"RIFF"), (8, b"WEBP")],
-        ".docx": [(0, b"PK")],
-        ".xlsx": [(0, b"PK")],
-        ".pptx": [(0, b"PK")],
-        ".mp3":  [(0, b"ID3"), (0, b"ÿû"), (0, b"ÿó"), (0, b"ÿò")],
-        ".mp4":  [(4, b"ftyp")],
+        ".docx": [(0, b"PK\x03\x04")],
+        ".xlsx": [(0, b"PK\x03\x04")],
+        ".pptx": [(0, b"PK\x03\x04")],
+        ".mp3": [(0, b"ID3"), (0, b"\xff\xfb"), (0, b"\xff\xf3"), (0, b"\xff\xf2")],
+        ".mp4": [(4, b"ftyp")],
     }
     if ext == ".txt":
         return True
@@ -48,8 +44,9 @@ def _validate_file_magic(file, ext: str) -> bool:
     header = file.read(12)
     file.seek(0)
     if ext == ".webp":
-        return all(header[offset: offset + len(sig)] == sig for offset, sig in checks)
-    return any(header[offset: offset + len(sig)] == sig for offset, sig in checks)
+        return all(header[offset : offset + len(sig)] == sig for offset, sig in checks)
+    return any(header[offset : offset + len(sig)] == sig for offset, sig in checks)
+
 
 class StartMeetingView(LoginRequiredMixin, View):
     """Tutor startet/betritt ein Meeting für eine bestimmte Stunde."""
