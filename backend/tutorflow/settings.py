@@ -99,11 +99,20 @@ INSTALLED_APPS = [
     "channels",
 ]
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",  # TODO: replace with channels_redis.core.RedisChannelLayer in production (multi-process unsafe)
+_REDIS_URL = os.environ.get("REDIS_URL")
+if _REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [_REDIS_URL]},
+        }
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
+    }
 
 ASGI_APPLICATION = "tutorflow.asgi.application"
 
