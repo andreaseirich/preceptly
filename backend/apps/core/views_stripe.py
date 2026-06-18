@@ -194,10 +194,10 @@ def _maybe_update_stripe_customer_email(profile: UserProfile, user) -> None:
         stripe.Customer.modify(profile.stripe_customer_id, email=new_email)
         profile.stripe_email_last_synced = new_email
         profile.save(update_fields=["stripe_email_last_synced"])
-    except stripe.error.StripeError:
-        logger.warning("Stripe Customer email sync failed")
-    except Exception:
-        logger.warning("Stripe Customer email sync failed")
+    except stripe.error.StripeError as e:
+        logger.warning("Stripe Customer email sync failed: %s %s", type(e).__name__, e.http_status)
+    except Exception as e:
+        logger.error("Stripe Customer email sync failed: %s", type(e).__name__)
 
 
 @method_decorator(login_required, name="dispatch")

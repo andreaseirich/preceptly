@@ -110,11 +110,9 @@ class StudentHomeView(View):
         if link.contract.user != portal_user.tutor:
             return HttpResponseForbidden()
         student = link.contract
-        import datetime
-
         from apps.lessons.models import Lesson
 
-        today = datetime.date.today()
+        today = _dt.date.today()
         upcoming = Lesson.objects.filter(
             contract=student,
             date__gte=today,
