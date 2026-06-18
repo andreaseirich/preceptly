@@ -159,7 +159,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                             old_channel,
                             {"type": "force_disconnect_event"},
                         )
-                    except Exception:
+                    except Exception:  # noqa: S110
                         pass
                 self.user_channels[self.group_name][self.user_token] = self.channel_name
 
