@@ -64,15 +64,17 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+    if DEBUG:
+        ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+    else:
+        from django.core.exceptions import ImproperlyConfigured
 
-if not DEBUG and (not ALLOWED_HOSTS or ALLOWED_HOSTS == ["*"]):
-    raise RuntimeError(
-        "ALLOWED_HOSTS must be set for production. "
-        "Set ALLOWED_HOSTS environment variable with your domain(s), e.g., "
-        "ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com or "
-        "ALLOWED_HOSTS=*.railway.app",
-    )
+        raise ImproperlyConfigured(
+            "ALLOWED_HOSTS environment variable must be set in production (DEBUG=False). "
+            "Set ALLOWED_HOSTS with your domain(s), e.g., "
+            "ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com or "
+            "ALLOWED_HOSTS=*.railway.app"
+        )
 
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", default=[])
 
@@ -161,7 +163,7 @@ WSGI_APPLICATION = "tutorflow.wsgi.application"
 DATABASE_URL = env("DATABASE_URL")
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG)
     }
 else:
     DATABASES = {
@@ -254,7 +256,7 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 
 if not DEBUG:
-    SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", default="3600"))
+    SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", default="31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", default=True)
     # Trust X-Forwarded-Proto so build_absolute_uri yields https behind Railway/reverse proxy
