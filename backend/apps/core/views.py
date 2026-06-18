@@ -211,6 +211,8 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
         return context
 
 
+# TODO: Add rate limiting on POST (install django_ratelimit, then:
+# @method_decorator(ratelimit(key="user", rate="20/m", method="POST", block=False), name="post")
 class SettingsView(LoginRequiredMixin, FormView):
     """Settings view for managing default working hours."""
 
@@ -241,23 +243,19 @@ class SettingsView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         """Handle WorkingHoursForm, UserEmailForm, and TravelPolicyForm."""
         if "save_email" in request.POST:
-            form = UserEmailForm(request.POST, instance=request.user)
-            if form.is_valid():
-                form.save()
-                messages.success(request, _("Email updated successfully."))
-                return redirect(self.success_url)
-            context = self.get_context_data()
-            context["email_form"] = form
-            return self.render_to_response(context)
+            messages.info(
+                request,
+                _("To change your email address, please contact support."),
+            )
+            return redirect(self.success_url)
         if "save_travel" in request.POST:
             travel_form = TravelPolicyForm(request.POST)
             if travel_form.is_valid():
                 profile, _created = UserProfile.objects.get_or_create(user=request.user)
                 policy = dict(profile.travel_policy or {})
                 policy["transport_mode"] = travel_form.cleaned_data["transport_mode"]
-                policy["fahrrad_buffer_minutes"] = (
-                    travel_form.cleaned_data.get("fahrrad_buffer_minutes") or 25
-                )
+                buffer = travel_form.cleaned_data.get("fahrrad_buffer_minutes")
+                policy["fahrrad_buffer_minutes"] = buffer if buffer is not None else 25
                 policy["enabled"] = True
                 profile.travel_policy = policy
                 profile.save()
@@ -394,8 +392,11 @@ class LegalImprintView(LegalPageView):
     def get_context_data(self, **kwargs):
         from apps.core.erecht24_service import get_imprint
 
+        ALLOWED_LANGS = {"de", "en"}
         context = super().get_context_data(**kwargs)
-        lang = self.request.LANGUAGE_CODE[:2] if hasattr(self.request, "LANGUAGE_CODE") else "de"
+        lang = getattr(self.request, "LANGUAGE_CODE", "de")[:2]
+        if lang not in ALLOWED_LANGS:
+            lang = "de"
         context["erecht24_html"] = get_imprint(lang)
         return context
 
@@ -408,8 +409,11 @@ class LegalPrivacyView(LegalPageView):
     def get_context_data(self, **kwargs):
         from apps.core.erecht24_service import get_privacy_policy
 
+        ALLOWED_LANGS = {"de", "en"}
         context = super().get_context_data(**kwargs)
-        lang = self.request.LANGUAGE_CODE[:2] if hasattr(self.request, "LANGUAGE_CODE") else "de"
+        lang = getattr(self.request, "LANGUAGE_CODE", "de")[:2]
+        if lang not in ALLOWED_LANGS:
+            lang = "de"
         context["erecht24_html"] = get_privacy_policy(lang)
         return context
 
