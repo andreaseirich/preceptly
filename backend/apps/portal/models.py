@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -32,6 +33,7 @@ class StudentPortalLink(models.Model):
         "contracts.Contract", on_delete=models.CASCADE, related_name="portal_link"
     )
     invite_token = models.CharField(max_length=64, unique=True, blank=True)
+    invite_token_created_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
 
     class Meta:
@@ -41,6 +43,7 @@ class StudentPortalLink(models.Model):
     def save(self, *args, **kwargs):
         if not self.invite_token:
             self.invite_token = uuid.uuid4().hex
+            self.invite_token_created_at = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -58,6 +61,7 @@ class ParentStudentLink(models.Model):
         "contracts.Contract", on_delete=models.CASCADE, related_name="parent_links"
     )
     invite_token = models.CharField(max_length=64, unique=True, blank=True)
+    invite_token_created_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
 
     class Meta:
@@ -68,6 +72,7 @@ class ParentStudentLink(models.Model):
     def save(self, *args, **kwargs):
         if not self.invite_token:
             self.invite_token = uuid.uuid4().hex
+            self.invite_token_created_at = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):

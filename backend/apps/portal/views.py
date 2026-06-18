@@ -206,7 +206,7 @@ class ParentHomeView(View):
             )
             .prefetch_related(
                 Prefetch(
-                    "contract__lesson_set",
+                    "contract__sessions",
                     queryset=upcoming_qs,
                     to_attr="_upcoming_lessons",
                 )
@@ -342,16 +342,21 @@ class PortalActivateView(View):
 
     template_name = "portal/activate.html"
 
-    def _get_link(self, token):
-        """Return (link, portal_user) for the given token, from either link model."""
-        link = StudentPortalLink.objects.filter(invite_token=token).first()
+def _get_link(self, token):
+        from datetime import timedelta
+
+        from django.db.models import Q
+        from django.utils import timezone
+
+        cutoff = timezone.now() - timedelta(hours=72)
+        valid = Q(invite_token_created_at__isnull=True) | Q(invite_token_created_at__gte=cutoff)
+        link = StudentPortalLink.objects.filter(invite_token=token).filter(valid).first()
         if link:
             return link, link.portal_user
-        link = ParentStudentLink.objects.filter(invite_token=token).first()
+        link = ParentStudentLink.objects.filter(invite_token=token).filter(valid).first()
         if link:
             return link, link.parent
         return None, None
-
     def get(self, request, token):
         link, portal_user = self._get_link(token)
         if link is None:

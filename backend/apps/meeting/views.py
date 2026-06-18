@@ -22,6 +22,35 @@ from apps.portal.views import get_portal_user
 logger = logging.getLogger(__name__)
 
 
+
+
+def _validate_file_magic(file, ext: str) -> bool:
+    _MAGIC = {
+        ".pdf":  [(0, b"%PDF")],
+        ".jpg":  [(0, b"ÿØÿ")],
+        ".jpeg": [(0, b"ÿØÿ")],
+        ".png":  [(0, b"PNG
+
+")],
+        ".gif":  [(0, b"GIF87a"), (0, b"GIF89a")],
+        ".webp": [(0, b"RIFF"), (8, b"WEBP")],
+        ".docx": [(0, b"PK")],
+        ".xlsx": [(0, b"PK")],
+        ".pptx": [(0, b"PK")],
+        ".mp3":  [(0, b"ID3"), (0, b"ÿû"), (0, b"ÿó"), (0, b"ÿò")],
+        ".mp4":  [(4, b"ftyp")],
+    }
+    if ext == ".txt":
+        return True
+    checks = _MAGIC.get(ext)
+    if not checks:
+        return False
+    header = file.read(12)
+    file.seek(0)
+    if ext == ".webp":
+        return all(header[offset: offset + len(sig)] == sig for offset, sig in checks)
+    return any(header[offset: offset + len(sig)] == sig for offset, sig in checks)
+
 class StartMeetingView(LoginRequiredMixin, View):
     """Tutor startet/betritt ein Meeting für eine bestimmte Stunde."""
 
@@ -87,6 +116,8 @@ class MeetingDocumentUploadView(View):
 
         ext = os.path.splitext(file.name)[1].lower()
         if ext not in _ALLOWED_MEETING_EXTENSIONS:
+            return JsonResponse({"error": "File type not allowed."}, status=400)
+        if not _validate_file_magic(file, ext):
             return JsonResponse({"error": "File type not allowed."}, status=400)
         if file.size > _MAX_UPLOAD_SIZE:
             return JsonResponse({"error": "File too large (max 50 MB)."}, status=400)
