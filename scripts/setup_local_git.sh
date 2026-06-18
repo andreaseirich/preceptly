@@ -38,4 +38,47 @@ HOOK
 chmod +x "$HOOK"
 echo "Installed pre-commit hook (hygiene + ruff format)."
 
+# Install pre-push hook: lint + full Django test suite
+PREPUSH="$REPO_ROOT/.git/hooks/pre-push"
+cat > "$PREPUSH" << 'HOOK'
+#!/bin/bash
+# pre-push: lint + Django tests before every push.
+# Emergency bypass: git push --no-verify
+set -euo pipefail
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+BACKEND="$REPO_ROOT/backend"
+export MOCK_LLM=1
+export SECRET_KEY=test-ci-secret
+export ALLOWED_HOSTS=localhost,127.0.0.1
+export DJANGO_SETTINGS_MODULE=tutorflow.settings
+export DJANGO_DEBUG=False
+echo "╔══════════════════════════════════════╗"
+echo "║  pre-push checks (skip: --no-verify) ║"
+echo "╚══════════════════════════════════════╝"
+echo ""
+echo "▶ ruff lint..."
+if ! ruff check "$BACKEND/apps" "$BACKEND/tutorflow"; then
+    echo "✖ Ruff lint failed. Fix before pushing."
+    exit 1
+fi
+echo "✔ lint OK"
+echo ""
+echo "▶ compile check..."
+if ! python3 -m compileall -q "$BACKEND"; then
+    echo "✖ Compile error. Fix before pushing."
+    exit 1
+fi
+echo "✔ compile OK"
+echo ""
+echo "▶ Django tests (this takes ~5 min)..."
+if ! (cd "$BACKEND" && python3 manage.py test --verbosity=1 2>&1); then
+    echo "✖ Tests failed. Fix before pushing."
+    exit 1
+fi
+echo ""
+echo "✔ All checks passed — pushing."
+HOOK
+chmod +x "$PREPUSH"
+echo "Installed pre-push hook (lint + compile + Django tests)."
+
 echo "Local git setup done."
