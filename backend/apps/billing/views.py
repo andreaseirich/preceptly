@@ -257,6 +257,7 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
 
 
 @login_required
+@require_POST
 def generate_invoice_document(request, pk):
     """Generiert das Rechnungsdokument für eine Invoice."""
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
@@ -287,7 +288,10 @@ def serve_invoice_document(request, pk):
 
     # Serve the file
     return FileResponse(
-        open(file_path, "rb"), content_type="text/html", filename=os.path.basename(file_path)
+        open(file_path, "rb"),
+        content_type="application/octet-stream",
+        as_attachment=True,
+        filename=os.path.basename(file_path),
     )
 
 
