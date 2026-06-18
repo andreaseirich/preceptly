@@ -23,6 +23,10 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(fix_session_no_show, noop),
+        migrations.RunSQL(
+            "ALTER TABLE lessons_session DROP CONSTRAINT IF EXISTS session_no_show_only_if_not_cancelled_paid",
+            reverse_sql=migrations.RunSQL.noop,
+        ),
         migrations.AddConstraint(
             model_name="session",
             constraint=models.CheckConstraint(
