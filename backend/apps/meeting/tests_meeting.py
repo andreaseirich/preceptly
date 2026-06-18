@@ -125,7 +125,9 @@ class MeetingDocumentUploadViewTest(TestCase):
     def test_tutor_can_upload_in_active_meeting(self):
         self.client.force_login(self.tutor)
         url = reverse("meeting:upload", kwargs={"token": str(self.room.token)})
-        upload = SimpleUploadedFile("doc.pdf", b"content", content_type="application/pdf")
+        upload = SimpleUploadedFile(
+            "doc.pdf", b"%PDF-1.4 fake content", content_type="application/pdf"
+        )
         response = self.client.post(url, {"file": upload})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(SessionDocument.objects.filter(session=self.lesson).exists())
@@ -134,7 +136,9 @@ class MeetingDocumentUploadViewTest(TestCase):
         inactive_room = make_room(make_session(self.contract), is_active=False)
         self.client.force_login(self.tutor)
         url = reverse("meeting:upload", kwargs={"token": str(inactive_room.token)})
-        upload = SimpleUploadedFile("doc.pdf", b"content", content_type="application/pdf")
+        upload = SimpleUploadedFile(
+            "doc.pdf", b"%PDF-1.4 fake content", content_type="application/pdf"
+        )
         response = self.client.post(url, {"file": upload})
         self.assertEqual(response.status_code, 404)
 
