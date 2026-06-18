@@ -59,9 +59,9 @@ class PortalLoginView(View):
                     return redirect(next_url)
                 return redirect("portal:home")
             else:
-                error = _("Invalid password.")
+                error = _("Ungültige Zugangsdaten.")
         except (User.DoesNotExist, PortalUser.DoesNotExist):
-            error = _("Account not found.")
+            error = _("Ungültige Zugangsdaten.")
         return render(request, self.template_name, {"error": error})
 
 
@@ -383,8 +383,8 @@ class PortalPasswordResetRequestView(View):
             if portal_user.role == "student":
                 link = StudentPortalLink.objects.get(portal_user=portal_user)
             else:
-                # Parent: use any of their StudentPortalLinks
-                link = StudentPortalLink.objects.filter(portal_user=portal_user).first()
+                # Parent: use ParentStudentLink (not StudentPortalLink)
+                link = ParentStudentLink.objects.filter(parent=portal_user).first()
             if link:
                 link.invite_token = uuid.uuid4().hex
                 link.save()
@@ -412,7 +412,12 @@ class PortalPasswordResetRequestView(View):
                         html_message=html,
                         fail_silently=True,
                     )
-        except (User.DoesNotExist, PortalUser.DoesNotExist, StudentPortalLink.DoesNotExist):
+        except (
+            User.DoesNotExist,
+            PortalUser.DoesNotExist,
+            StudentPortalLink.DoesNotExist,
+            ParentStudentLink.DoesNotExist,
+        ):
             pass  # Don't reveal if user exists
         return render(request, self.template_name, {"sent": True})
 
