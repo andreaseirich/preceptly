@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 
 import dj_database_url
-from django.core.management.utils import get_random_secret_key
 
 
 def env(name: str, default=None):
@@ -57,22 +56,11 @@ if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = "dev-insecure-secret-key"
     else:
-        # Auto-generate SECRET_KEY if not set (fallback for deployment)
-        # WARNING: This should be set explicitly in production for security
-        try:
-            SECRET_KEY = get_random_secret_key()
-        except Exception:
-            # Fallback: Generate a simple secret key if get_random_secret_key fails
-            import secrets
+        from django.core.exceptions import ImproperlyConfigured
 
-            SECRET_KEY = secrets.token_urlsafe(50)
-
-# Final check: Ensure SECRET_KEY is always set
-if not SECRET_KEY:
-    # Emergency fallback - should never happen, but ensures app doesn't crash
-    import secrets
-
-    SECRET_KEY = secrets.token_urlsafe(50)
+        raise ImproperlyConfigured(
+            "SECRET_KEY environment variable must be set in production (DEBUG=False)."
+        )
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 if not ALLOWED_HOSTS:
@@ -386,3 +374,5 @@ ERECHT24_API_KEY = env("ERECHT24_API_KEY", default="")
 ERECHT24_PLUGIN_KEY = env("ERECHT24_PLUGIN_KEY", default="")
 ERECHT24_PUSH_SECRET = env("ERECHT24_PUSH_SECRET", default="")
 ERECHT24_CLIENT_ID = env("ERECHT24_CLIENT_ID", default="")
+
+X_FRAME_OPTIONS = "DENY"
