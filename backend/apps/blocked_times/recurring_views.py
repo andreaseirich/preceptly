@@ -111,11 +111,16 @@ class RecurringBlockedTimeGenerateView(LoginRequiredMixin, DetailView):
         from django.core.cache import cache
 
         rate_key = f"gen_rate_{request.user.pk}"
-        current_count = cache.get(rate_key, 0)
-        if current_count >= 5:
+        try:
+            # atomic increment; add() initialisiert nur, wenn Schlüssel noch nicht existiert
+            cache.add(rate_key, 0, timeout=60)
+            current = cache.incr(rate_key)
+        except ValueError:
+            current = 1
+            cache.set(rate_key, 1, timeout=60)
+        if current > 5:
             messages.error(request, _("Too many requests. Please try again later."))
             return redirect("blocked_times:recurring_detail", pk=kwargs["pk"])
-        cache.set(rate_key, current_count + 1, timeout=60)
 
         recurring_blocked_time = self.get_object()
         check_conflicts = request.POST.get("check_conflicts", "on") == "on"
