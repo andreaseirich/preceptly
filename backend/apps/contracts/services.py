@@ -142,6 +142,10 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
     except (TypeError, KeyError, ValueError):
         return None
 
+    # Leere Tier-Liste nach Sortierung → sicher abbrechen (verhindert IndexError)
+    if not sorted_tiers:
+        return None
+
     qs = Session.objects.filter(
         contract__user=user,
         contract__institute__iexact=institute_name,

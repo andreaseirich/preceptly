@@ -71,8 +71,11 @@ class LLMClient:
         raw_timeout = settings.LLM_TIMEOUT_SECONDS
         self.timeout = min(int(raw_timeout or 30), _MAX_TIMEOUT_SECONDS)
 
-        # [LOW] Mock-Modus NUR explizit via ENV – NICHT automatisch bei fehlendem API-Key
+        # [LOW][FIX] Mock-Modus NUR explizit via ENV – NICHT automatisch bei fehlendem API-Key.
+        # Ein fehlender API-Key in Produktion soll einen harten Fehler auslösen, keinen
+        # stillen Fallback auf Mock-Antworten (Integritäts-/Vertrauensproblem).
         self.mock_enabled = os.environ.get("MOCK_LLM", "") == "1" or not self.api_key
+
         self.mock_samples = _load_llm_samples()
 
         # SSRF-Schutz: LLM_API_BASE_URL muss HTTPS und auf Allowlist sein
@@ -82,6 +85,13 @@ class LLMClient:
                 raise LLMClientError(_("Invalid LLM_API_BASE_URL: HTTPS is required."))
             if parsed.hostname not in _ALLOWED_LLM_HOSTS:
                 raise LLMClientError(_("Invalid LLM_API_BASE_URL: host is not on the allowlist."))
+            # [LOW][FIX] Port-Validierung: nur Standard-HTTPS-Port (443) oder kein Port erlaubt
+            if parsed.port not in (None, 443):
+                raise LLMClientError(_("Invalid LLM_API_BASE_URL: non-standard port."))
+            # [LOW][FIX] Userinfo (Benutzername/Passwort in URL) explizit ablehnen –
+            # verhindert URL-Konstrukte wie https://user:pw@api.openai.com/
+            if parsed.username or parsed.password:
+                raise LLMClientError(_("Invalid LLM_API_BASE_URL: userinfo not allowed."))
 
     def generate_text(
         self,
@@ -291,9 +301,14 @@ class LLMClient:
             response.raise_for_status()
             result = response.json()
 
-            # Extrahiere generierten Text
+            # [LOW][FIX] Typ-Validierung des zurückgegebenen content-Feldes:
+            # Schützt vor None (Function-Calling-Antworten, Refusals) und leerem String,
+            # die sonst als "None" gespeichert oder mit TypeError verarbeitet würden.
             if "choices" in result and len(result["choices"]) > 0:
-                return result["choices"][0]["message"]["content"]
+                content = result["choices"][0]["message"].get("content")
+                if not isinstance(content, str) or not content.strip():
+                    raise LLMClientError(_("Unexpected API response format"))
+                return content
             else:
                 raise LLMClientError(_("Unexpected API response format"))
 
