@@ -21,6 +21,11 @@ from apps.core.finance_metrics import (
 from apps.lessons.models import Lesson
 
 
+def _get_valid_lesson_statuses():
+    """Gibt die Menge gültiger Lesson-Status-Codes zurück (lazy, um Import-Reihenfolge zu vermeiden)."""
+    return {code for code, _ in Lesson.STATUS_CHOICES}
+
+
 class IncomeSelector:
     """
     Selector für Einnahmenberechnungen und -auswertungen.

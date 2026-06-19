@@ -4,17 +4,23 @@ Authentication views for login, logout, and registration.
 
 import logging
 import re
+import unicodedata
 
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from apps.core.auth_throttle import throttle_login, throttle_register
+from apps.core.auth_throttle import (
+    _cache_key,
+    throttle_login,
+    throttle_register,
+)
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.utils_booking import ensure_public_booking_token
@@ -38,6 +44,11 @@ class TutorFlowLoginView(LoginView):
     def form_valid(self, form):
         result = super().form_valid(form)
         self.request.session.cycle_key()
+        # Throttle-Zähler nach erfolgreichem Login zurücksetzen
+        user = form.get_user()
+        uname = unicodedata.normalize("NFKC", user.get_username()).casefold()[:64]
+        cache.delete(_cache_key("login_user", uname) + ":count")
+        cache.delete(_cache_key("login_user", uname) + ":meta")
         return result
 
     def get_context_data(self, **kwargs):

@@ -5,8 +5,10 @@ High-level service for lesson plan generation.
 from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.utils.html import escape
 from django.utils.translation import gettext_lazy as _
 
 from apps.ai.client import LLMClient, LLMClientError
@@ -87,18 +89,27 @@ class LessonPlanService:
 
         Args:
             session: Session object
-            user: Optional user for ownership check
+            user: User performing the request (REQUIRED – no default)
 
         Returns:
             LessonPlan object
 
         Raises:
-            PermissionDenied: If user does not own the session
+            PermissionDenied: If user is None or does not own the session
             LessonPlanGenerationError: On generation errors
         """
-        # Ownership-Check: Session muss dem aufrufenden User gehören
-        if user is not None and session.contract.user_id != user.id:
+        # [HIGH] user ist PFLICHT – kein opt-in Ownership-Check
+        if user is None:
+            raise PermissionDenied("User is required for lesson plan generation.")
+        if session.contract.user_id != user.id:
             raise PermissionDenied("Session does not belong to user.")
+
+        # [MEDIUM] Rate-Limiting: max. 10 Generierungen pro User pro Stunde
+        rate_key = f"llm_gen_rate:{user.id}"
+        current_count = cache.get(rate_key, 0)
+        if current_count >= 10:
+            raise LessonPlanGenerationError(_("Rate limit reached. Please try again later."))
+        cache.set(rate_key, current_count + 1, 3600)
 
         # Gather context and apply PII protection
         raw_context = self.gather_context(session)
@@ -107,43 +118,54 @@ class LessonPlanService:
         # Build prompt
         system_prompt, user_prompt = build_lesson_plan_prompt(session, safe_context)
 
-        # Race-Condition-Schutz: atomic + select_for_update verhindert doppelte LLM-Calls
+        # [MEDIUM] Lock entkoppeln: nur Existenz-Check + Placeholder in atomarer Transaktion,
+        # LLM-Call AUSSERHALB des Locks (verhindert DoS durch lange DB-Lock-Haltedauer)
         with transaction.atomic():
             existing = LessonPlan.objects.select_for_update().filter(lesson=session).first()
             if existing is not None:
                 # Bereits ein aktueller Plan vorhanden – direkt zurückgeben
                 return existing
 
-            # Call LLM (außerhalb des Lock-Bereichs wäre besser für Performance,
-            # aber innerhalb der Transaktion sichert uns gegen Race Conditions ab)
-            try:
-                generated_content = self.client.generate_text(
-                    prompt=user_prompt,
-                    system_prompt=system_prompt,
-                    max_tokens=1500,
-                    temperature=0.7,
-                )
-            except LLMClientError as e:
-                raise LessonPlanGenerationError(
-                    _("The lesson plan could not be generated. Please try again.")
-                ) from e
-
-            # Sanitize subject: strip injection patterns + length limit
+            # Platzhalter-Row anlegen, damit parallele Requests denselben Plan nicht
+            # doppelt generieren (unique constraint auf lesson greift)
             student = session.contract
             raw_subject = extract_subject_from_student(student)
             subject = strip_injection_patterns(raw_subject)[:100]
 
-            lesson_plan, created = LessonPlan.objects.update_or_create(
+            placeholder = LessonPlan.objects.create(
                 lesson=session,
-                defaults={
-                    "contract": student,
-                    "topic": _("Lesson plan for {date}").format(date=session.date),
-                    "subject": subject,
-                    "content": generated_content,
-                    "grade_level": student.grade or "",
-                    "duration_minutes": session.duration_minutes,
-                    "llm_model": settings.LLM_MODEL_NAME,
-                },
+                contract=student,
+                topic=_("Lesson plan for {date}").format(date=session.date),
+                subject=subject,
+                content="",
+                grade_level=student.grade or "",
+                duration_minutes=session.duration_minutes,
+                llm_model=settings.LLM_MODEL_NAME,
             )
+        # Transaktion beendet → Lock freigegeben
 
-        return lesson_plan
+        # LLM-Call außerhalb des Locks (kann bis zu 120 s dauern)
+        try:
+            generated_content = self.client.generate_text(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                max_tokens=1500,
+                temperature=0.7,
+            )
+        except LLMClientError as e:
+            # Placeholder aufräumen damit ein erneuter Versuch möglich ist
+            placeholder.delete()
+            raise LessonPlanGenerationError(
+                _("The lesson plan could not be generated. Please try again.")
+            ) from e
+
+        # [MEDIUM] Output-Safety: Länge begrenzen + HTML-Sonderzeichen neutralisieren
+        # (verhindert Stored-XSS falls der Content später gerendert wird)
+        generated_content = generated_content[:20000]
+        generated_content = escape(generated_content)
+
+        # Placeholder mit realem Inhalt aktualisieren
+        placeholder.content = generated_content
+        placeholder.save(update_fields=["content"])
+
+        return placeholder

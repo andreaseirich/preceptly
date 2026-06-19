@@ -126,7 +126,18 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
         return None
 
     # Defensive type-check vor dem Sortieren (verhindert TypeError bei unvalidiertem JSONField)
+    # Zusätzlich: Label-Inhalte werden nie als |safe gerendert (Template-Verantwortung),
+    # aber wir filtern hier defensiv XSS-verdächtige Labels heraus
     try:
+        for t in tiers:
+            if not isinstance(t, dict):
+                return None
+            hours_from = t.get("hours_from")
+            if not isinstance(hours_from, (int, float)) or hours_from < 0:
+                return None
+            label = t.get("label", "")
+            if not isinstance(label, str) or any(c in label for c in ("<", ">")):
+                return None
         sorted_tiers = sorted(tiers, key=lambda t: float(t["hours_from"]))
     except (TypeError, KeyError, ValueError):
         return None
