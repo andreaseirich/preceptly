@@ -145,7 +145,7 @@ class LessonPlanServiceTest(TestCase):
         mock_client_class.return_value = mock_client
 
         service = LessonPlanService(client=mock_client)
-        lesson_plan = service.generate_lesson_plan(self.lesson)
+        lesson_plan = service.generate_lesson_plan(self.lesson, user=self.user)
 
         self.assertIsNotNone(lesson_plan)
         self.assertEqual(lesson_plan.contract, self.student)
@@ -164,7 +164,7 @@ class LessonPlanServiceTest(TestCase):
         service = LessonPlanService(client=mock_client)
 
         with self.assertRaises(LessonPlanGenerationError):
-            service.generate_lesson_plan(self.lesson)
+            service.generate_lesson_plan(self.lesson, user=self.user)
 
     def test_gather_context(self):
         """Test: Kontext wird korrekt gesammelt."""

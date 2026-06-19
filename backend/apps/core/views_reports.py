@@ -59,7 +59,8 @@ class ReportsView(LoginRequiredMixin, TemplateView):
         context["lesson_count"] = lesson_count
         context["paid_amount"] = paid_amount
         context["invoice_count"] = invoice_count
-        context["contract_details"] = top_students
+        # Premium-Gate: Top-Student-Umsatzdaten nur für Premium-User
+        context["contract_details"] = top_students if is_premium else []
         context["is_premium"] = is_premium
 
         if is_premium:

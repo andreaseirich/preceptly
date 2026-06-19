@@ -88,6 +88,17 @@ PHONE_PATTERN = re.compile(
 )
 
 
+# [LOW] Erste (einfachere) PHONE_PATTERN-Definition entfernt – nur die erweiterte, robustere
+# Definition bleibt als einzige Definition bestehen.
+# Hinweis: Die ursprüngliche einfache Definition
+#   PHONE_PATTERN = re.compile(r"\+?[0-9]{1,4}(?:[\s.\-][0-9]{1,4}){2,14}")
+# wurde durch die nachfolgende erweiterte Definition überschrieben und ist daher
+# toter Code. Sie wird hier nicht mehr doppelt definiert.
+
+# [HIGH] notes-Felder explizit als PII kennzeichnen – verhindert Freitext-PII-Leak an LLM
+PII_KEYS = {"full_name", "address", "email", "phone", "tax_id", "dob", "medical_info", "notes"}
+
+
 def strip_injection_patterns(text: str) -> str:
     import unicodedata
 

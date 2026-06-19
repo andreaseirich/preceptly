@@ -33,21 +33,43 @@ def send_booking_notification(lesson: Lesson) -> bool:
     Returns:
         True if email was sent successfully, False otherwise
     """
+    from django.core.cache import cache
+
     notification_email = (getattr(settings, "NOTIFICATION_EMAIL", None) or "").strip()
 
     if not notification_email:
         logger.warning("NOTIFICATION_EMAIL not set; skipping booking notification")
         return False
 
+    # [LOW FIX] Rate-Limiting: max. 20 Notifications pro Stunde pro Tenant
+    rate_limit_key = f"booking_notify:{lesson.contract.user_id}"
+    current_count = cache.get(rate_limit_key, 0)
+    if current_count > 20:
+        logger.warning(
+            "Notification rate limit hit for user %s; skipping booking notification for lesson %s",
+            lesson.contract.user_id,
+            lesson.id,
+        )
+        return False
+    # Zähler erhöhen (atomic-safe durch kurze TTL-Fenster)
+    cache.set(rate_limit_key, current_count + 1, 3600)
+
     start_datetime = timezone.make_aware(datetime.combine(lesson.date, lesson.start_time))
     end_datetime = start_datetime + timedelta(minutes=lesson.duration_minutes)
     end_time = end_datetime.time()
 
     context = {"lesson": lesson, "end_time": end_time}
-    subject = _("New Lesson Booking: {student} - {date}").format(
-        student=_sanitize_header(lesson.contract.full_name),
-        date=lesson.date.strftime("%d.%m.%Y"),
+
+    # [MEDIUM FIX] Subject vollständig über _sanitize_header führen (inkl. Unicode-Zeilentrenner)
+    subject = _sanitize_header(
+        str(
+            _("New Lesson Booking: {student} - {date}").format(
+                student=_sanitize_header(lesson.contract.full_name),
+                date=lesson.date.strftime("%d.%m.%Y"),
+            )
+        )
     )
+
     html_message = render_to_string("lessons/email_booking_notification.html", context)
     plain_message = render_to_string("lessons/email_booking_notification.txt", context)
 

@@ -13,6 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from apps.core.erecht24_service import handle_push
 
+MAX_WEBHOOK_BYTES = 64 * 1024
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,10 +30,23 @@ class Erecht24PushView(View):
             logger.error("ERECHT24_WEBHOOK_SECRET not configured – rejecting push")
             return JsonResponse({"code": 403, "message": "invalid signature"}, status=403)
 
+        # Body-Größenbegrenzung: erst Content-Length-Header, dann echte Body-Länge prüfen
+        content_length = request.META.get("CONTENT_LENGTH")
+        if content_length is not None:
+            try:
+                if int(content_length) > MAX_WEBHOOK_BYTES:
+                    return JsonResponse({"code": 413, "message": "payload too large"}, status=413)
+            except (ValueError, TypeError):
+                pass
+
+        body = request.body
+        if len(body) > MAX_WEBHOOK_BYTES:
+            return JsonResponse({"code": 413, "message": "payload too large"}, status=413)
+
         signature = request.headers.get("X-ER24-Signature", "")
         expected = hmac.new(
             secret.encode("utf-8"),
-            request.body,
+            body,
             hashlib.sha256,
         ).hexdigest()
         if not hmac.compare_digest(signature, expected):
@@ -39,9 +54,12 @@ class Erecht24PushView(View):
             return JsonResponse({"code": 403, "message": "invalid signature"}, status=403)
 
         try:
-            payload = json.loads(request.body.decode("utf-8"))
+            payload = json.loads(body.decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
             return JsonResponse({"code": 400, "message": "invalid json"}, status=400)
+
+        if not isinstance(payload, dict):
+            return JsonResponse({"code": 400, "message": "invalid payload"}, status=400)
 
         response = handle_push(payload)
         status = response.get("code", 200)

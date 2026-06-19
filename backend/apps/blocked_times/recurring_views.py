@@ -108,6 +108,15 @@ class RecurringBlockedTimeGenerateView(LoginRequiredMixin, DetailView):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
+        from django.core.cache import cache
+
+        rate_key = f"gen_rate_{request.user.pk}"
+        current_count = cache.get(rate_key, 0)
+        if current_count >= 5:
+            messages.error(request, _("Too many requests. Please try again later."))
+            return redirect("blocked_times:recurring_detail", pk=kwargs["pk"])
+        cache.set(rate_key, current_count + 1, timeout=60)
+
         recurring_blocked_time = self.get_object()
         check_conflicts = request.POST.get("check_conflicts", "on") == "on"
 

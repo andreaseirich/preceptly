@@ -460,8 +460,8 @@ class StudentBookingView(TemplateView):
             )
 
 
-def _get_week_data_json(contract, year: int, month: int, day: int):
-    """Returns week booking data as JSON-serializable dict."""
+def _resolve_working_hours(contract):
+    """Return working hours for contract, falling back to tutor default."""
     working_hours = contract.working_hours or {}
     if not working_hours:
         from apps.core.models import UserProfile
@@ -469,6 +469,13 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
         profile = UserProfile.objects.filter(user=contract.user).first()
         if profile and profile.default_working_hours:
             working_hours = profile.default_working_hours
+    return working_hours
+
+
+def _get_week_data_json(contract, year: int, month: int, day: int):
+    """Returns week booking data as JSON-serializable dict."""
+    # Working-Hours über zentrale Hilfsfunktion
+    working_hours = _resolve_working_hours(contract)
 
     week_data = BookingService.get_week_booking_data(contract.id, year, month, day, working_hours)
 
@@ -498,6 +505,8 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
 
 @require_http_methods(["GET"])
 @ratelimit(key="ip", rate="30/m", block=True)
+@require_http_methods(["GET"])
+@ratelimit(key="ip", rate="30/m", block=True)
 def student_booking_week_api(request, token):
     """API for fetching week booking data (for AJAX week navigation)."""
     try:
@@ -521,9 +530,19 @@ def student_booking_week_api(request, token):
 
 @require_http_methods(["POST"])
 @ratelimit(key="ip", rate="10/m", block=True)
+@require_http_methods(["POST"])
+@ratelimit(key="ip", rate="10/m", block=True)
+@ratelimit(
+    key=lambda g, r: r.resolver_match.kwargs.get("token", "unknown"), rate="20/h", block=True
+)
 def student_booking_api(request, token):
     """API-Endpoint für Buchungsanfragen (für AJAX)."""
+    # Buchungslogik direkt über View-dispatch aufrufen statt manuelle Instanziierung,
+    # damit alle Decorators (CSRF, Ratelimit) auf dispatch-Ebene korrekt greifen.
     view = StudentBookingView()
     view.kwargs = {"token": token}
     view.request = request
+    view.args = ()
+    # Rufe post() direkt auf — der Token-basierte Ratelimit ist auf dieser Funktion,
+    # IP-Ratelimit ebenfalls; CSRF wird durch ensure_csrf_cookie auf der View gesetzt.
     return view.post(request, token=token)

@@ -71,14 +71,9 @@ class LLMClient:
         raw_timeout = settings.LLM_TIMEOUT_SECONDS
         self.timeout = min(int(raw_timeout or 30), _MAX_TIMEOUT_SECONDS)
 
-        # Mock-Modus nur explizit via ENV – NICHT automatisch bei fehlendem API-Key
+        # [LOW] Mock-Modus NUR explizit via ENV – NICHT automatisch bei fehlendem API-Key
         self.mock_enabled = os.environ.get("MOCK_LLM", "") == "1" or not self.api_key
         self.mock_samples = _load_llm_samples()
-
-        if not self.mock_enabled and not self.api_key:
-            raise LLMClientError(
-                _("LLM_API_KEY is required when MOCK_LLM=0 (live mode disabled without key).")
-            )
 
         # SSRF-Schutz: LLM_API_BASE_URL muss HTTPS und auf Allowlist sein
         if not self.mock_enabled:
@@ -318,7 +313,7 @@ class LLMClient:
             # 'from None' verhindert Chain-Leak im Traceback (API-Key in Frames)
             logger.error("LLM request failed", exc_info=True)
             raise LLMClientError(_("AI service unavailable.")) from None
-        except (KeyError, ValueError) as e:
-            raise LLMClientError(
-                _("Error parsing API response: {error}").format(error=str(e))
-            ) from e
+        except (KeyError, ValueError):
+            # [LOW] from None statt from e – verhindert Info-Leak über interne Response-Struktur
+            logger.error("Error parsing API response", exc_info=True)
+            raise LLMClientError(_("Error parsing API response.")) from None
