@@ -6322,3 +6322,9 @@ msgstr "Frühzeitiger Zugang zu neuen Features"
 
 msgid "Invoices & PDF billing"
 msgstr "Rechnungen & PDF"
+
+msgid "I expressly agree to the performance of the contract before the end of the withdrawal period. I acknowledge that my right of withdrawal expires upon commencement of performance."
+msgstr "Ich stimme der Ausführung des Vertrages vor Ablauf der Widerrufsfrist ausdrücklich zu. Ich nehme zur Kenntnis, dass mein Widerrufsrecht mit Beginn der Ausführung erlischt."
+
+msgid "Please confirm the withdrawal notice to proceed."
+msgstr "Bitte bestätige die Widerrufsbelehrung, um fortzufahren."

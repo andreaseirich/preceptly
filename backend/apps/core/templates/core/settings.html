@@ -275,8 +275,14 @@
         {% elif is_premium %}
             <span style="color: var(--text-secondary);">{% trans "Premium (manually activated)" %}</span>
         {% else %}
-            <form method="post" action="{% url 'stripe_checkout' %}" style="display: inline;">
+            <form method="post" action="{% url 'stripe_checkout' %}">
                 {% csrf_token %}
+                <div style="margin-bottom: 0.75rem; max-width: 420px;">
+                    <label style="display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
+                        <input type="checkbox" name="withdrawal_consent" required style="margin-top: 3px; flex-shrink: 0;">
+                        <span>{% blocktrans %}I expressly agree to the performance of the contract before the end of the withdrawal period. I acknowledge that my right of withdrawal expires upon commencement of performance.{% endblocktrans %}</span>
+                    </label>
+                </div>
                 <button type="submit" class="btn btn-success">{% trans "Activate Premium" %}</button>
             </form>
         {% endif %}
@@ -289,8 +295,14 @@
         {% elif is_premium %}
             <span style="color: var(--text-secondary);">{% trans "Premium (manually activated)" %}</span>
         {% else %}
-            <form method="post" action="{% url 'core:subscription_checkout' %}" style="display: inline;">
+            <form method="post" action="{% url 'core:subscription_checkout' %}">
                 {% csrf_token %}
+                <div style="margin-bottom: 0.75rem; max-width: 420px;">
+                    <label style="display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
+                        <input type="checkbox" name="withdrawal_consent" required style="margin-top: 3px; flex-shrink: 0;">
+                        <span>{% blocktrans %}I expressly agree to the performance of the contract before the end of the withdrawal period. I acknowledge that my right of withdrawal expires upon commencement of performance.{% endblocktrans %}</span>
+                    </label>
+                </div>
                 <button type="submit" class="btn btn-success">{% trans "Upgrade to Premium" %}</button>
             </form>
         {% endif %}
