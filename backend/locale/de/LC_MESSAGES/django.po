@@ -6280,3 +6280,45 @@ msgstr "Premium-Funktionen"
 
 msgid "developer & tutor"
 msgstr "Entwickler & Nachhilfelehrer"
+
+msgid "per month"
+msgstr "pro Monat"
+
+msgid "Recommended"
+msgstr "Empfohlen"
+
+msgid "Documents (3 per student)"
+msgstr "Dokumente (3 pro Schüler)"
+
+msgid "Billing Pro"
+msgstr "Billing Pro"
+
+msgid "Student portal"
+msgstr "Schülerportal"
+
+msgid "Portal bookings (3/month)"
+msgstr "Portalbuchen (3/Monat)"
+
+msgid "Everything in Starter"
+msgstr "Alles aus Starter"
+
+msgid "Unlimited documents"
+msgstr "Unbegrenzte Dokumente"
+
+msgid "EÜR tax export"
+msgstr "EÜR-Steuerexport"
+
+msgid "Parent portal"
+msgstr "Elternportal"
+
+msgid "Advanced reports"
+msgstr "Erweiterte Berichte"
+
+msgid "Everything in Pro"
+msgstr "Alles aus Pro"
+
+msgid "Early access to new features"
+msgstr "Frühzeitiger Zugang zu neuen Features"
+
+msgid "Invoices & PDF billing"
+msgstr "Rechnungen & PDF"

@@ -464,15 +464,34 @@ def stripe_webhook_view(request):
     return HttpResponse(status=200)
 
 
-def _set_premium(profile: UserProfile, is_premium: bool) -> None:
-    """Update profile premium status."""
-    profile.is_premium = is_premium
-    if is_premium and not profile.premium_since:
-        profile.premium_since = timezone.now()
-    if not is_premium:
+def _price_id_to_tier(price_id: str | None) -> str:
+    """Map a Stripe price ID to a subscription tier string."""
+    mapping = {
+        getattr(settings, "STRIPE_PRICE_ID_STARTER", None): "starter",
+        getattr(settings, "STRIPE_PRICE_ID_PRO", None): "pro",
+        getattr(settings, "STRIPE_PRICE_ID_BUSINESS", None): "business",
+        getattr(settings, "STRIPE_PRICE_ID_MONTHLY", None): "pro",
+        getattr(settings, "STRIPE_PRICE_ID_YEARLY", None): "pro",
+    }
+    return mapping.get(price_id, "pro")
+
+
+def _set_premium(profile: UserProfile, is_premium: bool, price_id: str | None = None) -> None:
+    """Update profile premium status and subscription tier."""
+    if is_premium:
+        tier = _price_id_to_tier(price_id or profile.stripe_price_id)
+        profile.subscription_tier = tier
+        profile.is_premium = tier in ("pro", "business")
+        if not profile.premium_since:
+            profile.premium_since = timezone.now()
+    else:
+        profile.subscription_tier = "free"
+        profile.is_premium = False
         profile.premium_since = None
     profile.premium_source = "stripe" if is_premium else (profile.premium_source or "")
-    profile.save(update_fields=["is_premium", "premium_since", "premium_source"])
+    profile.save(
+        update_fields=["subscription_tier", "is_premium", "premium_since", "premium_source"]
+    )
 
 
 def _handle_stripe_event(event: dict) -> None:
