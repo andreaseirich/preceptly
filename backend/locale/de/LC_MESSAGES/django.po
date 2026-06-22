@@ -6158,3 +6158,5 @@ msgstr "Deaktivieren"
 msgid "Activate"
 msgstr "Aktivieren"
 
+msgid "Operated by Andreas Eirich · Birkenweg 7, 49577 Ankum, Germany"
+msgstr "Betrieben von Andreas Eirich · Birkenweg 7, 49577 Ankum, Deutschland"
