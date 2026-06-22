@@ -6203,3 +6203,23 @@ msgstr "Der Technologie-Stack wurde wegen seiner Reife, bewährten Sicherheit un
 msgid "Preceptly is in active development and used by early testers. New features are released regularly."
 msgstr "Preceptly befindet sich in aktiver Entwicklung und wird bereits von frühen Testern genutzt. Neue Funktionen werden regelmäßig veröffentlicht."
 
+msgid "Working as a freelance tutor at two institutes, organizing lessons, contracts, and invoices across different tools quickly became overwhelming."
+msgstr "Als freiberuflicher Nachhilfelehrer bei zwei Instituten wurde die Organisation von Stunden, Verträgen und Abrechnungen über verschiedene Tools schnell unübersichtlich."
+
+msgid "Preceptly was built to have everything in one place — scheduling, contracts, invoices, and income — clearly arranged and without the chaos."
+msgstr "Preceptly entstand, um alles an einem Ort zu haben – Terminplanung, Verträge, Rechnungen und Einnahmen – übersichtlich und ohne Chaos."
+
+msgid "Preceptly is developed and used by Andreas Eirich, a freelance web developer from Ankum, Germany."
+msgstr "Preceptly wird von Andreas Eirich entwickelt und selbst genutzt. Er ist freiberuflicher Webentwickler aus Ankum und arbeitet auf Honorarbasis als Nachhilfelehrer bei TutorSpace und Abacus."
+
+msgid "He works as a tutor on a fee basis at TutorSpace and Abacus, and developed Preceptly because no suitable tool existed for his own tutoring work."
+msgstr "Für seine eigene Nachhilfearbeit fehlte ihm ein passendes Tool – deshalb hat er Preceptly entwickelt."
+
+msgid "The goal is to offer it to other tutors in the future. Under andicode he runs a web development business; further projects are listed at andicode.de."
+msgstr "Das Ziel ist, es künftig auch anderen Nachhilfelehrern anzubieten. Unter andicode betreibt er ein Gewerbe für Webentwicklung; weitere Projekte sind auf andicode.de aufgelistet."
+
+msgid "Preceptly is actively used by its developer for his own tutoring work and is in ongoing development."
+msgstr "Preceptly wird vom Entwickler aktiv für seine eigene Nachhilfearbeit eingesetzt und befindet sich in laufender Weiterentwicklung."
+
+msgid "There are no external testers yet — feedback and early access requests are welcome at contact@andicode.de."
+msgstr "Externe Tester gibt es bisher nicht – Feedback und Anfragen für frühen Zugang sind willkommen unter contact@andicode.de."
