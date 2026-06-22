@@ -98,7 +98,9 @@ class SubscriptionCheckoutTest(TestCase):
         UserProfile.objects.create(user=self.user, is_premium=False)
 
     def test_checkout_requires_login(self):
-        response = self.client.post(reverse("core:subscription_checkout"))
+        response = self.client.post(
+            reverse("core:subscription_checkout"), data={"withdrawal_consent": "on"}
+        )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith("/login/"))
 
@@ -108,7 +110,9 @@ class SubscriptionCheckoutTest(TestCase):
         mock_customer.return_value = MagicMock(id="cus_fake123")
         mock_create.return_value = MagicMock(url="https://checkout.stripe.com/fake")
         self.client.login(username="tutor", password="test")
-        response = self.client.post(reverse("core:subscription_checkout"))
+        response = self.client.post(
+            reverse("core:subscription_checkout"), data={"withdrawal_consent": "on"}
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "https://checkout.stripe.com/fake")
         mock_create.assert_called_once()
@@ -127,7 +131,9 @@ class SubscriptionCheckoutDisabledTest(TestCase):
 
     def test_checkout_disabled_returns_503(self):
         self.client.login(username="tutor", password="test")
-        response = self.client.post(reverse("core:subscription_checkout"))
+        response = self.client.post(
+            reverse("core:subscription_checkout"), data={"withdrawal_consent": "on"}
+        )
         self.assertEqual(response.status_code, 503)
 
 
@@ -181,7 +187,7 @@ class StripeCheckoutPremiumTest(TestCase):
         UserProfile.objects.create(user=self.user, is_premium=False)
 
     def test_stripe_checkout_requires_login(self):
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith("/login/"))
 
@@ -191,7 +197,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer.return_value = MagicMock(id="cus_new123")
         mock_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "https://checkout.stripe.com/premium")
         call_kw = mock_create.call_args[1]
@@ -206,7 +212,9 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
         with patch("apps.core.views_stripe.stripe.Customer.create") as mock_customer:
-            response = self.client.post(reverse("stripe_checkout"))
+            response = self.client.post(
+                reverse("stripe_checkout"), data={"withdrawal_consent": "on"}
+            )
         self.assertEqual(response.status_code, 302)
         mock_customer.assert_not_called()
         call_kw = mock_create.call_args[1]
@@ -221,7 +229,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer_create.return_value = MagicMock(id="cus_new_meta")
         mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         mock_customer_create.assert_called_once()
         call_kw = mock_customer_create.call_args[1]
@@ -238,7 +246,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer_create.return_value = MagicMock(id="cus_no_email")
         mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         mock_customer_create.assert_called_once()
         call_kw = mock_customer_create.call_args[1]
@@ -255,7 +263,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer_create.return_value = MagicMock(id="cus_with_email")
         mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         call_kw = mock_customer_create.call_args[1]
         self.assertEqual(call_kw["email"], "tutor@valid-domain.org")
@@ -271,7 +279,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer_create.return_value = MagicMock(id="cus_test")
         mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         call_kw = mock_customer_create.call_args[1]
         self.assertNotIn("email", call_kw)
@@ -287,7 +295,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_session_create.return_value = MagicMock(url="https://checkout.stripe.com/premium")
         self.client.login(username="tutor_prem", password="test")
         UserProfile.objects.filter(user=self.user).update(stripe_customer_id="cus_after_first")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         mock_customer_create.assert_not_called()
         call_kw = mock_session_create.call_args[1]
@@ -300,7 +308,9 @@ class StripeCheckoutPremiumTest(TestCase):
         """HTML flow: Customer.create raises -> 302 redirect to Settings, message queued."""
         mock_customer_create.side_effect = stripe.error.StripeError("api_error")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"), follow=True)
+        response = self.client.post(
+            reverse("stripe_checkout"), data={"withdrawal_consent": "on"}, follow=True
+        )
         self.assertEqual(response.status_code, 200)
         messages_list = list(get_messages(response.wsgi_request))
         self.assertTrue(any("checkout" in str(m.message).lower() for m in messages_list))
@@ -328,7 +338,9 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer_create.return_value = MagicMock(id="cus_ok")
         mock_session_create.side_effect = stripe.error.StripeError("session_error")
         self.client.login(username="tutor_prem", password="test")
-        response = self.client.post(reverse("stripe_checkout"), follow=True)
+        response = self.client.post(
+            reverse("stripe_checkout"), data={"withdrawal_consent": "on"}, follow=True
+        )
         self.assertEqual(response.status_code, 200)
         messages_list = list(get_messages(response.wsgi_request))
         self.assertTrue(any("checkout" in str(m.message).lower() for m in messages_list))
@@ -359,7 +371,7 @@ class StripeCheckoutPremiumTest(TestCase):
         mock_customer_create.return_value = MagicMock(id="cus_saved")
         mock_session_create.side_effect = stripe.error.StripeError("session_error")
         self.client.login(username="tutor_prem", password="test")
-        self.client.post(reverse("stripe_checkout"))
+        self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         profile = UserProfile.objects.get(user=self.user)
         self.assertEqual(profile.stripe_customer_id, "cus_saved")
 
@@ -483,7 +495,7 @@ class StripeCustomerEmailUpdateTest(TestCase):
         self.user.save()
         UserProfile.objects.filter(user=self.user).update(stripe_customer_id="cus_existing")
         self.client.login(username="tutor_email", password="test")
-        response = self.client.post(reverse("stripe_checkout"))
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "https://checkout.stripe.com/ok")
 
