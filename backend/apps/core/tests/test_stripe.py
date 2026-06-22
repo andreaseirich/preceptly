@@ -322,6 +322,7 @@ class StripeCheckoutPremiumTest(TestCase):
         self.client.login(username="tutor_prem", password="test")
         response = self.client.post(
             reverse("stripe_checkout"),
+            data={"withdrawal_consent": "on"},
             HTTP_ACCEPT="application/json",
         )
         self.assertEqual(response.status_code, 502)
@@ -356,6 +357,7 @@ class StripeCheckoutPremiumTest(TestCase):
         self.client.login(username="tutor_prem", password="test")
         response = self.client.post(
             reverse("stripe_checkout"),
+            data={"withdrawal_consent": "on"},
             HTTP_ACCEPT="application/json",
         )
         self.assertEqual(response.status_code, 502)
@@ -951,6 +953,7 @@ class StripeAbsoluteUrlsBehindProxyTest(TestCase):
         self.client.login(username="tutor_urls", password="test")
         self.client.post(
             reverse("stripe_checkout"),
+            data={"withdrawal_consent": "on"},
             HTTP_X_FORWARDED_PROTO="https",
             HTTP_HOST="example.com",
         )
