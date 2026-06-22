@@ -6223,3 +6223,60 @@ msgstr "Preceptly wird vom Entwickler aktiv für seine eigene Nachhilfearbeit ei
 
 msgid "There are no external testers yet — feedback and early access requests are welcome at contact@andicode.de."
 msgstr "Externe Tester gibt es bisher nicht – Feedback und Anfragen für frühen Zugang sind willkommen unter contact@andicode.de."
+
+msgid "Set up weekly, bi-weekly or monthly lesson series. Sessions are generated automatically — cancel or reschedule individually."
+msgstr "Richte wöchentliche, zweiwöchentliche oder monatliche Serien ein. Stunden werden automatisch generiert – einzeln absagen oder verschieben."
+
+msgid "Block off time windows for fixed commitments like lectures or appointments — one-off or as a recurring series."
+msgstr "Blockiere Zeitfenster für feste Verpflichtungen wie Vorlesungen oder Termine – einmalig oder als Serie."
+
+msgid "Session Notes & Homework"
+msgstr "Stundennotizen & Hausaufgaben"
+
+msgid "Record notes and assigned homework for every lesson. Accessible at a glance from the session detail view."
+msgstr "Notizen und Hausaufgaben pro Stunde festhalten. Übersichtlich abrufbar in der Stundendetailansicht."
+
+msgid "Document Management"
+msgstr "Dokumentenverwaltung"
+
+msgid "Upload worksheets, PDFs and materials per student. Everything stored centrally and always at hand."
+msgstr "Arbeitsblätter, PDFs und Materialien pro Schüler hochladen. Alles zentral gespeichert und jederzeit griffbereit."
+
+msgid "Students book their own sessions via a personal link — including reschedule and cancellation support."
+msgstr "Schüler buchen Stunden selbst über einen persönlichen Link – inkl. Umbuchen und Absagen."
+
+msgid "Student & Parent Portal"
+msgstr "Schüler- und Elternportal"
+
+msgid "Students and parents get their own login. They can view lessons, send messages, access documents, and see progress notes."
+msgstr "Schüler und Eltern erhalten einen eigenen Login. Sie können Stunden einsehen, Nachrichten schreiben, Dokumente aufrufen und Fortschrittsnotizen lesen."
+
+msgid "Integrated Meeting Rooms"
+msgstr "Integrierte Meeting-Räume"
+
+msgid "Start a video session directly from a lesson — no external tool needed. Students join via the portal or a link."
+msgstr "Videostunde direkt aus einer Stunde starten – kein externes Tool nötig. Schüler treten über das Portal oder einen Link bei."
+
+msgid "Recurring lessons & blocked times"
+msgstr "Wiederkehrende Stunden & Sperrzeiten"
+
+msgid "Students, contracts & documents"
+msgstr "Schüler, Verträge & Dokumente"
+
+msgid "Session notes & homework"
+msgstr "Stundennotizen & Hausaufgaben"
+
+msgid "Student & parent portal"
+msgstr "Schüler- und Elternportal"
+
+msgid "Integrated meeting rooms"
+msgstr "Integrierte Meeting-Räume"
+
+msgid "Included in the free plan"
+msgstr "Im kostenlosen Tarif enthalten"
+
+msgid "Premium features"
+msgstr "Premium-Funktionen"
+
+msgid "developer & tutor"
+msgstr "Entwickler & Nachhilfelehrer"
