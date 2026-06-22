@@ -35,7 +35,6 @@ from apps.core.forms import (
 )
 from apps.core.models import Expense, UserProfile
 from apps.core.selectors import IncomeSelector
-from apps.core.utils_booking import ensure_public_booking_token
 from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
 
@@ -311,8 +310,6 @@ class SettingsView(LoginRequiredMixin, FormView):
 
         context = super().get_context_data(**kwargs)
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
-        ensure_public_booking_token(profile)
-        profile.refresh_from_db()
 
         context["is_premium"] = is_premium_user(self.request.user)
         context["is_demo_user"] = self.request.user.username in ("demo_premium", "demo_user")
@@ -355,12 +352,6 @@ class SettingsView(LoginRequiredMixin, FormView):
         context["profile"] = profile
         context["current_working_hours"] = profile.default_working_hours or {}
         context["contracts"] = contracts
-        context["public_booking_url"] = self.request.build_absolute_uri(
-            reverse(
-                "lessons:public_booking_with_token",
-                kwargs={"tutor_token": profile.public_booking_token},
-            )
-        )
         context["contract_booking_urls"] = [
             {
                 "contract": c,

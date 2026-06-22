@@ -23,16 +23,18 @@ class FeatureFlagsTest(TestCase):
         UserProfile.objects.create(user=self.premium_user, is_premium=True, subscription_tier="pro")
 
     def test_basic_has_no_premium_features(self):
-        self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_PUBLIC_RESCHEDULE))
         self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_REPORTS))
-        self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_BILLING_PRO))
         self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_AI_LESSON_PLANS))
+        self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_BILLING_PRO))
+        self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_STUDENT_PORTAL))
 
-    def test_premium_has_all_features(self):
-        self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_PUBLIC_RESCHEDULE))
+    def test_pro_has_all_features(self):
         self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_REPORTS))
-        self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_BILLING_PRO))
         self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_AI_LESSON_PLANS))
+        self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_BILLING_PRO))
+        self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_STUDENT_PORTAL))
+        self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_PARENT_PORTAL))
+        self.assertTrue(user_has_feature(self.premium_user, Feature.FEATURE_MEETING_ROOMS))
 
     def test_reports_page_basic_teaser(self):
         self.client.login(username="basic", password="test")
