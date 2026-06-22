@@ -1,9 +1,9 @@
 """
-Centralized Premium feature gating.
+Centralized feature gating for the 3-tier subscription system.
 
-Features are granted based on user's premium status.
-Basic: minimal features (students, contracts, lessons, calendar, basic billing).
-Premium: full access including public booking (unlimited), reschedule, reports, billing-pro, AI.
+Tiers (ascending): free → starter → pro → business
+
+Feature access is determined by subscription_tier on UserProfile.
 """
 
 from enum import StrEnum
@@ -11,106 +11,145 @@ from enum import StrEnum
 from django.contrib.auth.models import User
 
 
-class Feature(StrEnum):
-    """Feature keys for gating."""
-
-    # Public Booking: Basic has limits (e.g. 10/month), Premium unlimited
-    FEATURE_PUBLIC_BOOKING_FULL = "public_booking_full"
-
-    # Public reschedule: Basic disabled, Premium enabled
-    FEATURE_PUBLIC_RESCHEDULE = "public_reschedule"
-
-    # Public series reschedule: Basic disabled, Premium enabled
-    FEATURE_PUBLIC_SERIES_RESCHEDULE = "public_series_reschedule"
-
-    # Reports/Stats page: Basic teaser, Premium full
-    FEATURE_REPORTS = "reports"
-
-    # Billing Pro: sequential invoice numbering, advanced filters
-    FEATURE_BILLING_PRO = "billing_pro"
-
-    # AI lesson plans (already premium)
-    FEATURE_AI_LESSON_PLANS = "ai_lesson_plans"
+class Tier(StrEnum):
+    FREE = "free"
+    STARTER = "starter"
+    PRO = "pro"
+    BUSINESS = "business"
 
 
-# Mapping: which features Basic has (False = Premium only)
-_FEATURE_IS_PREMIUM_ONLY = {
-    Feature.FEATURE_PUBLIC_BOOKING_FULL: True,  # Basic has limited booking
-    Feature.FEATURE_PUBLIC_RESCHEDULE: True,
-    Feature.FEATURE_PUBLIC_SERIES_RESCHEDULE: True,
-    Feature.FEATURE_REPORTS: True,  # Basic gets teaser
-    Feature.FEATURE_BILLING_PRO: True,
-    Feature.FEATURE_AI_LESSON_PLANS: True,
+TIER_RANK: dict[Tier, int] = {
+    Tier.FREE: 0,
+    Tier.STARTER: 1,
+    Tier.PRO: 2,
+    Tier.BUSINESS: 3,
 }
 
 
-def is_premium_user(user: User | None) -> bool:
-    """Check if user has premium access. Compatible with existing utils.is_premium_user."""
+class Feature(StrEnum):
+    # Starter+ features
+    FEATURE_RECURRING_LESSONS = "recurring_lessons"
+    FEATURE_BLOCKED_TIMES = "blocked_times"
+    FEATURE_DOCUMENTS = "documents"
+    FEATURE_BILLING_PRO = "billing_pro"
+    FEATURE_STUDENT_PORTAL = "student_portal"
+    FEATURE_PORTAL_BOOKING = "portal_booking"
+
+    # Pro+ features
+    FEATURE_EUE_EXPORT = "eue_export"
+    FEATURE_PARENT_PORTAL = "parent_portal"
+    FEATURE_MEETING_ROOMS = "meeting_rooms"
+    FEATURE_AI_LESSON_PLANS = "ai_lesson_plans"
+    FEATURE_REPORTS = "reports"
+
+
+FEATURE_MIN_TIER: dict[Feature, Tier] = {
+    Feature.FEATURE_RECURRING_LESSONS: Tier.STARTER,
+    Feature.FEATURE_BLOCKED_TIMES: Tier.STARTER,
+    Feature.FEATURE_DOCUMENTS: Tier.STARTER,
+    Feature.FEATURE_BILLING_PRO: Tier.STARTER,
+    Feature.FEATURE_STUDENT_PORTAL: Tier.STARTER,
+    Feature.FEATURE_PORTAL_BOOKING: Tier.STARTER,
+    Feature.FEATURE_EUE_EXPORT: Tier.PRO,
+    Feature.FEATURE_PARENT_PORTAL: Tier.PRO,
+    Feature.FEATURE_MEETING_ROOMS: Tier.PRO,
+    Feature.FEATURE_AI_LESSON_PLANS: Tier.PRO,
+    Feature.FEATURE_REPORTS: Tier.PRO,
+}
+
+# Starter-tier limits
+STARTER_DOCUMENT_LIMIT = 3
+STARTER_PORTAL_BOOKING_MONTHLY_LIMIT = 3
+
+
+def get_user_tier(user: User | None) -> Tier:
+    """Return the subscription tier for a user."""
     if not user or not user.is_authenticated:
-        return False
+        return Tier.FREE
     try:
-        return bool(user.profile.is_premium)
+        tier_str = user.profile.subscription_tier
+        return Tier(tier_str) if tier_str in Tier._value2member_map_ else Tier.FREE
     except AttributeError:
         from apps.core.models import UserProfile
 
-        profile, _ = UserProfile.objects.get_or_create(user=user, defaults={"is_premium": False})
-        return bool(profile.is_premium)
+        profile, _ = UserProfile.objects.get_or_create(
+            user=user, defaults={"subscription_tier": "free"}
+        )
+        try:
+            return Tier(profile.subscription_tier)
+        except ValueError:
+            return Tier.FREE
 
 
 def user_has_feature(user: User | None, feature: Feature) -> bool:
-    """
-    Check if user has access to the given feature.
-
-    Basic: no premium-only features.
-    Premium: all features.
-    """
+    """Check if user has access to the given feature based on their tier."""
     if not user or not user.is_authenticated:
         return False
-
-    if not _FEATURE_IS_PREMIUM_ONLY.get(feature, True):
+    min_tier = FEATURE_MIN_TIER.get(feature)
+    if min_tier is None:
         return True
-
-    return is_premium_user(user)
-
-
-# Basic tier limit: max public bookings per calendar month
-PUBLIC_BOOKING_MONTHLY_LIMIT = 10
+    return TIER_RANK[get_user_tier(user)] >= TIER_RANK[min_tier]
 
 
-def get_public_booking_count_this_month(tutor: User | None) -> int:
-    """Count lessons created via public booking this month for the tutor."""
+def is_premium_user(user: User | None) -> bool:
+    """Backward-compat check: True for Pro and Business tiers."""
+    return get_user_tier(user) in (Tier.PRO, Tier.BUSINESS)
+
+
+def is_starter_or_above(user: User | None) -> bool:
+    """True for Starter, Pro, and Business tiers."""
+    return get_user_tier(user) != Tier.FREE
+
+
+def get_document_count_for_contract(contract_id: int) -> int:
+    """Count uploaded documents for a given contract/student."""
+    from apps.students.models import StudentDocument
+
+    return StudentDocument.objects.filter(student_id=contract_id).count()
+
+
+def document_limit_reached(user: User | None, contract_id: int) -> bool:
+    """True if Starter user has reached the document upload limit for this student."""
+    if not user_has_feature(user, Feature.FEATURE_DOCUMENTS):
+        return True
+    if get_user_tier(user) == Tier.STARTER:
+        return get_document_count_for_contract(contract_id) >= STARTER_DOCUMENT_LIMIT
+    return False
+
+
+def get_portal_booking_count_this_month(tutor: User | None) -> int:
+    """Count portal bookings created this calendar month for the tutor."""
     if not tutor or not tutor.is_authenticated:
         return 0
     from django.utils import timezone
 
-    from apps.lessons.models import Lesson
+    from apps.lessons.models import Session
 
     now = timezone.now()
-    return Lesson.objects.filter(
+    return Session.objects.filter(
         contract__user=tutor,
-        created_via="public_booking",
+        created_via="portal_booking",
         created_at__year=now.year,
         created_at__month=now.month,
     ).count()
 
 
-def public_booking_limit_reached(tutor: User | None) -> bool:
-    """True if Basic user has reached monthly public booking limit."""
-    if user_has_feature(tutor, Feature.FEATURE_PUBLIC_BOOKING_FULL):
-        return False  # Premium: no limit
-    return get_public_booking_count_this_month(tutor) >= PUBLIC_BOOKING_MONTHLY_LIMIT
+def portal_booking_limit_reached(tutor: User | None) -> bool:
+    """True if Starter user has reached the monthly portal booking limit."""
+    if not user_has_feature(tutor, Feature.FEATURE_PORTAL_BOOKING):
+        return True
+    if get_user_tier(tutor) == Tier.STARTER:
+        return get_portal_booking_count_this_month(tutor) >= STARTER_PORTAL_BOOKING_MONTHLY_LIMIT
+    return False
 
 
 def require_feature_json(user: User | None, feature: Feature, message: str | None = None):
-    """
-    For API views: returns (False, JsonResponse) if feature denied, else (True, None).
-    Caller should return the JsonResponse when False.
-    """
+    """For API views: returns (False, JsonResponse) if feature denied, else (True, None)."""
     from django.http import JsonResponse
     from django.utils.translation import gettext as _
 
     if user_has_feature(user, feature):
         return (True, None)
 
-    default_msg = _("This feature requires Premium. Upgrade to access.")
+    default_msg = _("This feature requires a higher subscription plan. Upgrade to access.")
     return (False, JsonResponse({"success": False, "message": message or default_msg}, status=403))

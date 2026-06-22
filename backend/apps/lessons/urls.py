@@ -4,7 +4,7 @@ URL configuration for Lesson app.
 
 from django.urls import path
 
-from apps.lessons import recurring_views, views, views_booking, views_public_booking
+from apps.lessons import recurring_views, views, views_booking
 
 app_name = "lessons"
 
@@ -65,46 +65,5 @@ urlpatterns = [
         "booking/<str:token>/week/",
         views_booking.student_booking_week_api,
         name="student_booking_week_api",
-    ),
-    # Public booking page (optional tutor token for multi-tenancy)
-    path(
-        "public-booking/",
-        views_public_booking.PublicBookingView.as_view(),
-        name="public_booking",
-    ),
-    path(
-        "public-booking/<str:tutor_token>/",
-        views_public_booking.PublicBookingView.as_view(),
-        name="public_booking_with_token",
-    ),
-    path(
-        "public-booking/<str:tutor_token>/week/",
-        views_public_booking.public_booking_week_api,
-        name="public_booking_week_api",
-    ),
-    path(
-        "public-booking/api/search-student/",
-        views_public_booking.search_student_api,
-        name="public_booking_search_student",
-    ),
-    path(
-        "public-booking/api/verify-student/",
-        views_public_booking.verify_student_api,
-        name="public_booking_verify_student",
-    ),
-    path(
-        "public-booking/api/create-student/",
-        views_public_booking.create_student_api,
-        name="public_booking_create_student",
-    ),
-    path(
-        "public-booking/api/book-lesson/",
-        views_public_booking.book_lesson_api,
-        name="public_booking_book_lesson",
-    ),
-    path(
-        "public-booking/api/reschedule-lesson/",
-        views_public_booking.reschedule_lesson_api,
-        name="public_booking_reschedule_lesson",
     ),
 ]

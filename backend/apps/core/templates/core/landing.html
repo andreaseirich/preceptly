@@ -99,10 +99,20 @@
   }
   .lp-pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    max-width: 600px;
     margin: 0 auto;
+  }
+  .lp-pricing-grid-4 {
+    max-width: 900px;
+  }
+  .lp-recommended {
+    font-size: 0.72em;
+    font-weight: 700;
+    color: #007bff;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
   }
   .lp-plan {
     background: var(--bg-secondary);
@@ -297,34 +307,59 @@
 <div class="lp-section">
   <h2>{% trans "Simple, transparent pricing" %}</h2>
   <p class="lp-sub">{% trans "Start for free. Upgrade when you need more." %}</p>
-  <div class="lp-pricing-grid">
+  <div class="lp-pricing-grid lp-pricing-grid-4">
     <div class="lp-plan">
       <h3>Basic</h3>
       <div class="lp-price">{% trans "Free" %}</div>
       <div class="lp-period">{% trans "No credit card required" %}</div>
       <ul>
         <li>{% trans "Scheduling & conflict detection" %}</li>
-        <li>{% trans "Recurring lessons & blocked times" %}</li>
-        <li>{% trans "Students, contracts & documents" %}</li>
+        <li>{% trans "Students & contracts" %}</li>
+        <li>{% trans "Invoices & PDF billing" %}</li>
+        <li>{% trans "Income overview" %}</li>
         <li>{% trans "Session notes & homework" %}</li>
-        <li>{% trans "Invoices & billing" %}</li>
-        <li>{% trans "Income overview & EÜR" %}</li>
+      </ul>
+      <a href="{% url 'core:register' %}" class="btn btn-secondary" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Get Started" %}</a>
+    </div>
+    <div class="lp-plan">
+      <h3>Starter</h3>
+      <div class="lp-price">4,99 €</div>
+      <div class="lp-period">{% trans "per month" %}</div>
+      <ul>
+        <li>{% trans "Recurring lessons & blocked times" %}</li>
+        <li>{% trans "Documents (3 per student)" %}</li>
+        <li>{% trans "Billing Pro" %}</li>
+        <li>{% trans "Student portal" %}</li>
+        <li>{% trans "Portal bookings (3/month)" %}</li>
       </ul>
       <a href="{% url 'core:register' %}" class="btn btn-secondary" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Get Started" %}</a>
     </div>
     <div class="lp-plan featured">
-      <h3>Premium</h3>
-      <div class="lp-price">{% trans "Early Access" %}</div>
-      <div class="lp-period">{% trans "Be the first — join the waitlist" %}</div>
+      <div class="lp-recommended">{% trans "Recommended" %}</div>
+      <h3>Pro</h3>
+      <div class="lp-price">9,99 €</div>
+      <div class="lp-period">{% trans "per month" %}</div>
       <ul>
-        <li>{% trans "Everything in Basic" %}</li>
-        <li>{% trans "Public booking page" %}</li>
-        <li>{% trans "Student & parent portal" %}</li>
+        <li>{% trans "Everything in Starter" %}</li>
+        <li>{% trans "Unlimited documents" %}</li>
+        <li>{% trans "EÜR tax export" %}</li>
+        <li>{% trans "Parent portal" %}</li>
         <li>{% trans "Integrated meeting rooms" %}</li>
         <li>{% trans "AI lesson plans" %}</li>
-        <li>{% trans "Priority support" %}</li>
+        <li>{% trans "Advanced reports" %}</li>
       </ul>
-      <a href="{% url 'core:register' %}" class="btn" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Join Waitlist" %}</a>
+      <a href="{% url 'core:register' %}" class="btn" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Get Started" %}</a>
+    </div>
+    <div class="lp-plan">
+      <h3>Business</h3>
+      <div class="lp-price">19,99 €</div>
+      <div class="lp-period">{% trans "per month" %}</div>
+      <ul>
+        <li>{% trans "Everything in Pro" %}</li>
+        <li>{% trans "Priority support" %}</li>
+        <li>{% trans "Early access to new features" %}</li>
+      </ul>
+      <a href="{% url 'core:register' %}" class="btn btn-secondary" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Get Started" %}</a>
     </div>
   </div>
 </div>

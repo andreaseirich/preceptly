@@ -15,8 +15,21 @@ class UserProfile(models.Model):
         related_name="profile",
         help_text=_("Associated Django user"),
     )
+    SUBSCRIPTION_TIER_CHOICES = [
+        ("free", "Free"),
+        ("starter", "Starter"),
+        ("pro", "Pro"),
+        ("business", "Business"),
+    ]
+    subscription_tier = models.CharField(
+        max_length=20,
+        choices=SUBSCRIPTION_TIER_CHOICES,
+        default="free",
+        db_index=True,
+        help_text=_("Current subscription tier (free/starter/pro/business)"),
+    )
     is_premium = models.BooleanField(
-        default=False, db_index=True, help_text=_("Does the user have premium access?")
+        default=False, db_index=True, help_text=_("True for Pro and Business tiers")
     )
     premium_since = models.DateTimeField(
         null=True, blank=True, help_text=_("Since when is the user a premium member?")
