@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Component detection
         uses: advanced-security/component-detection-dependency-submission-action@main

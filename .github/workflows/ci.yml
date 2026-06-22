@@ -29,7 +29,7 @@ jobs:
       ALLOWED_HOSTS: localhost,127.0.0.1
       DJANGO_SETTINGS_MODULE: tutorflow.settings
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Repo hygiene check
         run: bash scripts/repo_hygiene_check.sh
