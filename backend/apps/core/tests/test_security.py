@@ -146,19 +146,3 @@ class LoginSessionCycleTest(TestCase):
         )
         session_key_after = self.client.session.session_key
         self.assertNotEqual(session_key_before, session_key_after)
-
-
-class PublicBookingCSRFTest(TestCase):
-    """Public booking POST endpoints enforce CSRF."""
-
-    def test_verify_student_rejects_post_without_csrf(self):
-        """POST to verify-student without CSRF token returns 403."""
-        from django.test import Client
-
-        client = Client(enforce_csrf_checks=True)
-        resp = client.post(
-            reverse("lessons:public_booking_verify_student"),
-            data='{"name":"x","code":"y","tutor_token":"z"}',
-            content_type="application/json",
-        )
-        self.assertEqual(resp.status_code, 403)

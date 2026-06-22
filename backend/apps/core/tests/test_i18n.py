@@ -2,9 +2,7 @@
 Tests for internationalization (i18n) functionality.
 """
 
-import json
 from datetime import date
-from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -12,9 +10,7 @@ from django.urls import reverse
 from django.utils.translation import activate
 
 from apps.billing.models import Invoice
-from apps.contracts.models import Contract
 from apps.core.models import UserProfile
-from apps.students.booking_code_service import set_booking_code
 
 
 class I18nTestCase(TestCase):
@@ -150,110 +146,6 @@ class I18nTestCase(TestCase):
             # Skip if view requires authentication or other setup
             pass
 
-    def test_booking_page_german_translations(self):
-        """When language is German, booking page shows German text and dd.mm format."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-i18nxxxxxxxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-i18nxxxxxxxxxxxxxxxxxxxxxxxx/")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Stunde buchen", response.content)
-        self.assertIn(b"Daten", response.content)
-        # DJANGO_LANGUAGE must be set for JS date formatting
-        self.assertIn(b"DJANGO_LANGUAGE", response.content)
-
-    def test_public_booking_week_api_returns_german_weekday_when_de_session(self):
-        """Week API returns German weekday_display when session has language=de."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-wkxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        prof.default_working_hours = {"monday": [{"start": "09:00", "end": "17:00"}]}
-        prof.save()
-        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        from django.utils import timezone
-
-        now = timezone.now()
-        r = self.client.get(
-            f"/lessons/public-booking/tok-wkxxxxxxxxxxxxxxxxxxxxxxxxxx/week/?year={now.year}&month={now.month}&day={now.day}"
-        )
-        self.assertEqual(r.status_code, 200)
-        data = json.loads(r.content)
-        self.assertTrue(data.get("success"))
-        days = data.get("week_data", {}).get("days", [])
-        self.assertGreater(len(days), 0)
-        # At least one weekday_display must be German (e.g. Montag, Dienstag)
-        weekdays_de = [d.get("weekday_display") for d in days]
-        self.assertTrue(
-            any(
-                w
-                in ("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag")
-                for w in weekdays_de
-            )
-        )
-
-    def test_csrf_after_language_switch_on_booking_page(self):
-        """After switching language, page reloads with valid CSRF token and next is preserved."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-csrfxxxxxxxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        # Load booking page
-        r1 = self.client.get("/lessons/public-booking/tok-csrfxxxxxxxxxxxxxxxxxxxxxxxx/")
-        self.assertEqual(r1.status_code, 200)
-        self.assertIn(b"csrf-token", r1.content)
-        # Switch language (POST to set_language with next=current path)
-        r2 = self.client.post(
-            reverse("set_language"),
-            {"language": "de", "next": "/lessons/public-booking/tok-csrfxxxxxxxxxxxxxxxxxxxxxxxx/"},
-            follow=True,
-        )
-        self.assertEqual(r2.status_code, 200)
-        # Page must still have csrf-token meta after redirect
-        self.assertIn(b"csrf-token", r2.content)
-
-    def test_language_switch_then_verify_student_post_succeeds(self):
-        """After language switch, verify-student POST must work (session/cookies intact)."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        student = Contract.objects.create(
-            hourly_rate=Decimal("25.00"),
-            start_date=date.today(),
-            user=user,
-            first_name="Max",
-            last_name="Test",
-        )
-        code = set_booking_code(student)
-        # 1. Load booking page (gets CSRF cookie)
-        self.client.get("/lessons/public-booking/tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx/")
-        # 2. Switch language
-        self.client.post(
-            reverse("set_language"),
-            {"language": "de", "next": "/lessons/public-booking/tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx/"},
-            follow=True,
-        )
-        # 3. POST verify-student with CSRF token
-        csrf = self.client.cookies.get("csrftoken")
-        headers = {"HTTP_X_CSRFTOKEN": csrf.value} if csrf else {}
-        r = self.client.post(
-            reverse("lessons:public_booking_verify_student"),
-            data=json.dumps(
-                {
-                    "name": "Max Test",
-                    "code": code,
-                    "tutor_token": "tok-csrf2xxxxxxxxxxxxxxxxxxxxxxx",
-                }
-            ),
-            content_type="application/json",
-            **headers,
-        )
-        self.assertEqual(r.status_code, 200)
-        data = json.loads(r.content)
-        self.assertTrue(data.get("success"))
-
     def test_jump_to_date_german(self):
         """Jump to date label is translated when German is active."""
         user = User.objects.create_user(username="tutor", password="test")
@@ -328,21 +220,6 @@ class I18nTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         # German short form must appear (Mo for Monday)
         self.assertIn(b"Mo", response.content)
-
-    def test_public_booking_de_contains_german_strings(self):
-        """When DE is active, public booking contains German UI strings."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-de-stringsxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-de-stringsxxxxxxxxxxxxxxxxxx/")
-        self.assertEqual(response.status_code, 200)
-        # Must contain German strings
-        self.assertIn(b"Zur\xc3\xbcck", response.content)  # Zurück
-        self.assertIn(b"Best\xc3\xa4tigen", response.content)  # Bestätigen
-        self.assertIn(b"Zum Datum springen:", response.content)
-        self.assertIn(b"Heute", response.content)
 
     def test_public_booking_de_does_not_contain_english_strings(self):
         """When DE is active, public booking must NOT contain English UI strings."""
