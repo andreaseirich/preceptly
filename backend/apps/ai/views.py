@@ -60,7 +60,7 @@ def generate_lesson_plan(request, lesson_id):
     # Generate lesson plan
     try:
         service = LessonPlanService()
-        lesson_plan = service.generate_lesson_plan(session)
+        lesson_plan = service.generate_lesson_plan(session, user=request.user)
         messages.success(
             request,
             _("Lesson plan successfully generated! Model: {model}").format(

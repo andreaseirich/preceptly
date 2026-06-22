@@ -198,6 +198,9 @@ class LLMClient:
 
         raise LLMClientError(_("Mock mode is active, but no mock samples are available."))
 
+    def _is_anthropic(self) -> bool:
+        return "anthropic.com" in self.api_base_url
+
     def _make_api_request(
         self,
         prompt: str,
@@ -205,8 +208,81 @@ class LLMClient:
         max_tokens: int = 1000,
         temperature: float = 0.7,
     ) -> str:
-        """
-        Führt einen einzelnen API-Request durch.
+        if self._is_anthropic():
+            return self._make_anthropic_request(prompt, system_prompt, max_tokens, temperature)
+        return self._make_openai_request(prompt, system_prompt, max_tokens, temperature)
+
+    def _make_anthropic_request(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        max_tokens: int = 1000,
+        temperature: float = 0.7,
+    ) -> str:
+        """Anthropic Messages API (/v1/messages)."""
+        try:
+            messages = [{"role": "user", "content": prompt}]
+            payload: dict = {
+                "model": self.model_name,
+                "max_tokens": max_tokens,
+                "messages": messages,
+            }
+            if system_prompt:
+                payload["system"] = system_prompt
+
+            headers = {
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+            }
+
+            logger.debug("Anthropic API Request: model=%s", self.model_name)
+
+            response = requests.post(
+                f"{self.api_base_url}/v1/messages",
+                json=payload,
+                headers=headers,
+                timeout=self.timeout,
+            )
+
+            if response.status_code == 429:
+                raise LLMClientError(
+                    _("API rate limit exceeded. Please try again in a few minutes.")
+                )
+            elif response.status_code == 401:
+                raise LLMClientError(
+                    _("Invalid API key. Please check your LLM_API_KEY configuration.")
+                )
+            elif response.status_code >= 400:
+                logger.error("Anthropic API error status=%s", response.status_code)
+                raise LLMClientError(_("The AI service is currently unavailable."))
+
+            result = response.json()
+            content_blocks = result.get("content", [])
+            if content_blocks and isinstance(content_blocks, list):
+                text = content_blocks[0].get("text")
+                if isinstance(text, str) and text.strip():
+                    return text
+            raise LLMClientError(_("Unexpected API response format"))
+
+        except requests.exceptions.Timeout:
+            logger.error("Anthropic API request timed out after %ss", self.timeout)
+            raise LLMClientError(_("AI service unavailable.")) from None
+        except requests.exceptions.RequestException:
+            logger.error("Anthropic request failed", exc_info=True)
+            raise LLMClientError(_("AI service unavailable.")) from None
+        except (KeyError, ValueError):
+            logger.error("Error parsing Anthropic response", exc_info=True)
+            raise LLMClientError(_("Error parsing API response.")) from None
+
+    def _make_openai_request(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        max_tokens: int = 1000,
+        temperature: float = 0.7,
+    ) -> str:
+        """OpenAI-kompatible API (/chat/completions).
 
         Args:
             prompt: Der Haupt-Prompt

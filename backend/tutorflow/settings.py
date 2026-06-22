@@ -270,9 +270,9 @@ if not DEBUG:
 # AI/LLM Configuration
 # Diese Werte sollten über Umgebungsvariablen gesetzt werden
 # Beispiel: export LLM_API_KEY="your-key-here"
-LLM_API_BASE_URL = os.environ.get("LLM_API_BASE_URL", "https://api.openai.com/v1")
+LLM_API_BASE_URL = os.environ.get("LLM_API_BASE_URL", "https://api.anthropic.com")
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
-LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "gpt-3.5-turbo")
+LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "claude-haiku-4-5-20251001")
 LLM_TIMEOUT_SECONDS = int(os.environ.get("LLM_TIMEOUT_SECONDS", "30"))
 
 # Logging configuration

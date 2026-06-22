@@ -32,6 +32,21 @@
             <p>{% trans "Preceptly is hosted on Railway (Railway Corp., 340 S Lemon Ave #4133, Walnut, CA 91789, USA). All application data and the database are processed on Railway servers." %}</p>
             <p>{% trans "The legal basis is our legitimate interest in reliable and secure operation of the service (Art. 6 para. 1 lit. f GDPR). Data transfers to the USA are based on the standard contractual clauses of the EU Commission. Further information:" %} <a href="https://railway.app/legal/privacy" target="_blank" rel="noopener noreferrer">railway.app/legal/privacy</a></p>
         </div>
+        <div class="legal-section">
+            <h2>{% trans "5. Video meetings (Meeting Rooms)" %}</h2>
+            <p>{% trans "The Pro plan includes an integrated video meeting function. Camera and microphone access is optional and only activated by the user's explicit action in the browser." %}</p>
+            <p>{% trans "Video and audio data is transmitted directly between participants (peer-to-peer via WebRTC). No audio or video is stored on Preceptly servers." %}</p>
+            <p>{% blocktrans %}To establish the connection, IP addresses are transmitted to STUN servers (Google: stun.l.google.com). Google's privacy policy applies: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.{% endblocktrans %}</p>
+            <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)." %}</p>
+        </div>
+        <div class="legal-section">
+            <h2>{% trans "6. AI-assisted lesson plans (Anthropic Claude)" %}</h2>
+            <p>{% trans "The Pro plan includes AI-generated lesson plan suggestions. When this feature is used, anonymised lesson data (subject, grade level, lesson date and duration) is transmitted to the Anthropic API." %}</p>
+            <p>{% trans "Personally identifiable information (name, email, telephone number, address, notes) is automatically filtered and removed before transmission. The data sent to Anthropic contains no student identifiers." %}</p>
+            <p>{% trans "AI provider: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA 94104, USA. Data transfers to the USA are based on the standard contractual clauses of the EU Commission." %}</p>
+            <p>{% trans "Anthropic does not use API data to train its models. Further information:" %} <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/legal/privacy</a></p>
+            <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)." %}</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

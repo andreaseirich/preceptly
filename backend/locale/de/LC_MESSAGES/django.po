@@ -6328,3 +6328,30 @@ msgstr "Ich stimme der Ausführung des Vertrages vor Ablauf der Widerrufsfrist a
 
 msgid "Please confirm the withdrawal notice to proceed."
 msgstr "Bitte bestätige die Widerrufsbelehrung, um fortzufahren."
+
+msgid "5. Video meetings (Meeting Rooms)"
+msgstr "5. Video-Meetings (Meeting Rooms)"
+
+msgid "The Pro plan includes an integrated video meeting function. Camera and microphone access is optional and only activated by the user's explicit action in the browser."
+msgstr "Der Pro-Tarif enthält eine integrierte Video-Meeting-Funktion. Kamera und Mikrofon werden optional und ausschließlich durch ausdrückliche Nutzeraktion im Browser aktiviert."
+
+msgid "Video and audio data is transmitted directly between participants (peer-to-peer via WebRTC). No audio or video is stored on Preceptly servers."
+msgstr "Video- und Audiodaten werden direkt zwischen den Teilnehmern übertragen (Peer-to-Peer via WebRTC). Auf Preceptly-Servern werden keine Audio- oder Videodaten gespeichert."
+
+msgid "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)."
+msgstr "Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)."
+
+msgid "6. AI-assisted lesson plans (Anthropic Claude)"
+msgstr "6. KI-gestützte Stundenpläne (Anthropic Claude)"
+
+msgid "The Pro plan includes AI-generated lesson plan suggestions. When this feature is used, anonymised lesson data (subject, grade level, lesson date and duration) is transmitted to the Anthropic API."
+msgstr "Der Pro-Tarif enthält KI-generierte Unterrichtsplanvorschläge. Bei Nutzung dieser Funktion werden anonymisierte Stundeninformationen (Fach, Klassenstufe, Datum und Dauer der Stunde) an die Anthropic-API übertragen."
+
+msgid "Personally identifiable information (name, email, telephone number, address, notes) is automatically filtered and removed before transmission. The data sent to Anthropic contains no student identifiers."
+msgstr "Personenbezogene Daten (Name, E-Mail, Telefonnummer, Adresse, Notizen) werden vor der Übertragung automatisch gefiltert und entfernt. Die an Anthropic gesendeten Daten enthalten keine Schülerkennzeichen."
+
+msgid "AI provider: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA 94104, USA. Data transfers to the USA are based on the standard contractual clauses of the EU Commission."
+msgstr "KI-Anbieter: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA 94104, USA. Datenübertragungen in die USA stützen sich auf die Standardvertragsklauseln der EU-Kommission."
+
+msgid "Anthropic does not use API data to train its models. Further information:"
+msgstr "Anthropic verwendet API-Daten nicht zum Training seiner Modelle. Weitere Informationen:"
