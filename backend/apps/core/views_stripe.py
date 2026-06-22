@@ -119,6 +119,10 @@ class SubscriptionCheckoutView(View):
     http_method_names = ["post"]
 
     def post(self, request):
+        if not request.POST.get("withdrawal_consent"):
+            messages.error(request, _("Please confirm the withdrawal notice to proceed."))
+            return redirect(reverse("core:settings"))
+
         if not _stripe_enabled():
             return JsonResponse(
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
@@ -280,6 +284,10 @@ class StripeCheckoutView(View):
     http_method_names = ["post"]
 
     def post(self, request):
+        if not request.POST.get("withdrawal_consent"):
+            messages.error(request, _("Please confirm the withdrawal notice to proceed."))
+            return redirect(reverse("core:settings"))
+
         if not _stripe_premium_checkout_enabled():
             return JsonResponse(
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
