@@ -220,7 +220,7 @@
     </div>
     <div class="lp-card">
       <div class="lp-icon">👥</div>
-      <h3>Schüler verwalten</h3>
+      <h3>{% trans "Manage Students" %}</h3>
       <p>{% trans "Manage student profiles, lesson rates, contract periods and monthly quotas in one place." %}</p>
     </div>
     <div class="lp-card">
@@ -267,16 +267,28 @@
     </div>
     <div class="lp-plan featured">
       <h3>Premium</h3>
-      <div class="lp-price">{% trans "Coming soon" %}</div>
-      <div class="lp-period">&nbsp;</div>
+      <div class="lp-price">{% trans "Early Access" %}</div>
+      <div class="lp-period">{% trans "Be the first — join the waitlist" %}</div>
       <ul>
         <li>{% trans "Everything in Basic" %}</li>
         <li>{% trans "Public booking page" %}</li>
         <li>{% trans "AI lesson plans" %}</li>
         <li>{% trans "Priority support" %}</li>
       </ul>
-      <a href="{% url 'core:register' %}" class="btn" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Sign Up for Free" %}</a>
+      <a href="{% url 'core:register' %}" class="btn" style="width:100%;box-sizing:border-box;text-align:center;">{% trans "Join Waitlist" %}</a>
     </div>
+  </div>
+</div>
+
+<!-- SOCIAL PROOF -->
+<div class="lp-section" style="border-bottom: 1px solid var(--border-color);">
+  <h2>{% trans "Built by a tutor, for tutors" %}</h2>
+  <p class="lp-sub">{% trans "Preceptly grew out of real frustration with spreadsheets and calendar chaos." %}</p>
+  <div class="lp-card">
+    <blockquote style="margin: 0;">
+      <p>"I used to spend Sunday evenings doing admin. Now it takes 10 minutes."</p>
+      <footer style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">— {% trans "Beta tester, Berlin" %}</footer>
+    </blockquote>
   </div>
 </div>
 
