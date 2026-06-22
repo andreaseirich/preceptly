@@ -30,7 +30,7 @@ class LLMClientTest(TestCase):
         # Mock API-Response
         mock_response = Mock()
         mock_response.json.return_value = {
-            "choices": [{"message": {"content": "Test generierter Text"}}]
+            "content": [{"type": "text", "text": "Test generierter Text"}]
         }
         mock_response.status_code = 200
         mock_response.raise_for_status = Mock()

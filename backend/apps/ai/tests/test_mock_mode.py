@@ -36,7 +36,7 @@ class MockLLMModeTest(TestCase):
     def test_real_mode_uses_requests(self, mock_post):
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"choices": [{"message": {"content": "Real call"}}]}
+        mock_response.json.return_value = {"content": [{"type": "text", "text": "Real call"}]}
         mock_response.raise_for_status = Mock()
         mock_post.return_value = mock_response
 
