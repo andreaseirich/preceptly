@@ -5827,15 +5827,11 @@ msgstr "Unsere Mission"
 #: templates/legal/about.html:20
 msgid ""
 "Preceptly helps tutors manage lessons, contracts and billing efficiently."
-msgstr ""
-"Preceptly hilft Nachhilfelehrern, Unterricht, Verträge und Abrechnung "
-"effizient zu verwalten."
+msgstr "Preceptly hilft Nachhilfelehrern, Unterrichtsstunden, Verträge und Abrechnung effizient zu verwalten."
 
 #: templates/legal/about.html:25
 msgid "Preceptly is actively operated and developed for productive use."
 msgstr "Preceptly wird aktiv betrieben und für den produktiven Einsatz weiterentwickelt."
-"Preceptly wird aktiv betrieben und fur den produktiven Einsatz "
-"weiterentwickelt."
 
 #: templates/legal/imprint.html:4 templates/legal/imprint.html:9
 #: templates/partials/footer.html:50
@@ -6161,3 +6157,4 @@ msgstr "Deaktivieren"
 
 msgid "Activate"
 msgstr "Aktivieren"
+
