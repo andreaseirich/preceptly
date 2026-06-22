@@ -143,7 +143,7 @@ class SubscriptionPortalTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
         self.profile = UserProfile.objects.create(
-            user=self.user, is_premium=True, stripe_customer_id="cus_fake"
+            user=self.user, is_premium=True, subscription_tier="pro", stripe_customer_id="cus_fake"
         )
 
     def test_portal_requires_login(self):
@@ -709,6 +709,8 @@ class StripeWebhookTest(TestCase):
 
     def test_subscription_updated_past_due_sets_premium_false(self):
         self.profile.is_premium = True
+
+        self.profile.subscription_tier = "pro"
         self.profile.stripe_subscription_id = "sub_pd"
         self.profile.premium_source = "stripe"
         self.profile.save()
@@ -742,6 +744,8 @@ class StripeWebhookTest(TestCase):
 
     def test_subscription_deleted_sets_premium_false(self):
         self.profile.is_premium = True
+
+        self.profile.subscription_tier = "pro"
         self.profile.stripe_subscription_id = "sub_fake"
         self.profile.premium_source = "stripe"
         self.profile.save()

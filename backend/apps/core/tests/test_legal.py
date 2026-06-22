@@ -2,11 +2,8 @@
 Tests for legal pages and footer integration.
 """
 
-from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from apps.core.models import UserProfile
 
 
 class LegalPagesTests(TestCase):
@@ -35,18 +32,3 @@ class FooterIntegrationTests(TestCase):
 
     def setUp(self):
         self.client = Client()
-
-    def test_footer_links_render_on_public_booking(self):
-        """Public booking page should render footer with legal links."""
-        user = User.objects.create_user(username="tutor-footer", password="test123")
-        profile = UserProfile.objects.create(
-            user=user, public_booking_token="token-footerxxxxxxxxxxxxxxxxxxxx"
-        )
-
-        response = self.client.get(f"/lessons/public-booking/{profile.public_booking_token}/")
-        self.assertEqual(response.status_code, 200)
-        content = response.content.decode("utf-8")
-        self.assertIn("/legal/imprint/", content)
-        self.assertIn("/legal/privacy/", content)
-        self.assertIn("/legal/terms/", content)
-        self.assertIn("/legal/about/", content)

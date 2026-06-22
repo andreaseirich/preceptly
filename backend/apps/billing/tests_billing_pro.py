@@ -21,7 +21,7 @@ class BillingProTest(TestCase):
         self.basic_user = User.objects.create_user(username="basic", password="test")
         UserProfile.objects.create(user=self.basic_user, is_premium=False)
         self.premium_user = User.objects.create_user(username="premium", password="test")
-        UserProfile.objects.create(user=self.premium_user, is_premium=True)
+        UserProfile.objects.create(user=self.premium_user, is_premium=True, subscription_tier="pro")
 
         for user in (self.basic_user, self.premium_user):
             contract = Contract.objects.create(

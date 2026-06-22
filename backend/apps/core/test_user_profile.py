@@ -18,7 +18,7 @@ class UserProfileModelTest(TestCase):
         user = User.objects.create_user(
             username="testuser", email="test@example.com", password="testpass123"
         )
-        profile = UserProfile.objects.create(user=user, is_premium=True)
+        profile = UserProfile.objects.create(user=user, is_premium=True, subscription_tier="pro")
         self.assertEqual(profile.user, user)
         self.assertTrue(profile.is_premium)
         self.assertIn("Premium", str(profile))

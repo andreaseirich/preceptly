@@ -31,7 +31,7 @@ class PremiumGatingTest(TestCase):
             username="premiumuser", email="premium@example.com", password="testpass123"
         )
         # Premium-User erstellen
-        UserProfile.objects.create(user=self.premium_user, is_premium=True)
+        UserProfile.objects.create(user=self.premium_user, is_premium=True, subscription_tier="pro")
 
     def test_is_premium_user_false(self):
         """Test: Nicht-Premium-User wird korrekt erkannt."""
