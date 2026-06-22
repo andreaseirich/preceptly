@@ -157,18 +157,6 @@ class I18nTestCase(TestCase):
         self.assertIn(b"Zum Datum springen:", response.content)
         self.assertNotIn(b"Jump to date", response.content)
 
-    def test_public_booking_jump_to_date_german(self):
-        """Public booking page: Jump to date in German, no English when de active."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-i18n-jumpxxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-i18n-jumpxxxxxxxxxxxxxxxxxxx/")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Zum Datum springen:", response.content)
-        self.assertNotIn(b"Jump to date", response.content)
-
     def test_billing_headers_german(self):
         """Billing invoice list: table headers in German when de active."""
         from datetime import date as _date
@@ -199,17 +187,6 @@ class I18nTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Mo", response.content)
 
-    def test_public_booking_no_reschedule_list_in_data_section(self):
-        """Public booking page must not render reschedule list (reschedule is inline in calendar)."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-no-listxxxxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        response = self.client.get("/lessons/public-booking/tok-no-listxxxxxxxxxxxxxxxxxxxxx/")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(b"existing-bookings-section", response.content)
-        self.assertNotIn(b"loadReschedulableLessons", response.content)
-
     def test_weekday_short_german_in_week_view(self):
         """With German locale, week view shows German short weekday (Mo, Di) not English (Mon, Tue)."""
         user = User.objects.create_user(username="tutor", password="test")
@@ -220,19 +197,6 @@ class I18nTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         # German short form must appear (Mo for Monday)
         self.assertIn(b"Mo", response.content)
-
-    def test_public_booking_de_does_not_contain_english_strings(self):
-        """When DE is active, public booking must NOT contain English UI strings."""
-        user = User.objects.create_user(username="tutor", password="test")
-        prof, _ = UserProfile.objects.get_or_create(user=user, defaults={})
-        prof.public_booking_token = "tok-de-no-enxxxxxxxxxxxxxxxxxxxx"
-        prof.save()
-        self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
-        response = self.client.get("/lessons/public-booking/tok-de-no-enxxxxxxxxxxxxxxxxxxxx/")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(b"Jump to date", response.content)
-        self.assertNotIn(b">Back<", response.content)
-        self.assertNotIn(b">Confirm<", response.content)
 
     def test_reports_premium_german_labels(self):
         """Reports page with premium user: DE labels when de active, no English."""

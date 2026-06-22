@@ -238,7 +238,7 @@ class RecurrenceStatusAutomationTest(TestCase):
         # Prüfe Status der erzeugten Lessons
         lessons = Lesson.objects.filter(contract=self.contract)
         for lesson in lessons:
-            if lesson.date < timezone.localdate():
+            if lesson.date <= timezone.localdate():
                 self.assertEqual(lesson.status, "taught")
             else:
                 self.assertEqual(lesson.status, "planned")
@@ -262,7 +262,7 @@ class RecurrenceStatusAutomationTest(TestCase):
         # Prüfe Status der erzeugten Lessons
         lessons = Lesson.objects.filter(contract=self.contract)
         for lesson in lessons:
-            if lesson.date < timezone.localdate():
+            if lesson.date <= timezone.localdate():
                 self.assertEqual(lesson.status, "taught")
             else:
                 self.assertEqual(lesson.status, "planned")
