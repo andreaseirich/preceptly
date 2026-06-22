@@ -6160,3 +6160,46 @@ msgstr "Aktivieren"
 
 msgid "Operated by Andreas Eirich · Birkenweg 7, 49577 Ankum, Germany"
 msgstr "Betrieben von Andreas Eirich · Birkenweg 7, 49577 Ankum, Deutschland"
+
+msgid "Why Preceptly?"
+msgstr "Warum Preceptly?"
+
+msgid "As a freelance tutor, keeping track of lessons, contracts, and invoices across spreadsheets and paper notes was a constant source of friction."
+msgstr "Als freiberuflicher Nachhilfelehrer war es mühsam, Unterrichtsstunden, Verträge und Rechnungen über Tabellen und Notizen im Überblick zu behalten."
+
+msgid "Existing tools were either too complex, too expensive, or simply not built with tutors in mind — so Preceptly was created to fill that gap."
+msgstr "Bestehende Tools waren entweder zu komplex, zu teuer oder schlicht nicht für Nachhilfelehrer gedacht – Preceptly wurde entwickelt, um diese Lücke zu schließen."
+
+msgid "The goal was a focused, no-nonsense application that handles the administrative side of tutoring so that educators can concentrate on what matters: teaching."
+msgstr "Das Ziel war eine fokussierte, unkomplizierte Anwendung, die den Verwaltungsaufwand beim Nachhilfeunterricht übernimmt, damit Lehrkräfte sich auf das Wesentliche konzentrieren können: das Unterrichten."
+
+msgid "Preceptly is the tool that was missing when it was needed most."
+msgstr "Preceptly ist das Werkzeug, das damals gefehlt hat."
+
+msgid "The developer"
+msgstr "Der Entwickler"
+
+msgid "Preceptly is built and maintained by Andreas Eirich, a freelance software developer based in Ankum, Lower Saxony, Germany."
+msgstr "Preceptly wird von Andreas Eirich entwickelt und betrieben, einem freiberuflichen Softwareentwickler aus Ankum, Niedersachsen."
+
+msgid "Andreas has been working with Python and Django for several years, building web applications with a focus on clarity, reliability, and practical value."
+msgstr "Andreas arbeitet seit mehreren Jahren mit Python und Django und entwickelt Webanwendungen mit Fokus auf Klarheit, Zuverlässigkeit und praktischem Nutzen."
+
+msgid "Preceptly is a tool he would have used himself — and that personal motivation shapes every design and product decision behind it."
+msgstr "Preceptly ist ein Tool, das er selbst gebraucht hätte – und diese persönliche Motivation prägt jede Design- und Produktentscheidung dahinter."
+
+msgid "Technology"
+msgstr "Technologie"
+
+msgid "Preceptly is built on Django 5 and Python 3.12, backed by a PostgreSQL database and hosted on Railway."
+msgstr "Preceptly basiert auf Django 5 und Python 3.12, nutzt eine PostgreSQL-Datenbank und wird auf Railway gehostet."
+
+msgid "All data is stored on servers located in Germany and processed in accordance with the General Data Protection Regulation (GDPR / DSGVO)."
+msgstr "Alle Daten werden auf Servern in Deutschland gespeichert und gemäß der Datenschutz-Grundverordnung (DSGVO) verarbeitet."
+
+msgid "The technology stack was chosen for its maturity, security track record, and long-term maintainability."
+msgstr "Der Technologie-Stack wurde wegen seiner Reife, bewährten Sicherheit und langfristigen Wartbarkeit gewählt."
+
+msgid "Preceptly is in active development and used by early testers. New features are released regularly."
+msgstr "Preceptly befindet sich in aktiver Entwicklung und wird bereits von frühen Testern genutzt. Neue Funktionen werden regelmäßig veröffentlicht."
+
