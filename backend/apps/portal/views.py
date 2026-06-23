@@ -418,9 +418,6 @@ class PortalActivateView(View):
         link.invite_token = uuid.uuid4().hex
         link.invite_token_created_at = None
         link.save()
-        from apps.portal.email_service import send_activation_notification
-
-        send_activation_notification(portal_user, link.contract)
         # Session-Fixation-Schutz: Session-Key vor dem Setzen rotieren
         request.session.cycle_key()
         request.session["portal_user_id"] = portal_user.pk
@@ -555,6 +552,37 @@ def _get_active_contract(student):
     return student
 
 
+def _get_busy_slots(tutor, date):
+    from apps.blocked_times.models import BlockedTime
+    from apps.lessons.models import Session as _Session
+
+    busy = []
+    sessions = _Session.objects.filter(
+        contract__user=tutor,
+        date=date,
+        status__in=["planned", "taught", "paid"],
+    )
+    for s in sessions:
+        s_start = _dt.datetime.combine(date, s.start_time)
+        s_end = s_start + _dt.timedelta(minutes=s.duration_minutes)
+        busy.append((s.start_time, s_end.time()))
+    blocked_times = BlockedTime.objects.filter(
+        user=tutor,
+        start_datetime__date__lte=date,
+        end_datetime__date__gte=date,
+    )
+    for bt in blocked_times:
+        clamped_start = max(
+            bt.start_datetime.replace(tzinfo=None), _dt.datetime.combine(date, _dt.time(0, 0))
+        )
+        clamped_end = min(
+            bt.end_datetime.replace(tzinfo=None), _dt.datetime.combine(date, _dt.time(23, 59))
+        )
+        if clamped_start < clamped_end:
+            busy.append((clamped_start.time(), clamped_end.time()))
+    return busy
+
+
 def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
     """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück."""
     from apps.blocked_times.models import BlockedTime
@@ -631,7 +659,9 @@ class PortalAvailabilityView(View):
             return JsonResponse({"error": "Ungültiges Datum"}, status=400)
 
         slots = _get_available_slots(student.user, date, duration_minutes=duration)
-        return JsonResponse({"slots": slots, "duration_minutes": duration})
+        busy = _get_busy_slots(student.user, date)
+        busy_data = [{"start": s.strftime("%H:%M"), "end": e.strftime("%H:%M")} for s, e in busy]
+        return JsonResponse({"slots": slots, "busy_slots": busy_data, "duration_minutes": duration})
 
 
 class PortalBookingView(View):
@@ -733,7 +763,7 @@ class PortalBookingView(View):
                     error="Diese Zeit ist durch eine Blockzeit belegt.",
                 )
 
-        session = _Session.objects.create(
+        _Session.objects.create(
             contract=contract,
             date=session_date,
             start_time=session_time,
@@ -742,9 +772,6 @@ class PortalBookingView(View):
             notes=topic or None,
             created_via="portal_booking",
         )
-        from apps.portal.email_service import send_booking_notification_portal
-
-        send_booking_notification_portal(session, student.user)
         return self._render(
             request,
             student,
@@ -1314,6 +1341,60 @@ class PortalCalendarView(View):
         for lesson in lessons:
             lessons_by_date.setdefault(lesson.date, []).append(lesson)
 
+        # Alle belegten Zeiten des Tutors fuer den Monat (anonymisiert)
+        import datetime as _datetime_mod
+
+        from apps.blocked_times.models import BlockedTime as _BT
+        from apps.lessons.models import Session as _AllSessions
+
+        tutor = student.user
+        all_sessions = _AllSessions.objects.filter(
+            contract__user=tutor,
+            date__gte=start_date,
+            date__lt=end_date,
+            status__in=["planned", "taught", "paid"],
+        )
+        busy_by_date = {}
+        for s in all_sessions:
+            entry = {
+                "start": s.start_time.strftime("%H:%M"),
+                "end": (
+                    (
+                        _datetime_mod.datetime.combine(s.date, s.start_time)
+                        + _datetime_mod.timedelta(minutes=s.duration_minutes)
+                    ).time()
+                ).strftime("%H:%M"),
+                "is_own": s.contract == student,
+            }
+            busy_by_date.setdefault(s.date, []).append(entry)
+        start_aware = __import__("django.utils.timezone", fromlist=["make_aware"]).make_aware(
+            _datetime_mod.datetime.combine(start_date, _datetime_mod.time.min)
+        )
+        end_aware = __import__("django.utils.timezone", fromlist=["make_aware"]).make_aware(
+            _datetime_mod.datetime.combine(end_date, _datetime_mod.time.min)
+        )
+        blocked = _BT.objects.filter(
+            user=tutor, start_datetime__lt=end_aware, end_datetime__gt=start_aware
+        )
+        for bt in blocked:
+            bt_date = bt.start_datetime.date()
+            while (
+                bt_date < bt.end_datetime.date() + _datetime_mod.timedelta(days=1)
+                and bt_date < end_date
+            ):
+                if bt_date >= start_date:
+                    entry = {
+                        "start": bt.start_datetime.strftime("%H:%M")
+                        if bt_date == bt.start_datetime.date()
+                        else "00:00",
+                        "end": bt.end_datetime.strftime("%H:%M")
+                        if bt_date == bt.end_datetime.date()
+                        else "23:59",
+                        "is_own": False,
+                    }
+                    busy_by_date.setdefault(bt_date, []).append(entry)
+                bt_date += _datetime_mod.timedelta(days=1)
+
         cal = _monthcalendar(year, month)
         today = timezone.localdate()
         weeks = []
@@ -1330,6 +1411,7 @@ class PortalCalendarView(View):
                             "is_today": d == today,
                             "is_past": d < today,
                             "lessons": lessons_by_date.get(d, []),
+                            "busy": busy_by_date.get(d, []),
                         }
                     )
             weeks.append(week_days)
@@ -1375,6 +1457,7 @@ class PortalCalendarView(View):
                 "Samstag",
                 "Sonntag",
             ],
+            "busy_by_date": busy_by_date,
         }
 
         if portal_user.role == "parent":
@@ -1445,6 +1528,68 @@ class PortalWeekView(View):
         ]
         weekday_names_short = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
         today = timezone.localdate()
+        import datetime as _dt_mod
+
+        from django.utils.timezone import make_aware as _make_aware2
+
+        from apps.blocked_times.models import BlockedTime as _BT2
+        from apps.lessons.models import Session as _AllSess2
+
+        tutor = student.user
+        all_sessions_week = _AllSess2.objects.filter(
+            contract__user=tutor,
+            date__gte=week_start,
+            date__lte=week_end,
+            status__in=["planned", "taught", "paid"],
+        )
+        busy_by_date_week = {}
+        for _s in all_sessions_week:
+            _entry = {
+                "start": _s.start_time.strftime("%H:%M"),
+                "end": (
+                    (
+                        _dt_mod.datetime.combine(_s.date, _s.start_time)
+                        + _dt_mod.timedelta(minutes=_s.duration_minutes)
+                    ).time()
+                ).strftime("%H:%M"),
+                "start_hour": _s.start_time.hour,
+                "start_min": _s.start_time.minute,
+                "duration": _s.duration_minutes,
+                "is_own": _s.contract == student,
+            }
+            busy_by_date_week.setdefault(_s.date, []).append(_entry)
+        _w_start_aware = _make_aware2(_dt_mod.datetime.combine(week_start, _dt_mod.time.min))
+        _w_end_aware = _make_aware2(
+            _dt_mod.datetime.combine(week_end + _dt_mod.timedelta(days=1), _dt_mod.time.min)
+        )
+        _blocked_week = _BT2.objects.filter(
+            user=tutor, start_datetime__lt=_w_end_aware, end_datetime__gt=_w_start_aware
+        )
+        for _bt in _blocked_week:
+            _bt_date = _bt.start_datetime.date()
+            while _bt_date <= _bt.end_datetime.date() and _bt_date <= week_end:
+                if _bt_date >= week_start:
+                    _bt_start_t = (
+                        _bt.start_datetime
+                        if _bt_date == _bt.start_datetime.date()
+                        else _dt_mod.datetime.combine(_bt_date, _dt_mod.time.min)
+                    )
+                    _bt_end_t = (
+                        _bt.end_datetime
+                        if _bt_date == _bt.end_datetime.date()
+                        else _dt_mod.datetime.combine(_bt_date, _dt_mod.time(23, 59))
+                    )
+                    _entry = {
+                        "start": _bt_start_t.strftime("%H:%M"),
+                        "end": _bt_end_t.strftime("%H:%M"),
+                        "start_hour": _bt_start_t.hour,
+                        "start_min": _bt_start_t.minute,
+                        "duration": int((_bt_end_t - _bt_start_t).total_seconds() / 60),
+                        "is_own": False,
+                    }
+                    busy_by_date_week.setdefault(_bt_date, []).append(_entry)
+                _bt_date += _dt_mod.timedelta(days=1)
+
         weekdays = []
         for i in range(7):
             d = week_start + _dt.timedelta(days=i)
@@ -1456,6 +1601,7 @@ class PortalWeekView(View):
                     "is_today": d == today,
                     "is_past": d < today,
                     "lessons": lessons_by_date.get(d, []),
+                    "busy": busy_by_date_week.get(d, []),
                 }
             )
 
