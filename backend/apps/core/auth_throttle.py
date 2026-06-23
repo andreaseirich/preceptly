@@ -108,6 +108,29 @@ def throttle_login(request):
         response["Retry-After"] = str(retry)
         return response
 
+    # Demo-Konten: strengere Beschränkung (öffentliche Credentials)
+    from apps.core.demo_guard import DEMO_USERNAMES
+
+    if username in {u.casefold() for u in DEMO_USERNAMES}:
+        allowed, retry = _throttle_check(
+            "demo_login", username, max_attempts=20, window_seconds=3600
+        )
+        if not allowed:
+            from django.contrib.auth.forms import AuthenticationForm as _AF
+
+            response = render(
+                request,
+                "core/login.html",
+                {
+                    "form": _AF(request, data=request.POST if request.POST else None),
+                    "error": _("Too many demo login attempts. Please try again later."),
+                    "show_landing_link": True,
+                },
+                status=429,
+            )
+            response["Retry-After"] = str(retry)
+            return response
+
     if username:
         allowed, retry = _throttle_check("login_user", username, max_attempts=5, window_seconds=300)
         if not allowed:

@@ -28,6 +28,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from apps.core.demo_guard import demo_block, is_demo_user
 from apps.core.models import StripeWebhookEvent, UserProfile
 from apps.core.stripe_utils import (
     get_email_for_stripe,
@@ -122,6 +123,9 @@ class SubscriptionCheckoutView(View):
         if not request.POST.get("withdrawal_consent"):
             messages.error(request, _("Please confirm the withdrawal notice to proceed."))
             return redirect(reverse("core:settings"))
+
+        if is_demo_user(request.user):
+            return demo_block(request, _("Stripe checkout is not available in demo mode."))
 
         if not _stripe_enabled():
             return JsonResponse(
@@ -302,6 +306,9 @@ class StripeCheckoutView(View):
         if not request.POST.get("withdrawal_consent"):
             messages.error(request, _("Please confirm the withdrawal notice to proceed."))
             return redirect(reverse("core:settings"))
+
+        if is_demo_user(request.user):
+            return demo_block(request, _("Stripe checkout is not available in demo mode."))
 
         if not _stripe_premium_checkout_enabled():
             return JsonResponse(
