@@ -1,7 +1,37 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Settings" %} - Preceptly{% endblock %}
+{% block title %}{% trans "Settings" %} - Preceptly
+<h2 style="margin-top: 40px;">{% trans "Legal agreements" %}</h2>
+<div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
+{% if profile.avv_accepted_at %}
+    {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
+    <p style="margin: 0; color: var(--text-secondary);">
+        {% blocktrans with date=profile.avv_accepted_at|date:"SHORT_DATE_FORMAT" url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}
+        You accepted the <a href="{{ url_terms }}">Terms of Service</a>,
+        <a href="{{ url_avv }}">Data Processing Agreement (AVV)</a>,
+        and <a href="{{ url_privacy }}">Privacy Policy</a> on {{ date }}.
+        {% endblocktrans %}
+    </p>
+{% else %}
+    <p style="margin-bottom: 12px; color: var(--text-secondary);">
+        {% trans "You have not yet explicitly accepted the Data Processing Agreement (AVV). This is required for GDPR-compliant use of Preceptly." %}
+    </p>
+    <form method="post" action="{% url 'core:accept_avv' %}">
+        {% csrf_token %}
+        {% url 'core:legal_terms' as url_terms2 %}{% url 'core:legal_avv' as url_avv2 %}{% url 'core:legal_privacy' as url_privacy2 %}
+        <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-bottom: 14px;">
+            <input type="checkbox" name="avv_consent" required style="margin-top: 3px; flex-shrink: 0;">
+            <span style="color: var(--text-secondary); font-size: 0.95em;">
+                {% blocktrans with url_terms=url_terms2 url_avv=url_avv2 url_privacy=url_privacy2 %}I accept the <a href="{{ url_terms }}">Terms of Service</a>, <a href="{{ url_avv }}">Data Processing Agreement (AVV, Art. 28 GDPR)</a>, and <a href="{{ url_privacy }}">Privacy Policy</a>.{% endblocktrans %}
+            </span>
+        </label>
+        <button type="submit" class="btn">{% trans "Accept agreements" %}</button>
+    </form>
+{% endif %}
+</div>
+
+{% endblock %}
 
 {% block content %}
 <h1>{% trans "Settings" %}</h1>
@@ -307,7 +337,7 @@
             </form>
         {% endif %}
     {% else %}
-        <p style="margin: 0; color: var(--text-secondary); font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:contact@andicode.de">contact@andicode.de</a>.{% endblocktrans %}</p>
+        <p style="margin: 0; color: var(--text-secondary); font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:impressum@andicode.de">impressum@andicode.de</a>.{% endblocktrans %}</p>
     {% endif %}
 </div>
 {% if stripe_premium_checkout_enabled and is_premium and profile.stripe_customer_id %}

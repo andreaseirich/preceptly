@@ -6,6 +6,7 @@ from django.urls import path
 
 from apps.core import views
 from apps.core.views import (
+    AcceptAvvView,
     EuerView,
     ExpenseCreateView,
     ExpenseDeleteView,
@@ -58,6 +59,7 @@ urlpatterns = [
     path("legal/about/", views.LegalAboutView.as_view(), name="legal_about"),
     path("legal/withdrawal/", views.LegalWithdrawalView.as_view(), name="legal_withdrawal"),
     path("legal/avv/", views.LegalAvvView.as_view(), name="legal_avv"),
+    path("legal/accept-avv/", AcceptAvvView.as_view(), name="accept_avv"),
     # PWA routes
     path("manifest.json", manifest_view, name="manifest"),
     path("sw.js", service_worker_view, name="service_worker"),

@@ -729,3 +729,20 @@ class EuerView(LoginRequiredMixin, TemplateView):
             }
         )
         return context
+
+
+class AcceptAvvView(LoginRequiredMixin, View):
+    """One-click AVV/AGB/Datenschutz acceptance from settings page."""
+
+    def post(self, request):
+        if not request.POST.get("avv_consent"):
+            messages.error(request, _("Please confirm the legal agreements to proceed."))
+            return redirect(reverse("core:settings"))
+        from django.utils import timezone
+
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if not profile.avv_accepted_at:
+            profile.avv_accepted_at = timezone.now()
+            profile.save(update_fields=["avv_accepted_at"])
+        messages.success(request, _("Legal agreements accepted."))
+        return redirect(reverse("core:settings"))

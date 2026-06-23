@@ -93,6 +93,11 @@ class UserProfile(models.Model):
         null=True,
         help_text=_("Last email synced to Stripe Customer (skip modify if unchanged)"),
     )
+    avv_accepted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("When the user explicitly accepted AGB, AVV, and Datenschutzerklärung."),
+    )
     tutor_no_show_pay_percent = models.PositiveSmallIntegerField(
         default=0,
         validators=[MaxValueValidator(100)],
