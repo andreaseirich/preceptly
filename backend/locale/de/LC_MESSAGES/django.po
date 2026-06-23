@@ -3563,7 +3563,7 @@ msgstr "Auf Premium upgraden"
 #: apps/core/templates/core/settings.html:298
 msgid ""
 "To access Premium, please contact <a href=\"mailto:contact@andicode."
-"de\">contact@andicode.de</a>."
+"de\">impressum@andicode.de</a>."
 msgstr ""
 
 #: apps/core/templates/core/settings.html:319
@@ -6194,8 +6194,8 @@ msgstr "Technologie"
 msgid "Preceptly is built on Django 5 and Python 3.12, backed by a PostgreSQL database and hosted on Railway."
 msgstr "Preceptly basiert auf Django 5 und Python 3.12, nutzt eine PostgreSQL-Datenbank und wird auf Railway gehostet."
 
-msgid "All data is stored on servers located in Germany and processed in accordance with the General Data Protection Regulation (GDPR / DSGVO)."
-msgstr "Alle Daten werden auf Servern in Deutschland gespeichert und gemäß der Datenschutz-Grundverordnung (DSGVO) verarbeitet."
+msgid "All data is hosted on Railway (Railway Corp., USA) and processed in accordance with the General Data Protection Regulation (GDPR / DSGVO). Data transfers to the USA are safeguarded by EU Standard Contractual Clauses (SCCs)."
+msgstr "Alle Daten werden bei Railway (Railway Corp., USA) gehostet und gemäß der Datenschutz-Grundverordnung (DSGVO) verarbeitet. Datenübertragungen in die USA sind durch EU-Standardvertragsklauseln (SCCs) abgesichert."
 
 msgid "The technology stack was chosen for its maturity, security track record, and long-term maintainability."
 msgstr "Der Technologie-Stack wurde wegen seiner Reife, bewährten Sicherheit und langfristigen Wartbarkeit gewählt."
@@ -6221,8 +6221,8 @@ msgstr "Das Ziel ist, es künftig auch anderen Nachhilfelehrern anzubieten. Unte
 msgid "Preceptly is actively used by its developer for his own tutoring work and is in ongoing development."
 msgstr "Preceptly wird vom Entwickler aktiv für seine eigene Nachhilfearbeit eingesetzt und befindet sich in laufender Weiterentwicklung."
 
-msgid "There are no external testers yet — feedback and early access requests are welcome at contact@andicode.de."
-msgstr "Externe Tester gibt es bisher nicht – Feedback und Anfragen für frühen Zugang sind willkommen unter contact@andicode.de."
+msgid "There are no external testers yet — feedback and early access requests are welcome at impressum@andicode.de."
+msgstr "Externe Tester gibt es bisher nicht – Feedback und Anfragen für frühen Zugang sind willkommen unter impressum@andicode.de."
 
 msgid "Set up weekly, bi-weekly or monthly lesson series. Sessions are generated automatically — cancel or reschedule individually."
 msgstr "Richte wöchentliche, zweiwöchentliche oder monatliche Serien ein. Stunden werden automatisch generiert – einzeln absagen oder verschieben."
