@@ -15,8 +15,11 @@ User = get_user_model()
 
 class DevStatsView(LoginRequiredMixin, View):
     def get(self, request):
-        if not request.user.is_superuser:
-            return HttpResponseForbidden("Zugriff verweigert – nur für Superuser.")
+        from django.conf import settings
+
+        allowed = getattr(settings, "DEV_STATS_EMAIL", "contact@andicode.de")
+        if request.user.email != allowed:
+            return HttpResponseForbidden("Zugriff verweigert.")
 
         now = timezone.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
