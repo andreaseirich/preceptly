@@ -58,6 +58,10 @@ class ContractForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["email"].label = _("Contact email (parent or student)")
+        self.fields["email"].help_text = _(
+            "This email receives all notifications. For minor students use the parent's email."
+        )
         self._user = user
 
     def save(self, commit=True):
