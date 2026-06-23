@@ -128,6 +128,21 @@ class SubscriptionCheckoutView(View):
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
 
+        tier_map = {
+            "starter": getattr(settings, "STRIPE_PRICE_ID_STARTER", None),
+            "pro": getattr(settings, "STRIPE_PRICE_ID_PRO", None)
+            or getattr(settings, "STRIPE_PRICE_ID_MONTHLY", None),
+            "business": getattr(settings, "STRIPE_PRICE_ID_BUSINESS", None),
+        }
+        requested_tier = request.POST.get("tier", "pro")
+        price_id = tier_map.get(requested_tier) or getattr(
+            settings, "STRIPE_PRICE_ID_MONTHLY", None
+        )
+        if not price_id:
+            return JsonResponse(
+                {"error": _("Payment is not configured. Please contact support.")}, status=503
+            )
+
         user = request.user
 
         with transaction.atomic():
@@ -175,7 +190,7 @@ class SubscriptionCheckoutView(View):
                 customer=customer_id,
                 line_items=[
                     {
-                        "price": settings.STRIPE_PRICE_ID_MONTHLY,
+                        "price": price_id,
                         "quantity": 1,
                     }
                 ],
@@ -293,7 +308,16 @@ class StripeCheckoutView(View):
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
 
-        price_id = getattr(settings, "STRIPE_PRICE_ID_MONTHLY", None)
+        tier_map = {
+            "starter": getattr(settings, "STRIPE_PRICE_ID_STARTER", None),
+            "pro": getattr(settings, "STRIPE_PRICE_ID_PRO", None)
+            or getattr(settings, "STRIPE_PRICE_ID_MONTHLY", None),
+            "business": getattr(settings, "STRIPE_PRICE_ID_BUSINESS", None),
+        }
+        requested_tier = request.POST.get("tier", "pro")
+        price_id = tier_map.get(requested_tier) or getattr(
+            settings, "STRIPE_PRICE_ID_MONTHLY", None
+        )
         if not price_id:
             return JsonResponse(
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
