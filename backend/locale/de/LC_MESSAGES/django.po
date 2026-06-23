@@ -6388,3 +6388,21 @@ msgstr "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeile
 
 msgid "We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board."
 msgstr "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+
+msgid "Preceptly-specific data processing"
+msgstr "Preceptly-spezifische Datenverarbeitung"
+
+msgid "The following sections supplement the general privacy policy above with information specific to the Preceptly platform."
+msgstr "Die folgenden Abschnitte ergänzen die allgemeine Datenschutzerklärung oben um Informationen, die spezifisch für die Preceptly-Plattform gelten."
+
+msgid "Hosting and infrastructure (Railway)"
+msgstr "Hosting und Infrastruktur (Railway)"
+
+msgid "Video meetings (Meeting Rooms)"
+msgstr "Video-Meetings (Meeting Rooms)"
+
+msgid "AI-assisted lesson plans (Anthropic Claude)"
+msgstr "KI-gestützte Stundenpläne (Anthropic Claude)"
+
+msgid "Cookies and technical storage"
+msgstr "Cookies und technische Speicherung"
