@@ -18,11 +18,11 @@
 </div>
 
 <div class="card" style="padding:0; overflow:hidden;">
-<table style="width: 100%; border-collapse: collapse; margin-top:0; box-shadow:none; border-radius:0; table-layout: fixed;">
+<table role="grid" aria-label="Kalender {{ month_label }} {{ year }}" style="width: 100%; border-collapse: collapse; margin-top:0; box-shadow:none; border-radius:0; table-layout: fixed;">
     <thead>
         <tr>
             {% for weekday in weekday_names %}
-            <th style="border: 1px solid var(--border-color); padding: 10px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">{{ weekday }}</th>
+            <th scope="col" style="border: 1px solid var(--border-color); padding: 10px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">{{ weekday }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -31,7 +31,7 @@
         <tr>
             {% for day in week %}
             {% if day %}
-            <td style="border: 1px solid var(--border-color); padding: 0; vertical-align: top; width: 14.28%;">
+            <td role="gridcell" style="border: 1px solid var(--border-color); padding: 0; vertical-align: top; width: 14.28%;">
                 <div style="min-height: 110px; padding: 8px;">
                     <div style="font-weight: bold; margin-bottom: 6px; {% if day.is_today %}color: #007bff;{% endif %}">
                         {{ day.date.day }}
@@ -55,7 +55,7 @@
                 </div>
             </td>
             {% else %}
-            <td style="border: 1px solid var(--border-color); background: rgba(255,255,255,0.02); min-height: 110px;"></td>
+            <td role="gridcell" style="border: 1px solid var(--border-color); background: rgba(255,255,255,0.02); min-height: 110px;"></td>
             {% endif %}
             {% endfor %}
         </tr>
@@ -64,10 +64,12 @@
 </table>
 </div>
 
+<section aria-label="Kalenderlegende">
 <div class="box-section" style="margin-top:12px;">
     <strong>Legende:</strong>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33,150,243,0.2); border-left: 3px solid #2196f3; color: var(--text-primary); font-size: 0.85em;">Unterrichtsstunde (anklicken für Details)</span>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(96,125,139,0.2); border-left: 3px solid #607d8b; color: var(--text-primary); font-size: 0.85em; opacity: 0.8;">Vergangene Stunde</span>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(239,68,68,0.12); border-left: 3px solid #ef4444; color: var(--text-secondary); font-size: 0.85em;">Belegt (anderer Termin)</span>
 </div>
+</section>
 {% endblock %}

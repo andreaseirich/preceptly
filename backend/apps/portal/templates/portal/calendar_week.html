@@ -25,12 +25,12 @@
 
 <div class="card" style="padding:0; overflow:hidden;">
 <div style="overflow-x: auto;">
-<table style="width: 100%; border-collapse: collapse; table-layout: fixed; margin-top:0; box-shadow:none; border-radius:0;">
+<table aria-label="Wochenansicht {{ week_start|date:'d.m.' }}–{{ week_end|date:'d.m.Y' }}" style="width: 100%; border-collapse: collapse; table-layout: fixed; margin-top:0; box-shadow:none; border-radius:0;">
     <thead>
         <tr>
-            <th style="width: 64px; border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">Zeit</th>
+            <th scope="col" style="width: 64px; border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">Zeit</th>
             {% for weekday in weekdays %}
-            <th style="border: 1px solid var(--border-color); padding: 8px; background: {% if weekday.is_today %}rgba(33,150,243,0.15){% else %}var(--table-header-bg){% endif %}; text-align: center; color: var(--text-primary);">
+            <th scope="col" style="border: 1px solid var(--border-color); padding: 8px; background: {% if weekday.is_today %}rgba(33,150,243,0.15){% else %}var(--table-header-bg){% endif %}; text-align: center; color: var(--text-primary);">
                 {{ weekday.name_short }}<br>
                 <small style="font-weight: normal; {% if weekday.is_today %}color: #007bff;{% endif %}">{{ weekday.date.day }}.{{ weekday.date.month }}.</small>
             </th>
@@ -40,9 +40,7 @@
     <tbody>
         {% for hour in hours %}
         <tr style="height: 60px;">
-            <td style="border: 1px solid var(--border-color); padding: 4px; text-align: center; background: rgba(255,255,255,0.03); font-size: 0.82em; color: var(--text-secondary); vertical-align: top;">
-                {{ hour }}:00
-            </td>
+            <th scope="row" style="border: 1px solid var(--border-color); padding: 4px; text-align: center; background: rgba(255,255,255,0.03); font-size: 0.82em; color: var(--text-secondary); vertical-align: top;">{{ hour }}:00</th>
             {% for weekday in weekdays %}
             <td style="border: 1px solid var(--border-color); padding: 0; position: relative; vertical-align: top; background: var(--bg-secondary);">
                 <div style="position: relative; height: 60px; overflow: visible;">

@@ -262,6 +262,18 @@
             border-radius: 10px; line-height: 1.6; margin-left: 4px; vertical-align: middle;
         }
 
+
+        .skip-link {
+            position: absolute; left: -9999px; top: auto;
+            width: 1px; height: 1px; overflow: hidden;
+            background: #007bff; color: #fff; padding: 8px 16px;
+            border-radius: 0 0 4px 4px; font-weight: 600; z-index: 9999;
+            text-decoration: none;
+        }
+        .skip-link:focus {
+            position: fixed; left: 50%; top: 0;
+            transform: translateX(-50%); width: auto; height: auto; overflow: visible;
+        }
         /* ── Responsive ── */
         @media (max-width: 640px) {
             .container { padding: 16px 14px 40px; }
@@ -274,7 +286,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav>
+<a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+<nav aria-label="Portalnavigation">
     {% if portal_user %}
     <a class="nav-brand" href="{% if portal_user.role == 'parent' %}{% url 'portal:parent_home' %}{% else %}{% url 'portal:student_home' %}{% endif %}">
         Preceptly
@@ -308,16 +321,16 @@
     </div>
     {% endif %}
 </nav>
-<div class="container">
+<main id="main-content" class="container">
     {% if messages %}
     {% for message in messages %}
-    <div class="alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+    <div class="alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %}" role="alert" aria-live="assertive">
         {{ message }}
     </div>
     {% endfor %}
     {% endif %}
     {% block content %}{% endblock %}
-</div>
+</main>
 <script>
 (function() {
     var html = document.documentElement;

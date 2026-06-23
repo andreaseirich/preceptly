@@ -161,6 +161,19 @@
         .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
         .btn-group .btn { margin-right: 0; }
         .premium-badge { background: #ffc107; color: #856404; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold; margin-left: 8px; }
+        .skip-link {
+            position: absolute; left: -9999px; top: auto;
+            width: 1px; height: 1px; overflow: hidden;
+            background: #007bff; color: #fff; padding: 8px 18px;
+            border-radius: 0 0 4px 4px; font-weight: 600;
+            z-index: 10000; text-decoration: none;
+        }
+        .skip-link:focus {
+            position: fixed; left: 50%; top: 0;
+            transform: translateX(-50%); width: auto;
+            height: auto; overflow: visible;
+        }
+
         
         /* Help / explanation callouts (income, reports, billing hints) */
         .tutorflow-help-box {
@@ -355,7 +368,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav>
+    <a href="#main-content" class="skip-link">{% trans "Skip to main content" %}</a>
+    <nav aria-label="{% trans 'Main navigation' %}">
         <div class="nav-container">
             <button class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}">☰</button>
             <div class="nav-links" id="navLinks">
@@ -374,7 +388,7 @@
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'core:logout' %}" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" title="{% trans 'Logout' %} ({{ user.username }})" class="btn-logout">🚪</button>
+                    <button type="submit" title="{% trans 'Logout' %} ({{ user.username }})" aria-label="{% trans 'Logout' %} {{ user.username }}" class="btn-logout">🚪</button>
                 </form>
                 {% else %}
                 {% if not user.is_authenticated %}
@@ -389,7 +403,7 @@
                     <input name="next" type="hidden" value="{{ request.get_full_path }}">
                         {% get_current_language as LANGUAGE_CODE %}
                         {% get_available_languages as LANGUAGES %}
-                    <select name="language" onchange="this.form.submit()" title="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
+                    <select name="language" onchange="this.form.submit()" title="{% trans 'Change language' %}" aria-label="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
                         {% for lang_code, lang_name in LANGUAGES %}
                         <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{% if lang_code == 'de' %}DE{% elif lang_code == 'en' %}EN{% else %}{{ lang_code|upper }}{% endif %}</option>
                         {% endfor %}
@@ -400,13 +414,13 @@
     </nav>
     
     {% if is_demo_user %}
-    <div style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;position:sticky;top:0;z-index:1000;">
+    <div role="banner" aria-live="polite" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;position:sticky;top:0;z-index:1000;">
         {% load i18n %}{% trans "Demo account — data resets hourly. Do not enter real personal data." %}
     </div>
     {% endif %}
-        <div class="container">
+        <main id="main-content" class="container">
         {% if messages %}
-        <div class="messages">
+        <div class="messages" role="alert" aria-live="polite">
             {% for message in messages %}
             <div class="message {{ message.tags }}">{{ message }}</div>
             {% endfor %}
@@ -414,7 +428,7 @@
         {% endif %}
         
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     {% include 'partials/footer.html' %}
 

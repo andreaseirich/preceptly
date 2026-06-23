@@ -44,7 +44,7 @@
     <div style="margin-bottom:16px;">
       <label style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Freie Zeitslots</label>
       <div class="tz-note" id="tz-note" style="display:none;"></div>
-      <div class="slot-grid" id="slot-grid">
+      <div class="slot-grid" id="slot-grid" aria-live="polite" aria-label="Verfügbare Zeitslots">
         <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
       </div>
       <input type="hidden" id="id_start_time" name="start_time" required>
@@ -107,7 +107,7 @@
   dateInput.addEventListener('change', function() {
     var date = dateInput.value;
     if (!date) return;
-    slotGrid.innerHTML = '<span class="slot-empty">Lade Zeitslots …</span>';
+    slotGrid.innerHTML = '<span class="slot-empty" role="status">Lade Zeitslots …</span>';
     timeInput.value = '';
     submitBtn.disabled = true;
 
@@ -154,12 +154,14 @@
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'slot-btn';
+            btn.setAttribute('aria-pressed', 'false');
             var label = slot.userDisplay + ' Uhr';
             if (tzDiffers) label += ' (' + slot.tutorTime + ' Tutor)';
             btn.textContent = label;
             btn.addEventListener('click', function() {
-              document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
+              document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
               btn.classList.add('selected');
+              btn.setAttribute('aria-pressed', 'true');
               timeInput.value = slot.tutorTime; // Tutor-Zeit wird gespeichert
               submitBtn.disabled = false;
             });
@@ -167,6 +169,8 @@
           } else {
             var span = document.createElement('span');
             span.className = 'slot-busy';
+            span.setAttribute('aria-disabled', 'true');
+            span.setAttribute('role', 'button');
             var busyLabel = slot.userDisplay + ' Uhr – Belegt';
             if (tzDiffers) busyLabel += ' (' + slot.tutorTime + ' Tutor)';
             span.textContent = busyLabel;
