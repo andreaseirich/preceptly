@@ -298,6 +298,19 @@ class SettingsView(LoginRequiredMixin, FormView):
             context = self.get_context_data()
             context["tutorspace_tier_form"] = tier_form
             return self.render_to_response(context)
+        if "save_timezone" in request.POST:
+            tz_value = request.POST.get("timezone", "Europe/Berlin").strip()
+            import zoneinfo
+
+            try:
+                zoneinfo.ZoneInfo(tz_value)  # Validierung
+                profile, _created = UserProfile.objects.get_or_create(user=request.user)
+                profile.timezone = tz_value
+                profile.save(update_fields=["timezone"])
+                messages.success(request, _("Timezone saved."))
+            except (KeyError, zoneinfo.ZoneInfoNotFoundError):
+                messages.error(request, _("Invalid timezone."))
+            return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -366,6 +379,10 @@ class SettingsView(LoginRequiredMixin, FormView):
             }
             for c in contracts
         ]
+        import zoneinfo
+
+        context["profile_timezone"] = profile.timezone or "Europe/Berlin"
+        context["all_timezones"] = sorted(zoneinfo.available_timezones())
         return context
 
 

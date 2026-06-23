@@ -117,6 +117,11 @@ class UserProfile(models.Model):
             "(can make the preview look ‘too high’ if you have many older sessions)."
         ),
     )
+    timezone = models.CharField(
+        max_length=64,
+        default="Europe/Berlin",
+        verbose_name="Zeitzone",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

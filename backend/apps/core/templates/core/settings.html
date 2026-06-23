@@ -287,6 +287,20 @@
     </div>
     {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;">{{ email_form.email.errors.0 }}</p>{% endif %}
 </form>
+<h2 style="margin-top: 40px;">Zeitzone</h2>
+<p>Deine Zeitzone bestimmt, wie Uhrzeiten für dich und deine Schüler im Portal angezeigt werden. Wähle die Zeitzone, in der du Nachhilfe gibst.</p>
+<form method="post" style="margin-top: 15px;">
+    {% csrf_token %}
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <select name="timezone" style="max-width: 300px;">
+            {% for tz in all_timezones %}
+            <option value="{{ tz }}"{% if tz == profile_timezone %} selected{% endif %}>{{ tz }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" name="save_timezone" class="btn btn-secondary">Speichern</button>
+    </div>
+</form>
+
 <h2 style="margin-top: 40px;">{% trans "Subscription" %}</h2>
 <p>{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
 <div style="margin-top: 20px; padding: 20px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
