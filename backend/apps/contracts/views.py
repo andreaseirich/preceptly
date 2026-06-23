@@ -22,13 +22,13 @@ from apps.contracts.formsets import (
     iter_contract_months,
 )
 from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
-from apps.contracts.models import Contract, ContractMonthlyPlan
+from apps.contracts.models import Contract, ContractMonthlyPlan, InstituteTierConfig
 from apps.contracts.services import (
     get_contract_current_month_summary,
     get_contract_monthly_planning_summary,
     get_institute_tier_progress,
 )
-from apps.core.demo_guard import DEMO_CONTRACT_LIMIT, InstituteTierConfig, demo_block, is_demo_user
+from apps.core.demo_guard import DEMO_CONTRACT_LIMIT, demo_block, is_demo_user
 
 
 class ContractListView(LoginRequiredMixin, ListView):
