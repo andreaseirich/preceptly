@@ -144,11 +144,11 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
         if is_demo_user(self.request.user):
             count = Contract.objects.filter(user=self.request.user).count()
             if count >= DEMO_CONTRACT_LIMIT:
-                from django.utils.translation import gettext as _
+                from django.utils.translation import gettext as _t
 
                 return demo_block(
                     self.request,
-                    _("Demo limit reached: max {n} contracts per demo account.").format(
+                    _t("Demo limit reached: max {n} contracts per demo account.").format(
                         n=DEMO_CONTRACT_LIMIT
                     ),
                 )
