@@ -56,11 +56,12 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
 
 
 def send_booking_notification_portal(session, tutor):
-    """Benachrichtigung an Tutor nach Portal-Buchung (fail_silently)."""
-    notification_email = (getattr(settings, "NOTIFICATION_EMAIL", None) or "").strip()
-    if not notification_email:
+    """Benachrichtigung an Tutor nach Portal-Buchung — geht an die E-Mail-Adresse des Tutors."""
+    recipient = (tutor.email or "").strip()
+    if not recipient:
         logger.warning(
-            "NOTIFICATION_EMAIL nicht gesetzt; Portal-Buchungsbenachrichtigung übersprungen"
+            "Tutor %s hat keine E-Mail-Adresse; Portal-Buchungsbenachrichtigung übersprungen",
+            tutor.username,
         )
         return
     student_name = session.contract.full_name
@@ -84,7 +85,7 @@ def send_booking_notification_portal(session, tutor):
             subject=subject,
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[notification_email],
+            recipient_list=[recipient],
             fail_silently=False,
         )
     except Exception:
