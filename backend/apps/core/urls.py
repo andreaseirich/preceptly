@@ -72,4 +72,5 @@ urlpatterns = [
     path("tax-year/euer/", EuerView.as_view(), name="euer"),
     path("messages/", TutorMessagesOverviewView.as_view(), name="tutor_messages_overview"),
     path("students/<int:pk>/messages/", TutorMessageView.as_view(), name="tutor_messages"),
+    path("api/detect-timezone/", views.AutoDetectTimezoneView.as_view(), name="detect_timezone"),
 ]

@@ -9,7 +9,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -768,3 +768,24 @@ class AcceptAvvView(LoginRequiredMixin, View):
             profile.save(update_fields=["avv_accepted_at"])
         messages.success(request, _("Legal agreements accepted."))
         return redirect(reverse("core:settings"))
+
+
+class AutoDetectTimezoneView(LoginRequiredMixin, View):
+    """Speichert die vom Browser erkannte Zeitzone still im Profil.
+    Nur wenn der neue Wert sich vom gespeicherten unterscheidet."""
+
+    def post(self, request):
+        import zoneinfo
+
+        tz_value = request.POST.get("timezone", "").strip()
+        if not tz_value:
+            return JsonResponse({"ok": False, "error": "missing"}, status=400)
+        try:
+            zoneinfo.ZoneInfo(tz_value)
+        except (KeyError, zoneinfo.ZoneInfoNotFoundError):
+            return JsonResponse({"ok": False, "error": "invalid"}, status=400)
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if profile.timezone != tz_value:
+            profile.timezone = tz_value
+            profile.save(update_fields=["timezone"])
+        return JsonResponse({"ok": True, "timezone": tz_value})
