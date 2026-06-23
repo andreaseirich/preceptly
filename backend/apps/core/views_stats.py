@@ -1,8 +1,8 @@
 import hashlib
+import os
 import secrets
 from datetime import timedelta
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
 from django.shortcuts import redirect, render
@@ -17,7 +17,7 @@ SESSION_KEY = "dev_stats_authed"
 
 
 def _check_password(raw: str) -> bool:
-    expected = getattr(settings, "DEV_STATS_PASSWORD", "")
+    expected = os.environ.get("DEV_STATS_PASSWORD", "")
     if not expected:
         return False
     return secrets.compare_digest(
