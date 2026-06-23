@@ -13,8 +13,8 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
-from django.utils import timezone
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView
 
 from apps.core.auth_throttle import (
