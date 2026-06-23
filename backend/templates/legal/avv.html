@@ -1,0 +1,247 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Data Processing Agreement" %} - Preceptly{% endblock %}
+
+{% block content %}
+{% include "legal/_style.html" %}
+{% get_current_language as LANGUAGE_CODE %}
+<div class="legal-page">
+{% if LANGUAGE_CODE == "de" %}
+<h1>Auftragsverarbeitungsvertrag (AVV)</h1>
+<p class="legal-meta">gemäß Art. 28 DSGVO</p>
+
+<div class="legal-placeholder-box">
+<strong>zwischen</strong><br>
+dem jeweiligen Nutzer von Preceptly (nachfolgend „Verantwortlicher")<br><br>
+<strong>und</strong><br>
+Andreas Eirich, andicode / Preceptly, Birkenweg 7, 49577 Ankum, Deutschland<br>
+E-Mail: <a href="mailto:contact@andicode.de">contact@andicode.de</a> (nachfolgend „Auftragsverarbeiter")
+</div>
+
+<p>Durch die Nutzung von Preceptly und die Zustimmung zu den <a href="{% url 'core:legal_terms' %}">Allgemeinen Geschäftsbedingungen</a> schließt der Verantwortliche diesen Auftragsverarbeitungsvertrag ab.</p>
+
+<div class="legal-section">
+<h2>1. Gegenstand und Dauer der Verarbeitung</h2>
+<p>1.1 Der Auftragsverarbeiter verarbeitet im Auftrag des Verantwortlichen personenbezogene Daten im Rahmen der Bereitstellung der SaaS-Plattform Preceptly.</p>
+<p>1.2 Die Verarbeitung erfolgt für die Dauer der Nutzung von Preceptly durch den Verantwortlichen.</p>
+</div>
+
+<div class="legal-section">
+<h2>2. Art, Zweck und Umfang der Verarbeitung</h2>
+<p>2.1 Folgende Kategorien personenbezogener Daten sind Gegenstand der Verarbeitung:</p>
+<ul>
+    <li>Schülerstammdaten (Name, Klasse/Jahrgangsstufe, Fach)</li>
+    <li>Vertragsdaten (Fach, Vergütung, geplante Stundenzahl)</li>
+    <li>Termindaten (Stundentermine, Notizen, Hausaufgabenvermerke)</li>
+    <li>Elternportal-Daten (Namen und E-Mail-Adressen von Erziehungsberechtigten, sofern genutzt)</li>
+    <li>Rechnungsdaten (erbrachte Leistungen, Beträge)</li>
+</ul>
+<p>2.2 Betroffene Personengruppen:</p>
+<ul>
+    <li>Schüler des Verantwortlichen</li>
+    <li>Erziehungsberechtigte (sofern das Elternportal genutzt wird)</li>
+</ul>
+<p>2.3 Zweck der Verarbeitung ist die technische Unterstützung der Nachhilfeverwaltung des Verantwortlichen (Stundenplanung, Vertragsverwaltung, Rechnungsstellung).</p>
+</div>
+
+<div class="legal-section">
+<h2>3. Weisungsgebundenheit</h2>
+<p>3.1 Der Auftragsverarbeiter verarbeitet personenbezogene Daten ausschließlich auf dokumentierte Weisung des Verantwortlichen, es sei denn, er ist durch das Unionsrecht oder das Recht eines Mitgliedstaats zur Verarbeitung verpflichtet (Art. 28 Abs. 3 lit. a DSGVO).</p>
+<p>3.2 Die Nutzung der Plattformfunktionen durch den Verantwortlichen gilt als dokumentierte Weisung im Sinne des Art. 28 DSGVO.</p>
+</div>
+
+<div class="legal-section">
+<h2>4. Vertraulichkeit</h2>
+<p>4.1 Der Auftragsverarbeiter stellt sicher, dass alle zur Verarbeitung der personenbezogenen Daten befugten Personen zur Vertraulichkeit verpflichtet sind.</p>
+</div>
+
+<div class="legal-section">
+<h2>5. Technische und organisatorische Maßnahmen (TOMs)</h2>
+<p>Der Auftragsverarbeiter trifft geeignete technische und organisatorische Maßnahmen gem. Art. 32 DSGVO, insbesondere:</p>
+<ul>
+    <li>Verschlüsselte Datenübertragung (HTTPS/TLS)</li>
+    <li>Sicheres Passwort-Hashing (PBKDF2/bcrypt)</li>
+    <li>Mandantentrennung: jeder Nutzer sieht ausschließlich seine eigenen Daten</li>
+    <li>Zugangsbeschränkung auf authentifizierte Nutzer</li>
+    <li>Regelmäßige Datensicherungen</li>
+    <li>Protokollierung sicherheitsrelevanter Ereignisse</li>
+</ul>
+</div>
+
+<div class="legal-section">
+<h2>6. Unterauftragsverarbeiter</h2>
+<p>6.1 Der Auftragsverarbeiter ist berechtigt, folgende Unterauftragsverarbeiter einzusetzen:</p>
+<table style="width:100%; border-collapse:collapse; margin: 1em 0; font-size:0.9em;">
+<thead><tr style="background:var(--bg-secondary);">
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Unterauftragsverarbeiter</th>
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Zweck</th>
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Sitz</th>
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Transfergrundlage</th>
+</tr></thead>
+<tbody>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Railway Corp.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Infrastruktur &amp; Hosting</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Standardvertragsklauseln (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Stripe, Inc.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Zahlungsabwicklung</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Standardvertragsklauseln (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Anthropic, PBC</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">KI-Unterrichtsplanung (nur Pro-Tarif)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Standardvertragsklauseln (SCCs)</td>
+</tr>
+</tbody>
+</table>
+<p>6.2 Änderungen hinsichtlich der eingesetzten Unterauftragsverarbeiter werden dem Verantwortlichen durch eine Aktualisierung dieser Seite mitgeteilt. Der Verantwortliche kann innerhalb von 14 Tagen nach Bekanntgabe Einspruch erheben.</p>
+</div>
+
+<div class="legal-section">
+<h2>7. Rechte der betroffenen Personen</h2>
+<p>7.1 Der Auftragsverarbeiter unterstützt den Verantwortlichen angemessen bei der Erfüllung seiner Pflichten zur Beantwortung von Anfragen betroffener Personen (Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch).</p>
+</div>
+
+<div class="legal-section">
+<h2>8. Löschung und Rückgabe</h2>
+<p>8.1 Nach Beendigung des Auftrags löscht oder gibt der Auftragsverarbeiter – nach Wahl des Verantwortlichen – alle personenbezogenen Daten zurück und löscht vorhandene Kopien, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+<p>8.2 Der Verantwortliche kann die Löschung seiner Daten jederzeit per E-Mail an <a href="mailto:contact@andicode.de">contact@andicode.de</a> beantragen.</p>
+</div>
+
+<div class="legal-section">
+<h2>9. Kontrollrechte</h2>
+<p>9.1 Der Verantwortliche hat das Recht, die Einhaltung dieses Vertrags beim Auftragsverarbeiter zu überprüfen oder durch einen beauftragten Dritten überprüfen zu lassen. Der Auftragsverarbeiter stellt alle erforderlichen Informationen zur Verfügung und kooperiert bei Überprüfungen.</p>
+</div>
+
+<div class="legal-section">
+<h2>10. Meldepflichten bei Datenpannen</h2>
+<p>10.1 Der Auftragsverarbeiter unterstützt den Verantwortlichen bei der Einhaltung der in Art. 32–36 DSGVO genannten Pflichten (Sicherheit der Verarbeitung, Meldung von Verletzungen, Datenschutz-Folgenabschätzung).</p>
+<p>10.2 Der Auftragsverarbeiter meldet dem Verantwortlichen Verletzungen des Schutzes personenbezogener Daten unverzüglich, spätestens innerhalb von 72 Stunden nach Bekanntwerden, per E-Mail an die im Konto hinterlegte Adresse.</p>
+</div>
+
+{% else %}
+<h1>Data Processing Agreement (DPA)</h1>
+<p class="legal-meta">pursuant to Art. 28 GDPR</p>
+
+<div class="legal-placeholder-box">
+<strong>between</strong><br>
+the respective user of Preceptly (hereinafter "Controller")<br><br>
+<strong>and</strong><br>
+Andreas Eirich, andicode / Preceptly, Birkenweg 7, 49577 Ankum, Germany<br>
+E-Mail: <a href="mailto:contact@andicode.de">contact@andicode.de</a> (hereinafter "Processor")
+</div>
+
+<p>By using Preceptly and agreeing to the <a href="{% url 'core:legal_terms' %}">Terms of Service</a>, the Controller enters into this Data Processing Agreement.</p>
+
+<div class="legal-section">
+<h2>1. Subject Matter and Duration</h2>
+<p>1.1 The Processor processes personal data on behalf of the Controller under this Agreement as part of the provision of the SaaS platform Preceptly.</p>
+<p>1.2 Processing takes place for the duration of the Controller's use of Preceptly.</p>
+</div>
+
+<div class="legal-section">
+<h2>2. Nature, Purpose, and Scope of Processing</h2>
+<p>2.1 The following categories of personal data are subject to processing:</p>
+<ul>
+    <li>Student master data (name, class/grade, subject)</li>
+    <li>Contract data (subject, remuneration, planned hours)</li>
+    <li>Scheduling data (lesson appointments, notes, homework remarks)</li>
+    <li>Parent portal data (names and email addresses of guardians, if used)</li>
+    <li>Invoice data (services rendered, amounts)</li>
+</ul>
+<p>2.2 Categories of data subjects:</p>
+<ul>
+    <li>Students of the Controller</li>
+    <li>Parents/guardians (if the parent portal is used)</li>
+</ul>
+<p>2.3 Purpose: Technical support of the Controller's tutoring management (scheduling, contract management, invoicing).</p>
+</div>
+
+<div class="legal-section">
+<h2>3. Instructions</h2>
+<p>3.1 The Processor processes personal data solely on documented instructions of the Controller, unless required by Union or Member State law (Art. 28(3)(a) GDPR).</p>
+<p>3.2 The Controller's use of platform features constitutes documented instructions within the meaning of Art. 28 GDPR.</p>
+</div>
+
+<div class="legal-section">
+<h2>4. Confidentiality</h2>
+<p>4.1 The Processor ensures that all persons authorised to process personal data are bound to confidentiality.</p>
+</div>
+
+<div class="legal-section">
+<h2>5. Technical and Organisational Measures (TOMs)</h2>
+<p>The Processor implements appropriate technical and organisational measures pursuant to Art. 32 GDPR, including:</p>
+<ul>
+    <li>Encrypted data transfer (HTTPS/TLS)</li>
+    <li>Secure password hashing (PBKDF2/bcrypt)</li>
+    <li>Multi-tenant data separation (each user sees only their own data)</li>
+    <li>Access restricted to authenticated users</li>
+    <li>Regular data backups</li>
+    <li>Logging of security-relevant events</li>
+</ul>
+</div>
+
+<div class="legal-section">
+<h2>6. Sub-processors</h2>
+<p>6.1 The Processor is authorised to engage the following sub-processors:</p>
+<table style="width:100%; border-collapse:collapse; margin: 1em 0; font-size:0.9em;">
+<thead><tr style="background:var(--bg-secondary);">
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Sub-processor</th>
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Purpose</th>
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Location</th>
+    <th style="padding:8px; text-align:left; border:1px solid var(--border-color);">Transfer Basis</th>
+</tr></thead>
+<tbody>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Railway Corp.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Infrastructure &amp; Hosting</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Standard Contractual Clauses (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Stripe, Inc.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Payment processing</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Standard Contractual Clauses (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Anthropic, PBC</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">AI lesson planning (Pro plan only)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Standard Contractual Clauses (SCCs)</td>
+</tr>
+</tbody>
+</table>
+<p>6.2 Changes to sub-processors will be communicated to the Controller by updating this page. The Controller may object within 14 days of notification.</p>
+</div>
+
+<div class="legal-section">
+<h2>7. Data Subject Rights</h2>
+<p>7.1 The Processor shall assist the Controller in fulfilling obligations towards data subjects (access, rectification, erasure, restriction, portability, objection).</p>
+</div>
+
+<div class="legal-section">
+<h2>8. Deletion and Return</h2>
+<p>8.1 Upon termination of the Agreement, the Processor shall, at the Controller's choice, delete or return all personal data and delete existing copies, unless retention is required by applicable law.</p>
+<p>8.2 The Controller may request deletion of their data at any time by emailing <a href="mailto:contact@andicode.de">contact@andicode.de</a>.</p>
+</div>
+
+<div class="legal-section">
+<h2>9. Audit Rights</h2>
+<p>9.1 The Controller has the right to audit compliance with this Agreement or to commission a third party to do so. The Processor shall provide all necessary information and cooperate in audits.</p>
+</div>
+
+<div class="legal-section">
+<h2>10. Data Breach Notification</h2>
+<p>10.1 The Processor shall assist the Controller in complying with the obligations set out in Art. 32–36 GDPR (security, breach notification, data protection impact assessment).</p>
+<p>10.2 The Processor shall notify the Controller of any personal data breach without undue delay, and in any event within 72 hours of becoming aware, by email to the address registered in the account.</p>
+</div>
+{% endif %}
+</div>
+{% endblock %}

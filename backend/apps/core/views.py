@@ -427,6 +427,12 @@ class LegalWithdrawalView(LegalPageView):
     template_name = "legal/withdrawal.html"
 
 
+class LegalAvvView(LegalPageView):
+    """Data processing agreement (AVV/DPA) page."""
+
+    template_name = "legal/avv.html"
+
+
 class TaxYearView(LoginRequiredMixin, TemplateView):
     """Tax year overview based on cash-basis accounting (Zufluss-Prinzip / EÜR)."""
 

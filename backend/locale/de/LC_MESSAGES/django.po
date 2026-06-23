@@ -6355,3 +6355,27 @@ msgstr "KI-Anbieter: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA 
 
 msgid "Anthropic does not use API data to train its models. Further information:"
 msgstr "Anthropic verwendet API-Daten nicht zum Training seiner Modelle. Weitere Informationen:"
+
+msgid "7. Cookies and technical storage"
+msgstr "7. Cookies und technische Speicherung"
+
+msgid "Preceptly uses only technically necessary cookies:"
+msgstr "Preceptly verwendet ausschließlich technisch notwendige Cookies:"
+
+msgid "Session cookie for managing the logged-in state. Deleted when you log out or close the browser."
+msgstr "Sitzungs-Cookie zur Verwaltung des eingeloggten Zustands. Wird beim Abmelden oder Schließen des Browsers gelöscht."
+
+msgid "Security cookie to protect against cross-site request forgery (CSRF) attacks."
+msgstr "Sicherheits-Cookie zum Schutz vor seitenübergreifenden Anfragefälschungen (CSRF)."
+
+msgid "In addition, Preceptly stores the selected display theme (light/dark) in the browser's localStorage. This is not a cookie and the data does not leave your device."
+msgstr "Darüber hinaus speichert Preceptly die gewählte Darstellungs-Theme (Hell/Dunkel) im localStorage des Browsers. Dabei handelt es sich nicht um ein Cookie; die Daten verlassen das Gerät nicht."
+
+msgid "No tracking, analytics, or advertising cookies are used. A cookie consent banner is therefore not required."
+msgstr "Es werden keine Tracking-, Analyse- oder Werbe-Cookies eingesetzt. Ein Cookie-Consent-Banner ist daher nicht erforderlich."
+
+msgid "Legal basis: Art. 6 para. 1 lit. b and f GDPR."
+msgstr "Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO."
+
+msgid "Data Processing Agreement"
+msgstr "Auftragsverarbeitungsvertrag"

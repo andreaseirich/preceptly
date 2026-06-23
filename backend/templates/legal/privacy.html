@@ -47,6 +47,17 @@
             <p>{% trans "Anthropic does not use API data to train its models. Further information:" %} <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/legal/privacy</a></p>
             <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)." %}</p>
         </div>
+        <div class="legal-section">
+            <h2>{% trans "7. Cookies and technical storage" %}</h2>
+            <p>{% trans "Preceptly uses only technically necessary cookies:" %}</p>
+            <ul>
+                <li><code>sessionid</code>: {% trans "Session cookie for managing the logged-in state. Deleted when you log out or close the browser." %}</li>
+                <li><code>csrftoken</code>: {% trans "Security cookie to protect against cross-site request forgery (CSRF) attacks." %}</li>
+            </ul>
+            <p>{% trans "In addition, Preceptly stores the selected display theme (light/dark) in the browser's localStorage. This is not a cookie and the data does not leave your device." %}</p>
+            <p>{% trans "No tracking, analytics, or advertising cookies are used. A cookie consent banner is therefore not required." %}</p>
+            <p>{% trans "Legal basis: Art. 6 para. 1 lit. b and f GDPR." %}</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
