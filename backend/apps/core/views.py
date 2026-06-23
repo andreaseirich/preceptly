@@ -745,7 +745,7 @@ class AcceptAvvView(LoginRequiredMixin, View):
             return redirect(reverse("core:settings"))
         from django.utils import timezone
 
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        profile, _created = UserProfile.objects.get_or_create(user=request.user)
         if not profile.avv_accepted_at:
             profile.avv_accepted_at = timezone.now()
             profile.save(update_fields=["avv_accepted_at"])
