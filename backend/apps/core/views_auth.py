@@ -86,9 +86,13 @@ class RegisterView(CreateView):
         try:
             with transaction.atomic():
                 user = form.save()
+                avv_consent = self.request.POST.get("avv_consent")
                 profile, _ = UserProfile.objects.get_or_create(
                     user=user, defaults={"is_premium": False}
                 )
+                if avv_consent and not profile.avv_accepted_at:
+                    profile.avv_accepted_at = timezone.now()
+                    profile.save(update_fields=["avv_accepted_at"])
                 ensure_public_booking_token(profile)
         except IntegrityError:
             form.add_error(None, _("Registration failed. Please try again."))
