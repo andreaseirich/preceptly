@@ -1,9 +1,14 @@
+import logging
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext as _
+
+logger = logging.getLogger(__name__)
 
 
 def send_portal_invite(student, portal_link, recipient_email, role="student"):
@@ -48,3 +53,73 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
         html_message=html_message,
         fail_silently=False,
     )
+
+
+def send_booking_notification_portal(session, tutor):
+    """Benachrichtigung an Tutor nach Portal-Buchung (fail_silently)."""
+    notification_email = (getattr(settings, "NOTIFICATION_EMAIL", None) or "").strip()
+    if not notification_email:
+        logger.warning(
+            "NOTIFICATION_EMAIL nicht gesetzt; Portal-Buchungsbenachrichtigung übersprungen"
+        )
+        return
+    student_name = session.contract.full_name
+    date_str = session.date.strftime("%d.%m.%Y")
+    time_str = session.start_time.strftime("%H:%M")
+    topic = session.notes or "-"
+    tutor_name = tutor.get_full_name() or tutor.username
+    subject = f"Neue Portal-Buchung: {student_name} - {date_str}".replace("\n", " ").replace(
+        "\r", " "
+    )
+    message = (
+        f"Ein neuer Termin wurde über das Portal gebucht.\n\n"
+        f"Schüler: {student_name}\n"
+        f"Datum: {date_str}\n"
+        f"Uhrzeit: {time_str} Uhr\n"
+        f"Thema: {topic}\n"
+        f"Tutor: {tutor_name}\n"
+    )
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[notification_email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception(
+            "Portal-Buchungsbenachrichtigung fehlgeschlagen für Session %s", session.pk
+        )
+
+
+def send_activation_notification(portal_user, contract):
+    """Benachrichtigung an Tutor nach Portal-Aktivierung (fail_silently)."""
+    notification_email = (getattr(settings, "NOTIFICATION_EMAIL", None) or "").strip()
+    if not notification_email:
+        logger.warning(
+            "NOTIFICATION_EMAIL nicht gesetzt; Aktivierungsbenachrichtigung übersprungen"
+        )
+        return
+    student_name = contract.full_name
+    role_display = "Schüler" if portal_user.role == "student" else "Elternteil"
+    timestamp = timezone.now().strftime("%d.%m.%Y %H:%M")
+    subject = f"Portal-Zugang aktiviert: {student_name}".replace("\n", " ").replace("\r", " ")
+    message = (
+        f"Ein Portal-Zugang wurde aktiviert.\n\n"
+        f"Schüler: {student_name}\n"
+        f"Rolle: {role_display}\n"
+        f"Zeitpunkt: {timestamp}\n"
+    )
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[notification_email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception(
+            "Aktivierungsbenachrichtigung fehlgeschlagen für PortalUser %s", portal_user.pk
+        )
