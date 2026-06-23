@@ -777,7 +777,9 @@ class PortalBookingView(View):
 
             send_booking_notification_portal(session, student.user)
         except Exception:
-            pass
+            import logging as _logging
+
+            _logging.getLogger(__name__).exception("Portal-Buchungsbenachrichtigung fehlgeschlagen")
         return self._render(
             request,
             student,
