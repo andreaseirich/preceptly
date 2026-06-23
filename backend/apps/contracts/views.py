@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -376,7 +376,14 @@ class ContractToggleActiveView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request, pk):
-        pass
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        contract.is_active = not contract.is_active
+        contract.save(update_fields=["is_active"])
+        if contract.is_active:
+            messages.success(request, _("Activated"))
+        else:
+            messages.success(request, _("Deactivated"))
+        return redirect("contracts:list")
 
 
 def _validate_tiers(tiers):
