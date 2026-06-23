@@ -1,5 +1,6 @@
 from django.core.cache import cache
 
+from apps.core.demo_guard import is_demo_user as _is_demo_user
 from apps.portal.models import PortalMessage
 
 
@@ -15,9 +16,6 @@ def unread_portal_messages(request):
         ).count()
         cache.set(key, count, 30)
     return {"unread_portal_count": count}
-
-
-from apps.core.demo_guard import is_demo_user as _is_demo_user
 
 
 def demo_context(request):
