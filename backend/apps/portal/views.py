@@ -763,7 +763,7 @@ class PortalBookingView(View):
                     error="Diese Zeit ist durch eine Blockzeit belegt.",
                 )
 
-        _Session.objects.create(
+        session = _Session.objects.create(
             contract=contract,
             date=session_date,
             start_time=session_time,
@@ -772,6 +772,12 @@ class PortalBookingView(View):
             notes=topic or None,
             created_via="portal_booking",
         )
+        try:
+            from apps.portal.email_service import send_booking_notification_portal
+
+            send_booking_notification_portal(session, student.user)
+        except Exception:
+            pass
         return self._render(
             request,
             student,
