@@ -664,7 +664,18 @@ class PortalAvailabilityView(View):
         slots = _get_available_slots(student.user, date, duration_minutes=duration)
         busy = _get_busy_slots(student.user, date)
         busy_data = [{"start": s.strftime("%H:%M"), "end": e.strftime("%H:%M")} for s, e in busy]
-        return JsonResponse({"slots": slots, "busy_slots": busy_data, "duration_minutes": duration})
+        tutor_tz = (
+            getattr(getattr(student.user, "profile", None), "timezone", "Europe/Berlin")
+            or "Europe/Berlin"
+        )
+        return JsonResponse(
+            {
+                "slots": slots,
+                "busy_slots": busy_data,
+                "duration_minutes": duration,
+                "tutor_timezone": tutor_tz,
+            }
+        )
 
 
 class PortalBookingView(View):
@@ -1469,6 +1480,10 @@ class PortalCalendarView(View):
                 "Sonntag",
             ],
             "busy_by_date": busy_by_date,
+            "tutor_timezone": getattr(
+                getattr(student.user, "profile", None), "timezone", "Europe/Berlin"
+            )
+            or "Europe/Berlin",
         }
 
         if portal_user.role == "parent":
@@ -1629,9 +1644,25 @@ class PortalWeekView(View):
             "next_week": next_week,
             "today": today,
             "hours": list(range(7, 22)),
+            "tutor_timezone": getattr(
+                getattr(student.user, "profile", None), "timezone", "Europe/Berlin"
+            )
+            or "Europe/Berlin",
         }
 
         if portal_user.role == "parent":
             context["student_pk"] = student_pk
 
         return render(request, self.template_name, context)
+
+
+class PortalFAQView(View):
+    """FAQ-Seite für Portal-Nutzer."""
+
+    template_name = "portal/faq.html"
+
+    def get(self, request):
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return redirect("portal:login")
+        return render(request, self.template_name, {"portal_user": portal_user})

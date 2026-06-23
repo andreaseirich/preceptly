@@ -12,6 +12,7 @@
 }
 .slot-btn:hover, .slot-btn.selected { background: #007bff; color: #fff; border-color: #007bff; }
 .slot-empty { color: var(--text-secondary); font-size: 0.9em; }
+.tz-note { font-size: 0.82em; color: var(--text-secondary); margin-bottom: 8px; }
 .slot-busy {
     padding: 7px 16px; border: 1px solid rgba(239,68,68,0.4);
     border-radius: 4px; background: rgba(239,68,68,0.08); color: #b91c1c;
@@ -42,6 +43,7 @@
 
     <div style="margin-bottom:16px;">
       <label style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Freie Zeitslots</label>
+      <div class="tz-note" id="tz-note" style="display:none;"></div>
       <div class="slot-grid" id="slot-grid">
         <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
       </div>
@@ -72,7 +74,35 @@
   var slotGrid  = document.getElementById('slot-grid');
   var timeInput = document.getElementById('id_start_time');
   var submitBtn = document.getElementById('submit-btn');
+  var tzNote    = document.getElementById('tz-note');
   if (!dateInput) return;
+
+  // Ermittelt den UTC-Zeitstempel für timeStr (z.B. "09:00") in tz (z.B. "Europe/Berlin") am dateStr
+  function localToUtcMs(dateStr, timeStr, tz) {
+    var parts = timeStr.split(':');
+    var h = parseInt(parts[0]), m = parseInt(parts[1]);
+    // Start-Probe: gleiche Stunde als UTC
+    var probe = new Date(dateStr + 'T' + timeStr + ':00Z').getTime();
+    // Was zeigt dieser UTC-Zeitpunkt in der Ziel-TZ?
+    var fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    var shown = fmt.format(new Date(probe));
+    var shownParts = shown.replace(',','').trim().split(':');
+    var sh = parseInt(shownParts[0]), sm = parseInt(shownParts[1]);
+    // Offset ausgleichen
+    var diffMs = ((sh - h) * 60 + (sm - m)) * 60000;
+    return probe - diffMs;
+  }
+
+  // Formatiert einen UTC-Zeitstempel in tz als "HH:MM"
+  function fmtInTz(utcMs, tz) {
+    return new Intl.DateTimeFormat('de-DE', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
+    }).format(new Date(utcMs));
+  }
+
+  var userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   dateInput.addEventListener('change', function() {
     var date = dateInput.value;
@@ -85,34 +115,61 @@
       .then(function(r){ return r.json(); })
       .then(function(data) {
         slotGrid.innerHTML = '';
+        var tutorTz = data.tutor_timezone || 'Europe/Berlin';
+        var tzDiffers = (userTz !== tutorTz);
+
+        // Zeitzonenhinweis anzeigen wenn nötig
+        if (tzNote) {
+          if (tzDiffers) {
+            tzNote.style.display = '';
+            tzNote.textContent = 'Zeiten in deiner Ortszeit (' + userTz + '). Tutor-Zeitzone: ' + tutorTz + '.';
+          } else {
+            tzNote.style.display = 'none';
+          }
+        }
+
         if (!data.slots || data.slots.length === 0) {
           slotGrid.innerHTML = '<span class="slot-empty">Keine freien Zeitslots an diesem Tag.</span>';
           return;
         }
-        // Merge available and busy slots, sort by time
+
+        // Slots zusammenführen und sortieren
         var allTimes = {};
         data.slots.forEach(function(s){ allTimes[s] = 'free'; });
         if (data.busy_slots) {
           data.busy_slots.forEach(function(b){ if (!allTimes[b.start]) allTimes[b.start] = 'busy'; });
         }
-        var sortedTimes = Object.keys(allTimes).sort();
-        sortedTimes.forEach(function(time) {
-          if (allTimes[time] === 'free') {
+
+        // Konvertieren und nach Nutzerzeitzone sortieren
+        var converted = [];
+        Object.keys(allTimes).forEach(function(tutorTime) {
+          var utcMs = localToUtcMs(date, tutorTime, tutorTz);
+          var userDisplay = fmtInTz(utcMs, userTz);
+          converted.push({ tutorTime: tutorTime, userDisplay: userDisplay, utcMs: utcMs, type: allTimes[tutorTime] });
+        });
+        converted.sort(function(a, b) { return a.utcMs - b.utcMs; });
+
+        converted.forEach(function(slot) {
+          if (slot.type === 'free') {
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'slot-btn';
-            btn.textContent = time + ' Uhr';
+            var label = slot.userDisplay + ' Uhr';
+            if (tzDiffers) label += ' (' + slot.tutorTime + ' Tutor)';
+            btn.textContent = label;
             btn.addEventListener('click', function() {
               document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
               btn.classList.add('selected');
-              timeInput.value = time;
+              timeInput.value = slot.tutorTime; // Tutor-Zeit wird gespeichert
               submitBtn.disabled = false;
             });
             slotGrid.appendChild(btn);
           } else {
             var span = document.createElement('span');
             span.className = 'slot-busy';
-            span.textContent = time + ' Uhr – Belegt';
+            var busyLabel = slot.userDisplay + ' Uhr – Belegt';
+            if (tzDiffers) busyLabel += ' (' + slot.tutorTime + ' Tutor)';
+            span.textContent = busyLabel;
             slotGrid.appendChild(span);
           }
         });

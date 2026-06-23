@@ -1,0 +1,72 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Hilfe & FAQ – Preceptly Portal{% endblock %}
+
+{% block content %}
+<h1>Hilfe & FAQ</h1>
+<p style="color:var(--text-secondary); margin-top:-8px; margin-bottom:24px;">
+    Hier findest du Antworten auf häufige Fragen zum Preceptly-Portal.
+</p>
+
+<div class="card">
+    <h2 style="margin-top:0;">Zeitzone & Uhrzeiten</h2>
+
+    <h3>Werden Zeiten in meiner Ortszeit angezeigt?</h3>
+    <p>Ja. Das Portal erkennt automatisch deine lokale Zeitzone über deinen Browser und rechnet alle Uhrzeiten entsprechend um. Ein Termin, den dein Tutor um 09:00 Uhr in Berlin eingetragen hat, erscheint für dich automatisch in deiner Ortszeit – zum Beispiel als 10:00 Uhr, wenn du dich in einem Gebiet mit UTC+1 befindest.</p>
+
+    <h3>Was passiert, wenn mein Tutor in einer anderen Zeitzone ist?</h3>
+    <p>Alle Buchungen, Kalendereinträge und freien Slots werden in deiner Ortszeit angezeigt. Beim Buchen wird die Uhrzeit automatisch in die Zeitzone deines Tutors umgerechnet und korrekt gespeichert. Du musst nichts manuell berechnen.</p>
+
+    <h3>Warum sehe ich manchmal eine Uhrzeit mit „(Tutor)" in Klammern?</h3>
+    <p>Bei der Terminbuchung wird dir sowohl deine Ortszeit als auch die entsprechende Tutor-Zeit angezeigt, falls sie abweichen. So vermeidest du Verwechslungen.</p>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Terminbuchung</h2>
+
+    <h3>Wie buche ich einen Termin?</h3>
+    <p>Gehe zu <strong>Termin buchen</strong> (über das Dashboard oder den Kalender). Wähle ein Datum – es werden automatisch die freien Zeitslots deines Tutors in deiner Ortszeit angezeigt. Klicke auf einen Slot und bestätige die Buchung.</p>
+
+    <h3>Was bedeuten die grauen „Belegt"-Felder?</h3>
+    <p>Graue Felder zeigen Zeiträume, die bereits durch andere Termine oder Blockzeiten deines Tutors belegt sind. Diese können nicht gebucht werden.</p>
+
+    <h3>Kann ich einen Termin absagen?</h3>
+    <p>Ja. Gehe zu deiner Terminübersicht oder zum Kalender, öffne den Termin und klicke auf <strong>Absagen</strong>. Bitte achte darauf, Absagen rechtzeitig vorzunehmen – kontaktiere deinen Tutor bei kurzfristigen Änderungen direkt.</p>
+
+    <h3>Was sind Serientermine?</h3>
+    <p>Serientermine ermöglichen es dir, regelmäßig wiederkehrende Stunden auf einmal zu buchen (z. B. jeden Montag um 16:00 Uhr). Du findest diese Funktion auf der Buchungsseite unter <strong>Serientermin erstellen</strong>.</p>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Kalender</h2>
+
+    <h3>Was bedeuten die roten „Belegt"-Blöcke im Kalender?</h3>
+    <p>Diese Blöcke zeigen anonym an, dass dein Tutor zu dieser Zeit einen anderen Termin oder eine Blockzeit hat. Du siehst keine Details (kein Name, kein Thema) – nur dass diese Zeit nicht verfügbar ist.</p>
+
+    <h3>Was bedeuten die blauen Blöcke?</h3>
+    <p>Blaue Blöcke sind deine eigenen gebuchten Stunden. Klicke darauf, um Details zu sehen.</p>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Portal-Zugang & Konto</h2>
+
+    <h3>Wie aktiviere ich meinen Portal-Zugang?</h3>
+    <p>Du erhältst per E-Mail einen persönlichen Aktivierungslink. Klicke darauf, setze dein Passwort und du bist sofort im Portal angemeldet. Der Link ist 7 Tage gültig – bitte deinen Tutor um einen neuen Link, falls er abgelaufen ist.</p>
+
+    <h3>Ich habe mein Passwort vergessen. Was jetzt?</h3>
+    <p>Gehe zur <a href="{% url portal:password_reset %}">Passwort-zurücksetzen</a>-Seite und gib deine E-Mail-Adresse ein. Du erhältst einen Link zum Zurücksetzen.</p>
+
+    <h3>Ich habe keine E-Mail erhalten.</h3>
+    <p>Prüfe deinen Spam-Ordner. Wenn die E-Mail dort nicht ist, kontaktiere deinen Tutor – er kann dir einen neuen Einladungslink schicken.</p>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Sonstiges</h2>
+
+    <h3>An wen wende ich mich bei technischen Problemen?</h3>
+    <p>Bitte kontaktiere deinen Tutor direkt. Er oder sie kann das Problem an den Support weiterleiten.</p>
+
+    <h3>Sind meine Daten sicher?</h3>
+    <p>Ja. Alle Daten werden verschlüsselt übertragen (HTTPS). Du siehst ausschließlich Informationen, die deinen eigenen Unterricht betreffen. Andere Schüler oder deren Daten sind für dich nicht einsehbar.</p>
+</div>
+{% endblock %}
