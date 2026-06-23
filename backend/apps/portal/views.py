@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.timezone import localtime as _localtime
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django_ratelimit.decorators import ratelimit
@@ -573,10 +574,12 @@ def _get_busy_slots(tutor, date):
     )
     for bt in blocked_times:
         clamped_start = max(
-            bt.start_datetime.replace(tzinfo=None), _dt.datetime.combine(date, _dt.time(0, 0))
+            _localtime(bt.start_datetime).replace(tzinfo=None),
+            _dt.datetime.combine(date, _dt.time(0, 0)),
         )
         clamped_end = min(
-            bt.end_datetime.replace(tzinfo=None), _dt.datetime.combine(date, _dt.time(23, 59))
+            _localtime(bt.end_datetime).replace(tzinfo=None),
+            _dt.datetime.combine(date, _dt.time(23, 59)),
         )
         if clamped_start < clamped_end:
             busy.append((clamped_start.time(), clamped_end.time()))
@@ -612,8 +615,8 @@ def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
     day_start_dt = _dt.datetime.combine(date, _dt.time(0, 0))
     day_end_dt = _dt.datetime.combine(date, _dt.time(23, 59))
     for bt in blocked_times:
-        bt_start = bt.start_datetime.replace(tzinfo=None)
-        bt_end = bt.end_datetime.replace(tzinfo=None)
+        bt_start = _localtime(bt.start_datetime).replace(tzinfo=None)
+        bt_end = _localtime(bt.end_datetime).replace(tzinfo=None)
         clamped_start = max(bt_start, day_start_dt)
         clamped_end = min(bt_end, day_end_dt)
         if clamped_start < clamped_end:
@@ -753,8 +756,8 @@ class PortalBookingView(View):
             end_datetime__date__gte=session_date,
         )
         for bt in blocked_times:
-            bt_start = max(bt.start_datetime.replace(tzinfo=None), day_start_dt)
-            bt_end = min(bt.end_datetime.replace(tzinfo=None), day_end_dt)
+            bt_start = max(_localtime(bt.start_datetime).replace(tzinfo=None), day_start_dt)
+            bt_end = min(_localtime(bt.end_datetime).replace(tzinfo=None), day_end_dt)
             if start_dt < bt_end and end_dt > bt_start:
                 return self._render(
                     request,
