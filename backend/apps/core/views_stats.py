@@ -1,10 +1,11 @@
+import hashlib
+import secrets
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Avg, Count
-from django.http import HttpResponseForbidden
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
 
@@ -12,15 +13,39 @@ from apps.core.models import RequestLog
 
 User = get_user_model()
 
+SESSION_KEY = "dev_stats_authed"
 
-class DevStatsView(LoginRequiredMixin, View):
+
+def _check_password(raw: str) -> bool:
+    expected = getattr(settings, "DEV_STATS_PASSWORD", "")
+    if not expected:
+        return False
+    return secrets.compare_digest(
+        hashlib.sha256(raw.encode()).hexdigest(),
+        hashlib.sha256(expected.encode()).hexdigest(),
+    )
+
+
+class DevStatsView(View):
     def get(self, request):
-        from django.conf import settings
+        if not request.session.get(SESSION_KEY):
+            return render(request, "core/dev_stats_login.html", {"error": False})
+        return self._dashboard(request)
 
-        allowed = getattr(settings, "DEV_STATS_EMAIL", "contact@andicode.de")
-        if request.user.email != allowed:
-            return HttpResponseForbidden("Zugriff verweigert.")
+    def post(self, request):
+        action = request.POST.get("action")
+        if action == "logout":
+            request.session.pop(SESSION_KEY, None)
+            return redirect("core:dev_stats")
 
+        password = request.POST.get("password", "")
+        if _check_password(password):
+            request.session[SESSION_KEY] = True
+            request.session.set_expiry(28800)  # 8 Stunden
+            return redirect("core:dev_stats")
+        return render(request, "core/dev_stats_login.html", {"error": True})
+
+    def _dashboard(self, request):
         now = timezone.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         week_start = today_start - timedelta(days=now.weekday())

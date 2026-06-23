@@ -23,6 +23,7 @@ from apps.core.views_log_test import test_logs
 from apps.core.views_portal import TutorMessagesOverviewView, TutorMessageView
 from apps.core.views_pwa import manifest_view, service_worker_view
 from apps.core.views_reports import ReportsView
+from apps.core.views_stats import DevStatsView
 from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalView
 
 app_name = "core"
@@ -73,4 +74,5 @@ urlpatterns = [
     path("messages/", TutorMessagesOverviewView.as_view(), name="tutor_messages_overview"),
     path("students/<int:pk>/messages/", TutorMessageView.as_view(), name="tutor_messages"),
     path("api/detect-timezone/", views.AutoDetectTimezoneView.as_view(), name="detect_timezone"),
+    path("dev/stats/", DevStatsView.as_view(), name="dev_stats"),
 ]
