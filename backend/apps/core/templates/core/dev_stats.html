@@ -1,0 +1,226 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}Dev Stats – Preceptly{% endblock %}
+
+{% block content %}
+<style>
+  .stats-wrap { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+  .stats-title { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+  .stats-sub { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  /* Summary cards */
+  .cards-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .stat-card {
+    flex: 1 1 180px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    box-shadow: 0 2px 8px var(--shadow);
+    border-left: 4px solid #3498db;
+  }
+  .stat-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-secondary); margin-bottom: .3rem; }
+  .stat-card .value { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+  .stat-card.green { border-left-color: #27ae60; }
+  .stat-card.orange { border-left-color: #e67e22; }
+  .stat-card.purple { border-left-color: #9b59b6; }
+
+  /* Section headers */
+  .section { background: var(--bg-secondary); border-radius: 10px; padding: 1.4rem; box-shadow: 0 2px 8px var(--shadow); margin-bottom: 1.5rem; }
+  .section h2 { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin: 0 0 1rem 0; border-bottom: 1px solid var(--border-color); padding-bottom: .5rem; }
+
+  /* Bar charts */
+  .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 130px; overflow-x: auto; padding-bottom: 4px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1 1 auto; min-width: 18px; }
+  .bar { background: #3498db; border-radius: 3px 3px 0 0; width: 100%; min-height: 2px; transition: opacity .2s; }
+  .bar:hover { opacity: .75; }
+  .bar-label { font-size: 0.55rem; color: var(--text-secondary); margin-top: 3px; white-space: nowrap; transform: rotate(-45deg); transform-origin: top left; }
+
+  /* Status badges */
+  .status-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .status-badge { flex: 1 1 120px; border-radius: 8px; padding: .8rem 1rem; text-align: center; }
+  .s2xx { background: #d5f5e3; color: #1a5c35; }
+  .s3xx { background: #d6eaf8; color: #154360; }
+  .s4xx { background: #fdebd0; color: #784212; }
+  .s5xx { background: #fadbd8; color: #78281f; }
+  .status-badge .sc { font-size: 1.5rem; font-weight: 700; }
+  .status-badge .sl { font-size: 0.75rem; margin-top: .2rem; }
+  [data-theme="dark"] .s2xx { background: #1a3d28; color: #6fcf97; }
+  [data-theme="dark"] .s3xx { background: #1a2e3d; color: #74b9ff; }
+  [data-theme="dark"] .s4xx { background: #3d2b1a; color: #f0a04b; }
+  [data-theme="dark"] .s5xx { background: #3d1a1a; color: #eb5757; }
+
+  /* Tables */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .data-table th { background: var(--table-header-bg); text-align: left; padding: .5rem .75rem; font-weight: 600; color: var(--text-secondary); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  .data-table td { padding: .45rem .75rem; border-bottom: 1px solid var(--border-color); color: var(--text-primary); word-break: break-all; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--table-hover-bg); }
+  .badge-code { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: .78rem; font-weight: 700; }
+  .code-2 { background: #d5f5e3; color: #1a5c35; }
+  .code-3 { background: #d6eaf8; color: #154360; }
+  .code-4 { background: #fdebd0; color: #784212; }
+  .code-5 { background: #fadbd8; color: #78281f; }
+  [data-theme="dark"] .code-2 { background: #1a3d28; color: #6fcf97; }
+  [data-theme="dark"] .code-3 { background: #1a2e3d; color: #74b9ff; }
+  [data-theme="dark"] .code-4 { background: #3d2b1a; color: #f0a04b; }
+  [data-theme="dark"] .code-5 { background: #3d1a1a; color: #eb5757; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+
+<div class="stats-wrap">
+  <div class="stats-title">Developer-Statistiken</div>
+  <div class="stats-sub">Stand: {{ now|date:"d.m.Y H:i" }} Uhr – nur für Superuser sichtbar</div>
+
+  <!-- Summary Cards -->
+  <div class="cards-row">
+    <div class="stat-card">
+      <div class="label">Requests heute</div>
+      <div class="value">{{ requests_today }}</div>
+    </div>
+    <div class="stat-card green">
+      <div class="label">Diese Woche</div>
+      <div class="value">{{ requests_week }}</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="label">Diesen Monat</div>
+      <div class="value">{{ requests_month }}</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="label">Unique IPs heute</div>
+      <div class="value">{{ unique_ips_today }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Ø Antwortzeit (24h)</div>
+      <div class="value">{% if avg_response %}{{ avg_response }} ms{% else %}–{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- Hourly chart (last 24h) -->
+  <div class="section">
+    <h2>Requests letzte 24 Stunden</h2>
+    <div class="bar-chart">
+      {% for item in hours_data %}
+      <div class="bar-col">
+        <div class="bar" style="height: calc({{ item.count }} * 120px / {{ max_hour_count }})" title="{{ item.count }} @ {{ item.hour }}"></div>
+        <div class="bar-label">{{ item.hour }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Daily chart (last 30d) -->
+  <div class="section">
+    <h2>Requests letzte 30 Tage</h2>
+    <div class="bar-chart">
+      {% for item in days_data %}
+      <div class="bar-col">
+        <div class="bar" style="height: calc({{ item.count }} * 120px / {{ max_day_count }})" title="{{ item.count }} @ {{ item.day }}"></div>
+        <div class="bar-label">{{ item.day }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Status codes + top paths -->
+  <div class="two-col">
+    <div class="section">
+      <h2>HTTP-Status-Codes (letzte 7 Tage)</h2>
+      <div class="status-row">
+        <div class="status-badge s2xx">
+          <div class="sc">{{ status_2xx }}</div>
+          <div class="sl">2xx Erfolg</div>
+        </div>
+        <div class="status-badge s3xx">
+          <div class="sc">{{ status_3xx }}</div>
+          <div class="sl">3xx Redirect</div>
+        </div>
+        <div class="status-badge s4xx">
+          <div class="sc">{{ status_4xx }}</div>
+          <div class="sl">4xx Client</div>
+        </div>
+        <div class="status-badge s5xx">
+          <div class="sc">{{ status_5xx }}</div>
+          <div class="sl">5xx Server</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Registrierungen (laufender Monat)</h2>
+      <table class="data-table">
+        <tbody>
+          <tr><td>Neue Django-User</td><td><strong>{{ new_users_30d }}</strong></td></tr>
+          <tr><td>Neue Portal-User</td><td><strong>{% if new_portal_users_30d is not None %}{{ new_portal_users_30d }}{% else %}–{% endif %}</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Top paths -->
+  <div class="section">
+    <h2>Top 15 Seiten (letzte 7 Tage)</h2>
+    <table class="data-table">
+      <thead><tr><th>Pfad</th><th style="text-align:right">Aufrufe</th></tr></thead>
+      <tbody>
+        {% for row in top_paths %}
+        <tr>
+          <td>{{ row.path }}</td>
+          <td style="text-align:right; font-weight:600">{{ row.count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="text-align:center;color:var(--text-secondary)">Noch keine Daten</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent errors -->
+  <div class="section">
+    <h2>Letzte Fehler (≥ 400)</h2>
+    <table class="data-table">
+      <thead><tr><th>Zeitpunkt</th><th>Code</th><th>Pfad</th><th>IP</th></tr></thead>
+      <tbody>
+        {% for err in recent_errors %}
+        <tr>
+          <td style="white-space:nowrap">{{ err.timestamp|date:"d.m. H:i" }}</td>
+          <td>
+            {% if err.status_code >= 500 %}
+              <span class="badge-code code-5">{{ err.status_code }}</span>
+            {% elif err.status_code >= 400 %}
+              <span class="badge-code code-4">{{ err.status_code }}</span>
+            {% else %}
+              <span class="badge-code code-3">{{ err.status_code }}</span>
+            {% endif %}
+          </td>
+          <td>{{ err.path }}</td>
+          <td>{{ err.ip|default:"–" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">Keine Fehler – alles grün ✓</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Top user agents -->
+  <div class="section">
+    <h2>Top User-Agents (letzte 7 Tage)</h2>
+    <table class="data-table">
+      <thead><tr><th>User-Agent</th><th style="text-align:right">Aufrufe</th></tr></thead>
+      <tbody>
+        {% for row in top_agents %}
+        <tr>
+          <td style="font-size:.8rem">{{ row.user_agent|truncatechars:100 }}</td>
+          <td style="text-align:right;font-weight:600">{{ row.count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="text-align:center;color:var(--text-secondary)">Noch keine Daten</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

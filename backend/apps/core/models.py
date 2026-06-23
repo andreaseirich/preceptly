@@ -194,3 +194,22 @@ class Expense(models.Model):
 
     def __str__(self):
         return f"{self.date} – {self.description} ({self.amount} €)"
+
+
+class RequestLog(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    path = models.CharField(max_length=500)
+    method = models.CharField(max_length=10)
+    status_code = models.PositiveSmallIntegerField(null=True, blank=True)
+    response_ms = models.PositiveIntegerField(null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    session_key = models.CharField(max_length=40, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=300, blank=True)
+    referer = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        indexes = [models.Index(fields=["timestamp", "path"])]
