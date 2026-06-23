@@ -317,6 +317,11 @@ class SettingsView(LoginRequiredMixin, FormView):
         context["stripe_premium_checkout_enabled"] = getattr(
             settings, "STRIPE_PREMIUM_CHECKOUT_ENABLED", False
         )
+        context["stripe_price_starter"] = getattr(settings, "STRIPE_PRICE_ID_STARTER", "")
+        context["stripe_price_pro"] = getattr(settings, "STRIPE_PRICE_ID_PRO", "") or getattr(
+            settings, "STRIPE_PRICE_ID_MONTHLY", ""
+        )
+        context["stripe_price_business"] = getattr(settings, "STRIPE_PRICE_ID_BUSINESS", "")
         q = self.request.GET
         context["show_stripe_success_banner"] = (
             q.get("stripe_success") == "1" or q.get("checkout") == "success"
