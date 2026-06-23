@@ -12,6 +12,11 @@
 }
 .slot-btn:hover, .slot-btn.selected { background: #007bff; color: #fff; border-color: #007bff; }
 .slot-empty { color: var(--text-secondary); font-size: 0.9em; }
+.slot-busy {
+    padding: 7px 16px; border: 1px solid rgba(239,68,68,0.4);
+    border-radius: 4px; background: rgba(239,68,68,0.08); color: #b91c1c;
+    font-size: 0.9em; cursor: default; opacity: 0.75;
+}
 </style>
 {% endblock %}
 
@@ -84,18 +89,32 @@
           slotGrid.innerHTML = '<span class="slot-empty">Keine freien Zeitslots an diesem Tag.</span>';
           return;
         }
-        data.slots.forEach(function(slot) {
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'slot-btn';
-          btn.textContent = slot + ' Uhr';
-          btn.addEventListener('click', function() {
-            document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
-            btn.classList.add('selected');
-            timeInput.value = slot;
-            submitBtn.disabled = false;
-          });
-          slotGrid.appendChild(btn);
+        // Merge available and busy slots, sort by time
+        var allTimes = {};
+        data.slots.forEach(function(s){ allTimes[s] = 'free'; });
+        if (data.busy_slots) {
+          data.busy_slots.forEach(function(b){ if (!allTimes[b.start]) allTimes[b.start] = 'busy'; });
+        }
+        var sortedTimes = Object.keys(allTimes).sort();
+        sortedTimes.forEach(function(time) {
+          if (allTimes[time] === 'free') {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'slot-btn';
+            btn.textContent = time + ' Uhr';
+            btn.addEventListener('click', function() {
+              document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              timeInput.value = time;
+              submitBtn.disabled = false;
+            });
+            slotGrid.appendChild(btn);
+          } else {
+            var span = document.createElement('span');
+            span.className = 'slot-busy';
+            span.textContent = time + ' Uhr – Belegt';
+            slotGrid.appendChild(span);
+          }
         });
       })
       .catch(function() {
