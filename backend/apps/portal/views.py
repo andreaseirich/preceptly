@@ -6,7 +6,6 @@ from calendar import monthcalendar as _monthcalendar
 
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db import models
 from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -419,6 +418,9 @@ class PortalActivateView(View):
         link.invite_token = uuid.uuid4().hex
         link.invite_token_created_at = None
         link.save()
+        from apps.portal.email_service import send_activation_notification
+
+        send_activation_notification(portal_user, link.contract)
         # Session-Fixation-Schutz: Session-Key vor dem Setzen rotieren
         request.session.cycle_key()
         request.session["portal_user_id"] = portal_user.pk
@@ -540,18 +542,22 @@ def _get_portal_student(portal_user, student_pk):
 
 
 def _get_active_contract(student):
-    """Gibt den neuesten aktiven Vertrag des Schülers zurück."""
+    """Gibt den Vertrag zurück falls er aktiv ist, sonst None.
+
+    Im Portal-Kontext ist 'student' bereits ein Contract-Objekt.
+    """
     today = _dt.date.today()
-    return (
-        student.contracts.filter(is_active=True)
-        .filter(models.Q(end_date__isnull=True) | models.Q(end_date__gte=today))
-        .order_by("-start_date")
-        .first()
-    )
+    if not student.is_active:
+        return None
+    end_date = getattr(student, "end_date", None)
+    if end_date and end_date < today:
+        return None
+    return student
 
 
 def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
     """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück."""
+    from apps.blocked_times.models import BlockedTime
     from apps.lessons.models import Session as _Session
 
     profile = getattr(tutor, "profile", None)
@@ -569,6 +575,21 @@ def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
         s_start = _dt.datetime.combine(date, s.start_time)
         s_end = s_start + _dt.timedelta(minutes=s.duration_minutes)
         busy.append((s.start_time, s_end.time()))
+
+    blocked_times = BlockedTime.objects.filter(
+        user=tutor,
+        start_datetime__date__lte=date,
+        end_datetime__date__gte=date,
+    )
+    day_start_dt = _dt.datetime.combine(date, _dt.time(0, 0))
+    day_end_dt = _dt.datetime.combine(date, _dt.time(23, 59))
+    for bt in blocked_times:
+        bt_start = bt.start_datetime.replace(tzinfo=None)
+        bt_end = bt.end_datetime.replace(tzinfo=None)
+        clamped_start = max(bt_start, day_start_dt)
+        clamped_end = min(bt_end, day_end_dt)
+        if clamped_start < clamped_end:
+            busy.append((clamped_start.time(), clamped_end.time()))
 
     available = []
     for slot in day_slots:
@@ -691,7 +712,28 @@ class PortalBookingView(View):
                     error=f"Zeitkonflikt mit bestehendem Termin um {ex.start_time.strftime('%H:%M')} Uhr.",
                 )
 
-        _Session.objects.create(
+        # BlockedTime-Konflikt-Prüfung
+        from apps.blocked_times.models import BlockedTime
+
+        day_start_dt = _dt.datetime.combine(session_date, _dt.time(0, 0))
+        day_end_dt = _dt.datetime.combine(session_date, _dt.time(23, 59, 59))
+        blocked_times = BlockedTime.objects.filter(
+            user=student.user,
+            start_datetime__date__lte=session_date,
+            end_datetime__date__gte=session_date,
+        )
+        for bt in blocked_times:
+            bt_start = max(bt.start_datetime.replace(tzinfo=None), day_start_dt)
+            bt_end = min(bt.end_datetime.replace(tzinfo=None), day_end_dt)
+            if start_dt < bt_end and end_dt > bt_start:
+                return self._render(
+                    request,
+                    student,
+                    contract,
+                    error="Diese Zeit ist durch eine Blockzeit belegt.",
+                )
+
+        session = _Session.objects.create(
             contract=contract,
             date=session_date,
             start_time=session_time,
@@ -700,6 +742,9 @@ class PortalBookingView(View):
             notes=topic or None,
             created_via="portal_booking",
         )
+        from apps.portal.email_service import send_booking_notification_portal
+
+        send_booking_notification_portal(session, student.user)
         return self._render(
             request,
             student,
