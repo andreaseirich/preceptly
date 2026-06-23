@@ -3650,16 +3650,16 @@ msgstr "Frühzeitiger Zugang zu neuen Features"
 
 #: apps/core/templates/core/landing.html:369
 msgid "Built by a tutor, for tutors"
-msgstr ""
+msgstr "Von einem Nachhilfelehrer, für Nachhilfelehrer"
 
 #: apps/core/templates/core/landing.html:370
 msgid ""
 "Preceptly grew out of real frustration with spreadsheets and calendar chaos."
-msgstr ""
+msgstr "Preceptly entstand aus echter Frustration über Tabellen und Kalender-Chaos."
 
 #: apps/core/templates/core/landing.html:373
 msgid "I used to spend Sunday evenings doing admin. Now it takes 10 minutes."
-msgstr ""
+msgstr "Früher habe ich Sonntagabende mit Verwaltung verbracht. Jetzt dauert es 10 Minuten."
 
 #: apps/core/templates/core/landing.html:374
 msgid "developer & tutor"
