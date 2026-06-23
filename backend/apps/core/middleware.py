@@ -1,6 +1,9 @@
+import logging
 import time
 
 from django.utils.deprecation import MiddlewareMixin
+
+logger = logging.getLogger(__name__)
 
 EXCLUDED_PATHS = (
     "/health/",
@@ -54,5 +57,5 @@ class RequestLogMiddleware(MiddlewareMixin):
                 referer=request.META.get("HTTP_REFERER", "")[:500],
             )
         except Exception:
-            pass
+            logger.debug("RequestLog write failed", exc_info=True)
         return response
