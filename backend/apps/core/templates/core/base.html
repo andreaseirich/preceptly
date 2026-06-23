@@ -750,6 +750,22 @@
     });
     </script>
     {% block extra_js %}{% endblock %}
+    {% if user.is_authenticated %}
+    <script>
+    (function() {
+      try {
+        var detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var stored = '{{ user.profile.timezone|default:"" }}';
+        if (detected && detected !== stored) {
+          var fd = new FormData();
+          fd.append('timezone', detected);
+          fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+          fetch('/api/detect-timezone/', { method: 'POST', body: fd, credentials: 'same-origin' });
+        }
+      } catch(e) {}
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>
 
