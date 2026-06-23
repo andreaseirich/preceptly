@@ -22,12 +22,13 @@ from apps.contracts.formsets import (
     iter_contract_months,
 )
 from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
-from apps.contracts.models import Contract, ContractMonthlyPlan, InstituteTierConfig
+from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.contracts.services import (
     get_contract_current_month_summary,
     get_contract_monthly_planning_summary,
     get_institute_tier_progress,
 )
+from apps.core.demo_guard import DEMO_CONTRACT_LIMIT, InstituteTierConfig, demo_block, is_demo_user
 
 
 class ContractListView(LoginRequiredMixin, ListView):
@@ -140,6 +141,17 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
+        if is_demo_user(self.request.user):
+            count = Contract.objects.filter(user=self.request.user).count()
+            if count >= DEMO_CONTRACT_LIMIT:
+                from django.utils.translation import gettext as _
+
+                return demo_block(
+                    self.request,
+                    _("Demo limit reached: max {n} contracts per demo account.").format(
+                        n=DEMO_CONTRACT_LIMIT
+                    ),
+                )
         # Save contract first
         form.instance.user = self.request.user
         self.object = form.save()

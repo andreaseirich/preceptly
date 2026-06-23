@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
+from apps.core.demo_guard import demo_ai_increment, demo_ai_limit_reached, is_demo_user
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Session
@@ -41,7 +42,22 @@ def generate_lesson_plan(request, lesson_id):
             return redirect(next_url)
         return redirect("lessons:detail", pk=lesson_id)
 
-    # Täglicher Quota-Cap (M8): Kosten-DoS verhindern
+    # Demo-Konto: Tageslimit (3 KI-Generierungen)
+    if is_demo_user(request.user):
+        if demo_ai_limit_reached(request.user):
+            messages.error(
+                request,
+                _("Demo limit reached: max 3 AI generations per day per demo account."),
+            )
+            next_url = request.POST.get("next") or request.GET.get("next")
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(next_url)
+            return redirect("lessons:detail", pk=lesson_id)
+        demo_ai_increment(request.user)
+
+        # Täglicher Quota-Cap (M8): Kosten-DoS verhindern
     MAX_DAILY_GENERATIONS = 20
     today = timezone.localdate()
     daily_count = LessonPlan.objects.filter(

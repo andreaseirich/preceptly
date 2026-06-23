@@ -399,7 +399,12 @@
         </div>
     </nav>
     
-    <div class="container">
+    {% if is_demo_user %}
+    <div style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;position:sticky;top:0;z-index:1000;">
+        {% load i18n %}{% trans "Demo account — data resets hourly. Do not enter real personal data." %}
+    </div>
+    {% endif %}
+        <div class="container">
         {% if messages %}
         <div class="messages">
             {% for message in messages %}

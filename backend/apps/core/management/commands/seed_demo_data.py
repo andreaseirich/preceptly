@@ -86,7 +86,11 @@ class Command(BaseCommand):
 
         UserProfile.objects.get_or_create(
             user=premium_user,
-            defaults={"is_premium": True, "premium_since": timezone.now()},
+            defaults={
+                "is_premium": True,
+                "subscription_tier": "business",
+                "premium_since": timezone.now(),
+            },
         )
 
         non_premium_user, _ = User.objects.get_or_create(
