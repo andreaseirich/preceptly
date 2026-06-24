@@ -244,6 +244,14 @@
                 z-index: 999;
             }
             nav .nav-links.active { left: 0; }
+            .nav-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 998;
+            }
+            .nav-backdrop.active { display: block; }
             nav .nav-links a { 
                 display: block; 
                 padding: 15px 20px; 
@@ -382,6 +390,7 @@
                 <a href="{% url 'core:tutor_messages_overview' %}">💬 {% trans "Messages" %}{% if unread_portal_count %} <span style="background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.75em;vertical-align:middle;">{{ unread_portal_count }}</span>{% endif %}</a>
                 <a href="{% url 'core:settings' %}">⚙️ {% trans "Settings" %}</a>
             </div>
+            <div id="navBackdrop" class="nav-backdrop" aria-hidden="true"></div>
             <div class="nav-right">
                 <button class="theme-toggle" id="themeToggle" title="{% trans 'Toggle dark mode' %}" aria-label="{% trans 'Toggle dark mode' %}">
                     <span id="themeIcon">🌙</span>
@@ -529,21 +538,43 @@
         const navLinks = document.getElementById('navLinks');
         
         if (menuToggle && navLinks) {
+            const navBackdrop = document.getElementById('navBackdrop');
+
+            function openMenu() {
+                navLinks.classList.add('active');
+                if (navBackdrop) navBackdrop.classList.add('active');
+                menuToggle.setAttribute('aria-expanded', 'true');
+            }
+            function closeMenu() {
+                navLinks.classList.remove('active');
+                if (navBackdrop) navBackdrop.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+
             menuToggle.addEventListener('click', function() {
-                navLinks.classList.toggle('active');
+                if (navLinks.classList.contains('active')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
             });
-            
+
+            // Close menu when clicking backdrop
+            if (navBackdrop) {
+                navBackdrop.addEventListener('click', closeMenu);
+            }
+
             // Close menu when clicking outside
             document.addEventListener('click', function(event) {
                 if (!navLinks.contains(event.target) && !menuToggle.contains(event.target)) {
-                    navLinks.classList.remove('active');
+                    closeMenu();
                 }
             });
-            
+
             // Close menu when clicking a link
             navLinks.querySelectorAll('a').forEach(function(link) {
                 link.addEventListener('click', function() {
-                    navLinks.classList.remove('active');
+                    closeMenu();
                 });
             });
         }
