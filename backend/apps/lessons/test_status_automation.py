@@ -2,7 +2,7 @@
 Tests für automatische Status-Setzung bei Recurring Lessons und manueller Erstellung.
 """
 
-from datetime import date, time, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -110,10 +110,16 @@ class RecurringLessonStatusAutomationTest(TestCase):
 
         self.assertGreater(result["created"], 0)
 
-        # Prüfe Status-Verteilung
+        # Prüfe Status-Verteilung (basierend auf end_datetime wie der Service)
+        now = timezone.now()
         lessons = Lesson.objects.filter(contract=self.contract)
-        past_lessons = [lesson for lesson in lessons if lesson.date < today]
-        future_lessons = [lesson for lesson in lessons if lesson.date >= today]
+
+        def end_dt(lesson):
+            start = timezone.make_aware(datetime.combine(lesson.date, lesson.start_time))
+            return start + timedelta(minutes=lesson.duration_minutes)
+
+        past_lessons = [l for l in lessons if end_dt(l) < now]
+        future_lessons = [l for l in lessons if end_dt(l) >= now]
 
         # Vergangene sollten TAUGHT sein
         for lesson in past_lessons:
@@ -121,7 +127,7 @@ class RecurringLessonStatusAutomationTest(TestCase):
                 lesson.status, "taught", f"Vergangene Lesson am {lesson.date} sollte TAUGHT sein"
             )
 
-        # Zukünftige sollten PLANNED sein
+        # Zukünftige oder laufende sollten PLANNED sein
         for lesson in future_lessons:
             self.assertEqual(
                 lesson.status, "planned", f"Zukünftige Lesson am {lesson.date} sollte PLANNED sein"
