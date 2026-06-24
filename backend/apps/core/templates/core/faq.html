@@ -1,0 +1,110 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}FAQ – Preceptly{% endblock %}
+
+{% block content %}
+<h1>Häufige Fragen (FAQ)</h1>
+
+<nav aria-label="FAQ-Abschnitte" style="margin-bottom: 32px;">
+  <ul style="list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px;">
+    <li><a href="#einnahmen">Einnahmen &amp; Abrechnung</a></li>
+    <li><a href="#rechnungen">Rechnungen</a></li>
+    <li><a href="#stunden">Stunden</a></li>
+    <li><a href="#steuern">Steuern &amp; EÜR</a></li>
+    <li><a href="#berichte">Berichte</a></li>
+    <li><a href="#tutorspace">TutorSpace</a></li>
+  </ul>
+</nav>
+
+{# ======= EINNAHMEN ======= #}
+<section id="einnahmen">
+  <h2>Einnahmen &amp; Abrechnung</h2>
+
+  <h3>Wie werden die Beträge in der Einnahmenübersicht ermittelt?</h3>
+  <ul>
+    <li><strong>Stunde bereits auf einer Rechnung:</strong> Summe aller Rechnungspositionen zu dieser Stunde – identisch mit der Abrechnung.</li>
+    <li><strong>Stunde noch nicht verrechnet:</strong> Dieselben Regeln wie beim Erstellen einer Rechnung (TutorSpace: Stufenvergütung aus kumulierten Stunden; sonst: Dauer ÷ Einheitslänge × Vertragssatz).</li>
+    <li><strong>Zeile „Bezahlt" vs. realisierte Einnahmen:</strong> Die Summen weichen oft ab, weil Rechnungszeitraum und Stundendatum nicht immer im selben Monat liegen.</li>
+  </ul>
+
+  <h3>Warum weicht die Monatssumme von meinen tatsächlichen Einnahmen ab?</h3>
+  <p>Die realisierten Einnahmen zählen nur <strong>bezahlte Rechnungen</strong> und ordnen sie nach dem Startmonat des Rechnungszeitraums – nicht nach dem Datum der einzelnen Stunden. Eine Rechnung für Juni, die im Juli bezahlt wird, erscheint daher im Juli.</p>
+
+  <h3>Was bedeuten die Spalten in der Jahresübersicht?</h3>
+  <p>Jede Zeile zeigt den Kalendermonat. Die realisierte Einnahme ist die Summe aller bezahlten Rechnungen, deren Abrechnungszeitraum in diesem Monat beginnt – unabhängig davon, wann die Stunden stattfanden.</p>
+</section>
+
+{# ======= RECHNUNGEN ======= #}
+<section id="rechnungen" style="margin-top: 40px;">
+  <h2>Rechnungen</h2>
+
+  <h3>Welche Stunden kommen auf eine neue Rechnung?</h3>
+  <p>Alle Stunden mit Status <strong>Unterrichtet</strong> im gewählten Zeitraum werden automatisch einbezogen. Stunden mit Status <em>Geplant</em> oder <em>Bezahlt</em> werden nicht berücksichtigt. Eine Stunde kann nur auf einer Rechnung erscheinen – bereits abgerechnete Stunden werden automatisch ausgeschlossen.</p>
+
+  <h3>Kann ich eine Rechnung nach bestimmten Verträgen oder Instituten filtern?</h3>
+  <p>Ja. Beim Erstellen einer Rechnung kannst du optional ein Institut oder einen einzelnen Vertrag auswählen. Dann werden nur Stunden des entsprechenden Vertrags abgerechnet.</p>
+
+  <h3>Was passiert, wenn ich eine Rechnung lösche?</h3>
+  <p>Die Stunden werden wieder auf „Unterrichtet" zurückgesetzt und können erneut abgerechnet werden.</p>
+</section>
+
+{# ======= STUNDEN ======= #}
+<section id="stunden" style="margin-top: 40px;">
+  <h2>Stunden</h2>
+
+  <h3>Was sind die Stundenstatus?</h3>
+  <ul>
+    <li><strong>Geplant:</strong> Die Stunde ist angesetzt, hat aber noch nicht stattgefunden.</li>
+    <li><strong>Unterrichtet:</strong> Die Stunde hat stattgefunden und kann abgerechnet werden.</li>
+    <li><strong>Ausgefallen:</strong> Die Stunde ist ausgefallen und wird nicht abgerechnet.</li>
+    <li><strong>Bezahlt:</strong> Die Stunde ist auf einer bezahlten Rechnung.</li>
+  </ul>
+
+  <h3>Was sind wiederkehrende Stunden?</h3>
+  <p>Mit wiederkehrenden Stunden legst du eine Serienstunde an (z. B. „jeden Montag um 14 Uhr"). Nach dem Speichern werden alle Einzelstunden für den angegebenen Zeitraum automatisch generiert. Du kannst einzelne Stunden der Serie später noch bearbeiten oder löschen.</p>
+
+  <h3>Kann ich eine einzelne Stunde aus einer Wiederholungsserie ändern?</h3>
+  <p>Ja. Beim Bearbeiten einer Stunde kannst du wählen, ob du nur diese eine Stunde oder alle zukünftigen Stunden der Serie ändern möchtest.</p>
+</section>
+
+{# ======= STEUERN ======= #}
+<section id="steuern" style="margin-top: 40px;">
+  <h2>Steuern &amp; EÜR</h2>
+
+  <h3>Was zeigt die EÜR-Ansicht?</h3>
+  <p>Die EÜR (Einnahmen-Überschuss-Rechnung) folgt dem <strong>Zufluss-Prinzip</strong> (§ 4 Abs. 3 EStG): Nur Rechnungen, deren Zahlungsdatum im gewählten Jahr liegt, werden einbezogen. Das entspricht der deutschen Steuererklärung für Freiberufler.</p>
+
+  <h3>Wann gilt eine Rechnung als „zugeflossen"?</h3>
+  <p>Wenn du in Preceptly ein Zahlungsdatum einträgst (Rechnung als bezahlt markieren). Das Datum der Rechnungsstellung oder des Abrechnungszeitraums ist für die EÜR nicht maßgeblich.</p>
+</section>
+
+{# ======= BERICHTE ======= #}
+<section id="berichte" style="margin-top: 40px;">
+  <h2>Berichte</h2>
+
+  <h3>Was bedeutet „Realisierte Einnahmen" im Bericht?</h3>
+  <p>Summe aller bezahlten Rechnungen für den gewählten Monat, geordnet nach dem Startdatum des Abrechnungszeitraums.</p>
+
+  <h3>Was bedeutet „Unterrichtet, nicht verrechnet"?</h3>
+  <p>Stunden mit Status „Unterrichtet", die noch auf keiner Rechnung stehen. Der angezeigte Betrag wird nach denselben Regeln berechnet wie beim Erstellen einer neuen Rechnung (inklusive TutorSpace-Stufenvergütung).</p>
+
+  <h3>Wie werden die Top-Stunden pro Schüler berechnet?</h3>
+  <p>Zählt alle Stunden mit Status „Unterrichtet" oder „Bezahlt" im gewählten Kalendermonat nach Stundendatum.</p>
+</section>
+
+{# ======= TUTORSPACE ======= #}
+<section id="tutorspace" style="margin-top: 40px;">
+  <h2>TutorSpace-Stufenvergütung</h2>
+
+  <h3>Wie funktioniert die TutorSpace-Stufenvergütung?</h3>
+  <p>TutorSpace zahlt gestaffelt: Der Stundensatz steigt mit der kumulierten Gesamtstundenzahl. Preceptly zählt alle vorherigen TutorSpace-Stunden (ab dem konfigurierten Startdatum in den Einstellungen) und wendet den entsprechenden Stufensatz automatisch bei der Abrechnung an.</p>
+
+  <h3>Ab welchem Datum werden Stunden für die Stufenberechnung gezählt?</h3>
+  <p>Das Startdatum für die Stufenberechnung kannst du in den <a href="{% url 'core:settings' %}">Einstellungen</a> festlegen. Stunden vor diesem Datum fließen nicht in die Stufenberechnung ein.</p>
+
+  <h3>Warum stimmt der berechnete Betrag nicht mit meiner TutorSpace-Abrechnung überein?</h3>
+  <p>Mögliche Ursachen: Das Startdatum für die Stufenberechnung ist nicht korrekt gesetzt, oder es wurden Stunden manuell ohne TutorSpace-Vertrag erfasst. Prüfe in den Einstellungen das konfigurierte Startdatum.</p>
+</section>
+
+{% endblock %}

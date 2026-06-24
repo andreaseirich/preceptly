@@ -7,12 +7,7 @@
 {% block content %}
 <h1>{% trans "Create New Invoice" %}</h1>
 
-<div class="alert-info" style="margin-bottom: 20px;">
-    <strong>💡 {% trans "Note:" %}</strong>
-    <p style="margin: 5px 0 0 0; font-size: 0.9em;">
-        {% trans "All taught lessons (status 'taught') in the specified period will be automatically included in the invoice. Lessons with status 'planned' or 'paid' will not be considered. A lesson can only appear in one invoice - lessons that are already included in another invoice will be automatically excluded." %}
-    </p>
-</div>
+<p style="font-size:0.875em;"><a href="/faq/#rechnungen">→ Wie funktioniert die Rechnungserstellung? (FAQ)</a></p>
 
 <form method="post" id="invoice-form">
     {% csrf_token %}

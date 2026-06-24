@@ -13,15 +13,7 @@
 <h1>{% trans "Reports" %}{% if is_premium %} <span class="premium-badge">{% trans "Premium" %}</span>{% endif %}</h1>
 
 {% if is_premium %}
-<div class="tutorflow-help-box" style="margin-bottom: 24px;">
-    <strong>{% trans "Definitions (same as Income)" %}</strong>
-    <ul>
-        <li>{% trans "Recognized revenue: sum of paid invoice totals for the selected month, by each invoice billing period start date." %}</li>
-        <li>{% trans "Lessons and taught hours: sessions dated in the selected calendar month (taught or paid status, as shown)." %}</li>
-        <li>{% trans "Taught but not invoiced: value uses the same billing rules as a new invoice (including TutorSpace tiers)." %}</li>
-    </ul>
-</div>
-
+<p style="font-size:0.875em;"><a href="/faq/#berichte">→ Definitionen &amp; Berechnungsregeln (FAQ)</a></p>
 <div style="margin-bottom: 30px;">
     <form method="get" action="" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
         <label for="year">{% trans "Year" %}:</label>

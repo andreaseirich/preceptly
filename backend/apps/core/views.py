@@ -789,3 +789,7 @@ class AutoDetectTimezoneView(LoginRequiredMixin, View):
             profile.timezone = tz_value
             profile.save(update_fields=["timezone"])
         return JsonResponse({"ok": True, "timezone": tz_value})
+
+
+class FaqView(LoginRequiredMixin, TemplateView):
+    template_name = "core/faq.html"
