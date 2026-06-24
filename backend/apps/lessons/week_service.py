@@ -9,8 +9,6 @@ from typing import Dict
 from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
-from apps.blocked_times.recurring_models import RecurringBlockedTime
-from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService
 
@@ -63,16 +61,6 @@ class WeekService:
             blocked_times_qs = blocked_times_qs.filter(user=user)
         blocked_times = blocked_times_qs
 
-        # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für die Woche
-        recurring_qs = RecurringBlockedTime.objects.filter(
-            start_date__lte=week_end, end_date__gte=week_start, is_active=True
-        ) | RecurringBlockedTime.objects.filter(
-            start_date__lte=week_end, end_date__isnull=True, is_active=True
-        )
-        if user:
-            recurring_qs = recurring_qs.filter(user=user)
-        recurring_blocked_times = recurring_qs
-
         # Gruppiere Lessons nach Datum
         lessons_by_date = defaultdict(list)
         conflicts_by_lesson = {}
@@ -97,14 +85,6 @@ class WeekService:
                 if current_date >= week_start:
                     blocked_times_by_date[current_date].append(blocked_time)
                 current_date += timedelta(days=1)
-
-        # Füge generierte Blockzeiten aus RecurringBlockedTime hinzu
-        for rbt in recurring_blocked_times:
-            generated_blocked_times_preview = RecurringBlockedTimeService.preview_blocked_times(rbt)
-            for bt_preview in generated_blocked_times_preview:
-                # Filter nur für die aktuelle Woche
-                if week_start <= bt_preview.start_datetime.date() <= week_end:
-                    blocked_times_by_date[bt_preview.start_datetime.date()].append(bt_preview)
 
         return {
             "week_start": week_start,

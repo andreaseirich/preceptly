@@ -26,7 +26,6 @@ from django.utils import timezone
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.blocked_times.models import BlockedTime
-from apps.blocked_times.recurring_models import RecurringBlockedTime
 from apps.contracts.models import Contract, ContractMonthlyPlan
 from apps.core.models import UserProfile
 from apps.lesson_plans.models import LessonPlan
@@ -61,7 +60,6 @@ class Command(BaseCommand):
         Lesson.objects.filter(contract_id__in=contract_ids).delete()
         RecurringLesson.objects.filter(contract_id__in=contract_ids).delete()
         BlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
-        RecurringBlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
         ContractMonthlyPlan.objects.filter(contract_id__in=contract_ids).delete()
         Contract.objects.filter(user_id__in=demo_user_ids).delete()
         UserProfile.objects.filter(user_id__in=demo_user_ids).delete()

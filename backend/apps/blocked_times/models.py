@@ -2,8 +2,6 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-# Import RecurringBlockedTime für Django-Erkennung
-
 
 class BlockedTime(models.Model):
     """Personal appointments/blocked times (e.g., university, job, community)."""

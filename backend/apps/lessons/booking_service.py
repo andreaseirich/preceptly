@@ -10,8 +10,6 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.blocked_times.models import BlockedTime
-from apps.blocked_times.recurring_models import RecurringBlockedTime
-from apps.blocked_times.recurring_service import RecurringBlockedTimeService
 from apps.lessons.conflict_service import LessonConflictService
 from apps.lessons.models import Lesson
 from apps.lessons.travel_policy import get_synthetic_occupied_for_date
@@ -56,23 +54,7 @@ class BookingService:
             start_datetime__lt=end_datetime, end_datetime__gt=start_datetime
         ).order_by("start_datetime")
 
-        # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für den Zeitraum
-        recurring_blocked_times = RecurringBlockedTime.objects.filter(
-            start_date__lte=end_date, end_date__gte=start_date, is_active=True
-        ) | RecurringBlockedTime.objects.filter(
-            start_date__lte=end_date, end_date__isnull=True, is_active=True
-        )
-
-        # Sammle Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten
-        extra = []
-        for rbt in recurring_blocked_times:
-            generated_blocked_times_preview = RecurringBlockedTimeService.preview_blocked_times(rbt)
-            for bt_preview in generated_blocked_times_preview:
-                # Filter nur für den Zeitraum
-                if start_date <= bt_preview.start_datetime.date() <= end_date:
-                    extra.append(bt_preview)
-
-        all_blocked = list(blocked_qs) + extra
+        all_blocked = list(blocked_qs)
 
         for blocked_time in all_blocked:
             # Convert to local timezone for correct time extraction
@@ -353,22 +335,6 @@ class BookingService:
             end_datetime__gt=start_datetime,
         ).order_by("start_datetime")
 
-        recurring_qs = RecurringBlockedTime.objects.filter(
-            user=user,
-            start_date__lte=week_end,
-            end_date__gte=week_start,
-            is_active=True,
-        ) | RecurringBlockedTime.objects.filter(
-            user=user,
-            start_date__lte=week_end,
-            end_date__isnull=True,
-            is_active=True,
-        )
-        for rbt in recurring_qs:
-            for bt in RecurringBlockedTimeService.preview_blocked_times(rbt):
-                if week_start <= bt.start_datetime.date() <= week_end:
-                    blocked_qs = list(blocked_qs) + [bt]
-
         for bt in blocked_qs:
             local_start = timezone.localtime(bt.start_datetime)
             local_end = timezone.localtime(bt.end_datetime)
@@ -556,24 +522,6 @@ class BookingService:
         if user:
             blocked_times_qs = blocked_times_qs.filter(user=user)
         blocked_times = blocked_times_qs
-
-        # Lade wiederkehrende Blockzeiten und generiere temporäre Blockzeiten für den Zeitraum
-        recurring_qs = RecurringBlockedTime.objects.filter(
-            start_date__lte=end_date, end_date__gte=start_date, is_active=True
-        ) | RecurringBlockedTime.objects.filter(
-            start_date__lte=end_date, end_date__isnull=True, is_active=True
-        )
-        if user:
-            recurring_qs = recurring_qs.filter(user=user)
-        recurring_blocked_times = recurring_qs
-
-        # Füge Vorschau-Blockzeiten aus wiederkehrenden Blockzeiten hinzu
-        for rbt in recurring_blocked_times:
-            generated_blocked_times_preview = RecurringBlockedTimeService.preview_blocked_times(rbt)
-            for bt_preview in generated_blocked_times_preview:
-                # Filter nur für den Zeitraum
-                if start_date <= bt_preview.start_datetime.date() <= end_date:
-                    blocked_times = list(blocked_times) + [bt_preview]
 
         for blocked_time in blocked_times:
             # Convert to local timezone for correct time extraction

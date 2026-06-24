@@ -98,25 +98,8 @@ class BlockedTimeForm(forms.ModelForm):
             self.fields["recurrence_type"].widget = forms.HiddenInput()
             self.fields["recurrence_end_date"].widget = forms.HiddenInput()
 
-            # Prüfe, ob diese BlockedTime zu einer Serie gehört
-            from apps.blocked_times.recurring_utils import find_matching_recurring_blocked_time
-
-            matching_recurring = find_matching_recurring_blocked_time(self.instance)
-            if matching_recurring:
-                # Zeige Option für Bearbeitungsscope
-                self.fields["edit_scope"].initial = "single"
-                # Wenn Serie bearbeitet wird, zeige Wochentage-Felder
-                # Initialisiere mit aktuellen Wochentagen der Serie
-                active_weekdays = matching_recurring.get_active_weekdays()
-                self.fields["recurrence_weekdays"].initial = [str(wd) for wd in active_weekdays]
-                # Widget immer sichtbar machen - wird per JavaScript gesteuert
-                self.fields["recurrence_weekdays"].widget = forms.CheckboxSelectMultiple(
-                    attrs={"class": "form-check-input"}
-                )
-            else:
-                # Verstecke edit_scope und recurrence_weekdays, wenn keine Serie gefunden
-                self.fields["edit_scope"].widget = forms.HiddenInput()
-                self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
+            self.fields["edit_scope"].widget = forms.HiddenInput()
+            self.fields["recurrence_weekdays"].widget = forms.HiddenInput()
         else:
             # Beim Erstellen: edit_scope verstecken
             self.fields["edit_scope"].widget = forms.HiddenInput()
