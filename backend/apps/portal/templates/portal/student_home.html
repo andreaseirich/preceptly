@@ -16,7 +16,7 @@
 <h1>Hallo, {{ student.full_name }}!</h1>
 
 <div class="btn-group" style="margin-bottom:28px;">
-    <a class="btn" href="{% url 'portal:calendar' %}">📅 Kalender</a>
+    <a class="btn" href="{% url 'portal:calendar_week' %}">📅 Kalender</a>
     <a class="btn" href="{% url 'portal:book' student.pk %}">+ Termin buchen</a>
     <a class="btn btn-secondary" href="{% url 'portal:student_lessons' %}">Alle Stunden</a>
     <a class="btn btn-secondary" href="{% url 'portal:recurring_manage' student.pk %}">Serientermine</a>
