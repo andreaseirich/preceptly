@@ -831,11 +831,9 @@ class PortalSessionCancelView(View):
         if session.status != "planned":
             messages.warning(request, "Nur geplante Termine können abgesagt werden.")
         else:
-            session.status = "cancelled"
-            session.save()
-            messages.success(
-                request, f"Termin am {session.date.strftime('%d.%m.%Y')} wurde abgesagt."
-            )
+            date_str = session.date.strftime("%d.%m.%Y")
+            session.delete()
+            messages.success(request, f"Termin am {date_str} wurde abgesagt.")
 
         # Zurück zur richtigen Übersicht
         if portal_user.role == "student":
@@ -1102,15 +1100,17 @@ class PortalRecurringCancelView(View):
             return HttpResponseForbidden()
 
         today = _dt.date.today()
-        cancelled = _Session.objects.filter(
+        deleted_count, _ = _Session.objects.filter(
             recurring_session=rs,
             date__gte=today,
             status="planned",
-        ).update(status="cancelled")
+        ).delete()
 
         rs.is_active = False
         rs.save()
-        messages.success(request, f"Serientermin beendet. {cancelled} zukünftige Termine abgesagt.")
+        messages.success(
+            request, f"Serientermin beendet. {deleted_count} zukünftige Termine gelöscht."
+        )
         return redirect("portal:recurring_manage", student_pk=student.pk)
 
 
@@ -1399,18 +1399,20 @@ class PortalCalendarView(View):
             user=tutor, start_datetime__lt=end_aware, end_datetime__gt=start_aware
         )
         for bt in blocked:
-            bt_date = bt.start_datetime.date()
+            bt_start_local = _localtime(bt.start_datetime)
+            bt_end_local = _localtime(bt.end_datetime)
+            bt_date = bt_start_local.date()
             while (
-                bt_date < bt.end_datetime.date() + _datetime_mod.timedelta(days=1)
+                bt_date < bt_end_local.date() + _datetime_mod.timedelta(days=1)
                 and bt_date < end_date
             ):
                 if bt_date >= start_date:
                     entry = {
-                        "start": bt.start_datetime.strftime("%H:%M")
-                        if bt_date == bt.start_datetime.date()
+                        "start": bt_start_local.strftime("%H:%M")
+                        if bt_date == bt_start_local.date()
                         else "00:00",
-                        "end": bt.end_datetime.strftime("%H:%M")
-                        if bt_date == bt.end_datetime.date()
+                        "end": bt_end_local.strftime("%H:%M")
+                        if bt_date == bt_end_local.date()
                         else "23:59",
                         "is_own": False,
                     }
