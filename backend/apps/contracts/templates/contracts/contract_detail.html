@@ -13,7 +13,7 @@
     <a href="{% url 'contracts:list' %}" class="btn btn-secondary">{% trans "Back to List" %}</a>
 </div>
 
-<h2>{% trans "Personal Details" %}</h2>
+<h2>Persönliche Daten</h2>
 <table aria-label="Persönliche Daten">
     <tr><th scope="row">{% trans "First Name" %}</th><td>{{ contract.first_name }}</td></tr>
     <tr><th scope="row">{% trans "Last Name" %}</th><td>{{ contract.last_name }}</td></tr>
@@ -25,30 +25,30 @@
     {% if contract.notes %}<tr><th scope="row">{% trans "Notes" %}</th><td>{{ contract.notes }}</td></tr>{% endif %}
 </table>
 
-<h2>{% trans "Contract Details" %}</h2>
+<h2>Vertragsdetails</h2>
 <table aria-label="Vertragsdetails">
     {% if contract.institute %}<tr><th scope="row">{% trans "Institute" %}</th><td>{{ contract.institute }}</td></tr>{% endif %}
     <tr><th scope="row">{% trans "Rate" %}</th><td>{% blocktrans with rate=contract.hourly_rate %}{{ rate }}€ per unit{% endblocktrans %}</td></tr>
     <tr><th scope="row">{% trans "Duration per unit" %}</th><td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
     <tr><th scope="row">{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
     <tr><th scope="row">{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
-    <tr><th scope="row">{% trans "Status" %}</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
+    <tr><th scope="row">Status</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     <tr><th scope="row">{% trans "Created" %}</th><td>{{ contract.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
     <tr><th scope="row">{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
 
 {% if contract.has_monthly_planning_limit and monthly_planning_summary %}
-<h2>{% trans "Monthly planning (this year)" %}</h2>
-<p>{% trans "Planned units per month; remaining carried to next month. Scheduled lessons in calendar are not counted as missing." %}</p>
+<h2>Monatliche Planung (dieses Jahr)</h2>
+<p>Geplante Einheiten pro Monat; Überschuss wird in den Folgemonat übertragen. Im Kalender geplante Stunden zählen nicht als fehlend.</p>
 <table aria-label="Monatsplanung">
     <thead>
         <tr>
-            <th scope="col">{% trans "Month" %}</th>
-            <th scope="col">{% trans "Planned" %}</th>
-            <th scope="col">{% trans "Carried over" %}</th>
-            <th scope="col">{% trans "Taught" %}</th>
-            <th scope="col">{% trans "Scheduled" %}</th>
-            <th scope="col">{% trans "Remaining" %}</th>
+            <th scope="col">Monat</th>
+            <th scope="col">Geplant</th>
+            <th scope="col">Übertrag</th>
+            <th scope="col">Gehalten</th>
+            <th scope="col">Ausstehend</th>
+            <th scope="col">Verbleibend</th>
         </tr>
     </thead>
     <tbody>
@@ -66,15 +66,15 @@
 </table>
 {% endif %}
 
-<h2>{% trans "Lessons" %}</h2>
+<h2>Stunden</h2>
 {% if contract.sessions.all %}
 <table aria-label="Lektionen">
     <thead>
         <tr>
-            <th scope="col">{% trans "Date" %}</th>
-            <th scope="col">{% trans "Time" %}</th>
-            <th scope="col">{% trans "Status" %}</th>
-            <th scope="col">{% trans "Actions" %}</th>
+            <th scope="col">Datum</th>
+            <th scope="col">Uhrzeit</th>
+            <th scope="col">Status</th>
+            <th scope="col">Aktionen</th>
         </tr>
     </thead>
     <tbody>
@@ -90,7 +90,7 @@
 </table>
 {% else %}
 <div class="empty-state">
-    <p>{% trans "No lessons available for this contract." %}</p>
+    <p>Keine Stunden für diesen Vertrag vorhanden.</p>
 </div>
 {% endif %}
 
@@ -155,7 +155,7 @@
 </div>
 
 <div class="box-section" style="margin-top: 1.5em;">
-  <h3>{% trans "Fortschrittsnotizen" %}</h3>
+  <h3>Fortschrittsnotizen</h3>
   {% for note in progress_notes %}
     <div style="border-bottom: 1px solid var(--border-color); padding: 8px 0;">
       <small style="color: var(--text-secondary);">{{ note.date }}</small>

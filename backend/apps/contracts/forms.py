@@ -10,7 +10,7 @@ class ContractForm(forms.ModelForm):
     has_monthly_planning_limit = forms.BooleanField(
         required=False,
         initial=True,
-        label=_("Monthly planning with planned units"),
+        label=_("Monatliche Planung mit geplanten Einheiten"),
     )
 
     class Meta:
@@ -58,9 +58,9 @@ class ContractForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].label = _("Contact email (parent or student)")
+        self.fields["email"].label = _("Kontakt-E-Mail (Elternteil oder Schüler)")
         self.fields["email"].help_text = _(
-            "This email receives all notifications. For minor students use the parent's email."
+            "Diese E-Mail-Adresse erhält alle Benachrichtigungen. Bei minderjährigen Schülern bitte die E-Mail-Adresse der Eltern angeben."
         )
         self._user = user
 
