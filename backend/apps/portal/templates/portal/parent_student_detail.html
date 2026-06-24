@@ -47,11 +47,18 @@
         <td style="white-space:nowrap;">
             {% if lesson.status == 'planned' %}
             <a href="{% url 'portal:session_reschedule' lesson.pk %}" class="btn-sm btn-sm-secondary">Verschieben</a>
+            {% if lesson.recurring_session_id %}
+            <button type="button" class="btn-sm btn-sm-danger"
+                    data-session-pk="{{ lesson.pk }}"
+                    data-recurring-pk="{{ lesson.recurring_session_id }}"
+                    onclick="openCancelModal(this)">Absagen</button>
+            {% else %}
             <form method="post" action="{% url 'portal:session_cancel' lesson.pk %}" style="display:inline"
-              onsubmit="return confirm('Termin wirklich absagen?')">
+                  onsubmit="return confirm('Termin wirklich absagen?')">
               {% csrf_token %}
               <button type="submit" class="btn-sm btn-sm-danger">Absagen</button>
             </form>
+            {% endif %}
             {% endif %}
         </td>
     </tr>
@@ -82,4 +89,31 @@
         Nachrichten öffnen
     </a>
 </div>
+
+<dialog id="cancelModal" aria-modal="true" aria-labelledby="cancelModalTitle" style="border:1px solid var(--border-color); border-radius:8px; padding:24px; max-width:420px; width:90%; background:var(--card-bg); color:var(--text-primary);">
+  <h3 id="cancelModalTitle" style="margin-top:0; margin-bottom:8px;">Termin absagen</h3>
+  <p style="margin-bottom:20px; color:var(--text-secondary);">Möchtest du nur diesen Termin oder die gesamte Serie löschen?</p>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <form id="cancelSingleForm" method="post" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm-danger">Nur diesen Termin</button>
+    </form>
+    <form id="cancelSeriesForm" method="post" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm-danger">Gesamte Serie</button>
+    </form>
+    <button type="button" class="btn btn-secondary" onclick="document.getElementById('cancelModal').close()">Abbrechen</button>
+  </div>
+</dialog>
+<script>
+(function () {
+  var singleBase = "{% url 'portal:session_cancel' 999999 %}";
+  var seriesBase = "{% url 'portal:recurring_cancel' 999999 %}";
+  window.openCancelModal = function (btn) {
+    document.getElementById('cancelSingleForm').action = singleBase.replace('999999', btn.dataset.sessionPk);
+    document.getElementById('cancelSeriesForm').action = seriesBase.replace('999999', btn.dataset.recurringPk);
+    document.getElementById('cancelModal').showModal();
+  };
+})();
+</script>
 {% endblock %}
