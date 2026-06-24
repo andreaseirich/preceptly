@@ -75,4 +75,5 @@ urlpatterns = [
     path("students/<int:pk>/messages/", TutorMessageView.as_view(), name="tutor_messages"),
     path("api/detect-timezone/", views.AutoDetectTimezoneView.as_view(), name="detect_timezone"),
     path("dev/stats/", DevStatsView.as_view(), name="dev_stats"),
+    path("faq/", views.FaqView.as_view(), name="faq"),
 ]
