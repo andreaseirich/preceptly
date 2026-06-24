@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Recurring Lessons" %} - Preceptly{% endblock %}
+{% block title %}Wiederkehrende Lektionen – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Recurring Lessons" %}</h1>
@@ -10,15 +10,15 @@
     <a href="{% url 'lessons:recurring_bulk_edit' %}" class="btn">{% trans "Bulk Edit" %}</a>
 </div>
 
-<table>
+<table aria-label="Wiederkehrende Lektionen">
     <thead>
         <tr>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Weekdays" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Start Date" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Student" %}</th>
+            <th scope="col">{% trans "Weekdays" %}</th>
+            <th scope="col">{% trans "Time" %}</th>
+            <th scope="col">{% trans "Start Date" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>

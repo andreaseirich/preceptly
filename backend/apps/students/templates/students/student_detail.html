@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{{ student.full_name }} - Preceptly{% endblock %}
+{% block title %}Schülerdetails – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{{ student.full_name }}</h1>
@@ -14,30 +14,30 @@
 </div>
 
 <h2>{% trans "Details" %}</h2>
-<table>
-    <tr><th>{% trans "First Name" %}</th><td>{{ student.first_name }}</td></tr>
-    <tr><th>{% trans "Last Name" %}</th><td>{{ student.last_name }}</td></tr>
-    {% if student.email %}<tr><th>{% trans "Email" %}</th><td>{{ student.email }}</td></tr>{% endif %}
-    {% if student.phone %}<tr><th>{% trans "Phone" %}</th><td>{{ student.phone }}</td></tr>{% endif %}
-    {% if student.school %}<tr><th>{% trans "School" %}</th><td>{{ student.school }}</td></tr>{% endif %}
-    {% if student.grade %}<tr><th>{% trans "Grade" %}</th><td>{{ student.grade }}</td></tr>{% endif %}
-    {% if student.subjects %}<tr><th>{% trans "Subjects" %}</th><td>{{ student.subjects }}</td></tr>{% endif %}
-    {% if student.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ student.notes }}</td></tr>{% endif %}
+<table aria-label="Schülerdetails">
+    <tr><th scope="row">{% trans "First Name" %}</th><td>{{ student.first_name }}</td></tr>
+    <tr><th scope="row">{% trans "Last Name" %}</th><td>{{ student.last_name }}</td></tr>
+    {% if student.email %}<tr><th scope="row">{% trans "Email" %}</th><td>{{ student.email }}</td></tr>{% endif %}
+    {% if student.phone %}<tr><th scope="row">{% trans "Phone" %}</th><td>{{ student.phone }}</td></tr>{% endif %}
+    {% if student.school %}<tr><th scope="row">{% trans "School" %}</th><td>{{ student.school }}</td></tr>{% endif %}
+    {% if student.grade %}<tr><th scope="row">{% trans "Grade" %}</th><td>{{ student.grade }}</td></tr>{% endif %}
+    {% if student.subjects %}<tr><th scope="row">{% trans "Subjects" %}</th><td>{{ student.subjects }}</td></tr>{% endif %}
+    {% if student.notes %}<tr><th scope="row">{% trans "Notes" %}</th><td>{{ student.notes }}</td></tr>{% endif %}
 </table>
 
 
 
 <h2>Schüler</h2>
 {% if student.contracts.all %}
-<table>
+<table aria-label="Verträge">
     <thead>
         <tr>
-            <th>{% trans "Institute" %}</th>
-            <th>{% trans "Rate" %}</th>
-            <th>{% trans "Duration" %}</th>
-            <th>{% trans "From" %}</th>
-            <th>{% trans "To" %}</th>
-            <th>{% trans "Status" %}</th>
+            <th scope="col">{% trans "Institute" %}</th>
+            <th scope="col">{% trans "Rate" %}</th>
+            <th scope="col">{% trans "Duration" %}</th>
+            <th scope="col">{% trans "From" %}</th>
+            <th scope="col">{% trans "To" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -97,8 +97,9 @@
   {% endif %}
   <form method="post" action="{% url 'students:portal_invite_parent' student.pk %}" style="display: flex; gap: 6px; margin-top: 0.5em; flex-wrap: wrap;">
     {% csrf_token %}
-    <input type="email" name="parent_email" placeholder="E-Mail der Eltern"
-      class="form-control" style="flex: 1; min-width: 160px; font-size: 0.9em;">
+    <label for="id_parent_email" class="sr-only">E-Mail der Eltern</label>
+    <input type="email" name="parent_email" id="id_parent_email" placeholder="E-Mail der Eltern"
+      class="form-control" style="flex: 1; min-width: 160px; font-size: 0.9em;" aria-required="true">
     <button type="submit" class="btn-sm btn-sm-secondary">Eltern einladen</button>
   </form>
   {% else %}
@@ -131,7 +132,8 @@
   {% endfor %}
   <form method="post" action="{% url 'students:progress_note_create' student.pk %}" style="margin-top: 1em;">
     {% csrf_token %}
-    <textarea name="text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Fortschrittsnotiz hinzufügen...' %}"></textarea>
+    <label for="id_progress_note_text" class="sr-only">{% trans "Fortschrittsnotiz hinzufügen" %}</label>
+    <textarea name="text" id="id_progress_note_text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Fortschrittsnotiz hinzufügen...' %}"></textarea>
     <button type="submit" class="btn-sm btn-sm-primary" style="margin-top: 6px;">{% trans "Speichern" %}</button>
   </form>
 </div>

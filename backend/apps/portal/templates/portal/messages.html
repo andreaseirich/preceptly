@@ -1,10 +1,17 @@
 {% extends "portal/base.html" %}
 {% load i18n %}
 
-{% block title %}Nachrichten – Preceptly Portal{% endblock %}
+{% block title %}Nachrichten – Preceptly{% endblock %}
 
 {% block extra_css %}
 <style>
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+    }
     .chat-wrapper {
         display: flex;
         flex-direction: column;
@@ -23,7 +30,6 @@
         max-width: 72%;
         margin-bottom: 14px;
     }
-    /* From portal user's perspective: own messages on the right, tutor on the left */
     .chat-msg.from-me {
         align-self: flex-end;
         align-items: flex-end;
@@ -104,28 +110,31 @@
 
 <h1>Nachrichten{% if student %}: {{ student.full_name }}{% endif %}</h1>
 
-<div class="chat-wrapper" id="chat-wrapper">
+<ul class="chat-wrapper" id="chat-wrapper" role="list" aria-label="Nachrichtenverlauf">
 {% if chat_messages %}
     {% for msg in chat_messages %}
-    <div class="chat-msg {% if msg.sender_is_tutor %}from-tutor{% else %}from-me{% endif %}">
-        <div class="chat-bubble">{{ msg.text }}</div>
+    <li class="chat-msg {% if msg.sender_is_tutor %}from-tutor{% else %}from-me{% endif %}">
+        <div class="chat-bubble">
+            {% if msg.sender_is_tutor %}<span class="sr-only">Empfangen:</span>{% else %}<span class="sr-only">Gesendet:</span>{% endif %}
+            {{ msg.text }}
+        </div>
         <div class="chat-meta">
             {% if msg.sender_is_tutor %}Nachhilfelehrer{% else %}Du{% endif %} &middot; {{ msg.created_at|date:"d.m.Y" }}, {{ msg.created_at|time:"H:i" }} Uhr
         </div>
-    </div>
+    </li>
     {% endfor %}
 {% else %}
-    <div class="empty-state" style="border:none; padding:40px 0;">
+    <li class="empty-state" style="border:none; padding:40px 0; list-style:none;">
         <p>Noch keine Nachrichten. Schreibe die erste!</p>
-    </div>
+    </li>
 {% endif %}
-</div>
+</ul>
 
 <div class="compose-box">
     <form method="post">
         {% csrf_token %}
         <label for="id_text">Neue Nachricht</label>
-        <textarea id="id_text" name="text" placeholder="Nachricht eingeben …" required></textarea>
+        <textarea id="id_text" name="text" placeholder="Nachricht eingeben …" required aria-required="true" aria-label="Nachricht schreiben"></textarea>
         <button type="submit" class="btn-send">Senden</button>
     </form>
 </div>

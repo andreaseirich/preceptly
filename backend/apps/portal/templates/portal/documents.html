@@ -1,6 +1,6 @@
 {% extends "portal/base.html" %}
 
-{% block title %}Dokumente – Preceptly Portal{% endblock %}
+{% block title %}Dokumente – Preceptly{% endblock %}
 
 {% block content %}
 <h1>Unterrichtsmaterial</h1>
@@ -18,7 +18,7 @@
       </div>
       <div style="flex:2; min-width:200px;">
         <label for="id_file" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Datei</label>
-        <input type="file" id="id_file" name="file" required
+        <input type="file" id="id_file" name="file" required aria-required="true"
           style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
       </div>
       <button type="submit" class="btn-sm btn-sm-primary" style="white-space:nowrap;">Hochladen</button>

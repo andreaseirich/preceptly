@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}Schüler - Preceptly{% endblock %}
+{% block title %}Verträge – Preceptly{% endblock %}
 
 {% block content %}
 <h1>Schüler</h1>
@@ -32,18 +32,18 @@
 </div>
 {% endif %}
 
-<table>
+<table aria-label="Schülerliste">
     <thead>
         <tr>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Institute" %}</th>
-            <th>{% trans "Rate" %}</th>
-            <th>{% trans "Duration" %}</th>
-            <th>{% trans "From" %}</th>
-            <th>{% trans "To" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "This month (planned / taught / remaining)" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Student" %}</th>
+            <th scope="col">{% trans "Institute" %}</th>
+            <th scope="col">{% trans "Rate" %}</th>
+            <th scope="col">{% trans "Duration" %}</th>
+            <th scope="col">{% trans "From" %}</th>
+            <th scope="col">{% trans "To" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "This month (planned / taught / remaining)" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -89,4 +89,3 @@
     </tbody>
 </table>
 {% endblock %}
-

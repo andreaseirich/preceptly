@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}{% trans "Income Overview" %} - Preceptly{% endblock %}
+{% block title %}Einnahmenübersicht – Preceptly{% endblock %}
 
 {% block content %}
 <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border-color);padding-bottom:12px;">
@@ -26,12 +26,12 @@
 <p class="tutorflow-kpi-hint">{% trans "Only invoices marked paid. Totals use the calendar month of each invoice billing period start date - not necessarily the month the lessons took place." %}</p>
 
 <h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% trans "lessons dated in this month" %})</span></h3>
-<table>
+<table aria-label="Beträge nach Stundenstatus">
     <thead>
         <tr>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Number of Lessons" %}</th>
-            <th>{% trans "Amount" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Number of Lessons" %}</th>
+            <th scope="col">{% trans "Amount" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -67,13 +67,13 @@
 
 <h3>{% trans "Monthly Breakdown" %}</h3>
 <p class="tutorflow-kpi-hint">{% trans "The recognized revenue column is paid invoice totals for that month (by billing period start)." %}</p>
-<table class="table">
+<table class="table" aria-label="Monatsübersicht">
     <thead>
         <tr>
-            <th>{% trans "Month" %}</th>
-            <th>{% trans "Lessons" %}</th>
-            <th>{% trans "Recognized revenue" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Month" %}</th>
+            <th scope="col">{% trans "Lessons" %}</th>
+            <th scope="col">{% trans "Recognized revenue" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -105,12 +105,12 @@
 </table>
 
 <h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% blocktrans with yr=year %}lessons dated in {{ yr }}{% endblocktrans %})</span></h3>
-<table>
+<table aria-label="Beträge nach Stundenstatus (Jahresansicht)">
     <thead>
         <tr>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Number of Lessons" %}</th>
-            <th>{% trans "Amount" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Number of Lessons" %}</th>
+            <th scope="col">{% trans "Amount" %}</th>
         </tr>
     </thead>
     <tbody>

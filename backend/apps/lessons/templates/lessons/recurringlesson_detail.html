@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{{ recurring_lesson }} - Preceptly{% endblock %}
+{% block title %}Wiederkehrende Lektion – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Recurring Lesson" %}</h1>
@@ -13,16 +13,16 @@
 </div>
 
 <h2>{% trans "Details" %}</h2>
-<table>
-    <tr><th>{% trans "Student" %}</th><td><a href="{% url 'students:detail' recurring_lesson.contract.student.pk %}">{{ recurring_lesson.contract.student }}</a></td></tr>
-    <tr><th>{% trans "Weekdays" %}</th><td>{{ recurring_lesson.get_active_weekdays_display }}</td></tr>
-    <tr><th>{% trans "Start Date" %}</th><td>{{ recurring_lesson.start_date }}</td></tr>
-    <tr><th>{% trans "End Date" %}</th><td>{{ recurring_lesson.end_date|default:_("Until contract end") }}</td></tr>
-    <tr><th>{% trans "Time" %}</th><td>{{ recurring_lesson.start_time }}</td></tr>
-    <tr><th>{% trans "Duration" %}</th><td>{% blocktrans with minutes=recurring_lesson.duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{% if recurring_lesson.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
+<table aria-label="Wiederkehrende Lektion">
+    <tr><th scope="row">{% trans "Student" %}</th><td><a href="{% url 'students:detail' recurring_lesson.contract.student.pk %}">{{ recurring_lesson.contract.student }}</a></td></tr>
+    <tr><th scope="row">{% trans "Weekdays" %}</th><td>{{ recurring_lesson.get_active_weekdays_display }}</td></tr>
+    <tr><th scope="row">{% trans "Start Date" %}</th><td>{{ recurring_lesson.start_date }}</td></tr>
+    <tr><th scope="row">{% trans "End Date" %}</th><td>{{ recurring_lesson.end_date|default:_("Until contract end") }}</td></tr>
+    <tr><th scope="row">{% trans "Time" %}</th><td>{{ recurring_lesson.start_time }}</td></tr>
+    <tr><th scope="row">{% trans "Duration" %}</th><td>{% blocktrans with minutes=recurring_lesson.duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
+    <tr><th scope="row">{% trans "Status" %}</th><td>{% if recurring_lesson.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     {% if recurring_lesson.notes %}
-    <tr><th>{% trans "Notes" %}</th><td>{{ recurring_lesson.notes }}</td></tr>
+    <tr><th scope="row">{% trans "Notes" %}</th><td>{{ recurring_lesson.notes }}</td></tr>
     {% endif %}
 </table>
 

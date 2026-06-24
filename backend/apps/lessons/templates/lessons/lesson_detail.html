@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}Unterrichtsstunde {{ date }} – {{ student }} - Preceptly{% endblock %}
+{% block title %}Lektionsdetails – Preceptly{% endblock %}
 
 {% block content %}
 <h1>Unterrichtsstunde</h1>
@@ -21,13 +21,13 @@
 
 <div class="box-section" style="margin-bottom: 20px;">
     <h2>Details</h2>
-    <table style="width: 100%;">
+    <table style="width: 100%;" aria-label="Lektionsdetails">
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary); width: 35%;">{% trans "Date:" %}</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary); width: 35%;">{% trans "Date:" %}</th>
             <td style="padding: 8px; color: var(--text-primary);">{{ lesson.date|date:"d.m.Y" }}</td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Zeit / Dauer:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Zeit / Dauer:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% blocktrans with time=lesson.start_time|time:"H:i" minutes=lesson.duration_minutes %}{{ time }} ({{ minutes }} Min.){% endblocktrans %}
                 {% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}
@@ -41,13 +41,13 @@
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Student:" %}</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">{% trans "Student:" %}</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 <a href="{% url 'students:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a>
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Schüler / Institut:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Schüler / Institut:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% if contract.institute %}
                     {{ contract.institute }}
@@ -57,7 +57,7 @@
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Stundensatz:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Stundensatz:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {{ contract.hourly_rate|floatformat:2 }} €
                 {% if contract.unit_duration_minutes != 60 %}
@@ -66,23 +66,23 @@
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">{% trans "Status:" %}</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">{% trans "Status:" %}</th>
             <td style="padding: 8px; color: var(--text-primary);">{{ lesson.get_status_display }}</td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Notizen:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Notizen:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% if lesson.notes %}{{ lesson.notes }}{% else %}<span style="color: var(--text-secondary);">–</span>{% endif %}
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Hausaufgaben:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Hausaufgaben:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% if lesson.homework %}{{ lesson.homework }}{% else %}<span style="color: var(--text-secondary);">–</span>{% endif %}
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Meeting-URL:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Meeting-URL:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% if lesson.meeting_url %}
                     <a href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">{{ lesson.meeting_url }}</a>
@@ -94,14 +94,14 @@
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Vertragslaufzeit:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Vertragslaufzeit:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {{ contract.start_date|date:"d.m.Y" }} –
                 {% if contract.end_date %}{{ contract.end_date|date:"d.m.Y" }}{% else %}unbefristet{% endif %}
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Schüler aktiv:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Schüler aktiv:</th>
             <td style="padding: 8px;">
                 {% if contract.is_active %}
                     <span style="color: #16a34a;">✓ Aktiv</span>
@@ -111,14 +111,14 @@
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Vertragsnotizen:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Vertragsnotizen:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 {% if contract.notes %}{{ contract.notes }}{% else %}<span style="color: var(--text-secondary);">–</span>{% endif %}
             </td>
         </tr>
         {% if lesson.recurring_session %}
         <tr style="border-bottom: 1px solid var(--border-color);">
-            <td style="padding: 8px; color: var(--text-secondary);">Serie:</td>
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">Serie:</th>
             <td style="padding: 8px; color: var(--text-primary);">
                 <small>🔁 Teil einer Wiederholungsserie</small>
             </td>
@@ -165,13 +165,13 @@
     
     {% if conflict_lessons %}
     <h3>Kollidierende Stunden ({{ conflict_lessons|length }})</h3>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" aria-label="Kollidierende Stunden">
         <thead>
             <tr style="background: var(--table-header-bg);">
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Datum</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Zeit</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Schüler</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Aktion</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Datum</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Zeit</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Schüler</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Aktion</th>
             </tr>
         </thead>
         <tbody>

@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{{ contract.full_name }} - Preceptly{% endblock %}
+{% block title %}Vertragsdetails – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{{ contract.full_name }}</h1>
@@ -14,41 +14,41 @@
 </div>
 
 <h2>{% trans "Personal Details" %}</h2>
-<table>
-    <tr><th>{% trans "First Name" %}</th><td>{{ contract.first_name }}</td></tr>
-    <tr><th>{% trans "Last Name" %}</th><td>{{ contract.last_name }}</td></tr>
-    {% if contract.email %}<tr><th>{% trans "Email" %}</th><td>{{ contract.email }}</td></tr>{% endif %}
-    {% if contract.phone %}<tr><th>{% trans "Phone" %}</th><td>{{ contract.phone }}</td></tr>{% endif %}
-    {% if contract.school %}<tr><th>{% trans "School" %}</th><td>{{ contract.school }}</td></tr>{% endif %}
-    {% if contract.grade %}<tr><th>{% trans "Grade" %}</th><td>{{ contract.grade }}</td></tr>{% endif %}
-    {% if contract.subjects %}<tr><th>{% trans "Subjects" %}</th><td>{{ contract.subjects }}</td></tr>{% endif %}
-    {% if contract.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ contract.notes }}</td></tr>{% endif %}
+<table aria-label="Persönliche Daten">
+    <tr><th scope="row">{% trans "First Name" %}</th><td>{{ contract.first_name }}</td></tr>
+    <tr><th scope="row">{% trans "Last Name" %}</th><td>{{ contract.last_name }}</td></tr>
+    {% if contract.email %}<tr><th scope="row">{% trans "Email" %}</th><td>{{ contract.email }}</td></tr>{% endif %}
+    {% if contract.phone %}<tr><th scope="row">{% trans "Phone" %}</th><td>{{ contract.phone }}</td></tr>{% endif %}
+    {% if contract.school %}<tr><th scope="row">{% trans "School" %}</th><td>{{ contract.school }}</td></tr>{% endif %}
+    {% if contract.grade %}<tr><th scope="row">{% trans "Grade" %}</th><td>{{ contract.grade }}</td></tr>{% endif %}
+    {% if contract.subjects %}<tr><th scope="row">{% trans "Subjects" %}</th><td>{{ contract.subjects }}</td></tr>{% endif %}
+    {% if contract.notes %}<tr><th scope="row">{% trans "Notes" %}</th><td>{{ contract.notes }}</td></tr>{% endif %}
 </table>
 
 <h2>{% trans "Contract Details" %}</h2>
-<table>
-    {% if contract.institute %}<tr><th>{% trans "Institute" %}</th><td>{{ contract.institute }}</td></tr>{% endif %}
-    <tr><th>{% trans "Rate" %}</th><td>{% blocktrans with rate=contract.hourly_rate %}{{ rate }}€ per unit{% endblocktrans %}</td></tr>
-    <tr><th>{% trans "Duration per unit" %}</th><td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
-    <tr><th>{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
-    <tr><th>{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
-    <tr><th>{% trans "Created" %}</th><td>{{ contract.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
-    <tr><th>{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
+<table aria-label="Vertragsdetails">
+    {% if contract.institute %}<tr><th scope="row">{% trans "Institute" %}</th><td>{{ contract.institute }}</td></tr>{% endif %}
+    <tr><th scope="row">{% trans "Rate" %}</th><td>{% blocktrans with rate=contract.hourly_rate %}{{ rate }}€ per unit{% endblocktrans %}</td></tr>
+    <tr><th scope="row">{% trans "Duration per unit" %}</th><td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
+    <tr><th scope="row">{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
+    <tr><th scope="row">{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
+    <tr><th scope="row">{% trans "Status" %}</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
+    <tr><th scope="row">{% trans "Created" %}</th><td>{{ contract.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
+    <tr><th scope="row">{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
 
 {% if contract.has_monthly_planning_limit and monthly_planning_summary %}
 <h2>{% trans "Monthly planning (this year)" %}</h2>
 <p>{% trans "Planned units per month; remaining carried to next month. Scheduled lessons in calendar are not counted as missing." %}</p>
-<table>
+<table aria-label="Monatsplanung">
     <thead>
         <tr>
-            <th>{% trans "Month" %}</th>
-            <th>{% trans "Planned" %}</th>
-            <th>{% trans "Carried over" %}</th>
-            <th>{% trans "Taught" %}</th>
-            <th>{% trans "Scheduled" %}</th>
-            <th>{% trans "Remaining" %}</th>
+            <th scope="col">{% trans "Month" %}</th>
+            <th scope="col">{% trans "Planned" %}</th>
+            <th scope="col">{% trans "Carried over" %}</th>
+            <th scope="col">{% trans "Taught" %}</th>
+            <th scope="col">{% trans "Scheduled" %}</th>
+            <th scope="col">{% trans "Remaining" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -68,13 +68,13 @@
 
 <h2>{% trans "Lessons" %}</h2>
 {% if contract.sessions.all %}
-<table>
+<table aria-label="Lektionen">
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Date" %}</th>
+            <th scope="col">{% trans "Time" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -132,8 +132,9 @@
   {% endif %}
   <form method="post" action="{% url 'students:portal_invite_parent' contract.pk %}" style="display: flex; gap: 6px; margin-top: 0.5em; flex-wrap: wrap;">
     {% csrf_token %}
-    <input type="email" name="parent_email" placeholder="E-Mail der Eltern"
-      class="form-control" style="flex: 1; min-width: 160px; font-size: 0.9em;">
+    <label for="parent_email" class="sr-only">E-Mail der Eltern</label>
+    <input type="email" name="parent_email" id="parent_email" placeholder="E-Mail der Eltern"
+      class="form-control" style="flex: 1; min-width: 160px; font-size: 0.9em;" aria-required="true">
     <button type="submit" class="btn-sm btn-sm-secondary">Eltern einladen</button>
   </form>
   {% else %}
@@ -165,7 +166,8 @@
   {% endfor %}
   <form method="post" action="{% url 'students:progress_note_create' contract.pk %}" style="margin-top: 1em;">
     {% csrf_token %}
-    <textarea name="text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Fortschrittsnotiz hinzufügen...' %}"></textarea>
+    <label for="progress_note_text" class="sr-only">{% trans "Fortschrittsnotiz hinzufügen" %}</label>
+    <textarea name="text" id="progress_note_text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Fortschrittsnotiz hinzufügen...' %}"></textarea>
     <button type="submit" class="btn-sm btn-sm-primary" style="margin-top: 6px;">{% trans "Speichern" %}</button>
   </form>
 </div>

@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}Schüler löschen - Preceptly{% endblock %}
+{% block title %}Vertrag löschen – Preceptly{% endblock %}
 
 {% block content %}
 <h1>Schüler löschen</h1>
@@ -12,9 +12,8 @@
 <form method="post">
     {% csrf_token %}
     <div class="btn-group">
-        <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+        <button type="submit" class="btn btn-danger" aria-label="Vertrag löschen">{% trans "Delete" %}</button>
         <a href="{% url 'contracts:detail' contract.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
 {% endblock %}
-

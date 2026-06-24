@@ -1,37 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Settings" %} - Preceptly
-<h2 style="margin-top: 40px;">{% trans "Legal agreements" %}</h2>
-<div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
-{% if profile.avv_accepted_at %}
-    {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
-    <p style="margin: 0; color: var(--text-secondary);">
-        {% blocktrans with date=profile.avv_accepted_at|date:"SHORT_DATE_FORMAT" url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}
-        You accepted the <a href="{{ url_terms }}">Terms of Service</a>,
-        <a href="{{ url_avv }}">Data Processing Agreement (AVV)</a>,
-        and <a href="{{ url_privacy }}">Privacy Policy</a> on {{ date }}.
-        {% endblocktrans %}
-    </p>
-{% else %}
-    <p style="margin-bottom: 12px; color: var(--text-secondary);">
-        {% trans "You have not yet explicitly accepted the Data Processing Agreement (AVV). This is required for GDPR-compliant use of Preceptly." %}
-    </p>
-    <form method="post" action="{% url 'core:accept_avv' %}">
-        {% csrf_token %}
-        {% url 'core:legal_terms' as url_terms2 %}{% url 'core:legal_avv' as url_avv2 %}{% url 'core:legal_privacy' as url_privacy2 %}
-        <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-bottom: 14px;">
-            <input type="checkbox" name="avv_consent" required style="margin-top: 3px; flex-shrink: 0;">
-            <span style="color: var(--text-secondary); font-size: 0.95em;">
-                {% blocktrans with url_terms=url_terms2 url_avv=url_avv2 url_privacy=url_privacy2 %}I accept the <a href="{{ url_terms }}">Terms of Service</a>, <a href="{{ url_avv }}">Data Processing Agreement (AVV, Art. 28 GDPR)</a>, and <a href="{{ url_privacy }}">Privacy Policy</a>.{% endblocktrans %}
-            </span>
-        </label>
-        <button type="submit" class="btn">{% trans "Accept agreements" %}</button>
-    </form>
-{% endif %}
-</div>
-
-{% endblock %}
+{% block title %}Einstellungen – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Settings" %}</h1>
@@ -45,155 +15,162 @@
 
 <form method="post">
     {% csrf_token %}
-    
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Monday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Monday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.monday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_monday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.monday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_monday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.monday_end }}
                 </div>
             </div>
         </div>
-        
+
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Tuesday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Tuesday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.tuesday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_tuesday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.tuesday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_tuesday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.tuesday_end }}
                 </div>
             </div>
         </div>
-        
+
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Wednesday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Wednesday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.wednesday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_wednesday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.wednesday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_wednesday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.wednesday_end }}
                 </div>
             </div>
         </div>
-        
+
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Thursday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Thursday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.thursday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_thursday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.thursday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_thursday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.thursday_end }}
                 </div>
             </div>
         </div>
-        
+
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Friday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Friday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.friday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_friday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.friday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_friday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.friday_end }}
                 </div>
             </div>
         </div>
-        
+
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Saturday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Saturday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.saturday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_saturday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.saturday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_saturday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.saturday_end }}
                 </div>
             </div>
         </div>
-        
+
         <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
             <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Sunday" %}</h3>
-            <div style="margin-bottom: 10px;">
+            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
+                <legend class="sr-only">{% trans "Sunday enabled" %}</legend>
                 <label style="display: flex; align-items: center; gap: 8px;">
                     {{ form.sunday_enabled }}
                     <span>{% trans "Enabled" %}</span>
                 </label>
-            </div>
+            </fieldset>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
+                    <label for="id_sunday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
                     {{ form.sunday_start }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
+                    <label for="id_sunday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
                     {{ form.sunday_end }}
                 </div>
             </div>
         </div>
     </div>
-    
+
     {% if form.non_field_errors %}
-    <div class="message error" style="margin-top: 20px;">
+    <div class="message error" style="margin-top: 20px;" role="alert">
         {{ form.non_field_errors }}
     </div>
     {% endif %}
-    
+
     <div class="btn-group" style="margin-top: 30px;">
         <button type="submit" class="btn btn-success">{% trans "Save Working Hours" %}</button>
         <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
@@ -221,7 +198,7 @@
         <button type="submit" name="save_travel" class="btn btn-success">{% trans "Save travel mode" %}</button>
     </div>
     {% if travel_form.non_field_errors %}
-    <p style="color: #dc3545; margin-top: 8px;">{{ travel_form.non_field_errors }}</p>
+    <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ travel_form.non_field_errors }}</p>
     {% endif %}
 </form>
 
@@ -242,7 +219,7 @@
         <button type="submit" name="save_tutor_no_show" class="btn btn-success">{% trans "Save TutorSpace missed-lesson pay" %}</button>
     </div>
     {% if tutor_no_show_form.non_field_errors %}
-    <p style="color: #dc3545; margin-top: 8px;">{{ tutor_no_show_form.non_field_errors }}</p>
+    <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ tutor_no_show_form.non_field_errors }}</p>
     {% endif %}
 </form>
 
@@ -263,17 +240,17 @@
         <button type="submit" name="save_tutorspace_tier_from" class="btn btn-success">{% trans "Save TutorSpace tier start date" %}</button>
     </div>
     {% if tutorspace_tier_form.non_field_errors %}
-    <p style="color: #dc3545; margin-top: 8px;">{{ tutorspace_tier_form.non_field_errors }}</p>
+    <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ tutorspace_tier_form.non_field_errors }}</p>
     {% endif %}
 </form>
 
 {% if show_stripe_success_banner %}
-<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(40, 167, 69, 0.12); border: 1px solid rgba(40, 167, 69, 0.4); border-radius: 4px; color: var(--text-primary);">
+<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(40, 167, 69, 0.12); border: 1px solid rgba(40, 167, 69, 0.4); border-radius: 4px; color: var(--text-primary);" role="alert">
     {% trans "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet." %}
 </div>
 {% endif %}
 {% if show_email_recommendation %}
-<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.4); border-radius: 4px; color: var(--text-primary);">
+<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.4); border-radius: 4px; color: var(--text-primary);" role="alert">
     {% trans "For invoices and Stripe we recommend adding an email address." %}
 </div>
 {% endif %}
@@ -285,14 +262,16 @@
         {{ email_form.email }}
         <button type="submit" name="save_email" class="btn btn-secondary">{% trans "Save" %}</button>
     </div>
-    {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;">{{ email_form.email.errors.0 }}</p>{% endif %}
+    {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
 </form>
+
 <h2 style="margin-top: 40px;">Zeitzone</h2>
 <p>Deine Zeitzone bestimmt, wie Uhrzeiten für dich und deine Schüler im Portal angezeigt werden. Wähle die Zeitzone, in der du Nachhilfe gibst.</p>
 <form method="post" style="margin-top: 15px;">
     {% csrf_token %}
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <select name="timezone" style="max-width: 300px;">
+        <label for="id_timezone" class="sr-only">Zeitzone</label>
+        <select name="timezone" id="id_timezone" style="max-width: 300px;">
             {% for tz in all_timezones %}
             <option value="{{ tz }}"{% if tz == profile_timezone %} selected{% endif %}>{{ tz }}</option>
             {% endfor %}
@@ -368,7 +347,7 @@
             </div>
             <div style="margin-bottom: 0.75rem; max-width: 480px;">
                 <label style="display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
-                    <input type="checkbox" name="withdrawal_consent" required style="margin-top: 3px; flex-shrink: 0;">
+                    <input type="checkbox" name="withdrawal_consent" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
                     <span>{% blocktrans %}I expressly agree to the performance of the contract before the end of the withdrawal period. I acknowledge that my right of withdrawal expires upon commencement of performance.{% endblocktrans %}</span>
                 </label>
             </div>
@@ -388,6 +367,39 @@
         <p style="margin: 0; color: var(--text-secondary); font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:impressum@andicode.de">impressum@andicode.de</a>.{% endblocktrans %}</p>
     {% endif %}
 </div>
+
+<h2 style="margin-top: 40px;">{% trans "Legal agreements" %}</h2>
+<div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
+{% if profile.avv_accepted_at %}
+    {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
+    <p style="margin: 0; color: var(--text-secondary);">
+        {% blocktrans with date=profile.avv_accepted_at|date:"SHORT_DATE_FORMAT" url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}
+        You accepted the <a href="{{ url_terms }}">Terms of Service</a>,
+        <a href="{{ url_avv }}">Data Processing Agreement (AVV)</a>,
+        and <a href="{{ url_privacy }}">Privacy Policy</a> on {{ date }}.
+        {% endblocktrans %}
+    </p>
+{% else %}
+    <p style="margin-bottom: 12px; color: var(--text-secondary);">
+        {% trans "You have not yet explicitly accepted the Data Processing Agreement (AVV). This is required for GDPR-compliant use of Preceptly." %}
+    </p>
+    <form method="post" action="{% url 'core:accept_avv' %}">
+        {% csrf_token %}
+        {% url 'core:legal_terms' as url_terms2 %}{% url 'core:legal_avv' as url_avv2 %}{% url 'core:legal_privacy' as url_privacy2 %}
+        <fieldset style="border: none; padding: 0; margin: 0 0 14px 0;">
+            <legend class="sr-only">{% trans "Legal consent" %}</legend>
+            <label for="id_avv_consent_settings" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                <input type="checkbox" name="avv_consent" id="id_avv_consent_settings" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
+                <span style="color: var(--text-secondary); font-size: 0.95em;">
+                    {% blocktrans with url_terms=url_terms2 url_avv=url_avv2 url_privacy=url_privacy2 %}I accept the <a href="{{ url_terms }}">Terms of Service</a>, <a href="{{ url_avv }}">Data Processing Agreement (AVV, Art. 28 GDPR)</a>, and <a href="{{ url_privacy }}">Privacy Policy</a>.{% endblocktrans %}
+                </span>
+            </label>
+        </fieldset>
+        <button type="submit" class="btn">{% trans "Accept agreements" %}</button>
+    </form>
+{% endif %}
+</div>
+
 {% if stripe_premium_checkout_enabled and is_premium and profile.stripe_customer_id %}
 <script>
 (function() {

@@ -1,24 +1,24 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Lessons" %} - Preceptly{% endblock %}
+{% block title %}Lektionen – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Lessons" %}</h1>
 <a href="{% url 'lessons:create' %}" class="btn">{% trans "New Lesson" %}</a>
 <a href="{% url 'lessons:month' current_year current_month %}" class="btn">{% trans "Month View" %}</a>
 
-<table>
+<table aria-label="Lektionsliste">
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Duration" %}</th>
-            <th>{% trans "Travel Time" %}</th>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Conflicts" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Date" %}</th>
+            <th scope="col">{% trans "Time" %}</th>
+            <th scope="col">{% trans "Duration" %}</th>
+            <th scope="col">{% trans "Travel Time" %}</th>
+            <th scope="col">{% trans "Student" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Conflicts" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -57,4 +57,3 @@
     </tbody>
 </table>
 {% endblock %}
-

@@ -1,17 +1,21 @@
 {% extends "portal/base.html" %}
 
-{% block title %}Eltern-Dashboard – Preceptly Portal{% endblock %}
+{% block title %}Elternportal – Preceptly{% endblock %}
 
 {% block extra_css %}
 <style>
-/* ── Schüler-Grid ── */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+}
 .student-grid {
     display: grid;
     gap: 24px;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
-
-/* ── Schüler-Karte ── */
 .student-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -26,8 +30,6 @@
     box-shadow: 0 6px 20px var(--shadow-card);
     transform: translateY(-2px);
 }
-
-/* Karten-Kopf mit Avatar */
 .card-head {
     display: flex;
     align-items: center;
@@ -74,8 +76,6 @@
     flex-shrink: 0;
     line-height: 1.7;
 }
-
-/* Karten-Body */
 .card-body {
     padding: 16px 20px;
     flex: 1;
@@ -83,8 +83,6 @@
     flex-direction: column;
     gap: 14px;
 }
-
-/* Nächste Stunde */
 .lesson-row {
     display: flex;
     align-items: center;
@@ -105,8 +103,6 @@
 }
 .lesson-meta { color: var(--text-secondary); font-size: 0.82em; margin: 0; }
 .lesson-time { color: var(--text-primary); font-weight: 600; margin: 0; }
-
-/* Meeting-Banner */
 .meeting-banner {
     display: flex;
     align-items: center;
@@ -153,8 +149,6 @@
     0%, 100% { transform: scale(1); opacity: 1; }
     50%       { transform: scale(1.4); opacity: 0.6; }
 }
-
-/* Aktions-Grid */
 .action-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -216,43 +210,39 @@
 {% with initials=sd.student.full_name|slice:":1" %}
 <div class="student-card">
 
-    <!-- Kopf: Avatar + Name + Fach + Badge -->
     <div class="card-head">
-        <div class="avatar">{{ initials }}</div>
+        <div class="avatar" aria-hidden="true">{{ initials }}</div>
         <div class="card-head-info">
             <p class="card-name">{{ sd.student.full_name }}</p>
             <p class="card-subject">{{ sd.student.subject|default:"Schüler" }}</p>
         </div>
         {% if sd.unread_messages > 0 %}
-        <span class="unread-badge">{{ sd.unread_messages }}</span>
+        <span class="unread-badge" aria-label="{{ sd.unread_messages }} ungelesene Nachrichten">{{ sd.unread_messages }}</span>
         {% endif %}
     </div>
 
-    <!-- Body -->
     <div class="card-body">
 
-        <!-- Nächste Stunde -->
         {% if sd.next_lesson %}
-        <div class="lesson-row">
-            <div class="lesson-icon">📅</div>
+        <div class="lesson-row" aria-label="Nächste Stunde">
+            <div class="lesson-icon" aria-hidden="true">📅</div>
             <div>
                 <p class="lesson-meta">Nächste Stunde</p>
                 <p class="lesson-time">{{ sd.next_lesson.date|date:"d.m.Y" }}, {{ sd.next_lesson.start_time|time:"H:i" }} Uhr</p>
             </div>
         </div>
 
-        <!-- Meeting-Banner wenn aktiv -->
         {% if sd.meeting_room %}
         <a class="meeting-banner" href="{% url 'portal:meeting_wait' sd.next_lesson.pk %}">
-            <span class="meeting-dot"></span>
+            <span class="meeting-dot" aria-hidden="true"></span>
             <span>Meeting läuft – Jetzt beitreten</span>
-            <span class="meeting-join-arrow">→</span>
+            <span class="meeting-join-arrow" aria-hidden="true">→</span>
         </a>
         {% endif %}
 
         {% else %}
         <div class="lesson-row" style="opacity:0.55;">
-            <div class="lesson-icon">📅</div>
+            <div class="lesson-icon" aria-hidden="true">📅</div>
             <div>
                 <p class="lesson-meta">Nächste Stunde</p>
                 <p class="lesson-time" style="font-weight:400; color:var(--text-secondary);">Keine geplant</p>
@@ -260,7 +250,6 @@
         </div>
         {% endif %}
 
-        <!-- Aktions-Buttons -->
         <div class="action-grid">
             <a class="action-btn primary" href="{% url 'portal:book' sd.student.pk %}">
                 ＋ Termin buchen
@@ -279,13 +268,13 @@
                style="grid-column: 1 / -1;">
                 💬 Nachrichten
                 {% if sd.unread_messages > 0 %}
-                <span class="btn-badge">{{ sd.unread_messages }}</span>
+                <span class="btn-badge" aria-label="{{ sd.unread_messages }} ungelesene Nachrichten">{{ sd.unread_messages }}</span>
                 {% endif %}
             </a>
         </div>
 
-    </div><!-- /card-body -->
-</div><!-- /student-card -->
+    </div>
+</div>
 {% endwith %}
 {% endfor %}
 </div>
