@@ -1594,17 +1594,19 @@ class PortalWeekView(View):
             user=tutor, start_datetime__lt=_w_end_aware, end_datetime__gt=_w_start_aware
         )
         for _bt in _blocked_week:
-            _bt_date = _bt.start_datetime.date()
-            while _bt_date <= _bt.end_datetime.date() and _bt_date <= week_end:
+            _bt_start_local = _localtime(_bt.start_datetime).replace(tzinfo=None)
+            _bt_end_local = _localtime(_bt.end_datetime).replace(tzinfo=None)
+            _bt_date = _bt_start_local.date()
+            while _bt_date <= _bt_end_local.date() and _bt_date <= week_end:
                 if _bt_date >= week_start:
                     _bt_start_t = (
-                        _bt.start_datetime
-                        if _bt_date == _bt.start_datetime.date()
+                        _bt_start_local
+                        if _bt_date == _bt_start_local.date()
                         else _dt_mod.datetime.combine(_bt_date, _dt_mod.time.min)
                     )
                     _bt_end_t = (
-                        _bt.end_datetime
-                        if _bt_date == _bt.end_datetime.date()
+                        _bt_end_local
+                        if _bt_date == _bt_end_local.date()
                         else _dt_mod.datetime.combine(_bt_date, _dt_mod.time(23, 59))
                     )
                     _entry = {
