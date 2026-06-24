@@ -16,6 +16,7 @@ from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView
@@ -121,7 +122,7 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return Contract.objects.filter(user=self.request.user)
 
-    def delete(self, request, *args, **kwargs):
+    def form_valid(self, form):
         from django.db import transaction
 
         from apps.portal.models import StudentPortalLink
@@ -133,7 +134,7 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
             spl = StudentPortalLink.objects.filter(contract=contract).first()
             if spl:
                 portal_user = spl.portal_user
-                if portal_user.tutor != request.user:
+                if portal_user.tutor != self.request.user:
                     raise PermissionDenied
                 django_user = portal_user.user
                 portal_user.delete()
@@ -149,14 +150,14 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
                     .exclude(contract=contract)
                     .exists()
                 ):
-                    if parent_portal.tutor != request.user:
+                    if parent_portal.tutor != self.request.user:
                         raise PermissionDenied
                     django_user = parent_portal.user
                     parent_portal.delete()
                     django_user.delete()
 
-            messages.success(request, "Schüler erfolgreich gelöscht.")
-            return super().delete(request, *args, **kwargs)
+            messages.success(self.request, "Schüler erfolgreich gelöscht.")
+            return super().form_valid(form)
 
 
 class PortalInviteCreateView(LoginRequiredMixin, View):
@@ -189,6 +190,7 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                 portal_user=portal_user,
                 contract=contract,
                 invite_token=secrets.token_urlsafe(32),
+                invite_token_created_at=timezone.now(),
             )
 
             if contract.email:
@@ -304,7 +306,8 @@ class PortalInviteResendView(LoginRequiredMixin, View):
 
         # H7 - Invite-Token nach erneutem Senden invalidieren und neu generieren
         spl.invite_token = secrets.token_urlsafe(32)
-        spl.save(update_fields=["invite_token"])
+        spl.invite_token_created_at = timezone.now()
+        spl.save(update_fields=["invite_token", "invite_token_created_at"])
 
         if contract.email:
             try:
