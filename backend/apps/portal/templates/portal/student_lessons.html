@@ -1,6 +1,6 @@
 {% extends "portal/base.html" %}
 
-{% block title %}Meine Stunden – Preceptly Portal{% endblock %}
+{% block title %}Meine Stunden – Preceptly{% endblock %}
 
 {% block content %}
 <h1>Meine Stunden</h1>
@@ -11,16 +11,16 @@
 
 {% if lessons %}
 <div class="card" style="padding:0; overflow:hidden;">
-<table style="margin-top:0; box-shadow:none; border-radius:0;">
+<table style="margin-top:0; box-shadow:none; border-radius:0;" aria-label="Meine Stunden">
     <thead>
         <tr>
-            <th>Datum</th>
-            <th>Uhrzeit</th>
-            <th>Dauer</th>
-            <th>Status</th>
-            <th>Hausaufgaben</th>
-            <th>Meeting</th>
-            <th></th>
+            <th scope="col">Datum</th>
+            <th scope="col">Uhrzeit</th>
+            <th scope="col">Dauer</th>
+            <th scope="col">Status</th>
+            <th scope="col">Hausaufgaben</th>
+            <th scope="col">Meeting</th>
+            <th scope="col"><span class="sr-only">Aktionen</span></th>
         </tr>
     </thead>
     <tbody>
@@ -30,20 +30,20 @@
         <td>{{ lesson.start_time|time:"H:i" }}</td>
         <td>{{ lesson.duration_minutes }} Min.</td>
         <td>
-            <span style="font-size:0.85em;">{{ lesson.get_status_display }}</span>
+            <span style="font-size:0.85em;" aria-label="Status: {{ lesson.get_status_display }}">{{ lesson.get_status_display }}</span>
         </td>
         <td>
             {% if lesson.homework %}
             <span title="{{ lesson.homework }}">{{ lesson.homework|truncatechars:80 }}</span>
             {% else %}
-            <span style="color:var(--text-secondary);">–</span>
+            <span style="color:var(--text-secondary);" aria-label="Keine Hausaufgaben">–</span>
             {% endif %}
         </td>
         <td>
             {% if lesson.meeting_url %}
             <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">▶ Beitreten</a>
             {% else %}
-            <span style="color:var(--text-secondary);">–</span>
+            <span style="color:var(--text-secondary);" aria-label="Kein Meeting">–</span>
             {% endif %}
         </td>
         <td style="white-space:nowrap;">

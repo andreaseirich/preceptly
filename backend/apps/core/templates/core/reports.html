@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}{% trans "Reports" %} - Preceptly{% endblock %}
+{% block title %}Berichte – Preceptly{% endblock %}
 
 {% block content %}
 <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border-color);padding-bottom:12px;">
@@ -79,8 +79,8 @@
 
 <h2>{% trans "Revenue (paid invoices, last 6 months)" %}</h2>
 <p class="tutorflow-kpi-hint">{% trans "Each row: recognized revenue for that calendar month (billing period start)." %}</p>
-<table class="table">
-    <thead><tr><th>{% trans "Month" %}</th><th>{% trans "Revenue" %}</th></tr></thead>
+<table class="table" aria-label="Umsatz letzte 6 Monate">
+    <thead><tr><th scope="col">{% trans "Month" %}</th><th scope="col">{% trans "Revenue" %}</th></tr></thead>
     <tbody>
         {% for r in revenue_last_6 %}
         <tr><td>{{ r.month }}/{{ r.year }}</td><td>{{ r.revenue|euro }}</td></tr>
@@ -89,8 +89,8 @@
 </table>
 
 <h2>{% trans "Hours taught (last 6 months)" %}</h2>
-<table class="table">
-    <thead><tr><th>{% trans "Month" %}</th><th>{% trans "Hours" %}</th></tr></thead>
+<table class="table" aria-label="Unterrichtsstunden letzte 6 Monate">
+    <thead><tr><th scope="col">{% trans "Month" %}</th><th scope="col">{% trans "Hours" %}</th></tr></thead>
     <tbody>
         {% for h in hours_last_6 %}
         <tr><td>{{ h.month }}/{{ h.year }}</td><td>{{ h.hours|floatformat:1 }}</td></tr>
@@ -101,12 +101,12 @@
 {% if contract_details %}
 <h2>{% trans "Top 5 students by revenue (selected month)" %}</h2>
 <p class="tutorflow-kpi-hint">{% trans "Amounts from paid invoices linked to each contract; lesson count = taught/paid sessions dated in the selected month." %}</p>
-<table class="table">
+<table class="table" aria-label="Top 5 Schüler nach Umsatz">
     <thead>
         <tr>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Lessons" %}</th>
-            <th>{% trans "Amount" %}</th>
+            <th scope="col">{% trans "Student" %}</th>
+            <th scope="col">{% trans "Lessons" %}</th>
+            <th scope="col">{% trans "Amount" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -123,8 +123,8 @@
 
 {% if breakdown_recognized %}
 <h2>{% trans "Revenue by institute (paid)" %}</h2>
-<table class="table">
-    <thead><tr><th>{% trans "Institute" %}</th><th>{% trans "Revenue (paid)" %}</th></tr></thead>
+<table class="table" aria-label="Umsatz nach Institut (bezahlt)">
+    <thead><tr><th scope="col">{% trans "Institute" %}</th><th scope="col">{% trans "Revenue (paid)" %}</th></tr></thead>
     <tbody>
         {% for b in breakdown_recognized %}
         <tr><td>{{ b.institute }}</td><td>{{ b.revenue|euro }}</td></tr>
@@ -134,8 +134,8 @@
 {% endif %}
 {% if breakdown_billed %}
 <h2>{% trans "Revenue by institute (sent + paid)" %}</h2>
-<table class="table">
-    <thead><tr><th>{% trans "Institute" %}</th><th>{% trans "Revenue (sent + paid)" %}</th></tr></thead>
+<table class="table" aria-label="Umsatz nach Institut (gesendet + bezahlt)">
+    <thead><tr><th scope="col">{% trans "Institute" %}</th><th scope="col">{% trans "Revenue (sent + paid)" %}</th></tr></thead>
     <tbody>
         {% for b in breakdown_billed %}
         <tr><td>{{ b.institute }}</td><td>{{ b.revenue|euro }}</td></tr>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     {% load i18n %}
-    <title>Anmelden – Preceptly Portal</title>
+    <title>Anmelden – Preceptly</title>
     <style>
         :root {
             --bg-primary: #f5f5f5;
@@ -111,22 +111,23 @@
     </style>
 </head>
 <body>
+<main id="main-content">
 <div class="login-card">
     <div class="login-brand">Preceptly Portal</div>
     <div class="login-subtitle">Deine Lernplattform</div>
 
     {% if error %}
-    <div class="alert-warning">{{ error }}</div>
+    <div class="alert-warning" role="alert">{{ error }}</div>
     {% endif %}
 
     <form method="post">
         {% csrf_token %}
         {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
         <label for="id_username">Benutzername</label>
-        <input type="text" id="id_username" name="username" autocomplete="username" autofocus required>
+        <input type="text" id="id_username" name="username" autocomplete="username" autofocus required aria-required="true">
 
         <label for="id_password">Passwort</label>
-        <input type="password" id="id_password" name="password" autocomplete="current-password" required>
+        <input type="password" id="id_password" name="password" autocomplete="current-password" required aria-required="true">
 
         <button type="submit" class="btn-login">Anmelden</button>
     </form>
@@ -135,6 +136,6 @@
 <p style="margin-top: 1.5em; font-size: 0.9em; color: var(--text-secondary, #666); text-align: center;">
   Erstes Mal? Nutze den Aktivierungslink, den dein Nachhilfelehrer dir geschickt hat.
 </p>
-</div>
+</main>
 </body>
 </html>

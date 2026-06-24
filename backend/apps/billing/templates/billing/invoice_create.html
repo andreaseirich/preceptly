@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}{% trans "Create New Invoice" %} - Preceptly{% endblock %}
+{% block title %}Rechnung erstellen – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Create New Invoice" %}</h1>
@@ -18,28 +18,29 @@
     {% csrf_token %}
     
     <div style="margin-bottom: 20px;">
-        <label for="{{ form.period_start.id_for_label }}">{% trans "Period:" %}</label>
+        <label for="{{ form.period_start.id_for_label }}">{% trans "Zeitraum von:" %}</label>
         <div style="display: flex; gap: 10px; align-items: center;">
             {{ form.period_start }}
             <span>{% trans "to" %}</span>
+            <label for="{{ form.period_end.id_for_label }}" class="sr-only">{% trans "Zeitraum bis:" %}</label>
             {{ form.period_end }}
         </div>
         {% if form.period_start.errors %}
-        <div class="error">{{ form.period_start.errors }}</div>
+        <div id="{{ form.period_start.html_name }}_errors" role="alert" class="error">{{ form.period_start.errors }}</div>
         {% endif %}
         {% if form.period_end.errors %}
-        <div class="error">{{ form.period_end.errors }}</div>
+        <div id="{{ form.period_end.html_name }}_errors" role="alert" class="error">{{ form.period_end.errors }}</div>
         {% endif %}
     </div>
     
     <div style="margin-bottom: 20px;">
-        <label for="{{ form.institute.id_for_label }}">{% trans "Institute (optional):" %}</label>
+        <label for="{{ form.institute.id_for_label }}">{% trans "Institut (optional):" %}</label>
         {{ form.institute }}
         <small class="form-text text-muted">{% trans "If selected, only lessons from contracts with this institute will be billed." %}</small>
     </div>
 
     <div style="margin-bottom: 20px;">
-        <label for="{{ form.contract.id_for_label }}">{% trans "Contract (optional):" %}</label>
+        <label for="{{ form.contract.id_for_label }}">{% trans "Vertrag (optional):" %}</label>
         {{ form.contract }}
         <small class="form-text text-muted">{% trans "If selected, only lessons from this contract will be billed." %}</small>
     </div>
@@ -69,14 +70,14 @@
     <h2>{% blocktrans count counter=billable_lessons|length %}Available Lesson ({{ counter }}){% plural %}Available Lessons ({{ counter }}){% endblocktrans %}</h2>
     <p>{% trans "These lessons will be automatically included in the invoice:" %}</p>
     
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;" aria-label="Abrechnungsfähige Lektionen">
         <thead>
             <tr style="background: var(--table-header-bg);">
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Date" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Time" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Student" %}</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Duration" %}</th>
-                <th style="padding: 8px; text-align: right; border: 1px solid var(--border-color);">{% trans "Amount" %}</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Date" %}</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Time" %}</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Student" %}</th>
+                <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Duration" %}</th>
+                <th scope="col" style="padding: 8px; text-align: right; border: 1px solid var(--border-color);">{% trans "Amount" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -141,7 +142,6 @@ function loadLessons() {
     window.location.href = url.toString();
 }
 
-// Stelle sicher, dass Datumsfelder die Werte aus GET-Parametern übernehmen
 document.addEventListener('DOMContentLoaded', function() {
     const periodStartField = document.getElementById('{{ form.period_start.id_for_label }}');
     const periodEndField = document.getElementById('{{ form.period_end.id_for_label }}');

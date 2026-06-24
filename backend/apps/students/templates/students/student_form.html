@@ -1,18 +1,34 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% if object %}{% trans "Edit Student" %}{% else %}{% trans "New Student" %}{% endif %} - Preceptly{% endblock %}
+{% block title %}Schüler bearbeiten – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% if object %}{% trans "Edit Student" %}{% else %}{% trans "New Student" %}{% endif %}</h1>
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {% for field in form %}
+    <div style="margin-bottom: 16px;">
+        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 4px; font-weight: 500;">
+            {{ field.label }}{% if field.field.required %} *{% endif %}
+        </label>
+        {{ field }}
+        {% if field.errors %}
+        <div id="{{ field.id_for_label }}_errors" role="alert" style="color: #dc3545; margin: 4px 0 0;">
+            <ul style="padding-left: 16px; margin: 0;">
+                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if field.help_text %}
+        <small style="color: var(--text-secondary);">{{ field.help_text }}</small>
+        {% endif %}
+    </div>
+    {% endfor %}
     <div class="btn-group">
         <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
         <a href="{% url 'students:list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
 {% endblock %}
-

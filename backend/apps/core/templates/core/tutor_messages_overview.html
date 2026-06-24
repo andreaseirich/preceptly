@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <style>
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
     .thread-list { display: flex; flex-direction: column; gap: 8px; }
     .thread-card {
         display: flex;
@@ -73,10 +74,11 @@
 <p style="color:var(--text-secondary); font-size:0.88em; margin-bottom:18px;">
     {{ threads|length }} Chat{% if threads|length != 1 %}s{% endif %} mit Schülern und Eltern im Portal
 </p>
+<nav aria-label="Nachrichtenübersicht">
 <div class="thread-list">
 {% for t in threads %}
 <a class="thread-card" href="{% url 'core:tutor_messages' t.contract.pk %}">
-    <div class="thread-avatar {% if t.unread %}has-unread{% endif %}">
+    <div class="thread-avatar {% if t.unread %}has-unread{% endif %}" aria-hidden="true">
         {{ t.contract.full_name|slice:":1" }}
     </div>
     <div class="thread-body">
@@ -94,12 +96,13 @@
         <div class="thread-time">{{ t.last_msg.created_at|date:"d.m.Y" }}</div>
         {% endif %}
         {% if t.unread %}
-        <div class="badge-unread">{{ t.unread }}</div>
+        <div class="badge-unread" aria-label="{{ t.unread }} ungelesene Nachrichten">{{ t.unread }}</div>
         {% endif %}
     </div>
 </a>
 {% endfor %}
 </div>
+</nav>
 
 {% else %}
 <div class="empty-box">

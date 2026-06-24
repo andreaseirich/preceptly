@@ -1,20 +1,20 @@
 {% extends "portal/base.html" %}
 
-{% block title %}Serientermin erstellen – Preceptly Portal{% endblock %}
+{% block title %}Wiederkehrende Buchung – Preceptly{% endblock %}
 
 {% block content %}
 <h1>Neuen Serientermin erstellen</h1>
 <p style="color:var(--text-secondary);">Schüler: <strong>{{ student.full_name }}</strong></p>
 
 {% if not contract %}
-<div class="alert-warning">Kein aktiver Vertrag vorhanden.</div>
+<div class="alert-warning" role="alert">Kein aktiver Vertrag vorhanden.</div>
 {% else %}
 <div class="box-section">
   <form method="post">
     {% csrf_token %}
 
-    <div style="margin-bottom:16px;">
-      <label style="display:block; margin-bottom:6px; color:var(--text-secondary); font-size:0.88em;">Wochentage</label>
+    <fieldset style="border:none; padding:0; margin:0 0 16px;">
+      <legend style="display:block; margin-bottom:6px; color:var(--text-secondary); font-size:0.88em; font-weight:500;">Wochentage</legend>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         {% for field, label in weekday_fields %}
         <label style="display:flex; align-items:center; gap:5px; cursor:pointer; font-size:0.95em;">
@@ -23,12 +23,12 @@
         </label>
         {% endfor %}
       </div>
-    </div>
+    </fieldset>
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
       <div>
         <label for="id_start_time" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Uhrzeit</label>
-        <input type="time" id="id_start_time" name="start_time" required
+        <input type="time" id="id_start_time" name="start_time" required aria-required="true"
           style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
       </div>
       <div>
@@ -45,7 +45,7 @@
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
       <div>
         <label for="id_start_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Startdatum</label>
-        <input type="date" id="id_start_date" name="start_date" min="{{ today }}" required
+        <input type="date" id="id_start_date" name="start_date" min="{{ today }}" required aria-required="true"
           style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
       </div>
       <div>

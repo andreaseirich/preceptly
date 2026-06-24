@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %} - Preceptly{% endblock %}
+{% block title %}Rechnung – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</h1>
@@ -33,25 +33,25 @@
 </div>
 
 <h2>{% trans "Details" %}</h2>
-<table>
-    <tr><th>{% trans "Payer" %}</th><td>{{ invoice.payer_name }}</td></tr>
-    {% if invoice.payer_address %}<tr><th>{% trans "Address" %}</th><td>{{ invoice.payer_address|linebreaks }}</td></tr>{% endif %}
-    {% if invoice.contract %}<tr><th>{% trans "Contract" %}</th><td><a href="{% url 'contracts:detail' invoice.contract.pk %}">{{ invoice.contract }}</a></td></tr>{% endif %}
-    <tr><th>{% trans "Period" %}</th><td>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</td></tr>
-    <tr><th>{% trans "Status" %}</th><td>{{ invoice.get_status_display }}{% if invoice.paid_at %} ({% trans "paid at" %} {{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}">✎</a>){% endif %}</td></tr>
-    <tr><th>{% trans "Total Amount" %}</th><td><strong>{{ invoice.total_amount|euro }}</strong></td></tr>
-    <tr><th>{% trans "Created" %}</th><td>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
+<table aria-label="Rechnungsdetails">
+    <tr><th scope="row">{% trans "Payer" %}</th><td>{{ invoice.payer_name }}</td></tr>
+    {% if invoice.payer_address %}<tr><th scope="row">{% trans "Address" %}</th><td>{{ invoice.payer_address|linebreaks }}</td></tr>{% endif %}
+    {% if invoice.contract %}<tr><th scope="row">{% trans "Contract" %}</th><td><a href="{% url 'contracts:detail' invoice.contract.pk %}">{{ invoice.contract }}</a></td></tr>{% endif %}
+    <tr><th scope="row">{% trans "Period" %}</th><td>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} - {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</td></tr>
+    <tr><th scope="row">{% trans "Status" %}</th><td>{{ invoice.get_status_display }}{% if invoice.paid_at %} ({% trans "paid at" %} {{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}">✎</a>){% endif %}</td></tr>
+    <tr><th scope="row">{% trans "Total Amount" %}</th><td><strong>{{ invoice.total_amount|euro }}</strong></td></tr>
+    <tr><th scope="row">{% trans "Created" %}</th><td>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
 
 <h2>{% trans "Invoice Items" %}</h2>
 {% if invoice.items.all %}
-<table>
+<table aria-label="Rechnungspositionen">
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Description" %}</th>
-            <th>{% trans "Duration" %}</th>
-            <th>{% trans "Amount" %}</th>
+            <th scope="col">{% trans "Date" %}</th>
+            <th scope="col">{% trans "Description" %}</th>
+            <th scope="col">{% trans "Duration" %}</th>
+            <th scope="col">{% trans "Amount" %}</th>
         </tr>
     </thead>
     <tbody>

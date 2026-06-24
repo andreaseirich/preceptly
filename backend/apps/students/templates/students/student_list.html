@@ -1,25 +1,25 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Students" %} - Preceptly{% endblock %}
+{% block title %}Schüler – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Students" %}</h1>
 <a href="{% url 'students:create' %}" class="btn">{% trans "New Student" %}</a>
 
-<table>
+<table aria-label="Schülerliste">
     <thead>
         <tr>
-            <th>{% trans "Name" %}</th>
-            <th>{% trans "School" %}</th>
-            <th>{% trans "Grade" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Name" %}</th>
+            <th scope="col">{% trans "School" %}</th>
+            <th scope="col">{% trans "Grade" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for student in students %}
         <tr>
-            <td>{{ student.full_name }}</td>
+            <th scope="row">{{ student.full_name }}</th>
             <td>{{ student.school|default:"-" }}</td>
             <td>{{ student.grade|default:"-" }}</td>
             <td>
@@ -32,4 +32,3 @@
     </tbody>
 </table>
 {% endblock %}
-

@@ -1,6 +1,6 @@
 {% extends "portal/base.html" %}
 
-{% block title %}{{ lesson.date|date:"d.m.Y" }} – {{ student.full_name }} – Preceptly Portal{% endblock %}
+{% block title %}Stundendetails – Preceptly{% endblock %}
 
 {% block content %}
 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
@@ -16,22 +16,22 @@
 </div>
 
 <div class="card">
-    <table>
+    <table aria-label="Stundendetails">
         <tbody>
             <tr>
-                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500; width:140px;">Datum</th>
+                <th scope="row" style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500; width:140px;">Datum</th>
                 <td>{{ lesson.date|date:"d.m.Y" }}</td>
             </tr>
             <tr>
-                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Uhrzeit</th>
+                <th scope="row" style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Uhrzeit</th>
                 <td>{{ lesson.start_time|time:"H:i" }} Uhr</td>
             </tr>
             <tr>
-                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Dauer</th>
+                <th scope="row" style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Dauer</th>
                 <td>{{ lesson.duration_minutes }} Min.</td>
             </tr>
             <tr>
-                <th style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Status</th>
+                <th scope="row" style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Status</th>
                 <td>{{ lesson.get_status_display }}</td>
             </tr>
         </tbody>

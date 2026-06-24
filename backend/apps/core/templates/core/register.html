@@ -1,18 +1,18 @@
 {% extends "core/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Register" %} - Preceptly{% endblock %}
+{% block title %}Registrierung – Preceptly{% endblock %}
 
 {% block content %}
 <div style="max-width: 400px; margin: 100px auto; padding: 40px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     <h1 style="text-align: center; margin-bottom: 30px; color: var(--text-primary);">{% trans "Register" %}</h1>
 
     {% if form.non_field_errors %}
-    <div class="message error" style="margin-bottom: 20px;">
+    <div class="message error" style="margin-bottom: 20px;" role="alert">
         {% for err in form.non_field_errors %}{{ err }}{% if not forloop.last %} {% endif %}{% endfor %}
     </div>
     {% elif form.errors %}
-    <div class="message error" style="margin-bottom: 20px;">
+    <div class="message error" style="margin-bottom: 20px;" role="alert">
         {% trans "Please correct the errors below." %}
     </div>
     {% endif %}
@@ -21,21 +21,23 @@
         {% csrf_token %}
         <div style="margin-bottom: 20px;">
             <label for="id_username" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Username" %}:</label>
-            <input type="text" name="username" id="id_username" required autofocus
+            <input type="text" name="username" id="id_username" required autofocus aria-required="true"
+                   {% if form.username.errors %}aria-describedby="id_username_errors"{% endif %}
                    value="{{ form.username.value|default:'' }}"
                    maxlength="150" autocomplete="username"
                    style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
             {% if form.username.errors %}
-            <div class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.username.errors.0 }}</div>
+            <div id="id_username_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.username.errors.0 }}</div>
             {% endif %}
         </div>
 
         <div style="margin-bottom: 20px;">
             <label for="id_password1" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password" %}:</label>
-            <input type="password" name="password1" id="id_password1" required autocomplete="new-password"
+            <input type="password" name="password1" id="id_password1" required aria-required="true" autocomplete="new-password"
+                   {% if form.password1.errors %}aria-describedby="id_password1_errors"{% endif %}
                    style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
             {% if form.password1.errors %}
-            <div class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.password1.errors.0 }}</div>
+            <div id="id_password1_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.password1.errors.0 }}</div>
             {% endif %}
             {% if form.password1.help_text %}
             <small style="display: block; margin-top: 5px; color: var(--text-secondary); font-size: 0.85em;">{{ form.password1.help_text }}</small>
@@ -44,22 +46,24 @@
 
         <div style="margin-bottom: 25px;">
             <label for="id_password2" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password confirmation" %}:</label>
-            <input type="password" name="password2" id="id_password2" required autocomplete="new-password"
+            <input type="password" name="password2" id="id_password2" required aria-required="true" autocomplete="new-password"
+                   {% if form.password2.errors %}aria-describedby="id_password2_errors"{% endif %}
                    style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
             {% if form.password2.errors %}
-            <div class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.password2.errors.0 }}</div>
+            <div id="id_password2_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.password2.errors.0 }}</div>
             {% endif %}
         </div>
 
         {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
-        <div style="margin-bottom: 20px;">
-            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                <input type="checkbox" name="avv_consent" required style="margin-top: 3px; flex-shrink: 0;">
+        <fieldset style="border: none; padding: 0; margin: 0 0 20px 0;">
+            <legend style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600; font-size: 1em;">{% trans "Consent" %}</legend>
+            <label for="id_avv_consent" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                <input type="checkbox" name="avv_consent" id="id_avv_consent" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
                 <span style="color: var(--text-secondary); font-size: 0.9em;">
                     {% blocktrans with url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}I accept the <a href="{{ url_terms }}" target="_blank">Terms of Service</a>, <a href="{{ url_avv }}" target="_blank">Data Processing Agreement (AVV)</a>, and <a href="{{ url_privacy }}" target="_blank">Privacy Policy</a>.{% endblocktrans %}
                 </span>
             </label>
-        </div>
+        </fieldset>
 
         <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">
             {% trans "Register" %}

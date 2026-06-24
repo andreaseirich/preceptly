@@ -1,6 +1,6 @@
 {% extends "portal/base.html" %}
 
-{% block title %}Termin verschieben – Preceptly Portal{% endblock %}
+{% block title %}Termin verschieben – Preceptly{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -19,22 +19,22 @@
   ({{ session.duration_minutes }} Min.)
 </p>
 
-{% if error %}<div class="alert-danger">{{ error }}</div>{% endif %}
+{% if error %}<div class="alert-danger" role="alert">{{ error }}</div>{% endif %}
 
 <div class="box-section">
   <form method="post">
     {% csrf_token %}
     <div style="margin-bottom:16px;">
       <label for="id_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neues Datum</label>
-      <input type="date" id="id_date" name="date" min="{{ today }}" required
+      <input type="date" id="id_date" name="date" min="{{ today }}" required aria-required="true"
         style="padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary); font-size:0.95em;">
     </div>
     <div style="margin-bottom:20px;">
-      <label style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neue Uhrzeit</label>
-      <div class="slot-grid" id="slot-grid">
+      <label for="id_start_time" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neue Uhrzeit</label>
+      <div class="slot-grid" id="slot-grid" role="group" aria-label="Verfügbare Uhrzeiten">
         <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
       </div>
-      <input type="hidden" id="id_start_time" name="start_time" required>
+      <input type="hidden" id="id_start_time" name="start_time" required aria-required="true">
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
       <button type="submit" id="submit-btn" disabled

@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% if object %}Schüler bearbeiten{% else %}Neuer Schüler{% endif %} - Preceptly{% endblock %}
+{% block title %}Vertrag bearbeiten – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% if object %}Schüler bearbeiten{% else %}Neuer Schüler{% endif %}</h1>
@@ -15,12 +15,12 @@
     <p>{% trans "Enter the planned units for each month in the contract period." %}</p>
     
     {{ formset.management_form }}
-    <table>
+    <table aria-label="Monatsplanung">
         <thead>
             <tr>
-                <th>{% trans "Year" %}</th>
-                <th>{% trans "Month" %}</th>
-                <th>{% trans "Planned Units" %}</th>
+                <th scope="col">{% trans "Year" %}</th>
+                <th scope="col">{% trans "Month" %}</th>
+                <th scope="col">{% trans "Planned Units" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -34,7 +34,7 @@
                     {{ form.month.as_hidden }}
                     {{ form.planned_units }}
                     {% if form.planned_units.errors %}
-                    <div class="error">{{ form.planned_units.errors }}</div>
+                    <div id="{{ form.planned_units.html_name }}_errors" role="alert" class="error">{{ form.planned_units.errors }}</div>
                     {% endif %}
                 </td>
             </tr>
@@ -53,8 +53,6 @@
 
 {% if not object %}
 <script>
-// Beim Erstellen: Nach Speichern zur Update-View weiterleiten, um monatliche Planung zu bearbeiten
-// Dies wird durch die View-Logik gehandhabt
 </script>
 {% endif %}
 {% endblock %}

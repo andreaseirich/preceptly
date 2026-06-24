@@ -2,20 +2,20 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}{% trans "Dashboard" %} - Preceptly{% endblock %}
+{% block title %}Dashboard – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Dashboard" %}{% if is_premium %} <span class="premium-badge">{% trans "Premium" %}</span>{% endif %}</h1>
 
 <h2>{% trans "Today's Lessons" %}</h2>
 {% if today_lessons %}
-<table>
+<table aria-label="Heutige Stunden">
     <thead>
         <tr>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Conflicts" %}</th>
+            <th scope="col">{% trans "Time" %}</th>
+            <th scope="col">{% trans "Student" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Conflicts" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -41,14 +41,14 @@
 
 <h2>{% trans "Upcoming Lessons (7 days)" %}</h2>
 {% if upcoming_lessons %}
-<table>
+<table aria-label="Kommende Stunden">
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Student" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Conflicts" %}</th>
+            <th scope="col">{% trans "Date" %}</th>
+            <th scope="col">{% trans "Time" %}</th>
+            <th scope="col">{% trans "Student" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Conflicts" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -81,4 +81,3 @@
 <p class="conflict">⚠ {% blocktrans count counter=conflict_count %}{{ counter }} conflict in upcoming lessons!{% plural %}{{ counter }} conflicts in upcoming lessons!{% endblocktrans %}</p>
 {% endif %}
 {% endblock %}
-

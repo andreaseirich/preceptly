@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Delete Lesson" %} - Preceptly{% endblock %}
+{% block title %}Lektion löschen – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Delete Lesson" %}</h1>
@@ -24,10 +24,8 @@
             <strong>{% trans "Total lessons in series:" %}</strong> {{ series_lessons_count }}
         </p>
 
-        <div style="margin-top: 15px;">
-            <label style="display: block; margin-bottom: 10px; font-weight: bold;">
-                <strong>{% trans "What do you want to delete?" %}</strong>
-            </label>
+        <fieldset style="border: none; padding: 0; margin: 15px 0 0 0;">
+            <legend style="font-weight: bold; margin-bottom: 10px;">Was möchten Sie löschen?</legend>
             <div style="margin-top: 10px;">
                 <label style="display: block; margin-bottom: 10px; cursor: pointer; padding: 10px; background: var(--bg-secondary); border-radius: 4px; border: 2px solid #dc3545;">
                     <input type="radio" name="delete_series" value="false" checked style="margin-right: 8px;">
@@ -38,13 +36,12 @@
                     <span>{% trans "Entire series" %} ({% blocktrans count count=series_lessons_count %}{{ count }} lesson{% plural %}{{ count }} lessons{% endblocktrans %})</span>
                 </label>
             </div>
-        </div>
+        </fieldset>
     </div>
     {% endif %}
     <div class="btn-group">
-        <button type="submit" class="btn btn-danger">{% trans "Confirm Delete" %}</button>
+        <button type="submit" class="btn btn-danger" aria-label="Lektion löschen">{% trans "Confirm Delete" %}</button>
         <a href="{% url 'lessons:detail' object.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
 {% endblock %}
-

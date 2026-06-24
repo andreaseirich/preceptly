@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% if object %}{% trans "Edit Recurring Lesson" %}{% else %}{% trans "New Recurring Lesson" %}{% endif %} - Preceptly{% endblock %}
+{% block title %}Wiederkehrende Lektion – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% if object %}{% trans "Edit Recurring Lesson" %}{% else %}{% trans "New Recurring Lesson" %}{% endif %}</h1>
@@ -20,7 +20,7 @@
             <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
             {{ field }}
             {% if field.errors %}
-                <div class="error">{{ field.errors }}</div>
+                <div id="{{ field.html_name }}_errors" role="alert" class="error">{{ field.errors }}</div>
             {% endif %}
             {% if field.name == 'recurrence_type' %}
                 <small class="form-text text-muted">
@@ -28,6 +28,11 @@
                     <strong>{% trans "Bi-weekly:" %}</strong> {% trans "Every second week on the selected weekdays." %}<br>
                     <strong>{% trans "Monthly:" %}</strong> {% trans "Every month on the same calendar day (e.g., every 15th of the month), if that day is a selected weekday." %}
                 </small>
+            {% endif %}
+            {% if field.name == 'recurrence_weekdays' %}
+                <fieldset style="border: none; padding: 0; margin: 0;">
+                    <legend class="sr-only">Wochentage</legend>
+                </fieldset>
             {% endif %}
         </div>
     {% endfor %}

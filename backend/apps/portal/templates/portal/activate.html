@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     {% load i18n %}
-    <title>Konto aktivieren – Preceptly Portal</title>
+    <title>Konto aktivieren – Preceptly</title>
     <style>
         :root {
             --bg-primary: #f5f5f5;
@@ -111,24 +111,26 @@
     </style>
 </head>
 <body>
+<main id="main-content">
 <div class="login-card">
     <div class="login-brand">Preceptly Portal</div>
     <div class="login-subtitle">Willkommen, {{ student.full_name }}! Lege dein Passwort fest, um dein Konto zu aktivieren.</div>
 
     {% if error %}
-    <div class="alert-warning">{{ error }}</div>
+    <div class="alert-warning" role="alert">{{ error }}</div>
     {% endif %}
 
     <form method="post">
         {% csrf_token %}
         <label for="id_password">Passwort</label>
-        <input type="password" id="id_password" name="password" minlength="8" autocomplete="new-password" autofocus required>
+        <input type="password" id="id_password" name="password" minlength="8" autocomplete="new-password" autofocus required aria-required="true">
 
         <label for="id_password_confirm">Passwort bestätigen</label>
-        <input type="password" id="id_password_confirm" name="password_confirm" minlength="8" autocomplete="new-password" required>
+        <input type="password" id="id_password_confirm" name="password_confirm" minlength="8" autocomplete="new-password" required aria-required="true">
 
         <button type="submit" class="btn-login">Konto aktivieren</button>
     </form>
 </div>
+</main>
 </body>
 </html>

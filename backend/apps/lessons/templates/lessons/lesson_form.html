@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% if object %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %} - Preceptly{% endblock %}
+{% block title %}Stunde bearbeiten – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% if object %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %}</h1>
@@ -16,8 +16,8 @@
         <p><strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }}
         {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</p>
 
-        <div style="margin-top: 15px;">
-            <label><strong>{% trans "What do you want to edit?" %}</strong></label>
+        <fieldset style="border: none; padding: 0; margin-top: 15px;">
+            <legend><strong>{% trans "What do you want to edit?" %}</strong></legend>
             <div style="margin-top: 10px;">
                 {% for choice in form.edit_scope %}
                 <label style="display: block; margin-bottom: 10px; cursor: pointer;">
@@ -26,50 +26,59 @@
                 </label>
                 {% endfor %}
             </div>
-        </div>
+        </fieldset>
     </div>
     {% endif %}
     
     <div style="margin-bottom: 20px;">
         <h3>{% trans "Lesson Details" %}</h3>
         <p>
-            <label for="{{ form.contract.id_for_label }}">{% trans "Contract:" %}</label>
+            <label for="{{ form.contract.id_for_label }}">{% trans "Vertrag:" %}</label>
             {{ form.contract }}
+            {% if form.contract.errors %}<div id="{{ form.contract.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.contract.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.date.id_for_label }}">{% trans "Date:" %}</label>
+            <label for="{{ form.date.id_for_label }}">{% trans "Datum:" %}</label>
             {{ form.date }}
+            {% if form.date.errors %}<div id="{{ form.date.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.date.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.start_time.id_for_label }}">{% trans "Start Time:" %}</label>
+            <label for="{{ form.start_time.id_for_label }}">{% trans "Startzeit:" %}</label>
             {{ form.start_time }}
+            {% if form.start_time.errors %}<div id="{{ form.start_time.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.start_time.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.duration_minutes.id_for_label }}">{% trans "Duration (minutes):" %}</label>
+            <label for="{{ form.duration_minutes.id_for_label }}">{% trans "Dauer (Minuten):" %}</label>
             {{ form.duration_minutes }}
+            {% if form.duration_minutes.errors %}<div id="{{ form.duration_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.duration_minutes.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.travel_time_before_minutes.id_for_label }}">{% trans "Travel Time Before (minutes):" %}</label>
+            <label for="{{ form.travel_time_before_minutes.id_for_label }}">{% trans "Fahrzeit vorher (Minuten):" %}</label>
             {{ form.travel_time_before_minutes }}
+            {% if form.travel_time_before_minutes.errors %}<div id="{{ form.travel_time_before_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.travel_time_before_minutes.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.travel_time_after_minutes.id_for_label }}">{% trans "Travel Time After (minutes):" %}</label>
+            <label for="{{ form.travel_time_after_minutes.id_for_label }}">{% trans "Fahrzeit nachher (Minuten):" %}</label>
             {{ form.travel_time_after_minutes }}
+            {% if form.travel_time_after_minutes.errors %}<div id="{{ form.travel_time_after_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.travel_time_after_minutes.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.notes.id_for_label }}">{% trans "Notes:" %}</label>
+            <label for="{{ form.notes.id_for_label }}">{% trans "Notizen:" %}</label>
             {{ form.notes }}
+            {% if form.notes.errors %}<div id="{{ form.notes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.notes.errors }}</div>{% endif %}
         </p>
         {% if form.homework %}
         <div class="form-group">
           <label for="{{ form.homework.id_for_label }}">{{ form.homework.label }}</label>
           {{ form.homework }}
+          {% if form.homework.errors %}<div id="{{ form.homework.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.homework.errors }}</div>{% endif %}
         </div>
         {% endif %}
         {% if form.meeting_url %}
         <div class="form-group">
           <label for="{{ form.meeting_url.id_for_label }}">{{ form.meeting_url.label }}</label>
           {{ form.meeting_url }}
+          {% if form.meeting_url.errors %}<div id="{{ form.meeting_url.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.meeting_url.errors }}</div>{% endif %}
         </div>
         {% endif %}
         <p style="padding: 10px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
@@ -79,7 +88,7 @@
             </label>
         </p>
         {% if form.tutor_no_show.errors %}
-        <p style="color: #dc3545;">{{ form.tutor_no_show.errors.0 }}</p>
+        <div id="{{ form.tutor_no_show.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.tutor_no_show.errors.0 }}</div>
         {% endif %}
     </div>
     
@@ -98,18 +107,18 @@
         
         <div id="recurrence-fields" style="display: none; margin-top: 15px; margin-left: 28px;">
             <p>
-                <label for="{{ form.recurrence_type.id_for_label }}">{% trans "Repeat pattern:" %}</label>
+                <label for="{{ form.recurrence_type.id_for_label }}">{% trans "Wiederholungsmuster:" %}</label>
                 {{ form.recurrence_type }}
             </p>
             <p>
-                <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans "End date (optional):" %}</label>
+                <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans "Enddatum (optional):" %}</label>
                 {{ form.recurrence_end_date }}
                 {% if form.recurrence_end_date.help_text %}
                 <small style="display: block; color: var(--text-secondary);">{{ form.recurrence_end_date.help_text }}</small>
                 {% endif %}
             </p>
-            <p>
-                <label>{% trans "Weekdays:" %}</label>
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <legend>{% trans "Wochentage" %}</legend>
                 <div id="weekdays-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
                     {% for choice in form.recurrence_weekdays %}
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
@@ -121,7 +130,7 @@
                 {% if form.recurrence_weekdays.help_text %}
                 <small style="display: block; color: var(--text-secondary);">{{ form.recurrence_weekdays.help_text }}</small>
                 {% endif %}
-            </p>
+            </fieldset>
         </div>
     </div>
     {% endif %}
@@ -141,10 +150,9 @@
         </div>
         
         <div id="series-weekdays-section" style="margin-top: 15px; display: none;">
-            <p>
-                <label><strong>{% trans "Change weekdays:" %}</strong></label>
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <legend><strong>{% trans "Change weekdays:" %}</strong></legend>
                 <div id="series-weekdays-container" style="display: none; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                    {# Erstelle Checkboxes immer manuell basierend auf matching_recurring #}
                     {% if matching_recurring %}
                         {% with active_weekdays=matching_recurring.get_active_weekdays %}
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
@@ -179,7 +187,7 @@
                     {% endif %}
                 </div>
                 <small style="display: block; color: var(--text-secondary); margin-top: 10px;">{% trans "Select the weekdays for this series. Lessons on deselected weekdays will be deleted, and new lessons will be created for newly selected weekdays." %}</small>
-            </p>
+            </fieldset>
         </div>
     </div>
     {% endif %}
@@ -198,15 +206,12 @@ function toggleRecurrenceFields() {
     if (isRecurring && recurrenceFields) {
         if (isRecurring.checked) {
             recurrenceFields.style.display = 'block';
-            // Show recurrence fields
             const recurrenceType = document.getElementById('{{ form.recurrence_type.id_for_label }}');
             const recurrenceEndDate = document.getElementById('{{ form.recurrence_end_date.id_for_label }}');
             if (recurrenceType) recurrenceType.style.display = 'block';
             if (recurrenceEndDate) recurrenceEndDate.style.display = 'block';
-            // Show weekdays checkboxes
             if (weekdaysContainer) {
                 weekdaysContainer.style.display = 'flex';
-                // Make sure all checkboxes are visible and enabled
                 const checkboxes = weekdaysContainer.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(function(checkbox) {
                     checkbox.style.display = 'inline-block';
@@ -220,11 +225,9 @@ function toggleRecurrenceFields() {
     }
 }
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     toggleRecurrenceFields();
     
-    // Function to show/hide series info
     function toggleSeriesInfo(show) {
         const seriesInfo = document.getElementById('series-info');
         const seriesWeekdaysSection = document.getElementById('series-weekdays-section');
@@ -237,20 +240,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (seriesWeekdaysSection) {
                 seriesWeekdaysSection.style.display = 'block';
             }
-            // Show weekday checkboxes
             if (seriesWeekdaysContainer) {
                 seriesWeekdaysContainer.style.display = 'flex';
-                // Ensure all checkboxes are visible and enabled
                 const checkboxes = seriesWeekdaysContainer.querySelectorAll('input[type="checkbox"]');
                 if (checkboxes.length > 0) {
                     checkboxes.forEach(function(checkbox) {
-                        // Remove all hiding styles and attributes
                         checkbox.removeAttribute('hidden');
                         checkbox.style.display = '';
                         checkbox.style.visibility = '';
                         checkbox.style.opacity = '';
                         checkbox.classList.remove('hidden');
-                        // Set explicitly visible
                         checkbox.style.display = 'inline-block';
                         checkbox.style.visibility = 'visible';
                         checkbox.style.opacity = '1';
@@ -258,7 +257,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         checkbox.readOnly = false;
                         checkbox.style.pointerEvents = 'auto';
                     });
-                    // Ensure labels are visible
                     const labels = seriesWeekdaysContainer.querySelectorAll('label');
                     labels.forEach(function(label) {
                         label.removeAttribute('hidden');
@@ -282,23 +280,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Show/hide series info based on edit_scope
     function setupEditScopeToggle() {
         const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
         
         if (editScopeRadios.length > 0) {
             editScopeRadios.forEach(function(radio) {
-                // Remove old event listeners if present
                 const newRadio = radio.cloneNode(true);
                 if (radio.checked) newRadio.checked = true;
                 radio.parentNode.replaceChild(newRadio, radio);
                 
-                // Add event listeners (both change and click)
                 newRadio.addEventListener('change', handleEditScopeChange);
                 newRadio.addEventListener('click', handleEditScopeChange);
             });
             
-            // Initial state - check immediately on load
             const checkedRadio = document.querySelector('input[name="edit_scope"]:checked');
             if (checkedRadio) {
                 handleEditScopeChange.call(checkedRadio);
@@ -311,47 +305,33 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleSeriesInfo(isSeries);
     }
     
-    // Initialize on DOM load
     setupEditScopeToggle();
     
-    // Ensure date fields display initial values
     function initializeDateFields() {
         const urlParams = new URLSearchParams(window.location.search);
         const dateField = document.getElementById('{{ form.date.id_for_label }}');
         const timeField = document.getElementById('{{ form.start_time.id_for_label }}');
         
-        // Support for start parameter (ISO datetime format: YYYY-MM-DDTHH:MM)
         const startParam = urlParams.get('start');
         if (startParam) {
             try {
-                // Parse ISO format: YYYY-MM-DDTHH:MM (treat as local time, not UTC)
-                // If format is YYYY-MM-DDTHH:MM, parse it directly to avoid timezone conversion
                 if (startParam.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
-                    // Parse as local time explicitly
                     const [datePart, timePart] = startParam.split('T');
-                    const [year, month, day] = datePart.split('-').map(Number);
-                    const [hours, minutes] = timePart.split(':').map(Number);
-                    
-                    // Set date
                     if (dateField) {
                         dateField.value = datePart;
                     }
-                    // Set time
                     if (timeField) {
                         timeField.value = timePart;
                     }
                 } else {
-                    // Fallback: use Date constructor (for other formats)
                     const startDate = new Date(startParam);
                     if (!isNaN(startDate.getTime())) {
-                        // Set date
                         if (dateField) {
                             const year = startDate.getFullYear();
                             const month = String(startDate.getMonth() + 1).padStart(2, '0');
                             const day = String(startDate.getDate()).padStart(2, '0');
                             dateField.value = `${year}-${month}-${day}`;
                         }
-                        // Set time
                         if (timeField) {
                             const hours = String(startDate.getHours()).padStart(2, '0');
                             const minutes = String(startDate.getMinutes()).padStart(2, '0');
@@ -360,19 +340,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch (e) {
-                // Failed to parse start parameter
             }
         }
         
-        // Fallback: date field for lesson (if not yet set)
         if (dateField && !dateField.value) {
-            // Try to read date from GET parameters
             const dateParam = urlParams.get('date');
             if (dateParam) {
-                // Convert YYYY-MM-DD format
                 dateField.value = dateParam;
             } else {
-                // Try to construct from year/month/day parameters
                 const year = urlParams.get('year');
                 const month = urlParams.get('month');
                 const day = urlParams.get('day') || '1';
@@ -383,7 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Fallback: time field (if not yet set)
         if (timeField && !timeField.value) {
             const timeParam = urlParams.get('time');
             if (timeParam) {
@@ -391,10 +365,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Recurrence end date
         const recurrenceEndDateField = document.getElementById('{{ form.recurrence_end_date.id_for_label }}');
         if (recurrenceEndDateField && !recurrenceEndDateField.value && dateField && dateField.value) {
-            // Set end date to 1 year after start date as default
             const startDate = new Date(dateField.value);
             const endDate = new Date(startDate);
             endDate.setFullYear(endDate.getFullYear() + 1);
@@ -402,9 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Initialize date fields on load
     initializeDateFields();
 });
 </script>
 {% endblock %}
-
