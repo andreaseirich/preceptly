@@ -61,3 +61,8 @@ docs/
 - Ruff für Linting (`ruff check backend/`)
 - Migrations immer committen
 - Echte Unicode-Zeichen: ä, ö, ü, ß — nicht ae, oe, ue, ss
+
+
+## Barrierefreiheit
+
+Bei **jeder** Template-Änderung WCAG 2.1 AA einhalten. Verbindliche Regeln: **`docs/ACCESSIBILITY.md`**
