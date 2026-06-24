@@ -16,18 +16,18 @@ class BlockedTimeForm(forms.ModelForm):
         required=False,
         initial="single",
         choices=[
-            ("single", _("Edit only this blocked time")),
-            ("series", _("Edit entire series")),
+            ("single", _("Nur diese Blockzeit bearbeiten")),
+            ("series", _("Gesamte Serie bearbeiten")),
         ],
-        label=_("Edit scope"),
+        label=_("Bearbeitungsumfang"),
         widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
     )
 
     # Recurrence fields (only shown when creating, not editing)
     is_recurring = forms.BooleanField(
         required=False,
-        label=_("Repeat this blocked time"),
-        help_text=_("Create a recurring series instead of a single blocked time"),
+        label=_("Blockzeit wiederholen"),
+        help_text=_("Statt einer einzelnen Blockzeit eine wiederkehrende Serie anlegen"),
         widget=forms.CheckboxInput(
             attrs={"class": "form-check-input", "onchange": "toggleRecurrenceFields()"}
         ),

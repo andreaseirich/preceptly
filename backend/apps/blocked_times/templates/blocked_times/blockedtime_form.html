@@ -4,18 +4,18 @@
 {% block title %}Sperrzeit – Preceptly{% endblock %}
 
 {% block content %}
-<h1>{% if object %}{% trans "Edit Blocked Time" %}{% else %}{% trans "New Blocked Time" %}{% endif %}</h1>
+<h1>{% if object %}Blockzeit bearbeiten{% else %}Neue Blockzeit{% endif %}</h1>
 
 {% if object and matching_recurring %}
 <div class="alert-info" style="margin-bottom: 20px;">
-    <h3>{% trans "This blocked time is part of a series" %}</h3>
-    <p><strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
-    ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})</p>
-    <p><strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }} 
-    {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</p>
+    <h3>Diese Blockzeit ist Teil einer Serie</h3>
+    <p><strong>Serie:</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }} 
+    (Wiederholung: {{ matching_recurring.get_recurrence_type_display }})</p>
+    <p><strong>Serienzeitraum:</strong> {{ matching_recurring.start_date }} 
+    {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}(unbegrenzt){% endif %}</p>
     
     <fieldset style="border: none; padding: 0; margin-top: 15px;">
-        <legend><strong>{% trans "What do you want to edit?" %}</strong></legend>
+        <legend><strong>Was möchtest du bearbeiten?</strong></legend>
         <div style="margin-top: 10px;">
             {% for choice in form.edit_scope %}
             <label style="display: block; margin-bottom: 10px; cursor: pointer;">
@@ -23,7 +23,7 @@
                 <span style="margin-left: 8px;">{{ choice.choice_label }}</span>
             </label>
             {% empty %}
-            <p style="color: red;">{% trans "Warning: edit scope field is empty." %}</p>
+            <p style="color: red;">Warnung: Bearbeitungsumfang-Feld ist leer.</p>
             {% endfor %}
         </div>
     </fieldset>
@@ -35,30 +35,30 @@
     <input type="hidden" name="edit_scope" id="edit_scope_hidden" value="single">
     
     <div style="margin-bottom: 20px;">
-        <h3>{% trans "Blocked Time Details" %}</h3>
+        <h3>Blockzeit-Details</h3>
         <p>
-            <label for="{{ form.title.id_for_label }}">{% trans "Titel:" %}</label>
+            <label for="{{ form.title.id_for_label }}">Titel:</label>
             {{ form.title }}
             {% if form.title.errors %}
             <div id="{{ form.title.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.title.errors }}</div>
             {% endif %}
         </p>
         <p>
-            <label for="{{ form.description.id_for_label }}">{% trans "Beschreibung:" %}</label>
+            <label for="{{ form.description.id_for_label }}">Beschreibung:</label>
             {{ form.description }}
             {% if form.description.errors %}
             <div id="{{ form.description.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.description.errors }}</div>
             {% endif %}
         </p>
         <p>
-            <label for="{{ form.start_datetime.id_for_label }}">{% trans "Startdatum und -zeit:" %}</label>
+            <label for="{{ form.start_datetime.id_for_label }}">Startdatum und -zeit:</label>
             {{ form.start_datetime }}
             {% if form.start_datetime.errors %}
             <div id="{{ form.start_datetime.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.start_datetime.errors }}</div>
             {% endif %}
         </p>
         <p>
-            <label for="{{ form.end_datetime.id_for_label }}">{% trans "Enddatum und -zeit:" %}</label>
+            <label for="{{ form.end_datetime.id_for_label }}">Enddatum und -zeit:</label>
             {{ form.end_datetime }}
             {% if form.end_datetime.errors %}
             <div id="{{ form.end_datetime.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.end_datetime.errors }}</div>
@@ -68,11 +68,11 @@
     
     {% if not object %}
     <div id="recurrence-section" class="box-section" style="margin-bottom: 20px;">
-        <h3>{% trans "Recurrence (Optional)" %}</h3>
+        <h3>Wiederholung (optional)</h3>
         <p>
             <label for="{{ form.is_recurring.id_for_label }}" style="display: flex; align-items: center; gap: 8px;">
                 {{ form.is_recurring }}
-                <strong>{% trans "Repeat this blocked time" %}</strong>
+                <strong>Blockzeit wiederholen</strong>
             </label>
             {% if form.is_recurring.help_text %}
             <small style="display: block; margin-left: 28px; color: var(--text-secondary);">{{ form.is_recurring.help_text }}</small>
@@ -81,18 +81,18 @@
         
         <div id="recurrence-fields" style="display: none; margin-top: 15px; margin-left: 28px;">
             <p>
-                <label for="{{ form.recurrence_type.id_for_label }}">{% trans "Wiederholungsmuster:" %}</label>
+                <label for="{{ form.recurrence_type.id_for_label }}">Wiederholungsmuster:</label>
                 {{ form.recurrence_type }}
             </p>
             <p>
-                <label for="{{ form.recurrence_end_date.id_for_label }}">{% trans "Enddatum (optional):" %}</label>
+                <label for="{{ form.recurrence_end_date.id_for_label }}">Enddatum (optional):</label>
                 {{ form.recurrence_end_date }}
                 {% if form.recurrence_end_date.help_text %}
                 <small style="display: block; color: var(--text-secondary);">{{ form.recurrence_end_date.help_text }}</small>
                 {% endif %}
             </p>
             <fieldset style="border: none; padding: 0; margin: 0;">
-                <legend>{% trans "Wochentage" %}</legend>
+                <legend>Wochentage</legend>
                 <div id="weekdays-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
                     {% for choice in form.recurrence_weekdays %}
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
@@ -111,56 +111,56 @@
     
     {% if object and matching_recurring %}
     <div id="series-info" class="alert-warning" style="margin-top: 20px; display: none;">
-        <h3>{% trans "Series Settings" %}</h3>
-        <p><em>{% trans "When editing the entire series, changes to the following fields will be applied to all blocked times in the series:" %}</em></p>
+        <h3>Serieneinstellungen</h3>
+        <p><em>Beim Bearbeiten der gesamten Serie werden Änderungen auf alle Blockzeiten der Serie angewendet:</em></p>
         
         <div style="margin-top: 15px;">
-            <p><strong>{% trans "Current series configuration:" %}</strong></p>
+            <p><strong>Aktuelle Serienkonfiguration:</strong></p>
             <ul>
-                <li>{% trans "Recurrence type" %}: {{ matching_recurring.get_recurrence_type_display }}</li>
-                <li>{% trans "Weekdays" %}: {{ matching_recurring.get_active_weekdays_display }}</li>
-                <li>{% trans "Series period" %}: {{ matching_recurring.start_date }} {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</li>
+                <li>Wiederholungstyp: {{ matching_recurring.get_recurrence_type_display }}</li>
+                <li>Wochentage: {{ matching_recurring.get_active_weekdays_display }}</li>
+                <li>Serienzeitraum: {{ matching_recurring.start_date }} {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}(unbegrenzt){% endif %}</li>
             </ul>
         </div>
         
         <div id="series-weekdays-section" style="margin-top: 15px; display: none;">
             <fieldset style="border: none; padding: 0; margin: 0;">
-                <legend><strong>{% trans "Change weekdays:" %}</strong></legend>
+                <legend><strong>Wochentage ändern:</strong></legend>
                 <div id="series-weekdays-container" style="display: none; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                     {% if matching_recurring %}
                         {% with active_weekdays=matching_recurring.get_active_weekdays %}
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="0" {% if 0 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-0">
-                            <span>{% trans "Monday" %}</span>
+                            <span>Montag</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="1" {% if 1 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-1">
-                            <span>{% trans "Tuesday" %}</span>
+                            <span>Dienstag</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="2" {% if 2 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-2">
-                            <span>{% trans "Wednesday" %}</span>
+                            <span>Mittwoch</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="3" {% if 3 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-3">
-                            <span>{% trans "Thursday" %}</span>
+                            <span>Donnerstag</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="4" {% if 4 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-4">
-                            <span>{% trans "Friday" %}</span>
+                            <span>Freitag</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="5" {% if 5 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-5">
-                            <span>{% trans "Saturday" %}</span>
+                            <span>Samstag</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-right: 15px; margin-bottom: 5px;">
                             <input type="checkbox" name="recurrence_weekdays" value="6" {% if 6 in active_weekdays %}checked{% endif %} class="form-check-input" id="weekday-6">
-                            <span>{% trans "Sunday" %}</span>
+                            <span>Sonntag</span>
                         </label>
                         {% endwith %}
                     {% endif %}
                 </div>
-                <small style="display: block; color: var(--text-secondary); margin-top: 10px;">{% trans "Select the weekdays for this series. Blocked times on deselected weekdays will be deleted, and new blocked times will be created for newly selected weekdays." %}</small>
+                <small style="display: block; color: var(--text-secondary); margin-top: 10px;">Wochentage für diese Serie auswählen. Blockzeiten für abgewählte Wochentage werden gelöscht, für neu gewählte neue Blockzeiten angelegt.</small>
             </fieldset>
         </div>
     </div>
@@ -173,8 +173,8 @@
     {% endif %}
     
     <div class="btn-group">
-        <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
-        <a href="{% url 'lessons:week' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+        <button type="submit" class="btn btn-success">Speichern</button>
+        <a href="{% url 'lessons:week' %}" class="btn btn-secondary">Abbrechen</a>
     </div>
 </form>
 
