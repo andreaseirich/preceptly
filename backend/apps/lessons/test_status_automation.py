@@ -118,8 +118,8 @@ class RecurringLessonStatusAutomationTest(TestCase):
             start = timezone.make_aware(datetime.combine(lesson.date, lesson.start_time))
             return start + timedelta(minutes=lesson.duration_minutes)
 
-        past_lessons = [l for l in lessons if end_dt(l) < now]
-        future_lessons = [l for l in lessons if end_dt(l) >= now]
+        past_lessons = [ls for ls in lessons if end_dt(ls) < now]
+        future_lessons = [ls for ls in lessons if end_dt(ls) >= now]
 
         # Vergangene sollten TAUGHT sein
         for lesson in past_lessons:
