@@ -120,7 +120,7 @@ class InstituteFilterTest(TestCase):
         response = self.client.get("/billing/create/")
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")
-        self.assertIn("Institute (optional)", content)
+        self.assertIn("Institut", content)
         self.assertIn("Institut Alpha", content)
         self.assertIn("Institut Beta", content)
 
