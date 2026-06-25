@@ -7,7 +7,7 @@
 <div class="box-section">
   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
     <h2 style="margin:0;">Dokumente: {{ student.full_name }}</h2>
-    <a href="{% url 'students:detail' student.pk %}" class="btn-sm btn-sm-secondary">&larr; Zum Schüler</a>
+    <a href="{% url 'contracts:detail' student.pk %}" class="btn-sm btn-sm-secondary">&larr; Zum Schüler</a>
   </div>
 
   <form method="post" enctype="multipart/form-data" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:24px;">

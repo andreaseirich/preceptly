@@ -13,7 +13,7 @@
     {% csrf_token %}
     <div class="btn-group">
         <button type="submit" class="btn btn-danger" aria-label="Schüler {{ student.full_name }} löschen">{% trans "Delete" %}</button>
-        <a href="{% url 'students:detail' student.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+        <a href="{% url 'contracts:detail' student.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
 {% endblock %}

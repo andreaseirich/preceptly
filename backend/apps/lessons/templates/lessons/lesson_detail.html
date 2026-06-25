@@ -43,7 +43,7 @@
         <tr style="border-bottom: 1px solid var(--border-color);">
             <th scope="row" style="padding: 8px; color: var(--text-secondary);">{% trans "Student:" %}</th>
             <td style="padding: 8px; color: var(--text-primary);">
-                <a href="{% url 'students:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a>
+                <a href="{% url 'contracts:detail' lesson.contract.student.pk %}">{{ lesson.contract.student.full_name }}</a>
             </td>
         </tr>
         <tr style="border-bottom: 1px solid var(--border-color);">
