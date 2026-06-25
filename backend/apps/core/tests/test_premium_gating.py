@@ -18,9 +18,9 @@ class FeatureFlagsTest(TestCase):
 
     def setUp(self):
         self.basic_user = User.objects.create_user(username="basic", password="test")
-        UserProfile.objects.create(user=self.basic_user, is_premium=False)
+        UserProfile.objects.create(user=self.basic_user)
         self.premium_user = User.objects.create_user(username="premium", password="test")
-        UserProfile.objects.create(user=self.premium_user, is_premium=True, subscription_tier="pro")
+        UserProfile.objects.create(user=self.premium_user, subscription_tier="pro")
 
     def test_basic_has_no_premium_features(self):
         self.assertFalse(user_has_feature(self.basic_user, Feature.FEATURE_REPORTS))

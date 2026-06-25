@@ -20,9 +20,9 @@ class ReportsPremiumGatingTest(TestCase):
 
     def setUp(self):
         self.basic = User.objects.create_user(username="basic", password="test")
-        UserProfile.objects.create(user=self.basic, is_premium=False)
+        UserProfile.objects.create(user=self.basic)
         self.premium = User.objects.create_user(username="premium", password="test")
-        UserProfile.objects.create(user=self.premium, is_premium=True, subscription_tier="pro")
+        UserProfile.objects.create(user=self.premium, subscription_tier="pro")
         self.contract = Contract.objects.create(
             user=self.premium,
             first_name="A",
@@ -73,9 +73,9 @@ class ReportsMultiUserIsolationTest(TestCase):
 
     def setUp(self):
         self.user_a = User.objects.create_user(username="a", password="test")
-        UserProfile.objects.create(user=self.user_a, is_premium=True, subscription_tier="pro")
+        UserProfile.objects.create(user=self.user_a, subscription_tier="pro")
         self.user_b = User.objects.create_user(username="b", password="test")
-        UserProfile.objects.create(user=self.user_b, is_premium=True, subscription_tier="pro")
+        UserProfile.objects.create(user=self.user_b, subscription_tier="pro")
         contract_a = Contract.objects.create(
             user=self.user_a,
             first_name="A",

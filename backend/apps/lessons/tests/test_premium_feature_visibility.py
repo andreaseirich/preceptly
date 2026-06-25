@@ -22,11 +22,11 @@ class PremiumFeatureVisibilityTest(TestCase):
 
         # Create premium user
         self.premium_user = User.objects.create_user(username="premium", password="password")
-        UserProfile.objects.create(user=self.premium_user, is_premium=True, subscription_tier="pro")
+        UserProfile.objects.create(user=self.premium_user, subscription_tier="pro")
 
         # Create non-premium user
         self.non_premium_user = User.objects.create_user(username="regular", password="password")
-        UserProfile.objects.create(user=self.non_premium_user, is_premium=False)
+        UserProfile.objects.create(user=self.non_premium_user)
 
         # Contract and lesson for premium user
         self.contract = Contract.objects.create(

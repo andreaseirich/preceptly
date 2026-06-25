@@ -95,7 +95,7 @@ class SubscriptionCheckoutTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
-        UserProfile.objects.create(user=self.user, is_premium=False)
+        UserProfile.objects.create(user=self.user)
 
     def test_checkout_requires_login(self):
         response = self.client.post(
@@ -149,7 +149,7 @@ class SubscriptionPortalTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
         self.profile = UserProfile.objects.create(
-            user=self.user, is_premium=True, subscription_tier="pro", stripe_customer_id="cus_fake"
+            user=self.user, subscription_tier="pro", stripe_customer_id="cus_fake"
         )
 
     def test_portal_requires_login(self):
@@ -184,7 +184,7 @@ class StripeCheckoutPremiumTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor_prem", password="test")
-        UserProfile.objects.create(user=self.user, is_premium=False)
+        UserProfile.objects.create(user=self.user)
 
     def test_stripe_checkout_requires_login(self):
         response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
@@ -435,7 +435,6 @@ class StripeCustomerEmailUpdateTest(TestCase):
         UserProfile.objects.create(
             user=self.user,
             stripe_customer_id="cus_update_test",
-            is_premium=False,
         )
 
     @patch("apps.core.views_stripe.stripe.Customer.modify")
@@ -563,7 +562,6 @@ class StripeWebhookTest(TestCase):
         self.user = User.objects.create_user(username="tutor", password="test")
         self.profile = UserProfile.objects.create(
             user=self.user,
-            is_premium=False,
             stripe_customer_id="cus_fake",
             stripe_subscription_id=None,
         )
@@ -601,7 +599,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 400)
         self.profile.refresh_from_db()
-        self.assertFalse(self.profile.is_premium)
+        self.assertEqual(self.profile.subscription_tier, "free")
 
     def test_webhook_unknown_event_type_returns_200_no_side_effects(self):
         """Unknown event type => 200, no state changes."""
@@ -622,7 +620,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertFalse(self.profile.is_premium)
+        self.assertEqual(self.profile.subscription_tier, "free")
 
     def test_webhook_without_mapping_returns_200_and_does_not_change_user(self):
         event = {
@@ -642,7 +640,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertFalse(self.profile.is_premium)
+        self.assertEqual(self.profile.subscription_tier, "free")
 
     @patch("apps.core.views_stripe._handle_stripe_event")
     def test_webhook_success_returns_200(self, mock_handle):
@@ -690,7 +688,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertTrue(self.profile.is_premium)
+        self.assertIn(self.profile.subscription_tier, ["pro", "business"])
         self.assertEqual(self.profile.stripe_subscription_id, "sub_new")
 
     def test_subscription_updated_trialing_sets_premium_true(self):
@@ -719,14 +717,13 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertTrue(self.profile.is_premium)
+        self.assertIn(self.profile.subscription_tier, ["pro", "business"])
 
     def test_subscription_updated_past_due_sets_premium_false(self):
-        self.profile.is_premium = True
 
         self.profile.subscription_tier = "pro"
         self.profile.stripe_subscription_id = "sub_pd"
-        self.profile.premium_source = "stripe"
+        self.profile.subscription_source = "stripe"
         self.profile.save()
 
         event = {
@@ -754,14 +751,13 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertFalse(self.profile.is_premium)
+        self.assertEqual(self.profile.subscription_tier, "free")
 
     def test_subscription_deleted_sets_premium_false(self):
-        self.profile.is_premium = True
 
         self.profile.subscription_tier = "pro"
         self.profile.stripe_subscription_id = "sub_fake"
-        self.profile.premium_source = "stripe"
+        self.profile.subscription_source = "stripe"
         self.profile.save()
 
         event = {
@@ -781,7 +777,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertFalse(self.profile.is_premium)
+        self.assertEqual(self.profile.subscription_tier, "free")
         self.assertIsNone(self.profile.stripe_subscription_id)
 
     def test_idempotency_same_event_id_processed_once(self):
@@ -831,7 +827,6 @@ class StripeWebhookTest(TestCase):
         user = User.objects.create_user(username="idem_user", password="test")
         profile = UserProfile.objects.create(
             user=user,
-            is_premium=False,
             stripe_customer_id="cus_idem_test",
             stripe_subscription_id=None,
         )
@@ -861,7 +856,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(r1.status_code, 200)
         profile.refresh_from_db()
-        self.assertTrue(profile.is_premium)
+        self.assertIn(profile.subscription_tier, ["pro", "business"])
         self.assertEqual(profile.stripe_subscription_id, "sub_idem_test")
         self.assertEqual(profile.stripe_customer_id, "cus_idem_test")
 
@@ -877,7 +872,7 @@ class StripeWebhookTest(TestCase):
             )
         self.assertEqual(r2.status_code, 200)
         profile.refresh_from_db()
-        self.assertTrue(profile.is_premium)
+        self.assertIn(profile.subscription_tier, ["pro", "business"])
         self.assertEqual(profile.stripe_subscription_id, "sub_idem_test")
         self.assertEqual(profile.stripe_customer_id, "cus_idem_test")
 

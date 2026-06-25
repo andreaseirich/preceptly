@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserProfile(models.Model):
-    """Extension of Django User model with Premium flag."""
+    """Extension of Django User model with subscription tier."""
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -27,9 +27,6 @@ class UserProfile(models.Model):
         default="free",
         db_index=True,
         help_text=_("Current subscription tier (free/starter/pro/business)"),
-    )
-    is_premium = models.BooleanField(
-        default=False, db_index=True, help_text=_("True for Pro and Business tiers")
     )
     premium_since = models.DateTimeField(
         null=True, blank=True, help_text=_("Since when is the user a premium member?")
@@ -81,7 +78,7 @@ class UserProfile(models.Model):
     stripe_price_id = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Stripe Price ID for current plan")
     )
-    premium_source = models.CharField(
+    subscription_source = models.CharField(
         max_length=20,
         blank=True,
         null=True,
@@ -130,8 +127,9 @@ class UserProfile(models.Model):
         verbose_name_plural = _("User Profiles")
 
     def __str__(self):
-        premium_str = " (Premium)" if self.is_premium else ""
-        return f"{self.user.username}{premium_str}"
+        tier = self.subscription_tier
+        tier_str = f" ({tier.capitalize()})" if tier != "free" else ""
+        return f"{self.user.username}{tier_str}"
 
 
 class StripeWebhookEvent(models.Model):

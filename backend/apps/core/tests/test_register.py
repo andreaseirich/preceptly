@@ -16,7 +16,7 @@ class RegisterViewTest(TestCase):
         self.client = Client()
 
     def test_register_creates_user_and_profile(self):
-        """Registration creates User and UserProfile with is_premium=False."""
+        """Registration creates User and UserProfile with subscription_tier="free"."""
         response = self.client.post(
             reverse("core:register"),
             {
@@ -30,7 +30,7 @@ class RegisterViewTest(TestCase):
         user = User.objects.get(username="newtutor")
         self.assertTrue(user.check_password("SecurePass123!"))
         profile = UserProfile.objects.get(user=user)
-        self.assertFalse(profile.is_premium)
+        self.assertEqual(profile.subscription_tier, "free")
 
     def test_register_redirects_authenticated_user(self):
         """Authenticated user visiting /register/ is redirected to dashboard."""
@@ -77,7 +77,7 @@ class PremiumGuardTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.non_premium = User.objects.create_user(username="np", password="test")
-        UserProfile.objects.create(user=self.non_premium, is_premium=False)
+        UserProfile.objects.create(user=self.non_premium)
 
     def test_non_premium_cannot_generate_lesson_plan(self):
         """Non-premium user gets redirect + error when POSTing to generate lesson plan."""

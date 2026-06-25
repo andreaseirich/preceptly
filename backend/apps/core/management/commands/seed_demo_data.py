@@ -85,7 +85,6 @@ class Command(BaseCommand):
         UserProfile.objects.get_or_create(
             user=premium_user,
             defaults={
-                "is_premium": True,
                 "subscription_tier": "business",
                 "premium_since": timezone.now(),
             },
@@ -100,7 +99,7 @@ class Command(BaseCommand):
         non_premium_user.is_active = True
         non_premium_user.save()
 
-        UserProfile.objects.get_or_create(user=non_premium_user, defaults={"is_premium": False})
+        UserProfile.objects.get_or_create(user=non_premium_user, defaults={})
 
         # Contracts (contain all student info)
         # Contract 1: With monthly quotas (for quota conflicts)
@@ -547,10 +546,10 @@ class Command(BaseCommand):
         self.stdout.write(f"  - {RecurringLesson.objects.count()} recurring lessons")
         self.stdout.write(f"  - {BlockedTime.objects.count()} blocked times")
         self.stdout.write(
-            f"  - {UserProfile.objects.filter(is_premium=True).count()} premium users"
+            f"  - {UserProfile.objects.filter(subscription_tier__in=['pro', 'business']).count()} premium users"
         )
         self.stdout.write(
-            f"  - {UserProfile.objects.filter(is_premium=False).count()} non-premium users"
+            f"  - {UserProfile.objects.filter(subscription_tier='free').count()} free users"
         )
         self.stdout.write(f"  - {LessonPlan.objects.count()} lesson plans")
         self.stdout.write(f"  - {Invoice.objects.count()} invoices")

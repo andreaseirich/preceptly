@@ -201,7 +201,7 @@ class I18nTestCase(TestCase):
     def test_reports_premium_german_labels(self):
         """Reports page with premium user: DE labels when de active, no English."""
         user = User.objects.create_user(username="premium", password="test")
-        UserProfile.objects.create(user=user, is_premium=True)
+        UserProfile.objects.create(user=user)
         self.client.force_login(user)
         self.client.post(reverse("set_language"), {"language": "de"}, follow=True)
         response = self.client.get(reverse("core:reports"))
@@ -214,7 +214,7 @@ class I18nTestCase(TestCase):
     def test_invoice_detail_german_buttons(self):
         """Invoice detail page: buttons in German when de active."""
         user = User.objects.create_user(username="tutor", password="test")
-        UserProfile.objects.create(user=user, is_premium=True)
+        UserProfile.objects.create(user=user)
         inv = Invoice.objects.create(
             owner=user,
             payer_name="Test",

@@ -88,9 +88,7 @@ class RegisterView(CreateView):
             with transaction.atomic():
                 user = form.save()
                 avv_consent = self.request.POST.get("avv_consent")
-                profile, _ = UserProfile.objects.get_or_create(
-                    user=user, defaults={"is_premium": False}
-                )
+                profile, _ = UserProfile.objects.get_or_create(user=user, defaults={})
                 if avv_consent and not profile.avv_accepted_at:
                     profile.avv_accepted_at = timezone.now()
                     profile.save(update_fields=["avv_accepted_at"])
