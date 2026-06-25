@@ -344,7 +344,7 @@ class PortalLoginReminderView(LoginRequiredMixin, View):
         from apps.portal.models import StudentPortalLink
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        spl = get_object_or_404(StudentPortalLink, contract=contract, is_active=True)
+        get_object_or_404(StudentPortalLink, contract=contract, is_active=True)
 
         tutor_name = request.user.get_full_name() or request.user.username
 
