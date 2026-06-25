@@ -79,30 +79,36 @@ class PortalLoginViewTest(TestCase):
     # --- POST: Student ---
 
     def test_student_login_correct_credentials_redirects_home(self):
-        resp = self.client.post(self.url, {"username": "student_login", "password": "s3cret!"})
+        resp = self.client.post(
+            self.url, {"email": "student_login@example.com", "password": "s3cret!"}
+        )
         self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
         self.assertEqual(self.client.session.get("portal_user_id"), self.student_pu.pk)
 
     def test_student_login_wrong_password_shows_error(self):
-        resp = self.client.post(self.url, {"username": "student_login", "password": "wrong"})
+        resp = self.client.post(
+            self.url, {"email": "student_login@example.com", "password": "wrong"}
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertNotIn("portal_user_id", self.client.session)
         self.assertContains(resp, "Ungültige Zugangsdaten")
 
     def test_student_login_nonexistent_user_shows_error(self):
-        resp = self.client.post(self.url, {"username": "nobody", "password": "irrelevant"})
+        resp = self.client.post(self.url, {"email": "nobody@example.com", "password": "irrelevant"})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Ungültige Zugangsdaten")
 
     # --- POST: Parent ---
 
     def test_parent_login_correct_credentials_redirects_home(self):
-        resp = self.client.post(self.url, {"username": "parent_login", "password": "p4rent!"})
+        resp = self.client.post(
+            self.url, {"email": "parent_login@example.com", "password": "p4rent!"}
+        )
         self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
         self.assertEqual(self.client.session.get("portal_user_id"), self.parent_pu.pk)
 
     def test_parent_login_wrong_password_shows_error(self):
-        resp = self.client.post(self.url, {"username": "parent_login", "password": "nope"})
+        resp = self.client.post(self.url, {"email": "parent_login@example.com", "password": "nope"})
         self.assertEqual(resp.status_code, 200)
         self.assertNotIn("portal_user_id", self.client.session)
         self.assertContains(resp, "Ungültige Zugangsdaten")
@@ -110,8 +116,10 @@ class PortalLoginViewTest(TestCase):
     # --- Error message uniformity ---
 
     def test_wrong_password_and_wrong_user_return_same_error(self):
-        resp_bad_pw = self.client.post(self.url, {"username": "student_login", "password": "x"})
-        resp_bad_user = self.client.post(self.url, {"username": "ghost", "password": "x"})
+        resp_bad_pw = self.client.post(
+            self.url, {"email": "student_login@example.com", "password": "x"}
+        )
+        resp_bad_user = self.client.post(self.url, {"email": "ghost@example.com", "password": "x"})
         self.assertEqual(resp_bad_pw.status_code, resp_bad_user.status_code)
         for resp in (resp_bad_pw, resp_bad_user):
             self.assertContains(resp, "Ungültige Zugangsdaten")
@@ -122,14 +130,18 @@ class PortalLoginViewTest(TestCase):
         next_url = reverse("portal:student_home")
         resp = self.client.post(
             self.url,
-            {"username": "student_login", "password": "s3cret!", "next": next_url},
+            {"email": "student_login@example.com", "password": "s3cret!", "next": next_url},
         )
         self.assertRedirects(resp, next_url, fetch_redirect_response=False)
 
     def test_login_ignores_unsafe_next_param(self):
         resp = self.client.post(
             self.url,
-            {"username": "student_login", "password": "s3cret!", "next": "http://evil.com"},
+            {
+                "email": "student_login@example.com",
+                "password": "s3cret!",
+                "next": "http://evil.com",
+            },
         )
         self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
 
@@ -138,7 +150,9 @@ class PortalLoginViewTest(TestCase):
     def test_inactive_portal_user_cannot_login(self):
         self.student_pu.user.is_active = False
         self.student_pu.user.save()
-        resp = self.client.post(self.url, {"username": "student_login", "password": "s3cret!"})
+        resp = self.client.post(
+            self.url, {"email": "student_login@example.com", "password": "s3cret!"}
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertNotIn("portal_user_id", self.client.session)
         self.assertContains(resp, "Ungültige Zugangsdaten")

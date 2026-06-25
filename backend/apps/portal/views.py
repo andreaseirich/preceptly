@@ -62,24 +62,30 @@ class PortalLoginView(View):
 
     @method_decorator(ratelimit(key="ip", rate="10/m", method="POST", block=True))
     def post(self, request):
-        from django.contrib.auth import authenticate
         from django.contrib.auth.hashers import check_password as _check_password
 
         _DUMMY_HASH = "pbkdf2_sha256$600000$dummy$dummyhashfortimingnoop="
 
-        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         password = request.POST.get("password", "").strip()
         error = None
 
-        user = authenticate(request, username=username, password=password)
-        if user is None or not user.is_active:
-            # Timing-Attack-Schutz: Dummy-Hash-Operation durchführen
+        # E-Mail-basiertes Login: Django-User über portal_profile suchen
+        try:
+            from django.contrib.auth import get_user_model as _get_user_model
+
+            _User = _get_user_model()
+            django_user = _User.objects.get(email__iexact=email, portal_profile__isnull=False)
+        except (_User.DoesNotExist, _User.MultipleObjectsReturned):
             _check_password("dummy", _DUMMY_HASH)
-            error = _("Ungültige Zugangsdaten.")
-            return render(request, self.template_name, {"error": error})
+            return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
+
+        if not django_user.is_active or not django_user.check_password(password):
+            _check_password("dummy", _DUMMY_HASH)
+            return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
 
         try:
-            portal_user = PortalUser.objects.get(user=user)
+            portal_user = PortalUser.objects.get(user=django_user)
         except PortalUser.DoesNotExist:
             _check_password("dummy", _DUMMY_HASH)
             error = _("Ungültige Zugangsdaten.")
