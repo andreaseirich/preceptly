@@ -114,6 +114,17 @@
 <main id="main-content">
 <div class="login-card">
     <div class="login-brand">Preceptly Portal</div>
+
+    {% if error_expired %}
+    <div class="login-subtitle">Einladungslink abgelaufen</div>
+    <div class="alert-warning" role="alert" style="margin-top: 16px;">
+        Dieser Einladungslink ist abgelaufen oder wurde bereits verwendet.<br>
+        Bitte bitte deinen Tutor, dir einen neuen Einladungslink zu schicken.
+    </div>
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{% url 'portal:login' %}" class="btn-login" style="display:inline-block; text-decoration:none;">Zum Portal-Login</a>
+    </div>
+    {% else %}
     <div class="login-subtitle">Willkommen, {{ student.full_name }}! Lege dein Passwort fest, um dein Konto zu aktivieren.</div>
 
     {% if error %}
@@ -130,6 +141,7 @@
 
         <button type="submit" class="btn-login">Konto aktivieren</button>
     </form>
+    {% endif %}
 </div>
 </main>
 </body>

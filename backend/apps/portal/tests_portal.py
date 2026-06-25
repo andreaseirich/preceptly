@@ -388,6 +388,7 @@ class PortalActivateViewTest(TestCase):
         resp = self.client.get(reverse("portal:activate", kwargs={"token": self.link.invite_token}))
         self.assertIn(resp.status_code, (200, 302))
 
-    def test_invalid_token_returns_404(self):
+    def test_invalid_token_shows_expired_message(self):
         resp = self.client.get(reverse("portal:activate", kwargs={"token": "invalid-token-xyz"}))
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "abgelaufen")

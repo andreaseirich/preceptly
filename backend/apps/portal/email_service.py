@@ -41,7 +41,7 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
         "site_url": site_url,
     }
 
-    subject = _("Your Preceptly Portal Access")
+    subject = _("Dein Preceptly Portal-Zugang")
     html_message = render_to_string("portal/email/invite.html", context)
     plain_message = render_to_string("portal/email/invite.txt", context)
 

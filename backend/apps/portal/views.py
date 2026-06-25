@@ -362,8 +362,10 @@ class PortalActivateView(View):
 
         cutoff = timezone.now() - timedelta(days=7)
         # Tokens die älter als 7 Tage sind, werden abgelehnt.
-        # invite_token_created_at=NULL (Legacy-Daten) werden ebenfalls abgelehnt.
-        valid = Q(invite_token_created_at__gte=cutoff)
+        # Fallback: noch nicht aktivierte Einladungen ohne Timestamp (Legacy) werden akzeptiert.
+        valid = Q(invite_token_created_at__gte=cutoff) | Q(
+            invite_token_created_at__isnull=True, is_active=False
+        )
         link = StudentPortalLink.objects.filter(invite_token=token).filter(valid).first()
         if link:
             return link, link.portal_user
@@ -375,9 +377,14 @@ class PortalActivateView(View):
     def get(self, request, token):
         link, portal_user = self._get_link(token)
         if link is None:
-            from django.http import Http404
-
-            raise Http404
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "error_expired": True,
+                },
+            )
         if link.is_active:
             return redirect("portal:login")
         return render(request, self.template_name, {"token": token, "student": link.contract})
@@ -385,9 +392,14 @@ class PortalActivateView(View):
     def post(self, request, token):
         link, portal_user = self._get_link(token)
         if link is None:
-            from django.http import Http404
-
-            raise Http404
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "error_expired": True,
+                },
+            )
         if link.is_active:
             return redirect("portal:login")
         password = request.POST.get("password", "").strip()
