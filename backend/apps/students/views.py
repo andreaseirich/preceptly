@@ -309,7 +309,14 @@ class PortalInviteResendView(LoginRequiredMixin, View):
         # H7 - Invite-Token nach erneutem Senden invalidieren und neu generieren
         spl.invite_token = secrets.token_urlsafe(32)
         spl.invite_token_created_at = timezone.now()
-        spl.save(update_fields=["invite_token", "invite_token_created_at"])
+        spl.is_active = False
+        spl.save(update_fields=["invite_token", "invite_token_created_at", "is_active"])
+
+        # Email am Django-User sicherstellen (Backfill für Accounts ohne Email)
+        django_user = spl.portal_user.user
+        if contract.email and not django_user.email:
+            django_user.email = contract.email
+            django_user.save(update_fields=["email"])
 
         if contract.email:
             try:
@@ -326,6 +333,35 @@ class PortalInviteResendView(LoginRequiredMixin, View):
                 )
         else:
             messages.info(request, "Kein E-Mail-Versand möglich.")
+        return redirect("students:detail", pk=pk)
+
+
+class PortalLoginReminderView(LoginRequiredMixin, View):
+    """Login-Erinnerung an bereits aktive Portal-Nutzer senden."""
+
+    def post(self, request, pk):
+        from apps.portal.email_service import send_login_reminder
+        from apps.portal.models import StudentPortalLink
+
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        spl = get_object_or_404(StudentPortalLink, contract=contract, is_active=True)
+
+        tutor_name = request.user.get_full_name() or request.user.username
+
+        if contract.email:
+            try:
+                send_login_reminder(contract, contract.email, tutor_name, role="student")
+                messages.success(
+                    request,
+                    f"Login-Erinnerung gesendet an {contract.email}.",
+                )
+            except Exception:
+                logger.exception("Portal login reminder failed for contract_id=%s", contract.pk)
+                messages.warning(
+                    request, "E-Mail konnte nicht gesendet werden. Bitte erneut versuchen."
+                )
+        else:
+            messages.info(request, "Kein E-Mail-Versand möglich — keine E-Mail-Adresse hinterlegt.")
         return redirect("students:detail", pk=pk)
 
 

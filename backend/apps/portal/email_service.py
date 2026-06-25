@@ -124,3 +124,41 @@ def send_activation_notification(portal_user, contract):
         logger.exception(
             "Aktivierungsbenachrichtigung fehlgeschlagen für PortalUser %s", portal_user.pk
         )
+
+
+def send_login_reminder(contract, recipient_email, tutor_name, role="student"):
+    """Login-Erinnerung an bereits aktive Portal-Nutzer senden."""
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+
+    try:
+        validate_email(recipient_email)
+    except ValidationError:
+        raise ValueError(f"Ungültige Empfänger-E-Mail-Adresse: {recipient_email!r}") from None
+
+    if not hasattr(settings, "SITE_URL"):
+        raise ImproperlyConfigured("settings.SITE_URL muss konfiguriert sein.")
+    site_url = settings.SITE_URL
+
+    context = {
+        "contract": contract,
+        "recipient_email": recipient_email,
+        "tutor_name": tutor_name,
+        "role": role,
+        "site_url": site_url,
+        "login_url": f"{site_url}/portal/login/",
+        "password_reset_url": f"{site_url}/portal/password-reset/",
+    }
+
+    subject = _("Dein Preceptly Portal-Zugang")
+    html_message = render_to_string("portal/email/login_reminder.html", context)
+    plain_message = render_to_string("portal/email/login_reminder.txt", context)
+
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[recipient_email],
+        html_message=html_message,
+        fail_silently=False,
+    )
