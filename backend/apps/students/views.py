@@ -7,11 +7,10 @@ import os
 import re
 import secrets
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,7 +18,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import DeleteView, DetailView, ListView
+from django.views.generic import DeleteView, ListView
 
 from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
@@ -41,40 +40,6 @@ class StudentListView(LoginRequiredMixin, ListView):
         return Contract.objects.filter(user=self.request.user)
 
 
-class StudentDetailView(LoginRequiredMixin, DetailView):
-    model = Contract
-    template_name = "students/student_detail.html"
-    context_object_name = "student"
-
-    def get_queryset(self):
-        return Contract.objects.filter(user=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        from apps.portal.models import PortalMessage, StudentPortalLink
-
-        context = super().get_context_data(**kwargs)
-        student = self.object  # Contract object
-        context["portal_link"] = StudentPortalLink.objects.filter(contract=student).first()
-        context["parent_links"] = ParentStudentLink.objects.filter(contract=student).select_related(
-            "parent"
-        )
-        context["progress_notes"] = ProgressNote.objects.filter(contract=student).order_by(
-            "-created_at"
-        )[:10]
-        context["unread_messages"] = PortalMessage.objects.filter(
-            contract=student, read_by_tutor=False
-        ).count()
-        portal_link = context.get("portal_link")
-        if portal_link:
-            site_url = getattr(settings, "SITE_URL", None)
-            if not site_url:
-                raise ImproperlyConfigured("SITE_URL must be set in settings.")
-            context["student_activation_url"] = (
-                f"{site_url}/portal/activate/{portal_link.invite_token}/"
-            )
-        return context
-
-
 class StudentCreateView(LoginRequiredMixin, View):
     """Create new student = create new contract with student fields."""
 
@@ -89,7 +54,7 @@ class StudentCreateView(LoginRequiredMixin, View):
             contract.user = request.user
             contract.save()
             messages.success(request, _("Student successfully created."))
-            return redirect("students:detail", pk=contract.pk)
+            return redirect("contracts:detail", pk=contract.pk)
         return render(request, "students/student_form.html", {"form": form, "is_create": True})
 
 
@@ -110,7 +75,7 @@ class StudentUpdateView(LoginRequiredMixin, View):
         if form.is_valid():
             form.save()
             messages.success(request, _("Student successfully updated."))
-            return redirect("students:detail", pk=contract.pk)
+            return redirect("contracts:detail", pk=contract.pk)
         return render(request, "students/student_form.html", {"form": form, "object": contract})
 
 
@@ -176,7 +141,7 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
             )
             if existing:
                 messages.info(request, "Portal-Zugang bereits vorhanden.")
-                return redirect("students:detail", pk=pk)
+                return redirect("contracts:detail", pk=pk)
 
             User = get_user_model()
             username = f"portal_student_{contract.pk}_{secrets.token_hex(4)}"
@@ -215,7 +180,7 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
                     "Portal-Account erstellt. Kein E-Mail-Versand möglich.",
                 )
 
-        return redirect("students:detail", pk=pk)
+        return redirect("contracts:detail", pk=pk)
 
 
 class PortalInviteParentView(LoginRequiredMixin, View):
@@ -230,12 +195,12 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         parent_email = request.POST.get("parent_email", "").strip()[:254]
         if not parent_email or "\n" in parent_email or "\r" in parent_email:
             messages.error(request, "Ungültige E-Mail-Adresse.")
-            return redirect("students:detail", pk=pk)
+            return redirect("contracts:detail", pk=pk)
         try:
             validate_email(parent_email)
         except ValidationError:
             messages.error(request, "Ungültige E-Mail-Adresse.")
-            return redirect("students:detail", pk=pk)
+            return redirect("contracts:detail", pk=pk)
 
         User = get_user_model()
         existing_user = User.objects.filter(email__iexact=parent_email).first()
@@ -254,7 +219,7 @@ class PortalInviteParentView(LoginRequiredMixin, View):
                     "Die Einladung konnte nicht erstellt werden. "
                     "Bitte kontaktieren Sie den Support, falls das Problem bestehen bleibt.",
                 )
-                return redirect("students:detail", pk=pk)
+                return redirect("contracts:detail", pk=pk)
 
             existing_link = ParentStudentLink.objects.filter(
                 parent=existing_portal, contract=contract
@@ -270,7 +235,7 @@ class PortalInviteParentView(LoginRequiredMixin, View):
                     request,
                     "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto.",
                 )
-            return redirect("students:detail", pk=pk)
+            return redirect("contracts:detail", pk=pk)
 
         with transaction.atomic():
             username = f"parent_{contract.pk}_{secrets.token_hex(4)}"
@@ -295,7 +260,7 @@ class PortalInviteParentView(LoginRequiredMixin, View):
                 )
                 raise  # Rollback: kein verwaister Account ohne E-Mail-Versand
 
-        return redirect("students:detail", pk=pk)
+        return redirect("contracts:detail", pk=pk)
 
 
 class PortalInviteResendView(LoginRequiredMixin, View):
@@ -333,7 +298,7 @@ class PortalInviteResendView(LoginRequiredMixin, View):
                 )
         else:
             messages.info(request, "Kein E-Mail-Versand möglich.")
-        return redirect("students:detail", pk=pk)
+        return redirect("contracts:detail", pk=pk)
 
 
 class PortalLoginReminderView(LoginRequiredMixin, View):
@@ -362,7 +327,7 @@ class PortalLoginReminderView(LoginRequiredMixin, View):
                 )
         else:
             messages.info(request, "Kein E-Mail-Versand möglich — keine E-Mail-Adresse hinterlegt.")
-        return redirect("students:detail", pk=pk)
+        return redirect("contracts:detail", pk=pk)
 
 
 class ProgressNoteCreateView(LoginRequiredMixin, View):
@@ -371,7 +336,7 @@ class ProgressNoteCreateView(LoginRequiredMixin, View):
         text = request.POST.get("text", "").strip()
         if text:
             ProgressNote.objects.create(contract=contract, tutor=request.user, text=text)
-        return redirect("students:detail", pk=pk)
+        return redirect("contracts:detail", pk=pk)
 
 
 class StudentRegenerateBookingCodeView(LoginRequiredMixin, View):

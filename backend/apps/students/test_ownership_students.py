@@ -52,19 +52,19 @@ class StudentOwnershipIsolationTest(TestCase):
         self.assertIn(self.student_b.pk, ids)
         self.assertNotIn(self.student_a.pk, ids)
 
-    def test_tutor_a_can_view_own_student_detail(self):
+    def test_tutor_a_can_view_own_contract_detail(self):
         self.client.force_login(self.tutor_a)
-        response = self.client.get(reverse("students:detail", kwargs={"pk": self.student_a.pk}))
+        response = self.client.get(reverse("contracts:detail", kwargs={"pk": self.student_a.pk}))
         self.assertEqual(response.status_code, 200)
 
-    def test_tutor_b_gets_404_for_tutor_a_student_detail(self):
+    def test_tutor_b_gets_404_for_tutor_a_contract_detail(self):
         self.client.force_login(self.tutor_b)
-        response = self.client.get(reverse("students:detail", kwargs={"pk": self.student_a.pk}))
+        response = self.client.get(reverse("contracts:detail", kwargs={"pk": self.student_a.pk}))
         self.assertEqual(response.status_code, 404)
 
-    def test_tutor_a_gets_404_for_tutor_b_student_detail(self):
+    def test_tutor_a_gets_404_for_tutor_b_contract_detail(self):
         self.client.force_login(self.tutor_a)
-        response = self.client.get(reverse("students:detail", kwargs={"pk": self.student_b.pk}))
+        response = self.client.get(reverse("contracts:detail", kwargs={"pk": self.student_b.pk}))
         self.assertEqual(response.status_code, 404)
 
     def test_tutor_a_can_update_own_student(self):
