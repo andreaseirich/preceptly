@@ -1,0 +1,16 @@
+Preceptly — Portal-Zugang
+==========================
+
+{{ tutor_name }} hat dir deine Zugangsdaten für das Preceptly-Portal geschickt.
+
+E-Mail: {{ recipient_email }}
+Passwort: dein selbst gewähltes Passwort
+
+Zum Portal-Login:
+{{ login_url }}
+
+Passwort vergessen? Hier zurücksetzen:
+{{ password_reset_url }}
+
+---
+Preceptly — {{ site_url }}
