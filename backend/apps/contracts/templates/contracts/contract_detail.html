@@ -98,21 +98,20 @@
   <h3>{% trans "Portal-Zugang" %}</h3>
   {% if portal_link %}
     {% if portal_link.is_active %}
-      <p style="color: #28a745;">✓ {% trans "Portal-Konto aktiv" %}
-         <small style="color: var(--text-secondary);">{{ portal_link.portal_user.user.username }}</small></p>
+      <p style="color: #28a745;">✓ Portal-Konto aktiv</p>
     {% else %}
-      <p style="color: var(--text-secondary);">⏳ {% trans "Einladung ausstehend — noch nicht aktiviert" %}</p>
+      <p style="color: var(--text-secondary);">⏳ Einladung ausstehend — noch nicht aktiviert</p>
       {% if student_activation_url %}
       <div style="margin: 0.5em 0;">
-        <small style="color: var(--text-secondary);">{% trans "Aktivierungslink:" %}</small><br>
+        <small style="color: var(--text-secondary);">Aktivierungslink:</small><br>
         <code style="font-size: 0.8em; word-break: break-all; color: var(--text-primary);">{{ student_activation_url }}</code>
       </div>
       {% endif %}
-      <form method="post" action="{% url 'students:portal_invite_resend' contract.pk %}" style="margin-top: 0.5em;">
-        {% csrf_token %}
-        <button type="submit" class="btn-sm btn-sm-secondary">↻ {% trans "Einladung erneut senden" %}</button>
-      </form>
     {% endif %}
+    <form method="post" action="{% url 'students:portal_invite_resend' contract.pk %}" style="margin-top: 0.5em;">
+      {% csrf_token %}
+      <button type="submit" class="btn-sm btn-sm-secondary">↻ Neue Einladung senden</button>
+    </form>
   {% else %}
     <form method="post" action="{% url 'students:portal_invite_create' contract.pk %}">
       {% csrf_token %}
