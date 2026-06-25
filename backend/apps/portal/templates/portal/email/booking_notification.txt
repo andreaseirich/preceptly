@@ -1,0 +1,15 @@
+Neue Portal-Buchung — Preceptly
+
+{{ student_name }} hat soeben einen Termin über das Portal gebucht.
+
+Schüler:  {{ student_name }}
+Datum:    {{ date_str }}
+Uhrzeit:  {{ time_str }} Uhr
+{% if topic and topic != "-" %}Thema:    {{ topic }}
+{% endif %}Tutor:    {{ tutor_name }}
+
+Im Dashboard ansehen: {{ dashboard_url }}
+
+---
+Preceptly — Nachhilfe-Management
+{{ site_url }}

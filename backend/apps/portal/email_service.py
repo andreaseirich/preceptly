@@ -69,23 +69,27 @@ def send_booking_notification_portal(session, tutor):
     time_str = session.start_time.strftime("%H:%M")
     topic = session.notes or "-"
     tutor_name = tutor.get_full_name() or tutor.username
-    subject = f"Neue Portal-Buchung: {student_name} - {date_str}".replace("\n", " ").replace(
-        "\r", " "
-    )
-    message = (
-        f"Ein neuer Termin wurde über das Portal gebucht.\n\n"
-        f"Schüler: {student_name}\n"
-        f"Datum: {date_str}\n"
-        f"Uhrzeit: {time_str} Uhr\n"
-        f"Thema: {topic}\n"
-        f"Tutor: {tutor_name}\n"
-    )
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+    dashboard_url = f"{site_url}/contracts/{session.contract.pk}/" if site_url else ""
+    subject = f"Neue Buchung: {student_name} — {date_str}".replace("\n", " ").replace("\r", " ")
+    context = {
+        "student_name": student_name,
+        "date_str": date_str,
+        "time_str": time_str,
+        "topic": topic,
+        "tutor_name": tutor_name,
+        "site_url": site_url,
+        "dashboard_url": dashboard_url,
+    }
+    html_message = render_to_string("portal/email/booking_notification.html", context)
+    plain_message = render_to_string("portal/email/booking_notification.txt", context)
     try:
         send_mail(
             subject=subject,
-            message=message,
+            message=plain_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[recipient],
+            html_message=html_message,
             fail_silently=False,
         )
     except Exception:
