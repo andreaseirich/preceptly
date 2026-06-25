@@ -151,7 +151,7 @@ class SubscriptionCheckoutView(View):
 
         with transaction.atomic():
             profile, _created = UserProfile.objects.select_for_update().get_or_create(
-                user=user, defaults={"is_premium": False}
+                user=user, defaults={}
             )
             customer_id = profile.stripe_customer_id
             if not customer_id:
@@ -340,7 +340,7 @@ class StripeCheckoutView(View):
 
         with transaction.atomic():
             profile, _created = UserProfile.objects.select_for_update().get_or_create(
-                user=user, defaults={"is_premium": False}
+                user=user, defaults={}
             )
             customer_id = profile.stripe_customer_id
             if not customer_id:
@@ -444,7 +444,7 @@ class StripePortalView(View):
 def stripe_webhook_view(request):
     """
     Handle Stripe webhooks. Verify signature, process events, update premium status.
-    Source of truth: only webhook events set is_premium.
+    Source of truth: only webhook events set subscription_tier.
     """
     # [MEDIUM] Payload-Größenlimit gegen DoS
     if len(request.body) > 1024 * 64:
@@ -520,17 +520,13 @@ def _set_premium(profile: UserProfile, is_premium: bool, price_id: str | None = 
     if is_premium:
         tier = _price_id_to_tier(price_id or profile.stripe_price_id)
         profile.subscription_tier = tier
-        profile.is_premium = tier in ("pro", "business")
         if not profile.premium_since:
             profile.premium_since = timezone.now()
     else:
         profile.subscription_tier = "free"
-        profile.is_premium = False
         profile.premium_since = None
-    profile.premium_source = "stripe" if is_premium else (profile.premium_source or "")
-    profile.save(
-        update_fields=["subscription_tier", "is_premium", "premium_since", "premium_source"]
-    )
+    profile.subscription_source = "stripe" if is_premium else (profile.subscription_source or "")
+    profile.save(update_fields=["subscription_tier", "premium_since", "subscription_source"])
 
 
 def _handle_stripe_event(event: dict) -> None:

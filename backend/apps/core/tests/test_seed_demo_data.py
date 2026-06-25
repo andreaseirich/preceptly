@@ -28,7 +28,7 @@ class SeedDemoDataTest(TestCase):
         # Check premium profile
         profile = UserProfile.objects.filter(user=premium_user).first()
         self.assertIsNotNone(profile)
-        self.assertTrue(profile.is_premium)
+        self.assertIn(profile.subscription_tier, ["pro", "business"])
 
         # Check lesson plan exists
         lesson_plans = LessonPlan.objects.all()
@@ -95,7 +95,7 @@ class SeedDemoDataTest(TestCase):
         # Check non-premium profile
         profile = UserProfile.objects.filter(user=non_premium_user).first()
         self.assertIsNotNone(profile)
-        self.assertFalse(profile.is_premium)
+        self.assertEqual(profile.subscription_tier, "free")
 
     def test_seed_demo_data_creates_demo_user_with_data(self):
         """Test: demo_user has students, contracts, lessons, and blocked times."""

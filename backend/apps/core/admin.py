@@ -10,7 +10,7 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
     verbose_name_plural = _("Profile")
-    fields = ["is_premium", "premium_since"]
+    fields = ["subscription_tier", "premium_since"]
 
 
 class UserAdmin(BaseUserAdmin):
@@ -20,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
 
     def get_premium_status(self, obj):
         if hasattr(obj, "userprofile"):
-            return _("Premium") if obj.userprofile.is_premium else _("Standard")
+            return obj.userprofile.subscription_tier.capitalize()
         return _("N/A")
 
     get_premium_status.short_description = _("Premium Status")
@@ -33,12 +33,12 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ["user", "is_premium", "premium_since", "created_at"]
+    list_display = ["user", "subscription_tier", "premium_since", "created_at"]
     search_fields = ["user__username", "user__email"]
-    list_filter = ["is_premium", "created_at", "premium_since"]
+    list_filter = ["subscription_tier", "created_at", "premium_since"]
     readonly_fields = ["created_at", "updated_at"]
     fieldsets = (
         (_("User"), {"fields": ("user",)}),
-        (_("Premium Status"), {"fields": ("is_premium", "premium_since")}),
+        (_("Subscription"), {"fields": ("subscription_tier", "premium_since")}),
         (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )

@@ -69,7 +69,7 @@ class Command(BaseCommand):
         username = options["username"]
         email = options["email"]
         password = options.get("password")
-        is_premium = options.get("premium", False)
+        use_premium_tier = options.get("premium", False)
         first_name = options.get("first_name", "")
         last_name = options.get("last_name", "")
 
@@ -83,7 +83,11 @@ class Command(BaseCommand):
         self.stdout.write(f"\nFound {demo_users.count()} demo user(s):")
         for user in demo_users:
             profile = getattr(user, "profile", None)
-            premium_str = " (Premium)" if profile and profile.is_premium else ""
+            premium_str = (
+                f" ({profile.subscription_tier.capitalize()})"
+                if profile and profile.subscription_tier != "free"
+                else ""
+            )
             self.stdout.write(f"  - {user.username} ({user.email}){premium_str}")
 
         # Check if new user already exists
@@ -111,10 +115,10 @@ class Command(BaseCommand):
             if demo_premium_profile:
                 # Use premium status from demo_premium if not explicitly set
                 if not options.get("premium"):
-                    is_premium = demo_premium_profile.is_premium
+                    use_premium_tier = demo_premium_profile.subscription_tier not in ("free", None)
                 self.stdout.write(
                     f"\nFound demo_premium with settings:"
-                    f"\n  - Premium: {demo_premium_profile.is_premium}"
+                    f"\n  - Tier: {demo_premium_profile.subscription_tier}"
                     f"\n  - Premium since: {demo_premium_profile.premium_since}"
                     f"\n  - Default working hours: {bool(demo_premium_profile.default_working_hours)}"
                 )
@@ -122,7 +126,7 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(self.style.WARNING("\nDRY-RUN: Would perform the following:"))
             self.stdout.write(f"  1. Create user: {username} ({email})")
-            self.stdout.write(f"  2. Create UserProfile with premium={is_premium}")
+            self.stdout.write(f"  2. Create UserProfile with premium tier={use_premium_tier}")
             if demo_premium_profile and demo_premium_profile.default_working_hours:
                 self.stdout.write("  3. Copy default_working_hours from demo_premium")
             self.stdout.write(f"  4. Delete {demo_users.count()} demo user(s)")
@@ -144,11 +148,15 @@ class Command(BaseCommand):
         # Create UserProfile
         self.stdout.write("Creating UserProfile...")
         profile_data = {
-            "is_premium": is_premium,
+            "subscription_tier": "pro" if use_premium_tier else "free",
         }
 
         # Copy premium_since if from demo_premium
-        if demo_premium_profile and demo_premium_profile.is_premium and is_premium:
+        if (
+            demo_premium_profile
+            and demo_premium_profile.subscription_tier not in ("free", None)
+            and use_premium_tier
+        ):
             if demo_premium_profile.premium_since:
                 profile_data["premium_since"] = demo_premium_profile.premium_since
             else:
@@ -159,7 +167,11 @@ class Command(BaseCommand):
             profile_data["default_working_hours"] = demo_premium_profile.default_working_hours
 
         UserProfile.objects.create(user=new_user, **profile_data)
-        self.stdout.write(self.style.SUCCESS(f"✓ UserProfile created (Premium: {is_premium})"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"✓ UserProfile created (Tier: {'pro' if use_premium_tier else 'free'})"
+            )
+        )
 
         if demo_premium_profile and demo_premium_profile.default_working_hours:
             self.stdout.write(
@@ -181,7 +193,7 @@ class Command(BaseCommand):
                 f"Successfully replaced demo users!\n"
                 f"{'=' * 50}\n"
                 f"New user: {username} ({email})\n"
-                f"Premium: {is_premium}\n"
+                f"Tier: {'pro' if use_premium_tier else 'free'}\n"
                 f"Demo users deleted: {deleted_count}\n"
             )
         )
