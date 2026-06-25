@@ -128,8 +128,8 @@ def send_activation_notification(portal_user, contract):
 
 def send_login_reminder(contract, recipient_email, tutor_name, role="student"):
     """Login-Erinnerung an bereits aktive Portal-Nutzer senden."""
-    from django.core.validators import validate_email
     from django.core.exceptions import ValidationError
+    from django.core.validators import validate_email
 
     try:
         validate_email(recipient_email)
