@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neue Portal-Buchung</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f6f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#1a56db; border-radius:10px 10px 0 0; padding: 24px 32px; text-align:center;">
+              <p style="margin:0; color:rgba(255,255,255,0.75); font-size:13px; letter-spacing:0.5px; text-transform:uppercase;">Preceptly</p>
+              <h1 style="margin:8px 0 0; color:#ffffff; font-size:22px; font-weight:600;">📅 Neue Buchung</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background:#ffffff; padding: 32px 32px 24px;">
+              <p style="margin:0 0 24px; color:#374151; font-size:16px; line-height:1.5;">
+                <strong>{{ student_name }}</strong> hat soeben einen Termin über das Portal gebucht.
+              </p>
+
+              <!-- Details card -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">
+                <tr>
+                  <td style="padding: 0 0 1px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+
+                      <tr>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb; width:36%;">
+                          <span style="color:#6b7280; font-size:13px; font-weight:500;">Schüler</span>
+                        </td>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#111827; font-size:14px; font-weight:600;">{{ student_name }}</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#6b7280; font-size:13px; font-weight:500;">Datum</span>
+                        </td>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#111827; font-size:14px;">{{ date_str }}</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#6b7280; font-size:13px; font-weight:500;">Uhrzeit</span>
+                        </td>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#111827; font-size:14px;">{{ time_str }} Uhr</span>
+                        </td>
+                      </tr>
+
+                      {% if topic and topic != "-" %}
+                      <tr>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#6b7280; font-size:13px; font-weight:500;">Thema</span>
+                        </td>
+                        <td style="padding:14px 20px; border-bottom:1px solid #e5e7eb;">
+                          <span style="color:#111827; font-size:14px;">{{ topic }}</span>
+                        </td>
+                      </tr>
+                      {% endif %}
+
+                      <tr>
+                        <td style="padding:14px 20px;">
+                          <span style="color:#6b7280; font-size:13px; font-weight:500;">Tutor</span>
+                        </td>
+                        <td style="padding:14px 20px;">
+                          <span style="color:#111827; font-size:14px;">{{ tutor_name }}</span>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <div style="margin-top:28px; text-align:center;">
+                <a href="{{ dashboard_url }}"
+                   style="background:#1a56db; color:#ffffff; text-decoration:none; padding:13px 28px; border-radius:7px; font-size:15px; font-weight:600; display:inline-block;">
+                  Im Dashboard ansehen →
+                </a>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f4f6f9; border-radius:0 0 10px 10px; padding:20px 32px; text-align:center; border-top:1px solid #e5e7eb;">
+              <p style="margin:0; color:#9ca3af; font-size:12px;">
+                Preceptly — Nachhilfe-Management<br>
+                <a href="{{ site_url }}" style="color:#9ca3af;">{{ site_url }}</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
