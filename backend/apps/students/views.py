@@ -181,7 +181,9 @@ class PortalInviteCreateView(LoginRequiredMixin, View):
             User = get_user_model()
             username = f"portal_student_{contract.pk}_{secrets.token_hex(4)}"
             portal_django_user = User.objects.create_user(
-                username=username, password=secrets.token_hex(16)
+                username=username,
+                email=contract.email or "",
+                password=secrets.token_hex(16),
             )
             portal_user = PortalUser.objects.create(
                 user=portal_django_user, role="student", tutor=request.user

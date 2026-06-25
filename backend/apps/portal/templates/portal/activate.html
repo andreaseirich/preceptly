@@ -126,6 +126,7 @@
     </div>
     {% else %}
     <div class="login-subtitle">Willkommen, {{ student.full_name }}! Lege dein Passwort fest, um dein Konto zu aktivieren.</div>
+    <p style="font-size:0.9em; color:var(--text-secondary); margin-top:8px;">Du wirst dich später mit deiner E-Mail-Adresse anmelden.</p>
 
     {% if error %}
     <div class="alert-warning" role="alert">{{ error }}</div>
