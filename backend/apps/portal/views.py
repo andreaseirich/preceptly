@@ -33,7 +33,7 @@ _ALLOWED_UPLOAD_EXTENSIONS = {
     ".xls",
     ".txt",
 }
-_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+_MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
 
 
 def get_portal_user(request):
@@ -1181,7 +1181,7 @@ class PortalDocumentsView(View):
             return redirect("portal:documents", student_pk=student_pk)
 
         if uploaded_file.size > _MAX_UPLOAD_SIZE:
-            messages.error(request, "Die Datei ist zu groß. Maximale Dateigröße: 10 MB.")
+            messages.error(request, "Die Datei ist zu groß. Maximale Dateigröße: 50 MB.")
             return redirect("portal:documents", student_pk=student_pk)
 
         name = request.POST.get("name", "").strip()
