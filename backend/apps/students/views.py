@@ -354,7 +354,7 @@ class StudentDocumentListView(LoginRequiredMixin, View):
         from apps.students.models import StudentDocument
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        docs = StudentDocument.objects.filter(student=contract)
+        docs = StudentDocument.objects.filter(student=contract, student__user=request.user)
         return render(
             request, "students/student_documents.html", {"student": contract, "documents": docs}
         )
@@ -376,13 +376,13 @@ class StudentDocumentListView(LoginRequiredMixin, View):
                 ".xls",
                 ".txt",
             }
-            max_size = 10 * 1024 * 1024  # 10 MB
+            max_size = 50 * 1024 * 1024  # 50 MB
             ext = os.path.splitext(uploaded_file.name)[1].lower()
             if ext not in allowed_extensions:
                 messages.error(request, "Dateityp nicht erlaubt.")
                 return redirect(request.path)
             if uploaded_file.size > max_size:
-                messages.error(request, "Datei ist zu groß (max. 10 MB).")
+                messages.error(request, "Datei ist zu groß (max. 50 MB).")
                 return redirect(request.path)
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
@@ -401,4 +401,12 @@ class StudentDocumentListView(LoginRequiredMixin, View):
 
 class StudentDocumentDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk, doc_pk):
-        pass
+        from apps.students.models import StudentDocument
+
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        doc = get_object_or_404(StudentDocument, pk=doc_pk, student=contract)
+        if doc.file:
+            doc.file.delete(save=False)
+        doc.delete()
+        messages.success(request, "Dokument gelöscht.")
+        return redirect("students:documents", pk=pk)
