@@ -62,7 +62,18 @@ class StudentDocument(models.Model):
         verbose_name_plural = _("Schülerdokumente")
 
     def display_name(self):
-        return self.name or self.file.name.split("/")[-1]
+        if self.file and self.file.name:
+            return self.name or self.file.name.split("/")[-1]
+        return self.name or "—"
+
+    @property
+    def file_exists(self):
+        if not self.file or not self.file.name:
+            return False
+        try:
+            return self.file.storage.exists(self.file.name)
+        except Exception:
+            return False
 
     def __str__(self):
         return f"{self.student.full_name} – {self.display_name()}"

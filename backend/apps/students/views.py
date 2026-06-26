@@ -405,8 +405,11 @@ class StudentDocumentDeleteView(LoginRequiredMixin, View):
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         doc = get_object_or_404(StudentDocument, pk=doc_pk, student=contract)
-        if doc.file:
-            doc.file.delete(save=False)
+        if doc.file and doc.file.name:
+            try:
+                doc.file.delete(save=False)
+            except Exception:
+                pass  # Datei bereits nicht mehr vorhanden (z. B. nach Deploy)
         doc.delete()
         messages.success(request, "Dokument gelöscht.")
         return redirect("students:documents", pk=pk)
