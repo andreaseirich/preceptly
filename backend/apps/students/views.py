@@ -409,7 +409,9 @@ class StudentDocumentDeleteView(LoginRequiredMixin, View):
             try:
                 doc.file.delete(save=False)
             except Exception:
-                pass  # Datei bereits nicht mehr vorhanden (z. B. nach Deploy)
+                logger.warning(
+                    "Datei nicht löschbar (vermutlich nicht vorhanden): %s", doc.file.name
+                )
         doc.delete()
         messages.success(request, "Dokument gelöscht.")
         return redirect("students:documents", pk=pk)
