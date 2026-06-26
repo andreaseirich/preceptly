@@ -7,5 +7,8 @@ from apps.students.models import StudentDocument
 @receiver(post_delete, sender=StudentDocument)
 def delete_student_document_file(sender, instance, **kwargs):
     """Physische Datei löschen, wenn das Dokument-Objekt entfernt wird."""
-    if instance.file:
-        instance.file.delete(save=False)
+    if instance.file and instance.file.name:
+        try:
+            instance.file.delete(save=False)
+        except Exception:
+            pass  # Datei bereits nicht mehr vorhanden

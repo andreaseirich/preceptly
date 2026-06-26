@@ -17,7 +17,7 @@
       <input type="text" id="id_name" name="name" class="form-control" placeholder="z. B. Hausaufgaben KW23">
     </div>
     <div style="flex:2; min-width:200px;">
-      <label for="id_file" style="display:block; font-size:0.88em; color:var(--text-secondary); margin-bottom:4px;">Datei</label>
+      <label for="id_file" style="display:block; font-size:0.88em; color:var(--text-secondary); margin-bottom:4px;">Datei (max. 50 MB)</label>
       <input type="file" id="id_file" name="file" required class="form-control">
     </div>
     <button type="submit" class="btn-sm btn-sm-primary" style="white-space:nowrap;">Hochladen</button>
@@ -36,13 +36,20 @@
     <tbody>
     {% for doc in documents %}
     <tr style="border-bottom:1px solid var(--border-color);">
-      <td style="padding:8px 0;">{{ doc.display_name }}</td>
+      <td style="padding:8px 0;">
+        {{ doc.display_name }}
+        {% if not doc.file_exists %}
+          <span style="font-size:0.78em; color:var(--danger,#dc3545); margin-left:6px;">⚠ nicht verfügbar</span>
+        {% endif %}
+      </td>
       <td style="padding:8px 0; font-size:0.88em; color:var(--text-secondary);">
         {% if doc.uploaded_by_tutor %}Du (Tutor){% else %}{{ doc.uploaded_by_portal_user.user.username }}{% endif %}
       </td>
       <td style="padding:8px 0; font-size:0.88em; color:var(--text-secondary);">{{ doc.uploaded_at|date:"d.m.Y H:i" }}</td>
-      <td style="padding:8px 0; text-align:right;">
-        <a href="{{ doc.file.url }}" class="btn-sm btn-sm-secondary" download>⬇</a>
+      <td style="padding:8px 0; text-align:right; white-space:nowrap;">
+        {% if doc.file_exists %}
+          <a href="{{ doc.file.url }}" class="btn-sm btn-sm-secondary" download>⬇</a>
+        {% endif %}
         <form method="post" action="{% url 'students:document_delete' student.pk doc.pk %}"
           style="display:inline" onsubmit="return confirm('Dokument löschen?')">
           {% csrf_token %}
