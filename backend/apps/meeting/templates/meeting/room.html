@@ -589,6 +589,7 @@ async function initMedia() {
 }
 
 function toggleMic() {
+    if (!localStream) return;
     micActive = !micActive;
     localStream.getAudioTracks().forEach(t => t.enabled = micActive);
     const btn = document.getElementById("btn-mic");
@@ -596,6 +597,7 @@ function toggleMic() {
     btn.classList.toggle("active", micActive);
 }
 function toggleCam() {
+    if (!localStream) return;
     camActive = !camActive;
     localStream.getVideoTracks().forEach(t => t.enabled = camActive);
     const btn = document.getElementById("btn-cam");
