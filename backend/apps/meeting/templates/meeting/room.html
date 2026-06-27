@@ -482,24 +482,23 @@ async function loadBackground(url, name, broadcast, docId, filename) {
             return;
         }
         try {
-            console.log("[WB] PDF laden:", url, "ext:", ext, "filename:", filename);
-            const pdfDoc = await pdfjsLib.getDocument({url, withCredentials: true}).promise;
-            console.log("[WB] PDF geladen, Seiten:", pdfDoc.numPages);
+            // PDF explizit per fetch laden (credentials inkl.) dann als ArrayBuffer an PDF.js übergeben,
+            // damit der interne PDF.js-XHR (der in Firefox hängen kann) umgangen wird.
+            const resp = await fetch(url, { credentials: "include" });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status} beim Laden der PDF`);
+            const data = await resp.arrayBuffer();
+            const pdfDoc = await pdfjsLib.getDocument({ data }).promise;
             const page   = await pdfDoc.getPage(1);
-            console.log("[WB] Seite 1 geladen");
             const vp     = page.getViewport({ scale: 2 });
             const offCanvas = document.createElement("canvas");
             offCanvas.width  = vp.width;
             offCanvas.height = vp.height;
             await page.render({ canvasContext: offCanvas.getContext("2d"), viewport: vp }).promise;
-            console.log("[WB] Render fertig, canvas:", offCanvas.width, "x", offCanvas.height);
             const img = new Image();
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
             wbBackground = { url, name: name || url, filename: filename || null, img, docId: docId ?? null, docWidth: img.width, docHeight: img.height };
-            console.log("[WB] wbBackground gesetzt, docWidth:", img.width, "docHeight:", img.height);
         } catch(e) {
-            console.error("[WB] PDF Fehler:", e);
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
         }
@@ -527,13 +526,9 @@ async function loadBackground(url, name, broadcast, docId, filename) {
     const wbPanel = document.getElementById("tab-whiteboard");
     if (wbPanel) wbPanel.classList.add("active");
     // Canvas-Größe erzwingen (ResizeObserver feuert erst im nächsten Frame)
-    console.log("[WB] Tab-Wechsel, canvasWrap.clientWidth:", document.getElementById("wb-canvas-wrap").clientWidth, "wbCanvas.width:", wbCanvas.width);
     resizeCanvas();
-    console.log("[WB] nach resizeCanvas – wbCanvas:", wbCanvas.width, "x", wbCanvas.height, "viewScale:", viewScale);
     fitDocToView();
-    console.log("[WB] nach fitDocToView – viewScale:", viewScale, "viewOX:", viewOX, "viewOY:", viewOY);
     redrawAll();
-    console.log("[WB] redrawAll fertig");
     const bgBtn   = document.getElementById("wb-bg-btn");
     const bgLabel = document.getElementById("wb-bg-label");
     if (bgBtn)   { bgBtn.style.display = ""; }
@@ -559,12 +554,7 @@ function clearWbBackground(broadcast) {
 }
 
 function openDocAsBackground(url, name, docId, filename) {
-    console.log("[WB] openDocAsBackground aufgerufen, url:", url, "name:", name, "filename:", filename);
-    const extSrcDbg = filename || ((name && name.includes(".")) ? name : url);
-    const extDbg = (extSrcDbg.split("?")[0].split(".").pop() || "").toLowerCase();
-    console.log("[WB] ext erkannt:", extDbg, "extSrc:", extSrcDbg);
     loadBackground(url, name, true, docId, filename).catch(err => {
-        console.error("[WB] Fehler in loadBackground:", err);
         alert("Dokument konnte nicht geöffnet werden: " + (err.message || err));
     });
 }
