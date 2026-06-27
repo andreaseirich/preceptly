@@ -95,9 +95,9 @@ class WeekServiceTest(TestCase):
         week_data = WeekService.get_week_data(2025, 1, 15)
 
         self.assertIn(blocked_time.start_datetime.date(), week_data["blocked_times_by_date"])
-        self.assertIn(
-            blocked_time, week_data["blocked_times_by_date"][blocked_time.start_datetime.date()]
-        )
+        day_views = week_data["blocked_times_by_date"][blocked_time.start_datetime.date()]
+        day_view_pks = [v.pk for v in day_views]
+        self.assertIn(blocked_time.pk, day_view_pks)
 
 
 class WeekViewTest(TestCase):

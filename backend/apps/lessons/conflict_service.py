@@ -56,10 +56,11 @@ def recalculate_conflicts_for_blocked_time(blocked_time: BlockedTime):
     Args:
         blocked_time: The blocked time that was changed or deleted
     """
-    # Find sessions on the same date belonging to the same user
+    # Find sessions on ALL dates covered by the blocked time (supports multi-day)
     Session = apps.get_model("lessons", "Session")
     affected_sessions = Session.objects.filter(
-        date=blocked_time.start_datetime.date(),
+        date__gte=blocked_time.start_datetime.date(),
+        date__lte=blocked_time.end_datetime.date(),
         contract__user=blocked_time.user,
     )
 

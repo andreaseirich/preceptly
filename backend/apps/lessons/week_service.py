@@ -13,6 +13,45 @@ from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService
 
 
+class _BlockedTimeDayView:
+    """Wrapper um eine Blockzeit mit tagesspezifischen Anzeigezeiten für mehrtägige Blockzeiten."""
+
+    __slots__ = (
+        "bt",
+        "display_start_datetime",
+        "display_end_datetime",
+        "is_start_day",
+        "is_end_day",
+    )
+
+    def __init__(self, bt, display_start_datetime, display_end_datetime, is_start_day, is_end_day):
+        self.bt = bt
+        self.display_start_datetime = display_start_datetime
+        self.display_end_datetime = display_end_datetime
+        self.is_start_day = is_start_day
+        self.is_end_day = is_end_day
+
+    @property
+    def pk(self):
+        return self.bt.pk
+
+    @property
+    def title(self):
+        return self.bt.title
+
+    @property
+    def start_datetime(self):
+        return self.bt.start_datetime
+
+    @property
+    def end_datetime(self):
+        return self.bt.end_datetime
+
+    @property
+    def description(self):
+        return self.bt.description
+
+
 class WeekService:
     """Service für Wochenansicht."""
 
@@ -74,16 +113,42 @@ class WeekService:
 
         # Gruppiere Blockzeiten nach Datum
         blocked_times_by_date = defaultdict(list)
+        # Sichtbarer Tagesbereich im Kalender (8–22 Uhr)
+        _DAY_START = time(8, 0)
+        _DAY_END = time(22, 59, 59)
 
-        # Füge normale Blockzeiten hinzu
         for blocked_time in blocked_times:
-            current_date = blocked_time.start_datetime.date()
-            end_date_bt = blocked_time.end_datetime.date()
+            bt_start_date = blocked_time.start_datetime.date()
+            bt_end_date = blocked_time.end_datetime.date()
+            is_multiday = bt_start_date != bt_end_date
 
-            # Füge für jeden betroffenen Tag hinzu
-            while current_date <= end_date_bt and current_date <= week_end:
+            current_date = bt_start_date
+            while current_date <= bt_end_date and current_date <= week_end:
                 if current_date >= week_start:
-                    blocked_times_by_date[current_date].append(blocked_time)
+                    is_start = current_date == bt_start_date
+                    is_end = current_date == bt_end_date
+
+                    if is_multiday and not is_start:
+                        # Mittlere und End-Tage beginnen am Anfang des sichtbaren Bereichs
+                        disp_start = timezone.make_aware(datetime.combine(current_date, _DAY_START))
+                    else:
+                        disp_start = blocked_time.start_datetime
+
+                    if is_multiday and not is_end:
+                        # Start- und Zwischen-Tage enden am Ende des sichtbaren Bereichs
+                        disp_end = timezone.make_aware(datetime.combine(current_date, _DAY_END))
+                    else:
+                        disp_end = blocked_time.end_datetime
+
+                    blocked_times_by_date[current_date].append(
+                        _BlockedTimeDayView(
+                            bt=blocked_time,
+                            display_start_datetime=disp_start,
+                            display_end_datetime=disp_end,
+                            is_start_day=is_start,
+                            is_end_day=is_end,
+                        )
+                    )
                 current_date += timedelta(days=1)
 
         return {
