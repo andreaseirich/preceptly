@@ -106,7 +106,16 @@ if _REDIS_URL:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {"hosts": [_REDIS_URL]},
+            "CONFIG": {
+                "hosts": [
+                    {
+                        "address": _REDIS_URL,
+                        "socket_timeout": None,
+                        "socket_connect_timeout": 5,
+                        "socket_keepalive": True,
+                    }
+                ],
+            },
         }
     }
 else:
