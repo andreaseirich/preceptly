@@ -755,7 +755,10 @@ function connectWS() {
                 addChatLine("System", "🗑 Dokument wurde gelöscht.", false, true);
                 break;
             case "chat":
-                addChatLine(msg.name, msg.text, msg.peer_id === myPeerId, false);
+                // Echo der eigenen Nachricht überspringen (bereits lokal angezeigt)
+                if (msg.peer_id !== myPeerId) {
+                    addChatLine(msg.name, msg.text, false, false);
+                }
                 break;
         }
     };
@@ -1310,6 +1313,8 @@ function sendChat() {
     if (!text || !ws || ws.readyState !== 1) return;
     ws.send(JSON.stringify({ type: "chat", text }));
     inp.value = "";
+    // Eigene Nachricht sofort anzeigen (kein Warten auf Server-Echo)
+    addChatLine(DISPLAY_NAME || "Du", text, true, false);
 }
 document.getElementById("chat-input").addEventListener("keydown", e => {
     if (e.key === "Enter") sendChat();
