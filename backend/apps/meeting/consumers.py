@@ -355,6 +355,15 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             allowed_wb_fields = {
                 "type",
                 "action",
+                # stroke data
+                "stroke",
+                "strokes",
+                # background
+                "url",
+                "name",
+                "background_url",
+                "background_name",
+                # legacy / shape coords kept for compat
                 "x",
                 "y",
                 "color",
