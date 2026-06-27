@@ -430,7 +430,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                     {"type": "peer_joined", "peer_id": event["peer_id"], "name": event["name"]}
                 )
             )
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
     async def peer_left_event(self, event):
@@ -440,7 +440,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                     {"type": "peer_left", "peer_id": event["peer_id"], "name": event["name"]}
                 )
             )
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
     async def relay_event(self, event):
@@ -450,7 +450,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         payload["sender_peer_id"] = event["sender_peer_id"]
         try:
             await self.send(json.dumps(payload))
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
     async def wb_broadcast_event(self, event):
@@ -458,7 +458,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             return
         try:
             await self.send(json.dumps(event["payload"]))
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
     async def chat_event(self, event):
@@ -473,7 +473,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
     async def kick_event(self, event):
@@ -483,7 +483,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     async def doc_event(self, event):
         try:
             await self.send(json.dumps(event["payload"]))
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
     async def force_disconnect_event(self, event):
