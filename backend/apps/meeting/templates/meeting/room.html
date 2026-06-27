@@ -21,7 +21,7 @@
     --shadow: rgba(0,0,0,0.6);
 }
 
-body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ── Header ── */
 #header {
@@ -446,6 +446,7 @@ function resizeCanvas() {
 }
 new ResizeObserver(() => requestAnimationFrame(resizeCanvas))
     .observe(document.getElementById("wb-canvas-wrap"));
+window.addEventListener("resize", () => requestAnimationFrame(resizeCanvas));
 wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
 
 // PDF.js worker – als Blob-Worker laden, damit er same-origin laeuft (verhindert
@@ -548,7 +549,9 @@ async function loadBackground(url, name, broadcast, docId, filename) {
     if (wbBtn) wbBtn.classList.add("active");
     const wbPanel = document.getElementById("tab-whiteboard");
     if (wbPanel) wbPanel.classList.add("active");
-    // Canvas-Größe erzwingen (ResizeObserver feuert erst im nächsten Frame)
+    // Canvas-Größe erzwingen: nach Tab-Sichtbarmachung einen Frame abwarten,
+    // damit der Browser Layout neu berechnet (wichtig auf iOS Safari).
+    await new Promise(r => requestAnimationFrame(r));
     resizeCanvas();
     fitDocToView();
     redrawAll();
@@ -1439,8 +1442,8 @@ function switchTab(name, btn) {
     btn.classList.add("active");
     document.getElementById("tab-" + name).classList.add("active");
     if (name === "whiteboard") {
-        // Canvas was hidden (display:none) — resize to fill wrap, then redraw
-        requestAnimationFrame(() => { resizeCanvas(); });
+        // Canvas was hidden (display:none) — resize to fill wrap, dann fitDocToView wenn Hintergrund vorhanden
+        requestAnimationFrame(() => { resizeCanvas(); if (wbBackground) { fitDocToView(); redrawAll(); } });
     }
     if (name === "chat") {
         chatUnread = 0;
