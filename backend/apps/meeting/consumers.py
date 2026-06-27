@@ -142,8 +142,8 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self.is_tutor = is_tutor
         self._portal_user = portal_user
 
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
 
     async def disconnect(self, code):
         cls = self.__class__
@@ -424,45 +424,67 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     async def peer_joined_event(self, event):
         if event["sender_channel"] == self.channel_name:
             return
-        await self.send(
-            json.dumps({"type": "peer_joined", "peer_id": event["peer_id"], "name": event["name"]})
-        )
+        try:
+            await self.send(
+                json.dumps(
+                    {"type": "peer_joined", "peer_id": event["peer_id"], "name": event["name"]}
+                )
+            )
+        except Exception:
+            pass
 
     async def peer_left_event(self, event):
-        await self.send(
-            json.dumps({"type": "peer_left", "peer_id": event["peer_id"], "name": event["name"]})
-        )
+        try:
+            await self.send(
+                json.dumps(
+                    {"type": "peer_left", "peer_id": event["peer_id"], "name": event["name"]}
+                )
+            )
+        except Exception:
+            pass
 
     async def relay_event(self, event):
         if event.get("target_peer_id") != self.peer_id:
             return
         payload = dict(event["payload"])
         payload["sender_peer_id"] = event["sender_peer_id"]
-        await self.send(json.dumps(payload))
+        try:
+            await self.send(json.dumps(payload))
+        except Exception:
+            pass
 
     async def wb_broadcast_event(self, event):
         if event["sender_channel"] == self.channel_name:
             return
-        await self.send(json.dumps(event["payload"]))
+        try:
+            await self.send(json.dumps(event["payload"]))
+        except Exception:
+            pass
 
     async def chat_event(self, event):
-        await self.send(
-            json.dumps(
-                {
-                    "type": "chat",
-                    "peer_id": event["peer_id"],
-                    "name": event["name"],
-                    "text": event["text"],
-                }
+        try:
+            await self.send(
+                json.dumps(
+                    {
+                        "type": "chat",
+                        "peer_id": event["peer_id"],
+                        "name": event["name"],
+                        "text": event["text"],
+                    }
+                )
             )
-        )
+        except Exception:
+            pass
 
     async def kick_event(self, event):
         if event.get("target_peer_id") == self.peer_id:
             await self.send(json.dumps({"type": "kicked", "by": event.get("kicked_by", "")}))
 
     async def doc_event(self, event):
-        await self.send(json.dumps(event["payload"]))
+        try:
+            await self.send(json.dumps(event["payload"]))
+        except Exception:
+            pass
 
     async def force_disconnect_event(self, event):
         """Erzwingt Trennung bei Dedup (gleicher User meldet sich erneut an)."""
