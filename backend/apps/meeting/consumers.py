@@ -409,6 +409,9 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 },
             )
 
+        elif msg_type == "ping":
+            await self.send(json.dumps({"type": "pong"}))
+
         elif msg_type == "leave":
             await self.close(code=1000)
 
