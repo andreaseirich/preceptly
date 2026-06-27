@@ -5,6 +5,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from django.core.cache import cache
+
 from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
 
 User = get_user_model()
@@ -56,6 +58,7 @@ def _make_parent_link(parent_portal_user, contract, active=True):
 
 class PortalLoginViewTest(TestCase):
     def setUp(self):
+        cache.clear()  # Ratelimit-Zähler vor jedem Test zurücksetzen
         self.client = Client()
         self.tutor = _make_tutor("tutor_login")
         self.student_pu = _make_portal_user(self.tutor, "student", "student_login", "s3cret!")
@@ -157,6 +160,47 @@ class PortalLoginViewTest(TestCase):
         self.assertNotIn("portal_user_id", self.client.session)
         self.assertContains(resp, "Ungültige Zugangsdaten")
 
+    def test_activate_then_logout_then_login_works(self):
+        """Regressionstest: Produktionsfluss – Einladungslink aktivieren, ausloggen, normal einloggen."""
+        from django.utils import timezone
+
+        User = get_user_model()
+        # Genau wie in students/views.py: Django-User mit zufälligem Passwort erstellen
+        user = User.objects.create_user(
+            username="portal_student_prod_test",
+            email="prod_flow@example.com",
+            password="random_garbage_token_hex",
+        )
+        tutor = _make_tutor("tutor_prod_flow")
+        portal_user = PortalUser.objects.create(user=user, role="student", tutor=tutor)
+        contract = _make_contract(tutor)
+        link = StudentPortalLink.objects.create(
+            portal_user=portal_user,
+            contract=contract,
+            invite_token="prod-flow-token-abc",
+            invite_token_created_at=timezone.now(),
+            is_active=False,
+        )
+
+        # 1. Aktivierung via Einladungslink (Passwort setzen)
+        activate_url = reverse("portal:activate", kwargs={"token": "prod-flow-token-abc"})
+        resp = self.client.post(
+            activate_url, {"password": "userchosen99!", "password_confirm": "userchosen99!"}
+        )
+        self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
+
+        # 2. Ausloggen
+        self.client.post(reverse("portal:logout"))
+        self.assertNotIn("portal_user_id", self.client.session)
+
+        # 3. Normales Login mit Email + selbst gewähltem Passwort
+        resp = self.client.post(
+            self.url,
+            {"email": "prod_flow@example.com", "password": "userchosen99!"},
+        )
+        self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
+        self.assertEqual(self.client.session.get("portal_user_id"), portal_user.pk)
+
 
 class PortalPasswordResetViewTest(TestCase):
     def setUp(self):
@@ -188,14 +232,14 @@ class PortalPasswordResetViewTest(TestCase):
         resp = self.client.post(self.url, {"email": "nonexistent@example.com"})
         self.assertIn(resp.status_code, (200, 302))
 
-    def test_post_unknown_username_returns_200(self):
-        # View never reveals whether username exists — always renders template
-        resp = self.client.post(self.url, {"username": "nobody_here"})
+    def test_post_unknown_email_returns_200(self):
+        # View never reveals whether email exists — always renders template
+        resp = self.client.post(self.url, {"email": "nobody@example.com"})
         self.assertEqual(resp.status_code, 200)
 
-    def test_post_empty_username_returns_200(self):
-        # Empty username is silently ignored, view still renders template
-        resp = self.client.post(self.url, {"username": ""})
+    def test_post_empty_email_returns_200(self):
+        # Empty email is silently ignored, view still renders template
+        resp = self.client.post(self.url, {"email": ""})
         self.assertEqual(resp.status_code, 200)
 
 
