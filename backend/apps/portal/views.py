@@ -1257,6 +1257,10 @@ class PortalDocumentDownloadView(View):
         if not student:
             return HttpResponseForbidden()
         doc = get_object_or_404(StudentDocument, pk=doc_pk, student=student)
+        if not doc.file_exists():
+            from django.http import Http404
+
+            raise Http404
         response = FileResponse(
             doc.file.open("rb"), as_attachment=True, filename=doc.display_name()
         )
