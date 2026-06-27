@@ -203,7 +203,7 @@ class PortalFileUploadValidationTest(TestCase):
     """Tests the file-upload validation constants and the upload endpoint."""
 
     ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".docx", ".doc", ".xlsx", ".xls", ".txt"}
-    MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+    MAX_SIZE = 50 * 1024 * 1024  # 50 MB
 
     def setUp(self):
         self.client = Client()
@@ -249,7 +249,7 @@ class PortalFileUploadValidationTest(TestCase):
         self.assertLessEqual(size, self.MAX_SIZE)
 
     def test_file_exactly_at_max_size_is_at_limit(self):
-        self.assertEqual(self.MAX_SIZE, 10 * 1024 * 1024)
+        self.assertEqual(self.MAX_SIZE, 50 * 1024 * 1024)
 
     def test_file_above_max_size_exceeds_limit(self):
         size = self.MAX_SIZE + 1
