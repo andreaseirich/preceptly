@@ -241,6 +241,33 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Cloudflare R2 — persistente Dateiablage (ersetzt ephemeres Railway-Filesystem).
+# Env-Vars: CLOUDFLARE_R2_ACCOUNT_ID, CLOUDFLARE_R2_ACCESS_KEY_ID,
+#           CLOUDFLARE_R2_SECRET_ACCESS_KEY, CLOUDFLARE_R2_BUCKET_NAME
+_R2_ACCOUNT_ID = env("CLOUDFLARE_R2_ACCOUNT_ID")
+_R2_ACCESS_KEY = env("CLOUDFLARE_R2_ACCESS_KEY_ID")
+_R2_SECRET_KEY = env("CLOUDFLARE_R2_SECRET_ACCESS_KEY")
+_R2_BUCKET = env("CLOUDFLARE_R2_BUCKET_NAME")
+
+if all([_R2_ACCOUNT_ID, _R2_ACCESS_KEY, _R2_SECRET_KEY, _R2_BUCKET]):
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    AWS_ACCESS_KEY_ID = _R2_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY = _R2_SECRET_KEY
+    AWS_STORAGE_BUCKET_NAME = _R2_BUCKET
+    AWS_S3_ENDPOINT_URL = f"https://{_R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+    AWS_S3_REGION_NAME = "auto"
+    AWS_DEFAULT_ACL = None
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = True
+    AWS_QUERYSTRING_EXPIRE = 3600
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
