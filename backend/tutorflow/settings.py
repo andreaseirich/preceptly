@@ -118,10 +118,23 @@ else:
 
 ASGI_APPLICATION = "tutorflow.asgi.application"
 
-# ICE servers for WebRTC (add TURN credentials here for production)
+# ICE servers for WebRTC
+# TURN auf ai-server (46.224.151.16:3478). Credential über Env-Var überschreibbar.
+_TURN_URL = env("TURN_URL", default="turn:46.224.151.16:3478")
+_TURN_USER = env("TURN_USER", default="preceptly")
+_TURN_CREDENTIAL = env(
+    "TURN_CREDENTIAL", default="849bdf4a2bbc42fadd2e9e4efc85707ed13e4b1571c6dc3d"
+)
+
 MEETING_ICE_SERVERS = [
     {"urls": "stun:stun.l.google.com:19302"},
     {"urls": "stun:stun1.l.google.com:19302"},
+    {"urls": _TURN_URL, "username": _TURN_USER, "credential": _TURN_CREDENTIAL},
+    {
+        "urls": _TURN_URL.replace("turn:", "turn:") + "?transport=tcp",
+        "username": _TURN_USER,
+        "credential": _TURN_CREDENTIAL,
+    },
 ]
 
 MIDDLEWARE = [

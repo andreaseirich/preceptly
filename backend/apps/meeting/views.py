@@ -300,7 +300,9 @@ class MeetingRoomView(View):
     def get(self, request, token):
         room = get_object_or_404(MeetingRoom, token=token, is_active=True)
         lesson = room.lesson
-        turn_servers = getattr(settings, "MEETING_ICE_SERVERS", [])
+        import json as _json
+
+        turn_servers = _json.dumps(getattr(settings, "MEETING_ICE_SERVERS", []))
 
         # ── 1. Tutor-Zugang zuerst prüfen (höchste Priorität) ─────────────────
         # Tutor-Check kommt vor Portal-Check, damit ein Tutor mit aktiver Portal-
