@@ -8,4 +8,4 @@ if [ "${DEBUG:-True}" != "True" ] && [ "${DEBUG:-True}" != "true" ]; then
 fi
 
 # Daphne (ASGI) statt Gunicorn (WSGI) – WebSockets benötigen ASGI
-exec daphne -b 0.0.0.0 -p ${PORT:-8000} tutorflow.asgi:application
+exec daphne -b 0.0.0.0 -p ${PORT:-8000} --ping-interval 20 --ping-timeout 10 tutorflow.asgi:application
