@@ -559,7 +559,12 @@ function clearWbBackground(broadcast) {
 }
 
 function openDocAsBackground(url, name, docId, filename) {
+    console.log("[WB] openDocAsBackground aufgerufen, url:", url, "name:", name, "filename:", filename);
+    const extSrcDbg = filename || ((name && name.includes(".")) ? name : url);
+    const extDbg = (extSrcDbg.split("?")[0].split(".").pop() || "").toLowerCase();
+    console.log("[WB] ext erkannt:", extDbg, "extSrc:", extSrcDbg);
     loadBackground(url, name, true, docId, filename).catch(err => {
+        console.error("[WB] Fehler in loadBackground:", err);
         alert("Dokument konnte nicht geöffnet werden: " + (err.message || err));
     });
 }
