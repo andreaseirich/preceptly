@@ -154,6 +154,7 @@ class MeetingDocumentUploadView(View):
                 "ok": True,
                 "id": doc.pk,
                 "name": doc.name or doc.file.name,
+                "file_name": os.path.basename(doc.file.name),
                 "url": reverse(
                     "meeting:doc_serve",
                     kwargs={"token": str(lesson.meeting_room.token), "doc_pk": doc.pk},
