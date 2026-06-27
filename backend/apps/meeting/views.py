@@ -302,7 +302,28 @@ class MeetingRoomView(View):
         lesson = room.lesson
         turn_servers = getattr(settings, "MEETING_ICE_SERVERS", [])
 
-        # ── 1. Portal-Nutzer zuerst prüfen ────────────────────────────────────
+        # ── 1. Tutor-Zugang zuerst prüfen (höchste Priorität) ─────────────────
+        # Tutor-Check kommt vor Portal-Check, damit ein Tutor mit aktiver Portal-
+        # Session im selben Browser nicht fälschlicherweise als Portal-Nutzer
+        # behandelt und mit "Kein Zugriff" abgewiesen wird.
+        if request.user.is_authenticated and lesson.contract.user == request.user:
+            display_name = (request.user.get_full_name() or request.user.username) + " (Tutor)"
+            return render(
+                request,
+                self.template_name,
+                {
+                    "room": room,
+                    "lesson": lesson,
+                    "display_name": display_name,
+                    "documents": lesson.documents.all(),
+                    "is_tutor": True,
+                    "back_url": f"/lessons/{lesson.pk}/",
+                    "user_token": f"tutor_{request.user.pk}",
+                    "MEETING_TURN_SERVERS": turn_servers,
+                },
+            )
+
+        # ── 2. Portal-Nutzer (Schüler / Elternteil) ───────────────────────────
         portal_user = get_portal_user(request)
         if portal_user:
             if portal_user.role == "student":
@@ -341,24 +362,6 @@ class MeetingRoomView(View):
                     "is_tutor": False,
                     "back_url": back_url,
                     "user_token": f"portal_{portal_user.pk}",
-                    "MEETING_TURN_SERVERS": turn_servers,
-                },
-            )
-
-        # ── 2. Tutor-Zugang (Django-Auth) ──────────────────────────────────────
-        if request.user.is_authenticated and lesson.contract.user == request.user:
-            display_name = (request.user.get_full_name() or request.user.username) + " (Tutor)"
-            return render(
-                request,
-                self.template_name,
-                {
-                    "room": room,
-                    "lesson": lesson,
-                    "display_name": display_name,
-                    "documents": lesson.documents.all(),
-                    "is_tutor": True,
-                    "back_url": f"/lessons/{lesson.pk}/",
-                    "user_token": f"tutor_{request.user.pk}",
                     "MEETING_TURN_SERVERS": turn_servers,
                 },
             )
