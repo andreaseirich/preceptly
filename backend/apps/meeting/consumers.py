@@ -49,28 +49,44 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     _user_channels_data: dict[str, dict[str, str]] = {}
 
     @database_sync_to_async
-    def _load_room_and_authorize(self, token, user):
-        from tutorflow.meetings.models import MeetingRoom
+    def _load_room_and_authorize(self, token, user, portal_user_id=None):
+        from apps.meeting.models import MeetingRoom
+        from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
 
         try:
-            room = MeetingRoom.objects.select_related("session__contract__user").get(token=token)
+            room = MeetingRoom.objects.select_related("lesson__contract__user").get(token=token)
         except MeetingRoom.DoesNotExist:
             return None, False, None, False
 
         if not room.is_active:
             return room, False, None, False
 
-        contract = room.session.contract
-        is_tutor = contract.user_id == user.pk
+        contract = room.lesson.contract
 
-        if is_tutor:
-            return room, True, None, True
+        if not user.is_anonymous:
+            if contract.user_id == user.pk:
+                return room, True, None, True
 
-        portal_user = contract.portal_users.filter(user=user).first()
-        if portal_user is None:
+        if portal_user_id is None:
             return room, False, None, False
 
-        return room, True, portal_user, False
+        try:
+            pu = PortalUser.objects.get(pk=portal_user_id)
+        except PortalUser.DoesNotExist:
+            return room, False, None, False
+
+        has_access = (
+            StudentPortalLink.objects.filter(
+                portal_user=pu, contract=contract, is_active=True
+            ).exists()
+            or ParentStudentLink.objects.filter(
+                parent=pu, contract=contract, is_active=True
+            ).exists()
+        )
+        if not has_access:
+            return room, False, None, False
+
+        return room, True, pu, False
 
     async def connect(self):
         self.token = str(self.scope["url_route"]["kwargs"]["token"])
@@ -84,7 +100,10 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self._msg_timestamps: deque = deque(maxlen=60)
 
         user = self.scope.get("user")
-        if user is None or user.is_anonymous:
+        session = self.scope.get("session")
+        portal_user_id = session.get("portal_user_id") if session else None
+
+        if (user is None or user.is_anonymous) and not portal_user_id:
             logger.warning(
                 "WS connect: Anonymer oder fehlender Benutzer token=%s",
                 self.token,
@@ -93,7 +112,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             return
 
         room, has_access, portal_user, is_tutor = await self._load_room_and_authorize(
-            self.token, user
+            self.token, user, portal_user_id=portal_user_id
         )
         if room is None or not room.is_active:
             logger.warning(
@@ -339,7 +358,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
             except (ValueError, TypeError):
                 return
 
-            from tutorflow.meetings.models import SessionDocument
+            from apps.lessons.models import SessionDocument
 
             doc = await SessionDocument.objects.filter(
                 pk=doc_id,
@@ -387,9 +406,9 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def _get_session(self):
-        from tutorflow.meetings.models import MeetingRoom
+        from apps.meeting.models import MeetingRoom
 
-        return MeetingRoom.objects.select_related("session").get(token=self.token).session
+        return MeetingRoom.objects.select_related("lesson").get(token=self.token).lesson
 
     async def peer_joined_event(self, event):
         if event["sender_channel"] == self.channel_name:
