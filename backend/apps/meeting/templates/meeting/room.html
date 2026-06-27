@@ -448,10 +448,15 @@ new ResizeObserver(() => requestAnimationFrame(resizeCanvas))
     .observe(document.getElementById("wb-canvas-wrap"));
 wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
 
-// PDF.js worker
+// PDF.js worker – als Blob-Worker laden, damit er same-origin laeuft (verhindert
+// Cross-Origin-Worker-Restrictions in Firefox und iOS Safari).
 if (typeof pdfjsLib !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const _pdfWorkerCdn = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const _pdfWorkerBlob = new Blob(
+        ['importScripts("' + _pdfWorkerCdn + '")'],
+        { type: "application/javascript" }
+    );
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(_pdfWorkerBlob);
 }
 
 function redrawAll() {
