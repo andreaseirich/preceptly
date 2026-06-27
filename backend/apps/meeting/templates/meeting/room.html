@@ -407,6 +407,8 @@ const ICE_SERVERS = [
 // ─────────────────────────────────────────────────────────────────────────────
 let ws, myPeerId;
 let localStream = null;
+let _intentionalClose = false;
+let _reconnectDelay = 1000;  // Exponential-Backoff-Startwert in ms
 let screenStream = null;
 let peers = {};       // peerId → { pc: RTCPeerConnection, name, stream }
 let micActive = true;
@@ -637,6 +639,7 @@ function stopScreenShare() {
 }
 
 async function hangUp() {
+    _intentionalClose = true;
     Object.keys(peers).forEach(removePeer);
     if (ws) { try { ws.send(JSON.stringify({ type: "leave" })); } catch(e) {} ws.close(); }
     if (IS_TUTOR) {
@@ -665,6 +668,7 @@ function connectWS() {
     let _wsHeartbeat = null;
 
     ws.onopen = () => {
+        _reconnectDelay = 1000;  // Backoff zurücksetzen nach erfolgreicher Verbindung
         ws.send(JSON.stringify({ type: "join", name: DISPLAY_NAME, is_tutor: IS_TUTOR, user_token: USER_TOKEN }));
         setStatus("Verbunden – warte auf Teilnehmer …");
         document.getElementById("header-sub").textContent = "Verbunden";
@@ -676,11 +680,22 @@ function connectWS() {
     ws.onclose = () => {
         clearInterval(_wsHeartbeat);
         _wsHeartbeat = null;
-        setStatus("Verbindung getrennt.");
-        document.getElementById("header-sub").textContent = "Getrennt";
+        if (_intentionalClose) {
+            setStatus("Verbindung getrennt.");
+            document.getElementById("header-sub").textContent = "Getrennt";
+            return;
+        }
+        // Unerwartete Trennung — Peers bereinigen und neu verbinden
+        Object.keys(peers).forEach(removePeer);
+        myPeerId = null;
+        const secs = Math.round(_reconnectDelay / 1000);
+        setStatus(`Verbindung unterbrochen – verbinde neu in ${secs} s …`);
+        document.getElementById("header-sub").textContent = "Verbinde neu …";
+        setTimeout(() => { if (!_intentionalClose) connectWS(); }, _reconnectDelay);
+        _reconnectDelay = Math.min(_reconnectDelay * 2, 30000);
     };
 
-    ws.onerror = () => setStatus("Verbindungsfehler.");
+    ws.onerror = () => { /* Fehler immer gefolgt von onclose — dort behandelt */ };
 
     ws.onmessage = async (evt) => {
         const msg = JSON.parse(evt.data);
@@ -718,7 +733,8 @@ function connectWS() {
                 break;
             case "kicked":
                 if (msg.by === "__reconnect__") {
-                    // Stille Trennung bei Reconnect – kein Alert
+                    // Stille Trennung: gleicher User hat neues Tab geöffnet — nicht neu verbinden
+                    _intentionalClose = true;
                     Object.keys(peers).forEach(removePeer);
                     if (ws) { ws.close(); }
                 } else {
@@ -767,7 +783,8 @@ async function createPeerConnection(peerId, name, initiator) {
     };
 
     pc.onconnectionstatechange = () => {
-        if (["disconnected","failed","closed"].includes(pc.connectionState)) {
+        if (["failed","closed"].includes(pc.connectionState)) {
+            // "disconnected" ist transient und kann sich erholen — kein removePeer
             removePeer(peerId);
         }
         updatePeerStatus();
