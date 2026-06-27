@@ -350,6 +350,11 @@ a.doc-item { text-decoration: none; }
                                 Hochladen
                             </button>
                         </div>
+                        <div id="doc-upload-progress" style="display:none; margin-top:6px;">
+                            <div style="background:var(--bg3); border-radius:4px; overflow:hidden; height:6px;">
+                                <div id="doc-upload-bar" style="height:100%; width:0%; background:var(--blue); transition:width 0.1s;"></div>
+                            </div>
+                        </div>
                         <div id="doc-upload-status" style="font-size:0.75em; color:var(--text2); margin-top:4px; min-height:1em;"></div>
                     </div>
                 </div>
@@ -1396,11 +1401,13 @@ function escHtml(s) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Dokument-Upload (AJAX – kein Seiten-Reload)
+// Dokument-Upload (AJAX mit Fortschrittsbalken)
 // ─────────────────────────────────────────────────────────────────────────────
-async function uploadDoc() {
+function uploadDoc() {
     const input = document.getElementById("doc-file-input");
     const status = document.getElementById("doc-upload-status");
+    const progress = document.getElementById("doc-upload-progress");
+    const bar = document.getElementById("doc-upload-bar");
     if (!input.files.length) {
         status.textContent = "Keine Datei ausgewählt.";
         return;
@@ -1410,40 +1417,63 @@ async function uploadDoc() {
         status.textContent = "Datei zu groß (max. 20 MB).";
         return;
     }
-    status.textContent = "Wird hochgeladen …";
     const fd = new FormData();
     fd.append("file", file);
     fd.append("name", file.name);
-    try {
-        const resp = await fetch(UPLOAD_URL, {
-            method: "POST",
-            headers: { "X-CSRFToken": getCookie("csrftoken") },
-            body: fd,
-        });
-        const data = await resp.json();
-        if (data.ok) {
-            // Lokal hinzufügen
-            addDocToPanel(data.name, data.url, data.date, data.id);
-            // Andere Teilnehmer benachrichtigen
-            if (ws && ws.readyState === 1) {
-                ws.send(JSON.stringify({
-                    type: "doc_notify",
-                    name: data.name,
-                    url: data.url,
-                    date: data.date,
-                    doc_id: data.id,
-                }));
-            }
-            addChatLine("System", `📄 Dokument hochgeladen: ${data.name}`, false, true);
-            input.value = "";
-            status.textContent = "✓ Hochgeladen";
-            setTimeout(() => { status.textContent = ""; }, 3000);
-        } else {
-            status.textContent = `Fehler: ${data.error || "Unbekannt"}`;
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            bar.style.width = pct + "%";
+            status.textContent = `Wird hochgeladen … ${pct} %`;
         }
-    } catch (e) {
+    };
+
+    xhr.upload.onloadstart = () => {
+        bar.style.width = "0%";
+        progress.style.display = "block";
+        status.textContent = "Wird hochgeladen …";
+    };
+
+    xhr.onload = () => {
+        progress.style.display = "none";
+        bar.style.width = "0%";
+        try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.ok) {
+                addDocToPanel(data.name, data.url, data.date, data.id);
+                if (ws && ws.readyState === 1) {
+                    ws.send(JSON.stringify({
+                        type: "doc_notify",
+                        name: data.name,
+                        url: data.url,
+                        date: data.date,
+                        doc_id: data.id,
+                    }));
+                }
+                addChatLine("System", `📄 Dokument hochgeladen: ${data.name}`, false, true);
+                input.value = "";
+                status.textContent = "✓ Hochgeladen";
+                setTimeout(() => { status.textContent = ""; }, 3000);
+            } else {
+                status.textContent = `Fehler: ${data.error || "Unbekannt"}`;
+            }
+        } catch (e) {
+            status.textContent = "Ungültige Server-Antwort.";
+        }
+    };
+
+    xhr.onerror = () => {
+        progress.style.display = "none";
+        bar.style.width = "0%";
         status.textContent = "Netzwerkfehler beim Hochladen.";
-    }
+    };
+
+    xhr.open("POST", UPLOAD_URL);
+    xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+    xhr.send(fd);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
