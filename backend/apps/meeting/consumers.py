@@ -47,6 +47,8 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     _rooms_data: dict[str, dict[str, str]] = {}
     # User-Token-Dedup: group_name -> {user_token: channel_name}
     _user_channels_data: dict[str, dict[str, str]] = {}
+    # Peer-ID-Dedup: group_name -> {user_token: peer_id}  (für sofortige _rooms_data-Bereinigung)
+    _user_peers_data: dict[str, dict[str, str]] = {}
 
     @classmethod
     async def _get_room_lock(cls, group_name: str):
@@ -159,6 +161,12 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 if not cls._user_channels_data[self.group_name]:
                     del cls._user_channels_data[self.group_name]
 
+            if self.group_name in cls._user_peers_data and self.user_token:
+                if cls._user_peers_data[self.group_name].get(self.user_token) == self.peer_id:
+                    del cls._user_peers_data[self.group_name][self.user_token]
+                if not cls._user_peers_data[self.group_name]:
+                    del cls._user_peers_data[self.group_name]
+
             # Prüfe ob Peer tatsächlich im Raum war (Race-Condition-sicher)
             peer_was_in_room = self.peer_id in cls._rooms_data.get(self.group_name, {})
 
@@ -246,6 +254,8 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 self.user_token = f"user_{user_pk}"
 
             old_channel = None
+            old_peer_id = None
+            old_peer_name = None
             existing_peers = {}
 
             lock = await cls._get_room_lock(self.group_name)
@@ -258,11 +268,29 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                         old_channel = None
                     cls._user_channels_data[self.group_name][self.user_token] = self.channel_name
 
+                    # Alte Peer-ID sofort aus _rooms_data entfernen (verhindert Geister-Peers)
+                    if self.group_name not in cls._user_peers_data:
+                        cls._user_peers_data[self.group_name] = {}
+                    old_peer_id = cls._user_peers_data[self.group_name].get(self.user_token)
+                    cls._user_peers_data[self.group_name][self.user_token] = self.peer_id
+                    if old_peer_id and self.group_name in cls._rooms_data:
+                        old_peer_name = cls._rooms_data[self.group_name].pop(old_peer_id, None)
+
                 if self.group_name not in cls._rooms_data:
                     cls._rooms_data[self.group_name] = {}
                 existing_peers = dict(cls._rooms_data[self.group_name])
                 cls._rooms_data[self.group_name][self.peer_id] = self.display_name
                 self._joined = True
+
+            if old_peer_id and old_peer_name is not None:
+                # Anderen Clients mitteilen dass der alte Peer weg ist
+                try:
+                    await self.channel_layer.group_send(
+                        self.group_name,
+                        {"type": "peer_left_event", "peer_id": old_peer_id, "name": old_peer_name},
+                    )
+                except Exception:  # noqa: S110
+                    pass
 
             if old_channel:
                 try:
