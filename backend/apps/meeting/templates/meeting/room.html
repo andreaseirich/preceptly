@@ -665,7 +665,7 @@ function connectWS() {
         document.getElementById("header-sub").textContent = "Verbunden";
         _wsHeartbeat = setInterval(() => {
             if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "ping" }));
-        }, 25000);
+        }, 3000);
     };
 
     ws.onclose = () => {
