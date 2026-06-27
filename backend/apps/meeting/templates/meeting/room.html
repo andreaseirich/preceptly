@@ -318,7 +318,7 @@ a.doc-item { text-decoration: none; }
                             <div class="doc-date">{{ doc.uploaded_at|date:"d.m.Y" }}</div>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:3px; flex-shrink:0;">
-                            <button onclick="openDocAsBackground('{% url "meeting:doc_serve" room.token doc.pk %}','{{ doc.name|default:doc.file.name|escapejs }}',{{ doc.pk }})"
+                            <button onclick="openDocAsBackground('{% url "meeting:doc_serve" room.token doc.pk %}','{{ doc.name|default:doc.file.name|escapejs }}',{{ doc.pk }},'{{ doc.file.name|escapejs }}')"
                                     style="padding:2px 7px; background:var(--blue); color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.74em; white-space:nowrap;">
                                 📌 Öffnen
                             </button>
@@ -471,9 +471,9 @@ function redrawAll() {
     wbCtx.restore();
 }
 
-async function loadBackground(url, name, broadcast, docId) {
-    // Detect file type from name (original filename) because the serve URL has no extension.
-    const extSrc = (name && name.includes(".")) ? name : url;
+async function loadBackground(url, name, broadcast, docId, filename) {
+    // filename = original file name for extension detection (name might be a user-chosen display name without extension)
+    const extSrc = filename || ((name && name.includes(".")) ? name : url);
     const ext = (extSrc.split("?")[0].split(".").pop() || "").toLowerCase();
     if (ext === "pdf") {
         // PDF via PDF.js – erste Seite als Bild
@@ -492,7 +492,7 @@ async function loadBackground(url, name, broadcast, docId) {
             const img = new Image();
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
-            wbBackground = { url, name: name || url, img, docId: docId ?? null, docWidth: img.width, docHeight: img.height };
+            wbBackground = { url, name: name || url, filename: filename || null, img, docId: docId ?? null, docWidth: img.width, docHeight: img.height };
         } catch(e) {
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
@@ -507,7 +507,7 @@ async function loadBackground(url, name, broadcast, docId) {
             alert("Dokument konnte nicht geöffnet werden: " + e.message);
             return;
         }
-        wbBackground = { url, name: name || url, img, docId: docId ?? null, docWidth: img.naturalWidth || img.width, docHeight: img.naturalHeight || img.height };
+        wbBackground = { url, name: name || url, filename: filename || null, img, docId: docId ?? null, docWidth: img.naturalWidth || img.width, docHeight: img.naturalHeight || img.height };
     } else {
         // Nicht darstellbar → in neuem Tab öffnen
         window.open(url, "_blank");
@@ -531,7 +531,7 @@ async function loadBackground(url, name, broadcast, docId) {
     if (broadcast && ws && ws.readyState === 1) {
         ws.send(JSON.stringify({
             type: "wb_event", action: "bg_set",
-            url: url, name: name || url, strokes: wbStrokes,
+            url: url, name: name || url, filename: filename || name || "", strokes: wbStrokes,
         }));
     }
 }
@@ -548,16 +548,16 @@ function clearWbBackground(broadcast) {
     }
 }
 
-function openDocAsBackground(url, name, docId) {
-    loadBackground(url, name, true, docId).catch(err => {
+function openDocAsBackground(url, name, docId, filename) {
+    loadBackground(url, name, true, docId, filename).catch(err => {
         alert("Dokument konnte nicht geöffnet werden: " + (err.message || err));
     });
 }
 
 function syncWhiteboardToAll() {
     if (!ws || ws.readyState !== 1) return;
-    const payload = { type: "wb_event", action: "state_sync", strokes: wbStrokes, background_url: null, background_name: null };
-    if (wbBackground) { payload.background_url = wbBackground.url; payload.background_name = wbBackground.name; }
+    const payload = { type: "wb_event", action: "state_sync", strokes: wbStrokes, background_url: null, background_name: null, background_filename: null };
+    if (wbBackground) { payload.background_url = wbBackground.url; payload.background_name = wbBackground.name; payload.background_filename = wbBackground.filename || null; }
     ws.send(JSON.stringify(payload));
 }
 
@@ -747,7 +747,7 @@ function connectWS() {
                 }
                 break;
             case "doc_added":
-                addDocToPanel(msg.name, msg.url, msg.date, msg.doc_id);
+                addDocToPanel(msg.name, msg.url, msg.date, msg.doc_id, msg.file_name);
                 addChatLine("System", `📄 Neues Dokument: ${msg.name}`, false, true);
                 break;
             case "doc_removed":
@@ -1285,13 +1285,13 @@ function handleWbEvent(msg) {
         redrawAll();
     } else if (msg.action === "bg_set") {
         wbStrokes = msg.strokes || [];
-        loadBackground(msg.url, msg.name, false);
+        loadBackground(msg.url, msg.name, false, null, msg.filename);
     } else if (msg.action === "bg_clear") {
         clearWbBackground(false);
     } else if (msg.action === "state_sync") {
         wbStrokes = msg.strokes || [];
         if (msg.background_url) {
-            loadBackground(msg.background_url, msg.background_name || "", false);
+            loadBackground(msg.background_url, msg.background_name || "", false, null, msg.background_filename);
         } else {
             clearWbBackground(false);
         }
@@ -1320,7 +1320,7 @@ document.getElementById("chat-input").addEventListener("keydown", e => {
     if (e.key === "Enter") sendChat();
 });
 
-function addDocToPanel(name, url, date, docId) {
+function addDocToPanel(name, url, date, docId, filename) {
     const panel = document.getElementById("docs-panel");
     const noDoc = panel.querySelector(".no-docs");
     if (noDoc) noDoc.remove();
@@ -1336,7 +1336,7 @@ function addDocToPanel(name, url, date, docId) {
         `<span class="doc-icon">📄</span>` +
         `<div style="flex:1;min-width:0;"><div class="doc-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>` +
         `<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">` +
-        `<button onclick="openDocAsBackground('${serveUrl}','${escHtml(name)}',${docId || 0})" style="padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">📌 Öffnen</button>` +
+        `<button onclick="openDocAsBackground('${serveUrl}','${escHtml(name)}',${docId || 0},'${escHtml(filename || name)}')" style="padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">📌 Öffnen</button>` +
         delBtn +
         `</div>`;
     panel.insertBefore(div, panel.querySelector("#doc-upload-area"));
@@ -1468,7 +1468,7 @@ function uploadDoc() {
         try {
             const data = JSON.parse(xhr.responseText);
             if (data.ok) {
-                addDocToPanel(data.name, data.url, data.date, data.id);
+                addDocToPanel(data.name, data.url, data.date, data.id, data.file_name || data.name);
                 if (ws && ws.readyState === 1) {
                     ws.send(JSON.stringify({
                         type: "doc_notify",
@@ -1476,6 +1476,7 @@ function uploadDoc() {
                         url: data.url,
                         date: data.date,
                         doc_id: data.id,
+                        file_name: data.file_name || data.name,
                     }));
                 }
                 addChatLine("System", `📄 Dokument hochgeladen: ${data.name}`, false, true);

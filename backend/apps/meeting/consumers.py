@@ -4,6 +4,7 @@ WebSocket-Consumer für WebRTC-Signaling und Whiteboard-Synchronisation.
 
 import html
 import json
+import os
 import logging
 import time
 import uuid
@@ -361,8 +362,10 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 # background
                 "url",
                 "name",
+                "filename",
                 "background_url",
                 "background_name",
+                "background_filename",
                 # legacy / shape coords kept for compat
                 "x",
                 "y",
@@ -432,6 +435,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                         "type": "doc_added",
                         "name": doc.name,
                         "url": doc.file.url,
+                        "file_name": os.path.basename(doc.file.name),
                         "date": str(data.get("date", "")),
                         "doc_id": doc_id,
                     },
