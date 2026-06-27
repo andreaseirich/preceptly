@@ -84,4 +84,5 @@ urlpatterns = [
         name="meeting_status",
     ),
     path("faq/", views.PortalFAQView.as_view(), name="faq"),
+    path("profile/", views.PortalProfileEditView.as_view(), name="profile"),
 ]

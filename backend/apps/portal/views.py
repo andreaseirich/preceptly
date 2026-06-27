@@ -1738,3 +1738,105 @@ class PortalFAQView(View):
         if not portal_user:
             return redirect("portal:login")
         return render(request, self.template_name, {"portal_user": portal_user})
+
+
+class PortalProfileEditView(View):
+    """Schüler/Elternteil kann eigene Kontaktdaten und Passwort ändern."""
+
+    template_name = "portal/profile_edit.html"
+
+    def _get_contract(self, portal_user):
+        """Gibt den primären Vertrag des Portal-Nutzers zurück (Schüler oder erstes Kind bei Eltern)."""
+        from apps.portal.models import StudentPortalLink
+
+        link = (
+            StudentPortalLink.objects.select_related("contract")
+            .filter(portal_user=portal_user, is_active=True)
+            .first()
+        )
+        return link.contract if link else None
+
+    def get(self, request):
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return redirect("portal:login")
+        contract = self._get_contract(portal_user)
+        return render(
+            request,
+            self.template_name,
+            {
+                "portal_user": portal_user,
+                "contract": contract,
+            },
+        )
+
+    def post(self, request):
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return redirect("portal:login")
+        contract = self._get_contract(portal_user)
+        django_user = portal_user.user
+
+        errors = []
+        success_msgs = []
+
+        action = request.POST.get("action", "")
+
+        if action == "contact":
+            new_email = request.POST.get("email", "").strip().lower()
+            new_phone = request.POST.get("phone", "").strip()
+
+            if new_email and new_email != (django_user.email or "").lower():
+                from django.contrib.auth import get_user_model as _gum
+
+                _User = _gum()
+                duplicate = (
+                    _User.objects.filter(email__iexact=new_email, portal_profile__isnull=False)
+                    .exclude(pk=django_user.pk)
+                    .exists()
+                )
+                if duplicate:
+                    errors.append(
+                        "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet."
+                    )
+                else:
+                    django_user.email = new_email
+                    django_user.save(update_fields=["email"])
+                    if contract:
+                        contract.email = new_email
+                        contract.save(update_fields=["email", "updated_at"])
+                    success_msgs.append("E-Mail-Adresse aktualisiert.")
+
+            if contract and new_phone != (contract.phone or ""):
+                contract.phone = new_phone or None
+                contract.save(update_fields=["phone", "updated_at"])
+                success_msgs.append("Telefonnummer aktualisiert.")
+
+        elif action == "password":
+            current_pw = request.POST.get("current_password", "")
+            new_pw = request.POST.get("new_password", "")
+            new_pw2 = request.POST.get("new_password_confirm", "")
+
+            if not django_user.check_password(current_pw):
+                errors.append("Das aktuelle Passwort ist falsch.")
+            elif len(new_pw) < 8:
+                errors.append("Das neue Passwort muss mindestens 8 Zeichen lang sein.")
+            elif new_pw != new_pw2:
+                errors.append("Die neuen Passwörter stimmen nicht überein.")
+            else:
+                django_user.set_password(new_pw)
+                django_user.save()
+                # Session neu setzen, damit die aktuelle Session nicht ungültig wird
+                request.session["portal_user_id"] = portal_user.pk
+                success_msgs.append("Passwort erfolgreich geändert.")
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "portal_user": portal_user,
+                "contract": contract,
+                "errors": errors,
+                "success_msgs": success_msgs,
+            },
+        )

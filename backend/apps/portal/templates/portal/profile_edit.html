@@ -1,0 +1,92 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Mein Profil – Preceptly{% endblock %}
+
+{% block content %}
+<h1>Mein Profil</h1>
+
+<a href="{% if portal_user.role == 'student' %}{% url 'portal:student_home' %}{% else %}{% url 'portal:parent_home' %}{% endif %}"
+   class="btn btn-secondary" style="margin-bottom:20px;">← Zurück</a>
+
+{% if errors %}
+<div role="alert" aria-live="assertive"
+     style="background:#fdecea; border:1px solid #e74c3c; border-radius:6px; padding:12px 16px; margin-bottom:16px; color:#c0392b;">
+    <strong>Fehler:</strong>
+    <ul style="margin:6px 0 0 16px; padding:0;">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if success_msgs %}
+<div role="status" aria-live="polite"
+     style="background:#eafaf1; border:1px solid #27ae60; border-radius:6px; padding:12px 16px; margin-bottom:16px; color:#1e8449;">
+    {% for m in success_msgs %}<div>✓ {{ m }}</div>{% endfor %}
+</div>
+{% endif %}
+
+<!-- Kontaktdaten -->
+<div class="card" style="margin-bottom:24px;">
+    <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Kontaktdaten</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="contact">
+
+        <div style="margin-bottom:16px;">
+            <label for="id_email" style="display:block; font-weight:600; margin-bottom:4px;">E-Mail-Adresse</label>
+            <input type="email" id="id_email" name="email"
+                   value="{{ portal_user.user.email }}"
+                   autocomplete="email"
+                   style="width:100%; max-width:420px; padding:8px 10px; border:1px solid var(--input-border); border-radius:5px; background:var(--bg-secondary); color:var(--text-primary);">
+            <div style="font-size:0.85em; color:var(--text-secondary); margin-top:4px;">
+                Wird für den Login und Benachrichtigungen verwendet.
+            </div>
+        </div>
+
+        {% if contract %}
+        <div style="margin-bottom:20px;">
+            <label for="id_phone" style="display:block; font-weight:600; margin-bottom:4px;">Telefonnummer</label>
+            <input type="tel" id="id_phone" name="phone"
+                   value="{{ contract.phone|default:'' }}"
+                   autocomplete="tel"
+                   style="width:100%; max-width:280px; padding:8px 10px; border:1px solid var(--input-border); border-radius:5px; background:var(--bg-secondary); color:var(--text-primary);">
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn">Kontaktdaten speichern</button>
+    </form>
+</div>
+
+<!-- Passwort ändern -->
+<div class="card">
+    <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Passwort ändern</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="password">
+
+        <div style="margin-bottom:16px;">
+            <label for="id_current_pw" style="display:block; font-weight:600; margin-bottom:4px;">Aktuelles Passwort</label>
+            <input type="password" id="id_current_pw" name="current_password"
+                   autocomplete="current-password"
+                   style="width:100%; max-width:320px; padding:8px 10px; border:1px solid var(--input-border); border-radius:5px; background:var(--bg-secondary); color:var(--text-primary);">
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label for="id_new_pw" style="display:block; font-weight:600; margin-bottom:4px;">Neues Passwort</label>
+            <input type="password" id="id_new_pw" name="new_password"
+                   autocomplete="new-password" minlength="8"
+                   style="width:100%; max-width:320px; padding:8px 10px; border:1px solid var(--input-border); border-radius:5px; background:var(--bg-secondary); color:var(--text-primary);">
+            <div style="font-size:0.85em; color:var(--text-secondary); margin-top:4px;">Mindestens 8 Zeichen.</div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label for="id_new_pw2" style="display:block; font-weight:600; margin-bottom:4px;">Neues Passwort bestätigen</label>
+            <input type="password" id="id_new_pw2" name="new_password_confirm"
+                   autocomplete="new-password"
+                   style="width:100%; max-width:320px; padding:8px 10px; border:1px solid var(--input-border); border-radius:5px; background:var(--bg-secondary); color:var(--text-primary);">
+        </div>
+
+        <button type="submit" class="btn">Passwort ändern</button>
+    </form>
+</div>
+{% endblock %}
