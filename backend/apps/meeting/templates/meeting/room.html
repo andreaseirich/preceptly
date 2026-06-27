@@ -440,6 +440,7 @@ function resizeCanvas() {
     if (w > 0 && h > 0 && (wbCanvas.width !== w || wbCanvas.height !== h)) {
         wbCanvas.width  = w;
         wbCanvas.height = h;
+        if (wbBackground) fitDocToView();
         redrawAll();
     }
 }
@@ -492,7 +493,6 @@ async function loadBackground(url, name, broadcast, docId) {
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
             wbBackground = { url, name: name || url, img, docId: docId ?? null, docWidth: img.width, docHeight: img.height };
-            fitDocToView();
         } catch(e) {
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
@@ -501,14 +501,28 @@ async function loadBackground(url, name, broadcast, docId) {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = url;
-        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+        try {
+            await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error("Bild konnte nicht geladen werden (evtl. fehlende Berechtigung oder ungültiges Format).")); });
+        } catch(e) {
+            alert("Dokument konnte nicht geöffnet werden: " + e.message);
+            return;
+        }
         wbBackground = { url, name: name || url, img, docId: docId ?? null, docWidth: img.naturalWidth || img.width, docHeight: img.naturalHeight || img.height };
-        fitDocToView();
     } else {
         // Nicht darstellbar → in neuem Tab öffnen
         window.open(url, "_blank");
         return;
     }
+    // Tab-Wechsel VOR fitDocToView/redrawAll, damit Canvas sichtbar und korrekt dimensioniert ist
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    const wbBtn = document.querySelector(".tab-btn");
+    if (wbBtn) wbBtn.classList.add("active");
+    const wbPanel = document.getElementById("tab-whiteboard");
+    if (wbPanel) wbPanel.classList.add("active");
+    // Canvas-Größe erzwingen (ResizeObserver feuert erst im nächsten Frame)
+    resizeCanvas();
+    fitDocToView();
     redrawAll();
     const bgBtn   = document.getElementById("wb-bg-btn");
     const bgLabel = document.getElementById("wb-bg-label");
@@ -520,13 +534,6 @@ async function loadBackground(url, name, broadcast, docId) {
             url: url, name: name || url, strokes: wbStrokes,
         }));
     }
-    // Zum Whiteboard wechseln
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-    const wbBtn = document.querySelector(".tab-btn");
-    if (wbBtn) wbBtn.classList.add("active");
-    const wbPanel = document.getElementById("tab-whiteboard");
-    if (wbPanel) wbPanel.classList.add("active");
 }
 
 function clearWbBackground(broadcast) {
@@ -542,7 +549,9 @@ function clearWbBackground(broadcast) {
 }
 
 function openDocAsBackground(url, name, docId) {
-    loadBackground(url, name, true, docId);
+    loadBackground(url, name, true, docId).catch(err => {
+        alert("Dokument konnte nicht geöffnet werden: " + (err.message || err));
+    });
 }
 
 function syncWhiteboardToAll() {
