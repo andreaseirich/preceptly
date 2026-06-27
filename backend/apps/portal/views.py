@@ -77,11 +77,27 @@ class PortalLoginView(View):
             _User = _get_user_model()
             django_user = _User.objects.get(email__iexact=email, portal_profile__isnull=False)
         except _User.DoesNotExist:
-            logger.warning(
-                "Portal-Login fehlgeschlagen: kein Nutzer mit email=%r und portal_profile", email
-            )
-            _check_password("dummy", _DUMMY_HASH)
-            return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
+            # Fallback: E-Mail liegt am Vertrag, nicht am Django-User (Legacy/Sync-Problem)
+            try:
+                from apps.portal.models import StudentPortalLink as _SPL
+
+                spl = _SPL.objects.select_related("portal_user__user").get(
+                    contract__email__iexact=email,
+                    is_active=True,
+                )
+                django_user = spl.portal_user.user
+                # Selbstheilung: E-Mail am Django-User setzen
+                if not django_user.email:
+                    django_user.email = email
+                    django_user.save(update_fields=["email"])
+                    logger.info("Portal-Login: E-Mail für User pk=%s nachgetragen", django_user.pk)
+            except (_SPL.DoesNotExist, _SPL.MultipleObjectsReturned):
+                logger.warning(
+                    "Portal-Login fehlgeschlagen: kein Nutzer mit email=%r und portal_profile",
+                    email,
+                )
+                _check_password("dummy", _DUMMY_HASH)
+                return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
         except _User.MultipleObjectsReturned:
             logger.warning(
                 "Portal-Login fehlgeschlagen: mehrere Nutzer mit email=%r gefunden", email
@@ -452,6 +468,9 @@ class PortalActivateView(View):
                     "error": "Die Passwörter stimmen nicht überein.",
                 },
             )
+        # E-Mail aus Vertrag übernehmen, falls Django-User sie noch nicht hat (Sync-Schutz)
+        if not portal_user.user.email and hasattr(link, "contract") and link.contract.email:
+            portal_user.user.email = link.contract.email
         portal_user.user.set_password(password)
         portal_user.user.save()
         link.is_active = True
