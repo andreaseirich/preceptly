@@ -670,7 +670,7 @@ function connectWS() {
         }, 3000);
     };
 
-    ws.onclose = () => {
+    ws.onclose = (evt) => {
         clearInterval(_wsHeartbeat);
         _wsHeartbeat = null;
         if (_intentionalClose) {
@@ -682,7 +682,8 @@ function connectWS() {
         Object.keys(peers).forEach(removePeer);
         myPeerId = null;
         const secs = Math.round(_reconnectDelay / 1000);
-        setStatus(`Verbindung unterbrochen – verbinde neu in ${secs} s …`);
+        const codeInfo = evt.code !== 1006 ? ` [Code ${evt.code}]` : ' [Netzwerkabbruch]';
+        setStatus(`Verbindung unterbrochen${codeInfo} – verbinde neu in ${secs} s …`);
         document.getElementById("header-sub").textContent = "Verbinde neu …";
         setTimeout(() => { if (!_intentionalClose) connectWS(); }, _reconnectDelay);
         _reconnectDelay = Math.min(_reconnectDelay * 2, 30000);
