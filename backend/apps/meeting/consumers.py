@@ -105,7 +105,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self.user_token = ""
         self._portal_user = None
         self._joined = False
-        self._msg_timestamps: deque = deque(maxlen=60)
+        self._msg_timestamps: deque = deque(maxlen=200)
 
         user = self.scope.get("user")
         session = self.scope.get("session")
@@ -195,7 +195,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         # Rate-Limit: max. 60 Nachrichten in 10 Sekunden pro Verbindung
         now = time.monotonic()
         self._msg_timestamps.append(now)
-        if len(self._msg_timestamps) == 60 and (now - self._msg_timestamps[0]) < 10.0:
+        if len(self._msg_timestamps) == 200 and (now - self._msg_timestamps[0]) < 10.0:
             logger.warning(
                 "WS rate-limit überschritten token=%s peer_id=%s",
                 self.token,
@@ -214,6 +214,15 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
         msg_type = data.get("type", "")
         cls = self.__class__
+
+        try:
+            await self._dispatch(msg_type, data, cls)
+        except Exception:
+            logger.exception(
+                "WS receive: unhandled exception peer_id=%s msg_type=%s", self.peer_id, msg_type
+            )
+
+    async def _dispatch(self, msg_type, data, cls):  # noqa: C901
 
         if msg_type != "join":
             lock = await cls._get_room_lock(self.group_name)
