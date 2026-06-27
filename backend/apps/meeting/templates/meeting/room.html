@@ -476,7 +476,11 @@ function redrawAll() {
     wbCtx.restore();
 }
 
+let _loadBgInProgress = false;
 async function loadBackground(url, name, broadcast, docId, filename) {
+    if (_loadBgInProgress) { console.warn("[PDF] loadBackground bereits aktiv – zweiter Aufruf ignoriert, url:", url); return; }
+    _loadBgInProgress = true;
+    console.log("[PDF] loadBackground start, broadcast:", broadcast, "url:", url);
     // filename = original file name for extension detection (name might be a user-chosen display name without extension)
     const extSrc = filename || ((name && name.includes(".")) ? name : url);
     const ext = (extSrc.split("?")[0].split(".").pop() || "").toLowerCase();
@@ -487,19 +491,24 @@ async function loadBackground(url, name, broadcast, docId, filename) {
             return;
         }
         try {
-            // Firefox: PDF.js-Worker-fetch haengt -> fetch+ArrayBuffer als Workaround.
-            // Safari/iOS/Chrome: PDF.js-URL-fetch mit withCredentials; kein grosses ArrayBuffer noetig.
             const isFirefox = /Firefox\//.test(navigator.userAgent);
+            console.log("[PDF] Browser erkannt:", isFirefox ? "Firefox" : "Sonstig");
             let pdfDoc;
             if (isFirefox) {
+                console.log("[PDF] fetch() startet...");
                 const resp = await fetch(url, { credentials: "include" });
                 if (!resp.ok) throw new Error(`HTTP ${resp.status} beim Laden der PDF`);
+                console.log("[PDF] fetch OK, arrayBuffer()...");
                 const data = await resp.arrayBuffer();
-                pdfDoc = await pdfjsLib.getDocument({ data }).promise;
+                console.log("[PDF] arrayBuffer OK, byteLength:", data.byteLength, "getDocument()...");
+                pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(data) }).promise;
             } else {
+                console.log("[PDF] getDocument mit URL startet...");
                 pdfDoc = await pdfjsLib.getDocument({ url, withCredentials: true }).promise;
             }
+            console.log("[PDF] getDocument OK, getPage(1)...");
             const page   = await pdfDoc.getPage(1);
+            console.log("[PDF] getPage OK, render...");
             const vp     = page.getViewport({ scale: 2 });
             const offCanvas = document.createElement("canvas");
             offCanvas.width  = vp.width;
@@ -508,8 +517,11 @@ async function loadBackground(url, name, broadcast, docId, filename) {
             const img = new Image();
             img.src = offCanvas.toDataURL();
             await new Promise(r => { img.onload = r; });
+            console.log("[PDF] Render OK, img:", img.width, "x", img.height);
             wbBackground = { url, name: name || url, filename: filename || null, img, docId: docId ?? null, docWidth: img.width, docHeight: img.height };
         } catch(e) {
+            console.error("[PDF] Fehler:", e);
+            _loadBgInProgress = false;
             alert("PDF konnte nicht geladen werden: " + e.message);
             return;
         }
@@ -550,6 +562,8 @@ async function loadBackground(url, name, broadcast, docId, filename) {
             url: url, name: name || url, filename: filename || name || "", strokes: wbStrokes,
         }));
     }
+    console.log("[PDF] loadBackground abgeschlossen");
+    _loadBgInProgress = false;
 }
 
 function clearWbBackground(broadcast) {
