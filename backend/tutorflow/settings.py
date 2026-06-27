@@ -113,6 +113,7 @@ else:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer",
+            "CAPACITY": 1000,
         }
     }
 
