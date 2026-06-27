@@ -76,11 +76,33 @@ class PortalLoginView(View):
 
             _User = _get_user_model()
             django_user = _User.objects.get(email__iexact=email, portal_profile__isnull=False)
-        except (_User.DoesNotExist, _User.MultipleObjectsReturned):
+        except _User.DoesNotExist:
+            logger.warning(
+                "Portal-Login fehlgeschlagen: kein Nutzer mit email=%r und portal_profile", email
+            )
+            _check_password("dummy", _DUMMY_HASH)
+            return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
+        except _User.MultipleObjectsReturned:
+            logger.warning(
+                "Portal-Login fehlgeschlagen: mehrere Nutzer mit email=%r gefunden", email
+            )
             _check_password("dummy", _DUMMY_HASH)
             return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
 
-        if not django_user.is_active or not django_user.check_password(password):
+        if not django_user.is_active:
+            logger.warning(
+                "Portal-Login fehlgeschlagen: Nutzer pk=%s (email=%r) ist nicht aktiv",
+                django_user.pk,
+                email,
+            )
+            _check_password("dummy", _DUMMY_HASH)
+            return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
+        elif not django_user.check_password(password):
+            logger.warning(
+                "Portal-Login fehlgeschlagen: Passwort-Check fehlgeschlagen für pk=%s (email=%r)",
+                django_user.pk,
+                email,
+            )
             _check_password("dummy", _DUMMY_HASH)
             return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
 
@@ -451,9 +473,9 @@ class PortalPasswordResetRequestView(View):
 
     @method_decorator(ratelimit(key="ip", rate="5/m", method="POST", block=True))
     def post(self, request):
-        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email__iexact=email, portal_profile__isnull=False)
             portal_user = PortalUser.objects.get(user=user)
             # Reuse invite_token mechanism for reset
             if portal_user.role == "student":
@@ -463,6 +485,10 @@ class PortalPasswordResetRequestView(View):
                 link = ParentStudentLink.objects.filter(parent=portal_user).first()
             if link:
                 link.invite_token = uuid.uuid4().hex
+                # Gültigkeit sicherstellen: Timestamp setzen + Link deaktivieren,
+                # damit _get_link() den Reset-Token akzeptiert (auch nach erster Aktivierung)
+                link.invite_token_created_at = timezone.now()
+                link.is_active = False
                 link.save()
                 # Get recipient email: user.email if available, else student.email
                 recipient = user.email or link.contract.email
@@ -490,11 +516,12 @@ class PortalPasswordResetRequestView(View):
                     )
         except (
             User.DoesNotExist,
+            User.MultipleObjectsReturned,
             PortalUser.DoesNotExist,
             StudentPortalLink.DoesNotExist,
             ParentStudentLink.DoesNotExist,
         ):
-            pass  # Don't reveal if user exists
+            pass  # Existenz von Accounts nicht preisgeben
         return render(request, self.template_name, {"sent": True})
 
 
