@@ -657,13 +657,20 @@ function getCookie(name) {
 function connectWS() {
     ws = new WebSocket(WS_URL);
 
+    let _wsHeartbeat = null;
+
     ws.onopen = () => {
         ws.send(JSON.stringify({ type: "join", name: DISPLAY_NAME, is_tutor: IS_TUTOR, user_token: USER_TOKEN }));
         setStatus("Verbunden – warte auf Teilnehmer …");
         document.getElementById("header-sub").textContent = "Verbunden";
+        _wsHeartbeat = setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "ping" }));
+        }, 25000);
     };
 
     ws.onclose = () => {
+        clearInterval(_wsHeartbeat);
+        _wsHeartbeat = null;
         setStatus("Verbindung getrennt.");
         document.getElementById("header-sub").textContent = "Getrennt";
     };
