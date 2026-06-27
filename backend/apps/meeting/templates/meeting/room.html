@@ -482,12 +482,18 @@ async function loadBackground(url, name, broadcast, docId, filename) {
             return;
         }
         try {
-            // PDF explizit per fetch laden (credentials inkl.) dann als ArrayBuffer an PDF.js übergeben,
-            // damit der interne PDF.js-XHR (der in Firefox hängen kann) umgangen wird.
-            const resp = await fetch(url, { credentials: "include" });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status} beim Laden der PDF`);
-            const data = await resp.arrayBuffer();
-            const pdfDoc = await pdfjsLib.getDocument({ data }).promise;
+            // Firefox: PDF.js-Worker-fetch haengt -> fetch+ArrayBuffer als Workaround.
+            // Safari/iOS/Chrome: PDF.js-URL-fetch mit withCredentials; kein grosses ArrayBuffer noetig.
+            const isFirefox = /Firefox\//.test(navigator.userAgent);
+            let pdfDoc;
+            if (isFirefox) {
+                const resp = await fetch(url, { credentials: "include" });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status} beim Laden der PDF`);
+                const data = await resp.arrayBuffer();
+                pdfDoc = await pdfjsLib.getDocument({ data }).promise;
+            } else {
+                pdfDoc = await pdfjsLib.getDocument({ url, withCredentials: true }).promise;
+            }
             const page   = await pdfDoc.getPage(1);
             const vp     = page.getViewport({ scale: 2 });
             const offCanvas = document.createElement("canvas");
