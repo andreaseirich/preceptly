@@ -1,11 +1,10 @@
 import io
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from django.core.cache import cache
 
 from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
 
@@ -174,7 +173,7 @@ class PortalLoginViewTest(TestCase):
         tutor = _make_tutor("tutor_prod_flow")
         portal_user = PortalUser.objects.create(user=user, role="student", tutor=tutor)
         contract = _make_contract(tutor)
-        link = StudentPortalLink.objects.create(
+        StudentPortalLink.objects.create(
             portal_user=portal_user,
             contract=contract,
             invite_token="prod-flow-token-abc",
