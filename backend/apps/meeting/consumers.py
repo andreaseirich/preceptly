@@ -48,6 +48,14 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     # User-Token-Dedup: group_name -> {user_token: channel_name}
     _user_channels_data: dict[str, dict[str, str]] = {}
 
+    @classmethod
+    async def _get_room_lock(cls, group_name: str):
+        import asyncio as _asyncio
+
+        if group_name not in cls._room_locks:
+            cls._room_locks[group_name] = _asyncio.Lock()
+        return cls._room_locks[group_name]
+
     @database_sync_to_async
     def _load_room_and_authorize(self, token, user, portal_user_id=None):
         from apps.meeting.models import MeetingRoom
@@ -63,7 +71,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
         contract = room.lesson.contract
 
-        if not user.is_anonymous:
+        if user is not None and not user.is_anonymous:
             if contract.user_id == user.pk:
                 return room, True, None, True
 
