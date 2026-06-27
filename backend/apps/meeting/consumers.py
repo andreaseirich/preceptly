@@ -145,7 +145,10 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         self._portal_user = portal_user
 
         await self.accept()
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        try:
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
+        except Exception:
+            logger.exception("WS connect: group_add fehlgeschlagen peer_id=%s", self.peer_id)
 
     async def disconnect(self, code):
         cls = self.__class__
@@ -515,7 +518,10 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
     async def kick_event(self, event):
         if event.get("target_peer_id") == self.peer_id:
-            await self.send(json.dumps({"type": "kicked", "by": event.get("kicked_by", "")}))
+            try:
+                await self.send(json.dumps({"type": "kicked", "by": event.get("kicked_by", "")}))
+            except Exception:  # noqa: S110
+                pass
 
     async def doc_event(self, event):
         try:
@@ -525,5 +531,11 @@ class MeetingConsumer(AsyncWebsocketConsumer):
 
     async def force_disconnect_event(self, event):
         """Erzwingt Trennung bei Dedup (gleicher User meldet sich erneut an)."""
-        await self.send(json.dumps({"type": "kicked", "by": "__reconnect__"}))
-        await self.close()
+        try:
+            await self.send(json.dumps({"type": "kicked", "by": "__reconnect__"}))
+        except Exception:  # noqa: S110
+            pass
+        try:
+            await self.close()
+        except Exception:  # noqa: S110
+            pass
