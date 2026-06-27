@@ -393,14 +393,7 @@ const UPLOAD_URL   = "{% url 'meeting:upload' room.token %}";
 const WS_URL       = (window.location.protocol === "https:" ? "wss" : "ws") +
                      "://" + window.location.host + "/ws/meeting/" + ROOM_TOKEN + "/";
 
-const ICE_SERVERS = [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-    // TURN (configure in Django MEETING_ICE_SERVERS setting):
-    {% if MEETING_TURN_SERVERS %}
-    {% for s in MEETING_TURN_SERVERS %}{{ s|safe }},{% endfor %}
-    {% endif %}
-];
+const ICE_SERVERS = {{ MEETING_TURN_SERVERS|safe }};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
