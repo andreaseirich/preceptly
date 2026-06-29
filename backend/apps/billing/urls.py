@@ -25,4 +25,9 @@ urlpatterns = [
     path("<int:pk>/undo-paid/", views.invoice_undo_paid, name="invoice_undo_paid"),
     path("<int:pk>/pdf/generate/", views.invoice_pdf_generate, name="invoice_pdf_generate"),
     path("<int:pk>/pdf/", views.invoice_pdf_download, name="invoice_pdf_download"),
+    path(
+        "<int:pk>/update-payer/",
+        views.InvoicePayerUpdateView.as_view(),
+        name="invoice_update_payer",
+    ),
 ]
