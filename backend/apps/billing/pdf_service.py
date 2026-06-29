@@ -47,6 +47,9 @@ _LABELS = {
             "Hinweis: Deine Rechnungsdaten sind noch nicht vollständig. "
             "Bitte pflege sie unter Einstellungen → Rechnungsdaten."
         ),
+        "payment_info": "Zahlungsinformationen",
+        "bank_name": "Kontoinhaber",
+        "kleinunternehmer_notice": ("Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet."),
     },
     "en": {
         "title": "Invoice",
@@ -70,6 +73,11 @@ _LABELS = {
         "no_profile_warning": (
             "Note: Your billing profile is incomplete. "
             "Please fill it in under Settings → Invoice Details."
+        ),
+        "payment_info": "Payment Information",
+        "bank_name": "Account Holder",
+        "kleinunternehmer_notice": (
+            "No VAT is charged in accordance with §19 para. 1 UStG (Kleinunternehmerregelung)."
         ),
     },
 }
