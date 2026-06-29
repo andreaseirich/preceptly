@@ -6172,3 +6172,86 @@ msgstr "Widerrufsbelehrung"
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Paid at"
+msgstr "Bezahlt am"
+
+msgid "min."
+msgstr "Min."
+
+msgid "optional"
+msgstr "optional"
+
+msgid "Regenerate PDF"
+msgstr "PDF neu erzeugen"
+
+msgid "Fill in invoice details first"
+msgstr "Zuerst Rechnungsdaten ausfüllen"
+
+msgid "Invoice details missing"
+msgstr "Rechnungsdaten fehlen"
+
+msgid "Document"
+msgstr "Dokument"
+
+msgid "You can change the recipient here, e.g. if the parents should receive the invoice instead of the student."
+msgstr "Sie können den Empfänger hier ändern, z. B. wenn die Eltern die Rechnung erhalten sollen statt des Schülers."
+
+msgid "To generate a PDF, please fill in your <a href=\"%(url)s\">invoice details</a> first (name, address, optional tax number)."
+msgstr "Um ein PDF zu erstellen, tragen Sie bitte zuerst Ihre <a href=\"%(url)s\">Rechnungsdaten</a> ein (Name, Adresse, optional Steuernummer)."
+
+
+msgid "Invoice Details"
+msgstr "Rechnungsdaten"
+
+msgid "These details appear on every invoice you generate as a PDF."
+msgstr "Diese Angaben erscheinen auf jeder Rechnung, die du als PDF generierst."
+
+msgid "Your invoice details are not filled in yet. Generated PDFs will not contain a name or address."
+msgstr "Deine Rechnungsdaten sind noch nicht ausgefüllt. Generierte PDFs enthalten keinen Namen und keine Adresse."
+
+msgid "Name / Company"
+msgstr "Name / Firma"
+
+msgid "e.g. Maria Müller"
+msgstr "z. B. Maria Müller"
+
+msgid "Street + no., ZIP City"
+msgstr "Straße Hausnr., PLZ Ort"
+
+msgid "Tax number / VAT ID"
+msgstr "Steuernummer / USt-IdNr."
+
+msgid "e.g. 123/456/78901 or DE123456789"
+msgstr "z. B. 123/456/78901 oder DE123456789"
+
+msgid "Format: Tax number (123/456/78901) or VAT ID (DE123456789)."
+msgstr "Format: Steuernummer (123/456/78901) oder USt-IdNr. (DE123456789)."
+
+msgid "E-mail address"
+msgstr "E-Mail-Adresse"
+
+msgid "e.g. contact@example.de"
+msgstr "z. B. kontakt@example.de"
+
+msgid "e.g. 0123 456789"
+msgstr "z. B. 0123 456789"
+
+msgid "Website"
+msgstr "Website"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "BIC"
+msgstr "BIC"
+
+msgid "Small business regulation (§19 UStG) – adds the note \"In accordance with §19 para. 1 UStG, no VAT is charged.\" to the invoice"
+msgstr "Kleinunternehmerregelung (§19 UStG) – fügt den Hinweis „Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet.\" zur Rechnung hinzu"
+
+msgid "Save invoice details"
+msgstr "Rechnungsdaten speichern"

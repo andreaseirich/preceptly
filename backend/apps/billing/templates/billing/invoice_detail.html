@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}Rechnung {{ invoice.id }} – Preceptly{% endblock %}
+{% block title %}{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %} – Preceptly{% endblock %}
 
 {% block content %}
 <style>
@@ -71,8 +71,8 @@
 {# ── Header ─────────────────────────────────────────────────────────────── #}
 <div class="inv-header">
     <div>
-        <a href="{% url 'billing:invoice_list' %}" style="font-size:0.85em; color:var(--text-secondary); text-decoration:none;">← Rechnungen</a>
-        <h1 style="margin-top:4px;">Rechnung {{ invoice.id }}</h1>
+        <a href="{% url 'billing:invoice_list' %}" style="font-size:0.85em; color:var(--text-secondary); text-decoration:none;">← {% trans "Invoices" %}</a>
+        <h1 style="margin-top:4px;">{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</h1>
     </div>
     <span class="inv-status {{ invoice.status }}">
         {% if invoice.status == "draft" %}⚪{% elif invoice.status == "sent" %}📤{% else %}✅{% endif %}
@@ -86,8 +86,8 @@
 <div class="profile-warning" role="alert">
     <span style="font-size:1.3em; flex-shrink:0;">⚠️</span>
     <div>
-        <strong>Rechnungsdaten fehlen</strong><br>
-        Um ein PDF zu generieren, fülle bitte zuerst deine <a href="{{ settings_url }}">Rechnungsdaten</a> aus (Name, Adresse, optional Steuernummer).
+        <strong>{% trans "Invoice details missing" %}</strong><br>
+        {% blocktrans with url=settings_url %}To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, optional tax number).{% endblocktrans %}
     </div>
 </div>
 {% endif %}
@@ -99,25 +99,25 @@
 
     {# Rechnungsdetails #}
     <div class="inv-card">
-        <div class="inv-card-header">Details</div>
+        <div class="inv-card-header">{% trans "Details" %}</div>
         <div class="inv-card-body">
             <dl class="inv-dl">
-                <dt>Zeitraum</dt>
+                <dt>{% trans "Period" %}</dt>
                 <dd>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} – {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</dd>
-                {% if invoice.contract %}
-                <dt>Vertrag</dt>
+                {% if invoice.contract and not invoice.contract.institute %}
+                <dt>{% trans "Contract" %}</dt>
                 <dd><a href="{% url 'contracts:detail' invoice.contract.pk %}">{{ invoice.contract }}</a></dd>
                 {% endif %}
-                <dt>Erstellt</dt>
+                <dt>{% trans "Created" %}</dt>
                 <dd>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
                 {% if invoice.paid_at %}
-                <dt>Bezahlt am</dt>
+                <dt>{% trans "Paid at" %}</dt>
                 <dd>{{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}" style="font-size:0.85em;">✎</a></dd>
                 {% endif %}
             </dl>
         </div>
         <div class="inv-total">
-            <span>Gesamtbetrag</span>
+            <span>{% trans "Total Amount" %}</span>
             <span>{{ invoice.total_amount|euro }}</span>
         </div>
     </div>
@@ -125,8 +125,8 @@
     {# Rechnungsempfänger (editierbar) #}
     <div class="inv-card">
         <div class="inv-card-header">
-            Rechnungsempfänger
-            <button class="edit-toggle" type="button" onclick="togglePayerEdit()" id="payer-toggle-btn" aria-expanded="false">✎ Bearbeiten</button>
+            {% trans "Recipient" %}
+            <button class="edit-toggle" type="button" onclick="togglePayerEdit()" id="payer-toggle-btn" aria-expanded="false">✎ {% trans "Edit" %}</button>
         </div>
         <div class="inv-card-body" id="payer-display">
             <strong>{{ invoice.payer_name }}</strong>
@@ -136,21 +136,21 @@
         </div>
         <div class="inv-card-body payer-edit-form" id="payer-edit-form">
             <p style="font-size:0.85em; color:var(--text-secondary); margin-top:0;">
-                Ändere hier den Rechnungsempfänger, z. B. wenn die Eltern die Rechnung erhalten sollen statt der Schülerin/des Schülers.
+                {% trans "You can change the recipient here, e.g. if the parents should receive the invoice instead of the student." %}
             </p>
             <form method="post" action="{% url 'billing:invoice_update_payer' invoice.pk %}">
                 {% csrf_token %}
                 <div style="margin-bottom:10px;">
-                    <label for="id_payer_name" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">Name <span style="color:#dc3545;">*</span></label>
+                    <label for="id_payer_name" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">{% trans "Name" %} <span style="color:#dc3545;">*</span></label>
                     <input type="text" name="payer_name" id="id_payer_name" value="{{ invoice.payer_name }}" maxlength="200" required style="width:100%; box-sizing:border-box;">
                 </div>
                 <div style="margin-bottom:12px;">
-                    <label for="id_payer_address" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">Adresse <span style="color:var(--text-secondary); font-weight:normal;">(optional)</span></label>
+                    <label for="id_payer_address" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">{% trans "Address" %} <span style="color:var(--text-secondary); font-weight:normal;">({% trans "optional" %})</span></label>
                     <textarea name="payer_address" id="id_payer_address" rows="3" style="width:100%; box-sizing:border-box;">{{ invoice.payer_address }}</textarea>
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button type="submit" class="btn btn-success" style="padding:8px 16px; font-size:0.9em;">Speichern</button>
-                    <button type="button" class="btn btn-secondary" style="padding:8px 16px; font-size:0.9em;" onclick="togglePayerEdit()">Abbrechen</button>
+                    <button type="submit" class="btn btn-success" style="padding:8px 16px; font-size:0.9em;">{% trans "Save" %}</button>
+                    <button type="button" class="btn btn-secondary" style="padding:8px 16px; font-size:0.9em;" onclick="togglePayerEdit()">{% trans "Cancel" %}</button>
                 </div>
             </form>
         </div>
@@ -158,15 +158,15 @@
 
     {# Rechnungspositionen #}
     <div class="inv-card inv-items">
-        <div class="inv-card-header">Rechnungspositionen <span style="font-weight:400;">({{ invoice.items.count }})</span></div>
+        <div class="inv-card-header">{% trans "Invoice Items" %} <span style="font-weight:400;">({{ invoice.items.count }})</span></div>
         {% if invoice.items.all %}
-        <table aria-label="Rechnungspositionen">
+        <table aria-label="{% trans "Invoice items" %}">
             <thead>
                 <tr>
-                    <th scope="col">Datum</th>
-                    <th scope="col">Beschreibung</th>
-                    <th scope="col">Dauer</th>
-                    <th scope="col" class="col-amount">Betrag</th>
+                    <th scope="col">{% trans "Date" %}</th>
+                    <th scope="col">{% trans "Description" %}</th>
+                    <th scope="col">{% trans "Duration" %}</th>
+                    <th scope="col" class="col-amount">{% trans "Amount" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -174,14 +174,14 @@
                 <tr>
                     <td style="white-space:nowrap;">{{ item.date|date:"SHORT_DATE_FORMAT" }}</td>
                     <td>{{ item.description }}</td>
-                    <td style="white-space:nowrap;">{{ item.duration_minutes }} Min.</td>
+                    <td style="white-space:nowrap;">{{ item.duration_minutes }} {% trans "min." %}</td>
                     <td class="col-amount">{{ item.amount|euro }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
-        <div style="padding:20px 16px; color:var(--text-secondary); text-align:center;">Keine Positionen vorhanden.</div>
+        <div style="padding:20px 16px; color:var(--text-secondary); text-align:center;">{% trans "No invoice items available." %}</div>
         {% endif %}
     </div>
 </div>
@@ -189,7 +189,7 @@
 {# ── Sidebar: Aktionen ────────────────────────────────────────────────────── #}
 <div class="inv-sidebar">
     <div class="inv-card">
-        <div class="inv-card-header">Aktionen</div>
+        <div class="inv-card-header">{% trans "Actions" %}</div>
         <div class="inv-card-body">
             <div class="action-section">
 
@@ -199,58 +199,58 @@
                         {% csrf_token %}
                         <button type="submit" class="action-btn primary">
                             <span class="icon">📑</span>
-                            <span>{% if invoice.invoice_pdf %}PDF neu erstellen{% else %}PDF erstellen{% endif %}</span>
+                            <span>{% if invoice.invoice_pdf %}{% trans "Regenerate PDF" %}{% else %}{% trans "Generate PDF" %}{% endif %}</span>
                         </button>
                     </form>
                     {% if invoice.invoice_pdf %}
                     <a href="{% url 'billing:invoice_pdf_download' invoice.pk %}" class="action-btn secondary" download>
                         <span class="icon">📥</span>
-                        <span>PDF herunterladen{% if invoice.invoice_pdf_created_at %}<br><span class="pdf-ts">{{ invoice.invoice_pdf_created_at|date:"SHORT_DATETIME_FORMAT" }}</span>{% endif %}</span>
+                        <span>{% trans "Download PDF" %}{% if invoice.invoice_pdf_created_at %}<br><span class="pdf-ts">{{ invoice.invoice_pdf_created_at|date:"SHORT_DATETIME_FORMAT" }}</span>{% endif %}</span>
                     </a>
                     {% endif %}
                 {% else %}
                     <span class="action-btn disabled">
                         <span class="icon">📑</span>
-                        <span>PDF erstellen<br><span class="pdf-ts">Rechnungsdaten zuerst ausfüllen</span></span>
+                        <span>{% trans "Generate PDF" %}<br><span class="pdf-ts">{% trans "Fill in invoice details first" %}</span></span>
                     </span>
                 {% endif %}
 
                 {% if invoice.document %}
                 <div class="action-divider"></div>
-                <div class="action-label">Dokument</div>
+                <div class="action-label">{% trans "Document" %}</div>
                 <a href="{% url 'billing:invoice_document' invoice.pk %}" class="action-btn secondary" target="_blank">
-                    <span class="icon">📄</span><span>Dokument anzeigen</span>
+                    <span class="icon">📄</span><span>{% trans "View Document" %}</span>
                 </a>
                 {% endif %}
 
                 <div class="action-divider"></div>
-                <div class="action-label">Status</div>
+                <div class="action-label">{% trans "Status" %}</div>
 
                 {% if invoice.status == "draft" %}
                 <form method="post" action="{% url 'billing:invoice_mark_sent' invoice.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="action-btn warning">
-                        <span class="icon">✉️</span><span>Als gesendet markieren</span>
+                        <span class="icon">✉️</span><span>{% trans "Mark as sent" %}</span>
                     </button>
                 </form>
                 {% endif %}
                 {% if invoice.status == "draft" or invoice.status == "sent" %}
                 <a href="{% url 'billing:invoice_mark_paid' invoice.pk %}" class="action-btn success">
-                    <span class="icon">✅</span><span>Als bezahlt markieren</span>
+                    <span class="icon">✅</span><span>{% trans "Mark as paid" %}</span>
                 </a>
                 {% endif %}
                 {% if invoice.status == "paid" %}
                 <form method="post" action="{% url 'billing:invoice_undo_paid' invoice.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="action-btn secondary">
-                        <span class="icon">↩</span><span>Zahlung rückgängig</span>
+                        <span class="icon">↩</span><span>{% trans "Undo payment" %}</span>
                     </button>
                 </form>
                 {% endif %}
 
                 <div class="action-divider"></div>
                 <a href="{% url 'billing:invoice_delete' invoice.pk %}" class="action-btn danger">
-                    <span class="icon">🗑️</span><span>Rechnung löschen</span>
+                    <span class="icon">🗑️</span><span>{% trans "Delete invoice" %}</span>
                 </a>
             </div>
         </div>
@@ -267,10 +267,7 @@ function togglePayerEdit() {
     var isOpen = form.classList.toggle('open');
     display.style.display = isOpen ? 'none' : '';
     btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    btn.textContent = isOpen ? '✕ Schließen' : '✎ Bearbeiten';
+    btn.textContent = isOpen ? '✕ {% trans "Close" %}' : '✎ {% trans "Edit" %}';
 }
-{% if request.session.payer_edit_open %}
-togglePayerEdit();
-{% endif %}
 </script>
 {% endblock %}
