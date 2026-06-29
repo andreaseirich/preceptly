@@ -2,6 +2,7 @@
 Views for lesson CRUD operations.
 """
 
+import datetime as _dt
 import logging
 from datetime import datetime
 
@@ -10,10 +11,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
-from django.shortcuts import get_object_or_404, render, render
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -582,8 +583,6 @@ class LessonRescheduleView(LoginRequiredMixin, View):
     template_name = "lessons/lesson_reschedule.html"
 
     def _get_lesson(self, request, pk):
-        from django.shortcuts import get_object_or_404
-
         return get_object_or_404(Lesson, pk=pk, contract__user=request.user)
 
     def get(self, request, pk):
@@ -595,14 +594,12 @@ class LessonRescheduleView(LoginRequiredMixin, View):
         )
 
     def post(self, request, pk):
-        from datetime import date as _date, time as _time
-
         lesson = self._get_lesson(request, pk)
         date_str = request.POST.get("date", "").strip()
         time_str = request.POST.get("start_time", "").strip()
         try:
-            new_date = _date.fromisoformat(date_str)
-            new_time = _time.fromisoformat(time_str)
+            new_date = _dt.date.fromisoformat(date_str)
+            new_time = _dt.time.fromisoformat(time_str)
         except ValueError:
             return render(
                 request,
