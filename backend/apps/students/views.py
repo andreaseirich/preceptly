@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -420,3 +420,15 @@ class StudentDocumentDeleteView(LoginRequiredMixin, View):
         doc.delete()
         messages.success(request, "Dokument gelöscht.")
         return redirect("students:documents", pk=pk)
+
+
+class StudentDocumentDownloadView(LoginRequiredMixin, View):
+    def get(self, request, pk, doc_pk):
+        from apps.students.models import StudentDocument
+
+        contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        doc = get_object_or_404(StudentDocument, pk=doc_pk, student=contract)
+        if not doc.file or not doc.file_exists:
+            raise Http404
+        filename = doc.display_name or os.path.basename(doc.file.name)
+        return FileResponse(doc.file.open("rb"), as_attachment=True, filename=filename)
