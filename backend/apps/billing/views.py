@@ -19,6 +19,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
+from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 
@@ -114,6 +115,23 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
             _log.debug("No profile for user %s", self.request.user.pk)
         context["billing_profile_complete"] = bool(profile and profile.billing_name)
         return context
+
+
+class InvoicePayerUpdateView(LoginRequiredMixin, View):
+    """Inline-Update für Rechnungsempfänger (payer_name, payer_address)."""
+
+    def post(self, request, pk):
+        invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+        payer_name = request.POST.get("payer_name", "").strip()[:200]
+        payer_address = request.POST.get("payer_address", "").strip()[:500]
+        if not payer_name:
+            messages.error(request, _("Der Name des Rechnungsempfängers darf nicht leer sein."))
+            return redirect("billing:invoice_detail", pk=pk)
+        invoice.payer_name = payer_name
+        invoice.payer_address = payer_address
+        invoice.save(update_fields=["payer_name", "payer_address"])
+        messages.success(request, _("Rechnungsempfänger aktualisiert."))
+        return redirect("billing:invoice_detail", pk=pk)
 
 
 class InvoiceCreateView(LoginRequiredMixin, CreateView):

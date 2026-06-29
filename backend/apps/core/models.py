@@ -136,11 +136,22 @@ class UserProfile(models.Model):
         verbose_name=_("Steuernummer / USt-IdNr."),
         help_text=_("Deine persönliche Steuernummer oder Umsatzsteuer-ID."),
     )
-    billing_contact = models.CharField(
-        max_length=300,
+    billing_email = models.EmailField(
         blank=True,
-        verbose_name=_("Kontakt"),
-        help_text=_("E-Mail, Telefon, Website – erscheint auf Rechnungen."),
+        verbose_name=_("E-Mail (Rechnungen)"),
+        help_text=_("Deine geschäftliche E-Mail-Adresse für Rechnungen."),
+    )
+    billing_phone = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name=_("Telefon"),
+        help_text=_("Deine Telefonnummer (optional)."),
+    )
+    billing_website = models.URLField(
+        max_length=200,
+        blank=True,
+        verbose_name=_("Website"),
+        help_text=_("Deine Website (optional, z. B. https://example.de)."),
     )
     billing_bank_iban = models.CharField(
         max_length=34,

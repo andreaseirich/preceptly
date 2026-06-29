@@ -265,50 +265,58 @@
     {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
 </form>
 
-<h2 style="margin-top: 40px;">{% trans "Invoice Details" %}</h2>
-<p>{% trans "These details appear on every invoice PDF you generate." %}</p>
+<h2 style="margin-top: 40px;">Rechnungsdaten</h2>
+<p>Diese Angaben erscheinen auf jeder Rechnung, die du als PDF generierst.</p>
 {% if not profile.billing_name %}
-<div class="message" style="margin-bottom: 14px; padding: 10px 14px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 4px; color: var(--text-primary);" role="alert">
-    {% trans "Your invoice details are not filled in yet. Generated PDFs will not contain your name or address." %}
+<div class="message warning" style="margin-bottom: 14px;" role="alert">
+    Deine Rechnungsdaten sind noch nicht ausgefüllt. Generierte PDFs enthalten keinen Namen und keine Adresse.
 </div>
 {% endif %}
 <form method="post" style="margin-top: 15px;">
     {% csrf_token %}
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 680px;">
         <div style="grid-column: 1 / -1;">
-            <label for="id_billing_name" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Name / Company" %}</label>
-            <input type="text" name="billing_name" id="id_billing_name" maxlength="200" value="{{ profile.billing_name }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'e.g. Maria Müller' %}">
+            <label for="id_billing_name" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">Name / Firma <span style="color: #dc3545;">*</span></label>
+            <input type="text" name="billing_name" id="id_billing_name" maxlength="200" value="{{ profile.billing_name }}" style="width: 100%; box-sizing: border-box;" placeholder="z. B. Maria Müller" required>
         </div>
         <div style="grid-column: 1 / -1;">
-            <label for="id_billing_address" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Address" %}</label>
-            <textarea name="billing_address" id="id_billing_address" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'Street, Postcode City' %}">{{ profile.billing_address }}</textarea>
+            <label for="id_billing_address" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">Adresse <span style="color: #dc3545;">*</span></label>
+            <textarea name="billing_address" id="id_billing_address" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="Straße Hausnr., PLZ Ort" required>{{ profile.billing_address }}</textarea>
         </div>
         <div>
-            <label for="id_billing_tax_number" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Tax Number / VAT ID" %}</label>
-            <input type="text" name="billing_tax_number" id="id_billing_tax_number" maxlength="50" value="{{ profile.billing_tax_number }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'e.g. 123/456/78901' %}">
+            <label for="id_billing_tax_number" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">Steuernummer / USt-IdNr. <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
+            <input type="text" name="billing_tax_number" id="id_billing_tax_number" maxlength="50" value="{{ profile.billing_tax_number }}" style="width: 100%; box-sizing: border-box;" placeholder="z. B. 123/456/78901 oder DE123456789">
+            <p style="font-size: 0.82em; color: var(--text-secondary); margin-top: 4px;">Format: Steuernummer (123/456/78901) oder USt-IdNr. (DE123456789).</p>
         </div>
         <div>
-            <label for="id_billing_contact" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Contact (email, phone, website)" %}</label>
-            <input type="text" name="billing_contact" id="id_billing_contact" maxlength="300" value="{{ profile.billing_contact }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'e.g. maria@example.com · 0123 456789' %}">
+            <label for="id_billing_email" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">E-Mail-Adresse <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
+            <input type="email" name="billing_email" id="id_billing_email" maxlength="254" value="{{ profile.billing_email }}" style="width: 100%; box-sizing: border-box;" placeholder="z. B. kontakt@example.de">
         </div>
         <div>
-            <label for="id_billing_bank_iban" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "IBAN" %} <span style="font-weight: normal; color: var(--text-secondary);">({% trans "optional" %})</span></label>
+            <label for="id_billing_phone" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">Telefon <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
+            <input type="tel" name="billing_phone" id="id_billing_phone" maxlength="30" value="{{ profile.billing_phone }}" style="width: 100%; box-sizing: border-box;" placeholder="z. B. 0123 456789">
+        </div>
+        <div>
+            <label for="id_billing_website" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">Website <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
+            <input type="url" name="billing_website" id="id_billing_website" maxlength="200" value="{{ profile.billing_website }}" style="width: 100%; box-sizing: border-box;" placeholder="https://example.de">
+        </div>
+        <div>
+            <label for="id_billing_bank_iban" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">IBAN <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
             <input type="text" name="billing_bank_iban" id="id_billing_bank_iban" maxlength="34" value="{{ profile.billing_bank_iban }}" style="width: 100%; box-sizing: border-box;" placeholder="DE00 0000 0000 0000 0000 00">
         </div>
         <div>
-            <label for="id_billing_bank_bic" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "BIC" %} <span style="font-weight: normal; color: var(--text-secondary);">({% trans "optional" %})</span></label>
+            <label for="id_billing_bank_bic" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">BIC <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
             <input type="text" name="billing_bank_bic" id="id_billing_bank_bic" maxlength="11" value="{{ profile.billing_bank_bic }}" style="width: 100%; box-sizing: border-box;" placeholder="XXXXXXXX">
         </div>
-    </div>
-    <div style="grid-column: 1 / -1; margin-top: 4px;">
+        <div style="grid-column: 1 / -1; margin-top: 4px;">
             <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
                 <input type="checkbox" name="billing_kleinunternehmer" id="id_billing_kleinunternehmer"{% if profile.billing_kleinunternehmer %} checked{% endif %} style="margin-top: 3px; flex-shrink: 0;">
-                <span style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Kleinunternehmerregelung (§19 UStG) – adds the note \"No VAT is charged in accordance with §19 para. 1 UStG.\" to the invoice" %}</span>
+                <span style="font-size: 0.9em; color: var(--text-secondary);">Kleinunternehmerregelung (§19 UStG) – fügt den Hinweis „Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet." zur Rechnung hinzu</span>
             </label>
         </div>
     </div>
     <div style="margin-top: 15px;">
-        <button type="submit" name="save_billing_profile" class="btn btn-success">{% trans "Save Invoice Details" %}</button>
+        <button type="submit" name="save_billing_profile" class="btn btn-success">Rechnungsdaten speichern</button>
     </div>
 </form>
 

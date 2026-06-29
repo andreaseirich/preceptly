@@ -249,8 +249,10 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
         issuer_tax = (
             profile.billing_tax_number if profile and profile.billing_tax_number else ""
         ) or ""
-        issuer_contact = (
-            profile.billing_contact if profile and profile.billing_contact else ""
+        issuer_email = (profile.billing_email if profile and profile.billing_email else "") or ""
+        issuer_phone = (profile.billing_phone if profile and profile.billing_phone else "") or ""
+        issuer_website = (
+            profile.billing_website if profile and profile.billing_website else ""
         ) or ""
         issuer_iban = (
             profile.billing_bank_iban if profile and profile.billing_bank_iban else ""
@@ -339,8 +341,13 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
             issuer_block.append(
                 Paragraph(f"{L['tax_number']}: {html.escape(issuer_tax)}", styles["issuer_detail"])
             )
-        if issuer_contact:
-            issuer_block.append(Paragraph(html.escape(issuer_contact), styles["issuer_detail"]))
+        contact_parts = [p for p in [issuer_email, issuer_phone, issuer_website] if p]
+        if contact_parts:
+            issuer_block.append(
+                Paragraph(
+                    "  ·  ".join(html.escape(p) for p in contact_parts), styles["issuer_detail"]
+                )
+            )
 
         recipient_block = [Paragraph(L["recipient"].upper(), styles["section_heading"])]
         recipient_block.append(Paragraph(html.escape(invoice.payer_name), styles["recipient_name"]))

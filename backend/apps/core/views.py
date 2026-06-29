@@ -312,16 +312,25 @@ class SettingsView(LoginRequiredMixin, FormView):
                 messages.error(request, _("Invalid timezone."))
             return redirect(self.success_url)
         if "save_billing_profile" in request.POST:
+            from apps.core.validators import validate_billing_tax_number
+
+            tax_raw = request.POST.get("billing_tax_number", "").strip()[:50]
+            tax_error = validate_billing_tax_number(tax_raw) if tax_raw else None
+            if tax_error:
+                messages.error(request, tax_error)
+                return redirect(self.success_url)
             profile, _created = UserProfile.objects.get_or_create(user=request.user)
             profile.billing_name = request.POST.get("billing_name", "").strip()[:200]
             profile.billing_address = request.POST.get("billing_address", "").strip()[:2000]
-            profile.billing_tax_number = request.POST.get("billing_tax_number", "").strip()[:50]
-            profile.billing_contact = request.POST.get("billing_contact", "").strip()[:300]
+            profile.billing_tax_number = tax_raw
+            profile.billing_email = request.POST.get("billing_email", "").strip()[:254]
+            profile.billing_phone = request.POST.get("billing_phone", "").strip()[:30]
+            profile.billing_website = request.POST.get("billing_website", "").strip()[:200]
             profile.billing_bank_iban = request.POST.get("billing_bank_iban", "").strip()[:34]
             profile.billing_bank_bic = request.POST.get("billing_bank_bic", "").strip()[:11]
             profile.billing_kleinunternehmer = "billing_kleinunternehmer" in request.POST
             profile.save()
-            messages.success(request, _("Invoice details saved."))
+            messages.success(request, _("Rechnungsdaten gespeichert."))
             return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 

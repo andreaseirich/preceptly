@@ -2,29 +2,13 @@
 {% load i18n %}
 {% load currency %}
 
-{% block title %}{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %} – Preceptly{% endblock %}
+{% block title %}Rechnung {{ invoice.id }} – Preceptly{% endblock %}
 
 {% block content %}
 <style>
-.inv-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 24px;
-}
+.inv-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
 .inv-header h1 { margin: 0; }
-.inv-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-}
+.inv-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600; letter-spacing: 0.02em; }
 .inv-status.draft  { background: rgba(107,114,128,0.15); color: #6b7280; border: 1px solid rgba(107,114,128,0.3); }
 .inv-status.sent   { background: rgba(37,99,235,0.12);  color: #2563eb; border: 1px solid rgba(37,99,235,0.3); }
 .inv-status.paid   { background: rgba(22,163,74,0.12);  color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
@@ -32,88 +16,30 @@
 [data-theme="dark"] .inv-status.sent  { color: #60a5fa; }
 [data-theme="dark"] .inv-status.paid  { color: #4ade80; }
 
-.inv-grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 24px;
-    align-items: start;
-}
-@media (max-width: 760px) {
-    .inv-grid { grid-template-columns: 1fr; }
-    .inv-sidebar { order: -1; }
-}
+.inv-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .inv-grid { grid-template-columns: 1fr; } .inv-sidebar { order: -1; } }
 
-.inv-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-.inv-card-header {
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.78em;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-}
-.inv-card-body { padding: 18px; }
+.inv-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+.inv-card-header { padding: 10px 16px; border-bottom: 1px solid var(--border-color); font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between; }
+.inv-card-body { padding: 16px; }
 
-.inv-dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; }
+.inv-dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 16px; }
 .inv-dl dt { color: var(--text-secondary); font-size: 0.85em; white-space: nowrap; padding-top: 1px; }
 .inv-dl dd { margin: 0; font-weight: 500; }
 
-.inv-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 18px;
-    background: rgba(37,99,235,0.07);
-    border-top: 1px solid rgba(37,99,235,0.15);
-    font-size: 1.1em;
-    font-weight: 700;
-}
+.inv-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(37,99,235,0.07); border-top: 1px solid rgba(37,99,235,0.15); font-size: 1.1em; font-weight: 700; }
 .inv-total span:last-child { color: #2563eb; font-size: 1.2em; }
 [data-theme="dark"] .inv-total { background: rgba(37,99,235,0.12); }
 
 .inv-items table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-.inv-items th {
-    text-align: left;
-    padding: 10px 12px;
-    background: var(--bg-nav);
-    color: var(--text-secondary);
-    font-size: 0.78em;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--border-color);
-}
-.inv-items td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+.inv-items th { text-align: left; padding: 9px 12px; background: var(--bg-nav); color: var(--text-secondary); font-size: 0.75em; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+.inv-items td { padding: 9px 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
 .inv-items tr:last-child td { border-bottom: none; }
 .inv-items tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
 [data-theme="dark"] .inv-items tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-.inv-items .col-amount { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.col-amount { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 11px 16px;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.95em;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.15s, transform 0.1s;
-    -webkit-tap-highlight-color: transparent;
-    text-align: left;
-    box-sizing: border-box;
-    min-height: 44px;
-}
+.action-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; text-align: left; box-sizing: border-box; min-height: 42px; line-height: 1.3; }
 .action-btn:active { transform: scale(0.98); }
 .action-btn.primary   { background: #2563eb; color: #fff; }
 .action-btn.primary:hover   { background: #1d4ed8; }
@@ -125,36 +51,28 @@
 .action-btn.warning:hover   { background: #b45309; }
 .action-btn.danger    { background: transparent; color: #dc3545; border: 1px solid #dc3545; }
 .action-btn.danger:hover    { background: #dc3545; color: #fff; }
-.action-btn.disabled  { background: var(--bg-nav); color: var(--text-secondary); cursor: not-allowed; opacity: 0.6; pointer-events: none; border: 1px solid var(--border-color); }
-.action-btn .icon { font-size: 1.1em; flex-shrink: 0; }
-.action-section { display: flex; flex-direction: column; gap: 8px; }
-.action-divider { height: 1px; background: var(--border-color); margin: 4px 0; }
-.action-label { font-size: 0.72em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); padding: 4px 0 2px; }
+.action-btn.disabled  { background: var(--bg-nav); color: var(--text-secondary); cursor: not-allowed; opacity: 0.55; border: 1px solid var(--border-color); pointer-events: none; }
+.action-btn .icon { font-size: 1.05em; flex-shrink: 0; }
+.action-section { display: flex; flex-direction: column; gap: 7px; }
+.action-divider { height: 1px; background: var(--border-color); margin: 2px 0; }
+.action-label { font-size: 0.7em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); padding: 4px 0 2px; }
+.pdf-ts { font-size: 0.75em; color: currentColor; opacity: 0.7; }
 
-.profile-warning {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 14px 16px;
-    background: rgba(245,158,11,0.1);
-    border: 1px solid rgba(245,158,11,0.4);
-    border-radius: 8px;
-    font-size: 0.9em;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-.profile-warning .pw-icon { font-size: 1.3em; flex-shrink: 0; margin-top: 1px; }
+.profile-warning { display: flex; gap: 12px; align-items: flex-start; padding: 12px 15px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4); border-radius: 8px; font-size: 0.9em; line-height: 1.5; margin-bottom: 18px; }
 .profile-warning a { color: #d97706; font-weight: 600; }
 [data-theme="dark"] .profile-warning a { color: #fbbf24; }
 
-.pdf-ts { font-size: 0.78em; color: var(--text-secondary); margin-top: 2px; }
+.payer-edit-form { display: none; padding-top: 10px; }
+.payer-edit-form.open { display: block; }
+.edit-toggle { background: none; border: none; color: var(--text-secondary); font-size: 0.8em; cursor: pointer; padding: 0; text-decoration: underline; }
+.edit-toggle:hover { color: var(--text-primary); }
 </style>
 
 {# ── Header ─────────────────────────────────────────────────────────────── #}
 <div class="inv-header">
     <div>
-        <a href="{% url 'billing:invoice_list' %}" style="font-size:0.85em; color:var(--text-secondary); text-decoration:none;">← {% trans "Invoices" %}</a>
-        <h1 style="margin-top:4px;">{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</h1>
+        <a href="{% url 'billing:invoice_list' %}" style="font-size:0.85em; color:var(--text-secondary); text-decoration:none;">← Rechnungen</a>
+        <h1 style="margin-top:4px;">Rechnung {{ invoice.id }}</h1>
     </div>
     <span class="inv-status {{ invoice.status }}">
         {% if invoice.status == "draft" %}⚪{% elif invoice.status == "sent" %}📤{% else %}✅{% endif %}
@@ -162,58 +80,93 @@
     </span>
 </div>
 
-{# ── Profile warning (blocks generation) ────────────────────────────────── #}
+{# ── Profil-Warnung ──────────────────────────────────────────────────────── #}
 {% if not billing_profile_complete %}
 {% url 'core:settings' as settings_url %}
 <div class="profile-warning" role="alert">
-    <span class="pw-icon">⚠️</span>
+    <span style="font-size:1.3em; flex-shrink:0;">⚠️</span>
     <div>
-        <strong>{% trans "Invoice details missing" %}</strong><br>
-        {% blocktrans with url=settings_url %}To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, tax number).{% endblocktrans %}
+        <strong>Rechnungsdaten fehlen</strong><br>
+        Um ein PDF zu generieren, fülle bitte zuerst deine <a href="{{ settings_url }}">Rechnungsdaten</a> aus (Name, Adresse, optional Steuernummer).
     </div>
 </div>
 {% endif %}
 
 <div class="inv-grid">
 
-{# ── Left: details + items ───────────────────────────────────────────────── #}
+{# ── Links: Details + Positionen ─────────────────────────────────────────── #}
 <div>
+
+    {# Rechnungsdetails #}
     <div class="inv-card">
-        <div class="inv-card-header">{% trans "Details" %}</div>
+        <div class="inv-card-header">Details</div>
         <div class="inv-card-body">
             <dl class="inv-dl">
-                <dt>{% trans "Payer" %}</dt>
-                <dd>{{ invoice.payer_name }}{% if invoice.payer_address %}<br><span style="font-size:0.85em;color:var(--text-secondary);">{{ invoice.payer_address|linebreaksbr }}</span>{% endif %}</dd>
+                <dt>Zeitraum</dt>
+                <dd>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} – {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</dd>
                 {% if invoice.contract %}
-                <dt>{% trans "Contract" %}</dt>
+                <dt>Vertrag</dt>
                 <dd><a href="{% url 'contracts:detail' invoice.contract.pk %}">{{ invoice.contract }}</a></dd>
                 {% endif %}
-                <dt>{% trans "Period" %}</dt>
-                <dd>{{ invoice.period_start|date:"SHORT_DATE_FORMAT" }} – {{ invoice.period_end|date:"SHORT_DATE_FORMAT" }}</dd>
-                <dt>{% trans "Created" %}</dt>
+                <dt>Erstellt</dt>
                 <dd>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
                 {% if invoice.paid_at %}
-                <dt>{% trans "Paid at" %}</dt>
+                <dt>Bezahlt am</dt>
                 <dd>{{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}" style="font-size:0.85em;">✎</a></dd>
                 {% endif %}
             </dl>
         </div>
         <div class="inv-total">
-            <span>{% trans "Total Amount" %}</span>
+            <span>Gesamtbetrag</span>
             <span>{{ invoice.total_amount|euro }}</span>
         </div>
     </div>
 
+    {# Rechnungsempfänger (editierbar) #}
+    <div class="inv-card">
+        <div class="inv-card-header">
+            Rechnungsempfänger
+            <button class="edit-toggle" type="button" onclick="togglePayerEdit()" id="payer-toggle-btn" aria-expanded="false">✎ Bearbeiten</button>
+        </div>
+        <div class="inv-card-body" id="payer-display">
+            <strong>{{ invoice.payer_name }}</strong>
+            {% if invoice.payer_address %}
+            <div style="margin-top:6px; font-size:0.9em; color:var(--text-secondary); white-space:pre-line;">{{ invoice.payer_address }}</div>
+            {% endif %}
+        </div>
+        <div class="inv-card-body payer-edit-form" id="payer-edit-form">
+            <p style="font-size:0.85em; color:var(--text-secondary); margin-top:0;">
+                Ändere hier den Rechnungsempfänger, z. B. wenn die Eltern die Rechnung erhalten sollen statt der Schülerin/des Schülers.
+            </p>
+            <form method="post" action="{% url 'billing:invoice_update_payer' invoice.pk %}">
+                {% csrf_token %}
+                <div style="margin-bottom:10px;">
+                    <label for="id_payer_name" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">Name <span style="color:#dc3545;">*</span></label>
+                    <input type="text" name="payer_name" id="id_payer_name" value="{{ invoice.payer_name }}" maxlength="200" required style="width:100%; box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label for="id_payer_address" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">Adresse <span style="color:var(--text-secondary); font-weight:normal;">(optional)</span></label>
+                    <textarea name="payer_address" id="id_payer_address" rows="3" style="width:100%; box-sizing:border-box;">{{ invoice.payer_address }}</textarea>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button type="submit" class="btn btn-success" style="padding:8px 16px; font-size:0.9em;">Speichern</button>
+                    <button type="button" class="btn btn-secondary" style="padding:8px 16px; font-size:0.9em;" onclick="togglePayerEdit()">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Rechnungspositionen #}
     <div class="inv-card inv-items">
-        <div class="inv-card-header">{% trans "Invoice Items" %} <span style="font-weight:400;">({{ invoice.items.count }})</span></div>
+        <div class="inv-card-header">Rechnungspositionen <span style="font-weight:400;">({{ invoice.items.count }})</span></div>
         {% if invoice.items.all %}
-        <table aria-label="{% trans "Invoice items" %}">
+        <table aria-label="Rechnungspositionen">
             <thead>
                 <tr>
-                    <th scope="col">{% trans "Date" %}</th>
-                    <th scope="col">{% trans "Description" %}</th>
-                    <th scope="col">{% trans "Duration" %}</th>
-                    <th scope="col" class="col-amount">{% trans "Amount" %}</th>
+                    <th scope="col">Datum</th>
+                    <th scope="col">Beschreibung</th>
+                    <th scope="col">Dauer</th>
+                    <th scope="col" class="col-amount">Betrag</th>
                 </tr>
             </thead>
             <tbody>
@@ -221,91 +174,83 @@
                 <tr>
                     <td style="white-space:nowrap;">{{ item.date|date:"SHORT_DATE_FORMAT" }}</td>
                     <td>{{ item.description }}</td>
-                    <td style="white-space:nowrap;">{{ item.duration_minutes }} {% trans "Min." %}</td>
+                    <td style="white-space:nowrap;">{{ item.duration_minutes }} Min.</td>
                     <td class="col-amount">{{ item.amount|euro }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
-        <div style="padding:24px 18px; color:var(--text-secondary); text-align:center;">{% trans "No invoice items available." %}</div>
+        <div style="padding:20px 16px; color:var(--text-secondary); text-align:center;">Keine Positionen vorhanden.</div>
         {% endif %}
     </div>
 </div>
 
-{# ── Sidebar: actions ────────────────────────────────────────────────────── #}
+{# ── Sidebar: Aktionen ────────────────────────────────────────────────────── #}
 <div class="inv-sidebar">
     <div class="inv-card">
-        <div class="inv-card-header">{% trans "Actions" %}</div>
+        <div class="inv-card-header">Aktionen</div>
         <div class="inv-card-body">
             <div class="action-section">
 
-                {# PDF block #}
                 <div class="action-label">PDF</div>
                 {% if billing_profile_complete %}
                     <form method="post" action="{% url 'billing:invoice_pdf_generate' invoice.pk %}">
                         {% csrf_token %}
                         <button type="submit" class="action-btn primary">
                             <span class="icon">📑</span>
-                            <span>{% if invoice.invoice_pdf %}{% trans "Regenerate PDF" %}{% else %}{% trans "Generate PDF" %}{% endif %}</span>
+                            <span>{% if invoice.invoice_pdf %}PDF neu erstellen{% else %}PDF erstellen{% endif %}</span>
                         </button>
                     </form>
                     {% if invoice.invoice_pdf %}
                     <a href="{% url 'billing:invoice_pdf_download' invoice.pk %}" class="action-btn secondary" download>
                         <span class="icon">📥</span>
-                        <span>
-                            {% trans "Download PDF" %}
-                            {% if invoice.invoice_pdf_created_at %}<br><span class="pdf-ts">{{ invoice.invoice_pdf_created_at|date:"SHORT_DATETIME_FORMAT" }}</span>{% endif %}
-                        </span>
+                        <span>PDF herunterladen{% if invoice.invoice_pdf_created_at %}<br><span class="pdf-ts">{{ invoice.invoice_pdf_created_at|date:"SHORT_DATETIME_FORMAT" }}</span>{% endif %}</span>
                     </a>
                     {% endif %}
                 {% else %}
                     <span class="action-btn disabled">
                         <span class="icon">📑</span>
-                        <span>{% trans "Generate PDF" %}<br><span class="pdf-ts">{% trans "Fill in settings first" %}</span></span>
+                        <span>PDF erstellen<br><span class="pdf-ts">Rechnungsdaten zuerst ausfüllen</span></span>
                     </span>
                 {% endif %}
 
-                {# Old HTML document (keep if exists) #}
                 {% if invoice.document %}
                 <div class="action-divider"></div>
-                <div class="action-label">{% trans "Document" %}</div>
+                <div class="action-label">Dokument</div>
                 <a href="{% url 'billing:invoice_document' invoice.pk %}" class="action-btn secondary" target="_blank">
-                    <span class="icon">📄</span><span>{% trans "View Document" %}</span>
+                    <span class="icon">📄</span><span>Dokument anzeigen</span>
                 </a>
                 {% endif %}
 
                 <div class="action-divider"></div>
+                <div class="action-label">Status</div>
 
-                {# Status workflow #}
-                <div class="action-label">{% trans "Status" %}</div>
                 {% if invoice.status == "draft" %}
                 <form method="post" action="{% url 'billing:invoice_mark_sent' invoice.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="action-btn warning">
-                        <span class="icon">✉️</span><span>{% trans "Mark as sent" %}</span>
+                        <span class="icon">✉️</span><span>Als gesendet markieren</span>
                     </button>
                 </form>
                 {% endif %}
                 {% if invoice.status == "draft" or invoice.status == "sent" %}
                 <a href="{% url 'billing:invoice_mark_paid' invoice.pk %}" class="action-btn success">
-                    <span class="icon">✅</span><span>{% trans "Mark as paid" %}</span>
+                    <span class="icon">✅</span><span>Als bezahlt markieren</span>
                 </a>
                 {% endif %}
                 {% if invoice.status == "paid" %}
                 <form method="post" action="{% url 'billing:invoice_undo_paid' invoice.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="action-btn secondary">
-                        <span class="icon">↩</span><span>{% trans "Undo payment" %}</span>
+                        <span class="icon">↩</span><span>Zahlung rückgängig</span>
                     </button>
                 </form>
                 {% endif %}
 
                 <div class="action-divider"></div>
-
-                {# Danger #}
                 <a href="{% url 'billing:invoice_delete' invoice.pk %}" class="action-btn danger">
-                    <span class="icon">🗑️</span><span>{% trans "Delete invoice" %}</span>
+                    <span class="icon">🗑️</span><span>Rechnung löschen</span>
                 </a>
             </div>
         </div>
@@ -313,4 +258,19 @@
 </div>
 
 </div>{# end .inv-grid #}
+
+<script>
+function togglePayerEdit() {
+    var form = document.getElementById('payer-edit-form');
+    var display = document.getElementById('payer-display');
+    var btn = document.getElementById('payer-toggle-btn');
+    var isOpen = form.classList.toggle('open');
+    display.style.display = isOpen ? 'none' : '';
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    btn.textContent = isOpen ? '✕ Schließen' : '✎ Bearbeiten';
+}
+{% if request.session.payer_edit_open %}
+togglePayerEdit();
+{% endif %}
+</script>
 {% endblock %}
