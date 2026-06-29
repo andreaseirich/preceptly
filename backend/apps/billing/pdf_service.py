@@ -36,7 +36,6 @@ _LABELS = {
         "duration_col": "Dauer",
         "amount_col": "Betrag",
         "total": "Gesamt",
-        "bank": "Bankverbindung",
         "iban": "IBAN",
         "bic": "BIC",
         "tax_number": "Steuernummer",
@@ -50,6 +49,7 @@ _LABELS = {
         "payment_info": "Zahlungsinformationen",
         "bank_name": "Kontoinhaber",
         "kleinunternehmer_notice": ("Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet."),
+        "pay_request": "Bitte überweisen Sie den Gesamtbetrag von {amount} auf folgendes Konto:",
     },
     "en": {
         "title": "Invoice",
@@ -63,7 +63,6 @@ _LABELS = {
         "duration_col": "Duration",
         "amount_col": "Amount",
         "total": "Total",
-        "bank": "Bank Details",
         "iban": "IBAN",
         "bic": "BIC",
         "tax_number": "Tax Number",
@@ -79,6 +78,7 @@ _LABELS = {
         "kleinunternehmer_notice": (
             "No VAT is charged in accordance with §19 para. 1 UStG (Kleinunternehmerregelung)."
         ),
+        "pay_request": "Please transfer the total amount of {amount} to the following account:",
     },
 }
 
@@ -260,6 +260,7 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
         issuer_bic = (
             profile.billing_bank_bic if profile and profile.billing_bank_bic else ""
         ) or ""
+        kleinunternehmer = bool(profile and profile.billing_kleinunternehmer)
 
         profile_incomplete = not issuer_name
 
@@ -460,19 +461,176 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
         elements.append(table)
         elements.append(Spacer(1, 0.8 * cm))
 
-        # ── Footer: bank details ──────────────────────────────────────────
+        # ── §19 UStG notice ───────────────────────────────────────────────
+        if kleinunternehmer:
+            notice_style = ParagraphStyle(
+                "Notice19",
+                parent=styles["footer"],
+                fontSize=9,
+                fontName="Helvetica-Oblique",
+                textColor=_COLOR_MUTED,
+                leading=13,
+            )
+            elements.append(Spacer(1, 0.3 * cm))
+            elements.append(Paragraph(L["kleinunternehmer_notice"], notice_style))
+
+        # ── Payment block ─────────────────────────────────────────────────
         if issuer_iban or issuer_bic:
-            elements.append(
-                HRFlowable(
-                    width=page_width, thickness=0.5, color=_COLOR_BORDER, spaceAfter=0.3 * cm
+            elements.append(Spacer(1, 0.6 * cm))
+
+            # Header bar (dark background, white text)
+            pay_head_style = ParagraphStyle(
+                "PayHead",
+                parent=styles["section_heading"],
+                fontSize=9,
+                textColor=colors.white,
+                spaceBefore=0,
+                spaceAfter=0,
+            )
+            pay_request_style = ParagraphStyle(
+                "PayReq",
+                parent=styles["meta_value"],
+                fontSize=9,
+                fontName="Helvetica-Bold",
+                textColor=_COLOR_DARK,
+                spaceAfter=0,
+                leading=14,
+            )
+            pay_label_style = ParagraphStyle(
+                "PayLbl",
+                parent=styles["footer"],
+                fontName="Helvetica-Bold",
+                textColor=_COLOR_DARK,
+                fontSize=9,
+            )
+            pay_val_style = ParagraphStyle(
+                "PayVal2",
+                parent=styles["footer"],
+                textColor=_COLOR_DARK,
+                fontSize=9,
+            )
+            pay_total_label = ParagraphStyle(
+                "PayTotLbl",
+                parent=styles["footer"],
+                fontSize=7,
+                textColor=_COLOR_MUTED,
+                alignment=2,
+            )
+            pay_total_val = ParagraphStyle(
+                "PayTotVal",
+                parent=styles["meta_value"],
+                fontSize=14,
+                fontName="Helvetica-Bold",
+                textColor=_COLOR_ACCENT,
+                alignment=2,
+                leading=17,
+            )
+
+            # Header row
+            head_inner = Table(
+                [[Paragraph(L["payment_info"].upper(), pay_head_style)]],
+                colWidths=[page_width],
+            )
+            head_inner.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, -1), _COLOR_HEADER_BG),
+                        ("TOPPADDING", (0, 0), (-1, -1), 7),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                    ]
                 )
             )
-            bank_parts = [L["bank"] + ":"]
+
+            # Bank detail rows
+            pay_rows = []
+            if issuer_name:
+                pay_rows.append(
+                    [
+                        Paragraph(L["bank_name"], pay_label_style),
+                        Paragraph(html.escape(issuer_name), pay_val_style),
+                    ]
+                )
             if issuer_iban:
-                bank_parts.append(f"{L['iban']}: {html.escape(issuer_iban)}")
+                pay_rows.append(
+                    [
+                        Paragraph(L["iban"], pay_label_style),
+                        Paragraph(html.escape(issuer_iban), pay_val_style),
+                    ]
+                )
             if issuer_bic:
-                bank_parts.append(f"{L['bic']}: {html.escape(issuer_bic)}")
-            elements.append(Paragraph("  ·  ".join(bank_parts), styles["footer"]))
+                pay_rows.append(
+                    [
+                        Paragraph(L["bic"], pay_label_style),
+                        Paragraph(html.escape(issuer_bic), pay_val_style),
+                    ]
+                )
+
+            detail_col_w = page_width - 4 * cm
+            bank_tbl = Table(pay_rows, colWidths=[3 * cm, detail_col_w - 3 * cm])
+            bank_tbl.setStyle(
+                TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("TOPPADDING", (0, 0), (-1, -1), 3),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                    ]
+                )
+            )
+
+            right_block = [
+                Paragraph(L["total"], pay_total_label),
+                Paragraph(f"{invoice.total_amount:.2f}&nbsp;€", pay_total_val),
+            ]
+
+            body_inner = Table(
+                [
+                    [
+                        Paragraph(
+                            L["pay_request"].format(amount=f"{invoice.total_amount:.2f} €"),
+                            pay_request_style,
+                        ),
+                        "",
+                    ],
+                    [bank_tbl, right_block],
+                ],
+                colWidths=[detail_col_w, 4 * cm],
+            )
+            body_inner.setStyle(
+                TableStyle(
+                    [
+                        ("SPAN", (0, 0), (1, 0)),
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("ALIGN", (1, 1), (1, 1), "RIGHT"),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                        ("RIGHTPADDING", (-1, 0), (-1, -1), 12),
+                        ("LEFTPADDING", (-1, 0), (-1, -1), 6),
+                        ("LINEBELOW", (0, 0), (-1, 0), 0.5, _COLOR_BORDER),
+                    ]
+                )
+            )
+
+            outer = Table(
+                [[head_inner], [body_inner]],
+                colWidths=[page_width],
+            )
+            outer.setStyle(
+                TableStyle(
+                    [
+                        ("BOX", (0, 0), (-1, -1), 1.5, _COLOR_ACCENT),
+                        ("TOPPADDING", (0, 0), (-1, -1), 0),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                    ]
+                )
+            )
+            elements.append(outer)
 
         doc.build(elements)
         return buffer.getvalue()
