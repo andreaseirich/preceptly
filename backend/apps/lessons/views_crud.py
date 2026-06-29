@@ -13,6 +13,8 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
+from django.shortcuts import get_object_or_404, render, render
+from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.core.feature_flags import is_premium_user
@@ -572,3 +574,64 @@ class LessonDeleteView(LoginRequiredMixin, DeleteView):
             recalculate_conflicts_for_affected_lessons(lesson)
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+class LessonRescheduleView(LoginRequiredMixin, View):
+    """Termin schnell verschieben (nur Datum + Uhrzeit)."""
+
+    template_name = "lessons/lesson_reschedule.html"
+
+    def _get_lesson(self, request, pk):
+        from django.shortcuts import get_object_or_404
+
+        return get_object_or_404(Lesson, pk=pk, contract__user=request.user)
+
+    def get(self, request, pk):
+        lesson = self._get_lesson(request, pk)
+        return render(
+            request,
+            self.template_name,
+            {"lesson": lesson, "today": timezone.localdate().isoformat()},
+        )
+
+    def post(self, request, pk):
+        from datetime import date as _date, time as _time
+
+        lesson = self._get_lesson(request, pk)
+        date_str = request.POST.get("date", "").strip()
+        time_str = request.POST.get("start_time", "").strip()
+        try:
+            new_date = _date.fromisoformat(date_str)
+            new_time = _time.fromisoformat(time_str)
+        except ValueError:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "lesson": lesson,
+                    "today": timezone.localdate().isoformat(),
+                    "error": "Ungültiges Datum oder Uhrzeit.",
+                },
+            )
+        if new_date < timezone.localdate():
+            return render(
+                request,
+                self.template_name,
+                {
+                    "lesson": lesson,
+                    "today": timezone.localdate().isoformat(),
+                    "error": "Das Datum liegt in der Vergangenheit.",
+                },
+            )
+        old_date = lesson.date
+        lesson.date = new_date
+        lesson.start_time = new_time
+        lesson.recurring_lesson = None
+        lesson.save(update_fields=["date", "start_time", "recurring_lesson"])
+        recalculate_conflicts_for_affected_lessons(lesson)
+        messages.success(
+            request,
+            f"Termin verschoben: {old_date.strftime('%d.%m.%Y')} → {new_date.strftime('%d.%m.%Y')} {new_time.strftime('%H:%M')} Uhr.",
+        )
+        next_url = request.GET.get("next") or get_last_calendar_url(request)
+        return HttpResponseRedirect(next_url)

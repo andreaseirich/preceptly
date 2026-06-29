@@ -19,6 +19,7 @@ class ContractForm(forms.ModelForm):
             "first_name",
             "last_name",
             "email",
+            "parent_email",
             "phone",
             "school",
             "grade",
@@ -37,6 +38,7 @@ class ContractForm(forms.ModelForm):
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "parent_email": forms.EmailInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
             "school": forms.TextInput(attrs={"class": "form-control"}),
             "grade": forms.TextInput(attrs={"class": "form-control"}),
@@ -58,10 +60,15 @@ class ContractForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].label = _("Kontakt-E-Mail (Elternteil oder Schüler)")
+        self.fields["email"].label = _("Schüler-E-Mail")
         self.fields["email"].help_text = _(
-            "Diese E-Mail-Adresse erhält alle Benachrichtigungen. Bei minderjährigen Schülern bitte die E-Mail-Adresse der Eltern angeben."
+            "E-Mail-Adresse des Schülers — wird für das Schüler-Portal verwendet."
         )
+        self.fields["parent_email"].label = _("Eltern-E-Mail")
+        self.fields["parent_email"].help_text = _(
+            "E-Mail-Adresse der Eltern — wird für das Eltern-Portal verwendet."
+        )
+        self.fields["parent_email"].required = False
         self._user = user
 
     def save(self, commit=True):

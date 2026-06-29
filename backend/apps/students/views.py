@@ -192,7 +192,9 @@ class PortalInviteParentView(LoginRequiredMixin, View):
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
 
         # E-Mail-Validierung: Längenbegrenzung + CRLF-Filter + Format-Prüfung
-        parent_email = request.POST.get("parent_email", "").strip()[:254]
+        parent_email = (
+            request.POST.get("parent_email", "").strip() or (contract.parent_email or "").strip()
+        )[:254]
         if not parent_email or "\n" in parent_email or "\r" in parent_email:
             messages.error(request, "Ungültige E-Mail-Adresse.")
             return redirect("contracts:detail", pk=pk)
@@ -246,6 +248,9 @@ class PortalInviteParentView(LoginRequiredMixin, View):
             parent_link, _ = ParentStudentLink.objects.get_or_create(
                 parent=portal_user, contract=contract
             )
+            if not contract.parent_email:
+                contract.parent_email = parent_email
+                contract.save(update_fields=["parent_email"])
             try:
                 send_portal_invite(contract, parent_link, parent_email, role="parent")
                 messages.success(

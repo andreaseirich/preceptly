@@ -10,6 +10,7 @@ backward compatibility with existing imports.
 from apps.lessons.views_calendar import CalendarView, LessonMonthView, WeekView
 from apps.lessons.views_conflicts import ConflictDetailView
 from apps.lessons.views_crud import (
+    LessonRescheduleView,
     LessonCreateView,
     LessonDeleteView,
     LessonDetailView,
