@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}Termin verschieben – Preceptly{% endblock %}
+
+{% block content %}
+<h1>Termin verschieben</h1>
+<p>
+    <strong>Schüler:</strong> {{ lesson.contract.full_name }}<br>
+    <strong>Aktueller Termin:</strong> {{ lesson.date|date:"d.m.Y" }} um {{ lesson.start_time|time:"H:i" }} Uhr
+</p>
+
+{% if error %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div style="display:flex; flex-direction:column; gap:16px; max-width:420px;">
+        <div>
+            <label for="id_date" class="form-label">Neues Datum</label>
+            <input type="date" id="id_date" name="date" class="form-control"
+                   value="{{ lesson.date|date:'Y-m-d' }}" min="{{ today }}" required>
+        </div>
+        <div>
+            <label for="id_start_time" class="form-label">Neue Uhrzeit</label>
+            <input type="time" id="id_start_time" name="start_time" class="form-control"
+                   value="{{ lesson.start_time|time:'H:i' }}" required>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary">Verschieben</button>
+            <a href="{{ request.GET.next|default:'javascript:history.back()' }}" class="btn">Abbrechen</a>
+        </div>
+    </div>
+</form>
+{% endblock %}
