@@ -311,6 +311,17 @@ class SettingsView(LoginRequiredMixin, FormView):
             except (KeyError, zoneinfo.ZoneInfoNotFoundError):
                 messages.error(request, _("Invalid timezone."))
             return redirect(self.success_url)
+        if "save_billing_profile" in request.POST:
+            profile, _created = UserProfile.objects.get_or_create(user=request.user)
+            profile.billing_name = request.POST.get("billing_name", "").strip()[:200]
+            profile.billing_address = request.POST.get("billing_address", "").strip()[:2000]
+            profile.billing_tax_number = request.POST.get("billing_tax_number", "").strip()[:50]
+            profile.billing_contact = request.POST.get("billing_contact", "").strip()[:300]
+            profile.billing_bank_iban = request.POST.get("billing_bank_iban", "").strip()[:34]
+            profile.billing_bank_bic = request.POST.get("billing_bank_bic", "").strip()[:11]
+            profile.save()
+            messages.success(request, _("Invoice details saved."))
+            return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

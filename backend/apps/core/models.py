@@ -119,6 +119,41 @@ class UserProfile(models.Model):
         default="Europe/Berlin",
         verbose_name="Zeitzone",
     )
+    billing_name = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name=_("Name / Firma"),
+        help_text=_("Dein vollständiger Name oder Firmenname, der auf Rechnungen erscheint."),
+    )
+    billing_address = models.TextField(
+        blank=True,
+        verbose_name=_("Adresse"),
+        help_text=_("Straße, PLZ, Ort – wird auf Rechnungen angezeigt."),
+    )
+    billing_tax_number = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name=_("Steuernummer / USt-IdNr."),
+        help_text=_("Deine persönliche Steuernummer oder Umsatzsteuer-ID."),
+    )
+    billing_contact = models.CharField(
+        max_length=300,
+        blank=True,
+        verbose_name=_("Kontakt"),
+        help_text=_("E-Mail, Telefon, Website – erscheint auf Rechnungen."),
+    )
+    billing_bank_iban = models.CharField(
+        max_length=34,
+        blank=True,
+        verbose_name=_("IBAN"),
+        help_text=_("Bankverbindung für Rechnungen (optional)."),
+    )
+    billing_bank_bic = models.CharField(
+        max_length=11,
+        blank=True,
+        verbose_name=_("BIC"),
+        help_text=_("BIC/SWIFT deiner Bank (optional)."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
