@@ -300,6 +300,13 @@
             <input type="text" name="billing_bank_bic" id="id_billing_bank_bic" maxlength="11" value="{{ profile.billing_bank_bic }}" style="width: 100%; box-sizing: border-box;" placeholder="XXXXXXXX">
         </div>
     </div>
+    <div style="grid-column: 1 / -1; margin-top: 4px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                <input type="checkbox" name="billing_kleinunternehmer" id="id_billing_kleinunternehmer"{% if profile.billing_kleinunternehmer %} checked{% endif %} style="margin-top: 3px; flex-shrink: 0;">
+                <span style="font-size: 0.9em; color: var(--text-secondary);">{% trans "Kleinunternehmerregelung (§19 UStG) – adds the note \"No VAT is charged in accordance with §19 para. 1 UStG.\" to the invoice" %}</span>
+            </label>
+        </div>
+    </div>
     <div style="margin-top: 15px;">
         <button type="submit" name="save_billing_profile" class="btn btn-success">{% trans "Save Invoice Details" %}</button>
     </div>

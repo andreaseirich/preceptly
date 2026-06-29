@@ -154,6 +154,14 @@ class UserProfile(models.Model):
         verbose_name=_("BIC"),
         help_text=_("BIC/SWIFT deiner Bank (optional)."),
     )
+    billing_kleinunternehmer = models.BooleanField(
+        default=False,
+        verbose_name=_("Kleinunternehmerregelung (§19 UStG)"),
+        help_text=_(
+            "Aktivieren wenn du die Kleinunternehmerregelung nutzt. Fügt den Hinweis "
+            '"Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet." zur Rechnung hinzu.'
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

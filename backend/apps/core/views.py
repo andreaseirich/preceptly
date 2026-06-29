@@ -319,6 +319,7 @@ class SettingsView(LoginRequiredMixin, FormView):
             profile.billing_contact = request.POST.get("billing_contact", "").strip()[:300]
             profile.billing_bank_iban = request.POST.get("billing_bank_iban", "").strip()[:34]
             profile.billing_bank_bic = request.POST.get("billing_bank_bic", "").strip()[:11]
+            profile.billing_kleinunternehmer = "billing_kleinunternehmer" in request.POST
             profile.save()
             messages.success(request, _("Invoice details saved."))
             return redirect(self.success_url)
