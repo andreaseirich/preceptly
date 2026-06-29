@@ -164,13 +164,12 @@
 
 {# ── Profile warning (blocks generation) ────────────────────────────────── #}
 {% if not billing_profile_complete %}
+{% url 'core:settings' as settings_url %}
 <div class="profile-warning" role="alert">
     <span class="pw-icon">⚠️</span>
     <div>
         <strong>{% trans "Invoice details missing" %}</strong><br>
-        {% blocktrans with url="{% url 'core:settings' %}" %}
-        To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, tax number).
-        {% endblocktrans %}
+        {% blocktrans with url=settings_url %}To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, tax number).{% endblocktrans %}
     </div>
 </div>
 {% endif %}
