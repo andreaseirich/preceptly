@@ -2,6 +2,7 @@
 Views für Billing-App.
 """
 
+import logging
 import os
 import re
 from datetime import date
@@ -31,6 +32,8 @@ from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
+
+_log = logging.getLogger(__name__)
 
 
 def _safe_date(val):
@@ -101,6 +104,16 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return _user_invoice_queryset(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = None
+        try:
+            profile = self.request.user.profile
+        except Exception:  # noqa: BLE001
+            _log.debug("No profile for user %s", self.request.user.pk)
+        context["billing_profile_complete"] = bool(profile and profile.billing_name)
+        return context
 
 
 class InvoiceCreateView(LoginRequiredMixin, CreateView):
