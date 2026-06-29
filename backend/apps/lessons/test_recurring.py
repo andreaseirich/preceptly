@@ -238,6 +238,11 @@ class CalendarServiceTest(TestCase):
         today = timezone.localdate()
 
         # Erstelle Lessons für aktuellen Monat (zukünftige) - bleib im aktuellen Monat
+        from calendar import monthrange
+
+        _, last_day = monthrange(today.year, today.month)
+        if today.day + 2 > last_day:
+            self.skipTest("Not enough future days remaining in current month")
         future_date1 = today + timedelta(days=1)
         future_date2 = today + timedelta(days=2)
 

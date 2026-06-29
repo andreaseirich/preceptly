@@ -221,7 +221,7 @@ class RecurrenceStatusAutomationTest(TestCase):
 
     def test_biweekly_lessons_get_correct_status(self):
         """Test: Zweiwöchentliche Lessons bekommen korrekten Status."""
-        past_date = timezone.localdate() - timedelta(days=20)
+        past_date = timezone.localdate() - timedelta(days=21)
 
         recurring = RecurringLesson.objects.create(
             contract=self.contract,
