@@ -265,6 +265,47 @@
     {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
 </form>
 
+<h2 style="margin-top: 40px;">{% trans "Invoice Details" %}</h2>
+<p>{% trans "These details appear on every invoice PDF you generate." %}</p>
+{% if not profile.billing_name %}
+<div class="message" style="margin-bottom: 14px; padding: 10px 14px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 4px; color: var(--text-primary);" role="alert">
+    {% trans "Your invoice details are not filled in yet. Generated PDFs will not contain your name or address." %}
+</div>
+{% endif %}
+<form method="post" style="margin-top: 15px;">
+    {% csrf_token %}
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 680px;">
+        <div style="grid-column: 1 / -1;">
+            <label for="id_billing_name" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Name / Company" %}</label>
+            <input type="text" name="billing_name" id="id_billing_name" maxlength="200" value="{{ profile.billing_name }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'e.g. Maria Müller' %}">
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <label for="id_billing_address" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Address" %}</label>
+            <textarea name="billing_address" id="id_billing_address" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'Street, Postcode City' %}">{{ profile.billing_address }}</textarea>
+        </div>
+        <div>
+            <label for="id_billing_tax_number" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Tax Number / VAT ID" %}</label>
+            <input type="text" name="billing_tax_number" id="id_billing_tax_number" maxlength="50" value="{{ profile.billing_tax_number }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'e.g. 123/456/78901' %}">
+        </div>
+        <div>
+            <label for="id_billing_contact" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Contact (email, phone, website)" %}</label>
+            <input type="text" name="billing_contact" id="id_billing_contact" maxlength="300" value="{{ profile.billing_contact }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans 'e.g. maria@example.com · 0123 456789' %}">
+        </div>
+        <div>
+            <label for="id_billing_bank_iban" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "IBAN" %} <span style="font-weight: normal; color: var(--text-secondary);">({% trans "optional" %})</span></label>
+            <input type="text" name="billing_bank_iban" id="id_billing_bank_iban" maxlength="34" value="{{ profile.billing_bank_iban }}" style="width: 100%; box-sizing: border-box;" placeholder="DE00 0000 0000 0000 0000 00">
+        </div>
+        <div>
+            <label for="id_billing_bank_bic" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "BIC" %} <span style="font-weight: normal; color: var(--text-secondary);">({% trans "optional" %})</span></label>
+            <input type="text" name="billing_bank_bic" id="id_billing_bank_bic" maxlength="11" value="{{ profile.billing_bank_bic }}" style="width: 100%; box-sizing: border-box;" placeholder="XXXXXXXX">
+        </div>
+    </div>
+    <div style="margin-top: 15px;">
+        <button type="submit" name="save_billing_profile" class="btn btn-success">{% trans "Save Invoice Details" %}</button>
+    </div>
+</form>
+
+
 <h2 style="margin-top: 40px;">Zeitzone</h2>
 <p>Deine Zeitzone bestimmt, wie Uhrzeiten für dich und deine Schüler im Portal angezeigt werden. Wähle die Zeitzone, in der du Nachhilfe gibst.</p>
 <form method="post" style="margin-top: 15px;">

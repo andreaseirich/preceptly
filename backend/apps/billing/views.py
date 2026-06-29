@@ -403,7 +403,8 @@ def invoice_pdf_generate(request, pk):
     """Generate and store PDF for invoice. Returns redirect."""
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
     try:
-        pdf_bytes = generate_invoice_pdf(invoice)
+        lang = getattr(request, "LANGUAGE_CODE", "de")
+        pdf_bytes = generate_invoice_pdf(invoice, language=lang)
         filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
         if invoice.invoice_pdf:
             invoice.invoice_pdf.delete(save=False)
@@ -424,7 +425,8 @@ def invoice_pdf_download(request, pk):
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
     if not invoice.invoice_pdf:
         try:
-            pdf_bytes = generate_invoice_pdf(invoice)
+            lang = getattr(request, "LANGUAGE_CODE", "de")
+            pdf_bytes = generate_invoice_pdf(invoice, language=lang)
             filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
             invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
             invoice.invoice_pdf_created_at = timezone.now()
