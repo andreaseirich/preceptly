@@ -49,4 +49,9 @@ urlpatterns = [
         views.StudentDocumentDeleteView.as_view(),
         name="document_delete",
     ),
+    path(
+        "<int:pk>/documents/<int:doc_pk>/download/",
+        views.StudentDocumentDownloadView.as_view(),
+        name="document_download",
+    ),
 ]

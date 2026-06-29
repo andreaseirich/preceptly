@@ -48,7 +48,7 @@
       <td style="padding:8px 0; font-size:0.88em; color:var(--text-secondary);">{{ doc.uploaded_at|date:"d.m.Y H:i" }}</td>
       <td style="padding:8px 0; text-align:right; white-space:nowrap;">
         {% if doc.file_exists %}
-          <a href="{{ doc.file.url }}" class="btn-sm btn-sm-secondary" download>⬇</a>
+          <a href="{% url 'students:document_download' student.pk doc.pk %}" class="btn-sm btn-sm-secondary">⬇</a>
         {% endif %}
         <form method="post" action="{% url 'students:document_delete' student.pk doc.pk %}"
           style="display:inline" onsubmit="return confirm('Dokument löschen?')">
