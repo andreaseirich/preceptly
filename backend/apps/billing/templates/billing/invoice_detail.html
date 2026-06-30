@@ -64,8 +64,43 @@
 
 .payer-edit-form { display: none; padding-top: 10px; }
 .payer-edit-form.open { display: block; }
-.edit-toggle { background: none; border: none; color: var(--text-secondary); font-size: 0.8em; cursor: pointer; padding: 0; text-decoration: underline; }
+.edit-toggle { background: none; border: none; color: var(--text-secondary); font-size: 0.8em; cursor: pointer; padding: 4px 8px; text-decoration: underline; border-radius: 4px; min-height: 32px; touch-action: manipulation; }
 .edit-toggle:hover { color: var(--text-primary); }
+
+/* ── Mobile ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .inv-card-body { padding: 12px; }
+  .inv-card-header { padding: 8px 12px; }
+  .inv-total { padding: 10px 12px; }
+  .action-btn { padding: 10px 12px; min-height: 44px; }
+
+  /* Items table → gestapelte Card-Zeilen */
+  .inv-items table thead { display: none; }
+  .inv-items table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "date amount" "desc desc";
+    gap: 3px 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: none !important;
+  }
+  .inv-items table tbody tr:last-child { border-bottom: none; }
+  .inv-items table td { display: block; padding: 0; border: none; font-size: 0.88em; }
+  .inv-items table td:nth-child(1) { grid-area: date; color: var(--text-secondary); font-size: 0.8em; align-self: center; }
+  .inv-items table td:nth-child(2) { grid-area: desc; }
+  .inv-items table td:nth-child(3) { display: none; }
+  .inv-items table td:nth-child(4) { grid-area: amount; font-weight: 600; text-align: right; white-space: nowrap; align-self: center; }
+
+  /* Dauer inline hinter Beschreibung anzeigen */
+  .inv-items table td:nth-child(2)::after {
+    content: attr(data-duration);
+    display: inline;
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-left: 4px;
+  }
+}
 </style>
 
 {# ── Header ─────────────────────────────────────────────────────────────── #}
@@ -173,7 +208,7 @@
                 {% for item in invoice.items.all %}
                 <tr>
                     <td style="white-space:nowrap;">{{ item.date|date:"SHORT_DATE_FORMAT" }}</td>
-                    <td>{{ item.description }}</td>
+                    <td data-duration="{{ item.duration_minutes }} min.">{{ item.description }}</td>
                     <td style="white-space:nowrap;">{{ item.duration_minutes }} {% trans "min." %}</td>
                     <td class="col-amount">{{ item.amount|euro }}</td>
                 </tr>
