@@ -404,6 +404,7 @@ let _intentionalClose = false;
 let _reconnectDelay = 1000;  // Exponential-Backoff-Startwert in ms
 let screenStream = null;
 let peers = {};       // peerId → { pc: RTCPeerConnection, name, stream }
+let _iceCandidateQueues = {}; // peerId → [ICECandidate] buffered before setRemoteDescription
 let micActive = true;
 let camActive = true;
 let screenActive = false;
@@ -607,7 +608,10 @@ setInterval(() => {
 // ─────────────────────────────────────────────────────────────────────────────
 async function initMedia() {
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } },
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
         const vid = document.getElementById("video-local");
         vid.srcObject = localStream;
         document.getElementById("no-video-local").style.display = "none";
@@ -824,9 +828,36 @@ async function createPeerConnection(peerId, name, initiator) {
     };
 
     pc.onconnectionstatechange = () => {
-        if (["failed","closed"].includes(pc.connectionState)) {
-            // "disconnected" ist transient und kann sich erholen — kein removePeer
+        const state = pc.connectionState;
+        if (["failed", "closed"].includes(state)) {
             removePeer(peerId);
+        } else if (state === "disconnected") {
+            // Warte 6 s — erholt sich die Verbindung nicht, ICE-Restart versuchen
+            setTimeout(() => {
+                if (!peers[peerId] || peers[peerId].pc !== pc) return;
+                if (pc.connectionState !== "disconnected") return;
+                if (initiator) {
+                    pc.createOffer({ iceRestart: true }).then(offer => {
+                        pc.setLocalDescription(offer);
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({ type: "offer", sdp: offer, target_peer_id: peerId }));
+                        }
+                    }).catch(() => { removePeer(peerId); });
+                }
+            }, 6000);
+        } else if (state === "connected") {
+            // Limit video bitrate to 600 kbps for stability on poor connections
+            const videoSender = pc.getSenders().find(s => s.track?.kind === "video");
+            if (videoSender) {
+                videoSender.getParameters().encodings?.forEach((enc, i, arr) => {
+                    if (arr.length === 1) enc.maxBitrate = 600_000;
+                });
+                const params = videoSender.getParameters();
+                if (params.encodings?.length === 1 && !params.encodings[0].maxBitrate) {
+                    params.encodings[0].maxBitrate = 600_000;
+                    videoSender.setParameters(params).catch(() => {});
+                }
+            }
         }
         updatePeerStatus();
     };
@@ -845,6 +876,13 @@ async function handleOffer(msg) {
     if (!peers[peerId]) await createPeerConnection(peerId, name, false);
     const { pc } = peers[peerId];
     await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    // Flush buffered ICE candidates
+    if (_iceCandidateQueues[peerId]) {
+        for (const c of _iceCandidateQueues[peerId]) {
+            try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(_) {}
+        }
+        delete _iceCandidateQueues[peerId];
+    }
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     ws.send(JSON.stringify({ type: "answer", sdp: pc.localDescription, target_peer_id: peerId }));
@@ -853,14 +891,28 @@ async function handleOffer(msg) {
 async function handleAnswer(msg) {
     const { sender_peer_id: peerId, sdp } = msg;
     if (peers[peerId]) {
-        await peers[peerId].pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        const { pc } = peers[peerId];
+        await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        // Flush buffered ICE candidates
+        if (_iceCandidateQueues[peerId]) {
+            for (const c of _iceCandidateQueues[peerId]) {
+                try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(_) {}
+            }
+            delete _iceCandidateQueues[peerId];
+        }
     }
 }
 
 async function handleIce(msg) {
     const { sender_peer_id: peerId, candidate } = msg;
-    if (peers[peerId]) {
-        try { await peers[peerId].pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(_) {}
+    if (!candidate) return;
+    const peer = peers[peerId];
+    if (peer && peer.pc.remoteDescription) {
+        try { await peer.pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(_) {}
+    } else {
+        // Buffer until setRemoteDescription completes
+        if (!_iceCandidateQueues[peerId]) _iceCandidateQueues[peerId] = [];
+        _iceCandidateQueues[peerId].push(candidate);
     }
 }
 
