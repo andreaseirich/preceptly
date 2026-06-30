@@ -200,10 +200,83 @@ a.doc-item { text-decoration: none; }
     #videos { flex-direction: row; }
     .video-tile { flex: 1; aspect-ratio: 4/3; }
 }
+
+/* ── Lobby / Pre-Join ── */
+#lobby {
+    position: fixed; inset: 0; z-index: 1000;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+#lobby-card {
+    width: 100%; max-width: 480px;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 28px 24px; display: flex; flex-direction: column; gap: 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+#lobby-title { font-size: 1.15em; font-weight: 700; text-align: center; }
+#lobby-sub   { font-size: 0.82em; color: var(--text2); text-align: center; margin-top: -10px; }
+#lobby-preview {
+    position: relative; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
+    background: #000; border: 1px solid var(--border);
+}
+#lobby-preview video { width: 100%; height: 100%; object-fit: cover; display: block; }
+#lobby-no-video {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg3); color: var(--text2); font-size: 2.5em;
+    gap: 8px;
+}
+#lobby-no-video span { font-size: 0.35em; }
+#lobby-toggles { display: flex; gap: 10px; justify-content: center; }
+.lobby-toggle {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 8px; font-size: 0.88em; font-weight: 600;
+    border: 1.5px solid var(--border); background: var(--bg3); color: var(--text);
+    cursor: pointer; transition: all 0.15s; flex: 1; justify-content: center;
+}
+.lobby-toggle.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.lobby-toggle.muted  { background: var(--bg3); border-color: #555; color: var(--text2); }
+#lobby-name-row {
+    text-align: center; font-size: 0.85em; color: var(--text2);
+    padding: 6px 12px; background: var(--bg3); border-radius: 6px;
+}
+#lobby-name-row strong { color: var(--text); }
+#lobby-join {
+    padding: 12px; border-radius: 9px; border: none; font-size: 1em; font-weight: 700;
+    background: var(--green); color: #fff; cursor: pointer; transition: background 0.15s;
+    letter-spacing: 0.02em;
+}
+#lobby-join:hover { background: #219a52; }
+#lobby-join:active { transform: scale(0.98); }
+#lobby-err { font-size: 0.82em; color: #e74c3c; text-align: center; min-height: 1.2em; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
+
+<!-- ── Pre-Join Lobby ── -->
+<div id="lobby" role="dialog" aria-modal="true" aria-labelledby="lobby-title">
+    <div id="lobby-card">
+        <div id="lobby-title">📹 Meeting beitreten</div>
+        <div id="lobby-sub">{{ lesson.date|date:"d.m.Y" }} &middot; {{ lesson.contract.student_display_name }}</div>
+
+        <div id="lobby-preview">
+            <video id="lobby-video" autoplay muted playsinline></video>
+            <div id="lobby-no-video" style="display:none;">🎥<span>Kamera deaktiviert</span></div>
+        </div>
+
+        <div id="lobby-toggles">
+            <button id="lobby-btn-mic" class="lobby-toggle active" onclick="lobbyToggleMic()">🎤 Mikrofon an</button>
+            <button id="lobby-btn-cam" class="lobby-toggle active" onclick="lobbyToggleCam()">📷 Kamera an</button>
+        </div>
+
+        <div id="lobby-name-row">Du beitrittst als <strong>{{ display_name }}</strong></div>
+
+        <div id="lobby-err"></div>
+
+        <button id="lobby-join" onclick="lobbyJoin()">Beitreten →</button>
+    </div>
+</div>
 
 <!-- Header -->
 <div id="header">
@@ -607,21 +680,13 @@ setInterval(() => {
 // Media
 // ─────────────────────────────────────────────────────────────────────────────
 async function initMedia() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } },
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-        });
-        const vid = document.getElementById("video-local");
+    // initMedia wird nur noch bei Kamera-Reinitialisierung gerufen (nach toggleCam).
+    // Die initiale Media-Initialisierung erfolgt in initLobby().
+    const vid = document.getElementById("video-local");
+    if (vid && localStream) {
         vid.srcObject = localStream;
-        document.getElementById("no-video-local").style.display = "none";
-    } catch (e) {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (e2) {
-            localStream = new MediaStream();
-        }
-        setStatus("Kamera nicht verfügbar – nur Audio");
+        document.getElementById("no-video-local").style.display =
+            (camActive && localStream.getVideoTracks().length > 0) ? "none" : "flex";
     }
 }
 
@@ -1590,11 +1655,122 @@ function uploadDoc() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Lobby (Pre-Join)
+// ─────────────────────────────────────────────────────────────────────────────
+let _lobbyMicOn = true;
+let _lobbyCamOn = true;
+
+async function initLobby() {
+    const lobbyVideo = document.getElementById("lobby-video");
+    const noVideo    = document.getElementById("lobby-no-video");
+    const errEl      = document.getElementById("lobby-err");
+
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } },
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+    } catch (e) {
+        // Kamera nicht verfügbar — Audio-only versuchen
+        try { localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+        catch (e2) { localStream = new MediaStream(); }
+        _lobbyCamOn = false;
+        document.getElementById("lobby-btn-cam").classList.remove("active");
+        document.getElementById("lobby-btn-cam").classList.add("muted");
+        document.getElementById("lobby-btn-cam").textContent = "📷 Kamera aus";
+        errEl.textContent = "Kamera nicht verfügbar – nur Audio.";
+    }
+
+    if (localStream.getVideoTracks().length > 0) {
+        lobbyVideo.srcObject = localStream;
+        noVideo.style.display = "none";
+    } else {
+        lobbyVideo.style.display = "none";
+        noVideo.style.display = "flex";
+    }
+
+    // Wenn Audio fehlt
+    if (localStream.getAudioTracks().length === 0 && !errEl.textContent) {
+        errEl.textContent = "Mikrofon nicht verfügbar.";
+        _lobbyMicOn = false;
+        document.getElementById("lobby-btn-mic").classList.remove("active");
+        document.getElementById("lobby-btn-mic").classList.add("muted");
+        document.getElementById("lobby-btn-mic").textContent = "🎤 Mikrofon aus";
+    }
+}
+
+function lobbyToggleMic() {
+    _lobbyMicOn = !_lobbyMicOn;
+    const btn = document.getElementById("lobby-btn-mic");
+    if (_lobbyMicOn) {
+        btn.textContent = "🎤 Mikrofon an";
+        btn.classList.add("active"); btn.classList.remove("muted");
+    } else {
+        btn.textContent = "🔇 Mikrofon aus";
+        btn.classList.remove("active"); btn.classList.add("muted");
+    }
+    if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = _lobbyMicOn);
+}
+
+function lobbyToggleCam() {
+    _lobbyCamOn = !_lobbyCamOn;
+    const btn    = document.getElementById("lobby-btn-cam");
+    const vid    = document.getElementById("lobby-video");
+    const noVid  = document.getElementById("lobby-no-video");
+    if (_lobbyCamOn) {
+        btn.textContent = "📷 Kamera an";
+        btn.classList.add("active"); btn.classList.remove("muted");
+        vid.style.display = "";
+        noVid.style.display = "none";
+    } else {
+        btn.textContent = "📷 Kamera aus";
+        btn.classList.remove("active"); btn.classList.add("muted");
+        vid.style.display = "none";
+        noVid.style.display = "flex";
+    }
+    if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = _lobbyCamOn);
+}
+
+function lobbyJoin() {
+    // Lobby-State auf Meeting-State übertragen
+    micActive = _lobbyMicOn;
+    camActive = _lobbyCamOn;
+
+    // Meeting-Buttons synchronisieren
+    const micBtn = document.getElementById("btn-mic");
+    const camBtn = document.getElementById("btn-cam");
+    if (micBtn) { micBtn.textContent = micActive ? "🎤 Mikrofon" : "🔇 Stumm"; micBtn.classList.toggle("active", micActive); }
+    if (camBtn) { camBtn.textContent = camActive ? "📷 Kamera"   : "📷 Aus";   camBtn.classList.toggle("active", camActive); }
+
+    // Lobby-Video auf Meeting-Tile umhängen
+    const meetingVid = document.getElementById("video-local");
+    const noVideoMeeting = document.getElementById("no-video-local");
+    if (meetingVid) {
+        meetingVid.srcObject = localStream;
+        if (noVideoMeeting) noVideoMeeting.style.display = camActive && localStream.getVideoTracks().length > 0 ? "none" : "flex";
+    }
+
+    // Lobby-Video-Stream stoppen (nicht den Stream selbst, nur das lobby-Element)
+    const lobbyVid = document.getElementById("lobby-video");
+    if (lobbyVid) lobbyVid.srcObject = null;
+
+    // Lobby ausblenden
+    const lobby = document.getElementById("lobby");
+    lobby.style.opacity = "0";
+    lobby.style.transition = "opacity 0.25s";
+    setTimeout(() => { lobby.style.display = "none"; }, 250);
+
+    connectWS();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Init
 // ─────────────────────────────────────────────────────────────────────────────
 (async () => {
-    await initMedia();
-    connectWS();
+    await initLobby();
+    // Focus Join-Button für Keyboard-Nutzer
+    const joinBtn = document.getElementById("lobby-join");
+    if (joinBtn) joinBtn.focus();
 })();
 </script>
 <div id="wb-text-overlay">
