@@ -78,16 +78,34 @@ class PortalLoginView(View):
             django_user = _User.objects.get(email__iexact=email, portal_profile__isnull=False)
         except _User.DoesNotExist:
             # Fallback: E-Mail liegt am Vertrag, nicht am Django-User (Legacy/Sync-Problem)
+            # Suche zuerst mit is_active=True; falls nicht gefunden auch ohne (nach Resend-Invite)
             try:
                 from apps.portal.models import StudentPortalLink as _SPL
 
-                spl = _SPL.objects.select_related("portal_user__user").get(
-                    contract__email__iexact=email,
-                    is_active=True,
-                )
+                try:
+                    spl = _SPL.objects.select_related("portal_user__user").get(
+                        contract__email__iexact=email,
+                        is_active=True,
+                    )
+                except _SPL.DoesNotExist:
+                    # Nach Resend-Invite ist is_active=False; Passwort ist aber noch gültig
+                    spl = _SPL.objects.select_related("portal_user__user").get(
+                        contract__email__iexact=email,
+                    )
                 django_user = spl.portal_user.user
-                # Selbstheilung: E-Mail am Django-User setzen
-                if not django_user.email:
+                # Selbstheilung: E-Mail am Django-User auf aktuelle Contract-E-Mail setzen
+                contract_email = spl.contract.email or ""
+                if contract_email and contract_email.lower() != (django_user.email or "").lower():
+                    old_email = django_user.email
+                    django_user.email = contract_email
+                    django_user.save(update_fields=["email"])
+                    logger.info(
+                        "Portal-Login: E-Mail für User pk=%s aktualisiert (%r → %r)",
+                        django_user.pk,
+                        old_email,
+                        contract_email,
+                    )
+                elif not django_user.email:
                     django_user.email = email
                     django_user.save(update_fields=["email"])
                     logger.info("Portal-Login: E-Mail für User pk=%s nachgetragen", django_user.pk)
