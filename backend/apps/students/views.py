@@ -282,11 +282,17 @@ class PortalInviteResendView(LoginRequiredMixin, View):
         spl.is_active = False
         spl.save(update_fields=["invite_token", "invite_token_created_at", "is_active"])
 
-        # Email am Django-User sicherstellen (Backfill für Accounts ohne Email)
+        # Email am Django-User auf aktuelle Contract-Email synchronisieren
+        # (nicht nur wenn leer — auch wenn die Contract-Email nachträglich geändert wurde)
         django_user = spl.portal_user.user
-        if contract.email and not django_user.email:
+        if contract.email and contract.email.lower() != (django_user.email or "").lower():
             django_user.email = contract.email
             django_user.save(update_fields=["email"])
+            logger.info(
+                "Resend invite: E-Mail für User pk=%s aktualisiert auf %r",
+                django_user.pk,
+                contract.email,
+            )
 
         if contract.email:
             try:
