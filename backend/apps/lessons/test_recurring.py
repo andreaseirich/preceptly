@@ -314,9 +314,18 @@ class CalendarServiceTest(TestCase):
 
     def test_recurring_lessons_appear_in_calendar(self):
         """Test: Serientermine erzeugen Lessons, die im Kalender auftauchen (nur zukünftige)."""
+        from calendar import monthrange
         from django.utils import timezone
 
         today = timezone.localdate()
+
+        # Skip wenn kein Montag oder Mittwoch mehr im laufenden Monat übrig ist
+        _, last_day = monthrange(today.year, today.month)
+        has_eligible = any(
+            (today + timedelta(days=d)).weekday() in (0, 2) for d in range(last_day - today.day + 1)
+        )
+        if not has_eligible:
+            self.skipTest("No Monday/Wednesday remaining in current month")
 
         # Erstelle RecurringLesson ab heute
         recurring = RecurringLesson.objects.create(
