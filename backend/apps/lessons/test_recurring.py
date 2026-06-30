@@ -315,6 +315,7 @@ class CalendarServiceTest(TestCase):
     def test_recurring_lessons_appear_in_calendar(self):
         """Test: Serientermine erzeugen Lessons, die im Kalender auftauchen (nur zukünftige)."""
         from calendar import monthrange
+
         from django.utils import timezone
 
         today = timezone.localdate()
