@@ -99,7 +99,7 @@ class StudentLimitWarningTest(TestCase):
     def test_new_free_user_gets_warning_at_6th_student(self):
         """New free user with 5 existing students sees a warning when creating the 6th."""
         user = _make_new_free_user("new_free_limit")
-        for i in range(FREE_STUDENT_LIMIT):
+        for _i in range(FREE_STUDENT_LIMIT):
             _make_student(user)
 
         self.assertEqual(Contract.objects.filter(user=user).count(), FREE_STUDENT_LIMIT)
@@ -120,7 +120,7 @@ class StudentLimitWarningTest(TestCase):
     def test_old_free_user_no_warning_beyond_limit(self):
         """Grandfathered free user (joined before cutoff) gets no warning even with 6+ students."""
         user = _make_old_free_user("old_free_limit")
-        for i in range(FREE_STUDENT_LIMIT):
+        for _i in range(FREE_STUDENT_LIMIT):
             _make_student(user)
 
         response = self._post_new_student(user)
@@ -139,7 +139,7 @@ class StudentLimitWarningTest(TestCase):
     def test_starter_user_no_warning_beyond_limit(self):
         """Starter/paid user gets no warning even with 6+ students."""
         user = _make_paid_user("starter_limit")
-        for i in range(FREE_STUDENT_LIMIT):
+        for _i in range(FREE_STUDENT_LIMIT):
             _make_student(user)
 
         response = self._post_new_student(user)
@@ -158,7 +158,7 @@ class StudentLimitWarningTest(TestCase):
     def test_new_free_user_below_limit_no_warning(self):
         """New free user below the student limit gets no limit warning."""
         user = _make_new_free_user("new_free_under")
-        for i in range(FREE_STUDENT_LIMIT - 1):
+        for _i in range(FREE_STUDENT_LIMIT - 1):
             _make_student(user)
 
         response = self._post_new_student(user)
