@@ -6,6 +6,8 @@ Tiers (ascending): free → starter → pro → business
 Feature access is determined by subscription_tier on UserProfile.
 """
 
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from enum import StrEnum
 
 from django.contrib.auth.models import User
@@ -60,6 +62,11 @@ FEATURE_MIN_TIER: dict[Feature, Tier] = {
 # Starter-tier limits
 STARTER_DOCUMENT_LIMIT = 3
 STARTER_PORTAL_BOOKING_MONTHLY_LIMIT = 3
+
+# Free-plan soft limits (only for accounts created on or after FREE_PLAN_LIMITS_SINCE)
+FREE_PLAN_LIMITS_SINCE = datetime(2026, 7, 2, 12, 0, 0, tzinfo=dt_timezone.utc)
+FREE_STUDENT_LIMIT = 5
+FREE_INVOICE_MONTHLY_LIMIT = 8
 
 
 def get_user_tier(user: User | None) -> Tier:
@@ -141,6 +148,15 @@ def portal_booking_limit_reached(tutor: User | None) -> bool:
     if get_user_tier(tutor) == Tier.STARTER:
         return get_portal_booking_count_this_month(tutor) >= STARTER_PORTAL_BOOKING_MONTHLY_LIMIT
     return False
+
+
+def is_new_free_user(user: User | None) -> bool:
+    """True for free-tier users created on/after FREE_PLAN_LIMITS_SINCE (soft limits apply)."""
+    if not user or not user.is_authenticated:
+        return False
+    if get_user_tier(user) != Tier.FREE:
+        return False
+    return user.date_joined >= FREE_PLAN_LIMITS_SINCE
 
 
 def require_feature_json(user: User | None, feature: Feature, message: str | None = None):

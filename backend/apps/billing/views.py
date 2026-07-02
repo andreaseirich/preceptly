@@ -15,8 +15,9 @@ from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views import View
@@ -238,10 +239,23 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
+        from apps.core.feature_flags import FREE_INVOICE_MONTHLY_LIMIT, is_new_free_user
+
         period_start = form.cleaned_data["period_start"]
         period_end = form.cleaned_data["period_end"]
         contract = form.cleaned_data.get("contract")
         institute = form.cleaned_data.get("institute") or None
+
+        show_invoice_limit_warning = False
+        if is_new_free_user(self.request.user):
+            now = timezone.now()
+            month_count = Invoice.objects.filter(
+                owner=self.request.user,
+                created_at__year=now.year,
+                created_at__month=now.month,
+            ).count()
+            if month_count >= FREE_INVOICE_MONTHLY_LIMIT:
+                show_invoice_limit_warning = True
 
         try:
             invoice = InvoiceService.create_invoice_from_lessons(
@@ -251,6 +265,17 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                 institute=institute,
                 user=self.request.user,
             )
+            if show_invoice_limit_warning:
+                messages.warning(
+                    self.request,
+                    format_html(
+                        _(
+                            "Free plan: the limit of 8 invoices per month has been reached. "
+                            'Your invoice was created — <a href="{}">upgrade to a paid plan</a> for unlimited invoices.'
+                        ),
+                        reverse("core:landing") + "#pricing",
+                    ),
+                )
             lesson_count = invoice.items.count()
             messages.success(
                 self.request,
