@@ -45,6 +45,7 @@ class RegisterViewTest(TestCase):
         response = self.client.post(
             reverse("core:register"),
             {"username": "taken", "password1": "SecurePass123!", "password2": "SecurePass123!"},
+            HTTP_ACCEPT_LANGUAGE="en",
         )
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()

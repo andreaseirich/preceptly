@@ -76,7 +76,10 @@ class ConflictVisibilityTest(TestCase):
         self.assertGreater(len(quota_conflicts), 0, "Lesson4 should have a quota conflict")
 
         # Access conflict detail view
-        response = self.client.get(reverse("lessons:conflicts", kwargs={"pk": lesson4.pk}))
+        response = self.client.get(
+            reverse("lessons:conflicts", kwargs={"pk": lesson4.pk}),
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
 
         self.assertEqual(response.status_code, 200)
         # Should show quota conflict (template renders "Contract Quota Conflict")
@@ -93,7 +96,10 @@ class ConflictVisibilityTest(TestCase):
         )
 
         # Access conflict detail view
-        response = self.client.get(reverse("lessons:conflicts", kwargs={"pk": lesson.pk}))
+        response = self.client.get(
+            reverse("lessons:conflicts", kwargs={"pk": lesson.pk}),
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
 
         self.assertEqual(response.status_code, 200)
         # Should show no conflicts

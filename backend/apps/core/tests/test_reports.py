@@ -58,7 +58,9 @@ class ReportsPremiumGatingTest(TestCase):
     def test_premium_sees_full_sections(self):
         """Premium user sees full reports with computed sections."""
         self.client.login(username="premium", password="test")
-        response = self.client.get(reverse("core:reports") + "?year=2025&month=3")
+        response = self.client.get(
+            reverse("core:reports") + "?year=2025&month=3", HTTP_ACCEPT_LANGUAGE="en"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Revenue (paid invoices, last 6 months)")
         self.assertContains(response, "Hours taught (last 6 months)")
