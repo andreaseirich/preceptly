@@ -723,6 +723,40 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
+def _euer_data(user, year: int) -> dict:
+    """Compute EÜR figures for *user* and *year*. Used by EuerView and EuerPdfView."""
+    available_year_dates = (
+        Invoice.objects.filter(owner=user, status="paid", paid_at__isnull=False)
+        .dates("paid_at", "year")
+        .order_by("-paid_at")
+    )
+    available_years = [d.year for d in available_year_dates]
+    if year not in available_years:
+        available_years = sorted(set(available_years + [year]), reverse=True)
+
+    total_income = Invoice.objects.filter(
+        owner=user, status="paid", paid_at__isnull=False, paid_at__year=year
+    ).aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
+
+    expenses_qs = list(Expense.objects.filter(user=user, date__year=year))
+    total_expenses = sum((e.effective_amount for e in expenses_qs), Decimal("0.00"))
+
+    category_labels = dict(Expense.CATEGORY_CHOICES)
+    category_sums: dict = {}
+    for e in expenses_qs:
+        label = category_labels.get(e.category, e.category)
+        category_sums[label] = category_sums.get(label, Decimal("0.00")) + e.effective_amount
+    expenses_by_category = {k: v for k, v in sorted(category_sums.items()) if v > 0}
+
+    return {
+        "available_years": available_years,
+        "total_income": total_income,
+        "expenses_by_category": expenses_by_category,
+        "total_expenses": total_expenses,
+        "profit": total_income - total_expenses,
+    }
+
+
 class EuerView(LoginRequiredMixin, TemplateView):
     """EÜR – Einnahmenüberschussrechnung nach §4 Abs.3 EStG."""
 
@@ -730,7 +764,6 @@ class EuerView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
         now = timezone.now()
 
         try:
@@ -738,40 +771,39 @@ class EuerView(LoginRequiredMixin, TemplateView):
         except (ValueError, TypeError):
             year = now.year
 
-        available_year_dates = (
-            Invoice.objects.filter(owner=user, status="paid", paid_at__isnull=False)
-            .dates("paid_at", "year")
-            .order_by("-paid_at")
-        )
-        available_years = [d.year for d in available_year_dates]
-        if year not in available_years:
-            available_years = sorted(set(available_years + [year]), reverse=True)
-
-        total_income = Invoice.objects.filter(
-            owner=user, status="paid", paid_at__isnull=False, paid_at__year=year
-        ).aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
-
-        expenses_qs = list(Expense.objects.filter(user=user, date__year=year))
-        total_expenses = sum((e.effective_amount for e in expenses_qs), Decimal("0.00"))
-
-        category_labels = dict(Expense.CATEGORY_CHOICES)
-        category_sums: dict = {}
-        for e in expenses_qs:
-            label = category_labels.get(e.category, e.category)
-            category_sums[label] = category_sums.get(label, Decimal("0.00")) + e.effective_amount
-        expenses_by_category = {k: v for k, v in sorted(category_sums.items()) if v > 0}
-
-        context.update(
-            {
-                "year": year,
-                "available_years": available_years,
-                "total_income": total_income,
-                "expenses_by_category": expenses_by_category,
-                "total_expenses": total_expenses,
-                "profit": total_income - total_expenses,
-            }
-        )
+        data = _euer_data(self.request.user, year)
+        context.update({"year": year, **data})
         return context
+
+
+class EuerPdfView(LoginRequiredMixin, View):
+    """Download EÜR as a formatted PDF (reportlab)."""
+
+    def get(self, request, *args, **kwargs):
+        from apps.core.pdf_service import generate_euer_pdf
+
+        now = timezone.now()
+        try:
+            year = max(2000, min(int(request.GET.get("year", now.year)), 2100))
+        except (ValueError, TypeError):
+            year = now.year
+
+        data = _euer_data(request.user, year)
+        language = getattr(request, "LANGUAGE_CODE", "de")
+
+        pdf_bytes = generate_euer_pdf(
+            user=request.user,
+            year=year,
+            total_income=data["total_income"],
+            expenses_by_category=data["expenses_by_category"],
+            total_expenses=data["total_expenses"],
+            profit=data["profit"],
+            language=language,
+        )
+
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="euer-{year}.pdf"'
+        return response
 
 
 class AcceptAvvView(LoginRequiredMixin, View):

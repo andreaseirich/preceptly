@@ -4,19 +4,8 @@
 
 {% block title %}{% trans "Income Surplus Statement (EÜR)" %} {{ year }} - Preceptly{% endblock %}
 
-{% block extra_head %}
-<style>
-@media print {
-    nav, .no-print { display: none !important; }
-    body { background: #fff !important; color: #000 !important; }
-    .table th, .table td { border: 1px solid #ccc; padding: 6px 10px; }
-    .table { border-collapse: collapse; width: 100%; }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px;" class="no-print">
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px;">
     <h1 style="margin:0;">{% trans "Income Surplus Statement (EÜR)" %} {{ year }}</h1>
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <form method="get" action="" style="display:flex; gap:8px; align-items:center;">
@@ -28,12 +17,12 @@
             </select>
             <button type="submit" class="btn">{% trans "Apply" %}</button>
         </form>
-        <button class="btn" onclick="window.print()">🖨 {% trans "Print" %}</button>
+        <a href="{% url 'core:euer_pdf' %}?year={{ year }}" class="btn">
+            &#8595; {% trans "Download PDF" %}
+        </a>
         <a href="{% url 'core:tax_year' %}?year={{ year }}" class="btn btn-secondary">&#8592; {% trans "Tax year overview" %}</a>
     </div>
 </div>
-
-<h1 class="print-only" style="display:none;">{% trans "Income Surplus Statement (EÜR)" %} {{ year }}</h1>
 
 <table class="table" style="max-width:600px;">
     <thead>
