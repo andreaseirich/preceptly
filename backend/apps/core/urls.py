@@ -7,6 +7,7 @@ from django.urls import path
 from apps.core import views
 from apps.core.views import (
     AcceptAvvView,
+    EuerPdfView,
     EuerView,
     ExpenseCreateView,
     ExpenseDeleteView,
@@ -71,6 +72,7 @@ urlpatterns = [
     path("expenses/<int:pk>/edit/", ExpenseUpdateView.as_view(), name="expense_update"),
     path("expenses/<int:pk>/delete/", ExpenseDeleteView.as_view(), name="expense_delete"),
     path("tax-year/euer/", EuerView.as_view(), name="euer"),
+    path("tax-year/euer/pdf/", EuerPdfView.as_view(), name="euer_pdf"),
     path("messages/", TutorMessagesOverviewView.as_view(), name="tutor_messages_overview"),
     path("students/<int:pk>/messages/", TutorMessageView.as_view(), name="tutor_messages"),
     path("api/detect-timezone/", views.AutoDetectTimezoneView.as_view(), name="detect_timezone"),
