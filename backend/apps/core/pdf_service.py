@@ -185,7 +185,7 @@ def _build_info_table(
         right_lines.append(("", "issuer_detail"))
 
     rows = []
-    for (lt, ls), (rt, rs) in zip(left_lines, right_lines):
+    for (lt, ls), (rt, rs) in zip(left_lines, right_lines, strict=True):
         rows.append([Paragraph(lt, styles[ls]), Paragraph(rt, styles[rs])])
 
     t = Table(rows, colWidths=[page_width * 0.6, page_width * 0.4])
@@ -253,8 +253,8 @@ def generate_euer_pdf(
         billing_address = getattr(profile, "billing_address", "") or ""
         billing_tax_number = getattr(profile, "billing_tax_number", "") or ""
         billing_email = getattr(profile, "billing_email", "") or ""
-    except Exception:
-        pass
+    except Exception:  # noqa: BLE001
+        _logger.debug("Could not load billing profile for user %s", user.pk)
     if not billing_name:
         billing_name = user.get_full_name() or user.username
 
