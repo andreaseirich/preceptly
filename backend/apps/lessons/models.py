@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from apps.contracts.models import Contract
+from apps.lessons.recurring_models import RecurringLesson, RecurringSession  # noqa: F401
 
 
 class Session(models.Model):
