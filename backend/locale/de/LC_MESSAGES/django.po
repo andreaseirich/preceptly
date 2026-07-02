@@ -6258,3 +6258,54 @@ msgstr "Rechnungsdaten speichern"
 
 msgid "Delete invoice"
 msgstr "Rechnung löschen"
+
+msgid "Add to home screen"
+msgstr "Zum Startbildschirm hinzufügen"
+
+msgid "Add Preceptly to your home screen for quick, app-like access."
+msgstr "Füge Preceptly zu deinem Startbildschirm hinzu – für schnellen App-ähnlichen Zugriff."
+
+msgid "Open Preceptly in Safari (not Chrome or Firefox)."
+msgstr "Öffne Preceptly in Safari (nicht Chrome oder Firefox)."
+
+msgid "Tap the Share button at the bottom of the browser."
+msgstr "Tippe auf das Teilen-Symbol am unteren Rand des Browsers."
+
+msgid "Select \"Add to Home Screen\"."
+msgstr "Wähle \"Zum Home-Bildschirm hinzufügen\"."
+
+msgid "Open the browser menu (three dots in the top right)."
+msgstr "Öffne das Browser-Menü (drei Punkte oben rechts)."
+
+msgid "Tap \"Install app\" or \"Add to Home Screen\"."
+msgstr "Tippe auf \"App installieren\" oder \"Zum Startbildschirm\"."
+
+msgid "Or tap the button below:"
+msgstr "Oder tippe auf die Schaltfläche unten:"
+
+msgid "Install Preceptly"
+msgstr "Preceptly installieren"
+
+msgid "Click the install icon in the browser address bar."
+msgstr "Klicke auf das Installieren-Symbol in der Adressleiste."
+
+msgid "Or open the browser menu and select \"Install Preceptly\"."
+msgstr "Oder öffne das Browser-Menü und wähle \"Preceptly installieren\"."
+
+msgid "Preceptly can be used as an app on your home screen."
+msgstr "Preceptly kann als App auf deinem Startbildschirm genutzt werden."
+
+msgid "Show me how"
+msgstr "Zeig mir wie"
+
+msgid "Not now"
+msgstr "Nicht jetzt"
+
+msgid "App installation hint"
+msgstr "Hinweis: App installieren"
+
+msgid "App on home screen"
+msgstr "App auf dem Startbildschirm"
+
+msgid "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser."
+msgstr "Nutze Preceptly als App direkt vom Startbildschirm – schnell und bequem, ohne Browser."
