@@ -9,6 +9,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
+from django.utils.translation import override as translation_override
 
 from apps.contracts.models import Contract
 from apps.lessons.email_service import send_booking_notification
@@ -68,7 +69,8 @@ class SendBookingNotificationTest(TestCase):
     def test_send_mail_called_with_correct_params_when_notification_email_set(self, mock_send_mail):
         """NOTIFICATION_EMAIL present -> send_mail called with correct subject/from/to."""
         mock_send_mail.return_value = 1
-        result = send_booking_notification(self.lesson)
+        with translation_override("en"):
+            result = send_booking_notification(self.lesson)
         self.assertTrue(result)
         mock_send_mail.assert_called_once()
         call_kw = mock_send_mail.call_args[1]

@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.utils.translation import override as translation_override
 
 from apps.billing.models import InvoiceItem
 from apps.billing.services import InvoiceService
@@ -99,10 +100,11 @@ class AutomaticInvoiceCreationTest(TestCase):
         self.assertEqual(invoice1.items.first().lesson, lesson)
 
         # Versuche zweite Rechnung zu erstellen (sollte ValueError werfen, da keine Lessons mehr verfügbar)
-        with self.assertRaises(ValueError) as context:
-            InvoiceService.create_invoice_from_lessons(
-                date(2025, 8, 1), date(2025, 8, 31), self.contract
-            )
+        with translation_override("en"):
+            with self.assertRaises(ValueError) as context:
+                InvoiceService.create_invoice_from_lessons(
+                    date(2025, 8, 1), date(2025, 8, 31), self.contract
+                )
 
         # Prüfe, dass die Fehlermeldung korrekt ist
         self.assertIn("No billable lessons found", str(context.exception))

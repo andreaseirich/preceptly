@@ -8,6 +8,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
+from django.utils.translation import override as translation_override
 
 from apps.billing.forms import InvoiceCreateForm, _get_institute_choices_for_user
 from apps.billing.services import InvoiceService
@@ -74,7 +75,8 @@ class InstituteFilterTest(TestCase):
 
     def test_institute_choices_include_only_tutor_institutes(self):
         """Invoice form lists only institutes from tutor's contracts."""
-        choices = _get_institute_choices_for_user(self.user)
+        with translation_override("en"):
+            choices = _get_institute_choices_for_user(self.user)
         self.assertIn(("", "All institutes"), choices)
         self.assertIn(("Institut Alpha", "Institut Alpha"), choices)
         self.assertIn(("Institut Beta", "Institut Beta"), choices)
@@ -140,6 +142,7 @@ class InstituteFilterTest(TestCase):
                 "period_end": "2025-03-31",
                 "institute": "Institut Alpha",
             },
+            HTTP_ACCEPT_LANGUAGE="en",
         )
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")

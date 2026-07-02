@@ -40,7 +40,7 @@ class RecurrenceWeekdaysTest(TestCase):
 
     def test_weekday_selection_in_form(self):
         """Test: Weekday checkboxes are visible and functional in form."""
-        response = self.client.get(reverse("lessons:create"))
+        response = self.client.get(reverse("lessons:create"), HTTP_ACCEPT_LANGUAGE="en")
 
         self.assertEqual(response.status_code, 200)
         # Check that weekday checkboxes are present
