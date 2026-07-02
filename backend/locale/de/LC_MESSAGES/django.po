@@ -3540,12 +3540,12 @@ msgstr ""
 "Schülerdaten bleiben lokal."
 
 #: apps/core/templates/core/landing.html:308
-msgid "Simple, transparent pricing"
-msgstr "Einfache, transparente Preise"
+msgid "Costs less than one lesson — saves you hours of admin."
+msgstr "Kostet weniger als eine Stunde – spart dir Stunden Verwaltungsaufwand."
 
 #: apps/core/templates/core/landing.html:309
-msgid "Start for free. Upgrade when you need more."
-msgstr "Kostenlos starten. Upgraden, wenn du mehr brauchst."
+msgid "Preceptly starts at 4.99 € per month — less than a single tutoring hour. If you still manage students in Excel, appointments in WhatsApp and invoices in Word: the switch pays for itself on the very first invoice."
+msgstr "Preceptly kostet ab 4,99 € pro Monat – weniger als eine einzige Nachhilfestunde. Wer Schüler noch in Excel, Termine in WhatsApp und Rechnungen in Word verwaltet: Der Wechsel rechnet sich ab der ersten Rechnung."
 
 #: apps/core/templates/core/landing.html:313
 msgid "Free"
@@ -6309,3 +6309,9 @@ msgstr "App auf dem Startbildschirm"
 
 msgid "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser."
 msgstr "Nutze Preceptly als App direkt vom Startbildschirm – schnell und bequem, ohne Browser."
+
+msgid "Free plan: the limit of 5 active students has been reached. Your student was saved — <a href=\"{}\">upgrade to a paid plan</a> for unlimited students."
+msgstr "Kostenloser Plan: Die Grenze von 5 aktiven Schülern ist erreicht. Dein Schüler wurde gespeichert – <a href=\"{}\">Auf einen bezahlten Plan upgraden</a> für unbegrenzte Schüler."
+
+msgid "Free plan: the limit of 8 invoices per month has been reached. Your invoice was created — <a href=\"{}\">upgrade to a paid plan</a> for unlimited invoices."
+msgstr "Kostenloser Plan: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Plan upgraden</a> für unbegrenzte Rechnungen."
