@@ -21,11 +21,11 @@ class I18nTestCase(TestCase):
         self.client = Client()
         self.user = User.objects.create_user(username="testuser_i18n", password="password")
 
-    def test_default_language_is_english(self):
-        """Test that default language is English."""
+    def test_default_language_is_german(self):
+        """Test that default language is German."""
         from django.conf import settings
 
-        self.assertEqual(settings.LANGUAGE_CODE, "en")
+        self.assertEqual(settings.LANGUAGE_CODE, "de")
 
     def test_language_switching(self):
         """Test that language switching works."""
@@ -63,12 +63,10 @@ class I18nTestCase(TestCase):
         self.assertIn(b"language", response.content)
 
     def test_english_texts_in_templates(self):
-        """Test that templates use English as primary language."""
+        """Test that templates render English when Accept-Language: en is sent."""
         self.client.force_login(self.user)
-        activate("en")
-        response = self.client.get(reverse("core:dashboard"))
+        response = self.client.get(reverse("core:dashboard"), HTTP_ACCEPT_LANGUAGE="en")
         self.assertEqual(response.status_code, 200)
-        # Check for English text
         self.assertIn(b"Dashboard", response.content)
         self.assertIn(b"Students", response.content)
         self.assertIn(b"Calendar", response.content)
@@ -230,3 +228,35 @@ class I18nTestCase(TestCase):
         self.assertIn(b"Als gesendet markieren", response.content)
         self.assertNotIn(b"Generate PDF", response.content)
         self.assertNotIn(b"Mark as sent", response.content)
+
+
+class AcceptLanguageDetectionTestCase(TestCase):
+    """Verify LocaleMiddleware auto-detects language from Accept-Language header."""
+
+    def _get_login(self, accept_language=None):
+        client = Client()
+        kwargs = {}
+        if accept_language is not None:
+            kwargs["HTTP_ACCEPT_LANGUAGE"] = accept_language
+        return client.get(reverse("core:login"), **kwargs)
+
+    def test_no_accept_language_header_yields_german(self):
+        """Request with no Accept-Language falls back to LANGUAGE_CODE=de."""
+        response = self._get_login()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Benutzername", response.content)
+        self.assertNotIn(b"Username", response.content)
+
+    def test_accept_language_en_yields_english(self):
+        """Request with Accept-Language: en yields English strings."""
+        response = self._get_login(accept_language="en")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Username", response.content)
+        self.assertNotIn(b"Benutzername", response.content)
+
+    def test_accept_language_de_yields_german(self):
+        """Request with Accept-Language: de yields German strings."""
+        response = self._get_login(accept_language="de")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Benutzername", response.content)
+        self.assertNotIn(b"Username", response.content)
