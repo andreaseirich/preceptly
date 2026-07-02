@@ -29,8 +29,6 @@ _COLOR_BORDER = colors.HexColor("#e2e8f0")
 _COLOR_HEADER_BG = colors.HexColor("#1e293b")
 _COLOR_HEADER_TEXT = colors.white
 _COLOR_TOTAL_BG = colors.HexColor("#eff6ff")
-_COLOR_WARNING = colors.HexColor("#92400e")
-_COLOR_WARNING_BG = colors.HexColor("#fef3c7")
 _COLOR_MUTED = colors.HexColor("#64748b")
 _COLOR_LOSS = colors.HexColor("#c0392b")
 
@@ -50,11 +48,6 @@ _LABELS = {
         "result_label": "Gewinn / Verlust (§ 4 Abs. 3 EStG)",
         "col_category": "Position",
         "col_amount": "Betrag (EUR)",
-        "disclaimer": (
-            "Hinweis: Diese Übersicht dient nur der Orientierung und ersetzt keine"
-            " steuerliche Beratung. Bitte prüfen Sie alle Angaben sorgfältig und"
-            " konsultieren Sie bei Bedarf einen Steuerberater oder Lohnsteuerhilfeverein."
-        ),
     },
     "en": {
         "title": "Income Surplus Statement",
@@ -71,11 +64,6 @@ _LABELS = {
         "result_label": "Profit / Loss (§ 4 para. 3 EStG)",
         "col_category": "Category",
         "col_amount": "Amount (EUR)",
-        "disclaimer": (
-            "Note: This overview is for guidance only and does not replace professional"
-            " tax advice. Please verify all figures carefully and consult a tax advisor"
-            " if required."
-        ),
     },
 }
 
@@ -150,16 +138,6 @@ def _get_styles() -> dict:
             fontName="Helvetica",
             textColor=_COLOR_MUTED,
             leading=12,
-        ),
-        "warning": ParagraphStyle(
-            "EuerWarning",
-            parent=base["Normal"],
-            fontSize=9,
-            fontName="Helvetica",
-            textColor=_COLOR_WARNING,
-            leading=13,
-            leftIndent=4,
-            rightIndent=4,
         ),
     }
 
@@ -414,26 +392,6 @@ def generate_euer_pdf(
         )
     )
     elements.append(result_table)
-    elements.append(Spacer(1, 0.5 * cm))
-
-    # ── Disclaimer-Box ───────────────────────────────────────────────────────
-    disclaimer_table = Table(
-        [[Paragraph(f"⚠ {L['disclaimer']}", styles["warning"])]],
-        colWidths=[page_width],
-    )
-    disclaimer_table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, -1), _COLOR_WARNING_BG),
-                ("BOX", (0, 0), (-1, -1), 0.5, _COLOR_BORDER),
-                ("TOPPADDING", (0, 0), (-1, -1), 9),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
-                ("LEFTPADDING", (0, 0), (-1, -1), 12),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ]
-        )
-    )
-    elements.append(disclaimer_table)
 
     doc.build(elements)
     pdf_bytes = buffer.getvalue()
