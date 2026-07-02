@@ -13,7 +13,7 @@ idna==3.18
 psycopg2-binary==2.9.12
 requests==2.34.2
 sqlparse==0.5.5
-pillow==12.2.0
+pillow==12.3.0
 pip-audit>=2.10.0
 reportlab>=4.5.1
 stripe>=15.2.0
