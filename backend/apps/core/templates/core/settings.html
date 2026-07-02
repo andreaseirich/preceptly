@@ -424,6 +424,14 @@
     {% endif %}
 </div>
 
+<h2 style="margin-top: 40px;" id="pwa-install-section">{% trans "App on home screen" %}</h2>
+<p>{% trans "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser." %}</p>
+<div style="margin-top: 15px;">
+    <button type="button" class="btn" id="pwaSettingsInstallBtn">
+        📲 {% trans "Add to home screen" %}
+    </button>
+</div>
+
 <h2 style="margin-top: 40px;">{% trans "Legal agreements" %}</h2>
 <div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
 {% if profile.avv_accepted_at %}
