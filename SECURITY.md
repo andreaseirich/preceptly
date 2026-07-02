@@ -69,16 +69,12 @@ When using TutorFlow:
 
 CI runs `pip-audit` to check for known vulnerabilities. If a vulnerability is found in a system or transitive package (e.g. pip itself) that cannot be fixed by upgrading our direct dependencies, add a justified ignore in CI and document it here. Do not ignore application dependency vulnerabilities without a clear mitigation plan.
 
-### pip-audit: CVE-2026-3219 (pip)
+### pip-audit: CVE-2026-3219 (pip) — RESOLVED
 
-- **What it is:** pip misclassifies files that are valid **both as a tar archive and a ZIP archive** (so-called polyglot archives), always treating them as ZIP. This can lead to installing unexpected file contents when a package archive is such a polyglot. There is no known public exploit targeting TutorFlow or its supply chain via this vector.
-- **Affected version:** pip 26.0.1 (CI installs pip via `python -m pip install --upgrade pip`, which resolves to the latest release at the time).
-- **Fix version:** None released as of 2026-04-26.
-- **Our mitigation:**
-  1. We do not distribute or consume package archives crafted to be polyglot tar+ZIP files.
-  2. All dependencies are pinned in `requirements.txt` and audited on every CI run.
-  3. CI keeps `pip-audit --ignore-vuln CVE-2026-3219` until a patched pip release is available.
-- **Follow-up:** When a pip release that fixes CVE-2026-3219 is published, pin `pip` to that version in CI (`pip install pip==<version>`) and **remove** this ignore.
+- **What it is:** pip misclassifies files that are valid **both as a tar archive and a ZIP archive** (so-called polyglot archives), always treating them as ZIP. This can lead to installing unexpected file contents when a package archive is such a polyglot.
+- **Affected version:** pip < 26.1.
+- **Fix version:** pip 26.1 (released 2026-07-02).
+- **Resolution:** CI now pins `pip>=26.1.2` in the install step, which also fixes PYSEC-2026-196 (pip < 26.1.2) and CVE-2026-6357 (pip < 26.1). The `--ignore-vuln CVE-2026-3219` flag has been removed from the audit command.
 
 ### pip-audit: CVE-2026-4539 (Pygments)
 
