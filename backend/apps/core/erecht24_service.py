@@ -201,7 +201,9 @@ def handle_push(payload: dict) -> dict:
     push_type = payload.get("erecht24_type", "")
     expected_secret = getattr(settings, "ERECHT24_PUSH_SECRET", "")
 
-    if not expected_secret or not hmac.compare_digest(secret.encode(), expected_secret.encode()):
+    if not expected_secret or not hmac.compare_digest(
+        str(secret).encode(), expected_secret.encode()
+    ):
         logger.warning("e-recht24 push: invalid secret")
         return {"code": 403, "message": "forbidden"}
 
