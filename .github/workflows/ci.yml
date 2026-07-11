@@ -60,6 +60,7 @@ jobs:
           DEBUG: "False"
           SECRET_KEY: test-ci-secret-key-for-deploy-check
           ALLOWED_HOSTS: test.example.com
+          TURN_CREDENTIAL: dummy-turn-credential-for-ci-deploy-check
         run: |
           python manage.py check --deploy
 
