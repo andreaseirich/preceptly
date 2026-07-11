@@ -1,7 +1,13 @@
 """
 Tests for auth_throttle._get_client_ip with TRUSTED_PROXIES configured.
-Verifies that the rightmost-untrusted IP from X-Forwarded-For is returned
+Verifies that the leftmost (first) IP from X-Forwarded-For is returned
 when REMOTE_ADDR matches a trusted proxy (plain IP or CIDR range).
+
+Railway uses at least two internal proxy hops between the real client and the
+app (empirically verified 2026-07-11): REMOTE_ADDR=100.64.x.x (CGN range),
+X-Forwarded-For=[real-client, another-internal-hop]. The rightmost-untrusted
+algorithm would misidentify the second hop as the client; taking the leftmost
+IP is correct for this topology.
 """
 
 from django.test import RequestFactory, TestCase, override_settings
@@ -41,10 +47,10 @@ class GetClientIpTest(TestCase):
         self.assertEqual(_get_client_ip(req), "1.2.3.4")
 
     @override_settings(TRUSTED_PROXIES=["10.0.0.1"])
-    def test_trusted_proxy_reads_xff_rightmost_untrusted(self):
-        # Client=1.2.3.4, first proxy=5.5.5.5, Railway proxy=10.0.0.1
+    def test_trusted_proxy_reads_xff_leftmost(self):
+        # Client=1.2.3.4 appended first, then internal hop 5.5.5.5; leftmost is the real client.
         req = self._request("10.0.0.1", xff="1.2.3.4, 5.5.5.5")
-        self.assertEqual(_get_client_ip(req), "5.5.5.5")
+        self.assertEqual(_get_client_ip(req), "1.2.3.4")
 
     @override_settings(TRUSTED_PROXIES=["10.0.0.0/8"])
     def test_cidr_trusted_proxy_reads_xff(self):
@@ -62,7 +68,16 @@ class GetClientIpTest(TestCase):
         self.assertEqual(_get_client_ip(req), "10.0.0.1")
 
     @override_settings(TRUSTED_PROXIES=["10.0.0.1", "10.0.0.2"])
-    def test_xff_with_multiple_trusted_hops_skipped(self):
-        # Two trusted proxies in chain; client is the first non-trusted from the right.
+    def test_xff_with_multiple_hops_leftmost_is_client(self):
+        # Multiple hops in XFF; leftmost is always the real client.
         req = self._request("10.0.0.2", xff="client.ip, 10.0.0.1, 10.0.0.2")
         self.assertEqual(_get_client_ip(req), "client.ip")
+
+    @override_settings(TRUSTED_PROXIES=["100.64.0.0/10"])
+    def test_railway_multihop_real_production_pattern(self):
+        # Empirically verified Railway topology (2026-07-11):
+        # REMOTE_ADDR=100.64.0.7 (internal CGN proxy), XFF=[real-client, edge-hop].
+        # The edge hop 152.233.12.241 is not in any known trusted range, so the
+        # rightmost-untrusted algorithm would wrongly return it; leftmost is correct.
+        req = self._request("100.64.0.7", xff="145.224.72.43, 152.233.12.241")
+        self.assertEqual(_get_client_ip(req), "145.224.72.43")
