@@ -225,7 +225,7 @@ else:
 # Supports individual IPs and CIDR notation (e.g. "10.0.0.0/8").
 # On Railway (and similar PaaS), set TRUSTED_PROXIES to the internal proxy
 # range so X-Forwarded-For is evaluated and rate limits apply per real client IP.
-TRUSTED_PROXIES = env_list("TRUSTED_PROXIES", default=["127.0.0.1"])
+TRUSTED_PROXIES = env_list("TRUSTED_PROXIES", default=["100.64.0.0/10"])
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

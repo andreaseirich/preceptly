@@ -41,22 +41,26 @@ def _get_client_ip(request) -> str:
     Reverse-Proxy lief, wird X-Forwarded-For ausgewertet.
 
     TRUSTED_PROXIES unterstützt einzelne IPs und CIDR-Ranges (z.B. 10.0.0.0/8).
+
+    Railway-spezifisches Mehrfach-Hop-Verhalten (empirisch verifiziert 2026-07-11):
+    REMOTE_ADDR ist ein interner Railway-Proxy (100.64.0.0/10), X-Forwarded-For
+    enthält [echte-Client-IP, weiterer-Railway-interner-Hop]. Da der rechteste Hop
+    (152.233.12.241) selbst kein eintragbarer bekannter Proxy ist, würde der
+    Right-most-untrusted-Algorithmus ihn fälschlich als Client-IP liefern.
+    Stattdessen gilt: wenn REMOTE_ADDR vertrauenswürdig ist, ist die LINKESTE
+    (erste) IP in X-Forwarded-For die echte Client-IP.
     """
     trusted_proxies = getattr(settings, "TRUSTED_PROXIES", [])
     remote = (request.META.get("REMOTE_ADDR") or "unknown")[:64]
     xff_raw = request.META.get("HTTP_X_FORWARDED_FOR", "")
     is_trusted = _is_trusted_proxy(remote, trusted_proxies)
-    logger.info(
+    logger.debug(
         "[TRUSTED_PROXIES-DIAG] remote_addr=%s xff=%r trusted=%s", remote, xff_raw, is_trusted
     )
-    if is_trusted:
-        if xff_raw:
-            ips = [ip.strip() for ip in xff_raw.split(",") if ip.strip()]
-            # Right-most-untrusted: von rechts nach links, erste IP die kein
-            # bekannter Proxy ist gilt als echter Client.
-            for ip in reversed(ips):
-                if not _is_trusted_proxy(ip, trusted_proxies):
-                    return ip[:64]
+    if is_trusted and xff_raw:
+        ips = [ip.strip() for ip in xff_raw.split(",") if ip.strip()]
+        if ips:
+            return ips[0][:64]
     return remote or "unknown"
 
 
