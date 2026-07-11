@@ -1928,7 +1928,7 @@ class PortalProfileEditView(View):
                 else:
                     django_user.set_password(new_pw)
                     django_user.save()
-                    # Session neu setzen, damit die aktuelle Session nicht ungültig wird
+                    request.session.cycle_key()
                     request.session["portal_user_id"] = portal_user.pk
                     success_msgs.append("Passwort erfolgreich geändert.")
 
