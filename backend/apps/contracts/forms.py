@@ -1,7 +1,38 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, InstituteTierConfig
+
+
+def _validate_tiers(tiers):
+    """Validate the tiers data structure for InstituteTierConfig."""
+    if not isinstance(tiers, list) or not tiers:
+        return _("Tier list must be a non-empty list.")
+    for t in tiers:
+        if not isinstance(t, dict):
+            return _("Each tier must be an object.")
+        hours_from = t.get("hours_from")
+        if not isinstance(hours_from, (int, float)) or hours_from < 0:
+            return _("hours_from must be a non-negative number.")
+        label = t.get("label", "")
+        if not isinstance(label, str) or len(label) > 50:
+            return _("Tier label must be a string with at most 50 characters.")
+        if any(c in label for c in ("<", ">")):
+            return _("Tier label contains invalid characters.")
+    return None
+
+
+class TierConfigForm(forms.ModelForm):
+    class Meta:
+        model = InstituteTierConfig
+        fields = ["institute_name", "tiers"]
+
+    def clean_tiers(self):
+        tiers = self.cleaned_data.get("tiers")
+        error = _validate_tiers(tiers)
+        if error:
+            raise forms.ValidationError(error)
+        return tiers
 
 
 class ContractForm(forms.ModelForm):

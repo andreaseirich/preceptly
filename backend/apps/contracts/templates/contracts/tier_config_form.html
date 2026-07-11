@@ -64,9 +64,11 @@
   #tier-table input[type=text] { width: 100%; }
 </style>
 
+{{ form.tiers.value|default:"[]"|json_script:"initialTiers" }}
 <script>
 (function () {
-  const initialTiers = {{ form.tiers.value|default:"[]"|safe }};
+  const _tiersRaw = JSON.parse(document.getElementById('initialTiers').textContent);
+  const initialTiers = typeof _tiersRaw === 'string' ? JSON.parse(_tiersRaw) : (Array.isArray(_tiersRaw) ? _tiersRaw : []);
   const tbody = document.getElementById('tier-rows');
   const hiddenField = document.querySelector('[name="tiers"]');
 

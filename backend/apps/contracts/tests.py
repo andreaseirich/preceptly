@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from apps.contracts.forms import TierConfigForm
 from apps.contracts.models import Contract
 
 
@@ -59,3 +60,36 @@ class ContractModelTest(TestCase):
         )
         self.assertEqual(contract.institute, "Nachhilfe-Institut XY")
         self.assertIn("Nachhilfe-Institut XY", str(contract))
+
+
+class TierConfigFormValidationTest(TestCase):
+    """Tests for TierConfigForm.clean_tiers — XSS label rejection."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_tier", password="test")
+
+    def _form(self, tiers):
+        import json
+
+        return TierConfigForm(
+            data={"institute_name": "Test Institut", "tiers": json.dumps(tiers)},
+        )
+
+    def test_valid_tiers_accepted(self):
+        form = self._form([{"hours_from": 0, "label": "14 €/h"}])
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_label_with_lt_gt_rejected(self):
+        form = self._form([{"hours_from": 0, "label": "</script><script>x</script>"}])
+        self.assertFalse(form.is_valid())
+        self.assertIn("tiers", form.errors)
+
+    def test_label_with_lt_only_rejected(self):
+        form = self._form([{"hours_from": 0, "label": "bad<label"}])
+        self.assertFalse(form.is_valid())
+        self.assertIn("tiers", form.errors)
+
+    def test_empty_tiers_rejected(self):
+        form = self._form([])
+        self.assertFalse(form.is_valid())
+        self.assertIn("tiers", form.errors)
