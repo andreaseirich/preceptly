@@ -5,6 +5,7 @@ Forms for Session model.
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.upload_validation import validate_file_magic
 from apps.lessons.models import Session, SessionDocument
 
 
@@ -204,7 +205,6 @@ class SessionDocumentForm(forms.ModelForm):
         """Validate file size and type."""
         file = self.cleaned_data.get("file")
         if file:
-            # Maximum file size: 10 MB
             max_size = 10 * 1024 * 1024  # 10 MB
             if file.size > max_size:
                 raise forms.ValidationError(
@@ -213,12 +213,17 @@ class SessionDocumentForm(forms.ModelForm):
                     )
                 )
 
-            # Allowed file types
             allowed_extensions = [".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png"]
             file_extension = file.name.lower().split(".")[-1] if "." in file.name else ""
-            if file_extension and f".{file_extension}" not in allowed_extensions:
+            ext = f".{file_extension}" if file_extension else ""
+            if ext not in allowed_extensions:
                 raise forms.ValidationError(
                     _("File type not allowed. Allowed types: PDF, DOC, DOCX, TXT, JPG, PNG")
+                )
+
+            if ext and not validate_file_magic(file, ext):
+                raise forms.ValidationError(
+                    _("File type not allowed. File content does not match the extension.")
                 )
 
         return file
@@ -264,10 +269,18 @@ class MultipleSessionDocumentForm(forms.Form):
                 )
 
             file_extension = file.name.lower().split(".")[-1] if "." in file.name else ""
-            if file_extension and f".{file_extension}" not in allowed_extensions:
+            ext = f".{file_extension}" if file_extension else ""
+            if ext not in allowed_extensions:
                 raise forms.ValidationError(
                     _(
                         "File '{name}' has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, JPG, PNG"
+                    ).format(name=file.name)
+                )
+
+            if ext and not validate_file_magic(file, ext):
+                raise forms.ValidationError(
+                    _(
+                        "File '{name}' has an invalid type. File content does not match the extension."
                     ).format(name=file.name)
                 )
 

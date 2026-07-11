@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django_ratelimit.decorators import ratelimit
 
+from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
 
@@ -1250,7 +1251,13 @@ class PortalDocumentsView(View):
             messages.error(request, "Die Datei ist zu groß. Maximale Dateigröße: 50 MB.")
             return redirect("portal:documents", student_pk=student_pk)
 
-        name = request.POST.get("name", "").strip()
+        if not validate_file_magic(uploaded_file, ext):
+            messages.error(
+                request, "Dateityp nicht erlaubt (Inhalt stimmt nicht mit Dateiendung überein)."
+            )
+            return redirect("portal:documents", student_pk=student_pk)
+
+        name = sanitize_doc_name(request.POST.get("name", "").strip() or uploaded_file.name)
         StudentDocument.objects.create(
             student=student,
             file=uploaded_file,
