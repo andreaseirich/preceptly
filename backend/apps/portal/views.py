@@ -1,11 +1,14 @@
 import datetime as _dt
 import logging
 import os
+import secrets
 import uuid
 from calendar import monthcalendar as _monthcalendar
 
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -524,12 +527,9 @@ class PortalPasswordResetRequestView(View):
                 # Parent: use ParentStudentLink (not StudentPortalLink)
                 link = ParentStudentLink.objects.filter(parent=portal_user).first()
             if link:
-                link.invite_token = uuid.uuid4().hex
-                # Gültigkeit sicherstellen: Timestamp setzen + Link deaktivieren,
-                # damit _get_link() den Reset-Token akzeptiert (auch nach erster Aktivierung)
-                link.invite_token_created_at = timezone.now()
-                link.is_active = False
-                link.save()
+                link.reset_token = secrets.token_urlsafe(32)
+                link.reset_token_created_at = timezone.now()
+                link.save(update_fields=["reset_token", "reset_token_created_at"])
                 # Get recipient email: user.email if available, else student.email
                 recipient = user.email or link.contract.email
                 if recipient:
@@ -538,7 +538,7 @@ class PortalPasswordResetRequestView(View):
                     from django.template.loader import render_to_string
 
                     site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
-                    reset_url = f"{site_url}/portal/activate/{link.invite_token}/"
+                    reset_url = f"{site_url}/portal/password-reset/confirm/{link.reset_token}/"
                     context = {
                         "student": link.contract,
                         "reset_url": reset_url,
@@ -563,6 +563,69 @@ class PortalPasswordResetRequestView(View):
         ):
             pass  # Existenz von Accounts nicht preisgeben
         return render(request, self.template_name, {"sent": True})
+
+
+class PortalPasswordResetConfirmView(View):
+    template_name = "portal/password_reset_confirm.html"
+
+    def _get_link(self, token):
+        from datetime import timedelta
+
+        cutoff = timezone.now() - timedelta(days=7)
+        link = StudentPortalLink.objects.filter(
+            reset_token=token, reset_token_created_at__gte=cutoff
+        ).first()
+        if link:
+            return link, link.portal_user
+        link = ParentStudentLink.objects.filter(
+            reset_token=token, reset_token_created_at__gte=cutoff
+        ).first()
+        if link:
+            return link, link.parent
+        return None, None
+
+    def get(self, request, token):
+        link, portal_user = self._get_link(token)
+        if link is None:
+            return render(request, self.template_name, {"token": token, "error_expired": True})
+        return render(request, self.template_name, {"token": token, "student": link.contract})
+
+    def post(self, request, token):
+        link, portal_user = self._get_link(token)
+        if link is None:
+            return render(request, self.template_name, {"token": token, "error_expired": True})
+        password = request.POST.get("password", "").strip()
+        password2 = request.POST.get("password_confirm", "").strip()
+        if password != password2:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "student": link.contract,
+                    "error": "Die Passwörter stimmen nicht überein.",
+                },
+            )
+        try:
+            validate_password(password, portal_user.user)
+        except ValidationError as e:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "student": link.contract,
+                    "error": " ".join(e.messages),
+                },
+            )
+        portal_user.user.set_password(password)
+        portal_user.user.save()
+        link.reset_token = None
+        link.reset_token_created_at = None
+        link.save(update_fields=["reset_token", "reset_token_created_at"])
+        request.session.cycle_key()
+        request.session["portal_user_id"] = portal_user.pk
+        return redirect("portal:home")
 
 
 class StudentLessonDetailView(View):

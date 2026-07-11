@@ -35,6 +35,8 @@ class StudentPortalLink(models.Model):
     invite_token = models.CharField(max_length=64, unique=True, blank=True)
     invite_token_created_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
+    reset_token = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    reset_token_created_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = _("Student Portal Link")
@@ -63,6 +65,8 @@ class ParentStudentLink(models.Model):
     invite_token = models.CharField(max_length=64, unique=True, blank=True)
     invite_token_created_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
+    reset_token = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    reset_token_created_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = [("parent", "contract")]

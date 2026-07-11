@@ -1,10 +1,12 @@
 import io
+import secrets as _secrets
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
 
@@ -410,6 +412,75 @@ class PortalDispatchViewTest(TestCase):
     def test_dispatch_unauthenticated_to_login(self):
         resp = self.client.get(reverse("portal:home"))
         self.assertRedirects(resp, reverse("portal:login"), fetch_redirect_response=False)
+
+
+class PortalPasswordResetM1Test(TestCase):
+    """M1 regression: password reset must not deactivate the portal link."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.tutor = _make_tutor("tutor_m1")
+        self.contract = _make_contract(self.tutor)
+        self.student_pu = _make_portal_user(self.tutor, "student", "m1_student", "m1pass123")
+        self.link = _make_student_link(self.student_pu, self.contract, active=True)
+        self.student_pu.user.email = "m1student@example.com"
+        self.student_pu.user.save()
+
+    def test_reset_request_preserves_link_is_active(self):
+        """A password-reset request must not set is_active=False on the portal link."""
+        self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+        self.link.refresh_from_db()
+        self.assertTrue(self.link.is_active)
+
+    def test_reset_request_sets_reset_token(self):
+        """A password-reset request must populate reset_token, not touch invite_token."""
+        old_invite_token = self.link.invite_token
+        self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+        self.link.refresh_from_db()
+        self.assertIsNotNone(self.link.reset_token)
+        self.assertEqual(self.link.invite_token, old_invite_token)
+
+    def test_portal_home_accessible_while_reset_token_open(self):
+        """The student home must remain reachable while a reset token is pending."""
+        self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+        self.link.refresh_from_db()
+        self.assertTrue(self.link.is_active)
+        session = self.client.session
+        session["portal_user_id"] = self.student_pu.pk
+        session.save()
+        resp = self.client.get(reverse("portal:student_home"))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_confirm_view_valid_token_logs_in_and_changes_password(self):
+        """Confirm view with a valid reset token must update the password and log in."""
+        self.link.reset_token = _secrets.token_urlsafe(32)
+        self.link.reset_token_created_at = timezone.now()
+        self.link.save(update_fields=["reset_token", "reset_token_created_at"])
+        url = reverse("portal:password_reset_confirm", kwargs={"token": self.link.reset_token})
+        resp = self.client.post(
+            url, {"password": "N3wS3cur3Pass!", "password_confirm": "N3wS3cur3Pass!"}
+        )
+        self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
+        self.assertEqual(self.client.session.get("portal_user_id"), self.student_pu.pk)
+
+    def test_confirm_view_clears_reset_token_after_use(self):
+        """Reset token must be cleared after successful confirmation."""
+        self.link.reset_token = _secrets.token_urlsafe(32)
+        self.link.reset_token_created_at = timezone.now()
+        self.link.save(update_fields=["reset_token", "reset_token_created_at"])
+        token = self.link.reset_token
+        url = reverse("portal:password_reset_confirm", kwargs={"token": token})
+        self.client.post(url, {"password": "N3wS3cur3Pass!", "password_confirm": "N3wS3cur3Pass!"})
+        self.link.refresh_from_db()
+        self.assertIsNone(self.link.reset_token)
+
+    def test_confirm_view_invalid_token_shows_expired_error(self):
+        """Confirm view with an unknown token must show an expiry error, not 500."""
+        url = reverse("portal:password_reset_confirm", kwargs={"token": "no-such-token-xyz"})
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "abgelaufen")
 
 
 class PortalLogoutViewTest(TestCase):
