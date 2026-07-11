@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from apps.contracts.forms import ContractForm
+from apps.contracts.forms import ContractForm, TierConfigForm
 from apps.contracts.formsets import (
     ContractMonthlyPlanFormSet,
     generate_monthly_plans_for_contract,
@@ -308,7 +308,7 @@ class TierConfigListView(LoginRequiredMixin, ListView):
 
 class TierConfigCreateView(LoginRequiredMixin, CreateView):
     model = InstituteTierConfig
-    fields = ["institute_name", "tiers"]
+    form_class = TierConfigForm
     template_name = "contracts/tier_config_form.html"
     success_url = reverse_lazy("contracts:tier_config_list")
 
@@ -321,7 +321,7 @@ class TierConfigCreateView(LoginRequiredMixin, CreateView):
 
 class TierConfigUpdateView(LoginRequiredMixin, UpdateView):
     model = InstituteTierConfig
-    fields = ["institute_name", "tiers"]
+    form_class = TierConfigForm
     template_name = "contracts/tier_config_form.html"
     success_url = reverse_lazy("contracts:tier_config_list")
 
@@ -384,24 +384,3 @@ class ContractToggleActiveView(LoginRequiredMixin, View):
         else:
             messages.success(request, _("Deactivated"))
         return redirect("contracts:list")
-
-
-def _validate_tiers(tiers):
-    """
-    Validiert die tiers-Datenstruktur für TierConfig.
-    Gibt None zurück wenn valide, sonst einen lokalisierten Fehlerstring.
-    """
-    if not isinstance(tiers, list) or not tiers:
-        return _("Tier list must be a non-empty list.")
-    for t in tiers:
-        if not isinstance(t, dict):
-            return _("Each tier must be an object.")
-        hours_from = t.get("hours_from")
-        if not isinstance(hours_from, (int, float)) or hours_from < 0:
-            return _("hours_from must be a non-negative number.")
-        label = t.get("label", "")
-        if not isinstance(label, str) or len(label) > 50:
-            return _("Tier label must be a string with at most 50 characters.")
-        if any(c in label for c in ("<", ">")):
-            return _("Tier label contains invalid characters.")
-    return None
