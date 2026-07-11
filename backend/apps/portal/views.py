@@ -472,16 +472,6 @@ class PortalActivateView(View):
             return redirect("portal:login")
         password = request.POST.get("password", "").strip()
         password2 = request.POST.get("password_confirm", "").strip()
-        if len(password) < 8:
-            return render(
-                request,
-                self.template_name,
-                {
-                    "token": token,
-                    "student": link.contract,
-                    "error": "Das Passwort muss mindestens 8 Zeichen lang sein.",
-                },
-            )
         if password != password2:
             return render(
                 request,
@@ -490,6 +480,18 @@ class PortalActivateView(View):
                     "token": token,
                     "student": link.contract,
                     "error": "Die Passwörter stimmen nicht überein.",
+                },
+            )
+        try:
+            validate_password(password, portal_user.user)
+        except ValidationError as e:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "token": token,
+                    "student": link.contract,
+                    "error": " ".join(e.messages),
                 },
             )
         # E-Mail aus Vertrag übernehmen, falls Django-User sie noch nicht hat (Sync-Schutz)
@@ -1909,16 +1911,19 @@ class PortalProfileEditView(View):
 
             if not django_user.check_password(current_pw):
                 errors.append("Das aktuelle Passwort ist falsch.")
-            elif len(new_pw) < 8:
-                errors.append("Das neue Passwort muss mindestens 8 Zeichen lang sein.")
             elif new_pw != new_pw2:
                 errors.append("Die neuen Passwörter stimmen nicht überein.")
             else:
-                django_user.set_password(new_pw)
-                django_user.save()
-                # Session neu setzen, damit die aktuelle Session nicht ungültig wird
-                request.session["portal_user_id"] = portal_user.pk
-                success_msgs.append("Passwort erfolgreich geändert.")
+                try:
+                    validate_password(new_pw, django_user)
+                except ValidationError as e:
+                    errors.extend(e.messages)
+                else:
+                    django_user.set_password(new_pw)
+                    django_user.save()
+                    # Session neu setzen, damit die aktuelle Session nicht ungültig wird
+                    request.session["portal_user_id"] = portal_user.pk
+                    success_msgs.append("Passwort erfolgreich geändert.")
 
         return render(
             request,
