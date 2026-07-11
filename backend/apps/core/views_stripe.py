@@ -740,9 +740,30 @@ def _handle_subscription_deleted(subscription: dict) -> None:
             _set_premium(profile, False)
 
 
+def _extract_invoice_subscription_id(invoice: dict) -> str | None:
+    """
+    Return the subscription ID of an invoice across Stripe API versions.
+
+    Pre-Basil API versions (< 2025) carry a top-level "subscription" field;
+    Basil (2025+, includes the library default 2026-06-24.dahlia) moved it to
+    parent.subscription_details.subscription. Either place may hold an
+    expanded object instead of an ID string.
+    """
+    value = invoice.get("subscription")
+    if not value:
+        parent = invoice.get("parent")
+        if isinstance(parent, dict):
+            details = parent.get("subscription_details")
+            if isinstance(details, dict):
+                value = details.get("subscription")
+    if isinstance(value, dict):
+        value = value.get("id")
+    return value or None
+
+
 def _handle_invoice_payment_failed(invoice: dict) -> None:
     """invoice.payment_failed: if subscription status implies non-premium, set premium False."""
-    sub_id = invoice.get("subscription")
+    sub_id = _extract_invoice_subscription_id(invoice)
     if not sub_id:
         return
     profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()

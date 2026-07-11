@@ -13,12 +13,12 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.core.models import StripeWebhookEvent, UserProfile
-from apps.core.views_stripe import _price_id_to_tier
 from apps.core.stripe_utils import (
     get_email_for_stripe,
     is_premium_subscription_status,
     resolve_user_from_stripe_event,
 )
+from apps.core.views_stripe import _price_id_to_tier
 
 
 # --- stripe_utils unit tests ---
@@ -931,6 +931,105 @@ class StripeWebhookConstraintsTest(TestCase):
         UserProfile.objects.create(user=u1, stripe_customer_id="cus_same")
         with self.assertRaises(IntegrityError):
             UserProfile.objects.create(user=u2, stripe_customer_id="cus_same")
+
+
+@override_settings(
+    STRIPE_WEBHOOK_SECRET="whsec_fake",
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_MONTHLY="price_fake",
+)
+class InvoicePaymentFailedApiVersionTest(TestCase):
+    """invoice.payment_failed must work with pre-Basil and Basil (2025+) payload layouts."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_fail", password="test")
+        self.profile = UserProfile.objects.create(
+            user=self.user,
+            subscription_tier="pro",
+            subscription_source="stripe",
+            stripe_customer_id="cus_fail",
+            stripe_subscription_id="sub_fail",
+        )
+
+    def _post_invoice_failed(self, invoice, event_id):
+        event = {"id": event_id, "type": "invoice.payment_failed", "data": {"object": invoice}}
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            return self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+
+    @patch("apps.core.views_stripe.stripe.Subscription.retrieve")
+    def test_legacy_top_level_subscription_field(self, mock_retrieve):
+        """Pre-Basil layout: invoice.subscription is a top-level ID string."""
+        mock_retrieve.return_value = {"status": "past_due"}
+        invoice = {"id": "in_legacy", "customer": "cus_fail", "subscription": "sub_fail"}
+        response = self._post_invoice_failed(invoice, "evt_inv_legacy")
+        self.assertEqual(response.status_code, 200)
+        mock_retrieve.assert_called_once_with("sub_fail")
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "free")
+
+    @patch("apps.core.views_stripe.stripe.Subscription.retrieve")
+    def test_basil_parent_subscription_details_field(self, mock_retrieve):
+        """Basil (2025+) layout: subscription under parent.subscription_details."""
+        mock_retrieve.return_value = {"status": "past_due"}
+        invoice = {
+            "id": "in_basil",
+            "customer": "cus_fail",
+            "parent": {
+                "type": "subscription_details",
+                "subscription_details": {"subscription": "sub_fail"},
+            },
+        }
+        response = self._post_invoice_failed(invoice, "evt_inv_basil")
+        self.assertEqual(response.status_code, 200)
+        mock_retrieve.assert_called_once_with("sub_fail")
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "free")
+
+    @patch("apps.core.views_stripe.stripe.Subscription.retrieve")
+    def test_expanded_subscription_object(self, mock_retrieve):
+        """Expanded subscription object instead of ID string is handled."""
+        mock_retrieve.return_value = {"status": "past_due"}
+        invoice = {
+            "id": "in_exp",
+            "customer": "cus_fail",
+            "subscription": {"id": "sub_fail", "status": "past_due"},
+        }
+        response = self._post_invoice_failed(invoice, "evt_inv_exp")
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "free")
+
+    @patch("apps.core.views_stripe.stripe.Subscription.retrieve")
+    def test_invoice_without_subscription_is_ignored(self, mock_retrieve):
+        """One-off invoice without any subscription reference: no-op, premium kept."""
+        invoice = {"id": "in_none", "customer": "cus_fail"}
+        response = self._post_invoice_failed(invoice, "evt_inv_none")
+        self.assertEqual(response.status_code, 200)
+        mock_retrieve.assert_not_called()
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "pro")
+
+    @patch("apps.core.views_stripe.stripe.Subscription.retrieve")
+    def test_still_active_subscription_keeps_premium(self, mock_retrieve):
+        """Retried payment succeeded meanwhile: status active keeps premium."""
+        mock_retrieve.return_value = {"status": "active"}
+        invoice = {
+            "id": "in_active",
+            "customer": "cus_fail",
+            "parent": {"subscription_details": {"subscription": "sub_fail"}},
+        }
+        response = self._post_invoice_failed(invoice, "evt_inv_active")
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "pro")
 
 
 @override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
