@@ -4,6 +4,7 @@ Per-IP and per-username throttling; 429 on exceed.
 """
 
 import hashlib
+import ipaddress
 import time
 import unicodedata
 
@@ -19,19 +20,35 @@ def _cache_key(prefix: str, value: str) -> str:
     return f"auth_throttle:{prefix}:{h}"
 
 
+def _is_trusted_proxy(ip: str, trusted: list) -> bool:
+    """Return True if ip matches any entry in trusted (plain IP or CIDR range)."""
+    for entry in trusted:
+        if entry == ip:
+            return True
+        try:
+            if ipaddress.ip_address(ip) in ipaddress.ip_network(entry, strict=False):
+                return True
+        except ValueError:
+            pass
+    return False
+
+
 def _get_client_ip(request) -> str:
     """Lese die echte Client-IP - nur wenn der Request durch einen bekannten
-    Reverse-Proxy lief, wird X-Forwarded-For ausgewertet."""
+    Reverse-Proxy lief, wird X-Forwarded-For ausgewertet.
+
+    TRUSTED_PROXIES unterstützt einzelne IPs und CIDR-Ranges (z.B. 10.0.0.0/8).
+    """
     trusted_proxies = getattr(settings, "TRUSTED_PROXIES", [])
     remote = (request.META.get("REMOTE_ADDR") or "unknown")[:64]
-    if remote in trusted_proxies:
+    if _is_trusted_proxy(remote, trusted_proxies):
         xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
         if xff:
             ips = [ip.strip() for ip in xff.split(",") if ip.strip()]
             # Right-most-untrusted: von rechts nach links, erste IP die kein
             # bekannter Proxy ist gilt als echter Client.
             for ip in reversed(ips):
-                if ip not in trusted_proxies:
+                if not _is_trusted_proxy(ip, trusted_proxies):
                     return ip[:64]
     return remote or "unknown"
 
