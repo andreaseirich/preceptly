@@ -23,6 +23,7 @@ from django.views.generic import DeleteView, ListView
 
 from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
+from apps.core.upload_validation import validate_file_magic
 from apps.portal.models import ParentStudentLink, PortalUser, ProgressNote
 from apps.students.booking_code_service import set_booking_code
 
@@ -412,6 +413,12 @@ class StudentDocumentListView(LoginRequiredMixin, View):
                 return redirect(request.path)
             if uploaded_file.size > max_size:
                 messages.error(request, "Datei ist zu groß (max. 50 MB).")
+                return redirect(request.path)
+            if not validate_file_magic(uploaded_file, ext):
+                messages.error(
+                    request,
+                    "Dateityp nicht erlaubt (Inhalt stimmt nicht mit Dateiendung überein).",
+                )
                 return redirect(request.path)
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
