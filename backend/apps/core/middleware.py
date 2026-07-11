@@ -1,9 +1,33 @@
 import logging
 import time
 
+from django.conf import settings
+from django.http import HttpResponsePermanentRedirect
 from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger(__name__)
+
+_LOCAL_HOSTS = {"localhost", "127.0.0.1", "testserver"}
+
+
+class CanonicalDomainMiddleware:
+    """Redirect www.preceptly.de and *.up.railway.app to https://preceptly.de (301)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not settings.DEBUG:
+            raw = request.META.get("HTTP_HOST") or request.META.get("SERVER_NAME", "")
+            host = raw.split(":")[0].lower()
+            if host not in _LOCAL_HOSTS and (
+                host == "www.preceptly.de" or host.endswith(".up.railway.app")
+            ):
+                return HttpResponsePermanentRedirect(
+                    "https://preceptly.de" + request.get_full_path()
+                )
+        return self.get_response(request)
+
 
 EXCLUDED_PATHS = (
     "/health/",
