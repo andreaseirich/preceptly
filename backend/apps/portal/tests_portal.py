@@ -664,3 +664,59 @@ class PortalDocumentDownloadTest(TestCase):
         )
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
+
+
+class PortalPasswordValidatorL1Test(TestCase):
+    """L1: portal activation and profile password-change must run AUTH_PASSWORD_VALIDATORS."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.tutor = _make_tutor("tutor_l1")
+        self.contract = _make_contract(self.tutor)
+        self.student_pu = _make_portal_user(self.tutor, "student", "l1_student", "L1pass123!")
+        self.link = _make_student_link(self.student_pu, self.contract, active=False)
+
+    def test_activation_rejects_numeric_only_password(self):
+        """Activation must reject passwords that fail NumericPasswordValidator."""
+        url = reverse("portal:activate", kwargs={"token": self.link.invite_token})
+        resp = self.client.post(url, {"password": "12345678", "password_confirm": "12345678"})
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertIn("error", content.lower())
+
+    def test_activation_rejects_common_password(self):
+        """Activation must reject passwords that fail CommonPasswordValidator."""
+        url = reverse("portal:activate", kwargs={"token": self.link.invite_token})
+        resp = self.client.post(url, {"password": "password1", "password_confirm": "password1"})
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertIn("error", content.lower())
+
+    def test_activation_accepts_strong_password(self):
+        """Activation must accept a password that passes all validators."""
+        url = reverse("portal:activate", kwargs={"token": self.link.invite_token})
+        resp = self.client.post(
+            url, {"password": "Xk7!mNpQ9rT2", "password_confirm": "Xk7!mNpQ9rT2"}
+        )
+        self.assertRedirects(resp, reverse("portal:home"), fetch_redirect_response=False)
+
+    def test_profile_change_rejects_numeric_only_password(self):
+        """Profile password change must reject passwords that fail NumericPasswordValidator."""
+        self.link.is_active = True
+        self.link.save()
+        session = self.client.session
+        session["portal_user_id"] = self.student_pu.pk
+        session.save()
+        resp = self.client.post(
+            reverse("portal:profile"),
+            {
+                "action": "password",
+                "current_password": "L1pass123!",
+                "new_password": "12345678",
+                "new_password_confirm": "12345678",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertIn("error", content.lower())
