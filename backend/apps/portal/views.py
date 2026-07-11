@@ -325,7 +325,9 @@ class ParentStudentDetailView(View):
         portal_user = get_portal_user(request)
         if not portal_user or portal_user.role != "parent":
             return redirect("portal:login")
-        link = get_object_or_404(ParentStudentLink, parent=portal_user, contract_id=student_pk)
+        link = get_object_or_404(
+            ParentStudentLink, parent=portal_user, contract_id=student_pk, is_active=True
+        )
         student = link.contract
         from apps.lessons.models import Lesson
 
@@ -363,7 +365,7 @@ class PortalMessageView(View):
             return link.contract if link else None
         else:
             link = ParentStudentLink.objects.filter(
-                parent=portal_user, contract_id=student_pk
+                parent=portal_user, contract_id=student_pk, is_active=True
             ).first()
             if link and link.contract.user != portal_user.tutor:
                 return None
