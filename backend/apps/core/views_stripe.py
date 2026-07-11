@@ -43,9 +43,6 @@ if hasattr(settings, "STRIPE_SECRET_KEY") and settings.STRIPE_SECRET_KEY:
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-_ALLOWED_PREMIUM_PRICES = set(getattr(settings, "STRIPE_PREMIUM_PRICE_IDS", []))
-
-
 def _resolve_and_validate_profile(event, obj):
     """Resolve UserProfile from Stripe event with cross-validation against obj.customer."""
     profile = resolve_user_from_stripe_event(event)
@@ -508,7 +505,12 @@ def stripe_webhook_view(request):
 
 
 def _price_id_to_tier(price_id: str | None) -> str:
-    """Map a Stripe price ID to a subscription tier string."""
+    """Map a Stripe price ID to a subscription tier string.
+
+    Fail-closed: an unknown or missing price ID must never grant a paid tier.
+    Unknown IDs indicate a tier-escalation attempt or a misconfiguration and
+    are logged as an alert.
+    """
     mapping = {
         getattr(settings, "STRIPE_PRICE_ID_STARTER", None): "starter",
         getattr(settings, "STRIPE_PRICE_ID_PRO", None): "pro",
@@ -516,7 +518,18 @@ def _price_id_to_tier(price_id: str | None) -> str:
         getattr(settings, "STRIPE_PRICE_ID_MONTHLY", None): "pro",
         getattr(settings, "STRIPE_PRICE_ID_YEARLY", None): "pro",
     }
-    return mapping.get(price_id, "pro")
+    mapping.pop(None, None)  # unconfigured settings must not match price_id=None
+    if price_id in mapping:
+        return mapping[price_id]
+    if price_id:
+        logger.error(
+            "ALERT: unknown Stripe price_id=%s — tier escalation attempt or "
+            "misconfigured STRIPE_PRICE_ID_* settings; falling back to free",
+            price_id,
+        )
+    else:
+        logger.warning("No Stripe price_id available for tier mapping; falling back to free")
+    return "free"
 
 
 def _set_premium(profile: UserProfile, is_premium: bool, price_id: str | None = None) -> None:

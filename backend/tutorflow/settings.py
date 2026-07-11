@@ -428,6 +428,24 @@ STRIPE_PORTAL_RETURN_URL = env("STRIPE_PORTAL_RETURN_URL", default="")
 STRIPE_CHECKOUT_SUCCESS_URL = env("STRIPE_CHECKOUT_SUCCESS_URL", default="")
 STRIPE_CHECKOUT_CANCEL_URL = env("STRIPE_CHECKOUT_CANCEL_URL", default="")
 
+# Whitelist of all known premium price IDs. Unknown prices must never grant a
+# paid tier (see _handle_subscription_created_or_updated / _price_id_to_tier).
+# Defaults to every configured tier price; override via comma-separated env var.
+STRIPE_PREMIUM_PRICE_IDS = env_list(
+    "STRIPE_PREMIUM_PRICE_IDS",
+    default=[
+        price_id
+        for price_id in (
+            STRIPE_PRICE_ID_MONTHLY,
+            STRIPE_PRICE_ID_YEARLY,
+            STRIPE_PRICE_ID_STARTER,
+            STRIPE_PRICE_ID_PRO,
+            STRIPE_PRICE_ID_BUSINESS,
+        )
+        if price_id
+    ],
+)
+
 STRIPE_ENABLED = bool(
     STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET and (STRIPE_PRICE_ID_MONTHLY or STRIPE_PRICE_ID_PRO)
 )

@@ -13,6 +13,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.core.models import StripeWebhookEvent, UserProfile
+from apps.core.views_stripe import _price_id_to_tier
 from apps.core.stripe_utils import (
     get_email_for_stripe,
     is_premium_subscription_status,
@@ -554,7 +555,11 @@ class StripeCustomerEmailUpdateTest(TestCase):
 
 
 # --- Webhook ---
-@override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
+@override_settings(
+    STRIPE_WEBHOOK_SECRET="whsec_fake",
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_MONTHLY="price_fake",
+)
 class StripeWebhookTest(TestCase):
     """Webhook signature verification, event handling, idempotency."""
 
@@ -701,7 +706,7 @@ class StripeWebhookTest(TestCase):
                     "status": "trialing",
                     "customer": "cus_fake",
                     "metadata": {"user_id": str(self.user.id)},
-                    "items": {"data": []},
+                    "items": {"data": [{"price": {"id": "price_fake"}}]},
                 }
             },
         }
@@ -982,6 +987,98 @@ class StripeWebhookRetryTest(TestCase):
         mock_handler.assert_called_once()
         row = StripeWebhookEvent.objects.get(event_id="evt_retry123")
         self.assertIsNotNone(row.processed_at)
+
+
+@override_settings(
+    STRIPE_PRICE_ID_STARTER="price_starter",
+    STRIPE_PRICE_ID_PRO="price_pro",
+    STRIPE_PRICE_ID_BUSINESS="price_business",
+    STRIPE_PRICE_ID_MONTHLY="price_monthly",
+    STRIPE_PRICE_ID_YEARLY="price_yearly",
+)
+class PriceIdToTierTest(TestCase):
+    """Unknown/missing price IDs must fall back to free (fail-closed), never to pro."""
+
+    def test_known_price_ids_map_to_their_tiers(self):
+        self.assertEqual(_price_id_to_tier("price_starter"), "starter")
+        self.assertEqual(_price_id_to_tier("price_pro"), "pro")
+        self.assertEqual(_price_id_to_tier("price_business"), "business")
+        self.assertEqual(_price_id_to_tier("price_monthly"), "pro")
+        self.assertEqual(_price_id_to_tier("price_yearly"), "pro")
+
+    def test_unknown_price_id_falls_back_to_free_and_logs_alert(self):
+        with self.assertLogs("apps.core.views_stripe", level="ERROR") as logs:
+            self.assertEqual(_price_id_to_tier("price_evil"), "free")
+        self.assertTrue(any("price_evil" in line for line in logs.output))
+
+    def test_missing_price_id_falls_back_to_free(self):
+        with self.assertLogs("apps.core.views_stripe", level="WARNING"):
+            self.assertEqual(_price_id_to_tier(None), "free")
+
+    @override_settings(STRIPE_PRICE_ID_STARTER=None, STRIPE_PRICE_ID_YEARLY="")
+    def test_unconfigured_settings_do_not_match_missing_price_id(self):
+        """None/empty settings must not make _price_id_to_tier(None) return a paid tier."""
+        with self.assertLogs("apps.core.views_stripe", level="WARNING"):
+            self.assertEqual(_price_id_to_tier(None), "free")
+
+
+@override_settings(
+    STRIPE_WEBHOOK_SECRET="whsec_fake",
+    STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_PRICE_ID_MONTHLY="price_known",
+    STRIPE_PREMIUM_PRICE_IDS=["price_known"],
+)
+class StripeUnknownPriceWebhookTest(TestCase):
+    """Active subscription with an unlisted price ID must not grant a paid tier."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_price", password="test")
+        self.profile = UserProfile.objects.create(user=self.user, stripe_customer_id="cus_price")
+
+    def _post_subscription_updated(self, price_id):
+        event = {
+            "id": f"evt_price_{price_id}",
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": "sub_price",
+                    "status": "active",
+                    "customer": "cus_price",
+                    "metadata": {"user_id": str(self.user.id)},
+                    "items": {"data": [{"price": {"id": price_id}}]},
+                }
+            },
+        }
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=event,
+        ):
+            return self.client.post(
+                reverse("stripe_webhook"),
+                data=json.dumps(event),
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+            )
+
+    def test_unknown_price_id_results_in_free_tier(self):
+        response = self._post_subscription_updated("price_evil")
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "free")
+
+    @override_settings(STRIPE_PREMIUM_PRICE_IDS=[])
+    def test_unknown_price_id_results_in_free_tier_even_without_whitelist(self):
+        """Even if the whitelist is empty, tier mapping itself fails closed."""
+        response = self._post_subscription_updated("price_evil")
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "free")
+
+    def test_known_price_id_grants_pro(self):
+        response = self._post_subscription_updated("price_known")
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.subscription_tier, "pro")
 
 
 @override_settings(
