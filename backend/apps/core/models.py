@@ -192,6 +192,9 @@ class StripeWebhookEvent(models.Model):
     event_id = models.CharField(max_length=255, unique=True, db_index=True)
     event_type = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(
+        null=True, blank=True, help_text=_("Set only after successful processing")
+    )
     payload_summary = models.JSONField(default=dict, blank=True)  # minimal, no PII
 
     class Meta:
