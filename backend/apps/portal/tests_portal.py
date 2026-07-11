@@ -618,3 +618,49 @@ class PortalDocumentUploadMagicByteTest(TestCase):
 
         msgs = [str(m) for m in get_messages(resp.wsgi_request)]
         self.assertFalse(any("Inhalt" in m for m in msgs))
+
+
+class PortalDocumentDownloadTest(TestCase):
+    """Regression: PortalDocumentDownloadView must call doc.file_exists as property (not method)."""
+
+    def setUp(self):
+        from datetime import date
+        from decimal import Decimal
+
+        from apps.contracts.models import Contract
+        from apps.students.models import StudentDocument
+
+        self.tutor = User.objects.create_user(username="tutor_dl", password="pw")
+        self.contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="DL",
+            last_name="Tester",
+            hourly_rate=Decimal("20.00"),
+            start_date=date.today(),
+        )
+        portal_user_account = User.objects.create_user(username="portal_dl", password="pw")
+        self.portal_user = PortalUser.objects.create(
+            user=portal_user_account, role="student", tutor=self.tutor
+        )
+        StudentPortalLink.objects.create(
+            portal_user=self.portal_user,
+            contract=self.contract,
+            is_active=True,
+        )
+        self.doc = StudentDocument.objects.create(
+            student=self.contract,
+            name="missing.pdf",
+        )
+        self.client = Client()
+        session = self.client.session
+        session["portal_user_id"] = self.portal_user.pk
+        session.save()
+
+    def test_download_missing_file_returns_404_not_500(self):
+        """Document with no file must return 404, not 500 (property not method)."""
+        url = reverse(
+            "portal:document_download",
+            kwargs={"student_pk": self.contract.pk, "doc_pk": self.doc.pk},
+        )
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
