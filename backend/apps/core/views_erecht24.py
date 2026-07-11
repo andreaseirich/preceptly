@@ -25,9 +25,9 @@ class Erecht24PushView(View):
     http_method_names = ["post"]
 
     def post(self, request):
-        secret = getattr(settings, "ERECHT24_WEBHOOK_SECRET", None)
+        secret = getattr(settings, "ERECHT24_PUSH_SECRET", None)
         if not secret:
-            logger.error("ERECHT24_WEBHOOK_SECRET not configured – rejecting push")
+            logger.error("ERECHT24_PUSH_SECRET not configured – rejecting push")
             return JsonResponse({"code": 403, "message": "invalid signature"}, status=403)
 
         # Body-Größenbegrenzung: erst Content-Length-Header, dann echte Body-Länge prüfen
