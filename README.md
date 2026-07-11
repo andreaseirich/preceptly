@@ -47,7 +47,7 @@ All integrated into a single, coherent workflow that saves tutors hours every we
 
 ## Live Links
 
-- 🚀 **[Live Application](https://tutorflow-production.up.railway.app/)** – Deployed on Railway
+- 🚀 **[Live Application](https://preceptly.de)** – Deployed on Railway
 - 👨‍💻 **[Portfolio](https://andreaseirich.github.io/tutorflow.html)** – Project details and case study
 
 **Demo Credentials:**

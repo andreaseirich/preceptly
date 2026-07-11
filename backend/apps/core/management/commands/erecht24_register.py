@@ -17,7 +17,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--push-uri",
             required=True,
-            help="Public URL of the push webhook, e.g. https://preceptly.up.railway.app/erecht24/push/",
+            help="Public URL of the push webhook, e.g. https://preceptly.de/erecht24/push/",
         )
         parser.add_argument(
             "--delete",

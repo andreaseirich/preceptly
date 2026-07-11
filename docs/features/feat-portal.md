@@ -80,4 +80,4 @@ Das Eltern/Schüler-Portal gibt Eltern und Schülern einen dedizierten, sicheren
 | `EMAIL_HOST_USER` | `deine@email.de` |
 | `EMAIL_HOST_PASSWORD` | `app-passwort` |
 | `DEFAULT_FROM_EMAIL` | `noreply@preceptly.app` |
-| `SITE_URL` | `https://preceptly.up.railway.app` |
+| `SITE_URL` | `https://preceptly.de` |

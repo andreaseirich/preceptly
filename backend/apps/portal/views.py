@@ -534,7 +534,7 @@ class PortalPasswordResetRequestView(View):
                     from django.core.mail import send_mail
                     from django.template.loader import render_to_string
 
-                    site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+                    site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
                     reset_url = f"{site_url}/portal/activate/{link.invite_token}/"
                     context = {
                         "student": link.contract,

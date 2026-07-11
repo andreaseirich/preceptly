@@ -13,7 +13,7 @@ Alle Secrets werden als Railway Environment Variables gesetzt, nie im Code.
 | `EMAIL_HOST_USER` | `andreaseirich2004@icloud.com` |
 | `EMAIL_HOST_PASSWORD` | *(App-spezifisches Passwort — in Railway setzen)* |
 | `DEFAULT_FROM_EMAIL` | `andreaseirich2004@icloud.com` |
-| `SITE_URL` | `https://preceptly.up.railway.app` |
+| `SITE_URL` | `https://preceptly.de` |
 
 **Hinweis:** Für iCloud muss ein App-spezifisches Passwort generiert werden unter:
 appleid.apple.com → Anmeldung und Sicherheit → App-spezifische Passwörter
@@ -24,7 +24,7 @@ appleid.apple.com → Anmeldung und Sicherheit → App-spezifische Passwörter
 |----------|-------------|
 | `SECRET_KEY` | Django Secret Key |
 | `DATABASE_URL` | PostgreSQL-URL (von Railway automatisch gesetzt) |
-| `ALLOWED_HOSTS` | `preceptly.up.railway.app` |
+| `ALLOWED_HOSTS` | `preceptly.de,www.preceptly.de` *(seit Custom Domain aktiv)* |
 | `DEBUG` | `False` |
 
 ## Stripe (Subscription)
