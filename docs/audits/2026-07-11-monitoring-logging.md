@@ -42,8 +42,10 @@ Drei Optionen genannt:
 | Abschnitt 4 — `invoice.payment_failed` stiller No-op | `logger.warning` beim Zahlungsausfall-Handler ergaenzt | Behoben | 7265e0a (Logging), 43cd022 (Stripe-Handler) |
 | Abschnitt 4 — `subscription.deleted` stiller No-op | `logger.warning` bei Kuendigungs-Handler ergaenzt | Behoben | 43cd022 |
 
-### Offener Punkt: ADMIN_EMAIL vs. ADMIN_NOTIFICATION_EMAIL in Railway
+### ~~Offener Punkt: ADMIN_EMAIL vs. ADMIN_NOTIFICATION_EMAIL in Railway~~ — Erledigt (Commit 2b9d4e6)
 
-In Railway existiert bereits eine Variable `ADMIN_NOTIFICATION_EMAIL` (vermutlich fuer Kontaktformular-Benachrichtigungen, Default im Code: `contact@andicode.de`). Das ist ein **bestehendes, anderes Setting** und **nicht** identisch mit dem neuen `ADMIN_EMAIL`-Setting, das der `mail_admins`-Handler in Commit 7265e0a tatsaechlich auswertet.
+~~In Railway existiert bereits eine Variable `ADMIN_NOTIFICATION_EMAIL` (vermutlich fuer Kontaktformular-Benachrichtigungen, Default im Code: `contact@andicode.de`). Das ist ein **bestehendes, anderes Setting** und **nicht** identisch mit dem neuen `ADMIN_EMAIL`-Setting, das der `mail_admins`-Handler in Commit 7265e0a tatsaechlich auswertet.~~
 
-**Andreas muss `ADMIN_EMAIL` separat und zusaetzlich in Railway setzen**, damit der `mail_admins`-Handler einen Empfaenger erhaelt und 500-Fehler per E-Mail zugestellt werden. Solange `ADMIN_EMAIL` nicht gesetzt ist, bleibt `ADMINS` leer und der Handler laeuft kommentarlos ins Leere.
+~~**Andreas muss `ADMIN_EMAIL` separat und zusaetzlich in Railway setzen**, damit der `mail_admins`-Handler einen Empfaenger erhaelt und 500-Fehler per E-Mail zugestellt werden. Solange `ADMIN_EMAIL` nicht gesetzt ist, bleibt `ADMINS` leer und der Handler laeuft kommentarlos ins Leere.~~
+
+**Behoben:** Commit 2b9d4e6 (`refactor(settings): reuse ADMIN_NOTIFICATION_EMAIL for Django ADMINS`) hat das separate `ADMIN_EMAIL`-Setting entfernt. `settings.py` liest nun direkt `ADMIN_NOTIFICATION_EMAIL` fuer `ADMINS` — dieselbe Variable, die in Railway bereits konfiguriert ist. Kein zusaetzliches Railway-Setting erforderlich; der `mail_admins`-Handler ist vollstaendig aktiv.
