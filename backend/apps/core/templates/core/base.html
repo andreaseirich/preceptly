@@ -384,7 +384,7 @@
         .pwa-modal-subtitle{font-size:.88em;color:var(--text-secondary);margin-bottom:16px;}
         .pwa-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border-color);margin-bottom:16px;}
         .pwa-tab{background:transparent;border:none;padding:8px 12px;cursor:pointer;font-size:.85em;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:3px 3px 0 0;transition:color .15s,border-color .15s;white-space:nowrap;}
-        .pwa-tab.active{color:#3498db;border-bottom-color:#3498db;font-weight:600;}
+        .pwa-tab.active{color:#1565c0;border-bottom-color:#1565c0;font-weight:600;}
         .pwa-tab:hover:not(.active){color:var(--text-primary);}
         .pwa-panel{display:none;}
         .pwa-panel.active{display:block;}
@@ -452,7 +452,7 @@
     </nav>
     
     {% if is_demo_user %}
-    <div role="banner" aria-live="polite" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;position:sticky;top:0;z-index:1000;">
+    <div role="status" aria-live="polite" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;position:sticky;top:0;z-index:1000;">
         {% load i18n %}{% trans "Demo account — data resets hourly. Do not enter real personal data." %}
     </div>
     {% endif %}
@@ -848,9 +848,9 @@
     <h2 id="pwaModalTitle">{% trans "Add to home screen" %}</h2>
     <p class="pwa-modal-subtitle">{% trans "Add Preceptly to your home screen for quick, app-like access." %}</p>
     <div class="pwa-tabs" role="tablist">
-      <button class="pwa-tab" role="tab" id="pwa-tab-ios" aria-controls="pwa-panel-ios" aria-selected="false" data-tab="ios">iOS (Safari)</button>
-      <button class="pwa-tab" role="tab" id="pwa-tab-android" aria-controls="pwa-panel-android" aria-selected="false" data-tab="android">Android (Chrome)</button>
-      <button class="pwa-tab" role="tab" id="pwa-tab-desktop" aria-controls="pwa-panel-desktop" aria-selected="false" data-tab="desktop">Desktop</button>
+      <button class="pwa-tab" role="tab" id="pwa-tab-ios" aria-controls="pwa-panel-ios" aria-selected="false" tabindex="-1" data-tab="ios">iOS (Safari)</button>
+      <button class="pwa-tab" role="tab" id="pwa-tab-android" aria-controls="pwa-panel-android" aria-selected="false" tabindex="-1" data-tab="android">Android (Chrome)</button>
+      <button class="pwa-tab" role="tab" id="pwa-tab-desktop" aria-controls="pwa-panel-desktop" aria-selected="false" tabindex="-1" data-tab="desktop">Desktop</button>
     </div>
     <!-- iOS panel -->
     <div id="pwa-panel-ios" class="pwa-panel" role="tabpanel" aria-labelledby="pwa-tab-ios">
@@ -935,15 +935,26 @@
 
   var platform = detectPlatform();
 
-  function activateTab(tab) {
+  function activateTab(tab, focusTab) {
     document.querySelectorAll('.pwa-tab').forEach(function (b) {
       var active = b.dataset.tab === tab;
       b.classList.toggle('active', active);
       b.setAttribute('aria-selected', active ? 'true' : 'false');
+      b.setAttribute('tabindex', active ? '0' : '-1');
+      if (active && focusTab) b.focus();
     });
     document.querySelectorAll('.pwa-panel').forEach(function (p) {
       p.classList.toggle('active', p.id === 'pwa-panel-' + tab);
     });
+  }
+
+  function isVisible(el) {
+    if (!el) return false;
+    if (!el.isConnected) return false;
+    var rects = el.getClientRects();
+    if (!rects.length) return false;
+    var style = window.getComputedStyle(el);
+    return style.visibility !== 'hidden' && style.display !== 'none';
   }
 
   function openModal(triggerEl) {
@@ -965,7 +976,18 @@
     var overlay = document.getElementById('pwaOverlay');
     if (!overlay) return;
     overlay.classList.remove('open');
-    if (_trigger && typeof _trigger.focus === 'function') { _trigger.focus(); _trigger = null; }
+    if (_trigger && typeof _trigger.focus === 'function' && isVisible(_trigger)) {
+      _trigger.focus();
+    } else {
+      var fallback = document.getElementById('main-content') || document.body;
+      if (fallback) {
+        if (fallback.tagName !== 'BODY' && !fallback.hasAttribute('tabindex')) {
+          fallback.setAttribute('tabindex', '-1');
+        }
+        try { fallback.focus({ preventScroll: true }); } catch (e) { fallback.focus(); }
+      }
+    }
+    _trigger = null;
   }
 
   function dismissBanner() {
@@ -988,8 +1010,20 @@
   });
 
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.pwa-tab').forEach(function (btn) {
+    var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.pwa-tab'));
+    tabButtons.forEach(function (btn, idx) {
       btn.addEventListener('click', function () { activateTab(btn.dataset.tab); });
+      btn.addEventListener('keydown', function (e) {
+        var target = null;
+        if (e.key === 'ArrowRight') target = tabButtons[(idx + 1) % tabButtons.length];
+        else if (e.key === 'ArrowLeft') target = tabButtons[(idx - 1 + tabButtons.length) % tabButtons.length];
+        else if (e.key === 'Home') target = tabButtons[0];
+        else if (e.key === 'End') target = tabButtons[tabButtons.length - 1];
+        if (target) {
+          e.preventDefault();
+          activateTab(target.dataset.tab, true);
+        }
+      });
     });
 
     var closeBtn = document.getElementById('pwaModalClose');
