@@ -58,11 +58,11 @@ jobs:
         working-directory: ./backend
         env:
           DEBUG: "False"
-          SECRET_KEY: test-ci-secret-key-for-deploy-check
+          SECRET_KEY: test-ci-secret-key-for-deploy-check-must-be-fifty-chars
           ALLOWED_HOSTS: test.example.com
           TURN_CREDENTIAL: dummy-turn-credential-for-ci-deploy-check
         run: |
-          python manage.py check --deploy
+          python manage.py check --deploy --fail-level WARNING
 
       - name: Ruff format
         run: |
