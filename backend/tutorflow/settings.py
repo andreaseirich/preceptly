@@ -442,3 +442,8 @@ ERECHT24_PUSH_SECRET = env("ERECHT24_PUSH_SECRET", default="")
 ERECHT24_CLIENT_ID = env("ERECHT24_CLIENT_ID", default="")
 
 X_FRAME_OPTIONS = "DENY"
+
+# security.W021: SECURE_HSTS_PRELOAD not set to True.
+# HSTS preloading is a hard-to-reverse, browser-level commitment (removal takes
+# months). We deliberately leave it disabled until we are ready to opt in.
+SILENCED_SYSTEM_CHECKS = ["security.W021"]
