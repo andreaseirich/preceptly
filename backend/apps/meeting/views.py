@@ -15,45 +15,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 
+from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
 from apps.portal.models import ParentStudentLink, StudentPortalLink
 from apps.portal.views import get_portal_user
 
 logger = logging.getLogger(__name__)
-
-
-def _validate_file_magic(file, ext: str) -> bool:
-    _MAGIC = {
-        ".pdf": [(0, b"%PDF")],
-        ".jpg": [(0, b"\xff\xd8\xff")],
-        ".jpeg": [(0, b"\xff\xd8\xff")],
-        ".png": [(0, b"\x89PNG\r\n\x1a\n")],
-        ".gif": [(0, b"GIF87a"), (0, b"GIF89a")],
-        ".webp": [(0, b"RIFF"), (8, b"WEBP")],
-        ".docx": [(0, b"PK\x03\x04")],
-        ".xlsx": [(0, b"PK\x03\x04")],
-        ".pptx": [(0, b"PK\x03\x04")],
-        ".mp3": [(0, b"ID3"), (0, b"\xff\xfb"), (0, b"\xff\xf3"), (0, b"\xff\xf2")],
-        ".mp4": [(4, b"ftyp")],
-    }
-    if ext == ".txt":
-        # Prüfen dass die Datei valides UTF-8 enthält (kein Binär-Inhalt)
-        chunk = file.read(8192)
-        file.seek(0)
-        try:
-            chunk.decode("utf-8")
-            return True
-        except UnicodeDecodeError:
-            return False
-    checks = _MAGIC.get(ext)
-    if not checks:
-        return False
-    header = file.read(12)
-    file.seek(0)
-    if ext == ".webp":
-        return all(header[offset : offset + len(sig)] == sig for offset, sig in checks)
-    return any(header[offset : offset + len(sig)] == sig for offset, sig in checks)
 
 
 class StartMeetingView(LoginRequiredMixin, View):
@@ -70,18 +38,6 @@ class StartMeetingView(LoginRequiredMixin, View):
 
     def post(self, request, lesson_pk):
         return self.get(request, lesson_pk)
-
-
-def _sanitize_doc_name(raw: str) -> str:
-    import os
-    import unicodedata
-
-    from django.utils.text import get_valid_filename
-
-    raw = unicodedata.normalize("NFKC", raw)
-    raw = os.path.basename(raw)
-    raw = get_valid_filename(raw)
-    return raw[:200] or "unnamed"
 
 
 class MeetingDocumentUploadView(View):
@@ -139,12 +95,12 @@ class MeetingDocumentUploadView(View):
         ext = os.path.splitext(file.name)[1].lower()
         if ext not in _ALLOWED_MEETING_EXTENSIONS:
             return JsonResponse({"error": "File type not allowed."}, status=400)
-        if not _validate_file_magic(file, ext):
+        if not validate_file_magic(file, ext):
             return JsonResponse({"error": "File type not allowed."}, status=400)
         if file.size > _MAX_UPLOAD_SIZE:
             return JsonResponse({"error": "File too large (max 50 MB)."}, status=400)
 
-        name = _sanitize_doc_name(request.POST.get("name", "").strip() or file.name)
+        name = sanitize_doc_name(request.POST.get("name", "").strip() or file.name)
         doc = SessionDocument.objects.create(session=lesson, file=file, name=name)
         safe_name = name.replace("\n", " ").replace("\r", " ")
         logger.info("Dokument hochgeladen: %s (lesson %s)", safe_name, lesson.pk)

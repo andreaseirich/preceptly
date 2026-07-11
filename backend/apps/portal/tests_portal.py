@@ -490,3 +490,60 @@ class InactiveParentLinkAccessTest(TestCase):
         url = reverse("portal:messages", kwargs={"student_pk": self.contract.pk})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+
+
+class PortalDocumentUploadMagicByteTest(TestCase):
+    """Portal document upload must reject files whose magic bytes don't match the extension."""
+
+    def setUp(self):
+        from datetime import date
+        from decimal import Decimal
+
+        from apps.contracts.models import Contract
+
+        self.tutor = User.objects.create_user(username="tutor_upload", password="pw")
+        self.contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="Upload",
+            last_name="Tester",
+            hourly_rate=Decimal("20.00"),
+            start_date=date.today(),
+        )
+        portal_user_account = User.objects.create_user(username="portal_upload", password="pw")
+        self.portal_user = PortalUser.objects.create(
+            user=portal_user_account, role="student", tutor=self.tutor
+        )
+        StudentPortalLink.objects.create(
+            portal_user=self.portal_user,
+            contract=self.contract,
+            is_active=True,
+        )
+        self.client = Client()
+        session = self.client.session
+        session["portal_user_id"] = self.portal_user.pk
+        session.save()
+
+    def test_fake_pdf_rejected(self):
+        """File with .pdf extension but no PDF magic bytes must be rejected."""
+        fake_pdf = SimpleUploadedFile("evil.pdf", b"NOTAPDFCONTENT", content_type="application/pdf")
+        url = reverse("portal:documents", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.post(url, {"file": fake_pdf})
+        # Rejected uploads redirect back with an error message (not a 200 success)
+        self.assertEqual(resp.status_code, 302)
+        from django.contrib.messages import get_messages
+
+        msgs = [str(m) for m in get_messages(resp.wsgi_request)]
+        self.assertTrue(any("Inhalt" in m or "erlaubt" in m for m in msgs))
+
+    def test_valid_pdf_accepted(self):
+        """File with valid PDF magic bytes must be accepted."""
+        valid_pdf = SimpleUploadedFile(
+            "real.pdf", b"%PDF-1.4 dummy content", content_type="application/pdf"
+        )
+        url = reverse("portal:documents", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.post(url, {"file": valid_pdf})
+        self.assertEqual(resp.status_code, 302)
+        from django.contrib.messages import get_messages
+
+        msgs = [str(m) for m in get_messages(resp.wsgi_request)]
+        self.assertFalse(any("Inhalt" in m for m in msgs))
