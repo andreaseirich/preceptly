@@ -5,15 +5,20 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
 
+from apps.core.auth_throttle import _get_client_ip, _throttle_check
 from apps.core.models import RequestLog
 
 User = get_user_model()
 
 SESSION_KEY = "dev_stats_authed"
+_STATS_THROTTLE_PREFIX = "dev_stats_ip"
+_STATS_MAX_ATTEMPTS = 10
+_STATS_WINDOW = 300  # 5 minutes
 
 
 def _check_password(raw: str) -> bool:
@@ -37,6 +42,18 @@ class DevStatsView(View):
         if action == "logout":
             request.session.pop(SESSION_KEY, None)
             return redirect("core:dev_stats")
+
+        ip = _get_client_ip(request)
+        allowed, retry = _throttle_check(
+            _STATS_THROTTLE_PREFIX,
+            ip,
+            max_attempts=_STATS_MAX_ATTEMPTS,
+            window_seconds=_STATS_WINDOW,
+        )
+        if not allowed:
+            response = HttpResponse("Too many login attempts. Please try again later.", status=429)
+            response["Retry-After"] = str(retry)
+            return response
 
         password = request.POST.get("password", "")
         if _check_password(password):
