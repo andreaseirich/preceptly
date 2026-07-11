@@ -33,7 +33,6 @@ def robots_txt(request):
         "Disallow: /dev/",
         "Disallow: /tax-year/",
         "Disallow: /expenses/",
-        "Disallow: /faq/",
         "Disallow: /legal/avv/",
         "Disallow: /legal/accept-avv/",
         "Disallow: /webhooks/",
@@ -50,6 +49,7 @@ def robots_txt(request):
 
 _PUBLIC_PAGES = [
     ("core:landing", 1.0, "weekly"),
+    ("core:faq", 0.6, "monthly"),
     ("core:legal_imprint", 0.3, "yearly"),
     ("core:legal_privacy", 0.3, "monthly"),
     ("core:legal_terms", 0.3, "monthly"),
