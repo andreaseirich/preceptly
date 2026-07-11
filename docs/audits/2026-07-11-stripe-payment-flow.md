@@ -2,7 +2,7 @@
 
 **Datum:** 2026-07-11
 **Autor:** Fable (Security-Audit-Agent)
-**Status:** Fixes ausstehend
+**Status:** Fixes erledigt (2026-07-11)
 
 **Scope:** backend/apps/core/views_stripe.py, stripe_utils.py, models.py, feature_flags.py, settings.py, sowie alle Erstellungspfade fuer Studenten/Rechnungen. Nur Analyse, keine Code-Aenderungen.
 
@@ -56,3 +56,14 @@ Mittlere Funde:
 4. invoice.payment_failed API-versionsabhaengig - invoice.subscription existiert in neueren Stripe-API-Versionen nicht mehr top-level (:684); gepinnte Endpoint-API-Version pruefen.
 
 Best-Practice-Empfehlungen: processed_at-Flag fuer StripeWebhookEvent; Starter-Checkout setzt kurzzeitig "pro" bis subscription.updated eintrifft (:597 + :515); Stripe-API-Call aus der select_for_update-Transaktion bei der Customer-Anlage herausziehen (:152-179); Contract-Create-Pfad in die Free-Limit-Warnung einbeziehen (contracts/views.py:143); doppelte Checkout/Portal-View-Paare (StripeCheckoutView/SubscriptionCheckoutView) konsolidieren, um Drift zu vermeiden; doppelte @csrf_exempt/@require_POST-Dekoratoren am Webhook entfernen (:440-443, kosmetisch).
+
+---
+
+## Fix-Status (2026-07-11)
+
+| Fund | Beschreibung | Status | Commit |
+|------|-------------|--------|--------|
+| Fund 4 (Medium-High) | Webhook-Retry wirkungslos — Event vor Verarbeitung als verarbeitet markiert; `processed_at`-Feld + Retry-Logik-Fix; `logger.warning` fuer `subscription.deleted` und `invoice.payment_failed` ergaenzt | Behoben | 43cd022 |
+| Zusatzfund (Medium) | Preis-Whitelist tot — `STRIPE_PREMIUM_PRICE_IDS` nicht definiert; Default-"pro" auf fail-closed (free + Alarm) umgestellt; Setting scharf geschaltet | Behoben | a6ade0e |
+| Fund 5 (Medium) | Doppel-Abo moeglich — serverseitiger Guard vor Checkout-Session-Erstellung eingefuegt | Behoben | 0f563b2 |
+| Anmerkung A (Medium-Low) | `invoice.payment_failed` API-versionsabhaengig — Handler liest jetzt robust ueber beide Stripe-API-Versionen (legacy `subscription` und `parent.subscription_details.subscription`) | Behoben | 864fa9c |

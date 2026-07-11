@@ -2,7 +2,7 @@
 
 **Datum:** 2026-07-11
 **Autor:** Sonnet (Audit-Agent)
-**Status:** Fixes ausstehend — Entscheidung: Option B (mail_admins + SMTP)
+**Status:** Fixes erledigt (2026-07-11) — Option B (mail_admins + SMTP) umgesetzt
 
 ## 1. Error-Tracking (Sentry o.ae.)
 Nicht vorhanden. Kein sentry-sdk in requirements.txt, kein sentry_sdk.init(), keine DSN-Konfiguration, keine Sentry-Middleware.
@@ -31,3 +31,19 @@ Drei Optionen genannt:
 - C) Railway-Logs reichen erstmal (Luecke bleiben stille Stripe-Events)
 
 **ENTSCHEIDUNG (2026-07-11, Andreas Eirich): Option B - mail_admins wird umgesetzt.**
+
+---
+
+## Fix-Status (2026-07-11)
+
+| Fund | Beschreibung | Status | Commit |
+|------|-------------|--------|--------|
+| Abschnitt 2 — kein mail_admins-Handler | `mail_admins`-Handler und `ADMINS`-Setting (aus `ADMIN_EMAIL`-Env-Var) in settings.py ergaenzt; `logger.warning` fuer `subscription.deleted` und `invoice.payment_failed` nachgezogen (siehe auch Stripe-Audit) | Behoben | 7265e0a |
+| Abschnitt 4 — `invoice.payment_failed` stiller No-op | `logger.warning` beim Zahlungsausfall-Handler ergaenzt | Behoben | 7265e0a (Logging), 43cd022 (Stripe-Handler) |
+| Abschnitt 4 — `subscription.deleted` stiller No-op | `logger.warning` bei Kuendigungs-Handler ergaenzt | Behoben | 43cd022 |
+
+### Offener Punkt: ADMIN_EMAIL vs. ADMIN_NOTIFICATION_EMAIL in Railway
+
+In Railway existiert bereits eine Variable `ADMIN_NOTIFICATION_EMAIL` (vermutlich fuer Kontaktformular-Benachrichtigungen, Default im Code: `contact@andicode.de`). Das ist ein **bestehendes, anderes Setting** und **nicht** identisch mit dem neuen `ADMIN_EMAIL`-Setting, das der `mail_admins`-Handler in Commit 7265e0a tatsaechlich auswertet.
+
+**Andreas muss `ADMIN_EMAIL` separat und zusaetzlich in Railway setzen**, damit der `mail_admins`-Handler einen Empfaenger erhaelt und 500-Fehler per E-Mail zugestellt werden. Solange `ADMIN_EMAIL` nicht gesetzt ist, bleibt `ADMINS` leer und der Handler laeuft kommentarlos ins Leere.
