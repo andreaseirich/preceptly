@@ -765,3 +765,47 @@ class PortalEmailUniquenessL4Test(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.student_pu.user.refresh_from_db()
         self.assertEqual(self.student_pu.user.email, "brand-new@example.com")
+
+
+class PortalSessionRotationL5Test(TestCase):
+    """L5: profile password change must rotate the session key via cycle_key()."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.tutor = _make_tutor("tutor_l5")
+        self.contract = _make_contract(self.tutor)
+        self.student_pu = _make_portal_user(self.tutor, "student", "l5_student", "L5pass123!")
+        self.link = _make_student_link(self.student_pu, self.contract, active=True)
+        session = self.client.session
+        session["portal_user_id"] = self.student_pu.pk
+        session.save()
+        self.old_session_key = self.client.session.session_key
+
+    def test_password_change_rotates_session_key(self):
+        """After a successful password change the session key must differ from the old one."""
+        resp = self.client.post(
+            reverse("portal:profile"),
+            {
+                "action": "password",
+                "current_password": "L5pass123!",
+                "new_password": "Xk9!nPqR3mZ7",
+                "new_password_confirm": "Xk9!nPqR3mZ7",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        new_session_key = self.client.session.session_key
+        self.assertNotEqual(self.old_session_key, new_session_key)
+
+    def test_password_change_keeps_portal_user_id_in_session(self):
+        """After rotation the portal_user_id must still be set so the user stays logged in."""
+        self.client.post(
+            reverse("portal:profile"),
+            {
+                "action": "password",
+                "current_password": "L5pass123!",
+                "new_password": "Xk9!nPqR3mZ7",
+                "new_password_confirm": "Xk9!nPqR3mZ7",
+            },
+        )
+        self.assertEqual(self.client.session.get("portal_user_id"), self.student_pu.pk)
