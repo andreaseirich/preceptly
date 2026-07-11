@@ -116,9 +116,13 @@ def _sanitize_html(raw: str) -> str:
             f"(erhalten: {len(raw)} Zeichen)."
         )
     try:
-        import bleach
+        import nh3
 
-        return bleach.clean(raw, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        return nh3.clean(
+            raw,
+            tags=set(ALLOWED_TAGS),
+            attributes={k: set(v) for k, v in ALLOWED_ATTRS.items()},
+        )
     except ImportError:
         import html as html_lib
 
