@@ -24,12 +24,14 @@ from apps.core.views_log_test import test_logs
 from apps.core.views_portal import TutorMessagesOverviewView, TutorMessageView
 from apps.core.views_pwa import manifest_view, service_worker_view
 from apps.core.views_reports import ReportsView
+from apps.core.views_seo import robots_txt
 from apps.core.views_stats import DevStatsView
 from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalView
 
 app_name = "core"
 
 urlpatterns = [
+    path("robots.txt", robots_txt, name="robots_txt"),
     path("erecht24/push/", Erecht24PushView.as_view(), name="erecht24_push"),
     path("health/", health_status, name="health"),
     # TODO: Requires @staff_member_required — verify in views_log_test.py
