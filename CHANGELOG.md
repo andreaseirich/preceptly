@@ -13,6 +13,16 @@ Three security/quality audits completed; all medium findings fixed. Findings doc
 - [Accessibility WCAG 2.1 AA audit](docs/audits/2026-07-11-accessibility-wcag.md) (Opus) — 7 medium findings across PWA modal, landing pricing, invoice detail, meeting lobby
 - [Monitoring/logging audit](docs/audits/2026-07-11-monitoring-logging.md) (Sonnet) — no error tracking, silent Stripe events; decision: implement Django mail_admins + SMTP (Option B)
 
+### Audit (2026-07-11) — 2-Wochen-Security-Review — Fixes ausstehend
+Security audit over commit range `2f22ea1..HEAD` (140 commits), covering Portal-Auth, Meeting/WebRTC-Consumer, file uploads, billing/PDF, e-recht24 webhook, CanonicalDomainMiddleware, dependency bumps. No critical findings. Findings documented in [`docs/audits/2026-07-11-security-2weeks-review.md`](docs/audits/2026-07-11-security-2weeks-review.md):
+- **M1** — unauthenticated griefing/DoS via password-reset deactivating portal links (`portal/views.py:531`) — **fix pending**
+- **L1** — portal passwords bypass Django validators (`portal/views.py:472`, `:1849`) — fix pending
+- **L2** — e-recht24 webhook missing rate-limit / replay protection (`core/erecht24_service.py:204`) — fix pending
+- **L3** — tutor upload path missing magic-byte check (`students/views.py:391-428`) — fix pending
+- **L4** — no email uniqueness between `contract.email` and Django user email — fix pending
+- **L5** — password change does not rotate/invalidate sessions (`portal/views.py:1857`) — fix pending
+- **Bug** — `file_exists()` called as method instead of property → portal downloads broken (500) (`portal/views.py:1287`) — **fix pending**
+
 ### Fixed
 - **Series delete form**: Radio buttons for "delete series / delete single lesson" were placed outside the `<form>` tag and were never submitted — deleting an entire series had no effect. Fixed by moving `<form>` tag before the series info block.
 - **Biweekly generation**: Week counter was incremented on each Monday, causing the first week's non-Monday active days to be skipped when start_date falls on a Monday. Generation now uses `(date - start_date).days // 7`, consistent with the matching logic in `recurring_utils.py`.
