@@ -1,5 +1,7 @@
 from django.conf import settings
+from django.contrib.sitemaps import Sitemap
 from django.http import HttpResponse
+from django.urls import reverse
 
 
 def robots_txt(request):
@@ -44,3 +46,27 @@ def robots_txt(request):
         f"Sitemap: {site_url}/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+_PUBLIC_PAGES = [
+    ("core:landing", 1.0, "weekly"),
+    ("core:legal_imprint", 0.3, "yearly"),
+    ("core:legal_privacy", 0.3, "monthly"),
+    ("core:legal_terms", 0.3, "monthly"),
+    ("core:legal_about", 0.3, "yearly"),
+    ("core:legal_withdrawal", 0.3, "yearly"),
+]
+
+
+class StaticPageSitemap(Sitemap):
+    def items(self):
+        return _PUBLIC_PAGES
+
+    def location(self, item):
+        return reverse(item[0])
+
+    def priority(self, item):
+        return item[1]
+
+    def changefreq(self, item):
+        return item[2]

@@ -7,16 +7,23 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 from django.views.i18n import set_language
 
+from apps.core.views_seo import StaticPageSitemap
 from apps.core.views_stripe import (
     StripeCheckoutView,
     StripePortalView,
     stripe_webhook_view,
 )
 
+_sitemaps = {
+    "static": StaticPageSitemap,
+}
+
 urlpatterns = [
+    path("sitemap.xml", sitemap, {"sitemaps": _sitemaps}, name="sitemap"),
     path("meetings/", include("apps.meeting.urls", namespace="meeting")),
     path("i18n/setlang/", set_language, name="set_language"),
     path("webhooks/stripe/", stripe_webhook_view, name="stripe_webhook"),
