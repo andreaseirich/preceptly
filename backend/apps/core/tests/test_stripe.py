@@ -1083,6 +1083,74 @@ class StripeUnknownPriceWebhookTest(TestCase):
 
 @override_settings(
     STRIPE_SECRET_KEY="sk_test_fake",
+    STRIPE_WEBHOOK_SECRET="whsec_fake",
+    STRIPE_PRICE_ID_MONTHLY="price_fake",
+    STRIPE_ENABLED=True,
+    STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
+)
+class CheckoutActiveSubscriptionGuardTest(TestCase):
+    """Users with an active subscription must not reach checkout again (double billing)."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_guard", password="test")
+        self.profile = UserProfile.objects.create(
+            user=self.user,
+            subscription_tier="pro",
+            stripe_customer_id="cus_guard",
+            stripe_subscription_id="sub_guard_active",
+        )
+        self.client.login(username="tutor_guard", password="test")
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_subscription_checkout_blocked_for_active_subscriber(self, mock_create):
+        response = self.client.post(
+            reverse("core:subscription_checkout"), data={"withdrawal_consent": "on"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("core:settings"), response.url)
+        mock_create.assert_not_called()
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_stripe_checkout_blocked_for_active_subscriber(self, mock_create):
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("core:settings"), response.url)
+        mock_create.assert_not_called()
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_checkout_blocked_json_returns_409(self, mock_create):
+        response = self.client.post(
+            reverse("stripe_checkout"),
+            data={"withdrawal_consent": "on"},
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertIn("error", response.json())
+        mock_create.assert_not_called()
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_checkout_blocked_when_free_tier_but_subscription_id_exists(self, mock_create):
+        """Tab race: webhook not yet processed (tier still free) but subscription exists."""
+        self.profile.subscription_tier = "free"
+        self.profile.save(update_fields=["subscription_tier"])
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
+        self.assertEqual(response.status_code, 302)
+        mock_create.assert_not_called()
+
+    @patch("apps.core.views_stripe.stripe.checkout.Session.create")
+    def test_checkout_allowed_for_free_user_without_subscription(self, mock_create):
+        self.profile.subscription_tier = "free"
+        self.profile.stripe_subscription_id = None
+        self.profile.save(update_fields=["subscription_tier", "stripe_subscription_id"])
+        mock_create.return_value = MagicMock(url="https://checkout.stripe.com/ok")
+        response = self.client.post(reverse("stripe_checkout"), data={"withdrawal_consent": "on"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "https://checkout.stripe.com/ok")
+        mock_create.assert_called_once()
+
+
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_fake",
     STRIPE_PRICE_ID_MONTHLY="price_premium_123",
     STRIPE_PREMIUM_CHECKOUT_ENABLED=True,
     SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO", "https"),
