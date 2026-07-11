@@ -149,6 +149,7 @@ MEETING_ICE_SERVERS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.middleware.CanonicalDomainMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -391,7 +392,7 @@ EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", default="10"))  # 10 seconds default
 # Email notification settings
 NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")
 ADMIN_NOTIFICATION_EMAIL = env("ADMIN_NOTIFICATION_EMAIL", default="contact@andicode.de")
-SITE_URL = env("SITE_URL", default="https://preceptly.up.railway.app")
+SITE_URL = env("SITE_URL", default="https://preceptly.de")
 
 # Stripe (subscription payments for Premium)
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
