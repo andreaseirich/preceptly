@@ -146,3 +146,19 @@ class LoginSessionCycleTest(TestCase):
         )
         session_key_after = self.client.session.session_key
         self.assertNotEqual(session_key_before, session_key_after)
+
+
+class DevStatsThrottleTest(TestCase):
+    """DevStatsView login must return 429 after too many failed attempts."""
+
+    def test_throttle_after_repeated_wrong_passwords(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        url = reverse("core:dev_stats")
+        response = None
+        for _ in range(15):
+            response = self.client.post(url, {"password": "wrongpassword"})
+            if response.status_code == 429:
+                break
+        self.assertEqual(response.status_code, 429)
