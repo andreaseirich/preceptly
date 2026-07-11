@@ -6,6 +6,31 @@ from unittest.mock import patch
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
+from apps.core.erecht24_service import _sanitize_html
+
+
+class SanitizeHtmlTest(TestCase):
+    """_sanitize_html must strip script tags while keeping allowed tags."""
+
+    def test_script_tags_stripped(self):
+        result = _sanitize_html("<p>Hello</p><script>alert(1)</script>")
+        self.assertNotIn("<script", result)
+        self.assertIn("<p>", result)
+
+    def test_allowed_tags_preserved(self):
+        result = _sanitize_html('<p>Text <a href="https://example.com">link</a></p>')
+        self.assertIn("<a", result)
+        self.assertIn("https://example.com", result)
+
+    def test_disallowed_tag_stripped(self):
+        result = _sanitize_html("<p>Text</p><iframe src='x'></iframe>")
+        self.assertNotIn("iframe", result)
+
+    def test_length_limit_raises(self):
+        with self.assertRaises(ValueError):
+            _sanitize_html("x" * 100_001)
+
+
 TEST_SECRET = "test-push-secret-value"
 PUSH_URL = "core:erecht24_push"
 
