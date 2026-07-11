@@ -1,48 +1,76 @@
-"""Tests for Erecht24PushView – webhook signature verification."""
+"""Tests for Erecht24PushView – e-recht24 secret-in-payload protocol."""
 
-import hashlib
-import hmac
 import json
+from unittest.mock import patch
 
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 TEST_SECRET = "test-push-secret-value"
+PUSH_URL = "core:erecht24_push"
 
 
-def _signed_post(client, payload, secret=TEST_SECRET, corrupt=False):
-    body = json.dumps(payload).encode("utf-8")
-    sig = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
-    if corrupt:
-        sig = "0" * len(sig)
-    return client.post(
-        reverse("core:erecht24_push"),
-        data=body,
-        content_type="application/json",
-        HTTP_X_ER24_SIGNATURE=sig,
-    )
-
-
-class Erecht24PushViewSecretTest(TestCase):
+@override_settings(ERECHT24_PUSH_SECRET=TEST_SECRET)
+class Erecht24PushViewTest(TestCase):
     def setUp(self):
         self.client = Client()
+        self.url = reverse(PUSH_URL)
 
-    @override_settings(ERECHT24_PUSH_SECRET=TEST_SECRET)
-    def test_valid_ping_not_rejected(self):
-        """Valid HMAC signature with ERECHT24_PUSH_SECRET must not return 403."""
-        response = _signed_post(
-            self.client, {"erecht24_type": "ping", "erecht24_secret": TEST_SECRET}
-        )
-        self.assertNotEqual(response.status_code, 403)
+    def _post_form(self, data):
+        return self.client.post(self.url, data)
 
-    @override_settings(ERECHT24_PUSH_SECRET="")
-    def test_missing_secret_returns_403(self):
-        """Empty ERECHT24_PUSH_SECRET must reject the request."""
-        response = _signed_post(self.client, {"erecht24_type": "ping"})
+    def _post_json(self, data):
+        return self.client.post(self.url, json.dumps(data), content_type="application/json")
+
+    def test_ping_form_urlencoded(self):
+        """Correct secret + ping type via form POST returns 200 with pong."""
+        response = self._post_form({"erecht24_secret": TEST_SECRET, "erecht24_type": "ping"})
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data.get("message"), "pong")
+
+    def test_ping_json(self):
+        """Correct secret + ping type via JSON POST returns 200 with pong."""
+        response = self._post_json({"erecht24_secret": TEST_SECRET, "erecht24_type": "ping"})
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data.get("message"), "pong")
+
+    def test_wrong_secret_returns_403(self):
+        """Wrong erecht24_secret must return 403."""
+        response = self._post_form({"erecht24_secret": "wrong-secret", "erecht24_type": "ping"})
         self.assertEqual(response.status_code, 403)
 
-    @override_settings(ERECHT24_PUSH_SECRET=TEST_SECRET)
-    def test_wrong_signature_returns_403(self):
-        """Corrupted HMAC signature must be rejected."""
-        response = _signed_post(self.client, {"erecht24_type": "ping"}, corrupt=True)
+    def test_missing_secret_returns_403(self):
+        """Missing erecht24_secret must return 403."""
+        response = self._post_form({"erecht24_type": "ping"})
+        self.assertEqual(response.status_code, 403)
+
+    def test_unknown_type_returns_400(self):
+        """Valid secret but unknown erecht24_type must return 400."""
+        response = self._post_form({"erecht24_secret": TEST_SECRET, "erecht24_type": "unknown"})
+        self.assertEqual(response.status_code, 400)
+
+    def test_imprint_calls_pull_imprint(self):
+        """erecht24_type=imprint with valid secret calls pull_imprint()."""
+        with patch("apps.core.erecht24_service.pull_imprint") as mock_pull:
+            response = self._post_form({"erecht24_secret": TEST_SECRET, "erecht24_type": "imprint"})
+        self.assertEqual(response.status_code, 200)
+        mock_pull.assert_called_once()
+
+    def test_invalid_json_body_returns_400(self):
+        """Malformed JSON body must return 400."""
+        response = self.client.post(self.url, b"not-valid-json{{{", content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_oversized_body_returns_413(self):
+        """Body exceeding MAX_WEBHOOK_BYTES must return 413."""
+        big = b"x" * (64 * 1024 + 1)
+        response = self.client.post(self.url, big, content_type="application/octet-stream")
+        self.assertEqual(response.status_code, 413)
+
+    @override_settings(ERECHT24_PUSH_SECRET="")
+    def test_unconfigured_secret_returns_403(self):
+        """Empty ERECHT24_PUSH_SECRET must cause handle_push to return 403."""
+        response = self._post_form({"erecht24_secret": "", "erecht24_type": "ping"})
         self.assertEqual(response.status_code, 403)
