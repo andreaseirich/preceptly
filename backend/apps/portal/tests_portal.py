@@ -720,3 +720,48 @@ class PortalPasswordValidatorL1Test(TestCase):
         self.assertEqual(resp.status_code, 200)
         content = resp.content.decode()
         self.assertIn("error", content.lower())
+
+
+class PortalEmailUniquenessL4Test(TestCase):
+    """L4: profile email change must also reject emails already used as contract.email."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.tutor = _make_tutor("tutor_l4")
+        self.contract = _make_contract(self.tutor)
+        self.student_pu = _make_portal_user(self.tutor, "student", "l4_student", "L4pass123!")
+        self.link = _make_student_link(self.student_pu, self.contract, active=True)
+        self.student_pu.user.email = "l4student@example.com"
+        self.student_pu.user.save()
+
+        # Second contract whose email is taken
+        self.other_contract = _make_contract(self.tutor)
+        self.other_contract.email = "taken@example.com"
+        self.other_contract.save()
+        other_pu = _make_portal_user(self.tutor, "student", "l4_other", "L4other123!")
+        _make_student_link(other_pu, self.other_contract, active=True)
+
+        session = self.client.session
+        session["portal_user_id"] = self.student_pu.pk
+        session.save()
+
+    def test_email_matching_other_contract_is_rejected(self):
+        """Changing to an email already used as another active contract.email must be rejected."""
+        resp = self.client.post(
+            reverse("portal:profile"),
+            {"action": "contact", "email": "taken@example.com", "phone": ""},
+        )
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertIn("error", content.lower())
+
+    def test_own_email_change_is_accepted(self):
+        """Changing to a fresh email not used anywhere must be accepted."""
+        resp = self.client.post(
+            reverse("portal:profile"),
+            {"action": "contact", "email": "brand-new@example.com", "phone": ""},
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.student_pu.user.refresh_from_db()
+        self.assertEqual(self.student_pu.user.email, "brand-new@example.com")
