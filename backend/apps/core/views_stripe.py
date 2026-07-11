@@ -110,6 +110,37 @@ def _stripe_checkout_error_response(request: HttpRequest) -> HttpResponse:
     return redirect(reverse("core:settings"), status=302)
 
 
+def _active_subscription_guard(request: HttpRequest) -> HttpResponse | None:
+    """
+    Block checkout when the user already has an active subscription.
+
+    Without this guard a second checkout (direct POST, second tab) creates a
+    second Stripe subscription for the same customer: double billing, and the
+    newer subscription ID overwrites the tracked one. Returns None if checkout
+    may proceed, otherwise a response pointing the user to the billing portal
+    (reachable from the settings page).
+    """
+    profile = UserProfile.objects.filter(user=request.user).first()
+    if not profile:
+        return None
+    if profile.subscription_tier == "free" and not profile.stripe_subscription_id:
+        return None
+    logger.info(
+        "Checkout blocked: user=%s already has an active subscription (tier=%s sub=%s)",
+        request.user.id,
+        profile.subscription_tier,
+        profile.stripe_subscription_id,
+    )
+    msg = _(
+        "You already have an active subscription. "
+        "Please use the billing portal to manage or change your plan."
+    )
+    if _wants_json(request):
+        return JsonResponse({"error": str(msg)}, status=409)
+    messages.info(request, msg)
+    return redirect(reverse("core:settings"))
+
+
 @method_decorator(login_required, name="dispatch")
 class SubscriptionCheckoutView(View):
     """POST: Create Stripe Checkout Session and redirect to Stripe."""
@@ -128,6 +159,10 @@ class SubscriptionCheckoutView(View):
             return JsonResponse(
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
+
+        guard_response = _active_subscription_guard(request)
+        if guard_response is not None:
+            return guard_response
 
         tier_map = {
             "starter": getattr(settings, "STRIPE_PRICE_ID_STARTER", None),
@@ -311,6 +346,10 @@ class StripeCheckoutView(View):
             return JsonResponse(
                 {"error": _("Payment is not configured. Please contact support.")}, status=503
             )
+
+        guard_response = _active_subscription_guard(request)
+        if guard_response is not None:
+            return guard_response
 
         tier_map = {
             "starter": getattr(settings, "STRIPE_PRICE_ID_STARTER", None),
