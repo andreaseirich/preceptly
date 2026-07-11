@@ -19,7 +19,7 @@ class Command(BaseCommand):
         from django.conf import settings
 
         recipient = options["to"]
-        site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+        site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
 
         for role in ("student", "parent"):
             context = {

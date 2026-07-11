@@ -103,7 +103,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
         ).count()
         portal_link = context.get("portal_link")
         if portal_link:
-            site_url = getattr(settings, "SITE_URL", "https://preceptly.up.railway.app")
+            site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
             context["student_activation_url"] = (
                 f"{site_url}/portal/activate/{portal_link.invite_token}/"
             )
