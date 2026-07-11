@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django_ratelimit.decorators import ratelimit
 
 from apps.core.erecht24_service import handle_push
 
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(ratelimit(key="ip", rate="10/m", method="POST", block=True), name="dispatch")
 class Erecht24PushView(View):
     """Receives push notifications from e-recht24 when legal texts change."""
 

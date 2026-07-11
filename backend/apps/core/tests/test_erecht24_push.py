@@ -99,3 +99,8 @@ class Erecht24PushViewTest(TestCase):
         """Empty ERECHT24_PUSH_SECRET must cause handle_push to return 403."""
         response = self._post_form({"erecht24_secret": "", "erecht24_type": "ping"})
         self.assertEqual(response.status_code, 403)
+
+    def test_non_string_secret_in_payload_returns_403_not_500(self):
+        """A non-string erecht24_secret value (e.g. int) must not raise TypeError — returns 403."""
+        response = self._post_json({"erecht24_secret": 12345, "erecht24_type": "ping"})
+        self.assertEqual(response.status_code, 403)
