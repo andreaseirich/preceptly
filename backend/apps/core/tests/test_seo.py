@@ -19,7 +19,10 @@ class RobotsTxtTest(TestCase):
 
     def test_contains_sitemap_reference(self):
         self.assertIn(b"Sitemap:", self.response.content)
-        self.assertIn(b"sitemap.xml", self.response.content)
+        self.assertIn(b"preceptly.de/sitemap.xml", self.response.content)
+
+    def test_faq_not_disallowed(self):
+        self.assertNotIn(b"Disallow: /faq/", self.response.content)
 
 
 class SitemapTest(TestCase):
@@ -46,3 +49,6 @@ class SitemapTest(TestCase):
 
     def test_does_not_contain_login(self):
         self.assertNotIn(b"/login/", self.response.content)
+
+    def test_contains_faq_url(self):
+        self.assertIn(b"/faq/", self.response.content)
