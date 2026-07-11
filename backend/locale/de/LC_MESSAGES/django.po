@@ -6153,6 +6153,46 @@ msgstr ""
 msgid "Legal basis: Art. 6 para. 1 lit. b and f GDPR."
 msgstr "Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO."
 
+#: templates/legal/privacy.html:67
+msgid "Email (iCloud Mail)"
+msgstr "E-Mail (iCloud Mail)"
+
+#: templates/legal/privacy.html:68
+msgid ""
+"We use Apple's iCloud Mail with a custom email domain to send and receive "
+"emails under the preceptly.de domain (e.g., info@preceptly.de)."
+msgstr ""
+"Wir nutzen Apples iCloud Mail mit einer benutzerdefinierten E-Mail-Domain, "
+"um E-Mails unter der Domain preceptly.de zu senden und zu empfangen "
+"(z. B. info@preceptly.de)."
+
+#: templates/legal/privacy.html:69
+msgid ""
+"Provider: Apple Distribution International Ltd., Hollyhill Industrial "
+"Estate, Hollyhill, Cork, Irland (a subsidiary of Apple Inc., Cupertino, "
+"USA)."
+msgstr ""
+"Anbieter: Apple Distribution International Ltd., Hollyhill Industrial "
+"Estate, Hollyhill, Cork, Irland (eine Tochtergesellschaft der Apple Inc., "
+"Cupertino, USA)."
+
+#: templates/legal/privacy.html:70
+msgid ""
+"Data transfers to the USA are based on the standard contractual clauses of "
+"the EU Commission."
+msgstr ""
+"Datenübertragungen in die USA erfolgen auf Grundlage der "
+"Standardvertragsklauseln der EU-Kommission."
+
+#: templates/legal/privacy.html:71
+msgid ""
+"Legal basis: legitimate interest in reliable and professional business "
+"communication (Art. 6 para. 1 lit. f GDPR)."
+msgstr ""
+"Rechtsgrundlage: berechtigtes Interesse an einer zuverlässigen und "
+"professionellen Geschäftskommunikation (Art. 6 Abs. 1 lit. f "
+"DSGVO)."
+
 #: templates/legal/terms.html:4 templates/partials/footer.html:52
 msgid "Terms of Service"
 msgstr "Allgemeine Geschäftsbedingungen"
