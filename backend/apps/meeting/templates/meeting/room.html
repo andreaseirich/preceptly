@@ -236,6 +236,7 @@ a.doc-item { text-decoration: none; }
 }
 .lobby-toggle.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 .lobby-toggle.muted  { background: var(--bg3); border-color: #555; color: var(--text2); }
+.lobby-toggle:focus-visible { outline: 3px solid #90caf9; outline-offset: 2px; }
 #lobby-name-row {
     text-align: center; font-size: 0.85em; color: var(--text2);
     padding: 6px 12px; background: var(--bg3); border-radius: 6px;
@@ -243,11 +244,12 @@ a.doc-item { text-decoration: none; }
 #lobby-name-row strong { color: var(--text); }
 #lobby-join {
     padding: 12px; border-radius: 9px; border: none; font-size: 1em; font-weight: 700;
-    background: var(--green); color: #fff; cursor: pointer; transition: background 0.15s;
+    background: #0f5132; color: #fff; cursor: pointer; transition: background 0.15s;
     letter-spacing: 0.02em;
 }
-#lobby-join:hover { background: #219a52; }
+#lobby-join:hover { background: #0b3d26; }
 #lobby-join:active { transform: scale(0.98); }
+#lobby-join:focus-visible { outline: 3px solid #90caf9; outline-offset: 2px; }
 #lobby-err { font-size: 0.82em; color: #e74c3c; text-align: center; min-height: 1.2em; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -266,15 +268,15 @@ a.doc-item { text-decoration: none; }
         </div>
 
         <div id="lobby-toggles">
-            <button id="lobby-btn-mic" class="lobby-toggle active" onclick="lobbyToggleMic()">🎤 Mikrofon an</button>
-            <button id="lobby-btn-cam" class="lobby-toggle active" onclick="lobbyToggleCam()">📷 Kamera an</button>
+            <button id="lobby-btn-mic" class="lobby-toggle active" type="button" aria-pressed="true" onclick="lobbyToggleMic()">🎤 Mikrofon an</button>
+            <button id="lobby-btn-cam" class="lobby-toggle active" type="button" aria-pressed="true" onclick="lobbyToggleCam()">📷 Kamera an</button>
         </div>
 
         <div id="lobby-name-row">Du beitrittst als <strong>{{ display_name }}</strong></div>
 
-        <div id="lobby-err"></div>
+        <div id="lobby-err" role="alert" aria-live="polite"></div>
 
-        <button id="lobby-join" onclick="lobbyJoin()">Beitreten →</button>
+        <button id="lobby-join" type="button" onclick="lobbyJoin()">Beitreten →</button>
     </div>
 </div>
 
@@ -1675,9 +1677,11 @@ async function initLobby() {
         try { localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
         catch (e2) { localStream = new MediaStream(); }
         _lobbyCamOn = false;
-        document.getElementById("lobby-btn-cam").classList.remove("active");
-        document.getElementById("lobby-btn-cam").classList.add("muted");
-        document.getElementById("lobby-btn-cam").textContent = "📷 Kamera aus";
+        const camBtnFallback = document.getElementById("lobby-btn-cam");
+        camBtnFallback.classList.remove("active");
+        camBtnFallback.classList.add("muted");
+        camBtnFallback.textContent = "📷 Kamera aus";
+        camBtnFallback.setAttribute("aria-pressed", "false");
         errEl.textContent = "Kamera nicht verfügbar – nur Audio.";
     }
 
@@ -1693,9 +1697,11 @@ async function initLobby() {
     if (localStream.getAudioTracks().length === 0 && !errEl.textContent) {
         errEl.textContent = "Mikrofon nicht verfügbar.";
         _lobbyMicOn = false;
-        document.getElementById("lobby-btn-mic").classList.remove("active");
-        document.getElementById("lobby-btn-mic").classList.add("muted");
-        document.getElementById("lobby-btn-mic").textContent = "🎤 Mikrofon aus";
+        const micBtnFallback = document.getElementById("lobby-btn-mic");
+        micBtnFallback.classList.remove("active");
+        micBtnFallback.classList.add("muted");
+        micBtnFallback.textContent = "🎤 Mikrofon aus";
+        micBtnFallback.setAttribute("aria-pressed", "false");
     }
 }
 
@@ -1709,6 +1715,7 @@ function lobbyToggleMic() {
         btn.textContent = "🔇 Mikrofon aus";
         btn.classList.remove("active"); btn.classList.add("muted");
     }
+    btn.setAttribute("aria-pressed", _lobbyMicOn ? "true" : "false");
     if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = _lobbyMicOn);
 }
 
@@ -1728,6 +1735,7 @@ function lobbyToggleCam() {
         vid.style.display = "none";
         noVid.style.display = "flex";
     }
+    btn.setAttribute("aria-pressed", _lobbyCamOn ? "true" : "false");
     if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = _lobbyCamOn);
 }
 
@@ -1762,6 +1770,42 @@ function lobbyJoin() {
 
     connectWS();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lobby Focus Trap
+// ─────────────────────────────────────────────────────────────────────────────
+function _lobbyFocusableEls() {
+    const lobby = document.getElementById("lobby");
+    if (!lobby) return [];
+    return Array.prototype.slice
+        .call(lobby.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+        .filter(el => !el.disabled && el.offsetParent !== null);
+}
+
+function _lobbyIsOpen() {
+    const lobby = document.getElementById("lobby");
+    return !!lobby && lobby.style.display !== "none" && lobby.style.opacity !== "0";
+}
+
+document.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab" || !_lobbyIsOpen()) return;
+    const els = _lobbyFocusableEls();
+    if (!els.length) return;
+    const first = els[0];
+    const last  = els[els.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey) {
+        if (active === first || !els.includes(active)) {
+            e.preventDefault();
+            last.focus();
+        }
+    } else {
+        if (active === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Init
