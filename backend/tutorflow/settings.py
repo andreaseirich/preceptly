@@ -343,6 +343,11 @@ LOGGING = {
             "filename": BASE_DIR / "logs" / "tutorflow.log",
             "formatter": "verbose",
         },
+        "mail_admins": {
+            "class": "django.utils.log.AdminEmailHandler",
+            "level": "ERROR",
+            "include_html": False,
+        },
     },
     "loggers": {
         "apps.ai": {
@@ -361,7 +366,7 @@ LOGGING = {
             "propagate": False,
         },
         "django": {
-            "handlers": ["console"],
+            "handlers": ["console", "mail_admins"],
             "level": "INFO",
         },
     },
@@ -406,6 +411,8 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="andreaseirich2004@icloud.com")
 INVOICE_FROM_EMAIL = env("INVOICE_FROM_EMAIL", default="rechnung@andicode.de")
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+_admin_email = env("ADMIN_EMAIL", default="")
+ADMINS = [("Admin", _admin_email)] if _admin_email else []
 
 # Email timeout configuration (for TimeoutSMTPEmailBackend)
 # Socket timeout for SMTP connections (prevents hanging)
