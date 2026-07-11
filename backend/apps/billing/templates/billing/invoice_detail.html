@@ -9,9 +9,9 @@
 .inv-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
 .inv-header h1 { margin: 0; }
 .inv-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600; letter-spacing: 0.02em; }
-.inv-status.draft  { background: rgba(107,114,128,0.15); color: #6b7280; border: 1px solid rgba(107,114,128,0.3); }
-.inv-status.sent   { background: rgba(37,99,235,0.12);  color: #2563eb; border: 1px solid rgba(37,99,235,0.3); }
-.inv-status.paid   { background: rgba(22,163,74,0.12);  color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
+.inv-status.draft  { background: rgba(107,114,128,0.15); color: #374151; border: 1px solid rgba(107,114,128,0.3); }
+.inv-status.sent   { background: rgba(37,99,235,0.12);  color: #1e3a8a; border: 1px solid rgba(37,99,235,0.3); }
+.inv-status.paid   { background: rgba(22,163,74,0.12);  color: #14532d; border: 1px solid rgba(22,163,74,0.3); }
 [data-theme="dark"] .inv-status.draft { color: #9ca3af; }
 [data-theme="dark"] .inv-status.sent  { color: #60a5fa; }
 [data-theme="dark"] .inv-status.paid  { color: #4ade80; }
@@ -51,7 +51,8 @@
 .action-btn.warning:hover   { background: #b45309; }
 .action-btn.danger    { background: transparent; color: #dc3545; border: 1px solid #dc3545; }
 .action-btn.danger:hover    { background: #dc3545; color: #fff; }
-.action-btn.disabled  { background: var(--bg-nav); color: var(--text-secondary); cursor: not-allowed; opacity: 0.55; border: 1px solid var(--border-color); pointer-events: none; }
+.action-btn.disabled,
+.action-btn:disabled  { background: var(--bg-nav); color: var(--text-secondary); cursor: not-allowed; opacity: 0.55; border: 1px solid var(--border-color); }
 .action-btn .icon { font-size: 1.05em; flex-shrink: 0; }
 .action-section { display: flex; flex-direction: column; gap: 7px; }
 .action-divider { height: 1px; background: var(--border-color); margin: 2px 0; }
@@ -106,7 +107,7 @@
 {# ── Header ─────────────────────────────────────────────────────────────── #}
 <div class="inv-header">
     <div>
-        <a href="{% url 'billing:invoice_list' %}" style="font-size:0.85em; color:var(--text-secondary); text-decoration:none;">← {% trans "Invoices" %}</a>
+        <a href="{% url 'billing:invoice_list' %}" style="font-size:0.85em; color:var(--text-secondary); text-decoration:underline;">← {% trans "Invoices" %}</a>
         <h1 style="margin-top:4px;">{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</h1>
     </div>
     <span class="inv-status {{ invoice.status }}">
@@ -244,10 +245,10 @@
                     </a>
                     {% endif %}
                 {% else %}
-                    <span class="action-btn disabled">
-                        <span class="icon">📑</span>
-                        <span>{% trans "Generate PDF" %}<br><span class="pdf-ts">{% trans "Fill in invoice details first" %}</span></span>
-                    </span>
+                    <button type="button" class="action-btn disabled" disabled aria-describedby="pdf-disabled-hint">
+                        <span class="icon" aria-hidden="true">📑</span>
+                        <span>{% trans "Generate PDF" %}<br><span class="pdf-ts" id="pdf-disabled-hint">{% trans "Fill in invoice details first" %}</span></span>
+                    </button>
                 {% endif %}
 
                 {% if invoice.document %}
