@@ -4,8 +4,6 @@ Verifies that the rightmost-untrusted IP from X-Forwarded-For is returned
 when REMOTE_ADDR matches a trusted proxy (plain IP or CIDR range).
 """
 
-from unittest.mock import patch
-
 from django.test import RequestFactory, TestCase, override_settings
 
 from apps.core.auth_throttle import _get_client_ip, _is_trusted_proxy

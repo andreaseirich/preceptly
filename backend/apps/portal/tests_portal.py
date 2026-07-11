@@ -449,3 +449,44 @@ class PortalActivateViewTest(TestCase):
         resp = self.client.get(reverse("portal:activate", kwargs={"token": "invalid-token-xyz"}))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "abgelaufen")
+
+
+class InactiveParentLinkAccessTest(TestCase):
+    """Regression: deactivated parent links must not grant access to student data."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.tutor = _make_tutor("tutor_inactive_parent")
+        self.parent_pu = _make_portal_user(self.tutor, "parent", "parent_inactive", "pw_inactive")
+        self.contract = _make_contract(self.tutor)
+        # Inactive link – is_active=False
+        self.inactive_link = _make_parent_link(self.parent_pu, self.contract, active=False)
+        # Authenticate as the parent portal user
+        session = self.client.session
+        session["portal_user_id"] = self.parent_pu.pk
+        session.save()
+
+    def test_inactive_parent_link_detail_view_returns_404(self):
+        url = reverse("portal:parent_student_detail", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_inactive_parent_link_message_view_returns_403(self):
+        url = reverse("portal:messages", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 403)
+
+    def test_active_parent_link_detail_view_returns_200(self):
+        self.inactive_link.is_active = True
+        self.inactive_link.save()
+        url = reverse("portal:parent_student_detail", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_active_parent_link_message_view_returns_200(self):
+        self.inactive_link.is_active = True
+        self.inactive_link.save()
+        url = reverse("portal:messages", kwargs={"student_pk": self.contract.pk})
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
