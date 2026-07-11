@@ -5,6 +5,7 @@ Per-IP and per-username throttling; 429 on exceed.
 
 import hashlib
 import ipaddress
+import logging
 import time
 import unicodedata
 
@@ -12,6 +13,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import render
 from django.utils.translation import gettext as _
+
+logger = logging.getLogger(__name__)
 
 
 def _cache_key(prefix: str, value: str) -> str:
@@ -41,10 +44,14 @@ def _get_client_ip(request) -> str:
     """
     trusted_proxies = getattr(settings, "TRUSTED_PROXIES", [])
     remote = (request.META.get("REMOTE_ADDR") or "unknown")[:64]
-    if _is_trusted_proxy(remote, trusted_proxies):
-        xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        if xff:
-            ips = [ip.strip() for ip in xff.split(",") if ip.strip()]
+    xff_raw = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    is_trusted = _is_trusted_proxy(remote, trusted_proxies)
+    logger.info(
+        "[TRUSTED_PROXIES-DIAG] remote_addr=%s xff=%r trusted=%s", remote, xff_raw, is_trusted
+    )
+    if is_trusted:
+        if xff_raw:
+            ips = [ip.strip() for ip in xff_raw.split(",") if ip.strip()]
             # Right-most-untrusted: von rechts nach links, erste IP die kein
             # bekannter Proxy ist gilt als echter Client.
             for ip in reversed(ips):
