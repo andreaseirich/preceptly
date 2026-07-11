@@ -132,9 +132,16 @@ ASGI_APPLICATION = "tutorflow.asgi.application"
 # TURN auf ai-server (46.224.151.16:3478). Credential über Env-Var überschreibbar.
 _TURN_URL = env("TURN_URL", default="turn:46.224.151.16:3478")
 _TURN_USER = env("TURN_USER", default="preceptly")
-_TURN_CREDENTIAL = env(
-    "TURN_CREDENTIAL", default="849bdf4a2bbc42fadd2e9e4efc85707ed13e4b1571c6dc3d"
-)
+_TURN_CREDENTIAL = env("TURN_CREDENTIAL")
+if not _TURN_CREDENTIAL:
+    if DEBUG or "test" in sys.argv:
+        _TURN_CREDENTIAL = "dummy-turn-credential-for-development-only"
+    else:
+        from django.core.exceptions import ImproperlyConfigured
+
+        raise ImproperlyConfigured(
+            "TURN_CREDENTIAL environment variable must be set in production (DEBUG=False)."
+        )
 
 MEETING_ICE_SERVERS = [
     {"urls": "stun:stun.l.google.com:19302"},
