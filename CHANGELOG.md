@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Audit (2026-07-11) — Fixes pending
-Three security/quality audits completed; no code changes yet. All findings documented in `docs/audits/`:
+### Audit (2026-07-11) — Fixes erledigt (2026-07-11)
+Three security/quality audits completed; all medium findings fixed. Findings documented in `docs/audits/`:
 - [Stripe payment flow audit](docs/audits/2026-07-11-stripe-payment-flow.md) (Fable) — 4 medium findings: webhook idempotency bug, dead price whitelist, double-subscription race, API-version-dependent payment_failed handler
 - [Accessibility WCAG 2.1 AA audit](docs/audits/2026-07-11-accessibility-wcag.md) (Opus) — 7 medium findings across PWA modal, landing pricing, invoice detail, meeting lobby
 - [Monitoring/logging audit](docs/audits/2026-07-11-monitoring-logging.md) (Sonnet) — no error tracking, silent Stripe events; decision: implement Django mail_admins + SMTP (Option B)
