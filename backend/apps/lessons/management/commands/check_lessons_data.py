@@ -67,6 +67,9 @@ class Command(BaseCommand):
 
             self.stdout.write("\nAll tables with 'lesson' in name:")
             for table in all_lesson_tables:
-                cursor.execute(f"SELECT COUNT(*) FROM {table[0]};")
+                from django.db import connection as _conn
+
+                quoted = _conn.ops.quote_name(table[0])
+                cursor.execute(f"SELECT COUNT(*) FROM {quoted};")
                 table_count = cursor.fetchone()[0]
                 self.stdout.write(f"  - {table[0]}: {table_count} rows")
