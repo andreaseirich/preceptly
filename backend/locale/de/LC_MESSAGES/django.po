@@ -6141,6 +6141,16 @@ msgstr ""
 "Dunkel) im localStorage des Browsers. Dabei handelt es sich nicht um ein "
 "Cookie; die Daten verlassen das Gerät nicht."
 
+#: templates/legal/privacy.html:62
+msgid ""
+"Preceptly also stores in localStorage whether you have dismissed the hint "
+"about installing the app to your home screen, so it is not shown again. "
+"This data does not leave your device either."
+msgstr ""
+"Preceptly speichert im localStorage außerdem, ob Sie den Hinweis zur "
+"Installation der App auf Ihrem Startbildschirm weggeklickt haben, damit er "
+"nicht erneut erscheint. Auch diese Daten verlassen das Gerät nicht."
+
 #: templates/legal/privacy.html:63
 msgid ""
 "No tracking, analytics, or advertising cookies are used. A cookie consent "
