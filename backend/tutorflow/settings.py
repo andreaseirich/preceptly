@@ -411,9 +411,6 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="andreaseirich2004@icloud.com")
 INVOICE_FROM_EMAIL = env("INVOICE_FROM_EMAIL", default="rechnung@andicode.de")
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
-_admin_email = env("ADMIN_EMAIL", default="")
-ADMINS = [("Admin", _admin_email)] if _admin_email else []
-
 # Email timeout configuration (for TimeoutSMTPEmailBackend)
 # Socket timeout for SMTP connections (prevents hanging)
 EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", default="10"))  # 10 seconds default
@@ -421,6 +418,7 @@ EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", default="10"))  # 10 seconds default
 # Email notification settings
 NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")
 ADMIN_NOTIFICATION_EMAIL = env("ADMIN_NOTIFICATION_EMAIL", default="contact@andicode.de")
+ADMINS = [ADMIN_NOTIFICATION_EMAIL]
 SITE_URL = env("SITE_URL", default="https://preceptly.de")
 
 # Stripe (subscription payments for Premium)
