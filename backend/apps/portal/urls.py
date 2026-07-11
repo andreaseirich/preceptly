@@ -20,6 +20,11 @@ urlpatterns = [
     path("activate/<str:token>/", views.PortalActivateView.as_view(), name="activate"),
     path("password-reset/", views.PortalPasswordResetRequestView.as_view(), name="password_reset"),
     path(
+        "password-reset/confirm/<str:token>/",
+        views.PortalPasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
+    ),
+    path(
         "student/lessons/<int:pk>/",
         views.StudentLessonDetailView.as_view(),
         name="student_lesson_detail",
