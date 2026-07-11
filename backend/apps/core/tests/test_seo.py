@@ -20,3 +20,29 @@ class RobotsTxtTest(TestCase):
     def test_contains_sitemap_reference(self):
         self.assertIn(b"Sitemap:", self.response.content)
         self.assertIn(b"sitemap.xml", self.response.content)
+
+
+class SitemapTest(TestCase):
+    def setUp(self):
+        self.response = self.client.get("/sitemap.xml")
+
+    def test_returns_200(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_content_type_is_xml(self):
+        self.assertIn("xml", self.response.get("Content-Type", ""))
+
+    def test_contains_landing_url(self):
+        self.assertIn(b"<loc>", self.response.content)
+
+    def test_contains_imprint_url(self):
+        self.assertIn(b"/legal/imprint/", self.response.content)
+
+    def test_contains_privacy_url(self):
+        self.assertIn(b"/legal/privacy/", self.response.content)
+
+    def test_does_not_contain_portal(self):
+        self.assertNotIn(b"/portal/", self.response.content)
+
+    def test_does_not_contain_login(self):
+        self.assertNotIn(b"/login/", self.response.content)
