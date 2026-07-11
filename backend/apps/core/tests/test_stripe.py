@@ -928,6 +928,62 @@ class StripeWebhookConstraintsTest(TestCase):
             UserProfile.objects.create(user=u2, stripe_customer_id="cus_same")
 
 
+@override_settings(STRIPE_WEBHOOK_SECRET="whsec_fake", STRIPE_SECRET_KEY="sk_test_fake")
+class StripeWebhookRetryTest(TestCase):
+    """Failed events must NOT be marked processed; a Stripe retry reprocesses them."""
+
+    def setUp(self):
+        self.event = {
+            "id": "evt_retry123",
+            "type": "customer.subscription.updated",
+            "data": {"object": {"id": "sub_retry", "customer": "cus_retry"}},
+        }
+
+    def _post(self):
+        return self.client.post(
+            reverse("stripe_webhook"),
+            data=json.dumps(self.event),
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="t=0,v1=fake",
+        )
+
+    def test_failed_event_is_reprocessed_on_retry(self):
+        """Handler raises -> 500, processed_at empty; retry with same event ID processes again."""
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=self.event,
+        ):
+            with patch(
+                "apps.core.views_stripe._handle_stripe_event",
+                side_effect=[RuntimeError("boom"), None],
+            ) as mock_handler:
+                r1 = self._post()
+                self.assertEqual(r1.status_code, 500)
+                row = StripeWebhookEvent.objects.get(event_id="evt_retry123")
+                self.assertIsNone(row.processed_at)
+
+                r2 = self._post()
+                self.assertEqual(r2.status_code, 200)
+        self.assertEqual(mock_handler.call_count, 2)
+        row.refresh_from_db()
+        self.assertIsNotNone(row.processed_at)
+        self.assertEqual(StripeWebhookEvent.objects.filter(event_id="evt_retry123").count(), 1)
+
+    def test_successful_event_sets_processed_at_and_is_not_reprocessed(self):
+        with patch(
+            "apps.core.views_stripe.stripe.Webhook.construct_event",
+            return_value=self.event,
+        ):
+            with patch("apps.core.views_stripe._handle_stripe_event") as mock_handler:
+                r1 = self._post()
+                r2 = self._post()
+        self.assertEqual(r1.status_code, 200)
+        self.assertEqual(r2.status_code, 200)
+        mock_handler.assert_called_once()
+        row = StripeWebhookEvent.objects.get(event_id="evt_retry123")
+        self.assertIsNotNone(row.processed_at)
+
+
 @override_settings(
     STRIPE_SECRET_KEY="sk_test_fake",
     STRIPE_PRICE_ID_MONTHLY="price_premium_123",

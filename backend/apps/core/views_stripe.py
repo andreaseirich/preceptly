@@ -473,19 +473,20 @@ def stripe_webhook_view(request):
     if obj.get("id"):
         payload_summary["object_id"] = str(obj["id"])[:50]
 
-    # [MEDIUM] Webhook-Idempotenz: bei IntegrityError 409 zurückgeben damit Stripe retryt,
-    # es sei denn, der Event wurde bereits erfolgreich verarbeitet.
+    # [MEDIUM] Webhook-Idempotenz: nur Events verwerfen, die bereits ERFOLGREICH
+    # verarbeitet wurden (processed_at gesetzt). Eine Zeile ohne processed_at stammt
+    # aus einem fehlgeschlagenen Versuch — der Stripe-Retry muss erneut verarbeiten.
     try:
         with transaction.atomic():
             webhook_event, created = StripeWebhookEvent.objects.get_or_create(
                 event_id=event_id,
                 defaults={"event_type": event_type, "payload_summary": payload_summary},
             )
-            if not created:
+            if not created and webhook_event.processed_at:
                 return HttpResponse(status=200)
     except IntegrityError:
-        # Race: anderer Worker hat denselben Event eingefügt.
-        # Wenn er bereits verarbeitet wurde → 200. Sonst → 409 damit Stripe retryt.
+        # Race: anderer Worker hat denselben Event gerade eingefügt und verarbeitet ihn.
+        # Schlägt er fehl, bleibt processed_at leer und der Stripe-Retry greift.
         return HttpResponse(status=200)
 
     try:
@@ -497,9 +498,12 @@ def stripe_webhook_view(request):
             event_id,
             type(e).__name__,
         )
-        # [MEDIUM] 500 zurückgeben damit Stripe den Event retryt (kein stilles Verwerfen)
+        # [MEDIUM] 500 zurückgeben damit Stripe den Event retryt (kein stilles Verwerfen);
+        # processed_at bleibt leer, damit der Retry tatsächlich erneut verarbeitet.
         return HttpResponse(status=500)
 
+    webhook_event.processed_at = timezone.now()
+    webhook_event.save(update_fields=["processed_at"])
     return HttpResponse(status=200)
 
 
@@ -671,6 +675,11 @@ def _handle_subscription_deleted(subscription: dict) -> None:
     sub_id = subscription.get("id")
     profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
     if profile:
+        logger.warning(
+            "subscription.deleted sub=%s user=%s",
+            sub_id,
+            profile.pk,
+        )
         with transaction.atomic():
             profile = UserProfile.objects.select_for_update().get(pk=profile.pk)
             profile.stripe_subscription_id = None
@@ -700,13 +709,21 @@ def _handle_invoice_payment_failed(invoice: dict) -> None:
             )
             return
 
+    logger.warning(
+        "invoice.payment_failed sub=%s user=%s",
+        sub_id,
+        profile.pk,
+    )
+
     # Stripe API call OUTSIDE transaction
     try:
         sub = stripe.Subscription.retrieve(sub_id)
         status = sub.get("status", "")
     except stripe.error.StripeError as e:
         logger.warning("Stripe Subscription.retrieve failed for invoice: %s", e.http_status)
-        return
+        # Re-raise: nichts wurde verarbeitet → Webhook antwortet 500 und Stripe retryt,
+        # statt den Event stillschweigend als verarbeitet zu markieren.
+        raise
 
     if not is_premium_subscription_status(status):
         with transaction.atomic():
