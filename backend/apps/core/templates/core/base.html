@@ -144,8 +144,8 @@
         /* Navigation */
         nav { background: var(--bg-nav); padding: 15px 0; margin-bottom: 30px; border-radius: 4px; box-shadow: 0 2px 4px var(--shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s ease; }
         nav .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; }
-        nav .nav-brand { display: flex; align-items: center; padding: 0 8px 0 0; white-space: nowrap; }
-        nav .nav-brand img { height: 28px; width: auto; display: block; }
+        nav .nav-brand { display: flex; align-items: center; padding: 0 4px 0 0; flex-shrink: 0; }
+        nav .nav-brand img { height: 28px; width: 28px; display: block; }
         nav .nav-links { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; flex: 1; }
         nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 3px; transition: background 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
         nav a:hover { background: var(--hover-bg); }
@@ -459,7 +459,7 @@
     <nav aria-label="{% trans 'Main navigation' %}">
         <div class="nav-container">
             <a class="nav-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
-                <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
+                <img src="{% static 'brand/preceptly-icon.svg' %}" alt="Preceptly">
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}">☰</button>
             <div class="nav-links" id="navLinks">
