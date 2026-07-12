@@ -17,10 +17,10 @@ class CaptureAsNode(template.Node):
 def captureas(parser, token):
     try:
         _, _, var_name = token.split_contents()
-    except ValueError:
+    except ValueError as err:
         raise template.TemplateSyntaxError(
             "'captureas' requires syntax: {% captureas as varname %}"
-        )
+        ) from err
     nodelist = parser.parse(("endcaptureas",))
     parser.delete_first_token()
     return CaptureAsNode(nodelist, var_name)
