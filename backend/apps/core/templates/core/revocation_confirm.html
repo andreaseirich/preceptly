@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+
+{% block title %}Widerruf bestätigen – Preceptly{% endblock %}
+
+{% block content %}
+<div style="max-width: 560px; margin: 100px auto; padding: 40px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% if state == "confirm" %}
+        <h1 style="margin-bottom: 20px; color: var(--text-primary);">Widerruf bestätigen</h1>
+        <p style="margin-bottom: 16px; color: var(--text-primary);">
+            Für Ihr Preceptly-Abo ist über unser Widerrufsformular ein Widerruf eingegangen.
+        </p>
+        <p style="margin-bottom: 16px; color: var(--text-primary);">
+            Wenn Sie diesen Widerruf selbst eingereicht haben, bestätigen Sie ihn bitte mit dem
+            Button unten. <strong>Ihr Abo wird dann sofort gekündigt.</strong>
+        </p>
+        <p style="margin-bottom: 24px; color: var(--text-primary);">
+            Wenn Sie diesen Widerruf <strong>nicht</strong> selbst eingereicht haben, schließen Sie
+            diese Seite einfach – dann passiert nichts und Ihr Abo bleibt unverändert. Bei Fragen
+            wenden Sie sich gerne an unseren Support.
+        </p>
+        <form method="post" action="{% url 'core:erecht24_revocation_confirm' token %}">
+            {% csrf_token %}
+            <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">
+                Kündigung jetzt bestätigen
+            </button>
+        </form>
+    {% elif state == "success" %}
+        <h1 style="margin-bottom: 20px; color: var(--text-primary);">Widerruf bestätigt</h1>
+        <p role="status" style="color: var(--text-primary);">
+            Ihr Widerruf wurde bestätigt und Ihr Preceptly-Abo wurde gekündigt. Sie erhalten keine
+            weiteren Abbuchungen. Bei Fragen zur Erstattung wenden Sie sich gerne an unseren
+            Support.
+        </p>
+    {% elif state == "expired" %}
+        <h1 style="margin-bottom: 20px; color: var(--text-primary);">Link abgelaufen</h1>
+        <p role="alert" style="color: var(--text-primary);">
+            Dieser Bestätigungslink ist abgelaufen (Gültigkeit: 14 Tage). Ihr Abo wurde
+            <strong>nicht</strong> gekündigt. Bitte wenden Sie sich an unseren Support, wenn Sie
+            Ihren Widerruf weiterhin ausüben möchten.
+        </p>
+    {% else %}
+        <h1 style="margin-bottom: 20px; color: var(--text-primary);">Link ungültig</h1>
+        <p role="alert" style="color: var(--text-primary);">
+            Dieser Bestätigungslink ist ungültig oder wurde bereits verwendet. Es wurde keine
+            Kündigung ausgelöst. Bei Fragen wenden Sie sich gerne an unseren Support.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
