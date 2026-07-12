@@ -6,12 +6,16 @@ import logging
 from decimal import Decimal
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from apps.billing.forms import NO_INSTITUTE_FILTER_VALUE
 from apps.billing.models import Invoice, InvoiceItem
-from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
-from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
+from apps.contracts.institute_billing import (
+    calculate_lesson_amount,
+    resolve_institute_billing_config,
+)
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
 
@@ -64,7 +68,11 @@ class InvoiceService:
 
         if contract_id:
             queryset = queryset.filter(contract_id=contract_id)
-        if institute:
+        if institute == NO_INSTITUTE_FILTER_VALUE:
+            queryset = queryset.filter(
+                Q(contract__institute__isnull=True) | Q(contract__institute="")
+            )
+        elif institute:
             queryset = queryset.filter(contract__institute=institute)
         if user:
             queryset = queryset.filter(contract__user=user)
@@ -167,29 +175,25 @@ class InvoiceService:
             invoice = Invoice.objects.create(**invoice_kwargs)
 
             total_amount = Decimal("0.00")
+            institute_config_cache = {}
             for lesson in lesson_list:
                 lesson_contract = lesson.contract
+                cache_key = (owner.pk, (lesson_contract.institute or "").strip().lower())
+                if cache_key not in institute_config_cache:
+                    institute_config_cache[cache_key] = resolve_institute_billing_config(
+                        owner, lesson_contract.institute
+                    )
+                institute_config = institute_config_cache[cache_key]
+                has_tiers = bool(institute_config and institute_config.tiers)
+                unpaid_on_no_show = bool(
+                    institute_config and institute_config.unpaid_on_tutor_no_show
+                )
 
-                if is_tutorspace_institute(getattr(lesson_contract, "institute", None)):
-                    try:
-                        amount = calculate_tutorspace_amount_for_session(lesson, tutor=owner)
-                    except (ValueError, ZeroDivisionError) as e:
-                        logger.error(
-                            "Tutorspace amount calc failed for lesson %s: %s", lesson.pk, e
-                        )
-                        raise
-                else:
-                    unit_duration = Decimal(str(lesson_contract.unit_duration_minutes))
-                    if unit_duration == 0:
-                        raise ValueError("unit_duration_minutes darf nicht 0 sein")
-                    lesson_duration = Decimal(str(lesson.duration_minutes))
-                    units = lesson_duration / unit_duration
-                    rate_per_unit = lesson_contract.hourly_rate
-                    amount = units * rate_per_unit
-                    if getattr(lesson, "tutor_no_show", False) and is_abacus_institute(
-                        getattr(lesson_contract, "institute", None)
-                    ):
-                        amount = Decimal("0.00")
+                try:
+                    amount = calculate_lesson_amount(lesson, owner, config=institute_config)
+                except (ValueError, ZeroDivisionError) as e:
+                    logger.error("Amount calc failed for lesson %s: %s", lesson.pk, e)
+                    raise
 
                 desc = _("Lesson {date} {time} - {student}").format(
                     date=lesson.date,
@@ -197,9 +201,9 @@ class InvoiceService:
                     student=lesson.contract.full_name,
                 )
                 if getattr(lesson, "tutor_no_show", False):
-                    if is_tutorspace_institute(getattr(lesson_contract, "institute", None)):
+                    if has_tiers:
                         desc = f"{desc} ({_('tutor no-show / deduction')})"
-                    elif is_abacus_institute(getattr(lesson_contract, "institute", None)):
+                    elif unpaid_on_no_show:
                         desc = f"{desc} ({_('not billed — tutor no-show')})"
 
                 from django.db import IntegrityError

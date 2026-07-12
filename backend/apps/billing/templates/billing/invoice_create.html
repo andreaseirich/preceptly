@@ -45,10 +45,10 @@
     {% if billable_lessons %}
     {% if tutorspace_show_tier_explainer %}
     <div class="tutorflow-help-box" style="border-left: 4px solid rgba(33, 150, 243, 0.6);">
-        <p style="margin: 0 0 8px 0;"><strong>{% trans "TutorSpace – tier calculation" %}</strong></p>
+        <p style="margin: 0 0 8px 0;"><strong>{% blocktrans with institute=tutorspace_institute_name %}{{ institute }} – tier calculation{% endblocktrans %}</strong></p>
         <p style="margin: 0;">
-            {% blocktrans with mins=tutorspace_preview_prior_minutes fh=tutorspace_preview_prior_full_hours rm=tutorspace_preview_prior_remainder_minutes %}
-            Before this billing period you already have <strong>{{ mins }}</strong> minutes of TutorSpace lessons that count toward the rate tier (that is <strong>{{ fh }}</strong> full hours plus <strong>{{ rm }}</strong> minutes). The 13 € / 14 € amounts use this history, not only the table below.
+            {% blocktrans with institute=tutorspace_institute_name mins=tutorspace_preview_prior_minutes fh=tutorspace_preview_prior_full_hours rm=tutorspace_preview_prior_remainder_minutes %}
+            Before this billing period you already have <strong>{{ mins }}</strong> minutes of {{ institute }} lessons that count toward the rate tier (that is <strong>{{ fh }}</strong> full hours plus <strong>{{ rm }}</strong> minutes). The tiered rate uses this history, not only the table below.
             {% endblocktrans %}
         </p>
         {% if tutorspace_tier_count_from %}
@@ -58,7 +58,7 @@
             {% endblocktrans %}
         </p>
         {% else %}
-        <p style="margin: 8px 0 0 0;">{% trans 'Tip: If 14 € appears too early, set "Count TutorSpace tier hours only from" in Settings, or remove old test lessons.' %} <a href="{% url 'core:settings' %}">{% trans "Open settings" %}</a></p>
+        <p style="margin: 8px 0 0 0;">{% trans 'Tip: If a higher rate appears too early, check your tier config in Settings, or remove old test lessons.' %} <a href="{% url 'core:settings' %}">{% trans "Open settings" %}</a></p>
         {% endif %}
     </div>
     {% endif %}

@@ -10,7 +10,11 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.utils.translation import override as translation_override
 
-from apps.billing.forms import InvoiceCreateForm, _get_institute_choices_for_user
+from apps.billing.forms import (
+    NO_INSTITUTE_FILTER_VALUE,
+    InvoiceCreateForm,
+    _get_institute_choices_for_user,
+)
 from apps.billing.services import InvoiceService
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
@@ -74,14 +78,59 @@ class InstituteFilterTest(TestCase):
         self.client.force_login(self.user)
 
     def test_institute_choices_include_only_tutor_institutes(self):
-        """Invoice form lists only institutes from tutor's contracts."""
+        """Invoice form lists only institutes from tutor's contracts, plus an explicit
+        "no institute" bucket for private contracts."""
         with translation_override("en"):
             choices = _get_institute_choices_for_user(self.user)
         self.assertIn(("", "All institutes"), choices)
+        self.assertIn((NO_INSTITUTE_FILTER_VALUE, "No institute (private lessons)"), choices)
         self.assertIn(("Institut Alpha", "Institut Alpha"), choices)
         self.assertIn(("Institut Beta", "Institut Beta"), choices)
-        # Private contracts (institute=None) should not appear
-        self.assertEqual(len(choices), 3)
+        self.assertEqual(len(choices), 4)
+
+    def test_no_institute_choice_absent_without_private_contracts(self):
+        """The "no institute" bucket only appears when the tutor actually has private
+        (blank-institute) contracts."""
+        Contract.objects.filter(user=self.user).exclude(
+            institute__in=["Institut Alpha", "Institut Beta"]
+        ).delete()
+        with translation_override("en"):
+            choices = _get_institute_choices_for_user(self.user)
+        choice_values = [value for value, _label in choices]
+        self.assertNotIn(NO_INSTITUTE_FILTER_VALUE, choice_values)
+
+    def test_no_institute_filter_limits_billable_lessons_to_private_contracts(self):
+        """Selecting "no institute" only bills lessons from private (blank-institute) contracts."""
+        Lesson.objects.create(
+            contract=self.contract_a,
+            date=date(2025, 3, 5),
+            start_time=time(14, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        Lesson.objects.create(
+            contract=self.contract_private,
+            date=date(2025, 3, 6),
+            start_time=time(14, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        period_start = date(2025, 3, 1)
+        period_end = date(2025, 3, 31)
+
+        private_lessons = InvoiceService.get_billable_lessons(
+            period_start, period_end, institute=NO_INSTITUTE_FILTER_VALUE, user=self.user
+        )
+        self.assertEqual(private_lessons.count(), 1)
+        self.assertEqual(private_lessons.first().contract, self.contract_private)
+
+    def test_no_institute_filter_restricts_contract_dropdown(self):
+        """When "no institute" is selected, the contract dropdown only shows private contracts."""
+        form = InvoiceCreateForm(user=self.user, initial={"institute": NO_INSTITUTE_FILTER_VALUE})
+        contract_ids = set(form.fields["contract"].queryset.values_list("pk", flat=True))
+        self.assertIn(self.contract_private.pk, contract_ids)
+        self.assertNotIn(self.contract_a.pk, contract_ids)
+        self.assertNotIn(self.contract_b.pk, contract_ids)
 
     def test_institute_filter_limits_billable_lessons(self):
         """get_billable_lessons filters by institute when specified."""

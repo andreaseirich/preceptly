@@ -9,9 +9,13 @@ from django.utils.translation import gettext_lazy as _
 from apps.billing.models import Invoice
 from apps.contracts.models import Contract
 
+NO_INSTITUTE_FILTER_VALUE = "__none__"
+
 
 def _get_institute_choices_for_user(user):
-    """Return choices for institute filter: empty + distinct institutes from user's contracts."""
+    """Return choices for institute filter: empty + distinct institutes from user's
+    contracts, plus an explicit "no institute" bucket for private (blank-institute)
+    contracts."""
     if not user:
         return [("", _("All institutes"))]
     institutes = (
@@ -21,7 +25,16 @@ def _get_institute_choices_for_user(user):
         .distinct()
         .order_by("institute")
     )
-    return [("", _("All institutes"))] + [(i, i) for i in institutes]
+    has_private_contracts = (
+        Contract.objects.filter(user=user, is_active=True)
+        .filter(Q(institute__isnull=True) | Q(institute=""))
+        .exists()
+    )
+    choices = [("", _("All institutes"))]
+    if has_private_contracts:
+        choices.append((NO_INSTITUTE_FILTER_VALUE, _("No institute (private lessons)")))
+    choices += [(i, i) for i in institutes]
+    return choices
 
 
 class InvoiceCreateForm(forms.Form):
@@ -66,7 +79,9 @@ class InvoiceCreateForm(forms.Form):
             institute = self.initial.get("institute") or (
                 self.data.get("institute") if self.data else None
             )
-            if institute:
+            if institute == NO_INSTITUTE_FILTER_VALUE:
+                base_contracts = base_contracts.filter(Q(institute__isnull=True) | Q(institute=""))
+            elif institute:
                 base_contracts = base_contracts.filter(institute=institute)
             self.fields["contract"].queryset = base_contracts
 

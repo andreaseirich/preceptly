@@ -8,8 +8,35 @@
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        {% if field.name != "billing_type" and field.name != "institute" %}
+        <p>
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+            {{ field.errors }}
+        </p>
+        {% if field.name == "is_adult" %}
+        <fieldset id="billing-type-fieldset" style="margin: 1em 0; border: none; padding: 0;">
+            <p>
+                <label>{{ form.billing_type.label }}</label><br>
+                {% for radio in form.billing_type %}
+                <label style="margin-right: 1.5em; font-weight: normal;">{{ radio.tag }} {{ radio.choice_label }}</label>
+                {% endfor %}
+                {{ form.billing_type.errors }}
+            </p>
+            <p id="institute-field-wrapper">
+                {{ form.institute.label_tag }}
+                {{ form.institute }}
+                {% if form.institute.help_text %}<span class="helptext">{{ form.institute.help_text }}</span>{% endif %}
+                {{ form.institute.errors }}
+            </p>
+        </fieldset>
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+
     {% if formset %}
     <h2>{% trans "Monthly Planning" %}</h2>
     <p>{% trans "Enter the planned units for each month in the contract period." %}</p>
@@ -51,8 +78,21 @@
     </div>
 </form>
 
-{% if not object %}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    var wrapper = document.getElementById('institute-field-wrapper');
+    var radios = document.querySelectorAll('#billing-type-fieldset input[name="billing_type"]');
+    if (!wrapper || !radios.length) return;
+
+    function updateVisibility() {
+        var checked = document.querySelector('#billing-type-fieldset input[name="billing_type"]:checked');
+        wrapper.style.display = checked && checked.value === 'institute' ? '' : 'none';
+    }
+
+    radios.forEach(function (radio) {
+        radio.addEventListener('change', updateVisibility);
+    });
+    updateVisibility();
+});
 </script>
-{% endif %}
 {% endblock %}

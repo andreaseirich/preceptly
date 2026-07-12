@@ -29,13 +29,14 @@
   <div style="margin-bottom: 1.2em;">
     <label><strong>{% trans "Tier thresholds" %}</strong></label>
     <p style="color:var(--text-secondary); font-size:.9em; margin:.3em 0 .8em;">
-      {% trans "One row per pay rate. \"From hours\" is the cumulative total at which this rate starts (e.g. 0 for the first tier, 50 for the second)." %}
+      {% trans "One row per pay rate. \"From hours\" is the cumulative total at which this rate starts (e.g. 0 for the first tier, 50 for the second). Leave empty for an institute with no tiered pay (e.g. only the no-show rule below)." %}
     </p>
 
     <table id="tier-table" style="width:100%; border-collapse:collapse; margin-bottom:.8em;">
       <thead>
         <tr style="border-bottom:2px solid var(--border-color);">
-          <th style="padding:6px 10px; text-align:left; width:160px;">{% trans "From hours" %}</th>
+          <th style="padding:6px 10px; text-align:left; width:140px;">{% trans "From hours" %}</th>
+          <th style="padding:6px 10px; text-align:left; width:140px;">{% trans "Rate (€/h)" %}</th>
           <th style="padding:6px 10px; text-align:left;">{% trans "Label (e.g. 14 €/h)" %}</th>
           <th style="width:44px;"></th>
         </tr>
@@ -44,6 +45,16 @@
     </table>
 
     <button type="button" class="btn" id="add-tier-btn">+ {% trans "Add tier" %}</button>
+  </div>
+
+  <div style="margin-bottom: 1.2em;">
+    <label>
+      {{ form.unpaid_on_tutor_no_show }}
+      <strong>{% trans "No billing on tutor no-show" %}</strong>
+    </label>
+    <p style="color:var(--text-secondary); font-size:.9em; margin:.3em 0 0;">
+      {% trans "If enabled, lessons marked as tutor no-show for this institute are billed with 0 €." %}
+    </p>
   </div>
 
   {% if form.non_field_errors %}
@@ -72,12 +83,15 @@
   const tbody = document.getElementById('tier-rows');
   const hiddenField = document.querySelector('[name="tiers"]');
 
-  function addRow(hoursFrom, label) {
+  function addRow(hoursFrom, rate, label) {
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td><input type="number" class="tier-hours form-control" min="0" step="0.5"' +
         ' value="' + (hoursFrom !== undefined && hoursFrom !== '' ? hoursFrom : '') + '"' +
         ' placeholder="0"></td>' +
+      '<td><input type="number" class="tier-rate form-control" min="0" step="0.01"' +
+        ' value="' + (rate !== undefined && rate !== '' ? rate : '') + '"' +
+        ' placeholder="14"></td>' +
       '<td><input type="text" class="tier-label form-control"' +
         ' value="' + escapeHtml(label || '') + '"' +
         ' placeholder="{% trans "e.g. 14 €/h" %}"></td>' +
@@ -94,12 +108,15 @@
     let ok = true;
     tbody.querySelectorAll('tr').forEach(function(tr) {
       const h = tr.querySelector('.tier-hours');
+      const r = tr.querySelector('.tier-rate');
       const l = tr.querySelector('.tier-label');
       const hv = parseFloat(h.value);
+      const rv = parseFloat(r.value);
       const lv = l.value.trim();
       h.classList.toggle('tier-input-error', isNaN(hv) || hv < 0);
+      r.classList.toggle('tier-input-error', isNaN(rv) || rv < 0);
       l.classList.toggle('tier-input-error', lv === '');
-      if (isNaN(hv) || hv < 0 || lv === '') ok = false;
+      if (isNaN(hv) || hv < 0 || isNaN(rv) || rv < 0 || lv === '') ok = false;
     });
     return ok;
   }
@@ -112,15 +129,16 @@
       const v = parseFloat(last.value);
       nextHours = isNaN(v) ? 0 : v + 50;
     }
-    addRow(nextHours, '');
-    tbody.lastElementChild.querySelector('.tier-label').focus();
+    addRow(nextHours, '', '');
+    tbody.lastElementChild.querySelector('.tier-rate').focus();
   });
 
   document.getElementById('tier-config-form').addEventListener('submit', function(e) {
-    if (!validate()) { e.preventDefault(); return; }
+    if (tbody.querySelectorAll('tr').length > 0 && !validate()) { e.preventDefault(); return; }
     const tiers = Array.from(tbody.querySelectorAll('tr')).map(function(tr) {
       return {
         hours_from: parseFloat(tr.querySelector('.tier-hours').value),
+        rate: parseFloat(tr.querySelector('.tier-rate').value),
         label: tr.querySelector('.tier-label').value.trim()
       };
     }).sort(function(a, b) { return a.hours_from - b.hours_from; });
@@ -128,7 +146,7 @@
   });
 
   (Array.isArray(initialTiers) ? initialTiers : []).forEach(function(t) {
-    addRow(t.hours_from, t.label);
+    addRow(t.hours_from, t.rate, t.label);
   });
 }());
 </script>

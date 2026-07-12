@@ -29,9 +29,8 @@ from apps.billing.forms import InvoiceCreateForm
 from apps.billing.models import Invoice
 from apps.billing.pdf_service import generate_invoice_pdf
 from apps.billing.services import InvoiceService
-from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME, is_tutorspace_institute
+from apps.contracts.institute_billing import resolve_institute_billing_config
 from apps.contracts.models import Contract
-from apps.core.models import UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 
@@ -215,14 +214,20 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
             context["period_end"] = parsed_end
             context["contract"] = contract
 
-            if lessons_list and any(
-                is_tutorspace_institute(lesson.contract.institute) for lesson in lessons_list
-            ):
-                profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
-                tier_from = profile.tutorspace_tier_count_from
+            tiered_institute_name = None
+            tiered_config = None
+            for lesson in lessons_list:
+                cfg = resolve_institute_billing_config(self.request.user, lesson.contract.institute)
+                if cfg and cfg.tiers:
+                    tiered_institute_name = lesson.contract.institute
+                    tiered_config = cfg
+                    break
+
+            if tiered_institute_name:
+                tier_from = tiered_config.tier_count_from
                 prior_qs = Lesson.objects.filter(
                     contract__user=self.request.user,
-                    contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
+                    contract__institute__iexact=tiered_institute_name,
                     status__in=["taught", "paid"],
                     tutor_no_show=False,
                     date__lt=parsed_start,
@@ -231,6 +236,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                     prior_qs = prior_qs.filter(date__gte=tier_from)
                 prior_minutes = int(prior_qs.aggregate(t=Sum("duration_minutes"))["t"] or 0)
                 context["tutorspace_show_tier_explainer"] = True
+                context["tutorspace_institute_name"] = tiered_institute_name
                 context["tutorspace_preview_prior_minutes"] = prior_minutes
                 context["tutorspace_preview_prior_full_hours"] = prior_minutes // 60
                 context["tutorspace_preview_prior_remainder_minutes"] = prior_minutes % 60
