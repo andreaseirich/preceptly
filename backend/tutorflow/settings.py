@@ -465,6 +465,12 @@ ERECHT24_PLUGIN_KEY = env("ERECHT24_PLUGIN_KEY", default="")
 ERECHT24_PUSH_SECRET = env("ERECHT24_PUSH_SECRET", default="")
 ERECHT24_CLIENT_ID = env("ERECHT24_CLIENT_ID", default="")
 
+# e-recht24 Widerrufsbutton webhook (separate feature and secret from the
+# legal text push above). HMAC-SHA256 signature over the raw request body.
+# If unset, the webhook endpoint fails closed with 503 instead of accepting
+# unsigned requests (see views_erecht24_revocation.py).
+ERECHT24_REVOCATION_WEBHOOK_SECRET = env("ERECHT24_REVOCATION_WEBHOOK_SECRET", default="")
+
 X_FRAME_OPTIONS = "DENY"
 
 # security.W021: SECURE_HSTS_PRELOAD not set to True.
