@@ -59,7 +59,7 @@
 {% if taught_not_invoiced.count %}
 <div class="alert-info">
     <strong>{% trans "Taught but not yet invoiced" %}:</strong> {{ taught_not_invoiced.count }} {% trans "lessons" %}, {{ taught_not_invoiced.value|euro }}
-    <p class="tutorflow-kpi-hint" style="margin-bottom: 0;">{% trans "Euro amount = what billing would produce today (TutorSpace includes cumulative tier rules)." %}</p>
+    <p class="tutorflow-kpi-hint" style="margin-bottom: 0;">{% trans "Euro amount = what billing would produce today (institutes with tiered pay include cumulative tier rules)." %}</p>
 </div>
 {% endif %}
 

@@ -18,11 +18,6 @@ urlpatterns = [
     path("tier-config/", views.TierConfigListView.as_view(), name="tier_config_list"),
     path("tier-config/create/", views.TierConfigCreateView.as_view(), name="tier_config_create"),
     path(
-        "tier-config/create-tutorspace/",
-        views.TierConfigCreateTutorSpaceView.as_view(),
-        name="tier_config_create_tutorspace",
-    ),
-    path(
         "tier-config/<int:pk>/update/",
         views.TierConfigUpdateView.as_view(),
         name="tier_config_update",

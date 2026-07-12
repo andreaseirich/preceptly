@@ -14,7 +14,7 @@
   <h3>Wie werden die Beträge in der Einnahmenübersicht ermittelt?</h3>
   <ul>
     <li><strong>Stunde bereits auf einer Rechnung:</strong> Summe aller Rechnungspositionen zu dieser Stunde – identisch mit der Abrechnung.</li>
-    <li><strong>Stunde noch nicht verrechnet:</strong> Dieselben Regeln wie beim Erstellen einer Rechnung (TutorSpace: Stufenvergütung aus kumulierten Stunden; sonst: Dauer ÷ Einheitslänge × Vertragssatz).</li>
+    <li><strong>Stunde noch nicht verrechnet:</strong> Dieselben Regeln wie beim Erstellen einer Rechnung (bei Instituten mit gestaffelter Vergütung: Stufenvergütung aus kumulierten Stunden; sonst: Dauer ÷ Einheitslänge × Vertragssatz).</li>
     <li><strong>Zeile „Bezahlt" vs. realisierte Einnahmen:</strong> Die Summen weichen oft ab, weil Rechnungszeitraum und Stundendatum nicht immer im selben Monat liegen.</li>
   </ul>
 
@@ -77,24 +77,27 @@
   <p>Summe aller bezahlten Rechnungen für den gewählten Monat, geordnet nach dem Startdatum des Abrechnungszeitraums.</p>
 
   <h3>Was bedeutet „Unterrichtet, nicht verrechnet"?</h3>
-  <p>Stunden mit Status „Unterrichtet", die noch auf keiner Rechnung stehen. Der angezeigte Betrag wird nach denselben Regeln berechnet wie beim Erstellen einer neuen Rechnung (inklusive TutorSpace-Stufenvergütung).</p>
+  <p>Stunden mit Status „Unterrichtet", die noch auf keiner Rechnung stehen. Der angezeigte Betrag wird nach denselben Regeln berechnet wie beim Erstellen einer neuen Rechnung (inklusive gestaffelter Vergütung, falls für das Institut konfiguriert).</p>
 
   <h3>Wie werden die Top-Stunden pro Schüler berechnet?</h3>
   <p>Zählt alle Stunden mit Status „Unterrichtet" oder „Bezahlt" im gewählten Kalendermonat nach Stundendatum.</p>
 </section>
 
-{# ======= TUTORSPACE ======= #}
-<section id="tutorspace" style="margin-top: 40px;">
-  <h2>TutorSpace-Stufenvergütung</h2>
+{# ======= GESTAFFELTE VERGÜTUNG ======= #}
+<section id="gestaffelte-verguetung" style="margin-top: 40px;">
+  <h2>Gestaffelte Vergütung pro Institut</h2>
 
-  <h3>Wie funktioniert die TutorSpace-Stufenvergütung?</h3>
-  <p>TutorSpace zahlt gestaffelt: Der Stundensatz steigt mit der kumulierten Gesamtstundenzahl. Preceptly zählt alle vorherigen TutorSpace-Stunden (ab dem konfigurierten Startdatum in den Einstellungen) und wendet den entsprechenden Stufensatz automatisch bei der Abrechnung an.</p>
+  <h3>Wie funktioniert die gestaffelte Vergütung?</h3>
+  <p>Für ein Institut mit gestaffelter Vergütung steigt der Stundensatz mit der kumulierten Gesamtstundenzahl. Preceptly zählt alle vorherigen Stunden dieses Instituts (ab dem konfigurierten Startdatum in den Einstellungen) und wendet den entsprechenden Stufensatz automatisch bei der Abrechnung an.</p>
+
+  <h3>Wie richte ich das für ein Institut ein?</h3>
+  <p>Unter <a href="{% url 'contracts:tier_config_list' %}">Institut-Tarife</a> kannst du für jedes Institut eigene Stufen (ab wie vielen Stunden welcher Satz gilt) sowie optional die Regel „bei Tutor-Ausfall nicht abrechnen" hinterlegen. Für die Institute „TutorSpace" und „Abacus" gelten ohne eigene Konfiguration automatisch sinnvolle Standardwerte.</p>
 
   <h3>Ab welchem Datum werden Stunden für die Stufenberechnung gezählt?</h3>
   <p>Das Startdatum für die Stufenberechnung kannst du in den <a href="{% url 'core:settings' %}">Einstellungen</a> festlegen. Stunden vor diesem Datum fließen nicht in die Stufenberechnung ein.</p>
 
-  <h3>Warum stimmt der berechnete Betrag nicht mit meiner TutorSpace-Abrechnung überein?</h3>
-  <p>Mögliche Ursachen: Das Startdatum für die Stufenberechnung ist nicht korrekt gesetzt, oder es wurden Stunden manuell ohne TutorSpace-Vertrag erfasst. Prüfe in den Einstellungen das konfigurierte Startdatum.</p>
+  <h3>Warum stimmt der berechnete Betrag nicht mit meiner Institut-Abrechnung überein?</h3>
+  <p>Mögliche Ursachen: Das Startdatum für die Stufenberechnung ist nicht korrekt gesetzt, die Stufenkonfiguration für das Institut weicht ab, oder es wurden Stunden manuell ohne passenden Vertrag erfasst. Prüfe in den Einstellungen das konfigurierte Startdatum sowie unter Institut-Tarife die hinterlegten Stufen.</p>
 </section>
 
 {% endblock %}

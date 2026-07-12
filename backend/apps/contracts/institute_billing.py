@@ -5,7 +5,9 @@ Any institute name a tutor uses on a Contract can get tiered compensation and/or
 "no billing on tutor no-show" rule by creating an ``InstituteTierConfig`` in Settings.
 "TutorSpace" and "Abacus" are no longer special-cased in the calculation itself — they
 are only used as built-in *default presets* so existing tutors who never opened the
-tier-config settings keep getting the same behaviour they always had.
+tier-config settings keep getting the same behaviour they always had. The per-tutor
+"only count tier hours from this date" cutoff (UserProfile.tutorspace_tier_count_from)
+likewise applies to whichever institute(s) currently have tiered pay, not just TutorSpace.
 """
 
 from __future__ import annotations
@@ -74,7 +76,7 @@ def resolve_institute_billing_config(
         return None
 
     tier_count_from = None
-    if is_builtin_tutorspace:
+    if tiers:
         profile = UserProfile.objects.filter(user=user).first()
         tier_count_from = getattr(profile, "tutorspace_tier_count_from", None) if profile else None
 

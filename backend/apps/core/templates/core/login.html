@@ -36,16 +36,14 @@
         </button>
     </form>
 
+    <a href="{% url 'core:register' %}" class="btn btn-secondary" style="display: block; width: 100%; padding: 12px; font-size: 16px; margin-top: 12px; text-align: center; box-sizing: border-box;">
+        {% trans "Register" %}
+    </a>
+
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary); font-size: 0.9em;">
         <p style="margin: 0 0 10px 0;"><strong>{% trans "Demo Logins" %}:</strong></p>
         <p style="margin: 5px 0;">{% trans "Premium" %}: <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo_premium</code> / <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo123</code></p>
         <p style="margin: 5px 0;">{% trans "Standard" %}: <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo_user</code> / <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo123</code></p>
-    </div>
-
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'core:register' %}" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">
-            {% trans "Register" %}
-        </a>
     </div>
 
     {% if show_landing_link %}
