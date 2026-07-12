@@ -3276,12 +3276,8 @@ msgstr ""
 "der realisierten Einnahmen."
 
 #: apps/core/templates/core/landing.html:4
-msgid "Welcome to Preceptly"
-msgstr "Willkommen bei Preceptly"
-
-#: apps/core/templates/core/landing.html:4
-msgid "The complete workspace for tutors"
-msgstr "Der komplette Arbeitsplatz für Nachhilfelehrer"
+msgid "Preceptly - The Complete Workspace for Tutors"
+msgstr "Preceptly - Der komplette Arbeitsplatz für Nachhilfelehrer"
 
 #: apps/core/templates/core/landing.html:196
 msgid "The complete workspace for private tutors"
