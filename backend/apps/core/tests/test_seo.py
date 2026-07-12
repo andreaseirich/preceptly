@@ -1,4 +1,23 @@
+import re
+
 from django.test import TestCase
+
+
+class OgTitleParityTest(TestCase):
+    """og:title must mirror the page <title> so social previews match browser tabs."""
+
+    def test_landing_og_title_matches_title(self):
+        response = self.client.get("/")
+        html = response.content.decode()
+        title_match = re.search(r"<title>(.*?)</title>", html, re.DOTALL)
+        og_match = re.search(r'<meta property="og:title" content="(.*?)"', html)
+        self.assertIsNotNone(title_match, "<title> not found in landing page")
+        self.assertIsNotNone(og_match, "og:title not found in landing page")
+        self.assertEqual(
+            title_match.group(1).strip(),
+            og_match.group(1).strip(),
+            "og:title does not match <title> on the landing page",
+        )
 
 
 class RobotsTxtTest(TestCase):

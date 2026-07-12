@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load static %}
+{% load block_capture %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
@@ -12,7 +13,8 @@
     <meta name="apple-mobile-web-app-title" content="Preceptly">
     {% blocktrans asvar meta_desc %}Preceptly - Tutoring management software for private tutors: students, appointments, contracts, and invoices in one place.{% endblocktrans %}
     <meta name="description" content="{{ meta_desc }}">
-    <meta property="og:title" content="{% block og_title %}Preceptly{% endblock %}">
+    {% captureas as page_title %}{% block title %}Preceptly{% endblock %}{% endcaptureas %}
+    <meta property="og:title" content="{{ page_title }}">
     <meta property="og:description" content="{{ meta_desc }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
@@ -21,7 +23,7 @@
     <meta name="twitter:card" content="summary">
     <link rel="manifest" href="{% url 'core:manifest' %}">
     <link rel="apple-touch-icon" href="{% static 'icons/icon-192x192.png' %}">
-    <title>{% block title %}Preceptly{% endblock %}</title>
+    <title>{{ page_title }}</title>
     <style>
         * { box-sizing: border-box; }
         
