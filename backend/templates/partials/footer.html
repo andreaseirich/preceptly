@@ -28,6 +28,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     gap: 10px;
 }
 .site-footer .footer-meta {
@@ -42,6 +43,27 @@
     padding: 0;
     margin: 0;
     border-radius: 0;
+}
+.site-footer #eRecht24RevocationButton {
+    background: transparent;
+    color: #d9e2ec;
+    border: 1px solid #d9e2ec;
+    padding: 3px 10px;
+    font-size: 0.95em;
+    font-weight: normal;
+    min-height: 0;
+    min-width: 0;
+    line-height: 1.4;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.site-footer #eRecht24RevocationButton:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-color: #ffffff;
+    text-decoration: none;
 }
 @media (max-width: 768px) {
     .site-footer .footer-container {
@@ -65,14 +87,12 @@
                 <a href="{% url 'core:legal_about' %}">
                     {% if LANGUAGE_CODE == "de" %}Über uns{% else %}About us{% endif %}
                 </a>
+                <!-- Widerrufsbutton fuer den Shop "Preceptly" - Anfang -->
+                <a id="eRecht24RevocationButton" href="https://widerrufsbutton-cdn.e-recht24.de/019f5526-4b9d-7212-9233-20b6dabdf91d" data-shop-id="019f5526-4b9d-7212-9233-20b6dabdf91d" data-key="4A7hLTFn8T3hQgVkcE0fBAA8gJZPagrOSCn4n6CXq4FTw0CsxeJiaY925LGHiKAJ" aria-label="Vertrag widerrufen" aria-disabled="true" title="Widerrufsformular konnte nicht geladen werden" style="opacity:.5" class="btn btn-primary" target="_blank"><span>Vertrag widerrufen</span></a>
+                <!-- Widerrufsbutton fuer den Shop "Preceptly" - Ende -->
             </div>
         </nav>
-        <!-- Widerrufsbutton fuer den Shop "Preceptly" - Anfang -->
-        <div>
-            <a id="eRecht24RevocationButton" href="https://widerrufsbutton-cdn.e-recht24.de/019f5526-4b9d-7212-9233-20b6dabdf91d" data-shop-id="019f5526-4b9d-7212-9233-20b6dabdf91d" data-key="4A7hLTFn8T3hQgVkcE0fBAA8gJZPagrOSCn4n6CXq4FTw0CsxeJiaY925LGHiKAJ" aria-label="Vertrag widerrufen" aria-disabled="true" title="Widerrufsformular konnte nicht geladen werden" style="opacity:.5" class="btn btn-primary" target="_blank"><span>Vertrag widerrufen</span></a>
-            <script async src="https://widerrufsbutton-cdn.e-recht24.de/widgets/revocation-button.js"></script>
-        </div>
-        <!-- Widerrufsbutton fuer den Shop "Preceptly" - Ende -->
+        <script async src="https://widerrufsbutton-cdn.e-recht24.de/widgets/revocation-button.js"></script>
         <div class="footer-meta">
             <span>© {% now "Y" %} andicode</span>
             <span>· Preceptly by <a href="https://andicode.de" target="_blank" rel="noopener noreferrer" style="color: inherit;">andicode</a></span>
