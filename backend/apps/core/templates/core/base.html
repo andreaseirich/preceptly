@@ -146,6 +146,7 @@
         nav .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; }
         nav .nav-brand { display: flex; align-items: center; padding: 0 8px 0 0; flex-shrink: 0; white-space: nowrap; }
         nav .nav-brand img { height: 28px; width: auto; display: block; }
+        nav .nav-brand-icon { display: none; height: 28px; width: 28px; }
         nav .nav-links { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; flex: 1; }
         nav .nav-dropdown { position: relative; }
         nav .nav-dropdown-toggle { background: transparent; color: white; border: none; font: inherit; padding: 8px 15px; border-radius: 3px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
@@ -285,7 +286,10 @@
             .container { padding: 15px; margin: 10px; border-radius: 0; }
             nav { margin-bottom: 15px; border-radius: 0; }
             nav .nav-container { padding: 0 15px; }
-            .menu-toggle { display: block; }
+            .menu-toggle { display: block; order: -1; }
+            nav .nav-brand { order: 5; padding: 0; }
+            nav .nav-brand-full { display: none; }
+            nav .nav-brand-icon { display: block; }
             nav .nav-links { 
                 position: fixed; 
                 top: 60px; 
@@ -488,7 +492,8 @@
     <nav aria-label="{% trans 'Main navigation' %}">
         <div class="nav-container">
             <a class="nav-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
-                <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
+                <img class="nav-brand-full" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
+                <img class="nav-brand-icon" src="{% static 'brand/preceptly-icon.svg' %}" alt="Preceptly">
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}">☰</button>
             <div class="nav-links" id="navLinks">
