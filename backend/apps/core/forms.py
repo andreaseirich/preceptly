@@ -168,7 +168,8 @@ class TravelPolicyForm(forms.Form):
 
 
 class TutorNoShowPayForm(forms.Form):
-    """Percentage of TutorSpace pay when session is marked tutor no-show (student waited)."""
+    """Percentage of tiered pay kept when a session is marked tutor no-show (student waited),
+    for institutes with tiered compensation."""
 
     tutor_no_show_pay_percent = forms.IntegerField(
         min_value=0,
@@ -176,10 +177,10 @@ class TutorNoShowPayForm(forms.Form):
         initial=0,
         label=_("Pay when you missed the lesson (student was waiting)"),
         help_text=_(
-            "TutorSpace only, if you mark “you did not attend, student was waiting”: share of "
-            "the usual lesson pay you keep. You are not paid the rest, and the usual amount "
-            "is deducted (e.g. 0%% → line shows −full usual amount; 100%% → full pay, no "
-            "deduction)."
+            "For institutes with tiered pay, if you mark “you did not attend, student was "
+            "waiting”: share of the usual lesson pay you keep. You are not paid the rest, and "
+            "the usual amount is deducted (e.g. 0%% → line shows −full usual amount; 100%% → "
+            "full pay, no deduction)."
         ),
     )
 
@@ -191,7 +192,7 @@ class TutorNoShowPayForm(forms.Form):
 
 
 class TutorSpaceTierCountFromForm(forms.Form):
-    """Optional start date for TutorSpace tier cumulative (13/14 € steps)."""
+    """Optional start date for cumulative tiered-pay hour counting."""
 
     tutorspace_tier_count_from = forms.DateField(
         required=False,
@@ -199,11 +200,11 @@ class TutorSpaceTierCountFromForm(forms.Form):
             attrs={"class": "form-control", "type": "date"},
             format="%Y-%m-%d",
         ),
-        label=_("Count TutorSpace tier hours only from (optional)"),
+        label=_("Count tiered pay hours only from (optional)"),
         help_text=_(
-            "Empty: every past TutorSpace lesson counts toward the 13/14 € tiers (all pupils "
-            "together). Set a date if the preview or amounts look wrong because many older "
-            "lessons are included—only lessons on or after this date will count."
+            "Empty: every past lesson for an institute with tiered pay counts toward the tiers "
+            "(all pupils together). Set a date if the preview or amounts look wrong because "
+            "many older lessons are included—only lessons on or after this date will count."
         ),
     )
 

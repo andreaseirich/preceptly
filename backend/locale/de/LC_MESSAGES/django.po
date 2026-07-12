@@ -6317,3 +6317,123 @@ msgstr "Steuern & EÜR"
 msgctxt "FAQ nav dropdown"
 msgid "Reports"
 msgstr "Berichte"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Tiered pay"
+msgstr "Gestaffelte Vergütung"
+
+#: apps/core/templates/core/settings.html
+msgid "Missed lesson (student was waiting)"
+msgstr "Versäumte Stunde (Schüler hat gewartet)"
+
+#: apps/core/templates/core/settings.html
+msgid ""
+"For institutes with tiered pay, marking a lesson as tutor no-show deducts "
+"pay from the cumulative tier calculation by the share you set below (0% = "
+"full deduction, 100% = full pay). For institutes with \"no billing on "
+"tutor no-show\" enabled, the same flag simply bills the lesson at 0 €. "
+"Other institutes are unaffected."
+msgstr ""
+"Bei Instituten mit gestaffelter Vergütung wird eine als Tutor-Ausfall "
+"markierte Stunde vom kumulierten Stufenbetrag um den unten eingestellten "
+"Anteil abgezogen (0% = voller Abzug, 100% = volle Vergütung). Bei "
+"Instituten mit aktivierter Regel „bei Tutor-Ausfall nicht abrechnen“ wird "
+"die Stunde einfach mit 0 € abgerechnet. Andere Institute sind nicht "
+"betroffen."
+
+#: apps/core/templates/core/settings.html
+msgid "Save no-show pay settings"
+msgstr "Ausfall-Vergütung speichern"
+
+#: apps/core/templates/core/settings.html
+msgid "Tiered pay: cumulative hours"
+msgstr "Gestaffelte Vergütung: kumulierte Stunden"
+
+#: apps/core/templates/core/settings.html
+msgid ""
+"By default, all past lessons for an institute with tiered pay count "
+"toward the hourly tier. If your invoice preview shows a higher rate too "
+"early, older lessons outside the period are usually the reason—set a "
+"start date here so only lessons from that day onward count."
+msgstr ""
+"Standardmäßig zählen alle bisherigen Stunden eines Instituts mit "
+"gestaffelter Vergütung für die Stufenberechnung. Wenn die Rechnungsvorschau "
+"zu früh einen höheren Satz zeigt, liegt das meist an älteren Stunden "
+"außerhalb des Zeitraums — setze hier ein Startdatum, sodass nur Stunden "
+"ab diesem Tag zählen."
+
+#: apps/core/templates/core/settings.html
+msgid "Save tier start date"
+msgstr "Startdatum für Stufenberechnung speichern"
+
+#: apps/core/forms.py
+msgid ""
+"For institutes with tiered pay, if you mark “you did not attend, student "
+"was waiting”: share of the usual lesson pay you keep. You are not paid "
+"the rest, and the usual amount is deducted (e.g. 0%% → line shows −full "
+"usual amount; 100%% → full pay, no deduction)."
+msgstr ""
+"Bei Instituten mit gestaffelter Vergütung, wenn du „du warst nicht da, "
+"Schüler hat gewartet“ markierst: Anteil der üblichen Vergütung, den du "
+"behältst. Der Rest wird nicht bezahlt, und der übliche Betrag wird "
+"abgezogen (z. B. 0%% → Zeile zeigt −vollen üblichen Betrag; 100%% → volle "
+"Vergütung, kein Abzug)."
+
+#: apps/core/forms.py
+msgid "Count tiered pay hours only from (optional)"
+msgstr "Stunden für Stufenberechnung nur zählen ab (optional)"
+
+#: apps/core/forms.py
+msgid ""
+"Empty: every past lesson for an institute with tiered pay counts toward "
+"the tiers (all pupils together). Set a date if the preview or amounts "
+"look wrong because many older lessons are included—only lessons on or "
+"after this date will count."
+msgstr ""
+"Leer: Jede bisherige Stunde eines Instituts mit gestaffelter Vergütung "
+"zählt für die Stufen (alle Schüler zusammen). Setze ein Datum, wenn "
+"Vorschau oder Beträge falsch wirken, weil zu viele ältere Stunden "
+"einfließen — nur Stunden ab diesem Datum zählen dann."
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid ""
+"Configure hour thresholds at which your pay rate increases for a given "
+"institute, and whether tutor no-shows are billed. Any institute name "
+"works — type it exactly as it appears on your contracts."
+msgstr ""
+"Lege für ein Institut fest, ab welcher Stundenzahl sich dein Satz erhöht "
+"und ob Tutor-Ausfälle abgerechnet werden. Jeder Institutsname "
+"funktioniert — trage ihn genau so ein, wie er in deinen Verträgen steht."
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "no billing on tutor no-show"
+msgstr "keine Abrechnung bei Tutor-Ausfall"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "No custom tier configs yet."
+msgstr "Noch keine eigenen Stufenkonfigurationen."
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Built-in defaults"
+msgstr "Eingebaute Standardwerte"
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid ""
+"These apply automatically if you don't add a config above for an "
+"institute of the same name."
+msgstr ""
+"Diese gelten automatisch, solange oben keine eigene Konfiguration für ein "
+"gleichnamiges Institut hinterlegt ist."
+
+#: apps/contracts/templates/contracts/tier_config_list.html
+msgid "Default rule"
+msgstr "Standard-Regel"
+
+#: apps/core/templates/core/reports.html
+msgid ""
+"Euro amount = what billing would produce today (institutes with tiered "
+"pay include cumulative tier rules)."
+msgstr ""
+"Euro-Betrag = was die Abrechnung heute ergäbe (bei Instituten mit "
+"gestaffelter Vergütung inklusive kumulierter Stufenregeln)."

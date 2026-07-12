@@ -202,8 +202,8 @@
     {% endif %}
 </form>
 
-<h2 style="margin-top: 40px;">{% trans "TutorSpace: missed lesson (student was waiting)" %}</h2>
-<p>{% trans "TutorSpace: mark a missed lesson (student waited) on the session; below you set pay share and deduction. Abacus: the same flag means the lesson is not billed (0 €). Other institutes: the flag does not change amounts." %}</p>
+<h2 style="margin-top: 40px;">{% trans "Missed lesson (student was waiting)" %}</h2>
+<p>{% trans "For institutes with tiered pay, marking a lesson as tutor no-show deducts pay from the cumulative tier calculation by the share you set below (0% = full deduction, 100% = full pay). For institutes with \"no billing on tutor no-show\" enabled, the same flag simply bills the lesson at 0 €. Other institutes are unaffected." %}</p>
 <form method="post" style="margin-top: 15px;">
     {% csrf_token %}
     <div style="max-width: 480px;">
@@ -216,15 +216,15 @@
         {% endif %}
     </div>
     <div style="margin-top: 15px;">
-        <button type="submit" name="save_tutor_no_show" class="btn btn-success">{% trans "Save TutorSpace missed-lesson pay" %}</button>
+        <button type="submit" name="save_tutor_no_show" class="btn btn-success">{% trans "Save no-show pay settings" %}</button>
     </div>
     {% if tutor_no_show_form.non_field_errors %}
     <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ tutor_no_show_form.non_field_errors }}</p>
     {% endif %}
 </form>
 
-<h2 style="margin-top: 40px;">{% trans "TutorSpace: pay tier cumulative (13/14 €)" %}</h2>
-<p>{% trans "By default, all TutorSpace lessons in the past count toward the hourly tier. If your invoice preview shows 14 € too early, older lessons outside the period are usually the reason—set a start date here so only lessons from that day onward count." %}</p>
+<h2 style="margin-top: 40px;">{% trans "Tiered pay: cumulative hours" %}</h2>
+<p>{% trans "By default, all past lessons for an institute with tiered pay count toward the hourly tier. If your invoice preview shows a higher rate too early, older lessons outside the period are usually the reason—set a start date here so only lessons from that day onward count." %}</p>
 <form method="post" style="margin-top: 15px;">
     {% csrf_token %}
     <div style="max-width: 480px;">
@@ -237,7 +237,7 @@
         {% endif %}
     </div>
     <div style="margin-top: 15px;">
-        <button type="submit" name="save_tutorspace_tier_from" class="btn btn-success">{% trans "Save TutorSpace tier start date" %}</button>
+        <button type="submit" name="save_tutorspace_tier_from" class="btn btn-success">{% trans "Save tier start date" %}</button>
     </div>
     {% if tutorspace_tier_form.non_field_errors %}
     <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ tutorspace_tier_form.non_field_errors }}</p>
