@@ -6282,3 +6282,7 @@ msgstr "Kostenloser Plan: Die Grenze von 5 aktiven Schülern ist erreicht. Dein 
 
 msgid "Free plan: the limit of 8 invoices per month has been reached. Your invoice was created — <a href=\"{}\">upgrade to a paid plan</a> for unlimited invoices."
 msgstr "Kostenloser Plan: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Plan upgraden</a> für unbegrenzte Rechnungen."
+
+#: apps/core/templates/core/base.html
+msgid "Preceptly - Tutoring management software for private tutors: students, appointments, contracts, and invoices in one place."
+msgstr "Preceptly - Verwaltungssoftware für Nachhilfelehrer: Schüler, Termine, Verträge und Rechnungen an einem Ort."
