@@ -49,9 +49,7 @@ class ContractFormInstituteSelectionTest(TestCase):
         other_user = User.objects.create_user(username="other_tutor", password="x")
         Institute.objects.create(user=other_user, institute_name="OtherInstitute")
         form = ContractForm(user=self.user)
-        names = list(
-            form.fields["institute_fk"].queryset.values_list("institute_name", flat=True)
-        )
+        names = list(form.fields["institute_fk"].queryset.values_list("institute_name", flat=True))
         self.assertEqual(names, ["TutorSpace"])
 
     def test_editing_existing_institute_contract_preselects_institute(self):
