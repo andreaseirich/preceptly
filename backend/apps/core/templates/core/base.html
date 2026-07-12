@@ -496,7 +496,7 @@
                 <a href="{% url 'core:dashboard' %}">📊 {% trans "Dashboard" %}</a>
                 <div class="nav-dropdown">
                     <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownManage">
-                        👤 {% trans "Management" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                        👤 {% trans "Management" context "main nav dropdown" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
                     </button>
                     <div class="nav-dropdown-menu" id="navDropdownManage" role="menu">
                         <a href="{% url 'contracts:list' %}" role="menuitem">👤 {% trans "Students" %}</a>
@@ -506,7 +506,7 @@
                 </div>
                 <div class="nav-dropdown">
                     <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownBilling">
-                        💰 {% trans "Billing" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                        💰 {% trans "Billing" context "main nav dropdown" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
                     </button>
                     <div class="nav-dropdown-menu" id="navDropdownBilling" role="menu">
                         <a href="{% url 'billing:invoice_list' %}" role="menuitem">🧾 {% trans "Invoices" %}</a>

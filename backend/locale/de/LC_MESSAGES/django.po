@@ -6282,3 +6282,13 @@ msgstr "Kostenloser Plan: Die monatliche Grenze von 8 Rechnungen ist erreicht. D
 #: apps/core/templates/core/base.html
 msgid "Preceptly - Tutoring management software for private tutors: students, appointments, contracts, and invoices in one place."
 msgstr "Preceptly - Verwaltungssoftware für Nachhilfelehrer: Schüler, Termine, Verträge und Rechnungen an einem Ort."
+
+#: apps/core/templates/core/base.html
+msgctxt "main nav dropdown"
+msgid "Management"
+msgstr "Verwaltung"
+
+#: apps/core/templates/core/base.html
+msgctxt "main nav dropdown"
+msgid "Billing"
+msgstr "Abrechnung"
