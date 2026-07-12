@@ -3509,7 +3509,7 @@ msgstr "Kostet weniger als eine Stunde – spart dir Stunden Verwaltungsaufwand.
 
 #: apps/core/templates/core/landing.html:309
 msgid "Preceptly starts at 4.99 € per month — less than a single tutoring hour. If you still manage students in Excel, appointments in WhatsApp and invoices in Word: the switch pays for itself on the very first invoice."
-msgstr "Preceptly kostet ab 4,99 € pro Monat – weniger als eine einzige Nachhilfestunde. Wer Schüler noch in Excel, Termine in WhatsApp und Rechnungen in Word verwaltet: Der Wechsel rechnet sich ab der ersten Rechnung."
+msgstr "Preceptly ist kostenlos startbar - mehr Funktionen gibt's ab 4,99 Euro im Monat, weniger als eine einzige Nachhilfestunde. Wer Schüler noch in Excel, Termine in WhatsApp und Rechnungen in Word verwaltet: Der Wechsel rechnet sich ab der ersten Rechnung."
 
 #: apps/core/templates/core/landing.html:313
 msgid "Free"
