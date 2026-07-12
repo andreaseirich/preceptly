@@ -17,7 +17,7 @@
     border-radius: 10px;
     padding: 1.2rem 1.4rem;
     box-shadow: 0 2px 8px var(--shadow);
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--accent);
   }
   .stat-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-secondary); margin-bottom: .3rem; }
   .stat-card .value { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
@@ -32,7 +32,7 @@
   /* Bar charts */
   .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 130px; overflow-x: auto; padding-bottom: 4px; }
   .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1 1 auto; min-width: 18px; }
-  .bar { background: #3498db; border-radius: 3px 3px 0 0; width: 100%; min-height: 2px; transition: opacity .2s; }
+  .bar { background: var(--accent); border-radius: 3px 3px 0 0; width: 100%; min-height: 2px; transition: opacity .2s; }
   .bar:hover { opacity: .75; }
   .bar-label { font-size: 0.55rem; color: var(--text-secondary); margin-top: 3px; white-space: nowrap; transform: rotate(-45deg); transform-origin: top left; }
 

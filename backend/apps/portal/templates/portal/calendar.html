@@ -33,11 +33,11 @@
             {% if day %}
             <td role="gridcell" style="border: 1px solid var(--border-color); padding: 0; vertical-align: top; width: 14.28%;">
                 <div style="min-height: 110px; padding: 8px;">
-                    <div style="font-weight: bold; margin-bottom: 6px; {% if day.is_today %}color: #007bff;{% endif %}">
+                    <div style="font-weight: bold; margin-bottom: 6px; {% if day.is_today %}color: var(--accent);{% endif %}">
                         {{ day.date.day }}
                     </div>
                     {% for lesson in day.lessons %}
-                    <div style="background: {% if day.is_past %}rgba(96,125,139,0.2){% else %}rgba(33,150,243,0.2){% endif %}; border-left: 3px solid {% if day.is_past %}#607d8b{% else %}#2196f3{% endif %}; padding: 3px 5px; margin-bottom: 3px; border-radius: 0 2px 2px 0; {% if day.is_past %}opacity: 0.8;{% endif %}">
+                    <div style="background: {% if day.is_past %}rgba(96,125,139,0.2){% else %}var(--accent-tint){% endif %}; border-left: 3px solid {% if day.is_past %}#607d8b{% else %}var(--accent){% endif %}; padding: 3px 5px; margin-bottom: 3px; border-radius: 0 2px 2px 0; {% if day.is_past %}opacity: 0.8;{% endif %}">
                         <a href="{% url 'portal:student_lesson_detail' lesson.pk %}"
                            style="text-decoration: none; color: var(--text-primary); display: block; font-size: 0.85em;"
                            title="{{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} Min.){% if lesson.contract.subjects %} – {{ lesson.contract.subjects }}{% endif %}">
@@ -67,7 +67,7 @@
 <section aria-label="Kalenderlegende">
 <div class="box-section" style="margin-top:12px;">
     <strong>Legende:</strong>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(33,150,243,0.2); border-left: 3px solid #2196f3; color: var(--text-primary); font-size: 0.85em;">Unterrichtsstunde (anklicken für Details)</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: var(--accent-tint); border-left: 3px solid var(--accent); color: var(--text-primary); font-size: 0.85em;">Unterrichtsstunde (anklicken für Details)</span>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(96,125,139,0.2); border-left: 3px solid #607d8b; color: var(--text-primary); font-size: 0.85em; opacity: 0.8;">Vergangene Stunde</span>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(239,68,68,0.12); border-left: 3px solid #ef4444; color: var(--text-secondary); font-size: 0.85em;">Belegt (anderer Termin)</span>
 </div>
