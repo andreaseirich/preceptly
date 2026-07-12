@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g transform="translate(0,0) scale(1.0)">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d5266"/>
+      <stop offset="1" stop-color="#2c3e50"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="448" height="448" rx="104" fill="url(#tile)"/>
+  <!-- P: Stamm -->
+  <rect x="150" y="130" width="56" height="252" rx="28" fill="#ffffff"/>
+  <!-- P: Bogen als Ring -->
+  <circle cx="260" cy="230" r="76" fill="none" stroke="#ffffff" stroke-width="48"/>
+  <!-- Haken im Bogen -->
+  <path d="M 234 232 L 254 252 L 290 208" fill="none" stroke="#1abc9c"
+        stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/>
+</g></svg>
