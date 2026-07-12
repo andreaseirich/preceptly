@@ -214,20 +214,20 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
             context["period_end"] = parsed_end
             context["contract"] = contract
 
-            tiered_institute_name = None
+            tiered_institute = None
             tiered_config = None
             for lesson in lessons_list:
-                cfg = resolve_institute_billing_config(self.request.user, lesson.contract.institute)
+                cfg = resolve_institute_billing_config(lesson.contract.institute_fk)
                 if cfg and cfg.tiers:
-                    tiered_institute_name = lesson.contract.institute
+                    tiered_institute = lesson.contract.institute_fk
                     tiered_config = cfg
                     break
 
-            if tiered_institute_name:
+            if tiered_institute:
                 tier_from = tiered_config.tier_count_from
                 prior_qs = Lesson.objects.filter(
                     contract__user=self.request.user,
-                    contract__institute__iexact=tiered_institute_name,
+                    contract__institute_fk=tiered_institute,
                     status__in=["taught", "paid"],
                     tutor_no_show=False,
                     date__lt=parsed_start,
@@ -236,7 +236,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                     prior_qs = prior_qs.filter(date__gte=tier_from)
                 prior_minutes = int(prior_qs.aggregate(t=Sum("duration_minutes"))["t"] or 0)
                 context["tutorspace_show_tier_explainer"] = True
-                context["tutorspace_institute_name"] = tiered_institute_name
+                context["tutorspace_institute_name"] = tiered_institute.institute_name
                 context["tutorspace_preview_prior_minutes"] = prior_minutes
                 context["tutorspace_preview_prior_full_hours"] = prior_minutes // 60
                 context["tutorspace_preview_prior_remainder_minutes"] = prior_minutes % 60

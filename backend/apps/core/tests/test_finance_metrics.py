@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from apps.billing.services import InvoiceService
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, Institute
 from apps.core.finance_metrics import (
     breakdown_by_institute_billed,
     breakdown_by_institute_recognized,
@@ -166,6 +166,8 @@ class InstituteBreakdownTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor", password="test")
+        inst_a = Institute.objects.create(user=self.user, institute_name="InstA")
+        inst_b = Institute.objects.create(user=self.user, institute_name="InstB")
         c1 = Contract.objects.create(
             user=self.user,
             first_name="Test",
@@ -173,7 +175,7 @@ class InstituteBreakdownTest(TestCase):
             hourly_rate=Decimal("20"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
-            institute="InstA",
+            institute_fk=inst_a,
         )
         c2 = Contract.objects.create(
             user=self.user,
@@ -182,7 +184,7 @@ class InstituteBreakdownTest(TestCase):
             hourly_rate=Decimal("30"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
-            institute="InstB",
+            institute_fk=inst_b,
         )
         Lesson.objects.create(
             contract=c1,

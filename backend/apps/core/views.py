@@ -28,8 +28,6 @@ from apps.billing.models import Invoice
 from apps.core.forms import (
     ExpenseForm,
     TravelPolicyForm,
-    TutorNoShowPayForm,
-    TutorSpaceTierCountFromForm,
     UserEmailForm,
     WorkingHoursForm,
 )
@@ -266,38 +264,6 @@ class SettingsView(LoginRequiredMixin, FormView):
             context = self.get_context_data()
             context["travel_form"] = travel_form
             return self.render_to_response(context)
-        if "save_tutor_no_show" in request.POST:
-            ns_form = TutorNoShowPayForm(request.POST)
-            if ns_form.is_valid():
-                profile, _created = UserProfile.objects.get_or_create(user=request.user)
-                profile.tutor_no_show_pay_percent = ns_form.cleaned_data[
-                    "tutor_no_show_pay_percent"
-                ]
-                profile.save()
-                messages.success(
-                    request,
-                    _("TutorSpace: pay when you missed (student waited) saved."),
-                )
-                return redirect(self.success_url)
-            context = self.get_context_data()
-            context["tutor_no_show_form"] = ns_form
-            return self.render_to_response(context)
-        if "save_tutorspace_tier_from" in request.POST:
-            tier_form = TutorSpaceTierCountFromForm(request.POST)
-            if tier_form.is_valid():
-                profile, _created = UserProfile.objects.get_or_create(user=request.user)
-                profile.tutorspace_tier_count_from = tier_form.cleaned_data[
-                    "tutorspace_tier_count_from"
-                ]
-                profile.save()
-                messages.success(
-                    request,
-                    _("TutorSpace tier counting start date saved."),
-                )
-                return redirect(self.success_url)
-            context = self.get_context_data()
-            context["tutorspace_tier_form"] = tier_form
-            return self.render_to_response(context)
         if "save_timezone" in request.POST:
             tz_value = request.POST.get("timezone", "Europe/Berlin").strip()
             import zoneinfo
@@ -372,19 +338,6 @@ class SettingsView(LoginRequiredMixin, FormView):
                 "fahrrad_buffer_minutes": policy.get("fahrrad_buffer_minutes", 25),
             }
         )
-        context["tutor_no_show_form"] = kwargs.get("tutor_no_show_form") or TutorNoShowPayForm(
-            initial={
-                "tutor_no_show_pay_percent": getattr(profile, "tutor_no_show_pay_percent", 0) or 0,
-            }
-        )
-        context["tutorspace_tier_form"] = kwargs.get(
-            "tutorspace_tier_form"
-        ) or TutorSpaceTierCountFromForm(
-            initial={
-                "tutorspace_tier_count_from": getattr(profile, "tutorspace_tier_count_from", None),
-            }
-        )
-
         contracts = Contract.objects.filter(is_active=True, user=self.request.user).order_by(
             "last_name", "first_name"
         )
@@ -520,7 +473,7 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
             total_income = sum((inv.total_amount for inv in invoices), Decimal("0.00"))
             monthly_income = {m: Decimal("0.00") for m in range(1, 13)}
             for inv in invoices:
-                monthly_income[inv.paid_at.month] += inv.total_amount
+                monthly_income[timezone.localtime(inv.paid_at).month] += inv.total_amount
         else:
             invoices = []
             total_income = Decimal("0.00")
@@ -545,6 +498,9 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
 
         total_profit = total_income - total_expenses
 
+        active_months = sum(1 for row in monthly_breakdown if row["income"] or row["expenses"])
+        average_monthly_profit = total_profit / active_months if active_months else Decimal("0.00")
+
         category_labels = dict(Expense.CATEGORY_CHOICES)
         category_sums: dict = {}
         for e in expenses_qs:
@@ -567,6 +523,7 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
                 "total_expenses": total_expenses,
                 "profit": total_profit,
                 "total_profit": total_profit,
+                "average_monthly_profit": average_monthly_profit,
                 "expenses_by_category": expenses_by_category,
                 "expense_list": expenses_qs,
             }

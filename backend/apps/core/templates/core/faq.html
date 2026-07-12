@@ -91,7 +91,7 @@
   <p>Für ein Institut mit gestaffelter Vergütung steigt der Stundensatz mit der kumulierten Gesamtstundenzahl. Preceptly zählt alle vorherigen Stunden dieses Instituts (ab dem konfigurierten Startdatum in den Einstellungen) und wendet den entsprechenden Stufensatz automatisch bei der Abrechnung an.</p>
 
   <h3>Wie richte ich das für ein Institut ein?</h3>
-  <p>Unter <a href="{% url 'contracts:tier_config_list' %}">Institut-Tarife</a> kannst du für jedes Institut eigene Stufen (ab wie vielen Stunden welcher Satz gilt) sowie optional die Regel „bei Tutor-Ausfall nicht abrechnen" hinterlegen. Für die Institute „TutorSpace" und „Abacus" gelten ohne eigene Konfiguration automatisch sinnvolle Standardwerte.</p>
+  <p>Unter <a href="{% url 'contracts:institute_list' %}">Institute</a> kannst du jedes Institut anlegen und dort eigene Stufen (ab wie vielen Stunden welcher Satz gilt), die Regel „bei Tutor-Ausfall nicht abrechnen" sowie den Stufenfortschritt einsehen. Beim Anlegen eines Vertrags wählst du dann eines deiner Institute aus, oder „Kein Institut" für Privatunterricht. Ohne eigene Konfiguration hat ein Institut keine Stufenvergütung und rechnet Tutor-Ausfälle normal ab — auch für Institute wie „TutorSpace" oder „Abacus" musst du die Regeln selbst eintragen.</p>
 
   <h3>Ab welchem Datum werden Stunden für die Stufenberechnung gezählt?</h3>
   <p>Das Startdatum für die Stufenberechnung kannst du in den <a href="{% url 'core:settings' %}">Einstellungen</a> festlegen. Stunden vor diesem Datum fließen nicht in die Stufenberechnung ein.</p>

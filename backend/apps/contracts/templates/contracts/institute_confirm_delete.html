@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete institute" %} - Preceptly{% endblock %}
+
+{% block content %}
+<h1>{% trans "Delete institute" %}</h1>
+
+<p>{% blocktrans with name=object.institute_name %}Delete institute "{{ name }}"?{% endblocktrans %}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="btn-group">
+        <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+        <a href="{% url 'contracts:institute_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+</form>
+{% endblock %}

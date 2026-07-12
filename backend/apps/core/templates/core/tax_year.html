@@ -20,7 +20,7 @@
             <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn">{% trans "Apply" %}</button>
+        <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
     </form>
 </div>
 
@@ -67,6 +67,12 @@
             <td style="text-align:right;">{{ total_income|euro }}</td>
             <td style="text-align:right;">{{ total_expenses|euro }}</td>
             <td style="text-align:right;">{{ total_profit|euro }}</td>
+        </tr>
+        <tr>
+            <td>{% trans "Average profit per month" %}</td>
+            <td style="text-align:right;"></td>
+            <td style="text-align:right;"></td>
+            <td style="text-align:right;">{{ average_monthly_profit|euro }}</td>
         </tr>
     </tfoot>
 </table>

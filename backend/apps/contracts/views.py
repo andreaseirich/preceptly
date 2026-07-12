@@ -14,13 +14,13 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from apps.contracts.forms import ContractForm, TierConfigForm
+from apps.contracts.forms import ContractForm, InstituteForm
 from apps.contracts.formsets import (
     ContractMonthlyPlanFormSet,
     generate_monthly_plans_for_contract,
     iter_contract_months,
 )
-from apps.contracts.models import Contract, ContractMonthlyPlan, InstituteTierConfig
+from apps.contracts.models import Contract, ContractMonthlyPlan, Institute
 from apps.contracts.services import (
     get_contract_current_month_summary,
     get_contract_monthly_planning_summary,
@@ -52,14 +52,6 @@ class ContractListView(LoginRequiredMixin, ListView):
             }
             for c in contracts
         ]
-        user = self.request.user
-        institute_names = sorted({c.institute for c in contracts if c.institute})
-        summaries = []
-        for name in institute_names:
-            progress = get_institute_tier_progress(user, name)
-            if progress:
-                summaries.append(progress)
-        context["institute_tier_summaries"] = summaries
         return context
 
 
@@ -287,55 +279,75 @@ class ContractDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class TierConfigListView(LoginRequiredMixin, ListView):
-    model = InstituteTierConfig
-    template_name = "contracts/tier_config_list.html"
-    context_object_name = "configs"
+class InstituteListView(LoginRequiredMixin, ListView):
+    """Manage institutes: tiered pay, no-show rule, tier progress — all in one place."""
+
+    model = Institute
+    template_name = "contracts/institute_list.html"
+    context_object_name = "institutes"
 
     def get_queryset(self):
-        return InstituteTierConfig.objects.filter(user=self.request.user)
+        return Institute.objects.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        for institute in context["institutes"]:
+            institute.tier_progress = get_institute_tier_progress(institute)
+        return context
 
 
-class TierConfigCreateView(LoginRequiredMixin, CreateView):
-    model = InstituteTierConfig
-    form_class = TierConfigForm
-    template_name = "contracts/tier_config_form.html"
-    success_url = reverse_lazy("contracts:tier_config_list")
+class InstituteCreateView(LoginRequiredMixin, CreateView):
+    model = Institute
+    form_class = InstituteForm
+    template_name = "contracts/institute_form.html"
+    success_url = reverse_lazy("contracts:institute_list")
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         response = super().form_valid(form)
-        messages.success(self.request, _("Tier config saved."))
+        messages.success(self.request, _("Institute saved."))
         return response
 
 
-class TierConfigUpdateView(LoginRequiredMixin, UpdateView):
-    model = InstituteTierConfig
-    form_class = TierConfigForm
-    template_name = "contracts/tier_config_form.html"
-    success_url = reverse_lazy("contracts:tier_config_list")
+class InstituteUpdateView(LoginRequiredMixin, UpdateView):
+    model = Institute
+    form_class = InstituteForm
+    template_name = "contracts/institute_form.html"
+    success_url = reverse_lazy("contracts:institute_list")
 
     def get_queryset(self):
-        return InstituteTierConfig.objects.filter(user=self.request.user)
+        return Institute.objects.filter(user=self.request.user)
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         response = super().form_valid(form)
-        messages.success(self.request, _("Tier config saved."))
+        messages.success(self.request, _("Institute saved."))
         return response
 
 
-class TierConfigDeleteView(LoginRequiredMixin, DeleteView):
-    model = InstituteTierConfig
-    template_name = "contracts/tier_config_confirm_delete.html"
-    success_url = reverse_lazy("contracts:tier_config_list")
+class InstituteDeleteView(LoginRequiredMixin, DeleteView):
+    model = Institute
+    template_name = "contracts/institute_confirm_delete.html"
+    success_url = reverse_lazy("contracts:institute_list")
 
     def get_queryset(self):
-        return InstituteTierConfig.objects.filter(user=self.request.user)
+        return Institute.objects.filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
-        messages.success(request, _("Tier config deleted."))
+        from django.db.models import ProtectedError
+
+        try:
+            response = super().delete(request, *args, **kwargs)
+        except ProtectedError:
+            messages.error(
+                request,
+                _(
+                    "This institute cannot be deleted because contracts are still assigned "
+                    "to it. Reassign or remove those contracts first."
+                ),
+            )
+            return redirect("contracts:institute_list")
+        messages.success(request, _("Institute deleted."))
         return response
 
 

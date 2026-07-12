@@ -1,16 +1,16 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}{% if object %}{% trans "Edit tier config" %}{% else %}{% trans "New tier config" %}{% endif %} - Preceptly{% endblock %}
+{% block title %}{% if object %}{% trans "Edit institute" %}{% else %}{% trans "New institute" %}{% endif %} - Preceptly{% endblock %}
 
 {% block content %}
-<h1>{% if object %}{% trans "Edit tier config" %}{% else %}{% trans "New tier config" %}{% endif %}</h1>
+<h1>{% if object %}{% trans "Edit institute" %}{% else %}{% trans "New institute" %}{% endif %}</h1>
 
 <div class="btn-group">
-  <a href="{% url 'contracts:tier_config_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+  <a href="{% url 'contracts:institute_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
 </div>
 
-<form method="post" id="tier-config-form" style="margin-top: 1.5em; max-width: 640px;">
+<form method="post" id="institute-form" style="margin-top: 1.5em; max-width: 640px;">
   {% csrf_token %}
 
   <div style="margin-bottom: 1.2em;">
@@ -48,6 +48,22 @@
   </div>
 
   <div style="margin-bottom: 1.2em;">
+    <label for="{{ form.tier_count_from.id_for_label }}"><strong>{{ form.tier_count_from.label }}</strong></label><br>
+    {{ form.tier_count_from }}
+    {% if form.tier_count_from.help_text %}
+      <p style="color:var(--text-secondary); font-size:.9em; margin-top:4px;">{{ form.tier_count_from.help_text }}</p>
+    {% endif %}
+  </div>
+
+  <div style="margin-bottom: 1.2em;">
+    <label for="{{ form.tutor_no_show_pay_percent.id_for_label }}"><strong>{{ form.tutor_no_show_pay_percent.label }}</strong></label><br>
+    {{ form.tutor_no_show_pay_percent }}
+    {% if form.tutor_no_show_pay_percent.help_text %}
+      <p style="color:var(--text-secondary); font-size:.9em; margin-top:4px;">{{ form.tutor_no_show_pay_percent.help_text }}</p>
+    {% endif %}
+  </div>
+
+  <div style="margin-bottom: 1.2em;">
     <label>
       {{ form.unpaid_on_tutor_no_show }}
       <strong>{% trans "No billing on tutor no-show" %}</strong>
@@ -63,7 +79,7 @@
 
   <div class="btn-group" style="margin-top:1.5em;">
     <button type="submit" class="btn btn-success">{% trans "Save" %}</button>
-    <a href="{% url 'contracts:tier_config_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    <a href="{% url 'contracts:institute_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
   </div>
 </form>
 
@@ -133,7 +149,7 @@
     tbody.lastElementChild.querySelector('.tier-rate').focus();
   });
 
-  document.getElementById('tier-config-form').addEventListener('submit', function(e) {
+  document.getElementById('institute-form').addEventListener('submit', function(e) {
     if (tbody.querySelectorAll('tr').length > 0 && !validate()) { e.preventDefault(); return; }
     const tiers = Array.from(tbody.querySelectorAll('tr')).map(function(tr) {
       return {

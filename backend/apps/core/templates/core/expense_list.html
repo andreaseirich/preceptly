@@ -15,7 +15,7 @@
             <option value="{{ y }}" {% if y == year_filter %}selected{% endif %}>{{ y }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn">{% trans "Apply" %}</button>
+        <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
     </form>
     <a href="{% url 'core:expense_create' %}" class="btn">+ {% trans "New expense" %}</a>
 </div>

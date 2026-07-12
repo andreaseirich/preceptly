@@ -167,48 +167,6 @@ class TravelPolicyForm(forms.Form):
         return max(5, min(60, value))
 
 
-class TutorNoShowPayForm(forms.Form):
-    """Percentage of tiered pay kept when a session is marked tutor no-show (student waited),
-    for institutes with tiered compensation."""
-
-    tutor_no_show_pay_percent = forms.IntegerField(
-        min_value=0,
-        max_value=100,
-        initial=0,
-        label=_("Pay when you missed the lesson (student was waiting)"),
-        help_text=_(
-            "For institutes with tiered pay, if you mark “you did not attend, student was "
-            "waiting”: share of the usual lesson pay you keep. You are not paid the rest, and "
-            "the usual amount is deducted (e.g. 0%% → line shows −full usual amount; 100%% → "
-            "full pay, no deduction)."
-        ),
-    )
-
-    def clean_tutor_no_show_pay_percent(self):
-        value = self.cleaned_data.get("tutor_no_show_pay_percent")
-        if value is None:
-            return 0
-        return max(0, min(100, int(value)))
-
-
-class TutorSpaceTierCountFromForm(forms.Form):
-    """Optional start date for cumulative tiered-pay hour counting."""
-
-    tutorspace_tier_count_from = forms.DateField(
-        required=False,
-        widget=forms.DateInput(
-            attrs={"class": "form-control", "type": "date"},
-            format="%Y-%m-%d",
-        ),
-        label=_("Count tiered pay hours only from (optional)"),
-        help_text=_(
-            "Empty: every past lesson for an institute with tiered pay counts toward the tiers "
-            "(all pupils together). Set a date if the preview or amounts look wrong because "
-            "many older lessons are included—only lessons on or after this date will count."
-        ),
-    )
-
-
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense

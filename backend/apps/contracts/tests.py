@@ -4,8 +4,8 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from apps.contracts.forms import TierConfigForm
-from apps.contracts.models import Contract
+from apps.contracts.forms import InstituteForm
+from apps.contracts.models import Contract, Institute
 
 
 class ContractModelTest(TestCase):
@@ -50,11 +50,12 @@ class ContractModelTest(TestCase):
 
     def test_contract_with_institute(self):
         """Test: Contract mit Institut."""
+        institute = Institute.objects.create(user=self.user, institute_name="Nachhilfe-Institut XY")
         contract = Contract.objects.create(
             user=self.user,
             first_name="Test",
             last_name="Student",
-            institute="Nachhilfe-Institut XY",
+            institute_fk=institute,
             hourly_rate=Decimal("35.00"),
             start_date=date.today(),
         )
@@ -62,8 +63,8 @@ class ContractModelTest(TestCase):
         self.assertIn("Nachhilfe-Institut XY", str(contract))
 
 
-class TierConfigFormValidationTest(TestCase):
-    """Tests for TierConfigForm.clean_tiers — XSS label rejection."""
+class InstituteFormValidationTest(TestCase):
+    """Tests for InstituteForm.clean_tiers — XSS label rejection."""
 
     def setUp(self):
         self.user = User.objects.create_user(username="tutor_tier", password="test")
@@ -71,7 +72,7 @@ class TierConfigFormValidationTest(TestCase):
     def _form(self, tiers):
         import json
 
-        return TierConfigForm(
+        return InstituteForm(
             data={"institute_name": "Test Institut", "tiers": json.dumps(tiers)},
         )
 

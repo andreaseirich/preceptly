@@ -3,37 +3,27 @@ Forms for billing app.
 """
 
 from django import forms
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from apps.billing.models import Invoice
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, Institute
 
 NO_INSTITUTE_FILTER_VALUE = "__none__"
 
 
 def _get_institute_choices_for_user(user):
-    """Return choices for institute filter: empty + distinct institutes from user's
-    contracts, plus an explicit "no institute" bucket for private (blank-institute)
-    contracts."""
+    """Return choices for institute filter: empty + the tutor's institutes, plus an
+    explicit "no institute" bucket for private (institute-less) contracts."""
     if not user:
         return [("", _("All institutes"))]
-    institutes = (
-        Contract.objects.filter(user=user, is_active=True)
-        .exclude(Q(institute__isnull=True) | Q(institute=""))
-        .values_list("institute", flat=True)
-        .distinct()
-        .order_by("institute")
-    )
-    has_private_contracts = (
-        Contract.objects.filter(user=user, is_active=True)
-        .filter(Q(institute__isnull=True) | Q(institute=""))
-        .exists()
-    )
+    institutes = Institute.objects.filter(user=user).order_by("institute_name")
+    has_private_contracts = Contract.objects.filter(
+        user=user, is_active=True, institute_fk__isnull=True
+    ).exists()
     choices = [("", _("All institutes"))]
     if has_private_contracts:
         choices.append((NO_INSTITUTE_FILTER_VALUE, _("No institute (private lessons)")))
-    choices += [(i, i) for i in institutes]
+    choices += [(str(i.pk), i.institute_name) for i in institutes]
     return choices
 
 
@@ -80,9 +70,9 @@ class InvoiceCreateForm(forms.Form):
                 self.data.get("institute") if self.data else None
             )
             if institute == NO_INSTITUTE_FILTER_VALUE:
-                base_contracts = base_contracts.filter(Q(institute__isnull=True) | Q(institute=""))
+                base_contracts = base_contracts.filter(institute_fk__isnull=True)
             elif institute:
-                base_contracts = base_contracts.filter(institute=institute)
+                base_contracts = base_contracts.filter(institute_fk_id=institute)
             self.fields["contract"].queryset = base_contracts
 
     def clean(self):

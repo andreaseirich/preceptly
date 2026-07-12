@@ -1,4 +1,4 @@
-"""Abacus vs TutorSpace behavior for tutor_no_show."""
+"""No billing on tutor no-show, for any institute with the flag enabled."""
 
 from datetime import date, time
 from decimal import Decimal
@@ -6,42 +6,29 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from apps.contracts.institute_utils import ABACUS_INSTITUTE_NAME, is_abacus_institute
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, Institute
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 
 
-class InstituteUtilsTest(TestCase):
-    def test_abacus_name_case_insensitive(self):
-        self.assertTrue(is_abacus_institute("Abacus"))
-        self.assertTrue(is_abacus_institute("ABACUS"))
-        self.assertTrue(is_abacus_institute(" abacus "))
-        self.assertFalse(is_abacus_institute("TutorSpace"))
-
-
-class AbacusTutorNoShowBillingTest(TestCase):
+class NoShowUnpaidInstituteBillingTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tutor_abacus_ns", password="x")
-        self.student = Contract.objects.create(
-            hourly_rate=Decimal("25.00"),
-            start_date=date.today(),
-            user=self.user,
-            first_name="A",
-            last_name="Student",
+        self.institute = Institute.objects.create(
+            user=self.user, institute_name="Abacus", unpaid_on_tutor_no_show=True
         )
         self.contract = Contract.objects.create(
             user=self.user,
             first_name="Test",
             last_name="Student",
-            institute=ABACUS_INSTITUTE_NAME,
+            institute_fk=self.institute,
             hourly_rate=Decimal("24.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
             is_active=True,
         )
 
-    def test_abacus_no_show_not_billed(self):
+    def test_no_show_not_billed(self):
         lesson = Lesson.objects.create(
             contract=self.contract,
             date=date(2025, 3, 1),
@@ -52,7 +39,7 @@ class AbacusTutorNoShowBillingTest(TestCase):
         )
         self.assertEqual(IncomeSelector._calculate_lesson_amount(lesson), Decimal("0.00"))
 
-    def test_abacus_normal_lesson_billed(self):
+    def test_normal_lesson_billed(self):
         lesson = Lesson.objects.create(
             contract=self.contract,
             date=date(2025, 3, 1),

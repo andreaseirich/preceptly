@@ -49,6 +49,7 @@
             --success: #2e7d32;  /* 5.13:1 */
             --warning: #b45309;  /* 5.02:1 */
             --danger:  #b03a2e;  /* 6.02:1 */
+            --info:    #1565c0;  /* 5.13:1 — distinct from accent/success for neutral info actions */
 
             /* Neutral */
             --bg-primary: #f5f7f9;
@@ -76,6 +77,7 @@
             --success: #66bb6a;
             --warning: #f9a825;
             --danger:  #ef5350;
+            --info:    #64b5f6;
 
             --bg-primary: #1a1a1a;
             --bg-secondary: #2d2d2d;
@@ -102,6 +104,7 @@
                 --success: #66bb6a;
                 --warning: #f9a825;
                 --danger:  #ef5350;
+                --info:    #64b5f6;
 
                 --bg-primary: #1a1a1a;
                 --bg-secondary: #2d2d2d;
@@ -440,8 +443,8 @@
         /* Small outline buttons for table actions */
         .btn-sm { display: inline-block; padding: 3px 9px; border-radius: 3px; border: 1px solid; font-size: 0.82em; cursor: pointer; text-decoration: none !important; background: transparent; transition: background 0.15s, color 0.15s; white-space: nowrap; line-height: 1.5; }
         .btn-sm:active { transform: scale(0.97); }
-        .btn-sm-primary   { color: var(--accent); border-color: var(--accent); }
-        .btn-sm-primary:hover   { background: var(--accent); color: #fff; }
+        .btn-sm-primary   { color: var(--info); border-color: var(--info); }
+        .btn-sm-primary:hover   { background: var(--info); color: #fff; }
         .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
         .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
         .btn-sm-success   { color: var(--success); border-color: var(--success); }
