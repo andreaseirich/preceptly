@@ -36,6 +36,8 @@
 <p>.............................<br>.............................<br>.............................<br>.............................</p>
 <p>Datum: ....................................................</p>
 <p>Unterschrift Kunde (nur bei schriftlichem Widerruf): ....................................................</p>
+<h2>Widerrufsbutton</h2>
+<p>Zusätzlich zu den oben genannten Wegen (Brief, E-Mail) bieten wir auf unserer Website einen Widerrufsbutton an, über den Sie Ihren Widerruf bequem und digital einreichen können. Der Button befindet sich im Footer jeder Seite. Nähere Informationen zum Widerrufsbutton und den dabei eingesetzten Diensten finden Sie in unserer <a href="{% url 'core:legal_privacy' %}">Datenschutzerklärung</a>.</p>
 
 {% else %}
 <h1>Right of Withdrawal</h1>
@@ -67,6 +69,8 @@
 <p>Date: ....................................................</p>
 <p>Signature of consumer(s) (only if this form is notified on paper): ....................................................</p>
 <p><em>(*) Delete as appropriate.</em></p>
+<h2>Revocation Button</h2>
+<p>In addition to the methods described above (post, email), we also offer a revocation button on our website that allows you to submit your withdrawal conveniently and digitally. The button is located in the footer of every page. For further information about the revocation button and the services used, please refer to our <a href="{% url 'core:legal_privacy' %}">Privacy Policy</a>.</p>
 {% endif %}
 </div>
 {% endblock %}
