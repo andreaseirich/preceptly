@@ -1,7 +1,7 @@
 // Service Worker for Preceptly PWA
-const CACHE_NAME = 'preceptly-v1';
-const STATIC_CACHE_NAME = 'preceptly-static-v1';
-const DYNAMIC_CACHE_NAME = 'preceptly-dynamic-v1';
+const CACHE_NAME = 'preceptly-v2';
+const STATIC_CACHE_NAME = 'preceptly-static-v2';
+const DYNAMIC_CACHE_NAME = 'preceptly-dynamic-v2';
 
 // Files to cache on installation
 const STATIC_FILES = [
