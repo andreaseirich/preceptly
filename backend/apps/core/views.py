@@ -844,5 +844,8 @@ class AutoDetectTimezoneView(LoginRequiredMixin, View):
         return JsonResponse({"ok": True, "timezone": tz_value})
 
 
-class FaqView(LoginRequiredMixin, TemplateView):
+class FaqView(TemplateView):
+    """Public FAQ page — listed in robots.txt/sitemap.xml and shown to
+    anonymous visitors in the nav, so it must not require login."""
+
     template_name = "core/faq.html"

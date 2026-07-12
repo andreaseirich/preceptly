@@ -71,3 +71,16 @@ class SitemapTest(TestCase):
 
     def test_contains_faq_url(self):
         self.assertIn(b"/faq/", self.response.content)
+
+
+class FaqPageAccessTest(TestCase):
+    """FAQ is listed in robots.txt/sitemap.xml and shown to anonymous
+    visitors in the nav — it must not require login."""
+
+    def test_anonymous_visitor_gets_200(self):
+        response = self.client.get("/faq/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_anonymous_visitor_not_redirected_to_login(self):
+        response = self.client.get("/faq/")
+        self.assertNotEqual(response.status_code, 302)
