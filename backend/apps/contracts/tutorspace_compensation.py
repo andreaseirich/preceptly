@@ -38,14 +38,15 @@ TIERS: list[TutorSpaceTier] = [
 ]
 
 
-def tutorspace_rate_for_hour_index(hour_index_1_based: int) -> Decimal:
+def rate_for_hour_index(tiers: list[TutorSpaceTier], hour_index_1_based: int) -> Decimal:
     """
-    Map hour number (1-based, i.e. the 51st hour counts) to the hourly rate in EUR.
+    Map hour number (1-based, i.e. the 51st hour counts) to the hourly rate in EUR,
+    for an arbitrary (sorted) tier list.
     """
     if hour_index_1_based <= 0:
         raise ValueError("hour_index_1_based must be >= 1")
-    current = TIERS[0].rate_eur_per_hour
-    for tier in TIERS:
+    current = tiers[0].rate_eur_per_hour
+    for tier in tiers:
         if hour_index_1_based >= tier.start_hour_inclusive:
             current = tier.rate_eur_per_hour
         else:
@@ -53,26 +54,37 @@ def tutorspace_rate_for_hour_index(hour_index_1_based: int) -> Decimal:
     return current
 
 
-def _tier_boundaries_minutes() -> list[int]:
+def tutorspace_rate_for_hour_index(hour_index_1_based: int) -> Decimal:
+    return rate_for_hour_index(TIERS, hour_index_1_based)
+
+
+def tier_boundaries_minutes(tiers: list[TutorSpaceTier]) -> list[int]:
     # Convert start_hour (1-based) to start-minute index (0-based).
     # Example: hour 51 starts after 50*60 minutes.
-    boundaries = []
-    for tier in TIERS[1:]:
-        boundaries.append((tier.start_hour_inclusive - 1) * 60)
-    return boundaries
+    return [(tier.start_hour_inclusive - 1) * 60 for tier in tiers[1:]]
 
 
-def tutorspace_rate_for_cumulative_minute(cumulative_minute_0_based: int) -> Decimal:
+def _tier_boundaries_minutes() -> list[int]:
+    return tier_boundaries_minutes(TIERS)
+
+
+def rate_for_cumulative_minute(
+    tiers: list[TutorSpaceTier], cumulative_minute_0_based: int
+) -> Decimal:
     """
     Given the count of already taught minutes BEFORE the minute we are about to pay for,
-    return the hourly rate for that next minute.
+    return the hourly rate for that next minute, for an arbitrary (sorted) tier list.
     """
     if cumulative_minute_0_based < 0:
         cumulative_minute_0_based = 0
     # hour_index_1_based for the next minute:
     # minutes 0..59 => hour 1, minutes 60..119 => hour 2, ...
     hour_index = (cumulative_minute_0_based // 60) + 1
-    return tutorspace_rate_for_hour_index(hour_index)
+    return rate_for_hour_index(tiers, hour_index)
+
+
+def tutorspace_rate_for_cumulative_minute(cumulative_minute_0_based: int) -> Decimal:
+    return rate_for_cumulative_minute(TIERS, cumulative_minute_0_based)
 
 
 def _tutorspace_session_precedes_in_tier_order(a, b) -> bool:
@@ -99,25 +111,23 @@ def _tutorspace_session_precedes_in_tier_order(a, b) -> bool:
     return ap < bp
 
 
-def _tutorspace_minutes_before_session(session, tutor: User) -> int:
+def minutes_before_session_for_institute(
+    session, tutor: User, institute_name: str, tier_from
+) -> int:
     """
-    Sum duration_minutes of TutorSpace sessions (taught/paid, tutor_no_show=False) strictly
-    before ``session`` in tier order.
+    Sum duration_minutes of sessions of ``institute_name`` (taught/paid, tutor_no_show=False)
+    strictly before ``session`` in tier order.
 
     Note: a tutor_no_show session is not in this queryset but still gets a correct total from
     rows that precede it in time order.
 
-    If the tutor's profile has ``tutorspace_tier_count_from`` set, only sessions on or after
-    that date participate in the tier pool (earlier TutorSpace lessons are ignored for tiers).
+    If ``tier_from`` is set, only sessions on or after that date participate in the tier pool.
     """
     from apps.lessons.models import Session  # local import to avoid circulars
 
-    profile = UserProfile.objects.filter(user=tutor).first()
-    tier_from = getattr(profile, "tutorspace_tier_count_from", None) if profile else None
-
     qs = Session.objects.filter(
         contract__user=tutor,
-        contract__institute__iexact=TUTORSPACE_INSTITUTE_NAME,
+        contract__institute__iexact=institute_name,
         status__in=["taught", "paid"],
         tutor_no_show=False,
     )
@@ -132,6 +142,18 @@ def _tutorspace_minutes_before_session(session, tutor: User) -> int:
         if _tutorspace_session_precedes_in_tier_order(row, session):
             total += int(row.duration_minutes or 0)
     return total
+
+
+def _tutorspace_minutes_before_session(session, tutor: User) -> int:
+    """
+    TutorSpace-specific wrapper around ``minutes_before_session_for_institute``, kept for
+    backward compatibility: reads ``tutorspace_tier_count_from`` from the tutor's profile.
+    """
+    profile = UserProfile.objects.filter(user=tutor).first()
+    tier_from = getattr(profile, "tutorspace_tier_count_from", None) if profile else None
+    return minutes_before_session_for_institute(
+        session, tutor, TUTORSPACE_INSTITUTE_NAME, tier_from
+    )
 
 
 def calculate_tutorspace_amount_for_session(session, tutor: User) -> Decimal:

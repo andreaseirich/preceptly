@@ -10,9 +10,8 @@ from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 
 from apps.billing.models import InvoiceItem
-from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
+from apps.contracts.institute_billing import calculate_lesson_amount
 from apps.contracts.models import ContractMonthlyPlan
-from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
 from apps.core.finance_metrics import (
     lesson_count_taught_or_paid,
     recognized_revenue,
@@ -50,21 +49,7 @@ class IncomeSelector:
         Returns:
             Betrag als Decimal
         """
-        contract = lesson.contract
-        if is_tutorspace_institute(getattr(contract, "institute", None)):
-            tutor = contract.user
-            return calculate_tutorspace_amount_for_session(lesson, tutor=tutor)
-
-        unit_duration = Decimal(str(contract.unit_duration_minutes))
-        lesson_duration = Decimal(str(lesson.duration_minutes))
-        units = lesson_duration / unit_duration
-        rate_per_unit = contract.hourly_rate
-        amount = units * rate_per_unit
-        if getattr(lesson, "tutor_no_show", False) and is_abacus_institute(
-            getattr(contract, "institute", None)
-        ):
-            return Decimal("0.00")
-        return amount
+        return calculate_lesson_amount(lesson, lesson.contract.user)
 
     @staticmethod
     def _get_lesson_amount(lesson: Lesson) -> Decimal:

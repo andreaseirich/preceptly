@@ -76,20 +76,26 @@ class TierConfigFormValidationTest(TestCase):
         )
 
     def test_valid_tiers_accepted(self):
-        form = self._form([{"hours_from": 0, "label": "14 €/h"}])
+        form = self._form([{"hours_from": 0, "rate": 14, "label": "14 €/h"}])
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_label_with_lt_gt_rejected(self):
-        form = self._form([{"hours_from": 0, "label": "</script><script>x</script>"}])
+        form = self._form([{"hours_from": 0, "rate": 14, "label": "</script><script>x</script>"}])
         self.assertFalse(form.is_valid())
         self.assertIn("tiers", form.errors)
 
     def test_label_with_lt_only_rejected(self):
-        form = self._form([{"hours_from": 0, "label": "bad<label"}])
+        form = self._form([{"hours_from": 0, "rate": 14, "label": "bad<label"}])
         self.assertFalse(form.is_valid())
         self.assertIn("tiers", form.errors)
 
-    def test_empty_tiers_rejected(self):
-        form = self._form([])
+    def test_missing_rate_rejected(self):
+        form = self._form([{"hours_from": 0, "label": "14 €/h"}])
         self.assertFalse(form.is_valid())
         self.assertIn("tiers", form.errors)
+
+    def test_empty_tiers_accepted(self):
+        """An empty tier list is valid — it means "no tiered pay", e.g. for an institute
+        that only uses the "no billing on tutor no-show" rule."""
+        form = self._form([])
+        self.assertTrue(form.is_valid(), form.errors)

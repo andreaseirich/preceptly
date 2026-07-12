@@ -128,7 +128,12 @@ class InstituteTierConfig(models.Model):
         related_name="institute_tier_configs",
     )
     institute_name = models.CharField(max_length=200)
-    tiers = models.JSONField(default=list)
+    tiers = models.JSONField(default=list, blank=True)
+    unpaid_on_tutor_no_show = models.BooleanField(
+        default=False,
+        verbose_name=_("no billing on tutor no-show"),
+        help_text=_("If enabled, lessons marked as tutor no-show are billed with 0 €."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

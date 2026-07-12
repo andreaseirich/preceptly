@@ -21,8 +21,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 
 from apps.billing.models import Invoice, InvoiceItem
-from apps.contracts.institute_utils import is_abacus_institute, is_tutorspace_institute
-from apps.contracts.tutorspace_compensation import calculate_tutorspace_amount_for_session
+from apps.contracts.institute_billing import calculate_lesson_amount
 from apps.lessons.models import Lesson
 
 
@@ -31,19 +30,7 @@ def _calculate_lesson_amount(lesson: Lesson) -> "Decimal":
     Calculate the amount for a lesson using the same logic as InvoiceService.
     Extracted here to avoid cyclic imports with apps.core.selectors.
     """
-    contract = lesson.contract
-    if is_tutorspace_institute(getattr(contract, "institute", None)):
-        tutor = contract.user
-        return calculate_tutorspace_amount_for_session(lesson, tutor=tutor)
-    unit_duration = Decimal(str(contract.unit_duration_minutes))
-    lesson_duration = Decimal(str(lesson.duration_minutes))
-    units = lesson_duration / unit_duration
-    amount = units * contract.hourly_rate
-    if getattr(lesson, "tutor_no_show", False) and is_abacus_institute(
-        getattr(contract, "institute", None)
-    ):
-        return Decimal("0.00")
-    return amount
+    return calculate_lesson_amount(lesson, lesson.contract.user)
 
 
 class InvoiceStatus(StrEnum):
