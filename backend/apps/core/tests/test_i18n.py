@@ -270,11 +270,13 @@ class GermanLandingPageTestCase(TestCase):
         return client.get(reverse("core:landing"), HTTP_ACCEPT_LANGUAGE="de")
 
     def test_page_title_is_fully_german(self):
-        """Landing page title must not contain English 'The complete workspace for tutors'."""
+        """Landing page title must start with brand name and be fully in German."""
         response = self._get_landing_de()
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Der komplette Arbeitsplatz f\xc3\xbcr Nachhilfelehrer", response.content)
-        self.assertNotIn(b"The complete workspace for tutors", response.content)
+        self.assertIn(
+            b"Preceptly - Der komplette Arbeitsplatz f\xc3\xbcr Nachhilfelehrer", response.content
+        )
+        self.assertNotIn(b"Willkommen bei Preceptly", response.content)
 
     def test_marketing_text_mentions_free_plan(self):
         """Landing page pricing intro must mention 'kostenlos startbar'."""
