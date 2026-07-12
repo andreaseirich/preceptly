@@ -202,6 +202,62 @@ class StripeWebhookEvent(models.Model):
         verbose_name_plural = _("Stripe Webhook Events")
 
 
+class RevocationRequest(models.Model):
+    """Revocation (Widerruf) submitted via the e-recht24 revocation button webhook.
+
+    The e-recht24 form is self-reported and NOT identity-verified, so an
+    incoming webhook must never cancel a subscription directly. This model
+    records the request; the actual cancellation requires the matched user to
+    confirm via a tokenized link sent to their account email (two-step flow).
+    """
+
+    STATUS_CHOICES = [
+        ("pending_confirmation", _("Pending confirmation")),
+        ("confirmed_cancelled", _("Confirmed and cancelled")),
+        ("no_match", _("No matching account")),
+        ("ambiguous_match", _("Ambiguous match")),
+        ("expired", _("Confirmation token expired")),
+    ]
+
+    revo_id = models.CharField(
+        max_length=64,
+        unique=True,
+        help_text=_("e-recht24 revocation ID (idempotency key for webhook retries)"),
+    )
+    customer_name = models.CharField(max_length=200, blank=True)
+    customer_email = models.CharField(max_length=254, blank=True)
+    order_number = models.CharField(max_length=100, blank=True)
+    customer_number = models.CharField(max_length=100, blank=True)
+    relevant_service = models.CharField(max_length=200, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    occurred_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, db_index=True)
+    confirmation_token = models.CharField(
+        max_length=64,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text=_("Set to None once used or expired so the link cannot be reused"),
+    )
+    confirmation_token_created_at = models.DateTimeField(null=True, blank=True)
+    matched_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="revocation_requests",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Revocation Request")
+        verbose_name_plural = _("Revocation Requests")
+
+    def __str__(self):
+        return f"{self.revo_id} ({self.status})"
+
+
 class Expense(models.Model):
     """Business expense for tax return (EÜR)."""
 
