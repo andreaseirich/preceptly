@@ -32,3 +32,9 @@ class FooterIntegrationTests(TestCase):
 
     def setUp(self):
         self.client = Client()
+
+    def test_revocation_button_in_footer(self):
+        """eRecht24 revocation button must be present in the footer on every page."""
+        response = self.client.get(reverse("core:legal_imprint"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "eRecht24RevocationButton")
