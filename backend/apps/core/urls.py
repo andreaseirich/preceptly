@@ -19,6 +19,7 @@ from apps.core.views import (
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_email_test import test_email
 from apps.core.views_erecht24 import Erecht24PushView
+from apps.core.views_erecht24_revocation import Erecht24RevocationConfirmView
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
 from apps.core.views_portal import TutorMessagesOverviewView, TutorMessageView
@@ -33,6 +34,11 @@ app_name = "core"
 urlpatterns = [
     path("robots.txt", robots_txt, name="robots_txt"),
     path("erecht24/push/", Erecht24PushView.as_view(), name="erecht24_push"),
+    path(
+        "erecht24/revocation-confirm/<slug:token>/",
+        Erecht24RevocationConfirmView.as_view(),
+        name="erecht24_revocation_confirm",
+    ),
     path("health/", health_status, name="health"),
     # TODO: Requires @staff_member_required — verify in views_log_test.py
     path("test-logs/", test_logs, name="test_logs"),
