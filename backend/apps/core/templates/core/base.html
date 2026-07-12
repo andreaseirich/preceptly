@@ -144,9 +144,18 @@
         /* Navigation */
         nav { background: var(--bg-nav); padding: 15px 0; margin-bottom: 30px; border-radius: 4px; box-shadow: 0 2px 4px var(--shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s ease; }
         nav .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; }
-        nav .nav-brand { display: flex; align-items: center; padding: 0 4px 0 0; flex-shrink: 0; }
-        nav .nav-brand img { height: 28px; width: 28px; display: block; }
+        nav .nav-brand { display: flex; align-items: center; padding: 0 8px 0 0; flex-shrink: 0; white-space: nowrap; }
+        nav .nav-brand img { height: 28px; width: auto; display: block; }
         nav .nav-links { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; flex: 1; }
+        nav .nav-dropdown { position: relative; }
+        nav .nav-dropdown-toggle { background: transparent; color: white; border: none; font: inherit; padding: 8px 15px; border-radius: 3px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+        nav .nav-dropdown-toggle:hover, nav .nav-dropdown.open .nav-dropdown-toggle { background: var(--hover-bg); }
+        nav .nav-dropdown-caret { font-size: 0.75em; }
+        nav .nav-dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: var(--bg-nav); border-radius: 4px; box-shadow: 0 4px 10px var(--shadow); padding: 6px; z-index: 1001; }
+        nav .nav-dropdown-menu a { display: block; padding: 8px 12px; }
+        nav .nav-dropdown.open .nav-dropdown-menu,
+        nav .nav-dropdown:hover .nav-dropdown-menu,
+        nav .nav-dropdown:focus-within .nav-dropdown-menu { display: block; }
         nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 3px; transition: background 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
         nav a:hover { background: var(--hover-bg); }
         nav a.active { background: var(--active-bg); }
@@ -302,12 +311,32 @@
                 z-index: 998;
             }
             .nav-backdrop.active { display: block; }
-            nav .nav-links a { 
-                display: block; 
-                padding: 15px 20px; 
-                border-bottom: 1px solid var(--hover-bg); 
+            nav .nav-links a {
+                display: block;
+                padding: 15px 20px;
+                border-bottom: 1px solid var(--hover-bg);
                 font-size: 16px;
             }
+            nav .nav-dropdown-toggle {
+                display: block;
+                width: 100%;
+                text-align: left;
+                padding: 15px 20px;
+                border-bottom: 1px solid var(--hover-bg);
+                font-size: 16px;
+            }
+            nav .nav-dropdown-menu,
+            nav .nav-dropdown:hover .nav-dropdown-menu,
+            nav .nav-dropdown:focus-within .nav-dropdown-menu {
+                display: none;
+                position: static;
+                box-shadow: none;
+                background: var(--hover-bg);
+                border-radius: 0;
+                padding: 0;
+            }
+            nav .nav-dropdown.open .nav-dropdown-menu { display: block; }
+            nav .nav-dropdown-menu a { padding: 15px 20px 15px 40px; border-bottom: 1px solid var(--border-color); }
             nav .nav-right { gap: 5px; }
             table { font-size: 14px; }
             th, td { padding: 8px 4px; }
@@ -459,21 +488,35 @@
     <nav aria-label="{% trans 'Main navigation' %}">
         <div class="nav-container">
             <a class="nav-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
-                <img src="{% static 'brand/preceptly-icon.svg' %}" alt="Preceptly">
+                <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}">☰</button>
             <div class="nav-links" id="navLinks">
                 {% if user.is_authenticated %}
                 <a href="{% url 'core:dashboard' %}">📊 {% trans "Dashboard" %}</a>
-                <a href="{% url 'contracts:list' %}">👤 {% trans "Students" %}</a>
-                <a href="{% url 'lessons:week' %}">📅 {% trans "Calendar" %}</a>
-                <a href="{% url 'billing:invoice_list' %}">🧾 {% trans "Invoices" %}</a>
-                <a href="{% url 'core:income' %}">💰 {% trans "Finance" %}</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownManage">
+                        👤 {% trans "Management" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="nav-dropdown-menu" id="navDropdownManage" role="menu">
+                        <a href="{% url 'contracts:list' %}" role="menuitem">👤 {% trans "Students" %}</a>
+                        <a href="{% url 'lessons:week' %}" role="menuitem">📅 {% trans "Calendar" %}</a>
+                        <a href="{% url 'core:settings' %}" role="menuitem">⚙️ {% trans "Settings" %}</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownBilling">
+                        💰 {% trans "Billing" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="nav-dropdown-menu" id="navDropdownBilling" role="menu">
+                        <a href="{% url 'billing:invoice_list' %}" role="menuitem">🧾 {% trans "Invoices" %}</a>
+                        <a href="{% url 'core:income' %}" role="menuitem">💰 {% trans "Finance" %}</a>
+                    </div>
+                </div>
                 {% endif %}
                 <a href="{% url 'core:faq' %}">❓ {% trans "FAQ" %}</a>
                 {% if user.is_authenticated %}
                 <a href="{% url 'core:tutor_messages_overview' %}">💬 {% trans "Messages" %}{% if unread_portal_count %} <span style="background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.75em;vertical-align:middle;">{{ unread_portal_count }}</span>{% endif %}</a>
-                <a href="{% url 'core:settings' %}">⚙️ {% trans "Settings" %}</a>
                 {% endif %}
             </div>
             <div id="navBackdrop" class="nav-backdrop" aria-hidden="true"></div>
@@ -664,7 +707,39 @@
                 });
             });
         }
-        
+
+        // Nav dropdowns (Management / Billing): click/Enter to toggle for
+        // keyboard and touch users; CSS :hover/:focus-within additionally
+        // opens them on mouse hover for desktop pointer users.
+        var navDropdowns = document.querySelectorAll('.nav-dropdown');
+        function closeAllDropdowns(except) {
+            navDropdowns.forEach(function(dd) {
+                if (dd === except) return;
+                dd.classList.remove('open');
+                var toggle = dd.querySelector('.nav-dropdown-toggle');
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            });
+        }
+        navDropdowns.forEach(function(dropdown) {
+            var toggle = dropdown.querySelector('.nav-dropdown-toggle');
+            if (!toggle) return;
+            toggle.addEventListener('click', function() {
+                var isOpen = dropdown.classList.contains('open');
+                closeAllDropdowns(dropdown);
+                dropdown.classList.toggle('open', !isOpen);
+                toggle.setAttribute('aria-expanded', String(!isOpen));
+            });
+        });
+        document.addEventListener('click', function(event) {
+            var withinDropdown = Array.prototype.some.call(navDropdowns, function(dd) {
+                return dd.contains(event.target);
+            });
+            if (!withinDropdown) closeAllDropdowns();
+        });
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeAllDropdowns();
+        });
+
         // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
