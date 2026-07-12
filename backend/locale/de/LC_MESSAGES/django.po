@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -89,29 +88,20 @@ msgstr "Unerwartetes API-Antwortformat"
 
 #: apps/ai/client.py:270 apps/ai/client.py:273 apps/ai/client.py:393
 #: apps/ai/client.py:402 apps/ai/client.py:406
-#, fuzzy
-#| msgid "No invoices available."
 msgid "AI service unavailable."
-msgstr "Keine Rechnungen vorhanden."
+msgstr "KI-Dienst nicht verfügbar."
 
 #: apps/ai/client.py:276 apps/ai/client.py:410
-#, fuzzy
-#| msgid "Error parsing API response: {error}"
 msgid "Error parsing API response."
-msgstr "Fehler beim Parsen der API-Antwort: {error}"
+msgstr "Fehler beim Parsen der API-Antwort."
 
 #: apps/ai/client.py:373
 msgid "Payment required. Please check your API account balance."
 msgstr "Zahlung erforderlich. Bitte überprüfen Sie Ihr API-Kontoguthaben."
 
 #: apps/ai/services.py:111
-#, fuzzy
-#| msgid "API rate limit exceeded. Please try again in a few minutes."
 msgid "Rate limit reached. Please try again later."
-msgstr ""
-"API-Anfragelimit überschritten. Bitte versuche es in einigen Minuten erneut."
-"API-Rate-Limit überschritten. Bitte versuchen Sie es in ein paar Minuten "
-"erneut."
+msgstr "Anfragelimit erreicht. Bitte versuche es später erneut."
 
 #: apps/ai/services.py:138
 #, python-brace-format
@@ -119,10 +109,8 @@ msgid "Lesson plan for {date}"
 msgstr "Lektionsplan für {date}"
 
 #: apps/ai/services.py:159
-#, fuzzy
-#| msgid "The lesson plan could not be generated: {error}"
 msgid "The lesson plan could not be generated. Please try again."
-msgstr "Der Lektionsplan konnte nicht generiert werden: {error}"
+msgstr "Der Lektionsplan konnte nicht generiert werden. Bitte versuche es erneut."
 
 #: apps/ai/views.py:36
 msgid "This function is only available for premium users."
@@ -870,10 +858,9 @@ msgstr "Keine Rechnungen vorhanden."
 
 #: apps/billing/templates/billing/invoice_mark_paid.html:8
 #: apps/billing/templates/billing/invoice_set_paid_date.html:8
-#, fuzzy, python-format
-#| msgid "Invoice %(id)s"
+#, python-format
 msgid "Invoice %(id)s – %(payer)s"
-msgstr "Rechnung %(id)s"
+msgstr "Rechnung %(id)s – %(payer)s"
 
 #: apps/billing/templates/billing/invoice_mark_paid.html:13
 #: apps/billing/templates/billing/invoice_set_paid_date.html:13
@@ -953,10 +940,8 @@ msgid "Invalid paid date: date must not be in the future."
 msgstr ""
 
 #: apps/billing/views.py:339 apps/billing/views.py:371
-#, fuzzy
-#| msgid "The end date must not be before the start date."
 msgid "Invalid paid date: date must not be before the invoice period start."
-msgstr "Das Enddatum darf nicht vor dem Startdatum liegen."
+msgstr "Ungültiges Zahlungsdatum: Das Datum darf nicht vor dem Beginn des Rechnungszeitraums liegen."
 
 #: apps/billing/views.py:343
 msgid "Invoice marked as paid."
@@ -1369,10 +1354,8 @@ msgid "Recurring blocked time successfully deleted."
 msgstr "Wiederkehrende Blockzeit erfolgreich gelöscht."
 
 #: apps/blocked_times/recurring_views.py:122
-#, fuzzy
-#| msgid "Too many attempts. Please try again later."
 msgid "Too many requests. Please try again later."
-msgstr "Zu viele Versuche. Bitte später erneut versuchen."
+msgstr "Zu viele Anfragen. Bitte versuche es später erneut."
 
 #: apps/blocked_times/recurring_views.py:136
 #, python-brace-format
@@ -1885,10 +1868,8 @@ msgid "tutor"
 msgstr ""
 
 #: apps/contracts/models.py:19
-#, fuzzy
-#| msgid "Tutor who owns this invoice"
 msgid "Tutor who owns this contract"
-msgstr "Tutor, dem diese Rechnung gehört"
+msgstr "Tutor, dem dieser Vertrag gehört"
 
 #: apps/contracts/models.py:21
 msgid "first name"
@@ -1934,8 +1915,6 @@ msgstr ""
 "speichern)"
 
 #: apps/contracts/models.py:40
-#, fuzzy
-#| msgid "Institute"
 msgid "institute"
 msgstr "Institut"
 
@@ -1997,10 +1976,8 @@ msgid "Documents"
 msgstr "Dokumente"
 
 #: apps/contracts/templates/contracts/contract_detail.html:16
-#, fuzzy
-#| msgid "Lesson Details"
 msgid "Personal Details"
-msgstr "Stundendetails"
+msgstr "Persönliche Daten"
 
 #: apps/contracts/templates/contracts/contract_detail.html:18
 #: apps/students/templates/students/student_detail.html:18
@@ -2307,10 +2284,9 @@ msgid "Delete tier config"
 msgstr "Stufenkonfiguration löschen"
 
 #: apps/contracts/templates/contracts/tier_config_confirm_delete.html:9
-#, fuzzy, python-format
-#| msgid "Delete tier config"
+#, python-format
 msgid "Delete tier config for \"%(name)s\"?"
-msgstr "Stufenkonfiguration löschen"
+msgstr "Stufenkonfiguration für \"%(name)s\" löschen?"
 
 #: apps/contracts/templates/contracts/tier_config_form.html:4
 #: apps/contracts/templates/contracts/tier_config_form.html:7
@@ -2484,10 +2460,8 @@ msgid "Too many registration attempts. Please try again later."
 msgstr "Zu viele Registrierungsversuche. Bitte später erneut versuchen."
 
 #: apps/core/feature_flags.py:154
-#, fuzzy
-#| msgid "This feature requires Premium. Upgrade to access."
 msgid "This feature requires a higher subscription plan. Upgrade to access."
-msgstr "Diese Funktion erfordert Premium. Upgrade für vollen Zugang."
+msgstr "Diese Funktion erfordert ein höheres Abonnement. Upgrade für vollen Zugang."
 
 #: apps/core/forms.py:24 apps/core/templates/core/settings.html:280
 msgid "Email address"
@@ -2736,8 +2710,6 @@ msgid "Business use (%)"
 msgstr "Betriebliche Nutzung (%)"
 
 #: apps/core/models.py:175
-#, fuzzy
-#| msgid "Percentage of this expense used for business purposes (1–100)."
 msgid "Percentage of this expense used for business purposes (1\\u2013100)."
 msgstr "Prozentualer Anteil dieser Ausgabe für betriebliche Zwecke (1–100)."
 
@@ -3050,8 +3022,6 @@ msgid "New expense"
 msgstr "Neue Ausgabe"
 
 #: apps/core/templates/core/expense_form.html:35
-#, fuzzy
-#| msgid "Save Changes"
 msgid "Save changes"
 msgstr "Änderungen speichern"
 
@@ -3310,8 +3280,6 @@ msgid "Welcome to Preceptly"
 msgstr "Willkommen bei Preceptly"
 
 #: apps/core/templates/core/landing.html:4
-#, fuzzy
-#| msgid "The complete workspace for private tutors"
 msgid "The complete workspace for tutors"
 msgstr "Der komplette Arbeitsplatz für Nachhilfelehrer"
 
@@ -3427,16 +3395,12 @@ msgid "Students & Contracts"
 msgstr "Schüler & Verträge"
 
 #: apps/core/templates/core/landing.html:250
-#, fuzzy
-#| msgid ""
-#| "Manage student profiles, lesson rates, contract periods and monthly "
-#| "quotas in one place."
 msgid ""
 "Manage student profiles, lesson rates, contract periods, monthly quotas, and "
 "multiple institutes in one place."
 msgstr ""
-"Schülerprofile, Stundensätze, Vertragslaufzeiten und monatliche Quoten "
-"zentral verwalten."
+"Schülerprofile, Stundensätze, Vertragslaufzeiten, monatliche Quoten und "
+"mehrere Institute zentral verwalten."
 
 #: apps/core/templates/core/landing.html:254
 msgid "Session Notes & Homework"
@@ -4050,10 +4014,8 @@ msgstr "Abonnement verwalten"
 
 #: apps/core/templates/core/settings.html:306
 #: apps/core/templates/core/settings.html:326
-#, fuzzy
-#| msgid "Premium (manual or demo)"
 msgid "Premium (manually activated)"
-msgstr "Premium (manuell oder Demo)"
+msgstr "Premium (manuell aktiviert)"
 
 #: apps/core/templates/core/settings.html:313
 #: apps/core/templates/core/settings.html:333
@@ -4107,10 +4069,8 @@ msgid "Monthly breakdown"
 msgstr "Monatliche Aufschlüsselung"
 
 #: apps/core/templates/core/tax_year.html:70
-#, fuzzy
-#| msgid "Total:"
 msgid "Total"
-msgstr "Gesamt:"
+msgstr "Gesamt"
 
 #: apps/core/templates/core/tax_year.html:78
 msgid "Kleinunternehmer status (§ 19 UStG)"
@@ -4192,10 +4152,9 @@ msgid "Generate EÜR"
 msgstr "EÜR erstellen"
 
 #: apps/core/templates/core/tax_year.html:181
-#, fuzzy, python-format
-#| msgid "Download"
+#, python-format
 msgid "Download CSV %(y)s"
-msgstr "Herunterladen"
+msgstr "CSV %(y)s herunterladen"
 
 #: apps/core/templates/core/tax_year.html:188
 msgid "Tax Year Overview – Premium feature"
@@ -4217,10 +4176,8 @@ msgid "Default working hours updated successfully."
 msgstr "Standard-Arbeitszeiten erfolgreich aktualisiert."
 
 #: apps/core/views.py:247
-#, fuzzy
-#| msgid "Payment is not configured. Please contact support."
 msgid "To change your email address, please contact support."
-msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
+msgstr "Um Ihre E-Mail-Adresse zu ändern, kontaktieren Sie bitte den Support."
 
 #: apps/core/views.py:263
 msgid "Travel mode for on-site appointments updated."
@@ -4242,20 +4199,16 @@ msgid "Abrechnungszeitraum"
 msgstr ""
 
 #: apps/core/views.py:555 apps/core/views.py:585
-#, fuzzy
-#| msgid "Amount"
 msgid "Amount (EUR)"
-msgstr "Betrag"
+msgstr "Betrag (EUR)"
 
 #: apps/core/views.py:652
 msgid "Expense saved."
 msgstr "Ausgabe gespeichert."
 
 #: apps/core/views.py:666
-#, fuzzy
-#| msgid "Expense deleted."
 msgid "Expense updated."
-msgstr "Ausgabe gelöscht."
+msgstr "Ausgabe aktualisiert."
 
 #: apps/core/views.py:679
 msgid "Expense deleted."
@@ -4270,22 +4223,16 @@ msgid "Legal agreements accepted."
 msgstr "Rechtliche Vereinbarungen akzeptiert."
 
 #: apps/core/views_auth.py:98
-#, fuzzy
-#| msgid "Too many registration attempts. Please try again later."
 msgid "Registration failed. Please try again."
-msgstr "Zu viele Registrierungsversuche. Bitte später erneut versuchen."
+msgstr "Registrierung fehlgeschlagen. Bitte versuche es erneut."
 
 #: apps/core/views_stripe.py:82
-#, fuzzy
-#| msgid "Could not load week. Please try again."
 msgid "Could not start redirect. Please try again."
-msgstr "Woche konnte nicht geladen werden. Bitte erneut versuchen."
+msgstr "Weiterleitung konnte nicht gestartet werden. Bitte erneut versuchen."
 
 #: apps/core/views_stripe.py:87
-#, fuzzy
-#| msgid "Invalid request."
 msgid "Invalid redirect URL."
-msgstr "Ungültige Anfrage."
+msgstr "Ungültige Weiterleitungs-URL."
 
 #: apps/core/views_stripe.py:108
 msgid "Could not start checkout. Please try again in a moment."
@@ -4319,10 +4266,8 @@ msgstr ""
 "abschließen, um es zu verwalten."
 
 #: apps/lesson_plans/admin.py:16
-#, fuzzy
-#| msgid "Contract end"
 msgid "Contract & Lesson"
-msgstr "Vertragsende"
+msgstr "Vertrag & Stunde"
 
 #: apps/lesson_plans/admin.py:17
 msgid "Plan Details"
@@ -4612,26 +4557,20 @@ msgid "Notes for the session"
 msgstr "Notizen zur Unterrichtsstunde"
 
 #: apps/lessons/models.py:45
-#, fuzzy
-#| msgid "Home"
 msgid "Homework"
-msgstr "Startseite"
+msgstr "Hausaufgaben"
 
 #: apps/lessons/models.py:46
-#, fuzzy
-#| msgid "Notes for the session"
 msgid "Homework assigned for next session"
-msgstr "Notizen zur Unterrichtsstunde"
+msgstr "Hausaufgaben für die nächste Stunde"
 
 #: apps/lessons/models.py:52
 msgid "Meeting URL"
 msgstr ""
 
 #: apps/lessons/models.py:53
-#, fuzzy
-#| msgid "Notes for the session"
 msgid "Zoom/Meet link for this session"
-msgstr "Notizen zur Unterrichtsstunde"
+msgstr "Zoom/Meet-Link für diese Stunde"
 
 #: apps/lessons/models.py:58
 msgid ""
@@ -5477,10 +5416,8 @@ msgid "Time slot is already booked."
 msgstr "Zeitslot ist bereits gebucht."
 
 #: apps/lessons/views_booking.py:245
-#, fuzzy
-#| msgid "Booking is not available."
 msgid "Requested time slot is not available."
-msgstr "Buchung nicht verfügbar."
+msgstr "Gewünschter Zeitslot ist nicht verfügbar."
 
 #: apps/lessons/views_booking.py:276
 msgid "Lesson successfully booked."
@@ -5505,10 +5442,8 @@ msgid "Invalid JSON data."
 msgstr "Ungültige JSON-Daten."
 
 #: apps/lessons/views_booking.py:459
-#, fuzzy
-#| msgid "An error occurred."
 msgid "An unexpected error occurred."
-msgstr "Ein Fehler ist aufgetreten."
+msgstr "Ein unerwarteter Fehler ist aufgetreten."
 
 #: apps/lessons/views_booking.py:515
 msgid "Booking link not found."
@@ -5618,48 +5553,36 @@ msgid "Room Token"
 msgstr ""
 
 #: apps/meeting/models.py:26
-#, fuzzy
-#| msgid "Integrated Meeting Rooms"
 msgid "Meeting Room"
-msgstr "Integrierte Meeting-Räume"
+msgstr "Meeting-Raum"
 
 #: apps/meeting/models.py:27
-#, fuzzy
-#| msgid "Integrated Meeting Rooms"
 msgid "Meeting Rooms"
-msgstr "Integrierte Meeting-Räume"
+msgstr "Meeting-Räume"
 
 #: apps/portal/email_service.py:39
 msgid "Your Preceptly Portal Access"
 msgstr ""
 
 #: apps/portal/models.py:10
-#, fuzzy
-#| msgid "Parent portal"
 msgid "Parent"
-msgstr "Elternportal"
+msgstr "Elternteil"
 
 #: apps/portal/models.py:21
 msgid "Portal User"
 msgstr ""
 
 #: apps/portal/models.py:22
-#, fuzzy
-#| msgid "Total expenses"
 msgid "Portal Users"
-msgstr "Gesamtausgaben"
+msgstr "Portalnutzer"
 
 #: apps/portal/models.py:40
-#, fuzzy
-#| msgid "Student portal"
 msgid "Student Portal Link"
-msgstr "Schülerportal"
+msgstr "Schülerportallink"
 
 #: apps/portal/models.py:41
-#, fuzzy
-#| msgid "Student portal"
 msgid "Student Portal Links"
-msgstr "Schülerportal"
+msgstr "Schülerportallinks"
 
 #: apps/portal/models.py:69
 msgid "Parent-Student Link"
@@ -5670,10 +5593,8 @@ msgid "Parent-Student Links"
 msgstr ""
 
 #: apps/portal/models.py:89
-#, fuzzy
-#| msgid "Note:"
 msgid "Note"
-msgstr "Hinweis:"
+msgstr "Hinweis"
 
 #: apps/portal/models.py:95
 msgid "Progress Note"
@@ -5692,10 +5613,8 @@ msgid "Portal Message"
 msgstr ""
 
 #: apps/portal/models.py:118
-#, fuzzy
-#| msgid "Total expenses"
 msgid "Portal Messages"
-msgstr "Gesamtausgaben"
+msgstr "Portalnachrichten"
 
 #: apps/portal/views.py:78 apps/portal/views.py:85
 msgid "Ungültige Zugangsdaten."
@@ -5718,10 +5637,8 @@ msgid "Schüler/Vertrag"
 msgstr ""
 
 #: apps/students/models.py:47
-#, fuzzy
-#| msgid "Date"
 msgid "Datei"
-msgstr "Datum"
+msgstr "Datei"
 
 #: apps/students/models.py:48
 msgid "Bezeichnung"
