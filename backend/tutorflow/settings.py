@@ -157,6 +157,7 @@ MEETING_ICE_SERVERS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "apps.core.middleware.CanonicalDomainMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -293,7 +294,23 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-_testing = "test" in sys.argv
+_testing = "test" in sys.argv or (bool(sys.argv) and "pytest" in sys.argv[0])
+
+# WhiteNoise serves compressed+hashed static files in production.
+# In test runs collectstatic hasn't run so no manifest exists — use plain storage.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG and not _testing
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
+
 SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", default=not DEBUG and not _testing)
 # Production: secure cookies and HTTPOnly. Railway uses HTTPS (X-Forwarded-Proto).
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=not DEBUG)
