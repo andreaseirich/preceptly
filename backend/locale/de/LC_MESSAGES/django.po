@@ -6292,3 +6292,28 @@ msgstr "Verwaltung"
 msgctxt "main nav dropdown"
 msgid "Billing"
 msgstr "Abrechnung"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Overview"
+msgstr "Übersicht"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Income & billing"
+msgstr "Einnahmen & Abrechnung"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Lessons"
+msgstr "Stunden"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Taxes & EÜR"
+msgstr "Steuern & EÜR"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Reports"
+msgstr "Berichte"

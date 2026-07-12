@@ -520,7 +520,20 @@
                     </div>
                 </div>
                 {% endif %}
-                <a href="{% url 'core:faq' %}">❓ {% trans "FAQ" %}</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownFaq">
+                        ❓ {% trans "FAQ" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="nav-dropdown-menu" id="navDropdownFaq" role="menu">
+                        <a href="{% url 'core:faq' %}" role="menuitem">{% trans "Overview" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#einnahmen" role="menuitem">{% trans "Income & billing" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#rechnungen" role="menuitem">{% trans "Invoices" %}</a>
+                        <a href="{% url 'core:faq' %}#stunden" role="menuitem">{% trans "Lessons" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#steuern" role="menuitem">{% trans "Taxes & EÜR" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#berichte" role="menuitem">{% trans "Reports" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#tutorspace" role="menuitem">TutorSpace</a>
+                    </div>
+                </div>
                 {% if user.is_authenticated %}
                 <a href="{% url 'core:tutor_messages_overview' %}">💬 {% trans "Messages" %}{% if unread_portal_count %} <span style="background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.75em;vertical-align:middle;">{{ unread_portal_count }}</span>{% endif %}</a>
                 {% endif %}
