@@ -1,8 +1,11 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="de" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
+<link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
 <title>Meeting – {{ lesson.date|date:"d.m.Y" }} – Preceptly</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,8 +17,8 @@
     --border: #333;
     --text: #e0e0e0;
     --text2: #888;
-    --blue: #2980b9;
-    --blue2: #1a6fa8;
+    --blue: #0d8069;
+    --blue2: #0b6f5c;
     --red: #e74c3c;
     --green: #27ae60;
     --shadow: rgba(0,0,0,0.6);
@@ -236,7 +239,7 @@ a.doc-item { text-decoration: none; }
 }
 .lobby-toggle.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 .lobby-toggle.muted  { background: var(--bg3); border-color: #555; color: var(--text2); }
-.lobby-toggle:focus-visible { outline: 3px solid #90caf9; outline-offset: 2px; }
+.lobby-toggle:focus-visible { outline: 3px solid #6ee0c5; outline-offset: 2px; }
 #lobby-name-row {
     text-align: center; font-size: 0.85em; color: var(--text2);
     padding: 6px 12px; background: var(--bg3); border-radius: 6px;
@@ -249,7 +252,7 @@ a.doc-item { text-decoration: none; }
 }
 #lobby-join:hover { background: #0b3d26; }
 #lobby-join:active { transform: scale(0.98); }
-#lobby-join:focus-visible { outline: 3px solid #90caf9; outline-offset: 2px; }
+#lobby-join:focus-visible { outline: 3px solid #6ee0c5; outline-offset: 2px; }
 #lobby-err { font-size: 0.82em; color: #e74c3c; text-align: center; min-height: 1.2em; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>

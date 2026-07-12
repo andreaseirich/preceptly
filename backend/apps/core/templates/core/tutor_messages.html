@@ -59,7 +59,7 @@
         word-break: break-word;
     }
     .chat-msg.tutor .chat-bubble {
-        background: #2980b9;
+        background: var(--accent);
         color: #fff;
         border-bottom-right-radius: 5px;
     }
@@ -112,8 +112,8 @@
     }
     .compose-wrap textarea:focus {
         outline: none;
-        border-color: #2980b9;
-        box-shadow: 0 0 0 3px rgba(41,128,185,0.15);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--focus-ring);
     }
 </style>
 {% endblock %}

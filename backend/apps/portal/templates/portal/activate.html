@@ -8,14 +8,16 @@
     <title>Konto aktivieren – Preceptly</title>
     <style>
         :root {
-            --bg-primary: #f5f5f5;
+            --bg-primary: #f5f7f9;
             --bg-secondary: #ffffff;
-            --text-primary: #212121;
-            --text-secondary: #666666;
-            --border-color: #dddddd;
+            --text-primary: #22303f;
+            --text-secondary: #5a6b7b;
+            --border-color: #d7dee5;
             --shadow: rgba(0,0,0,0.1);
-            --input-border: #cccccc;
-            --input-focus: rgba(0,123,255,0.25);
+            --input-border: #d7dee5;
+            --accent: #0d8069;
+            --accent-hover: #0b6f5c;
+            --input-focus: rgba(13,128,105,0.35);
         }
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme="light"]) {
@@ -26,7 +28,9 @@
                 --border-color: #3a3a3a;
                 --shadow: rgba(0,0,0,0.4);
                 --input-border: #444444;
-                --input-focus: rgba(0,123,255,0.35);
+                --accent: #4dd0b3;
+                --accent-hover: #6ee0c5;
+                --input-focus: rgba(77,208,179,0.45);
             }
         }
         *, *::before, *::after { box-sizing: border-box; }
@@ -83,12 +87,12 @@
         input:focus {
             outline: none;
             box-shadow: 0 0 0 3px var(--input-focus);
-            border-color: #007bff;
+            border-color: var(--accent);
         }
         .btn-login {
             width: 100%;
             padding: 10px;
-            background: #007bff;
+            background: var(--accent);
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -98,7 +102,7 @@
             transition: background 0.15s;
             margin-top: 4px;
         }
-        .btn-login:hover { background: #0069d9; }
+        .btn-login:hover { background: var(--accent-hover); }
         .alert-warning {
             padding: 12px 15px;
             background: rgba(255,193,7,0.12);

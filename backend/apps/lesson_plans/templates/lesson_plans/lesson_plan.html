@@ -75,8 +75,8 @@
 {% endif %}
 
 {% if has_lesson_plan %}
-<div style="background: #e7f3ff; padding: 20px; border-radius: 5px; border-left: 4px solid #007bff; margin-bottom: 20px;">
-    <h2 style="color: #007bff; margin-top: 0;">📚 {% trans "Lesson Plan" %}</h2>
+<div style="background: var(--accent-tint); padding: 20px; border-radius: 5px; border-left: 4px solid var(--accent); margin-bottom: 20px;">
+    <h2 style="color: var(--accent); margin-top: 0;">📚 {% trans "Lesson Plan" %}</h2>
     
     {% for lesson_plan in lesson_plans %}
     <div style="background: var(--bg-secondary); padding: 15px; border-radius: 3px; margin-top: 15px; {% if not forloop.first %}opacity: 0.7;{% endif %}">
@@ -102,8 +102,8 @@
 {% endif %}
 
 {% if is_premium %}
-<div style="background: #e7f3ff; padding: 20px; border-radius: 5px; border-left: 4px solid #007bff; margin-bottom: 20px;">
-    <h2 style="color: #007bff; margin-top: 0;">🤖 {% trans "AI Lesson Plan" %}</h2>
+<div style="background: var(--accent-tint); padding: 20px; border-radius: 5px; border-left: 4px solid var(--accent); margin-bottom: 20px;">
+    <h2 style="color: var(--accent); margin-top: 0;">🤖 {% trans "AI Lesson Plan" %}</h2>
     {% if has_lesson_plan %}
     <p>{% trans "A lesson plan has already been generated for this lesson. You can regenerate it below." %}</p>
     {% else %}
@@ -112,7 +112,7 @@
     <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" style="margin-top: 15px;">
         {% csrf_token %}
         <input type="hidden" name="next" value="{% url 'lesson_plans:lesson_plan' lesson_id=lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}">
-        <button type="submit" class="btn" style="background: #007bff; color: white;">
+        <button type="submit" class="btn" style="background: var(--accent); color: white;">
             {% if has_lesson_plan %}
                 🔄 {% trans "Regenerate AI Lesson Plan" %}
             {% else %}

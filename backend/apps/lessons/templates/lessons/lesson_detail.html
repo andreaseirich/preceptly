@@ -226,8 +226,8 @@
 {% endif %}
 
 {% if is_premium %}
-<div class="alert-info" style="margin-bottom: 20px; border-left: 4px solid #007bff;">
-    <h2 style="color: #007bff; margin-top: 0;">🤖 KI-Lektionsplan</h2>
+<div class="alert-info" style="margin-bottom: 20px; border-left: 4px solid var(--accent);">
+    <h2 style="color: var(--accent); margin-top: 0;">🤖 KI-Lektionsplan</h2>
     {% if has_lesson_plan %}
     <p>Für diese Stunde wurde bereits ein Lektionsplan erstellt.</p>
     <div style="margin-top: 15px;">
@@ -248,7 +248,7 @@
     <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" style="margin-top: 15px;">
         {% csrf_token %}
         <input type="hidden" name="next" value="{% url 'lessons:detail' lesson.pk %}?year={{ year|default:lesson.date.year }}&month={{ month|default:lesson.date.month }}&day={{ day|default:lesson.date.day }}">
-        <button type="submit" class="btn" style="background: #007bff; color: white;">
+        <button type="submit" class="btn" style="background: var(--accent); color: white;">
             {% if has_lesson_plan %}
                 🔄 KI-Lektionsplan neu generieren
             {% else %}

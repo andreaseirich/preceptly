@@ -84,7 +84,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                                  style="position: absolute; 
                                         left: 0; 
                                         right: 0; 
-                                        background: {% if lesson.status == 'paid' %}#2e7d32{% elif lesson.status == 'taught' %}#607d8b{% else %}#2196f3{% endif %}; 
+                                        background: {% if lesson.status == 'paid' %}#2e7d32{% elif lesson.status == 'taught' %}#607d8b{% else %}var(--accent){% endif %};
                                         color: white; 
                                         padding: 2px 4px; 
                                         font-size: 0.75em; 

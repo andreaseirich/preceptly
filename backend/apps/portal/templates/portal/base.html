@@ -1,32 +1,61 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#2c3e50">
+    <link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
     <title>{% block title %}Preceptly Portal{% endblock %}</title>
     <style>
         * { box-sizing: border-box; }
 
         :root {
-            --bg-primary: #f5f5f5;
+            /* Brand */
+            --brand-navy: #2c3e50;
+            --brand-navy-light: #3d5266;
+            --brand-navy-dark: #22303f;
+            --brand-teal: #1abc9c;
+
+            /* Interaction */
+            --accent: #0d8069;
+            --accent-hover: #0b6f5c;
+            --accent-tint: #e6f4f1;
+            --focus-ring: rgba(13,128,105,.35);
+
+            /* Status */
+            --success: #2e7d32;
+            --warning: #b45309;
+            --danger:  #b03a2e;
+
+            /* Neutral */
+            --bg-primary: #f5f7f9;
             --bg-secondary: #ffffff;
-            --bg-nav: #2c3e50;
-            --text-primary: #2c3e50;
-            --text-secondary: #5a6a7a;
+            --bg-nav: var(--brand-navy);
+            --text-primary: var(--brand-navy-dark);
+            --text-secondary: #5a6b7b;
             --text-nav: #ffffff;
-            --border-color: #ddd;
+            --border-color: #d7dee5;
             --shadow: rgba(0,0,0,0.10);
             --shadow-card: rgba(0,0,0,0.12);
-            --hover-bg: #34495e;
-            --active-bg: #3498db;
+            --hover-bg: var(--brand-navy-light);
+            --active-bg: var(--accent);
             --table-header-bg: #f8f9fa;
-            --table-hover-bg: #f0f4f8;
-            --input-border: #ccc;
-            --input-focus: rgba(0,123,255,0.15);
+            --table-hover-bg: var(--accent-tint);
+            --input-border: #d7dee5;
+            --input-focus: var(--focus-ring);
         }
 
         [data-theme="dark"] {
+            --accent: #4dd0b3;
+            --accent-hover: #6ee0c5;
+            --accent-tint: rgba(77,208,179,0.14);
+            --focus-ring: rgba(77,208,179,.45);
+            --success: #66bb6a;
+            --warning: #f9a825;
+            --danger:  #ef5350;
+
             --bg-primary: #1a1a1a;
             --bg-secondary: #2d2d2d;
             --bg-nav: #1e1e1e;
@@ -37,15 +66,22 @@
             --shadow: rgba(0,0,0,0.4);
             --shadow-card: rgba(0,0,0,0.5);
             --hover-bg: #2a2a2a;
-            --active-bg: #1a6fa8;
+            --active-bg: var(--accent);
             --table-header-bg: #252525;
             --table-hover-bg: #333;
             --input-border: #444;
-            --input-focus: rgba(0,123,255,0.25);
         }
 
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme="light"]) {
+                --accent: #4dd0b3;
+                --accent-hover: #6ee0c5;
+                --accent-tint: rgba(77,208,179,0.14);
+                --focus-ring: rgba(77,208,179,.45);
+                --success: #66bb6a;
+                --warning: #f9a825;
+                --danger:  #ef5350;
+
                 --bg-primary: #1a1a1a;
                 --bg-secondary: #2d2d2d;
                 --bg-nav: #1e1e1e;
@@ -56,11 +92,10 @@
                 --shadow: rgba(0,0,0,0.4);
                 --shadow-card: rgba(0,0,0,0.5);
                 --hover-bg: #2a2a2a;
-                --active-bg: #1a6fa8;
+                --active-bg: var(--accent);
                 --table-header-bg: #252525;
                 --table-hover-bg: #333;
                 --input-border: #444;
-                --input-focus: rgba(0,123,255,0.25);
             }
         }
 
@@ -97,6 +132,7 @@
             padding: 0 8px 0 0;
             white-space: nowrap;
         }
+        .nav-brand img { height: 26px; width: auto; display: block; }
         .nav-links {
             display: flex;
             align-items: stretch;
@@ -163,8 +199,8 @@
              border-bottom: 2px solid var(--border-color); padding-bottom: 8px; font-size: 1.18em; }
         h3 { color: var(--text-secondary); font-size: 1.0em; margin-top: 0; }
         p  { color: var(--text-primary); }
-        a  { color: #1a6fa8; }
-        a:hover { text-decoration: underline; }
+        a  { color: var(--accent); }
+        a:hover { text-decoration: underline; color: var(--accent-hover); }
 
         /* ── Cards / Boxes ── */
         .card {
@@ -204,7 +240,7 @@
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         input:focus, textarea:focus, select:focus {
-            outline: none; box-shadow: 0 0 0 3px var(--input-focus); border-color: #1a6fa8;
+            outline: none; box-shadow: 0 0 0 3px var(--input-focus); border-color: var(--accent);
         }
         label { display: block; font-size: 0.87em; color: var(--text-secondary);
                 margin-bottom: 4px; font-weight: 500; }
@@ -212,18 +248,18 @@
         /* ── Buttons ── */
         .btn {
             display: inline-block; padding: 10px 22px;
-            background: #1a6fa8; color: #fff !important;
+            background: var(--accent); color: #fff !important;
             text-decoration: none !important; border-radius: 4px; border: none;
             cursor: pointer; font-size: 0.95em;
             transition: background 0.2s, transform 0.1s;
             white-space: nowrap; line-height: 1.4;
         }
-        .btn:hover { background: #1a6fa8; }
+        .btn:hover { background: var(--accent-hover); }
         .btn:active { transform: scale(0.98); }
         .btn-secondary { background: #6c757d; }
         .btn-secondary:hover { background: #5a6268; }
-        .btn-danger { background: #dc3545; }
-        .btn-danger:hover { background: #b02a37; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #922f26; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
         .btn-sm {
@@ -233,17 +269,18 @@
             white-space: nowrap; line-height: 1.5;
         }
         .btn-sm:active { transform: scale(0.97); }
-        .btn-sm-primary   { color: #1a6fa8; border-color: #1a6fa8; }
-        .btn-sm-primary:hover   { background: #1a6fa8; color: #fff; }
+        .btn-sm-primary   { color: var(--accent); border-color: var(--accent); }
+        .btn-sm-primary:hover   { background: var(--accent); color: #fff; }
         .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
         .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
-        .btn-sm-danger    { color: #dc3545; border-color: #dc3545; }
-        .btn-sm-danger:hover    { background: #dc3545; color: #fff; }
+        .btn-sm-danger    { color: var(--danger); border-color: var(--danger); }
+        .btn-sm-danger:hover    { background: var(--danger); color: #fff; }
 
         /* ── Alerts ── */
-        .alert-info    { padding: 14px 16px; background: rgba(41,128,185,0.10);
-                         border: 1px solid rgba(41,128,185,0.35); border-radius: 6px;
+        .alert-info    { padding: 14px 16px; background: var(--accent-tint);
+                         border: 1px solid rgba(13,128,105,0.3); border-radius: 6px;
                          margin-bottom: 16px; color: var(--text-primary); }
+        [data-theme="dark"] .alert-info { border-color: rgba(77,208,179,0.35); }
         .alert-success { padding: 14px 16px; background: rgba(39,174,96,0.10);
                          border: 1px solid rgba(39,174,96,0.40); border-radius: 6px;
                          margin-bottom: 16px; color: var(--text-primary); }
@@ -257,7 +294,7 @@
         /* ── Misc ── */
         .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
         .badge {
-            display: inline-block; background: #dc3545; color: #fff;
+            display: inline-block; background: var(--danger); color: #fff;
             font-size: 0.72em; font-weight: 700; padding: 1px 6px;
             border-radius: 10px; line-height: 1.6; margin-left: 4px; vertical-align: middle;
         }
@@ -266,7 +303,7 @@
         .skip-link {
             position: absolute; left: -9999px; top: auto;
             width: 1px; height: 1px; overflow: hidden;
-            background: #007bff; color: #fff; padding: 8px 16px;
+            background: var(--accent); color: #fff; padding: 8px 16px;
             border-radius: 0 0 4px 4px; font-weight: 600; z-index: 9999;
             text-decoration: none;
         }
@@ -290,7 +327,7 @@
 <nav aria-label="Portalnavigation">
     {% if portal_user %}
     <a class="nav-brand" href="{% if portal_user.role == 'parent' %}{% url 'portal:parent_home' %}{% else %}{% url 'portal:student_home' %}{% endif %}">
-        Preceptly
+        <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
     </a>
     <div class="nav-links">
         {% if portal_user.role == 'parent' %}
@@ -313,7 +350,7 @@
         </form>
     </div>
     {% else %}
-    <a class="nav-brand" href="#">Preceptly</a>
+    <a class="nav-brand" href="#"><img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly"></a>
     <div class="nav-right">
         <button class="theme-toggle" id="themeToggle" title="Design wechseln" aria-label="Design wechseln">
             <span id="themeIcon">🌙</span>

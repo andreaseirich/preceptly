@@ -41,7 +41,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2980b9, #1a6fa8);
+    background: linear-gradient(135deg, var(--brand-navy-light), var(--brand-navy));
     color: #fff;
     font-weight: 700;
     font-size: 1.1em;
@@ -171,16 +171,16 @@
 }
 .action-btn:hover {
     background: var(--hover-bg);
-    border-color: #2980b9;
+    border-color: var(--accent);
     color: var(--text-primary) !important;
 }
 .action-btn.primary {
-    background: rgba(41,128,185,0.1);
-    border-color: rgba(41,128,185,0.4);
-    color: #2980b9 !important;
+    background: var(--accent-tint);
+    border-color: rgba(13,128,105,0.4);
+    color: var(--accent) !important;
 }
 .action-btn.primary:hover {
-    background: #2980b9;
+    background: var(--accent);
     color: #fff !important;
 }
 .action-btn.unread-hint {

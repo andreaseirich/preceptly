@@ -22,30 +22,61 @@
     <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'icons/icon-512x512.png' %}">
     <meta name="twitter:card" content="summary">
     <link rel="manifest" href="{% url 'core:manifest' %}">
-    <link rel="apple-touch-icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/icon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/icon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
     <title>{{ page_title }}</title>
     <style>
         * { box-sizing: border-box; }
         
         /* CSS Variables for Light/Dark Mode */
         :root {
-            --bg-primary: #f5f5f5;
+            /* Brand */
+            --brand-navy: #2c3e50;
+            --brand-navy-light: #3d5266;
+            --brand-navy-dark: #22303f;
+            --brand-teal: #1abc9c; /* decorative only — not for text/buttons on white (2.2:1) */
+
+            /* Interaction (replaces Bootstrap blue #007bff / #006fe6) */
+            --accent: #0d8069;         /* 4.87:1 on white (AA) */
+            --accent-hover: #0b6f5c;   /* 6.10:1 on white (AA) */
+            --accent-tint: #e6f4f1;    /* selected rows, badge/info fills */
+            --focus-ring: rgba(13,128,105,.35);
+
+            /* Status */
+            --success: #2e7d32;  /* 5.13:1 */
+            --warning: #b45309;  /* 5.02:1 */
+            --danger:  #b03a2e;  /* 6.02:1 */
+
+            /* Neutral */
+            --bg-primary: #f5f7f9;
             --bg-secondary: #ffffff;
-            --bg-nav: #2c3e50;
-            --text-primary: #2c3e50;
-            --text-secondary: #34495e;
+            --bg-nav: var(--brand-navy);
+            --text-primary: var(--brand-navy-dark);
+            --text-secondary: #5a6b7b;
             --text-nav: #ffffff;
-            --border-color: #ddd;
+            --border-color: #d7dee5;
             --shadow: rgba(0,0,0,0.1);
-            --hover-bg: #34495e;
-            --active-bg: #3498db;
+            --hover-bg: var(--brand-navy-light);
+            --active-bg: var(--accent);
             --table-header-bg: #f8f9fa;
             --table-hover-bg: #f8f9fa;
-            --input-border: #ddd;
-            --input-focus: rgba(0,123,255,0.1);
+            --input-border: #d7dee5;
+            --input-focus: var(--focus-ring);
         }
-        
+
         [data-theme="dark"] {
+            /* Accent adjusted for dark backgrounds (4.5:1 on #2d2d2d) */
+            --accent: #4dd0b3;
+            --accent-hover: #6ee0c5;
+            --accent-tint: rgba(77,208,179,0.14);
+            --focus-ring: rgba(77,208,179,.45);
+            --success: #66bb6a;
+            --warning: #f9a825;
+            --danger:  #ef5350;
+
             --bg-primary: #1a1a1a;
             --bg-secondary: #2d2d2d;
             --bg-nav: #1e1e1e;
@@ -55,16 +86,23 @@
             --border-color: #404040;
             --shadow: rgba(0,0,0,0.3);
             --hover-bg: #3a3a3a;
-            --active-bg: #3498db;
+            --active-bg: var(--accent);
             --table-header-bg: #353535;
             --table-hover-bg: #3a3a3a;
             --input-border: #404040;
-            --input-focus: rgba(52,152,219,0.2);
         }
-        
+
         /* Respect system preference */
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme="light"]) {
+                --accent: #4dd0b3;
+                --accent-hover: #6ee0c5;
+                --accent-tint: rgba(77,208,179,0.14);
+                --focus-ring: rgba(77,208,179,.45);
+                --success: #66bb6a;
+                --warning: #f9a825;
+                --danger:  #ef5350;
+
                 --bg-primary: #1a1a1a;
                 --bg-secondary: #2d2d2d;
                 --bg-nav: #1e1e1e;
@@ -74,11 +112,10 @@
                 --border-color: #404040;
                 --shadow: rgba(0,0,0,0.3);
                 --hover-bg: #3a3a3a;
-                --active-bg: #3498db;
+                --active-bg: var(--accent);
                 --table-header-bg: #353535;
                 --table-hover-bg: #3a3a3a;
                 --input-border: #404040;
-                --input-focus: rgba(52,152,219,0.2);
             }
         }
         
@@ -159,22 +196,22 @@
         tr:hover { background: var(--table-hover-bg); }
         
         /* Buttons - Touch optimized */
-        .btn { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-size: 16px; transition: background 0.2s, transform 0.1s; -webkit-tap-highlight-color: transparent; min-height: 44px; min-width: 44px; touch-action: manipulation; }
-        .btn:hover { background: #0056b3; }
+        .btn { display: inline-block; padding: 12px 24px; background: var(--accent); color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-size: 16px; transition: background 0.2s, transform 0.1s; -webkit-tap-highlight-color: transparent; min-height: 44px; min-width: 44px; touch-action: manipulation; }
+        .btn:hover { background: var(--accent-hover); }
         .btn:active { transform: scale(0.98); }
         .btn-secondary { background: #6c757d; color: white; }
         .btn-secondary:hover { background: #5a6268; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #218838; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #922f26; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #256428; }
         .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
         .btn-group .btn { margin-right: 0; }
         .premium-badge { background: #ffc107; color: #856404; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold; margin-left: 8px; }
         .skip-link {
             position: absolute; left: -9999px; top: auto;
             width: 1px; height: 1px; overflow: hidden;
-            background: #007bff; color: #fff; padding: 8px 18px;
+            background: var(--accent); color: #fff; padding: 8px 18px;
             border-radius: 0 0 4px 4px; font-weight: 600;
             z-index: 10000; text-decoration: none;
         }
@@ -208,8 +245,8 @@
         p { color: var(--text-primary); }
         .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
         .empty-state p { font-size: 1.1em; color: var(--text-secondary); }
-        a { color: #007bff; }
-        a:hover { color: #0056b3; }
+        a { color: var(--accent); }
+        a:hover { color: var(--accent-hover); }
         
         /* Form inputs - Touch optimized */
         input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="time"], input[type="number"], textarea, select { 
@@ -226,10 +263,10 @@
             touch-action: manipulation;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="time"]:focus, input[type="number"]:focus, textarea:focus, select:focus { 
-            outline: none; 
-            border-color: #007bff; 
-            box-shadow: 0 0 0 3px var(--input-focus); 
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="time"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--input-focus);
         }
         
         /* Mobile Responsive */
@@ -317,7 +354,7 @@
             color: var(--text-secondary) !important;
         }
         [data-theme="dark"] .lesson-future {
-            background: rgba(33, 150, 243, 0.2) !important;
+            background: rgba(77,208,179,0.2) !important;
             color: var(--text-primary) !important;
         }
         [data-theme="dark"] .lesson-link {
@@ -350,7 +387,7 @@
             border-color: var(--border-color);
         }
         [data-theme="dark"] .week-calendar .today-header {
-            background: rgba(33, 150, 243, 0.15) !important;
+            background: rgba(77,208,179,0.15) !important;
         }
         [data-theme="dark"] .create-dialog {
             background: var(--bg-secondary);
@@ -367,18 +404,19 @@
         /* Small outline buttons for table actions */
         .btn-sm { display: inline-block; padding: 3px 9px; border-radius: 3px; border: 1px solid; font-size: 0.82em; cursor: pointer; text-decoration: none !important; background: transparent; transition: background 0.15s, color 0.15s; white-space: nowrap; line-height: 1.5; }
         .btn-sm:active { transform: scale(0.97); }
-        .btn-sm-primary   { color: #007bff; border-color: #007bff; }
-        .btn-sm-primary:hover   { background: #007bff; color: #fff; }
+        .btn-sm-primary   { color: var(--accent); border-color: var(--accent); }
+        .btn-sm-primary:hover   { background: var(--accent); color: #fff; }
         .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
         .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
-        .btn-sm-success   { color: #28a745; border-color: #28a745; }
-        .btn-sm-success:hover   { background: #28a745; color: #fff; }
-        .btn-sm-warning   { color: #d97706; border-color: #d97706; }
-        .btn-sm-warning:hover   { background: #d97706; color: #fff; }
-        .btn-sm-danger    { color: #dc3545; border-color: #dc3545; }
-        .btn-sm-danger:hover    { background: #dc3545; color: #fff; }
+        .btn-sm-success   { color: var(--success); border-color: var(--success); }
+        .btn-sm-success:hover   { background: var(--success); color: #fff; }
+        .btn-sm-warning   { color: var(--warning); border-color: var(--warning); }
+        .btn-sm-warning:hover   { background: var(--warning); color: #fff; }
+        .btn-sm-danger    { color: var(--danger); border-color: var(--danger); }
+        .btn-sm-danger:hover    { background: var(--danger); color: #fff; }
         .table-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-        .alert-info { padding: 15px; background: rgba(33, 150, 243, 0.12); border: 1px solid rgba(33, 150, 243, 0.3); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
+        .alert-info { padding: 15px; background: var(--accent-tint); border: 1px solid rgba(13,128,105,0.3); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
+        [data-theme="dark"] .alert-info { border-color: rgba(77,208,179,0.35); }
         .alert-warning { padding: 15px; background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.4); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
         .alert-success { padding: 15px; background: rgba(40, 167, 69, 0.12); border: 1px solid rgba(40, 167, 69, 0.4); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
         .alert-danger { padding: 15px; background: rgba(220, 53, 69, 0.12); border: 1px solid rgba(220, 53, 69, 0.4); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
@@ -394,16 +432,16 @@
         .pwa-modal-subtitle{font-size:.88em;color:var(--text-secondary);margin-bottom:16px;}
         .pwa-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border-color);margin-bottom:16px;}
         .pwa-tab{background:transparent;border:none;padding:8px 12px;cursor:pointer;font-size:.85em;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:3px 3px 0 0;transition:color .15s,border-color .15s;white-space:nowrap;}
-        .pwa-tab.active{color:#1565c0;border-bottom-color:#1565c0;font-weight:600;}
-        [data-theme="dark"] .pwa-tab.active{color:#90caf9;border-bottom-color:#90caf9;}
+        .pwa-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
         .pwa-tab:hover:not(.active){color:var(--text-primary);}
         .pwa-panel{display:none;}
         .pwa-panel.active{display:block;}
         .pwa-steps{list-style:none;margin:0;padding:0;}
         .pwa-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
         .pwa-step:last-child{margin-bottom:0;}
-        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:#3498db;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
-        .pwa-step-icon{flex-shrink:0;width:44px;height:44px;background:rgba(52,152,219,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
+        .pwa-step-icon{flex-shrink:0;width:44px;height:44px;background:var(--accent-tint);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);}
+        .pwa-step-icon svg{stroke:currentColor;}
         .pwa-step-text{font-size:.9em;color:var(--text-primary);line-height:1.45;padding-top:12px;}
         /* PWA Install Banner */
         .pwa-banner{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:460px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:14px 16px;z-index:1500;gap:12px;align-items:center;}
@@ -868,17 +906,17 @@
       <ol class="pwa-steps">
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">1</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
           <span class="pwa-step-text">{% trans "Open Preceptly in Safari (not Chrome or Firefox)." %}</span>
         </li>
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">2</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span>
           <span class="pwa-step-text">{% trans "Tap the Share button at the bottom of the browser." %}</span>
         </li>
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">3</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
           <span class="pwa-step-text">{% trans 'Select "Add to Home Screen".' %}</span>
         </li>
       </ol>
@@ -888,12 +926,12 @@
       <ol class="pwa-steps">
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">1</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5" fill="#3498db" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#3498db" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#3498db" stroke="none"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg></span>
           <span class="pwa-step-text">{% trans "Open the browser menu (three dots in the top right)." %}</span>
         </li>
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">2</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><polyline points="7 11 12 16 17 11"/><path d="M5 18v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><polyline points="7 11 12 16 17 11"/><path d="M5 18v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2"/></svg></span>
           <span class="pwa-step-text">{% trans 'Tap "Install app" or "Add to Home Screen".' %}</span>
         </li>
       </ol>
@@ -907,12 +945,12 @@
       <ol class="pwa-steps">
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">1</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
           <span class="pwa-step-text">{% trans "Click the install icon in the browser address bar." %}</span>
         </li>
         <li class="pwa-step">
           <span class="pwa-step-num" aria-hidden="true">2</span>
-          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
           <span class="pwa-step-text">{% trans 'Or open the browser menu and select "Install Preceptly".' %}</span>
         </li>
       </ol>

@@ -83,12 +83,12 @@ _LABELS = {
 }
 
 _COLOR_DARK = colors.HexColor("#1e293b")
-_COLOR_ACCENT = colors.HexColor("#2563eb")
+_COLOR_ACCENT = colors.HexColor("#0d8069")
 _COLOR_LIGHT_BG = colors.HexColor("#f8fafc")
 _COLOR_BORDER = colors.HexColor("#e2e8f0")
 _COLOR_HEADER_BG = colors.HexColor("#1e293b")
 _COLOR_HEADER_TEXT = colors.white
-_COLOR_TOTAL_BG = colors.HexColor("#eff6ff")
+_COLOR_TOTAL_BG = colors.HexColor("#e6f4f1")
 _COLOR_WARNING = colors.HexColor("#92400e")
 _COLOR_WARNING_BG = colors.HexColor("#fef3c7")
 _COLOR_MUTED = colors.HexColor("#64748b")
