@@ -8,7 +8,7 @@ from math import ceil
 from django.db.models import Sum
 
 from apps.contracts.formsets import iter_contract_months
-from apps.contracts.models import Contract, ContractMonthlyPlan, InstituteTierConfig
+from apps.contracts.models import Contract, ContractMonthlyPlan, Institute
 from apps.lessons.models import Lesson, Session
 
 
@@ -104,26 +104,10 @@ def _compute_carried_over_before(contract: Contract, before_year: int, before_mo
     return carried
 
 
-def get_institute_tier_progress(user, institute_name: str) -> dict | None:
-    from apps.contracts.tutorspace_compensation import TIERS
-    from apps.core.models import UserProfile
-
-    config = InstituteTierConfig.objects.filter(
-        user=user, institute_name__iexact=institute_name
-    ).first()
-
-    if config:
-        tiers = config.tiers
-    elif institute_name.lower() == "tutorspace":
-        tiers = [
-            {
-                "hours_from": tier.start_hour_inclusive - 1,
-                "label": f"{tier.rate_eur_per_hour} €/h",
-            }
-            for tier in TIERS
-        ]
-    else:
-        return None
+def get_institute_tier_progress(institute: Institute) -> dict | None:
+    """Cumulative-hours tier progress for one Institute, or None if it has no tiers
+    or its tier data is malformed."""
+    tiers = institute.tiers
 
     # Defensive type-check vor dem Sortieren (verhindert TypeError bei unvalidiertem JSONField)
     # Zusätzlich: Label-Inhalte werden nie als |safe gerendert (Template-Verantwortung),
@@ -147,16 +131,12 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
         return None
 
     qs = Session.objects.filter(
-        contract__user=user,
-        contract__institute__iexact=institute_name,
+        contract__user=institute.user,
+        contract__institute_fk=institute,
         status__in=["taught", "paid"],
     )
-
-    if institute_name.lower() == "tutorspace":
-        profile = UserProfile.objects.filter(user=user).first()
-        tier_from = getattr(profile, "tutorspace_tier_count_from", None) if profile else None
-        if tier_from is not None:
-            qs = qs.filter(date__gte=tier_from)
+    if institute.tier_count_from is not None:
+        qs = qs.filter(date__gte=institute.tier_count_from)
 
     total_minutes = qs.aggregate(total=Sum("duration_minutes"))["total"] or 0
     total_hours = round(total_minutes / 60.0, 2)
@@ -177,8 +157,8 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
 
     today = date.today()
     recent_qs = Session.objects.filter(
-        contract__user=user,
-        contract__institute__iexact=institute_name,
+        contract__user=institute.user,
+        contract__institute_fk=institute,
         status__in=["taught", "paid"],
         date__gte=today - timedelta(days=90),
     )
@@ -196,5 +176,5 @@ def get_institute_tier_progress(user, institute_name: str) -> dict | None:
         "next_tier_label": next_tier["label"] if next_tier else None,
         "hours_until_next_tier": hours_until_next_tier,
         "estimated_date": estimated_date,
-        "institute_name": institute_name,
+        "institute_name": institute.institute_name,
     }

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Contract, ContractMonthlyPlan
+from .models import Contract, ContractMonthlyPlan, Institute
 
 
 class ContractMonthlyPlanInline(admin.TabularInline):
@@ -14,14 +14,14 @@ class ContractMonthlyPlanInline(admin.TabularInline):
 class ContractAdmin(admin.ModelAdmin):
     list_display = [
         "full_name",
-        "institute",
+        "institute_fk",
         "hourly_rate",
         "start_date",
         "is_active",
         "get_lesson_count",
     ]
-    search_fields = ["first_name", "last_name", "institute", "notes", "email"]
-    list_filter = ["is_active", "start_date", "institute"]
+    search_fields = ["first_name", "last_name", "institute_fk__institute_name", "notes", "email"]
+    list_filter = ["is_active", "start_date", "institute_fk"]
     date_hierarchy = "start_date"
     readonly_fields = ["created_at", "updated_at"]
     inlines = [ContractMonthlyPlanInline]
@@ -43,7 +43,7 @@ class ContractAdmin(admin.ModelAdmin):
         ),
         (
             _("Contract Details"),
-            {"fields": ("user", "institute", "hourly_rate", "unit_duration_minutes")},
+            {"fields": ("user", "institute_fk", "hourly_rate", "unit_duration_minutes")},
         ),
         (_("Period"), {"fields": ("start_date", "end_date", "is_active")}),
         (_("Additional"), {"fields": ("notes",)}),
@@ -54,6 +54,14 @@ class ContractAdmin(admin.ModelAdmin):
         return obj.sessions.count()
 
     get_lesson_count.short_description = _("Lessons")
+
+
+@admin.register(Institute)
+class InstituteAdmin(admin.ModelAdmin):
+    list_display = ["institute_name", "user", "unpaid_on_tutor_no_show", "created_at"]
+    search_fields = ["institute_name", "user__username"]
+    list_filter = ["unpaid_on_tutor_no_show"]
+    readonly_fields = ["created_at", "updated_at"]
 
 
 @admin.register(ContractMonthlyPlan)

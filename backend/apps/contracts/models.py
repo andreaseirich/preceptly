@@ -38,7 +38,15 @@ class Contract(models.Model):
         db_index=True,
         help_text=_("SHA-256 hash of the public booking code (never store plaintext)"),
     )
-    institute = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("institute"))
+    institute_fk = models.ForeignKey(
+        "contracts.Institute",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="contracts",
+        verbose_name=_("institute"),
+        help_text=_("Institute this contract is billed through, or empty for private lessons."),
+    )
     hourly_rate = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -84,7 +92,7 @@ class Contract(models.Model):
     def __str__(self):
         from django.utils.translation import gettext as _
 
-        institute_str = f" ({self.institute})" if self.institute else ""
+        institute_str = f" ({self.institute_fk.institute_name})" if self.institute_fk_id else ""
         return f"{self.full_name} - {self.hourly_rate}€/{_('unit')}{institute_str}"
 
     @property
@@ -95,6 +103,11 @@ class Contract(models.Model):
     def student(self):
         """Rückwärtskompatibilität: gibt self zurück."""
         return self
+
+    @property
+    def institute(self):
+        """Rückwärtskompatibilität: Institutsname als String, oder None für Privatunterricht."""
+        return self.institute_fk.institute_name if self.institute_fk_id else None
 
 
 class ContractMonthlyPlan(models.Model):
@@ -121,18 +134,42 @@ class ContractMonthlyPlan(models.Model):
         return f"{self.contract} - {self.year}-{self.month:02d}: {self.planned_units} {_('units')}"
 
 
-class InstituteTierConfig(models.Model):
+class Institute(models.Model):
+    """An institute a tutor teaches for, with its own billing rules.
+
+    Contracts either point to one of a tutor's Institutes (institute billing)
+    or have no institute at all (private lessons)."""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="institute_tier_configs",
+        related_name="institutes",
     )
-    institute_name = models.CharField(max_length=200)
+    institute_name = models.CharField(max_length=200, verbose_name=_("name"))
     tiers = models.JSONField(default=list, blank=True)
     unpaid_on_tutor_no_show = models.BooleanField(
         default=False,
         verbose_name=_("no billing on tutor no-show"),
         help_text=_("If enabled, lessons marked as tutor no-show are billed with 0 €."),
+    )
+    tutor_no_show_pay_percent = models.PositiveSmallIntegerField(
+        default=0,
+        blank=True,
+        validators=[MaxValueValidator(100)],
+        verbose_name=_("pay when you missed the lesson (student was waiting)"),
+        help_text=_(
+            "For this institute, if you mark a lesson as tutor no-show: share of the usual "
+            "lesson pay you keep. Only used when this institute has tiered pay."
+        ),
+    )
+    tier_count_from = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("count tier hours only from (optional)"),
+        help_text=_(
+            "Empty: every past lesson for this institute counts toward the tiers. Set a date "
+            "if the preview or amounts look wrong because many older lessons are included."
+        ),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -140,8 +177,8 @@ class InstituteTierConfig(models.Model):
     class Meta:
         unique_together = [("user", "institute_name")]
         ordering = ["institute_name"]
-        verbose_name = _("Institute tier config")
-        verbose_name_plural = _("Institute tier configs")
+        verbose_name = _("Institute")
+        verbose_name_plural = _("Institutes")
 
     def __str__(self):
         return f"{self.institute_name} ({self.user.username})"

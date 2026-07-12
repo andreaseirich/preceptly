@@ -6,7 +6,6 @@ import logging
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -69,11 +68,9 @@ class InvoiceService:
         if contract_id:
             queryset = queryset.filter(contract_id=contract_id)
         if institute == NO_INSTITUTE_FILTER_VALUE:
-            queryset = queryset.filter(
-                Q(contract__institute__isnull=True) | Q(contract__institute="")
-            )
+            queryset = queryset.filter(contract__institute_fk__isnull=True)
         elif institute:
-            queryset = queryset.filter(contract__institute=institute)
+            queryset = queryset.filter(contract__institute_fk_id=institute)
         if user:
             queryset = queryset.filter(contract__user=user)
 
@@ -178,10 +175,10 @@ class InvoiceService:
             institute_config_cache = {}
             for lesson in lesson_list:
                 lesson_contract = lesson.contract
-                cache_key = (owner.pk, (lesson_contract.institute or "").strip().lower())
+                cache_key = lesson_contract.institute_fk_id
                 if cache_key not in institute_config_cache:
                     institute_config_cache[cache_key] = resolve_institute_billing_config(
-                        owner, lesson_contract.institute
+                        lesson_contract.institute_fk
                     )
                 institute_config = institute_config_cache[cache_key]
                 has_tiers = bool(institute_config and institute_config.tiers)

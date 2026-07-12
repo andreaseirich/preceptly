@@ -16,7 +16,7 @@ from apps.billing.forms import (
     _get_institute_choices_for_user,
 )
 from apps.billing.services import InvoiceService
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, Institute
 from apps.lessons.models import Lesson
 
 
@@ -41,11 +41,17 @@ class InstituteFilterTest(TestCase):
             last_name="Mueller",
             email="max@example.com",
         )
+        self.institute_alpha = Institute.objects.create(
+            user=self.user, institute_name="Institut Alpha"
+        )
+        self.institute_beta = Institute.objects.create(
+            user=self.user, institute_name="Institut Beta"
+        )
         self.contract_a = Contract.objects.create(
             user=self.user,
             first_name="Test",
             last_name="Student",
-            institute="Institut Alpha",
+            institute_fk=self.institute_alpha,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -56,7 +62,7 @@ class InstituteFilterTest(TestCase):
             user=self.user,
             first_name="Test",
             last_name="Student",
-            institute="Institut Beta",
+            institute_fk=self.institute_beta,
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -67,7 +73,7 @@ class InstituteFilterTest(TestCase):
             user=self.user,
             first_name="Test",
             last_name="Student",
-            institute=None,
+            institute_fk=None,
             hourly_rate=Decimal("20.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
@@ -78,29 +84,27 @@ class InstituteFilterTest(TestCase):
         self.client.force_login(self.user)
 
     def test_institute_choices_include_only_tutor_institutes(self):
-        """Invoice form lists only institutes from tutor's contracts, plus an explicit
+        """Invoice form lists only the tutor's institutes, plus an explicit
         "no institute" bucket for private contracts."""
         with translation_override("en"):
             choices = _get_institute_choices_for_user(self.user)
         self.assertIn(("", "All institutes"), choices)
         self.assertIn((NO_INSTITUTE_FILTER_VALUE, "No institute (private lessons)"), choices)
-        self.assertIn(("Institut Alpha", "Institut Alpha"), choices)
-        self.assertIn(("Institut Beta", "Institut Beta"), choices)
+        self.assertIn((str(self.institute_alpha.pk), "Institut Alpha"), choices)
+        self.assertIn((str(self.institute_beta.pk), "Institut Beta"), choices)
         self.assertEqual(len(choices), 4)
 
     def test_no_institute_choice_absent_without_private_contracts(self):
         """The "no institute" bucket only appears when the tutor actually has private
-        (blank-institute) contracts."""
-        Contract.objects.filter(user=self.user).exclude(
-            institute__in=["Institut Alpha", "Institut Beta"]
-        ).delete()
+        (institute-less) contracts."""
+        Contract.objects.filter(user=self.user, institute_fk__isnull=True).delete()
         with translation_override("en"):
             choices = _get_institute_choices_for_user(self.user)
         choice_values = [value for value, _label in choices]
         self.assertNotIn(NO_INSTITUTE_FILTER_VALUE, choice_values)
 
     def test_no_institute_filter_limits_billable_lessons_to_private_contracts(self):
-        """Selecting "no institute" only bills lessons from private (blank-institute) contracts."""
+        """Selecting "no institute" only bills lessons from private (institute-less) contracts."""
         Lesson.objects.create(
             contract=self.contract_a,
             date=date(2025, 3, 5),
@@ -155,13 +159,13 @@ class InstituteFilterTest(TestCase):
         self.assertEqual(all_lessons.count(), 2)
 
         alpha_lessons = InvoiceService.get_billable_lessons(
-            period_start, period_end, institute="Institut Alpha", user=self.user
+            period_start, period_end, institute=self.institute_alpha.pk, user=self.user
         )
         self.assertEqual(alpha_lessons.count(), 1)
         self.assertEqual(alpha_lessons.first().contract.institute, "Institut Alpha")
 
         beta_lessons = InvoiceService.get_billable_lessons(
-            period_start, period_end, institute="Institut Beta", user=self.user
+            period_start, period_end, institute=self.institute_beta.pk, user=self.user
         )
         self.assertEqual(beta_lessons.count(), 1)
         self.assertEqual(beta_lessons.first().contract.institute, "Institut Beta")
@@ -177,7 +181,9 @@ class InstituteFilterTest(TestCase):
 
     def test_institute_filter_restricts_contract_dropdown(self):
         """When institute is selected, contract dropdown shows only matching contracts."""
-        form = InvoiceCreateForm(user=self.user, initial={"institute": "Institut Alpha"})
+        form = InvoiceCreateForm(
+            user=self.user, initial={"institute": str(self.institute_alpha.pk)}
+        )
         contract_ids = list(form.fields["contract"].queryset.values_list("pk", flat=True))
         self.assertEqual(len(contract_ids), 1)
         self.assertEqual(contract_ids[0], self.contract_a.pk)
@@ -189,7 +195,7 @@ class InstituteFilterTest(TestCase):
             {
                 "period_start": "2025-03-01",
                 "period_end": "2025-03-31",
-                "institute": "Institut Alpha",
+                "institute": str(self.institute_alpha.pk),
             },
             HTTP_ACCEPT_LANGUAGE="en",
         )
@@ -224,7 +230,7 @@ class InstituteFilterTest(TestCase):
             {
                 "period_start": "2025-04-01",
                 "period_end": "2025-04-30",
-                "institute": "Institut Alpha",
+                "institute": str(self.institute_alpha.pk),
                 "contract": "",
                 "csrfmiddlewaretoken": csrf,
             },

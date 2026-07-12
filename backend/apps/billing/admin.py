@@ -29,7 +29,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "status",
         "created_at",
     ]
-    list_filter = ["status", "created_at", "period_start", "contract__institute"]
+    list_filter = ["status", "created_at", "period_start", "contract__institute_fk"]
     search_fields = [
         "payer_name",
         "payer_address",

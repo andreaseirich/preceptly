@@ -95,25 +95,6 @@ class UserProfile(models.Model):
         blank=True,
         help_text=_("When the user explicitly accepted AGB, AVV, and Datenschutzerklärung."),
     )
-    tutor_no_show_pay_percent = models.PositiveSmallIntegerField(
-        default=0,
-        validators=[MaxValueValidator(100)],
-        help_text=_(
-            "TutorSpace, session marked 'tutor did not show (student waited)': share of the "
-            "usual lesson amount you still keep. The rest is not paid, and the usual amount "
-            "is deducted (net ≈ −(100−this)% of usual pay). 0%% = full deduction (−100%% of "
-            "usual pay); 100%% = full usual pay (no deduction)."
-        ),
-    )
-    tutorspace_tier_count_from = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_(
-            "TutorSpace pay tiers (13/14 € …): if set, only lessons on or after this date "
-            "count toward cumulative hours. Empty = all past TutorSpace lessons count "
-            "(can make the preview look ‘too high’ if you have many older sessions)."
-        ),
-    )
     timezone = models.CharField(
         max_length=64,
         default="Europe/Berlin",

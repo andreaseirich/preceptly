@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Institutes" %} - Preceptly{% endblock %}
+
+{% block content %}
+<h1>{% trans "Institutes" %}</h1>
+
+<div class="btn-group">
+    <a href="{% url 'contracts:institute_create' %}" class="btn">{% trans "Add institute" %}</a>
+    <a href="{% url 'contracts:list' %}" class="btn btn-secondary">Zurück zu Schülern</a>
+</div>
+
+<p style="margin-top: 1em;">{% blocktrans %}Create an institute for each place you teach through, with its own pay tiers and tutor-no-show rule. On a student's contract, pick one of your institutes, or leave it as "No institute" for private lessons.{% endblocktrans %}</p>
+
+{% if institutes %}
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Institute" %}</th>
+            <th>{% trans "Tiers" %}</th>
+            <th>{% trans "Tier progress" %}</th>
+            <th>{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for institute in institutes %}
+        <tr>
+            <td><strong>{{ institute.institute_name }}</strong></td>
+            <td>
+                {% for tier in institute.tiers %}
+                    {% if not forloop.first %}, {% endif %}
+                    {{ tier.hours_from }}h: {{ tier.label }}
+                {% endfor %}
+                {% if institute.unpaid_on_tutor_no_show %}
+                    {% if institute.tiers %}, {% endif %}{% trans "no billing on tutor no-show" %}
+                {% endif %}
+            </td>
+            <td>
+                {% with p=institute.tier_progress %}
+                {% if p %}
+                    <p style="margin:0;">{% trans "Total taught" %}: {{ p.total_hours|floatformat:2 }} h</p>
+                    <p style="margin:0;">{% trans "Current tier" %}: {{ p.current_tier_label }} ({{ p.hours_in_current_tier|floatformat:2 }} h {% trans "in this tier" %})</p>
+                    {% if p.next_tier_label %}
+                        <p style="margin:0;">{% trans "Next increase" %}: {{ p.next_tier_label }} {% trans "in" %} {{ p.hours_until_next_tier|floatformat:2 }} h</p>
+                        {% if p.estimated_date %}
+                            <p style="margin:0;">{% trans "Estimated date" %}: {{ p.estimated_date|date:"d.m.Y" }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p style="margin:0; color: #28a745;">{% trans "Maximum tier reached" %}</p>
+                    {% endif %}
+                {% else %}
+                    <span style="color:var(--text-secondary);">—</span>
+                {% endif %}
+                {% endwith %}
+            </td>
+            <td>
+                <div class="table-actions"><a href="{% url 'contracts:institute_update' institute.pk %}" class="btn-sm btn-sm-secondary">{% trans "Edit" %}</a><a href="{% url 'contracts:institute_delete' institute.pk %}" class="btn-sm btn-sm-danger">{% trans "Delete" %}</a></div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>{% trans "No institutes yet." %}</p>
+</div>
+{% endif %}
+{% endblock %}

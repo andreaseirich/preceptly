@@ -15,7 +15,7 @@
                 <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
                 {% endfor %}
             </select>
-            <button type="submit" class="btn">{% trans "Apply" %}</button>
+            <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
         </form>
         <a href="{% url 'core:euer_pdf' %}?year={{ year }}" class="btn">
             &#8595; {% trans "Download PDF" %}

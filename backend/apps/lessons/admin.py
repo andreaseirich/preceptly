@@ -22,7 +22,7 @@ class LessonAdmin(admin.ModelAdmin):
         "contract__email",
         "notes",
     ]
-    list_filter = ["status", "date", "contract__institute", "contract"]
+    list_filter = ["status", "date", "contract__institute_fk", "contract"]
     raw_id_fields = ["contract"]
     date_hierarchy = "date"
     readonly_fields = ["created_at", "updated_at", "has_conflicts_display"]

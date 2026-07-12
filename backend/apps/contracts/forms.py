@@ -1,11 +1,11 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from apps.contracts.models import Contract, InstituteTierConfig
+from apps.contracts.models import Contract, Institute
 
 
 def _validate_tiers(tiers):
-    """Validate the tiers data structure for InstituteTierConfig. An empty list is
+    """Validate the tiers data structure for Institute.tiers. An empty list is
     allowed — it means "no tiered pay", e.g. for an institute that only uses the
     "no billing on tutor no-show" rule."""
     if not isinstance(tiers, list):
@@ -27,12 +27,24 @@ def _validate_tiers(tiers):
     return None
 
 
-class TierConfigForm(forms.ModelForm):
+class InstituteForm(forms.ModelForm):
     class Meta:
-        model = InstituteTierConfig
-        fields = ["institute_name", "tiers", "unpaid_on_tutor_no_show"]
+        model = Institute
+        fields = [
+            "institute_name",
+            "tiers",
+            "unpaid_on_tutor_no_show",
+            "tutor_no_show_pay_percent",
+            "tier_count_from",
+        ]
         widgets = {
             "unpaid_on_tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "tutor_no_show_pay_percent": forms.NumberInput(
+                attrs={"class": "form-control", "min": 0, "max": 100}
+            ),
+            "tier_count_from": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
+            ),
         }
 
     def clean_tiers(self):
@@ -52,20 +64,6 @@ class ContractForm(forms.ModelForm):
         label=_("Monatliche Planung mit geplanten Einheiten"),
     )
 
-    BILLING_TYPE_PRIVATE = "private"
-    BILLING_TYPE_INSTITUTE = "institute"
-
-    billing_type = forms.ChoiceField(
-        choices=[
-            (BILLING_TYPE_PRIVATE, _("Privat")),
-            (BILLING_TYPE_INSTITUTE, _("Institut")),
-        ],
-        initial=BILLING_TYPE_PRIVATE,
-        required=False,
-        widget=forms.RadioSelect,
-        label=_("Abrechnung über"),
-    )
-
     class Meta:
         model = Contract
         fields = [
@@ -78,7 +76,7 @@ class ContractForm(forms.ModelForm):
             "grade",
             "subjects",
             "is_adult",
-            "institute",
+            "institute_fk",
             "hourly_rate",
             "unit_duration_minutes",
             "start_date",
@@ -97,7 +95,7 @@ class ContractForm(forms.ModelForm):
             "grade": forms.TextInput(attrs={"class": "form-control"}),
             "subjects": forms.TextInput(attrs={"class": "form-control"}),
             "is_adult": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "institute": forms.TextInput(attrs={"class": "form-control"}),
+            "institute_fk": forms.Select(attrs={"class": "form-control"}),
             "hourly_rate": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "unit_duration_minutes": forms.NumberInput(attrs={"class": "form-control"}),
             "start_date": forms.DateInput(
@@ -122,10 +120,12 @@ class ContractForm(forms.ModelForm):
             "E-Mail-Adresse der Eltern — wird für das Eltern-Portal verwendet."
         )
         self.fields["parent_email"].required = False
-        self.fields["institute"].required = False
-        if self.instance and self.instance.pk and self.instance.institute:
-            self.fields["billing_type"].initial = self.BILLING_TYPE_INSTITUTE
         self._user = user
+        self.fields["institute_fk"].label = _("Institut")
+        self.fields["institute_fk"].empty_label = _("Kein Institut (Privatunterricht)")
+        self.fields["institute_fk"].queryset = Institute.objects.filter(
+            user=user if user else (self.instance.user if self.instance.pk else None)
+        ).order_by("institute_name")
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -141,12 +141,4 @@ class ContractForm(forms.ModelForm):
         end_date = cleaned_data.get("end_date")
         if start_date and end_date and end_date < start_date:
             raise forms.ValidationError(_("End date must not be before start date."))
-
-        billing_type = cleaned_data.get("billing_type")
-        if billing_type == self.BILLING_TYPE_INSTITUTE:
-            if not cleaned_data.get("institute"):
-                self.add_error("institute", _("Please enter the institute name."))
-        else:
-            cleaned_data["institute"] = ""
-
         return cleaned_data

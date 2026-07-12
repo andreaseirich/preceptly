@@ -26,7 +26,7 @@ from django.utils import timezone
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.blocked_times.models import BlockedTime
-from apps.contracts.models import Contract, ContractMonthlyPlan
+from apps.contracts.models import Contract, ContractMonthlyPlan, Institute
 from apps.core.models import UserProfile
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
@@ -62,6 +62,7 @@ class Command(BaseCommand):
         BlockedTime.objects.filter(user_id__in=demo_user_ids).delete()
         ContractMonthlyPlan.objects.filter(contract_id__in=contract_ids).delete()
         Contract.objects.filter(user_id__in=demo_user_ids).delete()
+        Institute.objects.filter(user_id__in=demo_user_ids).delete()
         UserProfile.objects.filter(user_id__in=demo_user_ids).delete()
         User.objects.filter(id__in=demo_user_ids).delete()
 
@@ -124,6 +125,9 @@ class Command(BaseCommand):
         ContractMonthlyPlan.objects.create(contract=contract1, year=2025, month=12, planned_units=5)
 
         # Contract 2: With recurring lessons
+        demo_institute, _ = Institute.objects.get_or_create(
+            user=premium_user, institute_name="Tutoring Institute ABC"
+        )
         contract2 = Contract.objects.create(
             user=premium_user,
             first_name="Anna",
@@ -134,7 +138,7 @@ class Command(BaseCommand):
             grade="Grade 9",
             subjects="German, English",
             notes="Recurring lessons weekly",
-            institute="Tutoring Institute ABC",
+            institute_fk=demo_institute,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=90,
             start_date=date(2025, 10, 15),

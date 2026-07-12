@@ -10,7 +10,7 @@ from django.test import TestCase
 
 from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, Institute
 from apps.lessons.models import Lesson
 
 
@@ -252,12 +252,15 @@ class InvoiceServiceTest(TestCase):
         self.assertEqual(invoice1.payer_name, self.student.full_name)
 
         # Contract mit Institut - sollte Institut als Zahler verwenden
+        institute = Institute.objects.create(
+            user=self.user, institute_name="Nachhilfe-Institut ABC"
+        )
         contract_with_institute = Contract.objects.create(
             user=self.user,
             first_name="Anna",
             last_name="Schmidt",
             email="anna@example.com",
-            institute="Nachhilfe-Institut ABC",
+            institute_fk=institute,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),

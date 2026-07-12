@@ -10,8 +10,7 @@ from django.test import TestCase
 
 from apps.billing.models import Invoice, InvoiceItem
 from apps.billing.services import InvoiceService
-from apps.contracts.institute_utils import TUTORSPACE_INSTITUTE_NAME
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, Institute
 from apps.lessons.models import Lesson
 
 
@@ -240,16 +239,21 @@ class InvoiceStatusTransitionTest(TestCase):
         self.assertEqual(reset_count, 1)
 
 
-class TutorSpaceInvoiceOwnerFallbackTest(TestCase):
-    """TutorSpace amounts must not be 0 when create_invoice_from_lessons(user=None)."""
+class TieredInstituteInvoiceOwnerFallbackTest(TestCase):
+    """Tiered-institute amounts must not be 0 when create_invoice_from_lessons(user=None)."""
 
-    def test_tutorspace_line_amount_uses_contract_tutor_when_user_none(self):
+    def test_tiered_line_amount_uses_contract_tutor_when_user_none(self):
         tutor = User.objects.create_user(username="ts_tutor", password="test")
+        institute = Institute.objects.create(
+            user=tutor,
+            institute_name="TutorSpace",
+            tiers=[{"hours_from": 0, "rate": 13, "label": "13 €/h"}],
+        )
         contract = Contract.objects.create(
             user=tutor,
             first_name="Test",
             last_name="Student",
-            institute=TUTORSPACE_INSTITUTE_NAME,
+            institute_fk=institute,
             hourly_rate=Decimal("13.00"),
             unit_duration_minutes=60,
             start_date=date(2025, 1, 1),
