@@ -32,6 +32,10 @@
 {% if not contract %}
 <div class="alert-warning">Kein aktiver Vertrag vorhanden. Bitte den Nachhilfelehrer kontaktieren.</div>
 {% else %}
+<h2 style="margin-top:0;">Wochenübersicht</h2>
+<p style="color:var(--text-secondary); font-size:0.88em; margin-top:-8px;">Klicke auf einen Tag, um die freien Zeiten darunter zu laden.</p>
+{% include "portal/_week_calendar_widget.html" with nav_url_name="portal:book" nav_pk=student.pk %}
+
 <div class="box-section">
   <form method="post" id="booking-form">
     {% csrf_token %}

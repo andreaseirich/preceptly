@@ -201,3 +201,23 @@ class PortalBookingFlowTest(TestCase):
         ).first()
         self.assertIsNotNone(session)
         self.assertEqual(session.created_via, "portal_booking")
+
+    # ------------------------------------------------------------------
+    def test_7_booking_page_get_renders_week_calendar(self):
+        """Die Buchungsseite rendert die Wochenkalender-Auswahl (nicht nur eine Weiterleitung)."""
+        resp = self.c.get(f"/portal/book/{self.contract.pk}/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "week-day-pick")
+
+    def test_8_reschedule_page_get_renders_week_calendar(self):
+        """Die Verschieben-Seite rendert die Wochenkalender-Auswahl."""
+        session = Session.objects.create(
+            contract=self.contract,
+            date=self.test_date,
+            start_time=dt.time(9, 0),
+            duration_minutes=60,
+            status="planned",
+        )
+        resp = self.c.get(f"/portal/session/{session.pk}/reschedule/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "week-day-pick")
