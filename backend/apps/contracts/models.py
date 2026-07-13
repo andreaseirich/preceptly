@@ -181,4 +181,4 @@ class Institute(models.Model):
         verbose_name_plural = _("Institutes")
 
     def __str__(self):
-        return f"{self.institute_name} ({self.user.username})"
+        return self.institute_name
