@@ -387,6 +387,13 @@ class PortalAccessControlTest(TestCase):
         resp = self.client.get(reverse("portal:student_home"))
         self.assertIn(resp.status_code, (302, 403))
 
+    def test_parent_home_renders_for_logged_in_parent(self):
+        session = self.client.session
+        session["portal_user_id"] = self.parent_pu.pk
+        session.save()
+        resp = self.client.get(reverse("portal:parent_home"))
+        self.assertEqual(resp.status_code, 200)
+
 
 class PortalDispatchViewTest(TestCase):
     def setUp(self):

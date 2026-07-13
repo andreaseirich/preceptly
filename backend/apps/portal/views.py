@@ -278,8 +278,8 @@ class ParentHomeView(View):
             .select_related("contract")
             .annotate(
                 unread_count=Count(
-                    "contract__portalmessage",
-                    filter=Q(contract__portalmessage__read_by_portal=False),
+                    "contract__portal_messages",
+                    filter=Q(contract__portal_messages__read_by_portal=False),
                 )
             )
             .prefetch_related(
