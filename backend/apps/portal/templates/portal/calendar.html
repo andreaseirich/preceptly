@@ -18,7 +18,8 @@
 </div>
 
 <div class="card" style="padding:0; overflow:hidden;">
-<table role="grid" aria-label="Kalender {{ month_label }} {{ year }}" style="width: 100%; border-collapse: collapse; margin-top:0; box-shadow:none; border-radius:0; table-layout: fixed;">
+<div style="overflow-x: auto;">
+<table role="grid" aria-label="Kalender {{ month_label }} {{ year }}" style="width: 100%; min-width: 640px; border-collapse: collapse; margin-top:0; box-shadow:none; border-radius:0; table-layout: fixed;">
     <thead>
         <tr>
             {% for weekday in weekday_names %}
@@ -62,6 +63,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 </div>
 
 <section aria-label="Kalenderlegende">
