@@ -145,7 +145,8 @@
         }
         
         /* Navigation */
-        nav { background: var(--bg-nav); padding: 15px 0; margin-bottom: 30px; border-radius: 4px; box-shadow: 0 2px 4px var(--shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s ease; }
+        .site-header { position: sticky; top: 0; z-index: 1000; }
+        nav { background: var(--bg-nav); padding: 15px 0; margin-bottom: 30px; border-radius: 4px; box-shadow: 0 2px 4px var(--shadow); transition: background-color 0.3s ease; }
         nav .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; }
         nav .nav-brand { display: flex; align-items: center; padding: 0 8px 0 0; flex-shrink: 0; white-space: nowrap; }
         nav .nav-brand img { height: 28px; width: auto; }
@@ -500,6 +501,7 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">{% trans "Skip to main content" %}</a>
+    <div class="site-header">
     <nav aria-label="{% trans 'Main navigation' %}">
         <div class="nav-container">
             <a class="nav-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
@@ -586,10 +588,11 @@
     </nav>
     
     {% if is_demo_user %}
-    <div role="status" aria-live="polite" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;position:sticky;top:0;z-index:1000;">
+    <div role="status" aria-live="polite" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;">
         {% load i18n %}{% trans "Demo account — data resets hourly. Do not enter real personal data." %}
     </div>
     {% endif %}
+    </div>
         <main id="main-content" class="container">
         {% if messages %}
         <div class="messages" role="alert" aria-live="polite">
