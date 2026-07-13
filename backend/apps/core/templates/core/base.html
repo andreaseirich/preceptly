@@ -151,6 +151,7 @@
         nav .nav-brand img { height: 28px; width: auto; }
         nav .nav-brand img.nav-brand-full { display: block; }
         nav .nav-brand img.nav-brand-icon { display: none; width: 28px; }
+        nav .nav-links-brand { display: none; }
         nav .nav-links { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; flex: 1; }
         nav .nav-dropdown { position: relative; }
         nav .nav-dropdown-toggle { background: transparent; color: white; border: none; font: inherit; padding: 8px 15px; border-radius: 3px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
@@ -291,26 +292,32 @@
             nav { margin-bottom: 15px; border-radius: 0; }
             nav .nav-container { padding: 0 15px; }
             .menu-toggle { display: block; order: -1; }
-            nav .nav-brand { order: 5; padding: 0; }
-            nav .nav-brand img.nav-brand-full { display: none; }
-            nav .nav-brand img.nav-brand-icon { display: block; }
-            nav .nav-links { 
-                position: fixed; 
-                top: 60px; 
-                left: -100%; 
-                width: 80%; 
-                max-width: 300px; 
-                height: calc(100vh - 60px); 
-                background: var(--bg-nav); 
-                flex-direction: column; 
-                align-items: stretch; 
-                padding: 20px 0; 
-                transition: left 0.3s ease, background-color 0.3s ease; 
-                box-shadow: 2px 0 4px var(--shadow);
-                border-right: 1px solid var(--border-color);
+            nav .nav-brand { display: none; }
+            nav .nav-links-brand {
+                display: flex;
+                align-items: center;
+                padding: 16px 20px;
+                border-bottom: 1px solid var(--hover-bg);
+            }
+            nav .nav-links-brand img { height: 28px; width: auto; }
+            nav .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-height: 0;
+                background: var(--bg-nav);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease, background-color 0.3s ease;
+                box-shadow: 0 4px 10px var(--shadow);
+                border-top: 1px solid var(--hover-bg);
                 z-index: 999;
             }
-            nav .nav-links.active { left: 0; }
+            nav .nav-links.active { max-height: calc(100vh - 60px); overflow-y: auto; }
             .nav-backdrop {
                 display: none;
                 position: fixed;
@@ -345,7 +352,7 @@
             }
             nav .nav-dropdown.open .nav-dropdown-menu { display: block; }
             nav .nav-dropdown-menu a { padding: 15px 20px 15px 40px; border-bottom: 1px solid var(--border-color); }
-            nav .nav-right { gap: 5px; }
+            nav .nav-right { gap: 5px; margin-left: auto; }
             table { font-size: 14px; }
             th, td { padding: 8px 4px; }
             .btn { padding: 12px 16px; font-size: 15px; width: 100%; }
@@ -501,6 +508,9 @@
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}">☰</button>
             <div class="nav-links" id="navLinks">
+                <a class="nav-links-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
+                    <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
+                </a>
                 {% if user.is_authenticated %}
                 <a href="{% url 'core:dashboard' %}">📊 {% trans "Dashboard" %}</a>
                 <div class="nav-dropdown">
