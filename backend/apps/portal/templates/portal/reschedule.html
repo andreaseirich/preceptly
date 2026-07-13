@@ -21,6 +21,10 @@
 
 {% if error %}<div class="alert-danger" role="alert">{{ error }}</div>{% endif %}
 
+<h2 style="margin-top:0;">Wochenübersicht</h2>
+<p style="color:var(--text-secondary); font-size:0.88em; margin-top:-8px;">Klicke auf einen Tag, um die freien Zeiten darunter zu laden.</p>
+{% include "portal/_week_calendar_widget.html" with nav_url_name="portal:session_reschedule" nav_pk=session.pk %}
+
 <div class="box-section">
   <form method="post">
     {% csrf_token %}

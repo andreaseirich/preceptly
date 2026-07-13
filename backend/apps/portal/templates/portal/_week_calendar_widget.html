@@ -1,0 +1,66 @@
+<div class="card" style="padding:0; overflow:hidden; margin-bottom:16px;">
+<div style="overflow-x: auto;">
+<table aria-label="Wochenübersicht zur Terminauswahl" style="width: 100%; min-width: 640px; border-collapse: collapse; table-layout: fixed; margin-top:0; box-shadow:none; border-radius:0;">
+    <thead>
+        <tr>
+            <th scope="col" style="width: 52px; border: 1px solid var(--border-color); padding: 6px 2px; background: var(--table-header-bg); text-align: center; color: var(--text-secondary); font-size:0.76em;">Zeit</th>
+            {% for weekday in weekdays %}
+            <th scope="col" style="border: 1px solid var(--border-color); padding: 0; background: {% if weekday.is_today %}var(--accent-tint){% else %}var(--table-header-bg){% endif %};">
+                <button type="button" class="week-day-pick" data-date="{{ weekday.date|date:'Y-m-d' }}" {% if weekday.is_past %}disabled{% endif %}
+                        style="width:100%; background:none; border:none; padding:8px 2px; text-align:center; cursor:{% if weekday.is_past %}default{% else %}pointer{% endif %}; color:inherit; font: inherit; opacity:{% if weekday.is_past %}0.5{% else %}1{% endif %};">
+                    {{ weekday.name_short }}<br>
+                    <small style="font-weight: normal; {% if weekday.is_today %}color: var(--accent);{% endif %}">{{ weekday.date.day }}.{{ weekday.date.month }}.</small>
+                </button>
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for hour in hours %}
+        <tr>
+            <th scope="row" style="border: 1px solid var(--border-color); padding: 2px; text-align: center; font-size: 0.72em; color: var(--text-secondary); vertical-align: top;">{{ hour }}:00</th>
+            {% for weekday in weekdays %}
+            <td style="border: 1px solid var(--border-color); padding: 2px; vertical-align: top; background: var(--bg-secondary); font-size:0.68em; line-height:1.3;">
+                {% for lesson in weekday.lessons %}{% if lesson.start_time.hour == hour %}
+                <div style="background: var(--accent); color:#fff; padding:1px 3px; border-radius:2px; margin-bottom:1px; white-space:nowrap; overflow:hidden;">{{ lesson.start_time|time:"H:i" }}</div>
+                {% endif %}{% endfor %}
+                {% for slot in weekday.busy %}{% if not slot.is_own and slot.start_hour == hour %}
+                <div style="background: rgba(239,68,68,0.18); border-left:2px solid #ef4444; padding:1px 3px; color: var(--text-secondary); white-space:nowrap; overflow:hidden;">Belegt</div>
+                {% endif %}{% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+<div class="btn-group" style="margin-bottom:20px;">
+    <a href="{% url nav_url_name nav_pk %}?year={{ prev_week.year }}&month={{ prev_week.month }}&day={{ prev_week.day }}" class="btn-sm btn-sm-secondary">← Vorige Woche</a>
+    <a href="{% url nav_url_name nav_pk %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn-sm btn-sm-secondary">Nächste Woche →</a>
+</div>
+
+<script>
+(function() {
+    function init() {
+        var pickers = document.querySelectorAll('.week-day-pick');
+        var dateInput = document.getElementById('id_date');
+        if (!dateInput || !pickers.length) return;
+        pickers.forEach(function(btn) {
+            if (btn.disabled) return;
+            btn.addEventListener('click', function() {
+                dateInput.value = btn.getAttribute('data-date');
+                dateInput.dispatchEvent(new Event('change'));
+                pickers.forEach(function(b) { b.style.textDecoration = ''; });
+                btn.style.textDecoration = 'underline';
+                dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>

@@ -835,18 +835,23 @@ class PortalBookingView(View):
 
     def _render(self, request, student, contract, error=None, success=None):
         today = _dt.date.today()
-        return render(
-            request,
-            self.template_name,
-            {
-                "student": student,
-                "contract": contract,
-                "error": error,
-                "success": success,
-                "today": today.isoformat(),
-                "portal_user": get_portal_user(request),
-            },
-        )
+        now = timezone.now()
+        try:
+            year = int(request.GET.get("year", now.year))
+            month = int(request.GET.get("month", now.month))
+            day = int(request.GET.get("day", now.day))
+        except (ValueError, TypeError):
+            year, month, day = now.year, now.month, now.day
+        context = {
+            "student": student,
+            "contract": contract,
+            "error": error,
+            "success": success,
+            "portal_user": get_portal_user(request),
+        }
+        context.update(_build_week_calendar(student, year, month, day))
+        context["today"] = today.isoformat()
+        return render(request, self.template_name, context)
 
     def get(self, request, student_pk):
         portal_user = get_portal_user(request)
@@ -1017,22 +1022,32 @@ class PortalSessionRescheduleView(View):
 
         return portal_user, session, student
 
+    def _render(self, request, session, student, portal_user, error=None):
+        today = _dt.date.today()
+        now = timezone.now()
+        try:
+            year = int(request.GET.get("year", now.year))
+            month = int(request.GET.get("month", now.month))
+            day = int(request.GET.get("day", now.day))
+        except (ValueError, TypeError):
+            year, month, day = now.year, now.month, now.day
+        context = {
+            "session": session,
+            "student": student,
+            "portal_user": portal_user,
+            "error": error,
+        }
+        context.update(_build_week_calendar(student, year, month, day))
+        context["today"] = today.isoformat()
+        return render(request, self.template_name, context)
+
     def get(self, request, session_pk):
         portal_user, session, student = self._get_session_and_student(request, session_pk)
         if not portal_user:
             return redirect("portal:login")
         if not student:
             return HttpResponseForbidden()
-        return render(
-            request,
-            self.template_name,
-            {
-                "session": session,
-                "student": student,
-                "portal_user": portal_user,
-                "today": _dt.date.today().isoformat(),
-            },
-        )
+        return self._render(request, session, student, portal_user)
 
     def post(self, request, session_pk):
         from apps.lessons.models import Session as _Session
@@ -1054,29 +1069,17 @@ class PortalSessionRescheduleView(View):
             new_date = _dt.date.fromisoformat(date_str)
             new_time = _dt.time.fromisoformat(time_str)
         except ValueError:
-            return render(
-                request,
-                self.template_name,
-                {
-                    "session": session,
-                    "student": student,
-                    "portal_user": portal_user,
-                    "today": _dt.date.today().isoformat(),
-                    "error": "Ungültiges Datum oder Uhrzeit.",
-                },
+            return self._render(
+                request, session, student, portal_user, error="Ungültiges Datum oder Uhrzeit."
             )
 
         if new_date < _dt.date.today():
-            return render(
+            return self._render(
                 request,
-                self.template_name,
-                {
-                    "session": session,
-                    "student": student,
-                    "portal_user": portal_user,
-                    "today": _dt.date.today().isoformat(),
-                    "error": "Das Datum liegt in der Vergangenheit.",
-                },
+                session,
+                student,
+                portal_user,
+                error="Das Datum liegt in der Vergangenheit.",
             )
 
         # Konflikt-Prüfung (außer sich selbst)
@@ -1092,16 +1095,12 @@ class PortalSessionRescheduleView(View):
             ex_start = _dt.datetime.combine(new_date, ex.start_time)
             ex_end = ex_start + _dt.timedelta(minutes=ex.duration_minutes)
             if start_dt < ex_end and end_dt > ex_start:
-                return render(
+                return self._render(
                     request,
-                    self.template_name,
-                    {
-                        "session": session,
-                        "student": student,
-                        "portal_user": portal_user,
-                        "today": _dt.date.today().isoformat(),
-                        "error": f"Zeitkonflikt mit Termin um {ex.start_time.strftime('%H:%M')} Uhr.",
-                    },
+                    session,
+                    student,
+                    portal_user,
+                    error=f"Zeitkonflikt mit Termin um {ex.start_time.strftime('%H:%M')} Uhr.",
                 )
 
         old_date = session.date
@@ -1654,6 +1653,136 @@ class PortalCalendarView(View):
         return render(request, self.template_name, context)
 
 
+def _build_week_calendar(student, year, month, day):
+    """Berechnet Wochenkalender-Daten (Stunden, Belegtzeiten) für einen Vertrag.
+
+    Wird sowohl von der Kalender-Wochenansicht als auch von der
+    Buchungs-/Verschiebungs-Ansicht verwendet, damit Schüler beim Buchen
+    dieselbe Frei/Belegt-Übersicht sehen wie im reinen Kalender.
+    """
+    current_date = _dt.date(year, month, day)
+    # Montag der aktuellen Woche
+    week_start = current_date - _dt.timedelta(days=current_date.weekday())
+    week_end = week_start + _dt.timedelta(days=6)
+
+    lessons = _Lesson.objects.filter(
+        contract=student,
+        date__gte=week_start,
+        date__lte=week_end,
+    ).order_by("date", "start_time")
+
+    lessons_by_date = {}
+    for lesson in lessons:
+        lessons_by_date.setdefault(lesson.date, []).append(lesson)
+
+    weekday_names = [
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag",
+        "Sonntag",
+    ]
+    weekday_names_short = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+    today = timezone.localdate()
+    import datetime as _dt_mod
+
+    from django.utils.timezone import make_aware as _make_aware2
+
+    from apps.blocked_times.models import BlockedTime as _BT2
+    from apps.lessons.models import Session as _AllSess2
+
+    tutor = student.user
+    all_sessions_week = _AllSess2.objects.filter(
+        contract__user=tutor,
+        date__gte=week_start,
+        date__lte=week_end,
+        status__in=["planned", "taught", "paid"],
+    )
+    busy_by_date_week = {}
+    for _s in all_sessions_week:
+        _entry = {
+            "start": _s.start_time.strftime("%H:%M"),
+            "end": (
+                (
+                    _dt_mod.datetime.combine(_s.date, _s.start_time)
+                    + _dt_mod.timedelta(minutes=_s.duration_minutes)
+                ).time()
+            ).strftime("%H:%M"),
+            "start_hour": _s.start_time.hour,
+            "start_min": _s.start_time.minute,
+            "duration": _s.duration_minutes,
+            "is_own": _s.contract == student,
+        }
+        busy_by_date_week.setdefault(_s.date, []).append(_entry)
+    _w_start_aware = _make_aware2(_dt_mod.datetime.combine(week_start, _dt_mod.time.min))
+    _w_end_aware = _make_aware2(
+        _dt_mod.datetime.combine(week_end + _dt_mod.timedelta(days=1), _dt_mod.time.min)
+    )
+    _blocked_week = _BT2.objects.filter(
+        user=tutor, start_datetime__lt=_w_end_aware, end_datetime__gt=_w_start_aware
+    )
+    for _bt in _blocked_week:
+        _bt_start_local = _localtime(_bt.start_datetime).replace(tzinfo=None)
+        _bt_end_local = _localtime(_bt.end_datetime).replace(tzinfo=None)
+        _bt_date = _bt_start_local.date()
+        while _bt_date <= _bt_end_local.date() and _bt_date <= week_end:
+            if _bt_date >= week_start:
+                _bt_start_t = (
+                    _bt_start_local
+                    if _bt_date == _bt_start_local.date()
+                    else _dt_mod.datetime.combine(_bt_date, _dt_mod.time.min)
+                )
+                _bt_end_t = (
+                    _bt_end_local
+                    if _bt_date == _bt_end_local.date()
+                    else _dt_mod.datetime.combine(_bt_date, _dt_mod.time(23, 59))
+                )
+                _entry = {
+                    "start": _bt_start_t.strftime("%H:%M"),
+                    "end": _bt_end_t.strftime("%H:%M"),
+                    "start_hour": _bt_start_t.hour,
+                    "start_min": _bt_start_t.minute,
+                    "duration": int((_bt_end_t - _bt_start_t).total_seconds() / 60),
+                    "is_own": False,
+                }
+                busy_by_date_week.setdefault(_bt_date, []).append(_entry)
+            _bt_date += _dt_mod.timedelta(days=1)
+
+    weekdays = []
+    for i in range(7):
+        d = week_start + _dt.timedelta(days=i)
+        weekdays.append(
+            {
+                "date": d,
+                "name": weekday_names[i],
+                "name_short": weekday_names_short[i],
+                "is_today": d == today,
+                "is_past": d < today,
+                "lessons": lessons_by_date.get(d, []),
+                "busy": busy_by_date_week.get(d, []),
+            }
+        )
+
+    prev_week = week_start - _dt.timedelta(days=7)
+    next_week = week_start + _dt.timedelta(days=7)
+
+    return {
+        "weekdays": weekdays,
+        "week_start": week_start,
+        "week_end": week_end,
+        "prev_week": prev_week,
+        "next_week": next_week,
+        "today": today,
+        "hours": list(range(7, 22)),
+        "tutor_timezone": getattr(
+            getattr(student.user, "profile", None), "timezone", "Europe/Berlin"
+        )
+        or "Europe/Berlin",
+    }
+
+
 class PortalWeekView(View):
     """Wochenansicht für Portal-Nutzer (Schüler und Eltern)."""
 
@@ -1690,128 +1819,10 @@ class PortalWeekView(View):
         except (ValueError, TypeError):
             year, month, day = now.year, now.month, now.day
 
-        current_date = _dt.date(year, month, day)
-        # Montag der aktuellen Woche
-        week_start = current_date - _dt.timedelta(days=current_date.weekday())
-        week_end = week_start + _dt.timedelta(days=6)
-
-        lessons = _Lesson.objects.filter(
-            contract=student,
-            date__gte=week_start,
-            date__lte=week_end,
-        ).order_by("date", "start_time")
-
-        lessons_by_date = {}
-        for lesson in lessons:
-            lessons_by_date.setdefault(lesson.date, []).append(lesson)
-
-        weekday_names = [
-            "Montag",
-            "Dienstag",
-            "Mittwoch",
-            "Donnerstag",
-            "Freitag",
-            "Samstag",
-            "Sonntag",
-        ]
-        weekday_names_short = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-        today = timezone.localdate()
-        import datetime as _dt_mod
-
-        from django.utils.timezone import make_aware as _make_aware2
-
-        from apps.blocked_times.models import BlockedTime as _BT2
-        from apps.lessons.models import Session as _AllSess2
-
-        tutor = student.user
-        all_sessions_week = _AllSess2.objects.filter(
-            contract__user=tutor,
-            date__gte=week_start,
-            date__lte=week_end,
-            status__in=["planned", "taught", "paid"],
-        )
-        busy_by_date_week = {}
-        for _s in all_sessions_week:
-            _entry = {
-                "start": _s.start_time.strftime("%H:%M"),
-                "end": (
-                    (
-                        _dt_mod.datetime.combine(_s.date, _s.start_time)
-                        + _dt_mod.timedelta(minutes=_s.duration_minutes)
-                    ).time()
-                ).strftime("%H:%M"),
-                "start_hour": _s.start_time.hour,
-                "start_min": _s.start_time.minute,
-                "duration": _s.duration_minutes,
-                "is_own": _s.contract == student,
-            }
-            busy_by_date_week.setdefault(_s.date, []).append(_entry)
-        _w_start_aware = _make_aware2(_dt_mod.datetime.combine(week_start, _dt_mod.time.min))
-        _w_end_aware = _make_aware2(
-            _dt_mod.datetime.combine(week_end + _dt_mod.timedelta(days=1), _dt_mod.time.min)
-        )
-        _blocked_week = _BT2.objects.filter(
-            user=tutor, start_datetime__lt=_w_end_aware, end_datetime__gt=_w_start_aware
-        )
-        for _bt in _blocked_week:
-            _bt_start_local = _localtime(_bt.start_datetime).replace(tzinfo=None)
-            _bt_end_local = _localtime(_bt.end_datetime).replace(tzinfo=None)
-            _bt_date = _bt_start_local.date()
-            while _bt_date <= _bt_end_local.date() and _bt_date <= week_end:
-                if _bt_date >= week_start:
-                    _bt_start_t = (
-                        _bt_start_local
-                        if _bt_date == _bt_start_local.date()
-                        else _dt_mod.datetime.combine(_bt_date, _dt_mod.time.min)
-                    )
-                    _bt_end_t = (
-                        _bt_end_local
-                        if _bt_date == _bt_end_local.date()
-                        else _dt_mod.datetime.combine(_bt_date, _dt_mod.time(23, 59))
-                    )
-                    _entry = {
-                        "start": _bt_start_t.strftime("%H:%M"),
-                        "end": _bt_end_t.strftime("%H:%M"),
-                        "start_hour": _bt_start_t.hour,
-                        "start_min": _bt_start_t.minute,
-                        "duration": int((_bt_end_t - _bt_start_t).total_seconds() / 60),
-                        "is_own": False,
-                    }
-                    busy_by_date_week.setdefault(_bt_date, []).append(_entry)
-                _bt_date += _dt_mod.timedelta(days=1)
-
-        weekdays = []
-        for i in range(7):
-            d = week_start + _dt.timedelta(days=i)
-            weekdays.append(
-                {
-                    "date": d,
-                    "name": weekday_names[i],
-                    "name_short": weekday_names_short[i],
-                    "is_today": d == today,
-                    "is_past": d < today,
-                    "lessons": lessons_by_date.get(d, []),
-                    "busy": busy_by_date_week.get(d, []),
-                }
-            )
-
-        prev_week = week_start - _dt.timedelta(days=7)
-        next_week = week_start + _dt.timedelta(days=7)
-
         context = {
             "student": student,
             "portal_user": portal_user,
-            "weekdays": weekdays,
-            "week_start": week_start,
-            "week_end": week_end,
-            "prev_week": prev_week,
-            "next_week": next_week,
-            "today": today,
-            "hours": list(range(7, 22)),
-            "tutor_timezone": getattr(
-                getattr(student.user, "profile", None), "timezone", "Europe/Berlin"
-            )
-            or "Europe/Berlin",
+            **_build_week_calendar(student, year, month, day),
         }
 
         if portal_user.role == "parent":
