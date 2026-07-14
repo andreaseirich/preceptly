@@ -53,11 +53,17 @@ class StudentPortalLink(models.Model):
 
 
 class ParentStudentLink(models.Model):
+    """Verknüpft einen Portal-Account mit einem Vertrag (Kind).
+
+    Trotz des Namens nicht mehr auf role="parent" beschränkt: ein Account
+    kann sowohl sein "eigener" Vertrag (Ein-Kind-Fall) als auch mehrere
+    Kinder-Verträge (vom Tutor manuell verknüpfte Familie) über diese
+    Tabelle verwalten."""
+
     parent = models.ForeignKey(
         PortalUser,
         on_delete=models.CASCADE,
         related_name="child_links",
-        limit_choices_to={"role": "parent"},
     )
     contract = models.ForeignKey(
         "contracts.Contract", on_delete=models.CASCADE, related_name="parent_links"
