@@ -41,7 +41,13 @@
     </div>
     
     <button type="button" onclick="loadLessons()" class="btn">{% trans "Show Preview" %}</button>
-    
+
+    {% if period_error %}
+    <div class="alert-warning" role="alert" style="margin-top: 20px;">
+        <p style="margin: 0;">{{ period_error }}</p>
+    </div>
+    {% endif %}
+
     {% if billable_lessons %}
     {% if tutorspace_show_tier_explainer %}
     <div class="tutorflow-help-box" style="border-left: 4px solid rgba(33, 150, 243, 0.6);">

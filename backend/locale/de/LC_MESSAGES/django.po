@@ -505,9 +505,7 @@ msgstr "Vertrag (optional):"
 
 #: apps/billing/templates/billing/invoice_create.html:40
 msgid "If selected, only lessons from this contract will be billed."
-msgstr ""
-"Wenn ausgewählt, werden nur Stunden aus diesem Vertrag abgerechnet.Wenn "
-"ausgewählt, werden nur Unterrichtsstunden aus diesem Vertrag abgerechnet."
+msgstr "Wenn ausgewählt, werden nur Unterrichtsstunden aus diesem Vertrag abgerechnet."
 
 #: apps/billing/templates/billing/invoice_create.html:43
 msgid "Show Preview"

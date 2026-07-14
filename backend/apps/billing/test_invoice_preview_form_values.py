@@ -175,3 +175,17 @@ class InvoicePreviewFormValuesTest(TestCase):
         self.assertEqual(les.invoice_preview_amount, Decimal("24.00"))
         self.assertEqual(les.invoice_preview_amount, expected)
         self.assertEqual(context["preview_total_amount"], Decimal("24.00"))
+
+    def test_get_with_period_start_after_period_end_shows_error_not_500(self):
+        """Regression: GET-Vorschau mit period_start > period_end darf keinen 500 werfen."""
+        response = self.client.get(
+            "/billing/create/",
+            {
+                "period_start": "2026-07-16",
+                "period_end": "2026-07-15",
+                "institute": "__none__",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("period_error", response.context)
+        self.assertNotIn("billable_lessons", response.context)
