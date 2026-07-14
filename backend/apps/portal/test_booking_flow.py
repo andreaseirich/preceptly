@@ -14,7 +14,7 @@ from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.lessons.models import Session
-from apps.portal.models import PortalUser, StudentPortalLink
+from apps.portal.models import ParentStudentLink, PortalUser
 
 User = get_user_model()
 
@@ -78,8 +78,8 @@ class PortalBookingFlowTest(TestCase):
             tutor=self.tutor,
             role="student",
         )
-        StudentPortalLink.objects.create(
-            portal_user=self.portal_user,
+        ParentStudentLink.objects.create(
+            parent=self.portal_user,
             contract=self.contract,
             is_active=True,
         )

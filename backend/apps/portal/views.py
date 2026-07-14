@@ -174,7 +174,8 @@ class PortalDispatchView(View):
         portal_user = get_portal_user(request)
         if not portal_user:
             return redirect("portal:login")
-        if portal_user.role == "student":
+        # Genau ein aktives Kind: direkte Ansicht. 0 oder mehrere: Familien-Übersicht.
+        if _get_default_portal_student(portal_user):
             return redirect("portal:student_home")
         return redirect("portal:parent_home")
 
@@ -184,12 +185,11 @@ class StudentHomeView(View):
 
     def get(self, request):
         portal_user = get_portal_user(request)
-        if not portal_user or portal_user.role != "student":
+        if not portal_user:
             return redirect("portal:login")
-        link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-        if link.contract.user != portal_user.tutor:
-            return HttpResponseForbidden()
-        student = link.contract
+        student = _get_default_portal_student(portal_user)
+        if not student:
+            return redirect("portal:parent_home")
         from apps.lessons.models import Lesson
 
         today = _dt.date.today()
@@ -235,21 +235,21 @@ class StudentLessonListView(View):
 
     def get(self, request):
         portal_user = get_portal_user(request)
-        if not portal_user or portal_user.role != "student":
+        if not portal_user:
             return redirect("portal:login")
-        link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-        if link.contract.user != portal_user.tutor:
-            return HttpResponseForbidden()
+        student = _get_default_portal_student(portal_user)
+        if not student:
+            return redirect("portal:parent_home")
         from apps.lessons.models import Lesson
 
         lessons = Lesson.objects.filter(
-            contract=link.contract,
+            contract=student,
         ).order_by("-date", "-start_time")
         return render(
             request,
             self.template_name,
             {
-                "student": link.contract,
+                "student": student,
                 "lessons": lessons,
                 "portal_user": portal_user,
             },
@@ -261,8 +261,10 @@ class ParentHomeView(View):
 
     def get(self, request):
         portal_user = get_portal_user(request)
-        if not portal_user or portal_user.role != "parent":
+        if not portal_user:
             return redirect("portal:login")
+        if _get_default_portal_student(portal_user):
+            return redirect("portal:student_home")
         today = _dt.date.today()
         upcoming_qs = (
             _Lesson.objects.filter(
@@ -327,7 +329,7 @@ class ParentStudentDetailView(View):
 
     def get(self, request, student_pk):
         portal_user = get_portal_user(request)
-        if not portal_user or portal_user.role != "parent":
+        if not portal_user:
             return redirect("portal:login")
         link = get_object_or_404(
             ParentStudentLink, parent=portal_user, contract_id=student_pk, is_active=True
@@ -360,20 +362,7 @@ class PortalMessageView(View):
     template_name = "portal/messages.html"
 
     def _get_student_for_portal_user(self, portal_user, student_pk):
-        if portal_user.role == "student":
-            link = StudentPortalLink.objects.filter(
-                portal_user=portal_user, is_active=True, contract_id=student_pk
-            ).first()
-            if link and link.contract.user != portal_user.tutor:
-                return None
-            return link.contract if link else None
-        else:
-            link = ParentStudentLink.objects.filter(
-                parent=portal_user, contract_id=student_pk, is_active=True
-            ).first()
-            if link and link.contract.user != portal_user.tutor:
-                return None
-            return link.contract if link else None
+        return _get_portal_student(portal_user, student_pk)
 
     def get(self, request, student_pk):
         portal_user = get_portal_user(request)
@@ -522,12 +511,9 @@ class PortalPasswordResetRequestView(View):
         try:
             user = User.objects.get(email__iexact=email, portal_profile__isnull=False)
             portal_user = PortalUser.objects.get(user=user)
-            # Reuse invite_token mechanism for reset
-            if portal_user.role == "student":
-                link = StudentPortalLink.objects.get(portal_user=portal_user)
-            else:
-                # Parent: use ParentStudentLink (not StudentPortalLink)
-                link = ParentStudentLink.objects.filter(parent=portal_user).first()
+            # Reuse invite_token mechanism for reset (irrelevant which linked
+            # contract; reset_token identifies the account, not a specific child)
+            link = ParentStudentLink.objects.filter(parent=portal_user).first()
             if link:
                 link.reset_token = secrets.token_urlsafe(32)
                 link.reset_token_created_at = timezone.now()
@@ -640,20 +626,14 @@ class StudentLessonDetailView(View):
 
         from apps.lessons.models import Lesson
 
-        if portal_user.role == "student":
-            link = get_object_or_404(StudentPortalLink, portal_user=portal_user, is_active=True)
-            if link.contract.user != portal_user.tutor:
-                return HttpResponseForbidden()
-            lesson = get_object_or_404(Lesson, pk=pk, contract=link.contract)
-            student = link.contract
-        elif portal_user.role == "parent":
-            # Elternteil kann Stunden aller verknüpften Kinder sehen
-            parent_links = ParentStudentLink.objects.filter(parent=portal_user)
-            contract_ids = list(parent_links.values_list("contract_id", flat=True))
-            lesson = get_object_or_404(Lesson, pk=pk, contract_id__in=contract_ids)
-            student = lesson.contract
-        else:
-            return redirect("portal:login")
+        # Zugriff auf Stunden aller aktiv verknüpften Kinder (auch im Ein-Kind-Fall)
+        contract_ids = list(
+            ParentStudentLink.objects.filter(parent=portal_user, is_active=True).values_list(
+                "contract_id", flat=True
+            )
+        )
+        lesson = get_object_or_404(Lesson, pk=pk, contract_id__in=contract_ids)
+        student = lesson.contract
 
         return render(
             request,
@@ -672,21 +652,37 @@ class StudentLessonDetailView(View):
 
 
 def _get_portal_student(portal_user, student_pk):
-    """Gibt den Schüler zurück, falls portal_user Zugriff hat, sonst None."""
-    if portal_user.role == "student":
-        link = StudentPortalLink.objects.filter(
-            portal_user=portal_user, is_active=True, contract_id=student_pk
-        ).first()
-        if not link or link.contract.user != portal_user.tutor:
-            return None
-        return link.contract
-    else:
-        link = ParentStudentLink.objects.filter(
-            parent=portal_user, contract_id=student_pk, is_active=True
-        ).first()
-        if not link or link.contract.user != portal_user.tutor:
-            return None
-        return link.contract
+    """Gibt den Vertrag zurück, falls portal_user Zugriff darauf hat, sonst None."""
+    link = ParentStudentLink.objects.filter(
+        parent=portal_user, contract_id=student_pk, is_active=True
+    ).first()
+    if not link or link.contract.user_id != portal_user.tutor_id:
+        return None
+    return link.contract
+
+
+def _get_default_portal_student(portal_user):
+    """Vertrag bei genau einem aktiven Kind (Ein-Kind-Fall, implizite Auswahl).
+
+    Bei 0 oder 2+ Kindern gibt es keine eindeutige Standardauswahl —
+    der Aufrufer muss dann explizit über student_pk auswählen (Familien-
+    Übersicht)."""
+    links = list(ParentStudentLink.objects.filter(parent=portal_user, is_active=True)[:2])
+    if len(links) != 1:
+        return None
+    contract = links[0].contract
+    if contract.user_id != portal_user.tutor_id:
+        return None
+    return contract
+
+
+def _portal_redirect_after_action(portal_user, student):
+    """Zurück zur Einzelansicht (Ein-Kind-Fall) oder zur Kind-Detailseite
+    (Familien-Übersicht), je nachdem wie viele Kinder verknüpft sind."""
+    default = _get_default_portal_student(portal_user)
+    if default and default.pk == student.pk:
+        return redirect("portal:student_lessons")
+    return redirect("portal:parent_student_detail", student_pk=student.pk)
 
 
 def _get_active_contract(student):
@@ -991,9 +987,7 @@ class PortalSessionCancelView(View):
             messages.success(request, f"Termin am {date_str} wurde abgesagt.")
 
         # Zurück zur richtigen Übersicht
-        if portal_user.role == "student":
-            return redirect("portal:student_lessons")
-        return redirect("portal:parent_student_detail", student_pk=student.pk)
+        return _portal_redirect_after_action(portal_user, student)
 
 
 class PortalSessionRescheduleView(View):
@@ -1059,9 +1053,7 @@ class PortalSessionRescheduleView(View):
             return HttpResponseForbidden()
         if session.status != "planned":
             messages.warning(request, "Nur geplante Termine können verschoben werden.")
-            if portal_user.role == "student":
-                return redirect("portal:student_lessons")
-            return redirect("portal:parent_student_detail", student_pk=student.pk)
+            return _portal_redirect_after_action(portal_user, student)
 
         date_str = request.POST.get("date", "").strip()
         time_str = request.POST.get("start_time", "").strip()
@@ -1113,9 +1105,7 @@ class PortalSessionRescheduleView(View):
             request,
             f"Termin vom {old_date.strftime('%d.%m.%Y')} auf {new_date.strftime('%d.%m.%Y')} um {new_time.strftime('%H:%M')} Uhr verschoben.",
         )
-        if portal_user.role == "student":
-            return redirect("portal:student_lessons")
-        return redirect("portal:parent_student_detail", student_pk=student.pk)
+        return _portal_redirect_after_action(portal_user, student)
 
 
 class PortalRecurringManageView(View):
@@ -1374,23 +1364,12 @@ class PortalMeetingWaitView(View):
         if not portal_user:
             return None, None
         lesson = get_object_or_404(Lesson, pk=lesson_pk)
-        if portal_user.role == "student":
-            link = StudentPortalLink.objects.filter(
-                portal_user=portal_user,
-                is_active=True,
-                contract=lesson.contract,
-            ).first()
-            if not link:
-                return None, None
-        elif portal_user.role == "parent":
-            has_access = ParentStudentLink.objects.filter(
-                parent=portal_user,
-                contract=lesson.contract,
-                is_active=True,
-            ).exists()
-            if not has_access:
-                return None, None
-        else:
+        has_access = ParentStudentLink.objects.filter(
+            parent=portal_user,
+            contract=lesson.contract,
+            is_active=True,
+        ).exists()
+        if not has_access:
             return None, None
         return portal_user, lesson
 
@@ -1442,16 +1421,9 @@ class PortalMeetingStatusView(View):
         lesson = get_object_or_404(Lesson, pk=lesson_pk)
 
         # Zugangsprüfung
-        if portal_user.role == "student":
-            ok = StudentPortalLink.objects.filter(
-                portal_user=portal_user, is_active=True, contract=lesson.contract
-            ).exists()
-        elif portal_user.role == "parent":
-            ok = ParentStudentLink.objects.filter(
-                parent=portal_user, contract=lesson.contract, is_active=True
-            ).exists()
-        else:
-            ok = False
+        ok = ParentStudentLink.objects.filter(
+            parent=portal_user, contract=lesson.contract, is_active=True
+        ).exists()
 
         if not ok:
             return JsonResponse({"active": False})
@@ -1472,18 +1444,9 @@ class PortalCalendarView(View):
     template_name = "portal/calendar.html"
 
     def _get_student(self, portal_user, student_pk=None):
-        if portal_user.role == "student":
-            link = StudentPortalLink.objects.filter(portal_user=portal_user, is_active=True).first()
-            if not link:
-                return None
-            return link.contract
-        else:
-            if not student_pk:
-                return None
-            link = ParentStudentLink.objects.filter(
-                parent=portal_user, contract_id=student_pk
-            ).first()
-            return link.contract if link else None
+        if student_pk:
+            return _get_portal_student(portal_user, student_pk)
+        return _get_default_portal_student(portal_user)
 
     def get(self, request, student_pk=None):
         portal_user = get_portal_user(request)
@@ -1647,7 +1610,7 @@ class PortalCalendarView(View):
             or "Europe/Berlin",
         }
 
-        if portal_user.role == "parent":
+        if student_pk:
             context["student_pk"] = student_pk
 
         return render(request, self.template_name, context)
@@ -1789,18 +1752,9 @@ class PortalWeekView(View):
     template_name = "portal/calendar_week.html"
 
     def _get_student(self, portal_user, student_pk=None):
-        if portal_user.role == "student":
-            link = StudentPortalLink.objects.filter(portal_user=portal_user, is_active=True).first()
-            if not link:
-                return None
-            return link.contract
-        else:
-            if not student_pk:
-                return None
-            link = ParentStudentLink.objects.filter(
-                parent=portal_user, contract_id=student_pk
-            ).first()
-            return link.contract if link else None
+        if student_pk:
+            return _get_portal_student(portal_user, student_pk)
+        return _get_default_portal_student(portal_user)
 
     def get(self, request, student_pk=None):
         portal_user = get_portal_user(request)
@@ -1825,7 +1779,7 @@ class PortalWeekView(View):
             **_build_week_calendar(student, year, month, day),
         }
 
-        if portal_user.role == "parent":
+        if student_pk:
             context["student_pk"] = student_pk
 
         return render(request, self.template_name, context)
@@ -1849,12 +1803,11 @@ class PortalProfileEditView(View):
     template_name = "portal/profile_edit.html"
 
     def _get_contract(self, portal_user):
-        """Gibt den primären Vertrag des Portal-Nutzers zurück (Schüler oder erstes Kind bei Eltern)."""
-        from apps.portal.models import StudentPortalLink
-
+        """Gibt den primären Vertrag des Portal-Nutzers zurück (das eine
+        Kind im Ein-Kind-Fall, sonst das zuerst verknüpfte Kind)."""
         link = (
-            StudentPortalLink.objects.select_related("contract")
-            .filter(portal_user=portal_user, is_active=True)
+            ParentStudentLink.objects.select_related("contract")
+            .filter(parent=portal_user, is_active=True)
             .first()
         )
         return link.contract if link else None
@@ -1901,7 +1854,7 @@ class PortalProfileEditView(View):
                     .exists()
                 )
                 duplicate_contract = (
-                    _Contract.objects.filter(email__iexact=new_email, portal_link__isnull=False)
+                    _Contract.objects.filter(email__iexact=new_email, parent_links__isnull=False)
                     .exclude(pk=contract.pk if contract else None)
                     .exists()
                 )
