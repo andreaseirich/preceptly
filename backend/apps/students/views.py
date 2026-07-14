@@ -109,100 +109,44 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         from django.db import transaction
 
-        from apps.portal.models import StudentPortalLink
-
         contract = self.get_object()
 
         with transaction.atomic():
-            # Student portal account
-            spl = StudentPortalLink.objects.filter(contract=contract).first()
-            if spl:
-                portal_user = spl.portal_user
-                if portal_user.tutor != self.request.user:
-                    raise PermissionDenied
-                django_user = portal_user.user
-                portal_user.delete()
-                django_user.delete()
-
-            # Parent portal accounts (only if no other children)
+            # Verknüpfte Portal-Accounts: löschen, wenn dies ihre einzige
+            # Verknüpfung ist; sonst nur die Verknüpfung zu diesem Vertrag
+            # entfernen (Account bleibt für andere Kinder erhalten).
             for plink in ParentStudentLink.objects.filter(contract=contract).select_related(
                 "parent__user"
             ):
-                parent_portal = plink.parent
-                if (
-                    not ParentStudentLink.objects.filter(parent=parent_portal)
+                portal_user = plink.parent
+                if portal_user.tutor != self.request.user:
+                    raise PermissionDenied
+                only_link = (
+                    not ParentStudentLink.objects.filter(parent=portal_user)
                     .exclude(contract=contract)
                     .exists()
-                ):
-                    if parent_portal.tutor != self.request.user:
-                        raise PermissionDenied
-                    django_user = parent_portal.user
-                    parent_portal.delete()
+                )
+                if only_link:
+                    django_user = portal_user.user
+                    portal_user.delete()
                     django_user.delete()
+                else:
+                    plink.delete()
 
             messages.success(self.request, "Schüler erfolgreich gelöscht.")
             return super().form_valid(form)
 
 
-class PortalInviteCreateView(LoginRequiredMixin, View):
-    def post(self, request, pk):
-        from django.db import transaction
+class PortalInviteView(LoginRequiredMixin, View):
+    """Sendet eine Portal-Einladung für einen Vertrag.
 
-        from apps.portal.email_service import send_portal_invite
-        from apps.portal.models import StudentPortalLink
+    Eltern und Schüler teilen sich einen gemeinsamen Portal-Account pro
+    Kind. Wird dieselbe E-Mail-Adresse für ein zweites Kind desselben
+    Tutors eingeladen, wird der bestehende Account einfach mit dem
+    weiteren Vertrag verknüpft (Familien-Zugang), statt einen neuen
+    Account anzulegen.
+    """
 
-        contract = get_object_or_404(Contract, pk=pk, user=request.user)
-
-        with transaction.atomic():
-            # select_for_update verhindert Race Condition bei parallelen Requests
-            existing = (
-                StudentPortalLink.objects.select_for_update().filter(contract=contract).first()
-            )
-            if existing:
-                messages.info(request, "Portal-Zugang bereits vorhanden.")
-                return redirect("contracts:detail", pk=pk)
-
-            User = get_user_model()
-            username = f"portal_student_{contract.pk}_{secrets.token_hex(4)}"
-            portal_django_user = User.objects.create_user(
-                username=username,
-                email=contract.email or "",
-                password=secrets.token_hex(16),
-            )
-            portal_user = PortalUser.objects.create(
-                user=portal_django_user, role="student", tutor=request.user
-            )
-            spl = StudentPortalLink.objects.create(
-                portal_user=portal_user,
-                contract=contract,
-                invite_token=secrets.token_urlsafe(32),
-                invite_token_created_at=timezone.now(),
-            )
-
-            if contract.email:
-                try:
-                    send_portal_invite(contract, spl, contract.email, role="student")
-                    messages.success(
-                        request,
-                        f"Portal-Einladung gesendet an {contract.email}.",
-                    )
-                except Exception:
-                    logger.exception("Portal invite email failed for contract_id=%s", contract.pk)
-                    messages.warning(
-                        request,
-                        "Could not send email. Please try again.",
-                    )
-                    raise  # Rollback: kein verwaister Account ohne E-Mail-Versand
-            else:
-                messages.info(
-                    request,
-                    "Portal-Account erstellt. Kein E-Mail-Versand möglich.",
-                )
-
-        return redirect("contracts:detail", pk=pk)
-
-
-class PortalInviteParentView(LoginRequiredMixin, View):
     def post(self, request, pk):
         from django.db import transaction
 
@@ -210,78 +154,82 @@ class PortalInviteParentView(LoginRequiredMixin, View):
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
 
-        # E-Mail-Validierung: Längenbegrenzung + CRLF-Filter + Format-Prüfung
-        parent_email = (
-            request.POST.get("parent_email", "").strip() or (contract.parent_email or "").strip()
+        email = (
+            request.POST.get("email", "").strip()
+            or (contract.email or contract.parent_email or "").strip()
         )[:254]
-        if not parent_email or "\n" in parent_email or "\r" in parent_email:
+        if not email or "\n" in email or "\r" in email:
             messages.error(request, "Ungültige E-Mail-Adresse.")
             return redirect("contracts:detail", pk=pk)
         try:
-            validate_email(parent_email)
+            validate_email(email)
         except ValidationError:
             messages.error(request, "Ungültige E-Mail-Adresse.")
             return redirect("contracts:detail", pk=pk)
 
         User = get_user_model()
-        existing_user = User.objects.filter(email__iexact=parent_email).first()
-        if existing_user and hasattr(existing_user, "portal_profile"):
-            existing_portal = existing_user.portal_profile
 
-            # Cross-Tenant-Schutz: generische Fehlermeldung, kein Info-Leak
-            if existing_portal.tutor != request.user:
-                logger.warning(
-                    "Parent invite cross-tenant attempt: tutor=%s email_hash=%s",
-                    request.user.id,
-                    hash(parent_email.lower()),
-                )
-                messages.error(
-                    request,
-                    "Die Einladung konnte nicht erstellt werden. "
-                    "Bitte kontaktieren Sie den Support, falls das Problem bestehen bleibt.",
-                )
+        with transaction.atomic():
+            # select_for_update verhindert Race Condition bei parallelen Requests
+            existing_link = (
+                ParentStudentLink.objects.select_for_update().filter(contract=contract).first()
+            )
+            if existing_link:
+                messages.info(request, "Portal-Zugang bereits vorhanden.")
                 return redirect("contracts:detail", pk=pk)
 
-            existing_link = ParentStudentLink.objects.filter(
-                parent=existing_portal, contract=contract
-            ).first()
-            if existing_link:
-                messages.info(
-                    request,
-                    "Dieses Konto ist bereits als Elternteil verknüpft.",
-                )
-            else:
+            existing_user = User.objects.filter(email__iexact=email).first()
+            if existing_user and hasattr(existing_user, "portal_profile"):
+                existing_portal = existing_user.portal_profile
+
+                # Cross-Tenant-Schutz: generische Fehlermeldung, kein Info-Leak
+                if existing_portal.tutor != request.user:
+                    logger.warning(
+                        "Portal invite cross-tenant attempt: tutor=%s email_hash=%s",
+                        request.user.id,
+                        hash(email.lower()),
+                    )
+                    messages.error(
+                        request,
+                        "Die Einladung konnte nicht erstellt werden. "
+                        "Bitte kontaktieren Sie den Support, falls das Problem bestehen bleibt.",
+                    )
+                    return redirect("contracts:detail", pk=pk)
+
+                # Familien-Zugang: bestehenden Account mit diesem Vertrag verknüpfen
                 ParentStudentLink.objects.get_or_create(parent=existing_portal, contract=contract)
                 messages.warning(
                     request,
-                    "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto.",
+                    "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto — "
+                    "als Familien-Zugang mit diesem Kind verknüpft.",
                 )
-            return redirect("contracts:detail", pk=pk)
+                return redirect("contracts:detail", pk=pk)
 
-        with transaction.atomic():
-            username = f"parent_{contract.pk}_{secrets.token_hex(4)}"
-            user = User.objects.create_user(username=username, email=parent_email)
-            user.set_unusable_password()
-            user.save()
-            portal_user = PortalUser.objects.create(user=user, role="parent", tutor=request.user)
-            parent_link, _ = ParentStudentLink.objects.get_or_create(
-                parent=portal_user, contract=contract
+            username = f"portal_{contract.pk}_{secrets.token_hex(4)}"
+            portal_django_user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=secrets.token_hex(16),
             )
-            if not contract.parent_email:
-                contract.parent_email = parent_email
+            portal_user = PortalUser.objects.create(
+                user=portal_django_user, role="student", tutor=request.user
+            )
+            link = ParentStudentLink.objects.create(
+                parent=portal_user,
+                contract=contract,
+                invite_token=secrets.token_urlsafe(32),
+                invite_token_created_at=timezone.now(),
+            )
+            if not contract.parent_email and email != contract.email:
+                contract.parent_email = email
                 contract.save(update_fields=["parent_email"])
+
             try:
-                send_portal_invite(contract, parent_link, parent_email, role="parent")
-                messages.success(
-                    request,
-                    "Eltern-Einladung wurde gesendet.",
-                )
+                send_portal_invite(contract, link, email, role="student")
+                messages.success(request, f"Portal-Einladung gesendet an {email}.")
             except Exception:
-                logger.exception("Parent invite email failed for contract_id=%s", contract.pk)
-                messages.warning(
-                    request,
-                    "Could not send email. Please try again.",
-                )
+                logger.exception("Portal invite email failed for contract_id=%s", contract.pk)
+                messages.warning(request, "Could not send email. Please try again.")
                 raise  # Rollback: kein verwaister Account ohne E-Mail-Versand
 
         return redirect("contracts:detail", pk=pk)
@@ -290,20 +238,19 @@ class PortalInviteParentView(LoginRequiredMixin, View):
 class PortalInviteResendView(LoginRequiredMixin, View):
     def post(self, request, pk):
         from apps.portal.email_service import send_portal_invite
-        from apps.portal.models import StudentPortalLink
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        spl = get_object_or_404(StudentPortalLink, contract=contract)
+        link = get_object_or_404(ParentStudentLink, contract=contract)
 
         # H7 - Invite-Token nach erneutem Senden invalidieren und neu generieren
-        spl.invite_token = secrets.token_urlsafe(32)
-        spl.invite_token_created_at = timezone.now()
-        spl.is_active = False
-        spl.save(update_fields=["invite_token", "invite_token_created_at", "is_active"])
+        link.invite_token = secrets.token_urlsafe(32)
+        link.invite_token_created_at = timezone.now()
+        link.is_active = False
+        link.save(update_fields=["invite_token", "invite_token_created_at", "is_active"])
 
         # Email am Django-User auf aktuelle Contract-Email synchronisieren
         # (nicht nur wenn leer — auch wenn die Contract-Email nachträglich geändert wurde)
-        django_user = spl.portal_user.user
+        django_user = link.parent.user
         if contract.email and contract.email.lower() != (django_user.email or "").lower():
             django_user.email = contract.email
             django_user.save(update_fields=["email"])
@@ -313,12 +260,13 @@ class PortalInviteResendView(LoginRequiredMixin, View):
                 contract.email,
             )
 
-        if contract.email:
+        recipient_email = django_user.email or contract.email
+        if recipient_email:
             try:
-                send_portal_invite(contract, spl, contract.email, role="student")
+                send_portal_invite(contract, link, recipient_email, role="student")
                 messages.success(
                     request,
-                    f"Einladung erneut gesendet an {contract.email}.",
+                    f"Einladung erneut gesendet an {recipient_email}.",
                 )
             except Exception:
                 logger.exception("Portal resend email failed for contract_id=%s", contract.pk)
@@ -336,19 +284,19 @@ class PortalLoginReminderView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         from apps.portal.email_service import send_login_reminder
-        from apps.portal.models import StudentPortalLink
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
-        get_object_or_404(StudentPortalLink, contract=contract, is_active=True)
+        link = get_object_or_404(ParentStudentLink, contract=contract, is_active=True)
 
         tutor_name = request.user.get_full_name() or request.user.username
+        recipient_email = link.parent.user.email or contract.email
 
-        if contract.email:
+        if recipient_email:
             try:
-                send_login_reminder(contract, contract.email, tutor_name, role="student")
+                send_login_reminder(contract, recipient_email, tutor_name, role="student")
                 messages.success(
                     request,
-                    f"Login-Erinnerung gesendet an {contract.email}.",
+                    f"Login-Erinnerung gesendet an {recipient_email}.",
                 )
             except Exception:
                 logger.exception("Portal login reminder failed for contract_id=%s", contract.pk)
