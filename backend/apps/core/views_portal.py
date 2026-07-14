@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 
 from apps.contracts.models import Contract
-from apps.portal.models import ParentStudentLink, PortalMessage, StudentPortalLink
+from apps.portal.models import ParentStudentLink, PortalMessage
 
 
 class TutorMessageView(LoginRequiredMixin, TemplateView):
@@ -57,17 +57,11 @@ class TutorMessagesOverviewView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         from apps.contracts.models import Contract
 
-        student_contract_ids = set(
-            StudentPortalLink.objects.filter(
-                portal_user__tutor=request.user, is_active=True
-            ).values_list("contract_id", flat=True)
-        )
-        parent_contract_ids = set(
+        all_ids = set(
             ParentStudentLink.objects.filter(parent__tutor=request.user).values_list(
                 "contract_id", flat=True
             )
         )
-        all_ids = student_contract_ids | parent_contract_ids
 
         threads = []
         for contract in Contract.objects.filter(pk__in=all_ids, user=request.user):
