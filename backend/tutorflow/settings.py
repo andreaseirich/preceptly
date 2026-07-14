@@ -435,7 +435,7 @@ EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", default="10"))  # 10 seconds default
 
 # Email notification settings
 NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")
-ADMIN_NOTIFICATION_EMAIL = env("ADMIN_NOTIFICATION_EMAIL", default="contact@andicode.de")
+ADMIN_NOTIFICATION_EMAIL = env("ADMIN_NOTIFICATION_EMAIL", default="info@preceptly.de")
 ADMINS = [(ADMIN_NOTIFICATION_EMAIL, ADMIN_NOTIFICATION_EMAIL)]
 SITE_URL = env("SITE_URL", default="https://preceptly.de")
 
