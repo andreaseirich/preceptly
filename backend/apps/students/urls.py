@@ -20,18 +20,13 @@ urlpatterns = [
     ),
     path(
         "<int:pk>/portal-invite/",
-        views.PortalInviteCreateView.as_view(),
-        name="portal_invite_create",
+        views.PortalInviteView.as_view(),
+        name="portal_invite",
     ),
     path(
         "<int:pk>/progress-note/",
         views.ProgressNoteCreateView.as_view(),
         name="progress_note_create",
-    ),
-    path(
-        "<int:pk>/portal-invite-parent/",
-        views.PortalInviteParentView.as_view(),
-        name="portal_invite_parent",
     ),
     path(
         "<int:pk>/portal-invite-resend/",

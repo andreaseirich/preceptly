@@ -66,12 +66,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
         return super().get_queryset().filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
-        from apps.portal.models import (
-            ParentStudentLink,
-            PortalMessage,
-            ProgressNote,
-            StudentPortalLink,
-        )
+        from apps.portal.models import ParentStudentLink, PortalMessage, ProgressNote
 
         context = super().get_context_data(**kwargs)
         contract = context["contract"]
@@ -81,22 +76,20 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
             )
         else:
             context["monthly_planning_summary"] = []
-        context["portal_link"] = StudentPortalLink.objects.filter(contract=contract).first()
-        context["parent_links"] = ParentStudentLink.objects.filter(
-            contract=contract
-        ).select_related("parent")
+        portal_links = list(
+            ParentStudentLink.objects.filter(contract=contract).select_related("parent__user")
+        )
+        site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
+        for link in portal_links:
+            if not link.is_active:
+                link.activation_url = f"{site_url}/portal/activate/{link.invite_token}/"
+        context["portal_links"] = portal_links
         context["progress_notes"] = ProgressNote.objects.filter(contract=contract).order_by(
             "-created_at"
         )[:10]
         context["unread_messages"] = PortalMessage.objects.filter(
             contract=contract, read_by_tutor=False
         ).count()
-        portal_link = context.get("portal_link")
-        if portal_link:
-            site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
-            context["student_activation_url"] = (
-                f"{site_url}/portal/activate/{portal_link.invite_token}/"
-            )
         return context
 
 
