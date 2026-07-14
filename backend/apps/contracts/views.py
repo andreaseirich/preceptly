@@ -52,7 +52,50 @@ class ContractListView(LoginRequiredMixin, ListView):
             }
             for c in contracts
         ]
+        context["family_suggestions"] = self._detect_family_suggestions()
         return context
+
+    def _detect_family_suggestions(self):
+        """Findet Vertragspaare, die vermutlich zur selben Familie gehören
+        (gleicher Nachname oder gleiche Kontakt-E-Mail), aber noch keinen
+        gemeinsamen Portal-Account haben."""
+        from apps.portal.models import ParentStudentLink
+
+        all_contracts = list(Contract.objects.filter(user=self.request.user))
+        if len(all_contracts) < 2:
+            return []
+
+        # Auch noch nicht aktivierte Einladungen zählen als "schon verknüpft",
+        # damit bereits eingeladene/verknüpfte Paare nicht weiter vorgeschlagen werden.
+        links = ParentStudentLink.objects.filter(contract__user=self.request.user).values_list(
+            "contract_id", "parent_id"
+        )
+        linked_accounts = {}
+        for contract_id, parent_id in links:
+            linked_accounts.setdefault(contract_id, set()).add(parent_id)
+
+        suggestions = []
+        for i, a in enumerate(all_contracts):
+            for b in all_contracts[i + 1 :]:
+                shared_account = linked_accounts.get(a.pk, set()) & linked_accounts.get(b.pk, set())
+                if shared_account:
+                    continue
+                same_name = bool(
+                    a.last_name.strip()
+                    and a.last_name.strip().lower() == b.last_name.strip().lower()
+                )
+                a_emails = {e.lower() for e in [a.email, a.parent_email] if e}
+                b_emails = {e.lower() for e in [b.email, b.parent_email] if e}
+                same_email = bool(a_emails & b_emails)
+                if same_name or same_email:
+                    suggestions.append(
+                        {
+                            "a": a,
+                            "b": b,
+                            "reason": "email" if same_email else "name",
+                        }
+                    )
+        return suggestions
 
 
 class ContractDetailView(LoginRequiredMixin, DetailView):
