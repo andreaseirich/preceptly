@@ -187,6 +187,12 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
 
         parsed_start = _safe_date(period_start)
         parsed_end = _safe_date(period_end)
+        if parsed_start is not None and parsed_end is not None and parsed_start > parsed_end:
+            context["period_error"] = _("The end date must not be before the start date.")
+            context["period_start"] = parsed_start
+            context["period_end"] = parsed_end
+            return context
+
         if parsed_start is not None and parsed_end is not None:
             contract = None
             parsed_contract_id = _safe_int(contract_id)
