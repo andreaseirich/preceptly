@@ -62,7 +62,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def _load_room_and_authorize(self, token, user, portal_user_id=None):
         from apps.meeting.models import MeetingRoom
-        from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
+        from apps.portal.models import ParentStudentLink, PortalUser
 
         try:
             room = MeetingRoom.objects.select_related("lesson__contract__user").get(token=token)
@@ -86,14 +86,9 @@ class MeetingConsumer(AsyncWebsocketConsumer):
         except PortalUser.DoesNotExist:
             return room, False, None, False
 
-        has_access = (
-            StudentPortalLink.objects.filter(
-                portal_user=pu, contract=contract, is_active=True
-            ).exists()
-            or ParentStudentLink.objects.filter(
-                parent=pu, contract=contract, is_active=True
-            ).exists()
-        )
+        has_access = ParentStudentLink.objects.filter(
+            parent=pu, contract=contract, is_active=True
+        ).exists()
         if not has_access:
             return room, False, None, False
 

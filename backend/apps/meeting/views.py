@@ -18,7 +18,7 @@ from django.views import View
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
-from apps.portal.models import ParentStudentLink, StudentPortalLink
+from apps.portal.models import ParentStudentLink
 from apps.portal.views import get_portal_user
 
 logger = logging.getLogger(__name__)
@@ -54,16 +54,9 @@ class MeetingDocumentUploadView(View):
 
         # Zugangsprüfung (autorisierter Teilnehmer dieses Meetings?)
         if portal_user:
-            if portal_user.role == "student":
-                ok = StudentPortalLink.objects.filter(
-                    portal_user=portal_user, is_active=True, contract=lesson.contract
-                ).exists()
-            elif portal_user.role == "parent":
-                ok = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract, is_active=True
-                ).exists()
-            else:
-                ok = False
+            ok = ParentStudentLink.objects.filter(
+                parent=portal_user, contract=lesson.contract, is_active=True
+            ).exists()
         elif request.user.is_authenticated and lesson.contract.user == request.user:
             ok = True
         else:
@@ -133,16 +126,9 @@ class MeetingDocumentServeView(View):
         portal_user = get_portal_user(request)
 
         if portal_user:
-            if portal_user.role == "student":
-                ok = StudentPortalLink.objects.filter(
-                    portal_user=portal_user, is_active=True, contract=lesson.contract
-                ).exists()
-            elif portal_user.role == "parent":
-                ok = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract, is_active=True
-                ).exists()
-            else:
-                ok = False
+            ok = ParentStudentLink.objects.filter(
+                parent=portal_user, contract=lesson.contract, is_active=True
+            ).exists()
         elif request.user.is_authenticated and lesson.contract.user == request.user:
             ok = True
         else:
@@ -197,16 +183,9 @@ class MeetingDocumentDeleteView(View):
 
         portal_user = get_portal_user(request)
         if portal_user:
-            if portal_user.role == "student":
-                ok = StudentPortalLink.objects.filter(
-                    portal_user=portal_user, is_active=True, contract=lesson.contract
-                ).exists()
-            elif portal_user.role == "parent":
-                ok = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract, is_active=True
-                ).exists()
-            else:
-                ok = False
+            ok = ParentStudentLink.objects.filter(
+                parent=portal_user, contract=lesson.contract, is_active=True
+            ).exists()
         elif request.user.is_authenticated and lesson.contract.user == request.user:
             ok = True
         else:
@@ -282,32 +261,27 @@ class MeetingRoomView(View):
                 },
             )
 
-        # ── 2. Portal-Nutzer (Schüler / Elternteil) ───────────────────────────
+        # ── 2. Portal-Nutzer (Ein-Kind-Konto / Familien-Konto) ────────────────
         portal_user = get_portal_user(request)
         if portal_user:
-            if portal_user.role == "student":
-                link = StudentPortalLink.objects.filter(
-                    portal_user=portal_user, is_active=True, contract=lesson.contract
-                ).first()
-                if not link:
-                    return HttpResponseForbidden("Kein Zugriff auf dieses Meeting.")
+            from apps.portal.views import _get_default_portal_student
+
+            has_access = ParentStudentLink.objects.filter(
+                parent=portal_user, contract=lesson.contract, is_active=True
+            ).exists()
+            if not has_access:
+                return HttpResponseForbidden("Kein Zugriff auf dieses Meeting.")
+
+            # Ein-Kind-Konto: eigener Name + eigene Stunden-URL.
+            # Familien-Konto (0 oder 2+ Kinder): Name des Kontoinhabers + Familienübersicht.
+            default_student = _get_default_portal_student(portal_user)
+            if default_student and default_student.pk == lesson.contract.pk:
                 display_name = lesson.contract.full_name
-            elif portal_user.role == "parent":
-                has_access = ParentStudentLink.objects.filter(
-                    parent=portal_user, contract=lesson.contract, is_active=True
-                ).exists()
-                if not has_access:
-                    return HttpResponseForbidden("Kein Zugriff auf dieses Meeting.")
+                back_url = f"/portal/student/lessons/{lesson.pk}/"
+            else:
                 display_name = (
                     portal_user.user.get_full_name() or portal_user.user.username
                 ) + " (Elternteil)"
-            else:
-                return HttpResponseForbidden()
-
-            # Zurück-URL rollenabhängig
-            if portal_user.role == "student":
-                back_url = f"/portal/student/lessons/{lesson.pk}/"
-            else:
                 back_url = "/portal/parent/"
 
             return render(
