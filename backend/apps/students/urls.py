@@ -24,6 +24,11 @@ urlpatterns = [
         name="portal_invite",
     ),
     path(
+        "<int:pk>/link-family/<int:other_pk>/",
+        views.FamilyLinkView.as_view(),
+        name="link_family",
+    ),
+    path(
         "<int:pk>/progress-note/",
         views.ProgressNoteCreateView.as_view(),
         name="progress_note_create",

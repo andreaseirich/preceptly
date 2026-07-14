@@ -7,6 +7,24 @@
 <h1>Schüler</h1>
 <a href="{% url 'contracts:create' %}" class="btn">Neuer Schüler</a>
 
+{% if family_suggestions %}
+<div class="box-section" style="margin-top: 1em; margin-bottom: 1.5em;">
+  <h3 style="margin-top: 0;">Mögliche Familien erkannt</h3>
+  {% for s in family_suggestions %}
+  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+    <span>
+      <strong>{{ s.a.full_name }}</strong> und <strong>{{ s.b.full_name }}</strong>
+      {% if s.reason == "email" %}(gleiche Kontakt-E-Mail){% else %}(gleicher Nachname){% endif %}
+    </span>
+    <form method="post" action="{% url 'students:link_family' s.a.pk s.b.pk %}" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn-sm btn-sm-primary">Als Familie verknüpfen</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <table aria-label="Schülerliste">
     <thead>
         <tr>

@@ -137,6 +137,55 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
             return super().form_valid(form)
 
 
+class FamilyLinkView(LoginRequiredMixin, View):
+    """Verknüpft zwei Verträge desselben Tutors zu einem gemeinsamen
+    Portal-Familien-Konto (übergeordnete Mehrkind-Ansicht)."""
+
+    def post(self, request, pk, other_pk):
+        from apps.portal.models import ParentStudentLink
+
+        contract_a = get_object_or_404(Contract, pk=pk, user=request.user)
+        contract_b = get_object_or_404(Contract, pk=other_pk, user=request.user)
+
+        link_a = ParentStudentLink.objects.filter(contract=contract_a).first()
+        link_b = ParentStudentLink.objects.filter(contract=contract_b).first()
+
+        if not link_a and not link_b:
+            messages.error(
+                request,
+                "Bitte zuerst mindestens eines der beiden Kinder zum Portal einladen.",
+            )
+            return redirect("contracts:list")
+
+        if link_a and link_b:
+            if link_a.parent_id == link_b.parent_id:
+                messages.info(request, "Diese beiden Kinder sind bereits verknüpft.")
+                return redirect("contracts:list")
+            # Beide haben schon einen eigenen Account: Account von A wird zum
+            # Familien-Konto; der separate Account von B wird deaktiviert
+            # (Nachrichtenhistorie bleibt erhalten, kein Löschen).
+            account = link_a.parent
+            other_django_user = link_b.parent.user
+            link_b.is_active = False
+            link_b.save(update_fields=["is_active"])
+            if other_django_user.is_active:
+                other_django_user.is_active = False
+                other_django_user.save(update_fields=["is_active"])
+            ParentStudentLink.objects.get_or_create(parent=account, contract=contract_b)
+        else:
+            existing_link = link_a or link_b
+            missing_contract = contract_b if link_a else contract_a
+            ParentStudentLink.objects.get_or_create(
+                parent=existing_link.parent, contract=missing_contract
+            )
+
+        messages.success(
+            request,
+            f"{contract_a.full_name} und {contract_b.full_name} als Familie verknüpft.",
+        )
+        return redirect("contracts:list")
+
+
 class PortalInviteView(LoginRequiredMixin, View):
     """Sendet eine Portal-Einladung für einen Vertrag.
 
