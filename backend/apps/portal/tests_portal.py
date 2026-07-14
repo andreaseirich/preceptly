@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
+from apps.portal.models import ParentStudentLink, PortalUser
 
 User = get_user_model()
 
@@ -42,8 +42,11 @@ def _make_contract(tutor):
 
 
 def _make_student_link(portal_user, contract, active=True):
-    return StudentPortalLink.objects.create(
-        portal_user=portal_user,
+    """Alias für _make_parent_link: seit der Zusammenlegung von Eltern-
+    und Schüler-Portal-Accounts läuft jede Vertragsverknüpfung über
+    ParentStudentLink, unabhängig von PortalUser.role."""
+    return ParentStudentLink.objects.create(
+        parent=portal_user,
         contract=contract,
         is_active=active,
     )
@@ -175,8 +178,8 @@ class PortalLoginViewTest(TestCase):
         tutor = _make_tutor("tutor_prod_flow")
         portal_user = PortalUser.objects.create(user=user, role="student", tutor=tutor)
         contract = _make_contract(tutor)
-        StudentPortalLink.objects.create(
-            portal_user=portal_user,
+        ParentStudentLink.objects.create(
+            parent=portal_user,
             contract=contract,
             invite_token="prod-flow-token-abc",
             invite_token_created_at=timezone.now(),
@@ -330,16 +333,20 @@ class PortalFileUploadValidationTest(TestCase):
 
 
 class PortalAccessControlTest(TestCase):
-    """Unauthenticated requests must be redirected to login."""
+    """Unauthenticated requests must be redirected to login. Ein-Kind-Konten
+    landen auf der Einzelansicht, Mehrkind-Konten auf der Familienübersicht."""
 
     def setUp(self):
         self.client = Client()
         self.tutor = _make_tutor("tutor_access")
         self.contract = _make_contract(self.tutor)
+        self.contract2 = _make_contract(self.tutor)
         self.student_pu = _make_portal_user(self.tutor, "student", "access_student", "accpass")
         _make_student_link(self.student_pu, self.contract, active=True)
+        # Mehrkind-Konto: zwei aktive Verknüpfungen -> Familienübersicht
         self.parent_pu = _make_portal_user(self.tutor, "parent", "access_parent", "accparent")
         _make_parent_link(self.parent_pu, self.contract, active=True)
+        _make_parent_link(self.parent_pu, self.contract2, active=True)
 
     def _assert_requires_login(self, url):
         resp = self.client.get(url)
@@ -373,21 +380,30 @@ class PortalAccessControlTest(TestCase):
     def test_calendar_redirects_unauthenticated(self):
         self._assert_requires_login(reverse("portal:calendar"))
 
-    def test_student_cannot_access_parent_home(self):
+    def test_single_child_account_redirected_away_from_parent_home(self):
+        """Ein-Kind-Konto landet auf der Einzelansicht, nicht der Familienübersicht."""
         session = self.client.session
         session["portal_user_id"] = self.student_pu.pk
         session.save()
         resp = self.client.get(reverse("portal:parent_home"))
-        self.assertIn(resp.status_code, (302, 403))
+        self.assertRedirects(resp, reverse("portal:student_home"), fetch_redirect_response=False)
 
-    def test_parent_cannot_access_student_home(self):
+    def test_multi_child_account_redirected_away_from_student_home(self):
+        """Mehrkind-Konto hat keine eindeutige Standardauswahl -> Familienübersicht."""
         session = self.client.session
         session["portal_user_id"] = self.parent_pu.pk
         session.save()
         resp = self.client.get(reverse("portal:student_home"))
-        self.assertIn(resp.status_code, (302, 403))
+        self.assertRedirects(resp, reverse("portal:parent_home"), fetch_redirect_response=False)
 
-    def test_parent_home_renders_for_logged_in_parent(self):
+    def test_single_child_account_reaches_student_home(self):
+        session = self.client.session
+        session["portal_user_id"] = self.student_pu.pk
+        session.save()
+        resp = self.client.get(reverse("portal:student_home"))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_parent_home_renders_for_multi_child_account(self):
         session = self.client.session
         session["portal_user_id"] = self.parent_pu.pk
         session.save()
@@ -399,8 +415,14 @@ class PortalDispatchViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.tutor = _make_tutor("tutor_dispatch")
+        self.contract_a = _make_contract(self.tutor)
+        self.contract_b = _make_contract(self.tutor)
         self.student_pu = _make_portal_user(self.tutor, "student", "dispatch_student", "pw")
+        _make_student_link(self.student_pu, self.contract_a, active=True)
+        # Mehrkind-Konto: zwei aktive Verknüpfungen -> Familienübersicht
         self.parent_pu = _make_portal_user(self.tutor, "parent", "dispatch_parent", "pw")
+        _make_parent_link(self.parent_pu, self.contract_a, active=True)
+        _make_parent_link(self.parent_pu, self.contract_b, active=True)
 
     def test_dispatch_student_to_student_home(self):
         session = self.client.session
@@ -591,8 +613,8 @@ class PortalDocumentUploadMagicByteTest(TestCase):
         self.portal_user = PortalUser.objects.create(
             user=portal_user_account, role="student", tutor=self.tutor
         )
-        StudentPortalLink.objects.create(
-            portal_user=self.portal_user,
+        ParentStudentLink.objects.create(
+            parent=self.portal_user,
             contract=self.contract,
             is_active=True,
         )
@@ -649,8 +671,8 @@ class PortalDocumentDownloadTest(TestCase):
         self.portal_user = PortalUser.objects.create(
             user=portal_user_account, role="student", tutor=self.tutor
         )
-        StudentPortalLink.objects.create(
-            portal_user=self.portal_user,
+        ParentStudentLink.objects.create(
+            parent=self.portal_user,
             contract=self.contract,
             is_active=True,
         )
