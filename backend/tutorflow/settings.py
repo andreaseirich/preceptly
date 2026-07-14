@@ -366,6 +366,10 @@ LOGGING = {
             "level": "ERROR",
             "include_html": False,
         },
+        "bark": {
+            "class": "apps.core.bark_alert.BarkErrorHandler",
+            "level": "ERROR",
+        },
     },
     "loggers": {
         "apps.ai": {
@@ -384,7 +388,7 @@ LOGGING = {
             "propagate": False,
         },
         "django": {
-            "handlers": ["console", "mail_admins"],
+            "handlers": ["console", "mail_admins", "bark"],
             "level": "INFO",
         },
     },
@@ -438,6 +442,12 @@ NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")
 ADMIN_NOTIFICATION_EMAIL = env("ADMIN_NOTIFICATION_EMAIL", default="info@preceptly.de")
 ADMINS = [(ADMIN_NOTIFICATION_EMAIL, ADMIN_NOTIFICATION_EMAIL)]
 SITE_URL = env("SITE_URL", default="https://preceptly.de")
+
+# Bark-Push bei Fehlern (zusaetzlich zur Admin-E-Mail, ohne Alarmton, nur Fehlerquelle)
+BARK_SERVER_URL = env("BARK_SERVER_URL", default="")
+BARK_DEVICE_KEY = env("BARK_DEVICE_KEY", default="")
+BARK_AUTH_USER = env("BARK_AUTH_USER", default="")
+BARK_AUTH_PASSWORD = env("BARK_AUTH_PASSWORD", default="")
 
 # Stripe (subscription payments for Premium)
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
