@@ -242,3 +242,71 @@ class InstituteFilterTest(TestCase):
         self.assertIsNotNone(invoice)
         self.assertEqual(invoice.items.count(), 1)
         self.assertEqual(invoice.payer_name, "Institut Alpha")
+
+    def test_unscoped_invoice_excludes_independently_billed_institutes(self):
+        """Regression test: creating an unscoped ("all institutes") invoice for
+        private + regular-institute lessons must NOT sweep in lessons from an
+        institute with its own billing configuration (e.g. tiered pay or a
+        tutor-no-show rule, like TutorSpace). Otherwise those lessons get marked
+        paid and linked to the wrong invoice, and silently disappear from a later,
+        dedicated invoice created for that institute.
+        """
+        tutorspace = Institute.objects.create(
+            user=self.user,
+            institute_name="TutorSpace",
+            unpaid_on_tutor_no_show=True,
+        )
+        contract_tutorspace = Contract.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="TutorSpaceStudent",
+            institute_fk=tutorspace,
+            hourly_rate=Decimal("28.00"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
+            end_date=date(2025, 12, 31),
+            is_active=True,
+        )
+        period_start = date(2025, 5, 1)
+        period_end = date(2025, 5, 31)
+
+        Lesson.objects.create(
+            contract=self.contract_a,
+            date=date(2025, 5, 5),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        Lesson.objects.create(
+            contract=self.contract_private,
+            date=date(2025, 5, 6),
+            start_time=time(11, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        tutorspace_lesson = Lesson.objects.create(
+            contract=contract_tutorspace,
+            date=date(2025, 5, 7),
+            start_time=time(12, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+
+        # Create the first invoice unscoped (no institute filter) - as done when
+        # invoicing Abacus/private lessons together without singling out TutorSpace.
+        InvoiceService.create_invoice_from_lessons(period_start, period_end, user=self.user)
+
+        tutorspace_lesson.refresh_from_db()
+        self.assertEqual(
+            tutorspace_lesson.status,
+            "taught",
+            "TutorSpace lesson must remain billable, not be swept into the unscoped invoice.",
+        )
+        self.assertFalse(tutorspace_lesson.invoice_items.exists())
+
+        # A dedicated invoice for TutorSpace must now find its lesson.
+        tutorspace_invoice = InvoiceService.create_invoice_from_lessons(
+            period_start, period_end, institute=tutorspace, user=self.user
+        )
+        self.assertEqual(tutorspace_invoice.items.count(), 1)
+        self.assertEqual(tutorspace_invoice.items.first().lesson_id, tutorspace_lesson.pk)

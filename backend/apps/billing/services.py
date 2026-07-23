@@ -21,6 +21,32 @@ from apps.lessons.models import Lesson
 logger = logging.getLogger(__name__)
 
 
+def _independently_billed_institute_ids(candidate_queryset):
+    """IDs of institutes referenced by ``candidate_queryset`` that carry their own
+    billing configuration (tiered pay or a tutor-no-show rule).
+
+    Such institutes are distinct billing contexts (own payer, own rate logic) and must
+    only be invoiced when explicitly selected. They must never be swept into an
+    unscoped "All institutes" invoice, otherwise their sessions get marked paid /
+    linked to that invoice and silently disappear from a later, dedicated invoice for
+    that institute (see the multi-institute overlapping-period regression test).
+    """
+    from apps.contracts.models import Institute
+
+    institute_ids = set(
+        candidate_queryset.exclude(contract__institute_fk__isnull=True)
+        .values_list("contract__institute_fk_id", flat=True)
+        .distinct()
+    )
+    if not institute_ids:
+        return []
+    return [
+        inst.pk
+        for inst in Institute.objects.filter(pk__in=institute_ids)
+        if resolve_institute_billing_config(inst) is not None
+    ]
+
+
 class InvoiceService:
     """Service für Invoice-Operationen."""
 
@@ -71,6 +97,16 @@ class InvoiceService:
             queryset = queryset.filter(contract__institute_fk__isnull=True)
         elif institute:
             queryset = queryset.filter(contract__institute_fk_id=institute)
+        elif not contract_id:
+            # Fully unscoped ("all institutes", no specific contract) query:
+            # institutes with their own billing configuration are distinct billing
+            # contexts and must only be invoiced when explicitly selected (by
+            # institute or by one of their contracts), otherwise their lessons get
+            # swept into this invoice, marked paid, and silently disappear from a
+            # later, dedicated invoice for that institute.
+            excluded_institute_ids = _independently_billed_institute_ids(queryset)
+            if excluded_institute_ids:
+                queryset = queryset.exclude(contract__institute_fk_id__in=excluded_institute_ids)
         if user:
             queryset = queryset.filter(contract__user=user)
 
