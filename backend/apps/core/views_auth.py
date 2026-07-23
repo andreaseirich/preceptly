@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class TutorFlowLoginView(LoginView):
-    """Custom login view for TutorFlow."""
+    """Custom login view for Preceptly."""
 
     template_name = "core/login.html"
     redirect_authenticated_user = True
@@ -60,7 +60,7 @@ class TutorFlowLoginView(LoginView):
 
 
 class TutorFlowLogoutView(LogoutView):
-    """Custom logout view for TutorFlow."""
+    """Custom logout view for Preceptly."""
 
     next_page = reverse_lazy("core:login")
 
@@ -112,7 +112,7 @@ class RegisterView(CreateView):
         body += f"E-Mail: {safe_email or '(keine Angabe)'}\n"
         try:
             send_mail(
-                subject=f"[TutorFlow] Neue Registrierung: {safe_username}",
+                subject=f"[Preceptly] Neue Registrierung: {safe_username}",
                 message=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[recipient],

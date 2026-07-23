@@ -1,8 +1,8 @@
-# Architecture – TutorFlow
+# Architecture – Preceptly
 
 ## Overview
 
-TutorFlow is a Django-based web application structured according to modern best practices. The architecture follows the principle of clear separation of responsibilities and modularity.
+Preceptly is a Django-based web application structured according to modern best practices. The architecture follows the principle of clear separation of responsibilities and modularity.
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@ TutorFlow is a Django-based web application structured according to modern best 
 
 ## Internationalization (i18n)
 
-TutorFlow is fully internationalized with English as the default language and German as a secondary language.
+Preceptly is fully internationalized with English as the default language and German as a secondary language.
 
 - **Default Language**: English (`en`)
 - **Supported Languages**: English (`en`), German (`de`)
@@ -533,7 +533,7 @@ The following entities form the core domain model and are implemented as Django 
 
 ### Why Service Layer?
 
-TutorFlow uses a service layer (e.g., `LessonConflictService`, `IncomeSelector`, `InvoiceService`) to:
+Preceptly uses a service layer (e.g., `LessonConflictService`, `IncomeSelector`, `InvoiceService`) to:
 
 - **Separation of Concerns**: Business logic is separated from views and models, making code more maintainable and testable
 - **Reusability**: Services can be used across multiple views, management commands, and API endpoints
@@ -542,7 +542,7 @@ TutorFlow uses a service layer (e.g., `LessonConflictService`, `IncomeSelector`,
 
 ### Why i18n + l10n?
 
-TutorFlow is designed for multilingual tutors, particularly in German-speaking regions:
+Preceptly is designed for multilingual tutors, particularly in German-speaking regions:
 
 - **Target Audience**: Many tutors work with students from different language backgrounds or operate in multilingual environments
 - **Professionalism**: Proper localization (dates, numbers, currency) shows attention to detail and respect for user preferences
@@ -795,7 +795,7 @@ The architecture is designed to be easily extended:
 
 ## Hackathon Demo Architecture
 
-TutorFlow is designed for reproducible hackathon demos with the following architecture decisions:
+Preceptly is designed for reproducible hackathon demos with the following architecture decisions:
 
 - **Mock LLM Mode**: `MOCK_LLM=1` is the default, using local samples (`docs/llm_samples.json`) instead of external API calls
 - **Deterministic Fixtures**: `backend/fixtures/demo_data.json` provides consistent demo data for reproducible scenarios

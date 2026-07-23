@@ -1,8 +1,8 @@
-# API Documentation – TutorFlow
+# API Documentation – Preceptly
 
 ## Overview
 
-This documentation describes the endpoints and views of TutorFlow. Django-based views with JSON responses for API endpoints.
+This documentation describes the endpoints and views of Preceptly. Django-based views with JSON responses for API endpoints.
 
 ## Status
 

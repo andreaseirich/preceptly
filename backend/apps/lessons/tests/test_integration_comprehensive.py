@@ -1,5 +1,5 @@
 """
-Comprehensive integration tests for TutorFlow workflows.
+Comprehensive integration tests for Preceptly workflows.
 Tests cover: Recurring Lesson generation, Conflict detection, Billing, Weekly Calendar.
 """
 

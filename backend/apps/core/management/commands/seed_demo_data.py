@@ -1,5 +1,5 @@
 """
-Management command for creating demo data for TutorFlow.
+Management command for creating demo data for Preceptly.
 
 Usage:
     python manage.py seed_demo_data           # Add demo data (idempotent for users)
@@ -35,7 +35,7 @@ from apps.lessons.recurring_service import RecurringLessonService
 
 
 class Command(BaseCommand):
-    help = "Creates demo data for TutorFlow"
+    help = "Creates demo data for Preceptly"
 
     def add_arguments(self, parser):
         parser.add_argument(

@@ -81,8 +81,8 @@ def test_email(request):
 
     try:
         send_mail(
-            subject="TutorFlow Test Email",
-            message="This is a test email from TutorFlow. If you receive this, email configuration is working correctly.",
+            subject="Preceptly Test Email",
+            message="This is a test email from Preceptly. If you receive this, email configuration is working correctly.",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[notification_email],
             fail_silently=False,

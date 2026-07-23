@@ -1,8 +1,8 @@
-# Deployment Guide – TutorFlow
+# Deployment Guide – Preceptly
 
 ## Overview
 
-This guide provides instructions for deploying TutorFlow in a production environment.
+This guide provides instructions for deploying Preceptly in a production environment.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide provides instructions for deploying TutorFlow in a production environ
 
 ## Database Setup
 
-TutorFlow uses an environment-first database configuration:
+Preceptly uses an environment-first database configuration:
 
 - **Production/CI**: Set `DATABASE_URL` (e.g. `postgresql://user:pass@host:5432/tutorflow`). The settings use `dj-database-url` to parse this value.
 - **Local/Demo fallback**: If `DATABASE_URL` is not set, SQLite is used at `backend/db.sqlite3`.
@@ -63,7 +63,7 @@ LLM_MODEL_NAME=gpt-3.5-turbo
 
 ## Production Settings
 
-TutorFlow uses **env-first configuration**. The main `settings.py` reads from environment variables. Ensure these are set:
+Preceptly uses **env-first configuration**. The main `settings.py` reads from environment variables. Ensure these are set:
 
 - `SECRET_KEY` – Required in production
 - `DEBUG=False` – Never use True in production
@@ -119,7 +119,7 @@ gunicorn tutorflow.wsgi:application --bind 0.0.0.0:8000 --workers 4
 **Systemd service** (`/etc/systemd/system/tutorflow.service`):
 ```ini
 [Unit]
-Description=TutorFlow Gunicorn daemon
+Description=Preceptly Gunicorn daemon
 After=network.target
 
 [Service]
@@ -218,7 +218,7 @@ psql -U tutorflow_user tutorflow < backup_20231205.sql
 
 ## Deployment with Docker
 
-Docker provides the easiest way to deploy TutorFlow in production.
+Docker provides the easiest way to deploy Preceptly in production.
 
 ### Prerequisites
 
@@ -300,7 +300,7 @@ For production with SSL, use a reverse proxy (e.g., Traefik) or configure nginx 
 
 ## Updates
 
-When updating TutorFlow:
+When updating Preceptly:
 
 1. Pull latest changes: `git pull`
 2. Activate virtual environment: `source venv/bin/activate`

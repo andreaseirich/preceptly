@@ -1,13 +1,13 @@
-# TutorFlow – CodeCraze Hackathon Submission
+# Preceptly – CodeCraze Hackathon Submission
 
 ## Title
-TutorFlow – AI-assisted tutoring operations with privacy-first design
+Preceptly – AI-assisted tutoring operations with privacy-first design
 
 ## Tagline
 AI-assisted tutoring ops with safe defaults
 
 ## Short Description (2–3 sentences)
-TutorFlow is a comprehensive web application for private tutors to manage students, contracts, lessons, and billing with intelligent conflict detection and AI-powered lesson planning. The application solves the challenge of organizing complex tutoring schedules while avoiding double bookings and maintaining clear financial oversight. Built with Django 6.0 and featuring a privacy-first AI integration with mock mode for demos, TutorFlow enables tutors to focus on teaching rather than administrative tasks.
+Preceptly is a comprehensive web application for private tutors to manage students, contracts, lessons, and billing with intelligent conflict detection and AI-powered lesson planning. The application solves the challenge of organizing complex tutoring schedules while avoiding double bookings and maintaining clear financial oversight. Built with Django 6.0 and featuring a privacy-first AI integration with mock mode for demos, Preceptly enables tutors to focus on teaching rather than administrative tasks.
 
 ## Inspiration
 
@@ -15,11 +15,11 @@ As a private tutor, I often experienced the same recurring problem: scattered in
 
 Existing tools are either too simple (pure calendars) or too complex (full CRM systems).
 I wanted something practical, fast, ethical, and secure — especially because tutoring involves minors and personal data.
-This became the motivation for TutorFlow: a structured, privacy-conscious management tool for tutors.
+This became the motivation for Preceptly: a structured, privacy-conscious management tool for tutors.
 
 ## What it does
 
-TutorFlow is a Django-based web application that allows tutors to:
+Preceptly is a Django-based web application that allows tutors to:
 - Manage students, contracts, planned hours, and monthly quotas
 - Schedule lessons in a weekly calendar with conflict detection
 - Automatically track income (taught / invoiced / paid)
@@ -28,27 +28,27 @@ TutorFlow is a Django-based web application that allows tutors to:
 - Use an LLM-powered lesson plan generator (with strict privacy controls)
 - Run a deterministic demo mode (MOCK_LLM) for safe hackathon evaluation
 
-TutorFlow supports English/German, includes a one-command demo setup, and offers a clear and secure workflow designed for real tutors.
+Preceptly supports English/German, includes a one-command demo setup, and offers a clear and secure workflow designed for real tutors.
 
 ## Why It's Unique
 
-TutorFlow isn't another generic calendar. It's a purpose-built operating system for tutors that uniquely combines AI-assisted lesson planning with strict business logic like contract quotas, conflict detection, and invoicing — all in one coherent workflow.
+Preceptly isn't another generic calendar. It's a purpose-built operating system for tutors that uniquely combines AI-assisted lesson planning with strict business logic like contract quotas, conflict detection, and invoicing — all in one coherent workflow.
 
 **What makes it different:**
 
-- **Not a generic calendar**: Most scheduling tools handle time slots, but TutorFlow understands tutoring-specific constraints: contract-based quotas, travel times, recurring lesson patterns, and billing relationships.
+- **Not a generic calendar**: Most scheduling tools handle time slots, but Preceptly understands tutoring-specific constraints: contract-based quotas, travel times, recurring lesson patterns, and billing relationships.
 
-- **Integrated business logic**: Unlike separate tools for scheduling, invoicing, and planning, TutorFlow integrates contract quotas, conflict detection (time + travel + quotas), automatic invoice generation, and AI lesson planning into a single workflow.
+- **Integrated business logic**: Unlike separate tools for scheduling, invoicing, and planning, Preceptly integrates contract quotas, conflict detection (time + travel + quotas), automatic invoice generation, and AI lesson planning into a single workflow.
 
 - **Domain-specific conflict engine**: The system detects three types of conflicts that matter to tutors: time overlaps (including travel), blocked personal time, and contract quota violations — automatically preventing double bookings and overcommitment.
 
 - **AI with privacy-first design**: The lesson planning feature uses LLM APIs, but with mandatory PII sanitization and a deterministic mock mode, ensuring no personal data leaves the system during demos or development.
 
-Most tools solve one of these problems. TutorFlow integrates all of them into a unified system designed specifically for the tutoring workflow.
+Most tools solve one of these problems. Preceptly integrates all of them into a unified system designed specifically for the tutoring workflow.
 
 ## Real World Impact
 
-TutorFlow directly addresses measurable pain points for private tutors:
+Preceptly directly addresses measurable pain points for private tutors:
 
 - **Prevents lost income**: Eliminates double bookings and quota overruns that can cost tutors hundreds of euros per month in missed or incorrectly billed lessons.
 
@@ -60,11 +60,11 @@ TutorFlow directly addresses measurable pain points for private tutors:
 
 - **Designed for real workflows**: Built for tutors working weekly with multiple students, varying contract terms, and complex scheduling constraints — not simplified use cases.
 
-The impact is measurable: tutors using TutorFlow can focus on teaching instead of administrative overhead, leading to better student outcomes and more sustainable tutoring businesses.
+The impact is measurable: tutors using Preceptly can focus on teaching instead of administrative overhead, leading to better student outcomes and more sustainable tutoring businesses.
 
 ## How we built it
 
-TutorFlow is built with modern Django 6.0 and demonstrates engineering maturity through deliberate architectural decisions:
+Preceptly is built with modern Django 6.0 and demonstrates engineering maturity through deliberate architectural decisions:
 
 **Clean Architecture & Service Layers:**
 - Domain-driven design with modular Django apps (students, contracts, lessons, billing, ai, core)
@@ -115,7 +115,7 @@ The architecture signals engineering maturity: not just tool usage, but thoughtf
 - Mock systems are crucial for stable demos and offline CI.
 - Documentation clarity significantly influences the evaluation experience for reviewers.
 
-## What's next for TutorFlow
+## What's next for Preceptly
 
 - A modern React or HTMX front-end for smoother interactions
 - Mobile-optimized week calendar
@@ -126,12 +126,12 @@ The architecture signals engineering maturity: not just tool usage, but thoughtf
 
 ## Hackathon Context
 
-TutorFlow is submitted to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge with no fixed theme. Projects are evaluated based on:
+Preceptly is submitted to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge with no fixed theme. Projects are evaluated based on:
 - **Uniqueness of the Idea**: How creative and original the solution is
 - **Real World Impact**: The practical value and potential adoption of the solution
 - **Technologies Used**: The technical sophistication and appropriate use of modern tools
 
-TutorFlow addresses all three criteria by solving a real problem with modern technology and a privacy-first approach.
+Preceptly addresses all three criteria by solving a real problem with modern technology and a privacy-first approach.
 
 ## How to run the demo
 

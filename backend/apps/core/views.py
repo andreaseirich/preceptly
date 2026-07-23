@@ -543,7 +543,7 @@ class TaxYearCsvView(LoginRequiredMixin, View):
             year = now.year
 
         response = HttpResponse(content_type="text/csv; charset=utf-8")
-        response["Content-Disposition"] = f'attachment; filename="tutorflow-einnahmen-{year}.csv"'
+        response["Content-Disposition"] = f'attachment; filename="preceptly-einnahmen-{year}.csv"'
         response.write("\ufeff")  # BOM for Excel UTF-8
 
         writer = csv.writer(response, delimiter=";")

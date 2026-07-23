@@ -1,4 +1,4 @@
-# TutorFlow – Judging Guide
+# Preceptly – Judging Guide
 
 Single-page orientation for reviewers/judges (CodeCraze Hackathon). Focus: fast-start demo, clear core flows, safety notes.
 
