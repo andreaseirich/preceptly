@@ -1,8 +1,8 @@
-# Ethical-Christian Guidelines – TutorFlow
+# Ethical-Christian Guidelines – Preceptly
 
 ## Principles
 
-TutorFlow is guided by ethical-Christian values that are reflected in development, code, and handling of user data.
+Preceptly is guided by ethical-Christian values that are reflected in development, code, and handling of user data.
 
 ### Core Principles
 
@@ -111,4 +111,4 @@ These principles should be reflected in the code:
 
 ## Continuous Review
 
-These guidelines are regularly reviewed and adjusted as needed to ensure that TutorFlow meets ethical standards.
+These guidelines are regularly reviewed and adjusted as needed to ensure that Preceptly meets ethical standards.

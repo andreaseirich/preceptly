@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-TutorFlow is currently in an early development stage (hackathon/early-stage project). At this time, only the `main` branch is actively maintained and supported.
+Preceptly is currently in an early development stage (hackathon/early-stage project). At this time, only the `main` branch is actively maintained and supported.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -10,7 +10,7 @@ TutorFlow is currently in an early development stage (hackathon/early-stage proj
 
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security issue in TutorFlow, please report it responsibly.
+We take security vulnerabilities seriously. If you discover a security issue in Preceptly, please report it responsibly.
 
 ### How to Report
 
@@ -51,11 +51,11 @@ All security-related information will be handled confidentially and will not be 
 - **No Prompt Logs in Demo Mode**: User prompts/responses are not persisted when running with mock mode.
 - **Sanitized Context Only**: Lesson plans are generated from sanitized context to reduce exposure of personal data.
 - **Opt-in for Production**: Live AI calls require setting `LLM_API_KEY` and disabling `MOCK_LLM` explicitly.
-- **Hackathon Demos**: During hackathon demos (e.g., CodeCraze Hackathon), TutorFlow runs in `MOCK_LLM` mode with synthetic data only; no real student data or real LLM calls are used.
+- **Hackathon Demos**: During hackathon demos (e.g., CodeCraze Hackathon), Preceptly runs in `MOCK_LLM` mode with synthetic data only; no real student data or real LLM calls are used.
 
 ## Security Best Practices
 
-When using TutorFlow:
+When using Preceptly:
 
 - **Never commit sensitive data** (API keys, passwords, real student data) to the repository
 - **Use environment variables** for configuration (see `docs/RAILWAY_DEPLOYMENT.md`)
@@ -84,10 +84,10 @@ CI runs `pip-audit` to check for known vulnerabilities. If a vulnerability is fo
 - **Our mitigation:**
   1. **`requirements.txt` pins Pygments from that git revision** so installs get the **patched source**, even though the package still self-reports version **2.19.2**.
   2. **CI** keeps `pip-audit --ignore-vuln CVE-2026-4539` until **Pygments > 2.19.2** exists on PyPI (otherwise the audit tool flags the metadata version only).
-- **TutorFlow:** The app does not use that lexer on untrusted user content; residual risk is mostly transitive/tooling (e.g. highlighting in dev dependencies).
+- **Preceptly:** The app does not use that lexer on untrusted user content; residual risk is mostly transitive/tooling (e.g. highlighting in dev dependencies).
 - **Follow-up:** When PyPI publishes a release **> 2.19.2**, switch to `Pygments==<version>`, remove the git pin, and **remove** the `pip-audit` ignore for this CVE.
 
 ## Acknowledgments
 
-We appreciate the security research community's efforts to help keep TutorFlow secure. Responsible disclosure helps protect all users of the application.
+We appreciate the security research community's efforts to help keep Preceptly secure. Responsible disclosure helps protect all users of the application.
 

@@ -88,7 +88,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    # TutorFlow apps
+    # Preceptly apps
     "apps.core",
     "apps.students",
     "apps.contracts",

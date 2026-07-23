@@ -1,4 +1,4 @@
-# Changelog – TutorFlow
+# Changelog – Preceptly
 
 All notable changes to this project will be documented in this file.
 
@@ -123,7 +123,7 @@ Security audit over commit range `2f22ea1..HEAD` (140 commits), covering Portal-
 
 ### Changed
 - **Documentation**: Adapted all documentation for CodeCraze Hackathon submission
-  - README.md: Updated hackathon references, added "How TutorFlow Fits CodeCraze Criteria" section, removed explicit GIF requirement
+  - README.md: Updated hackathon references, added "How Preceptly Fits CodeCraze Criteria" section, removed explicit GIF requirement
   - DEVPOST.md: Completely rewritten with CodeCraze structure (Inspiration, What it does, How we built it, Challenges, Accomplishments, What we learned, What's next)
   - SECURITY.md: Added note about hackathon demos running in MOCK_LLM mode
   - ARCHITECTURE.md: Added "Hackathon Demo Architecture" section, corrected drag-to-create references to click-to-create

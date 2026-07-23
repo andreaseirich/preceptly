@@ -1,7 +1,7 @@
 """
 Test that Django Admin is disabled and returns 404.
 
-TutorFlow does not expose the Django Admin interface for security and
+Preceptly does not expose the Django Admin interface for security and
 simplicity. The /admin/ URL must not be reachable.
 """
 

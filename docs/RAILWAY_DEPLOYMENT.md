@@ -1,8 +1,8 @@
-# Railway Deployment – TutorFlow
+# Railway Deployment – Preceptly
 
 ## Overview
 
-This guide explains how to deploy TutorFlow on Railway.app. Railway is the recommended platform for Django applications as it's easy to use and supports automatic deployments from GitHub.
+This guide explains how to deploy Preceptly on Railway.app. Railway is the recommended platform for Django applications as it's easy to use and supports automatic deployments from GitHub.
 
 ## Why Railway?
 

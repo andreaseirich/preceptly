@@ -1,8 +1,8 @@
-# CLAUDE.md – Preceptly / TutorFlow
+# CLAUDE.md – Preceptly
 
 ## Projekt-Übersicht
 
-Preceptly (ehemals TutorFlow) ist eine Django-Webanwendung für selbständige Tutoren zur Verwaltung von Schülern, Verträgen, Stunden, Abrechnung und KI-gestützter Unterrichtsplanung.
+Preceptly ist eine Django-Webanwendung für selbständige Tutoren zur Verwaltung von Schülern, Verträgen, Stunden, Abrechnung und KI-gestützter Unterrichtsplanung.
 
 ## Tech-Stack
 

@@ -1,4 +1,4 @@
-# TutorFlow
+# Preceptly
 
 [![CI Status](https://img.shields.io/badge/CI-Passing-brightgreen)](https://github.com/andreaseirich/tutorflow/actions)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
@@ -13,7 +13,7 @@
 
 ### 🎥 Demo Video
 
-[![TutorFlow Demo](https://img.youtube.com/vi/YUsSuPgR1XQ/maxresdefault.jpg)](https://youtu.be/YUsSuPgR1XQ?si=P2ucdtZZjWFqePLB)
+[![Preceptly Demo](https://img.youtube.com/vi/YUsSuPgR1XQ/maxresdefault.jpg)](https://youtu.be/YUsSuPgR1XQ?si=P2ucdtZZjWFqePLB)
 
 *Watch the full demo: [YouTube](https://youtu.be/YUsSuPgR1XQ?si=P2ucdtZZjWFqePLB)*
 
@@ -35,7 +35,7 @@ Existing tools are either too simple (generic calendars that ignore contract quo
 
 ### The Solution
 
-TutorFlow is a domain-specific operating system for tutors that uniquely combines:
+Preceptly is a domain-specific operating system for tutors that uniquely combines:
 - **Intelligent conflict detection** (time overlaps, travel constraints, contract quotas)
 - **Automated billing** with invoice generation from taught sessions
 - **AI-assisted lesson planning** with privacy-first design
@@ -103,7 +103,7 @@ Generate structured lesson plans using LLM APIs with privacy-first design—PII 
 
 ### Data Model
 
-TutorFlow's core data model follows a clear hierarchy:
+Preceptly's core data model follows a clear hierarchy:
 
 ```
 Students ←→ Contracts ←→ Sessions ←→ Invoices
@@ -165,7 +165,7 @@ To install a pre-commit hook that blocks forbidden paths (e.g. `.gitignore`, `.c
 
 ## Project Status
 
-TutorFlow is currently submitted to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge focused on creativity, real-world impact, and technology.
+Preceptly is currently submitted to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge focused on creativity, real-world impact, and technology.
 
 **Current Status:**
 - ✅ Core scheduling with conflict detection
