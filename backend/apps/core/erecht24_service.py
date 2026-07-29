@@ -71,7 +71,7 @@ def register_client(push_uri: str) -> dict | None:
             "cms": "Django",
             "cms_version": "6.0",
             "plugin_name": "Preceptly",
-            "author_mail": "impressum@andicode.de",
+            "author_mail": "info@preceptly.de",
         },
     )
 
