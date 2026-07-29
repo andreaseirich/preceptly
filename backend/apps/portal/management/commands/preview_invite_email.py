@@ -11,8 +11,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--to",
-            default="contact@andicode.de",
-            help="Recipient address (default: contact@andicode.de)",
+            default="info@preceptly.de",
+            help="Recipient address (default: info@preceptly.de)",
         )
 
     def handle(self, *args, **options):

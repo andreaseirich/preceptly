@@ -431,7 +431,7 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="andreaseirich2004@icloud.com")
-INVOICE_FROM_EMAIL = env("INVOICE_FROM_EMAIL", default="rechnung@andicode.de")
+INVOICE_FROM_EMAIL = env("INVOICE_FROM_EMAIL", default="noreply@preceptly.de")
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 # Email timeout configuration (for TimeoutSMTPEmailBackend)
 # Socket timeout for SMTP connections (prevents hanging)
