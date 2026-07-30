@@ -38,6 +38,9 @@ from apps.core.stripe_utils import (
 
 logger = logging.getLogger(__name__)
 
+# One-time free trial granted on a user's first subscription (see UserProfile.trial_used)
+TRIAL_PERIOD_DAYS = 30
+
 # Initialize Stripe API key once at module load time (not per-request)
 if hasattr(settings, "STRIPE_SECRET_KEY") and settings.STRIPE_SECRET_KEY:
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -220,6 +223,10 @@ class SubscriptionCheckoutView(View):
             or f"{base_url}{reverse('core:settings')}?checkout=cancelled"
         )
 
+        subscription_data = {"metadata": {"user_id": str(user.id)}}
+        if not profile.trial_used:
+            subscription_data["trial_period_days"] = TRIAL_PERIOD_DAYS
+
         try:
             session = stripe.checkout.Session.create(
                 mode="subscription",
@@ -233,7 +240,7 @@ class SubscriptionCheckoutView(View):
                 success_url=success_url,
                 cancel_url=cancel_url,
                 metadata={"user_id": str(user.id)},
-                subscription_data={"metadata": {"user_id": str(user.id)}},
+                subscription_data=subscription_data,
                 idempotency_key=f"checkout:{user.id}:{int(time.time() // 60)}",
             )
         except stripe.error.StripeError as e:
@@ -403,6 +410,10 @@ class StripeCheckoutView(View):
             else:
                 _maybe_update_stripe_customer_email(profile, user)
 
+        subscription_data = {"metadata": {"user_id": str(user.id)}}
+        if not profile.trial_used:
+            subscription_data["trial_period_days"] = TRIAL_PERIOD_DAYS
+
         try:
             session = stripe.checkout.Session.create(
                 mode="subscription",
@@ -411,7 +422,7 @@ class StripeCheckoutView(View):
                 success_url=success_url,
                 cancel_url=cancel_url,
                 metadata={"user_id": str(user.id)},
-                subscription_data={"metadata": {"user_id": str(user.id)}},
+                subscription_data=subscription_data,
                 idempotency_key=f"checkout:{user.id}:{int(time.time() // 60)}",
             )
         except stripe.error.StripeError as e:
@@ -642,12 +653,11 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
         profile.stripe_customer_id = session_customer or profile.stripe_customer_id
         if sub_id:
             profile.stripe_subscription_id = sub_id
-        profile.save(
-            update_fields=[
-                "stripe_customer_id",
-                "stripe_subscription_id",
-            ]
-        )
+        update_fields = ["stripe_customer_id", "stripe_subscription_id"]
+        if sub_status == "trialing" and not profile.trial_used:
+            profile.trial_used = True
+            update_fields.append("trial_used")
+        profile.save(update_fields=update_fields)
 
         if sub_status is not None:
             _set_premium(profile, is_premium_subscription_status(sub_status))
@@ -720,6 +730,11 @@ def _handle_subscription_created_or_updated(subscription: dict) -> None:
             update_fields=["stripe_subscription_id", "stripe_customer_id", "stripe_price_id"]
         )
         _set_premium(profile, is_premium)
+
+    if profile.referral_free_months_pending > 0:
+        from apps.core.referrals import apply_pending_referral_credit
+
+        apply_pending_referral_credit(profile)
 
 
 def _handle_subscription_deleted(subscription: dict) -> None:
@@ -805,5 +820,28 @@ def _handle_invoice_payment_failed(invoice: dict) -> None:
 
 
 def _handle_invoice_paid(invoice: dict) -> None:
-    """invoice.paid: no premium toggle, ensure no errors."""
-    pass
+    """invoice.paid: grant the referrer's free-month reward on the referred
+    user's first real (non-zero) payment. No premium toggle here."""
+    if (invoice.get("amount_paid") or 0) <= 0:
+        return
+    sub_id = _extract_invoice_subscription_id(invoice)
+    if not sub_id:
+        return
+    profile = UserProfile.objects.filter(stripe_subscription_id=sub_id).first()
+    if not profile:
+        return
+
+    invoice_customer_id = invoice.get("customer")
+    if invoice_customer_id and profile.stripe_customer_id:
+        if profile.stripe_customer_id != invoice_customer_id:
+            logger.error(
+                "SECURITY: customer_id mismatch profile=%s expected=%s got=%s",
+                profile.pk,
+                profile.stripe_customer_id,
+                invoice_customer_id,
+            )
+            return
+
+    from apps.core.referrals import grant_referral_reward_if_due
+
+    grant_referral_reward_if_due(profile)

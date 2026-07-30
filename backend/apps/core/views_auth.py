@@ -24,6 +24,7 @@ from apps.core.auth_throttle import (
 )
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
+from apps.core.referrals import ensure_referral_code, resolve_referrer_user
 from apps.core.utils_booking import ensure_public_booking_token
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,9 @@ class RegisterView(CreateView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect("core:dashboard")
+        ref_code = request.GET.get("ref") or request.POST.get("ref")
+        if ref_code:
+            request.session["referral_code"] = ref_code.strip().upper()[:12]
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -93,6 +97,12 @@ class RegisterView(CreateView):
                     profile.avv_accepted_at = timezone.now()
                     profile.save(update_fields=["avv_accepted_at"])
                 ensure_public_booking_token(profile)
+                ensure_referral_code(profile)
+                ref_code = self.request.session.pop("referral_code", None)
+                referrer = resolve_referrer_user(ref_code)
+                if referrer and referrer.pk != user.pk:
+                    profile.referred_by = referrer
+                    profile.save(update_fields=["referred_by"])
         except IntegrityError:
             form.add_error(None, _("Registration failed. Please try again."))
             return self.form_invalid(form)

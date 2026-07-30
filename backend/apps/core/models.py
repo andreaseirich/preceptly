@@ -154,6 +154,39 @@ class UserProfile(models.Model):
             '"Gemäß §19 Abs. 1 UStG wird keine Umsatzsteuer berechnet." zur Rechnung hinzu.'
         ),
     )
+    trial_used = models.BooleanField(
+        default=False,
+        help_text=_("True once the user's one-time free trial month has started."),
+    )
+    referral_code = models.CharField(
+        max_length=12,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=_("This user's own code to share for referrals."),
+    )
+    referred_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="referred_signups",
+        help_text=_("The user whose referral code was used at registration, if any."),
+    )
+    referral_reward_granted = models.BooleanField(
+        default=False,
+        help_text=_(
+            "True once this user's first paid invoice has granted their referrer's reward. "
+            "Prevents granting the reward again on later renewal invoices."
+        ),
+    )
+    referral_free_months_pending = models.PositiveIntegerField(
+        default=0,
+        help_text=_(
+            "Free months earned as a referrer, not yet applied as Stripe balance credit "
+            "(e.g. because this user has no Stripe customer/price yet)."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

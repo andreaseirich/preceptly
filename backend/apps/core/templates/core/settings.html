@@ -313,6 +313,9 @@
     {% elif is_premium %}
         <span style="color: var(--text-secondary);">{% trans "Premium (manually activated)" %}</span>
     {% elif stripe_premium_checkout_enabled or stripe_enabled %}
+        {% if trial_available %}
+        <p style="margin: 0 0 14px 0; color: var(--accent); font-weight: 600;">{% trans "First month free, cancel anytime during the trial." %}</p>
+        {% endif %}
         {% url 'stripe_checkout' as checkout_url_stripe %}{% url 'core:subscription_checkout' as checkout_url_sub %}
         {% with checkout_url=checkout_url_stripe|default:checkout_url_sub %}
         <style>
@@ -383,6 +386,20 @@
         <p style="margin: 0; color: var(--text-secondary); font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:info@preceptly.de">info@preceptly.de</a>.{% endblocktrans %}</p>
     {% endif %}
 </div>
+
+{% if referral_link %}
+<h2 style="margin-top: 40px;">{% trans "Invite friends" %}</h2>
+<p>{% trans "Share your link. For every friend whose subscription becomes active, you get one free month." %}</p>
+<div style="margin-top: 15px; padding: 20px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <input type="text" readonly value="{{ referral_link }}" id="referral-link-input" style="flex: 1; min-width: 220px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);">
+        <button type="button" class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('referral-link-input').value)">{% trans "Copy" %}</button>
+    </div>
+    {% if referral_free_months_pending %}
+    <p style="margin: 12px 0 0 0; color: var(--text-secondary); font-size: 0.9em;">{% blocktrans count months=referral_free_months_pending %}{{ months }} free month earned, applied on your next invoice once you have an active subscription.{% plural %}{{ months }} free months earned, applied on your next invoice once you have an active subscription.{% endblocktrans %}</p>
+    {% endif %}
+</div>
+{% endif %}
 
 <h2 style="margin-top: 40px;" id="pwa-install-section">{% trans "App on home screen" %}</h2>
 <p>{% trans "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser." %}</p>
