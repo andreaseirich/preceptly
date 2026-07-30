@@ -322,6 +322,19 @@ class SettingsView(LoginRequiredMixin, FormView):
             settings, "STRIPE_PRICE_ID_MONTHLY", ""
         )
         context["stripe_price_business"] = getattr(settings, "STRIPE_PRICE_ID_BUSINESS", "")
+        context["trial_available"] = not profile.trial_used
+
+        from apps.core.referrals import ensure_referral_code
+
+        referral_code = ensure_referral_code(profile)
+        context["referral_code"] = referral_code
+        if referral_code:
+            from django.urls import reverse
+
+            base_url = f"{self.request.scheme}://{self.request.get_host()}"
+            register_path = reverse("core:register")
+            context["referral_link"] = f"{base_url}{register_path}?ref={referral_code}"
+        context["referral_free_months_pending"] = profile.referral_free_months_pending
         q = self.request.GET
         context["show_stripe_success_banner"] = (
             q.get("stripe_success") == "1" or q.get("checkout") == "success"
