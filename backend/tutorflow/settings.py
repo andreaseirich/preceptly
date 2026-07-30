@@ -183,6 +183,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "apps.core.context_processors.unread_portal_messages",
                 "apps.core.context_processors.demo_context",
+                "apps.core.context_processors.vapid_public_key",
             ],
         },
     },
@@ -460,6 +461,13 @@ STRIPE_PRICE_ID_BUSINESS = env("STRIPE_PRICE_ID_BUSINESS", default="")
 STRIPE_PORTAL_RETURN_URL = env("STRIPE_PORTAL_RETURN_URL", default="")
 STRIPE_CHECKOUT_SUCCESS_URL = env("STRIPE_CHECKOUT_SUCCESS_URL", default="")
 STRIPE_CHECKOUT_CANCEL_URL = env("STRIPE_CHECKOUT_CANCEL_URL", default="")
+
+# Web Push (VAPID) - notification preferences per user (tutor and portal users).
+# Generate a keypair with: python3 -c "from pywebpush import webpush; " (see docs/) or
+# `vapid --gen` from the py-vapid package; never commit real keys, set via env in production.
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+VAPID_ADMIN_EMAIL = env("VAPID_ADMIN_EMAIL", default="")
 
 # Whitelist of all known premium price IDs. Unknown prices must never grant a
 # paid tier (see _handle_subscription_created_or_updated / _price_id_to_tier).

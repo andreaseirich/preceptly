@@ -338,3 +338,52 @@ class RequestLog(models.Model):
     class Meta:
         ordering = ["-timestamp"]
         indexes = [models.Index(fields=["timestamp", "path"])]
+
+
+class NotificationPreference(models.Model):
+    """Per-user opt-in/opt-out for email vs. push delivery of specific notification types.
+
+    One row per Django User - covers both tutors and portal users (students/parents),
+    since PortalUser also wraps a Django User. A missing row (or a missing/older field)
+    defaults to True everywhere, so existing users keep getting the emails they already
+    receive today unless they explicitly opt out; push has no effect until the user has
+    an active PushSubscription regardless of this flag.
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notification_preference",
+    )
+    notify_portal_booking_email = models.BooleanField(default=True)
+    notify_portal_booking_push = models.BooleanField(default=True)
+    notify_login_reminder_email = models.BooleanField(default=True)
+    notify_login_reminder_push = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Notification Preference"
+        verbose_name_plural = "Notification Preferences"
+
+    def __str__(self):
+        return f"Notification preferences for {self.user}"
+
+
+class PushSubscription(models.Model):
+    """A registered Web Push endpoint for one of a user's devices."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="push_subscriptions"
+    )
+    endpoint = models.URLField(max_length=500, unique=True)
+    p256dh = models.CharField(max_length=255)
+    auth = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Push Subscription"
+        verbose_name_plural = "Push Subscriptions"
+
+    def __str__(self):
+        return f"Push subscription for {self.user} ({self.endpoint[:40]}...)"

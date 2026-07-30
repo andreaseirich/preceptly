@@ -2,11 +2,15 @@
 Views for PWA (Progressive Web App) support.
 """
 
+import json
 from pathlib import Path
 
 from django.conf import settings
-from django.http import Http404, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.cache import cache_control
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
 
 
 @cache_control(max_age=86400)  # Cache for 1 day
@@ -35,3 +39,42 @@ def service_worker_view(request):
         sw_content = f.read()
 
     return HttpResponse(sw_content, content_type="application/javascript")
+
+
+@login_required
+@require_POST
+@csrf_protect
+def push_subscribe_view(request):
+    """POST body: {"endpoint": ..., "keys": {"p256dh": ..., "auth": ...}} - registers
+    a Web Push subscription for the logged-in tutor."""
+    from apps.core.push_service import save_push_subscription
+
+    try:
+        data = json.loads(request.body)
+        endpoint = data["endpoint"]
+        keys = data["keys"]
+        p256dh = keys["p256dh"]
+        auth = keys["auth"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return HttpResponseBadRequest("Invalid subscription payload")
+
+    save_push_subscription(request.user, endpoint, p256dh, auth)
+    return JsonResponse({"status": "ok"})
+
+
+@login_required
+@require_POST
+@csrf_protect
+def push_unsubscribe_view(request):
+    """POST body: {"endpoint": ...} - removes a Web Push subscription for the
+    logged-in tutor."""
+    from apps.core.push_service import delete_push_subscription
+
+    try:
+        data = json.loads(request.body)
+        endpoint = data["endpoint"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return HttpResponseBadRequest("Invalid payload")
+
+    delete_push_subscription(request.user, endpoint)
+    return JsonResponse({"status": "ok"})

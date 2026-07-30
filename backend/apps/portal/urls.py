@@ -90,4 +90,6 @@ urlpatterns = [
     ),
     path("faq/", views.PortalFAQView.as_view(), name="faq"),
     path("profile/", views.PortalProfileEditView.as_view(), name="profile"),
+    path("push/subscribe/", views.PortalPushSubscribeView.as_view(), name="push_subscribe"),
+    path("push/unsubscribe/", views.PortalPushUnsubscribeView.as_view(), name="push_unsubscribe"),
 ]

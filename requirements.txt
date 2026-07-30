@@ -20,5 +20,6 @@ urllib3==2.7.0
 django-ratelimit==4.1.0
 nh3>=0.2.14
 whitenoise>=6.7.0
+pywebpush>=2.0.3
 
 # cache-bust: 2026-06-25

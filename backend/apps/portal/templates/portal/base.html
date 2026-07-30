@@ -7,6 +7,7 @@
     <link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
     <link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
+    <link rel="manifest" href="{% url 'core:manifest' %}">
     <title>{% block title %}Preceptly Portal{% endblock %}</title>
     <style>
         * { box-sizing: border-box; }
@@ -351,6 +352,33 @@
             table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 0.85em; }
             th, td { padding: 9px 8px; }
         }
+
+        /* PWA install modal + banner (mirrors the tutor-facing app) */
+        .pwa-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:16px;}
+        .pwa-modal-overlay.open{display:flex;}
+        .pwa-modal{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;width:100%;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,.35);padding:24px;position:relative;max-height:90vh;overflow-y:auto;}
+        .pwa-modal h2{margin:0 0 6px;font-size:1.15em;border:none;padding:0;color:var(--text-primary);}
+        .pwa-modal-close{position:absolute;top:12px;right:12px;background:transparent;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);line-height:1;padding:4px 8px;border-radius:4px;min-width:auto;min-height:auto;}
+        .pwa-modal-close:hover{background:var(--hover-bg);color:var(--text-primary);}
+        .pwa-modal-subtitle{font-size:.88em;color:var(--text-secondary);margin-bottom:16px;}
+        .pwa-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border-color);margin-bottom:16px;}
+        .pwa-tab{background:transparent;border:none;padding:8px 12px;cursor:pointer;font-size:.85em;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:3px 3px 0 0;transition:color .15s,border-color .15s;white-space:nowrap;}
+        .pwa-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+        .pwa-tab:hover:not(.active){color:var(--text-primary);}
+        .pwa-panel{display:none;}
+        .pwa-panel.active{display:block;}
+        .pwa-steps{list-style:none;margin:0;padding:0;}
+        .pwa-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+        .pwa-step:last-child{margin-bottom:0;}
+        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
+        .pwa-step-icon{flex-shrink:0;width:44px;height:44px;background:var(--accent-tint);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);}
+        .pwa-step-icon svg{stroke:currentColor;}
+        .pwa-step-text{font-size:.9em;color:var(--text-primary);line-height:1.45;padding-top:12px;}
+        .pwa-banner{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:460px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:14px 16px;z-index:1500;gap:12px;align-items:center;}
+        .pwa-banner.visible{display:flex;}
+        .pwa-banner p{margin:0;font-size:.88em;color:var(--text-primary);flex:1;line-height:1.4;}
+        .pwa-banner-btns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+        .pwa-banner-btns .btn{width:auto;min-width:auto;font-size:.85em;padding:8px 12px;}
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -401,6 +429,82 @@
     {% endif %}
     {% block content %}{% endblock %}
 </main>
+
+<!-- PWA Install Modal -->
+<div id="pwaOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwaModalTitle">
+  <div class="pwa-modal">
+    <button class="pwa-modal-close" id="pwaModalClose" aria-label="Schließen">&#215;</button>
+    <h2 id="pwaModalTitle">Zum Home-Bildschirm hinzufügen</h2>
+    <p class="pwa-modal-subtitle">Füge das Preceptly-Portal zu deinem Home-Bildschirm hinzu, um schnell und bequem auf deine Termine und Nachrichten zuzugreifen.</p>
+    <div class="pwa-tabs" role="tablist">
+      <button class="pwa-tab" role="tab" id="pwa-tab-ios" aria-controls="pwa-panel-ios" aria-selected="false" tabindex="-1" data-tab="ios">iOS (Safari)</button>
+      <button class="pwa-tab" role="tab" id="pwa-tab-android" aria-controls="pwa-panel-android" aria-selected="false" tabindex="-1" data-tab="android">Android (Chrome)</button>
+      <button class="pwa-tab" role="tab" id="pwa-tab-desktop" aria-controls="pwa-panel-desktop" aria-selected="false" tabindex="-1" data-tab="desktop">Desktop</button>
+    </div>
+    <!-- iOS panel -->
+    <div id="pwa-panel-ios" class="pwa-panel" role="tabpanel" aria-labelledby="pwa-tab-ios">
+      <ol class="pwa-steps">
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">1</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+          <span class="pwa-step-text">Öffne das Preceptly-Portal in Safari (nicht Chrome oder Firefox).</span>
+        </li>
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">2</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span>
+          <span class="pwa-step-text">Tippe unten im Browser auf das Teilen-Symbol.</span>
+        </li>
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">3</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+          <span class="pwa-step-text">Wähle „Zum Home-Bildschirm".</span>
+        </li>
+      </ol>
+    </div>
+    <!-- Android panel -->
+    <div id="pwa-panel-android" class="pwa-panel" role="tabpanel" aria-labelledby="pwa-tab-android">
+      <ol class="pwa-steps">
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">1</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg></span>
+          <span class="pwa-step-text">Öffne das Browser-Menü (drei Punkte oben rechts).</span>
+        </li>
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">2</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><polyline points="7 11 12 16 17 11"/><path d="M5 18v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2"/></svg></span>
+          <span class="pwa-step-text">Tippe auf „App installieren" oder „Zum Startbildschirm hinzufügen".</span>
+        </li>
+      </ol>
+      <div id="pwaAndroidBtn" style="display:none;margin-top:14px;">
+        <p style="font-size:.85em;color:var(--text-secondary);margin-bottom:8px;">Oder tippe direkt auf den Button:</p>
+        <button type="button" class="btn btn-success" id="pwaDirectInstall" style="width:auto;">Preceptly Portal installieren</button>
+      </div>
+    </div>
+    <!-- Desktop panel -->
+    <div id="pwa-panel-desktop" class="pwa-panel" role="tabpanel" aria-labelledby="pwa-tab-desktop">
+      <ol class="pwa-steps">
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">1</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+          <span class="pwa-step-text">Klicke auf das Installations-Symbol in der Adressleiste des Browsers.</span>
+        </li>
+        <li class="pwa-step">
+          <span class="pwa-step-num" aria-hidden="true">2</span>
+          <span class="pwa-step-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="pwa-step-text">Bestätige die Installation.</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+<!-- PWA Install Banner -->
+<div id="pwaBanner" class="pwa-banner" role="complementary" aria-label="Hinweis zur App-Installation">
+  <p>📲 Das Preceptly-Portal lässt sich als App auf deinem Home-Bildschirm nutzen.</p>
+  <div class="pwa-banner-btns">
+    <button type="button" class="btn btn-success" id="pwaBannerOpen">Zeig mir wie</button>
+    <button type="button" class="btn btn-secondary" id="pwaBannerDismiss">Nicht jetzt</button>
+  </div>
+</div>
 <script>
 (function() {
     var html = document.documentElement;
@@ -448,6 +552,225 @@
             });
         });
     }
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  var BANNER_KEY = 'pwa_install_dismissed_portal';
+  var _trigger = null;
+
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
+  }
+
+  function detectPlatform() {
+    var ua = navigator.userAgent;
+    if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+    if (/android/i.test(ua)) return 'android';
+    return 'desktop';
+  }
+
+  var platform = detectPlatform();
+
+  function activateTab(tab, focusTab) {
+    document.querySelectorAll('.pwa-tab').forEach(function (b) {
+      var active = b.dataset.tab === tab;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+      b.setAttribute('tabindex', active ? '0' : '-1');
+      if (active && focusTab) b.focus();
+    });
+    document.querySelectorAll('.pwa-panel').forEach(function (p) {
+      p.classList.toggle('active', p.id === 'pwa-panel-' + tab);
+    });
+  }
+
+  function isVisible(el) {
+    if (!el) return false;
+    if (!el.isConnected) return false;
+    var rects = el.getClientRects();
+    if (!rects.length) return false;
+    var style = window.getComputedStyle(el);
+    return style.visibility !== 'hidden' && style.display !== 'none';
+  }
+
+  function openModal(triggerEl) {
+    if (isStandalone()) return;
+    _trigger = triggerEl || document.activeElement || null;
+    var overlay = document.getElementById('pwaOverlay');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    activateTab(platform);
+    if (platform === 'android' && window._pwaDeferredPrompt) {
+      var ab = document.getElementById('pwaAndroidBtn');
+      if (ab) ab.style.display = 'block';
+    }
+    var first = overlay.querySelector('button, [href], input, [tabindex]:not([tabindex="-1"])');
+    if (first) first.focus();
+  }
+
+  function closeModal() {
+    var overlay = document.getElementById('pwaOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    if (_trigger && typeof _trigger.focus === 'function' && isVisible(_trigger)) {
+      _trigger.focus();
+    }
+    _trigger = null;
+  }
+
+  function dismissBanner() {
+    try { localStorage.setItem(BANNER_KEY, '1'); } catch (e) {}
+    var b = document.getElementById('pwaBanner');
+    if (b) b.classList.remove('visible');
+  }
+
+  function maybeShowBanner() {
+    if (isStandalone()) return;
+    try { if (localStorage.getItem(BANNER_KEY)) return; } catch (e) {}
+    var b = document.getElementById('pwaBanner');
+    if (b) b.classList.add('visible');
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    window._pwaDeferredPrompt = e;
+    maybeShowBanner();
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('{% url "core:service_worker" %}').catch(function () {});
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.pwa-tab'));
+    tabButtons.forEach(function (btn, idx) {
+      btn.addEventListener('click', function () { activateTab(btn.dataset.tab); });
+      btn.addEventListener('keydown', function (e) {
+        var target = null;
+        if (e.key === 'ArrowRight') target = tabButtons[(idx + 1) % tabButtons.length];
+        else if (e.key === 'ArrowLeft') target = tabButtons[(idx - 1 + tabButtons.length) % tabButtons.length];
+        else if (e.key === 'Home') target = tabButtons[0];
+        else if (e.key === 'End') target = tabButtons[tabButtons.length - 1];
+        if (target) {
+          e.preventDefault();
+          activateTab(target.dataset.tab, true);
+        }
+      });
+    });
+
+    var closeBtn = document.getElementById('pwaModalClose');
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+    var overlay = document.getElementById('pwaOverlay');
+    if (overlay) overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+    document.addEventListener('keydown', function (e) {
+      var ov = document.getElementById('pwaOverlay');
+      if (!ov || !ov.classList.contains('open')) return;
+      if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+      if (e.key === 'Tab') {
+        var focusable = Array.from(ov.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])'));
+        if (!focusable.length) return;
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    var bannerOpen = document.getElementById('pwaBannerOpen');
+    if (bannerOpen) bannerOpen.addEventListener('click', function () { dismissBanner(); openModal(bannerOpen); });
+    var bannerDismiss = document.getElementById('pwaBannerDismiss');
+    if (bannerDismiss) bannerDismiss.addEventListener('click', dismissBanner);
+
+    var settingsBtn = document.getElementById('pwaSettingsInstallBtn');
+    if (settingsBtn) settingsBtn.addEventListener('click', function () { openModal(settingsBtn); });
+
+    var directInstall = document.getElementById('pwaDirectInstall');
+    if (directInstall) directInstall.addEventListener('click', function () {
+      if (window._pwaDeferredPrompt) {
+        window._pwaDeferredPrompt.prompt();
+        window._pwaDeferredPrompt.userChoice.then(function () {
+          window._pwaDeferredPrompt = null;
+          closeModal();
+          dismissBanner();
+        });
+      }
+    });
+
+    if (!isStandalone()) {
+      setTimeout(maybeShowBanner, 4000);
+    }
+
+    // Push notification subscribe flow
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      var padding = '='.repeat((4 - base64String.length % 4) % 4);
+      var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      var rawData = window.atob(base64);
+      var outputArray = new Uint8Array(rawData.length);
+      for (var i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    var pushBtn = document.getElementById('pushSubscribeBtn');
+    if (pushBtn) {
+      pushBtn.addEventListener('click', function () {
+        var vapidPublicKey = '{{ vapid_public_key|escapejs }}';
+        if (!vapidPublicKey) {
+          alert('Push-Benachrichtigungen sind auf diesem Server nicht konfiguriert.');
+          return;
+        }
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+          alert('Push-Benachrichtigungen werden von diesem Browser nicht unterstützt.');
+          return;
+        }
+        Notification.requestPermission().then(function (permission) {
+          if (permission !== 'granted') return;
+          navigator.serviceWorker.ready.then(function (registration) {
+            registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            }).then(function (subscription) {
+              fetch('{% url "portal:push_subscribe" %}', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(subscription.toJSON())
+              }).then(function (response) {
+                if (response.ok) {
+                  pushBtn.outerHTML = '<span style="color: var(--text-secondary); font-size: 0.9em;">✓ Push-Benachrichtigungen sind auf diesem Gerät aktiviert.</span>';
+                }
+              });
+            });
+          });
+        });
+      });
+    }
+  });
+
+  window.openPwaModal = openModal;
 })();
 </script>
 {% block extra_js %}{% endblock %}
