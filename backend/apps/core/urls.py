@@ -26,7 +26,12 @@ from apps.core.views_erecht24_revocation import (
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
 from apps.core.views_portal import TutorMessagesOverviewView, TutorMessageView
-from apps.core.views_pwa import manifest_view, service_worker_view
+from apps.core.views_pwa import (
+    manifest_view,
+    push_subscribe_view,
+    push_unsubscribe_view,
+    service_worker_view,
+)
 from apps.core.views_reports import ReportsView
 from apps.core.views_seo import robots_txt
 from apps.core.views_stats import DevStatsView
@@ -81,6 +86,8 @@ urlpatterns = [
     # PWA routes
     path("manifest.json", manifest_view, name="manifest"),
     path("sw.js", service_worker_view, name="service_worker"),
+    path("push/subscribe/", push_subscribe_view, name="push_subscribe"),
+    path("push/unsubscribe/", push_unsubscribe_view, name="push_unsubscribe"),
     path("tax-year/", TaxYearView.as_view(), name="tax_year"),
     path("tax-year/csv/", TaxYearCsvView.as_view(), name="tax_year_csv"),
     path("expenses/", ExpenseListView.as_view(), name="expense_list"),

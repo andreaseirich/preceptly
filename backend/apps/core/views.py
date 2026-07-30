@@ -298,6 +298,25 @@ class SettingsView(LoginRequiredMixin, FormView):
             profile.save()
             messages.success(request, _("Rechnungsdaten gespeichert."))
             return redirect(self.success_url)
+        if "save_notifications" in request.POST:
+            from apps.core.models import NotificationPreference
+
+            notif_pref, _created = NotificationPreference.objects.get_or_create(user=request.user)
+            notif_pref.notify_portal_booking_email = bool(
+                request.POST.get("notify_portal_booking_email")
+            )
+            notif_pref.notify_portal_booking_push = bool(
+                request.POST.get("notify_portal_booking_push")
+            )
+            notif_pref.save(
+                update_fields=[
+                    "notify_portal_booking_email",
+                    "notify_portal_booking_push",
+                    "updated_at",
+                ]
+            )
+            messages.success(request, _("Notification settings saved."))
+            return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -335,6 +354,12 @@ class SettingsView(LoginRequiredMixin, FormView):
             register_path = reverse("core:register")
             context["referral_link"] = f"{base_url}{register_path}?ref={referral_code}"
         context["referral_free_months_pending"] = profile.referral_free_months_pending
+
+        from apps.core.models import NotificationPreference
+
+        notif_pref, _created = NotificationPreference.objects.get_or_create(user=self.request.user)
+        context["notif_pref"] = notif_pref
+        context["has_push_subscription"] = self.request.user.push_subscriptions.exists()
         q = self.request.GET
         context["show_stripe_success_banner"] = (
             q.get("stripe_success") == "1" or q.get("checkout") == "success"

@@ -56,14 +56,10 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
 
 
 def send_booking_notification_portal(session, tutor):
-    """Benachrichtigung an Tutor nach Portal-Buchung — geht an die E-Mail-Adresse des Tutors."""
-    recipient = (tutor.email or "").strip()
-    if not recipient:
-        logger.warning(
-            "Tutor %s hat keine E-Mail-Adresse; Portal-Buchungsbenachrichtigung übersprungen",
-            tutor.username,
-        )
-        return
+    """Benachrichtigung an Tutor nach Portal-Buchung: E-Mail und/oder Push,
+    je nach NotificationPreference des Tutors (Typ "portal_booking")."""
+    from apps.core.push_service import is_channel_enabled, send_push_notification
+
     student_name = session.contract.full_name
     date_str = session.date.strftime("%d.%m.%Y")
     time_str = session.start_time.strftime("%H:%M")
@@ -71,31 +67,47 @@ def send_booking_notification_portal(session, tutor):
     tutor_name = tutor.get_full_name() or tutor.username
     site_url = getattr(settings, "SITE_URL", "").rstrip("/")
     dashboard_url = f"{site_url}/contracts/{session.contract.pk}/" if site_url else ""
-    subject = f"Neue Buchung: {student_name} — {date_str}".replace("\n", " ").replace("\r", " ")
-    context = {
-        "student_name": student_name,
-        "date_str": date_str,
-        "time_str": time_str,
-        "topic": topic,
-        "tutor_name": tutor_name,
-        "site_url": site_url,
-        "dashboard_url": dashboard_url,
-    }
-    html_message = render_to_string("portal/email/booking_notification.html", context)
-    plain_message = render_to_string("portal/email/booking_notification.txt", context)
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[recipient],
-            html_message=html_message,
-            fail_silently=False,
+
+    recipient = (tutor.email or "").strip()
+    if recipient and is_channel_enabled(tutor, "portal_booking", "email"):
+        subject = f"Neue Buchung: {student_name} — {date_str}".replace("\n", " ").replace("\r", " ")
+        context = {
+            "student_name": student_name,
+            "date_str": date_str,
+            "time_str": time_str,
+            "topic": topic,
+            "tutor_name": tutor_name,
+            "site_url": site_url,
+            "dashboard_url": dashboard_url,
+        }
+        html_message = render_to_string("portal/email/booking_notification.html", context)
+        plain_message = render_to_string("portal/email/booking_notification.txt", context)
+        try:
+            send_mail(
+                subject=subject,
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        except Exception:
+            logger.exception(
+                "Portal-Buchungsbenachrichtigung fehlgeschlagen für Session %s", session.pk
+            )
+    elif not recipient:
+        logger.warning(
+            "Tutor %s hat keine E-Mail-Adresse; Portal-Buchungsbenachrichtigung (E-Mail) übersprungen",
+            tutor.username,
         )
-    except Exception:
-        logger.exception(
-            "Portal-Buchungsbenachrichtigung fehlgeschlagen für Session %s", session.pk
-        )
+
+    send_push_notification(
+        tutor,
+        "portal_booking",
+        title=f"Neue Buchung: {student_name}",
+        body=f"{date_str} um {time_str} Uhr",
+        url=dashboard_url or None,
+    )
 
 
 def send_activation_notification(portal_user, contract):
@@ -130,8 +142,14 @@ def send_activation_notification(portal_user, contract):
         )
 
 
-def send_login_reminder(contract, recipient_email, tutor_name, role="student"):
-    """Login-Erinnerung an bereits aktive Portal-Nutzer senden."""
+def send_login_reminder(contract, recipient_email, tutor_name, role="student", recipient_user=None):
+    """Login-Erinnerung an bereits aktive Portal-Nutzer senden (E-Mail und/oder Push).
+
+    `recipient_user` is the recipient's Django User (student's or parent's portal
+    account), used to check their NotificationPreference (type "login_reminder") and
+    to send a push notification. If not passed, email is always sent (preserves the
+    old always-on-email behavior for call sites that don't have the user object).
+    """
     from django.core.exceptions import ValidationError
     from django.core.validators import validate_email
 
@@ -144,13 +162,31 @@ def send_login_reminder(contract, recipient_email, tutor_name, role="student"):
         raise ImproperlyConfigured("settings.SITE_URL muss konfiguriert sein.")
     site_url = settings.SITE_URL
 
+    login_url = f"{site_url}/portal/login/"
+
+    send_email = True
+    if recipient_user is not None:
+        from apps.core.push_service import is_channel_enabled, send_push_notification
+
+        send_email = is_channel_enabled(recipient_user, "login_reminder", "email")
+        send_push_notification(
+            recipient_user,
+            "login_reminder",
+            title="Dein Preceptly Portal-Zugang",
+            body=f"Erinnerung von {tutor_name}: Logg dich in dein Portal ein.",
+            url=login_url,
+        )
+
+    if not send_email:
+        return
+
     context = {
         "contract": contract,
         "recipient_email": recipient_email,
         "tutor_name": tutor_name,
         "role": role,
         "site_url": site_url,
-        "login_url": f"{site_url}/portal/login/",
+        "login_url": login_url,
         "password_reset_url": f"{site_url}/portal/password-reset/",
     }
 

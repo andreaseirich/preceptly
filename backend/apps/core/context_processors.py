@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.cache import cache
 
 from apps.core.demo_guard import is_demo_user as _is_demo_user
@@ -20,3 +21,9 @@ def unread_portal_messages(request):
 
 def demo_context(request):
     return {"is_demo_user": _is_demo_user(request.user) if request.user.is_authenticated else False}
+
+
+def vapid_public_key(request):
+    """Exposes the (non-secret) VAPID public key to every template, for the
+    push-notification subscribe flow. Empty string if push is not configured."""
+    return {"vapid_public_key": getattr(settings, "VAPID_PUBLIC_KEY", "")}

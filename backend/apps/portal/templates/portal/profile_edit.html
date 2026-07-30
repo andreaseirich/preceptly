@@ -57,6 +57,47 @@
     </form>
 </div>
 
+<!-- Benachrichtigungen -->
+<div class="card" style="margin-bottom:24px;">
+    <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Benachrichtigungen</h2>
+    <p style="color:var(--text-secondary); font-size:0.9em; margin-top:0;">Lege fest, wie du an eine ausstehende Anmeldung erinnert werden möchtest.</p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="notifications">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 14px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:6px; margin-bottom:16px;">
+            <span>Login-Erinnerung</span>
+            <span style="display:flex; gap:14px;">
+                <label style="display:flex; align-items:center; gap:5px; font-size:0.9em;">
+                    <input type="checkbox" name="notify_login_reminder_email" {% if notif_pref.notify_login_reminder_email %}checked{% endif %}>
+                    E-Mail
+                </label>
+                <label style="display:flex; align-items:center; gap:5px; font-size:0.9em;">
+                    <input type="checkbox" name="notify_login_reminder_push" {% if notif_pref.notify_login_reminder_push %}checked{% endif %}>
+                    Push
+                </label>
+            </span>
+        </div>
+
+        <button type="submit" class="btn">Einstellungen speichern</button>
+    </form>
+
+    <div style="margin-top:16px;">
+        {% if has_push_subscription %}
+            <span style="color:var(--text-secondary); font-size:0.9em;">✓ Push-Benachrichtigungen sind auf diesem Gerät aktiviert.</span>
+        {% else %}
+            <button type="button" class="btn btn-secondary" id="pushSubscribeBtn">🔔 Push-Benachrichtigungen auf diesem Gerät aktivieren</button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- App installieren -->
+<div class="card" style="margin-bottom:24px;">
+    <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">App auf dem Home-Bildschirm</h2>
+    <p style="color:var(--text-secondary); font-size:0.9em; margin-top:0;">Nutze das Preceptly-Portal wie eine App direkt von deinem Home-Bildschirm aus.</p>
+    <button type="button" class="btn" id="pwaSettingsInstallBtn">📲 Zum Home-Bildschirm hinzufügen</button>
+</div>
+
 <!-- Passwort ändern -->
 <div class="card">
     <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Passwort ändern</h2>

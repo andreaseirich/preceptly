@@ -1817,12 +1817,17 @@ class PortalProfileEditView(View):
         if not portal_user:
             return redirect("portal:login")
         contract = self._get_contract(portal_user)
+        from apps.core.models import NotificationPreference
+
+        notif_pref, _created = NotificationPreference.objects.get_or_create(user=portal_user.user)
         return render(
             request,
             self.template_name,
             {
                 "portal_user": portal_user,
                 "contract": contract,
+                "notif_pref": notif_pref,
+                "has_push_subscription": portal_user.user.push_subscriptions.exists(),
             },
         )
 
@@ -1896,6 +1901,29 @@ class PortalProfileEditView(View):
                     request.session["portal_user_id"] = portal_user.pk
                     success_msgs.append("Passwort erfolgreich geändert.")
 
+        elif action == "notifications":
+            from apps.core.models import NotificationPreference
+
+            notif_pref, _created = NotificationPreference.objects.get_or_create(user=django_user)
+            notif_pref.notify_login_reminder_email = bool(
+                request.POST.get("notify_login_reminder_email")
+            )
+            notif_pref.notify_login_reminder_push = bool(
+                request.POST.get("notify_login_reminder_push")
+            )
+            notif_pref.save(
+                update_fields=[
+                    "notify_login_reminder_email",
+                    "notify_login_reminder_push",
+                    "updated_at",
+                ]
+            )
+            success_msgs.append("Benachrichtigungseinstellungen gespeichert.")
+
+        from apps.core.models import NotificationPreference as _NotifPref
+
+        notif_pref, _created = _NotifPref.objects.get_or_create(user=django_user)
+
         return render(
             request,
             self.template_name,
@@ -1904,5 +1932,60 @@ class PortalProfileEditView(View):
                 "contract": contract,
                 "errors": errors,
                 "success_msgs": success_msgs,
+                "notif_pref": notif_pref,
+                "has_push_subscription": django_user.push_subscriptions.exists(),
             },
         )
+
+
+class PortalPushSubscribeView(View):
+    """POST body: {"endpoint": ..., "keys": {"p256dh": ..., "auth": ...}} - registers
+    a Web Push subscription for the logged-in portal user (student/parent)."""
+
+    def post(self, request):
+        import json
+
+        from django.http import HttpResponseBadRequest
+
+        from apps.core.push_service import save_push_subscription
+
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return HttpResponseForbidden("Not logged in")
+
+        try:
+            data = json.loads(request.body)
+            endpoint = data["endpoint"]
+            keys = data["keys"]
+            p256dh = keys["p256dh"]
+            auth = keys["auth"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return HttpResponseBadRequest("Invalid subscription payload")
+
+        save_push_subscription(portal_user.user, endpoint, p256dh, auth)
+        return JsonResponse({"status": "ok"})
+
+
+class PortalPushUnsubscribeView(View):
+    """POST body: {"endpoint": ...} - removes a Web Push subscription for the
+    logged-in portal user."""
+
+    def post(self, request):
+        import json
+
+        from django.http import HttpResponseBadRequest
+
+        from apps.core.push_service import delete_push_subscription
+
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return HttpResponseForbidden("Not logged in")
+
+        try:
+            data = json.loads(request.body)
+            endpoint = data["endpoint"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return HttpResponseBadRequest("Invalid payload")
+
+        delete_push_subscription(portal_user.user, endpoint)
+        return JsonResponse({"status": "ok"})

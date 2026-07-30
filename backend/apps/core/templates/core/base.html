@@ -788,6 +788,76 @@
                     });
             });
         }
+
+        // Push notification subscribe flow
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function subscribeToPush(subscribeUrl, button) {
+            const vapidPublicKey = '{{ vapid_public_key|escapejs }}';
+            if (!vapidPublicKey) {
+                alert('{% trans "Push notifications are not configured on this server." %}');
+                return;
+            }
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                alert('{% trans "Push notifications are not supported in this browser." %}');
+                return;
+            }
+            Notification.requestPermission().then(function(permission) {
+                if (permission !== 'granted') return;
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                    }).then(function(subscription) {
+                        fetch(subscribeUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(subscription.toJSON())
+                        }).then(function(response) {
+                            if (response.ok && button) {
+                                button.outerHTML = '<span style="color: var(--text-secondary); font-size: 0.9em;">✓ {% trans "Push notifications are enabled on this device." %}</span>';
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+        (function() {
+            var btn = document.getElementById('pushSubscribeBtn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    subscribeToPush('{% url "core:push_subscribe" %}', btn);
+                });
+            }
+        })();
         
         // PWA Install Prompt
         let deferredPrompt;

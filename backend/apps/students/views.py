@@ -342,7 +342,13 @@ class PortalLoginReminderView(LoginRequiredMixin, View):
 
         if recipient_email:
             try:
-                send_login_reminder(contract, recipient_email, tutor_name, role="student")
+                send_login_reminder(
+                    contract,
+                    recipient_email,
+                    tutor_name,
+                    role="student",
+                    recipient_user=link.parent.user,
+                )
                 messages.success(
                     request,
                     f"Login-Erinnerung gesendet an {recipient_email}.",
