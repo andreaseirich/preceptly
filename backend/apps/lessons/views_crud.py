@@ -623,8 +623,8 @@ class LessonRescheduleView(LoginRequiredMixin, View):
         old_date = lesson.date
         lesson.date = new_date
         lesson.start_time = new_time
-        lesson.recurring_lesson = None
-        lesson.save(update_fields=["date", "start_time", "recurring_lesson"])
+        lesson.recurring_session = None
+        lesson.save(update_fields=["date", "start_time", "recurring_session"])
         recalculate_conflicts_for_affected_lessons(lesson)
         messages.success(
             request,
