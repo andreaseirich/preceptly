@@ -58,8 +58,7 @@ msgstr ""
 msgid "Mock mode is disabled. Call generate_text() with real prompts instead."
 msgstr ""
 "Der Mock-Modus ist deaktiviert. Rufe stattdessen generate_text() mit echten "
-"Prompts auf.Mock-Modus ist deaktiviert. Rufen Sie generate_text() "
-"stattdessen mit echten Prompts auf."
+"Prompts auf."
 
 #: apps/ai/client.py:199
 msgid "Mock mode is active, but no mock samples are available."
@@ -68,16 +67,11 @@ msgstr "Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar."
 #: apps/ai/client.py:250 apps/ai/client.py:366 apps/ai/client.py:400
 msgid "API rate limit exceeded. Please try again in a few minutes."
 msgstr ""
-"API-Anfragelimit überschritten. Bitte versuche es in einigen Minuten "
-"erneut.API-Rate-Limit überschritten. Bitte versuchen Sie es in ein paar "
-"Minuten erneut."
+"API-Anfragelimit überschritten. Bitte versuche es in einigen Minuten erneut."
 
 #: apps/ai/client.py:254 apps/ai/client.py:370
 msgid "Invalid API key. Please check your LLM_API_KEY configuration."
-msgstr ""
-"Ungültiger API-Schlüssel. Überprüfe deine LLM_API_KEY-"
-"Konfiguration.Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihre "
-"LLM_API_KEY-Konfiguration."
+msgstr "Ungültiger API-Schlüssel. Überprüfe deine LLM_API_KEY-Konfiguration."
 
 #: apps/ai/client.py:258 apps/ai/client.py:375
 msgid "The AI service is currently unavailable."
@@ -278,9 +272,7 @@ msgstr "Tutor, dem diese Rechnung gehört"
 #: apps/billing/models.py:43
 msgid "Sequential invoice number (Premium). INV-<id> fallback for Basic."
 msgstr ""
-"Fortlaufende Rechnungsnummer (Premium). INV-<id> als Fallback für "
-"Basic.Fortlaufende Rechnungsnummer (Premium). INV-<id> als Fallback für "
-"Basic."
+"Fortlaufende Rechnungsnummer (Premium). INV-<id> als Fallback für Basic."
 
 #: apps/billing/models.py:45
 msgid "Name of the payer"
@@ -382,9 +374,7 @@ msgstr "Rechnungsposten"
 #: apps/billing/services.py:163
 #: apps/billing/templates/billing/invoice_create.html:102
 msgid "No billable lessons found in the specified period."
-msgstr ""
-"Im angegebenen Zeitraum wurden keine abrechenbaren Stunden gefunden.Keine "
-"abrechenbaren Unterrichtsstunden im angegebenen Zeitraum gefunden."
+msgstr "Im angegebenen Zeitraum wurden keine abrechenbaren Stunden gefunden."
 
 #: apps/billing/services.py:231
 #, python-brace-format
@@ -2096,9 +2086,7 @@ msgstr "Monatliche Planung"
 
 #: apps/contracts/templates/contracts/contract_form.html:27
 msgid "Enter the planned units for each month in the contract period."
-msgstr ""
-"Gib die geplanten Einheiten für jeden Monat im Vertragszeitraum ein.Geben "
-"Sie die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
+msgstr "Gib die geplanten Einheiten für jeden Monat im Vertragszeitraum ein."
 
 #: apps/contracts/templates/contracts/contract_form.html:33
 #: apps/core/templates/core/euer.html:12
@@ -2295,9 +2283,7 @@ msgstr "Noch keine Institute."
 
 #: apps/contracts/views.py:191
 msgid "Contract created. Please enter the planned units per month."
-msgstr ""
-"Vertrag erstellt. Bitte gib die geplanten Einheiten pro Monat ein.Vertrag "
-"erstellt. Bitte geben Sie die geplanten Einheiten pro Monat ein."
+msgstr "Vertrag erstellt. Bitte gib die geplanten Einheiten pro Monat ein."
 
 #: apps/contracts/views.py:195
 msgid "Contract successfully created."
@@ -4048,9 +4034,7 @@ msgstr ""
 #: apps/core/templates/core/settings.html:214
 msgid "For invoices and Stripe we recommend adding an email address."
 msgstr ""
-"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse "
-"hinzuzufügen.Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu"
-" hinterlegen."
+"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
 
 #: apps/core/templates/core/settings.html:218
 msgid "Optional. Used for invoices and Stripe billing notifications."
@@ -4504,9 +4488,7 @@ msgstr "Ungültige Weiterleitungs-URL."
 #: apps/core/views_stripe.py:109
 msgid "Could not start checkout. Please try again in a moment."
 msgstr ""
-"Checkout konnte nicht gestartet werden. Bitte versuche es gleich "
-"erneut.Checkout konnte nicht gestartet werden. Bitte in einem Moment erneut "
-"versuchen."
+"Checkout konnte nicht gestartet werden. Bitte versuche es gleich erneut."
 
 #: apps/core/views_stripe.py:138
 msgid ""
@@ -4534,16 +4516,14 @@ msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
 msgid "Could not open billing portal. Please try again."
 msgstr ""
 "Das Abrechnungsportal konnte nicht geöffnet werden. Bitte versuche es "
-"erneut.Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie "
-"es erneut."
+"erneut."
 
 #: apps/core/views_stripe.py:457
 msgid ""
 "No billing customer found. Subscribe first to manage your subscription."
 msgstr ""
 "Kein Abrechnungskunde gefunden. Bitte abonniere zuerst, um dein Abonnement "
-"zu verwalten.Kein Abrechnungskunde gefunden. Bitte zuerst ein Abo "
-"abschließen, um es zu verwalten."
+"zu verwalten."
 
 #: apps/lesson_plans/admin.py:16
 msgid "Contract & Lesson"
@@ -4685,9 +4665,7 @@ msgstr ""
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:110
 msgid "Generate an AI-powered lesson plan for this lesson."
-msgstr ""
-"Erstelle einen KI-gestützten Unterrichtsplan für diese Stunde.Einen KI-"
-"gestützten Lektionsplan für diese Unterrichtsstunde generieren."
+msgstr "Erstelle einen KI-gestützten Unterrichtsplan für diese Stunde."
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:117
 msgid "Regenerate AI Lesson Plan"
@@ -4702,7 +4680,6 @@ msgstr "KI-Unterrichtsplan generieren"
 msgid "AI-powered lesson plan generation is only available for premium users."
 msgstr ""
 "Die KI-gestützte Unterrichtsplanerstellung ist nur für Premium-Nutzer "
-"verfügbar.KI-gestützte Lektionsplangenerierung ist nur für Premium-Benutzer "
 "verfügbar."
 
 #: apps/lessons/admin.py:31 apps/lessons/admin.py:86
@@ -5245,9 +5222,7 @@ msgstr "Minuten"
 #: apps/lessons/templates/lessons/email_booking_notification.txt:13
 msgid "You can view and manage this lesson in your Preceptly dashboard."
 msgstr ""
-"Du kannst diese Stunde in deinem Preceptly-Dashboard ansehen und "
-"verwalten.Diese Stunde kann im Preceptly-Dashboard eingesehen und verwaltet "
-"werden."
+"Du kannst diese Stunde in deinem Preceptly-Dashboard ansehen und verwalten."
 
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:7
 msgid "Delete Lesson"
@@ -5662,8 +5637,7 @@ msgstr "Diese Stunde stornieren?"
 msgid "Cancel the entire series? All future planned lessons will be deleted."
 msgstr ""
 "Die gesamte Serie abbrechen? Alle zukünftig geplanten Stunden werden "
-"gelöscht.Gesamte Serie stornieren? Alle zukünftigen geplanten Stunden werden"
-" gelöscht."
+"gelöscht."
 
 #: apps/lessons/templates/lessons/student_booking.html:627
 msgid "Edit Recurring Series"
@@ -5874,8 +5848,7 @@ msgstr ""
 msgid "Conflict detected for {date} at {time}. No changes were made."
 msgstr ""
 "Konflikt erkannt für {date} um {time}. Es wurden keine Änderungen "
-"vorgenommen.Konflikt erkannt für {date} um {time}. Es wurden keine "
-"Änderungen vorgenommen."
+"vorgenommen."
 
 #: apps/lessons/views_crud.py:468
 #, python-brace-format
