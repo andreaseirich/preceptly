@@ -56,9 +56,9 @@ class Session(models.Model):
     tutor_no_show = models.BooleanField(
         default=False,
         help_text=_(
-            "Tutor did not attend while the student was waiting. "
-            "TutorSpace: pay/deduction per your settings. "
-            "Abacus: lesson is not billed (0). Other contracts: no effect on amount."
+            "Tutor did not attend while the student was waiting. Depending on the "
+            "institute's no-show rule, this may reduce or zero out the billed "
+            "amount; contracts without such a rule are unaffected."
         ),
     )
     recurring_session = models.ForeignKey(
