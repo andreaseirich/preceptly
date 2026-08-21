@@ -64,6 +64,13 @@
             <div id="{{ form.end_datetime.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.end_datetime.errors }}</div>
             {% endif %}
         </p>
+        <p>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="whole-day-toggle" class="form-check-input">
+                <span>Ganzer Tag</span>
+            </label>
+            <small style="display: block; margin-left: 28px; color: var(--text-secondary);">Setzt Start auf 00:00 und Ende auf 23:59 des jeweiligen Tages. Liegt das Enddatum nach dem Startdatum, werden alle Tage dazwischen ebenfalls vollständig blockiert.</small>
+        </p>
     </div>
     
     {% if not object %}
@@ -278,6 +285,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formatted = dt.toISOString().slice(0, 16);
                 endField.value = formatted;
             } catch (e) {
+            }
+        }
+    }
+
+    // "Ganzer Tag" toggle: pins start to 00:00 and end to 23:59 of their
+    // respective dates. If the end date is after the start date, every day
+    // in between is already fully covered by the continuous start/end range.
+    const wholeDayToggle = document.getElementById('whole-day-toggle');
+    if (wholeDayToggle && startField && endField) {
+        function datePart(fieldValue, fallback) {
+            if (fieldValue && fieldValue.includes('T')) {
+                return fieldValue.split('T')[0];
+            }
+            return fallback;
+        }
+
+        function applyWholeDay() {
+            const today = new Date().toISOString().slice(0, 10);
+            const startDate = datePart(startField.value, today);
+            let endDate = datePart(endField.value, startDate);
+            if (endDate < startDate) {
+                endDate = startDate;
+            }
+            startField.value = startDate + 'T00:00';
+            endField.value = endDate + 'T23:59';
+        }
+
+        wholeDayToggle.addEventListener('change', function () {
+            if (this.checked) {
+                applyWholeDay();
+            }
+        });
+
+        // Keep enforcing 00:00/23:59 if the user tweaks the dates afterwards
+        // (e.g. extends a multi-day block) while the toggle stays checked.
+        [startField, endField].forEach(function (field) {
+            field.addEventListener('change', function () {
+                if (wholeDayToggle.checked) {
+                    applyWholeDay();
+                }
+            });
+        });
+
+        // Pre-check the toggle when editing an existing blocked time that
+        // already spans exactly 00:00-23:59.
+        if (startField.value && endField.value) {
+            const startTime = startField.value.split('T')[1];
+            const endTime = endField.value.split('T')[1];
+            if (startTime === '00:00' && endTime === '23:59') {
+                wholeDayToggle.checked = true;
             }
         }
     }

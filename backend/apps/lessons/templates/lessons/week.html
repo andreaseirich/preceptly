@@ -14,19 +14,51 @@
 </div>
 
 <div style="margin-bottom: 20px; margin-top: 10px;">
-    <form method="get" action="{% url 'lessons:week' %}" style="display: inline-block;">
+    <form method="get" action="{% url 'lessons:week' %}" style="display: inline-block;" id="date-jump-form">
         <label for="date-select">{% trans "Jump to date:" %}</label>
-        <input type="date" id="date-select" name="date" value="{{ week_start|date:'Y-m-d' }}" 
-               onchange="this.form.submit()" style="margin-left: 10px; padding: 5px;">
+        <input type="date" id="date-select" name="date" value="{{ week_start|date:'Y-m-d' }}"
+               style="margin-left: 10px; padding: 5px;">
     </form>
     <script>
-        document.getElementById('date-select').addEventListener('change', function() {
-            const selectedDate = new Date(this.value);
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth() + 1;
-            const day = selectedDate.getDate();
-            window.location.href = '{% url "lessons:week" %}?year=' + year + '&month=' + month + '&day=' + day;
-        });
+        (function () {
+            // Navigate only once the whole date (including the year) has been
+            // entered - either after a short typing pause, or immediately on
+            // Enter/blur. A native <input type="date"> only ever exposes a
+            // non-empty .value once day, month AND year are all complete and
+            // valid, but some browsers still fire 'change'/'input' while the
+            // year is mid-typing (e.g. after the first digit) with a padded
+            // guess - debouncing on 'input' avoids navigating away on that.
+            var dateInput = document.getElementById('date-select');
+            var debounceTimer = null;
+            var DEBOUNCE_MS = 800;
+
+            function navigateToDate() {
+                if (!dateInput.value) return;
+                var selectedDate = new Date(dateInput.value + 'T00:00:00');
+                var year = selectedDate.getFullYear();
+                var month = selectedDate.getMonth() + 1;
+                var day = selectedDate.getDate();
+                window.location.href = '{% url "lessons:week" %}?year=' + year + '&month=' + month + '&day=' + day;
+            }
+
+            dateInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(navigateToDate, DEBOUNCE_MS);
+            });
+
+            dateInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(debounceTimer);
+                    navigateToDate();
+                }
+            });
+
+            dateInput.addEventListener('blur', function () {
+                clearTimeout(debounceTimer);
+                navigateToDate();
+            });
+        })();
     </script>
 </div>
 
