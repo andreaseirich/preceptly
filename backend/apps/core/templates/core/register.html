@@ -32,6 +32,21 @@
         </div>
 
         <div style="margin-bottom: 20px;">
+            <label for="id_email" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Email address" %} ({% trans "optional" %}):</label>
+            <input type="email" name="email" id="id_email"
+                   {% if form.email.errors %}aria-describedby="id_email_errors"{% endif %}
+                   value="{{ form.email.value|default:'' }}"
+                   maxlength="254" autocomplete="email"
+                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+            {% if form.email.errors %}
+            <div id="id_email_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.email.errors.0 }}</div>
+            {% endif %}
+            {% if form.email.help_text %}
+            <small style="display: block; margin-top: 5px; color: var(--text-secondary); font-size: 0.85em;">{{ form.email.help_text }}</small>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 20px;">
             <label for="id_password1" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password" %}:</label>
             <input type="password" name="password1" id="id_password1" required aria-required="true" autocomplete="new-password"
                    {% if form.password1.errors %}aria-describedby="id_password1_errors"{% endif %}

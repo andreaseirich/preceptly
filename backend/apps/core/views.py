@@ -240,11 +240,23 @@ class SettingsView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         """Handle WorkingHoursForm, UserEmailForm, and TravelPolicyForm."""
         if "save_email" in request.POST:
-            messages.info(
-                request,
-                _("To change your email address, please contact support."),
-            )
-            return redirect(self.success_url)
+            if request.user.email:
+                # Changing an existing email is blocked in the UI (security
+                # hardening, see commit 077c4af): only first-time addition is
+                # self-service, to limit account-takeover / billing-hijack risk.
+                messages.info(
+                    request,
+                    _("To change your email address, please contact support."),
+                )
+                return redirect(self.success_url)
+            email_form = UserEmailForm(request.POST, instance=request.user)
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(request, _("Email address saved."))
+                return redirect(self.success_url)
+            context = self.get_context_data()
+            context["email_form"] = email_form
+            return self.render_to_response(context)
         if "save_travel" in request.POST:
             travel_form = TravelPolicyForm(request.POST)
             if travel_form.is_valid():

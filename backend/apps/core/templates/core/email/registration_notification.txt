@@ -1,0 +1,11 @@
+Neue Registrierung — Preceptly
+
+{{ username }} hat sich soeben bei Preceptly registriert.
+
+Benutzername:  {{ username }}
+Account-Typ:   {% if has_email %}Vollständig (mit E-Mail){% else %}Anonym / Basic (ohne Mail){% endif %}
+{% if has_email %}E-Mail:        {{ email }}
+{% endif %}
+---
+Preceptly — Nachhilfe-Management
+{{ site_url }}

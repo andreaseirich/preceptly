@@ -32,11 +32,17 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("username", "password1", "password2")
+        fields = ("username", "email", "password1", "password2")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = _("Username")
+        self.fields["email"].required = False
+        self.fields["email"].label = _("Email address")
+        self.fields["email"].help_text = _(
+            "Optional. Enables automatic PDF invoices and appointment reminders; "
+            "can only be changed later via support."
+        )
         self.fields["password1"].label = _("Password")
         self.fields["password2"].label = _("Password confirmation")
         # Generic error to avoid account enumeration

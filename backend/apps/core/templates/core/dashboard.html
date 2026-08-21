@@ -7,6 +7,13 @@
 {% block content %}
 <h1>{% trans "Dashboard" %}{% if is_premium %} <span class="premium-badge">{% trans "Premium" %}</span>{% endif %}</h1>
 
+{% if not user.email %}
+<div class="alert-info">
+    {% blocktrans %}Hinterlege deine E-Mail-Adresse, um automatische PDF-Rechnungen und Terminerinnerungen zu aktivieren.{% endblocktrans %}
+    <a href="{% url 'core:settings' %}#id_email" style="font-weight:600; white-space:nowrap;">{% trans "Jetzt hinzufügen →" %}</a>
+</div>
+{% endif %}
+
 <h2>{% trans "Today's Lessons" %}</h2>
 {% if today_lessons %}
 <table aria-label="Heutige Stunden">
