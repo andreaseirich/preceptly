@@ -215,7 +215,8 @@
 </div>
 {% endif %}
 <h2 style="margin-top: 40px;">{% trans "Email address" %}</h2>
-<p>{% trans "Optional. Used for invoices and Stripe billing notifications." %}</p>
+<p>{% trans "Optional. Used for invoices and Stripe billing notifications." %}
+{% if user.email %} {% trans "To change an existing email address, please contact support." %}{% endif %}</p>
 <form method="post" style="margin-top: 15px;">
     {% csrf_token %}
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">

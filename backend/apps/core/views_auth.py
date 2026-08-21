@@ -13,6 +13,7 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView
@@ -117,15 +118,21 @@ class RegisterView(CreateView):
             return
         safe_username = re.sub(r"[\r\n\x00-\x1f]", "", user.username)[:200]
         safe_email = re.sub(r"[\r\n\x00-\x1f]", "", user.email or "")[:200]
-        body = "Ein neuer Nutzer hat sich registriert.\n\n"
-        body += f"Benutzername: {safe_username}\n"
-        body += f"E-Mail: {safe_email or '(keine Angabe)'}\n"
+        context = {
+            "username": safe_username,
+            "email": safe_email,
+            "has_email": bool(safe_email),
+            "site_url": getattr(settings, "SITE_URL", ""),
+        }
+        html_message = render_to_string("core/email/registration_notification.html", context)
+        plain_message = render_to_string("core/email/registration_notification.txt", context)
         try:
             send_mail(
                 subject=f"[Preceptly] Neue Registrierung: {safe_username}",
-                message=body,
+                message=plain_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[recipient],
+                html_message=html_message,
                 fail_silently=True,
             )
         except Exception:
