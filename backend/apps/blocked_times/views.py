@@ -4,6 +4,7 @@ Views für BlockedTime-CRUD-Operationen.
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
@@ -204,7 +205,13 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     ).format(count=conflict_count),
                 )
 
-            # Set self.object for redirection
+            # Set self.object for redirection. Return directly here instead of
+            # falling through to super().form_valid(form) below: that would
+            # save form.instance (the original single-day blocked_time) a
+            # second time, and it never gets .user assigned on this branch -
+            # the actual recurring rows are already created via the service
+            # above, so this extra save is both unwanted and would crash with
+            # a NOT NULL user_id violation.
             if result.get("created", 0) > 0:
                 first_blocked_time = (
                     BlockedTime.objects.filter(
@@ -222,6 +229,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                 blocked_time.save()
                 recalculate_conflicts_for_blocked_time(blocked_time)
                 self.object = blocked_time
+            return HttpResponseRedirect(self.get_success_url())
         else:
             # Create normal single BlockedTime
             blocked_time = form.save(commit=False)
