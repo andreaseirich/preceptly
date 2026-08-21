@@ -101,7 +101,7 @@ class SessionForm(forms.ModelForm):
         labels = {
             "homework": _("Hausaufgaben für nächste Stunde"),
             "meeting_url": _("Meeting-URL (Zoom/Meet)"),
-            "tutor_no_show": _("I did not attend; student was waiting (TutorSpace / Abacus)"),
+            "tutor_no_show": _("I did not attend; student was waiting"),
         }
 
     def __init__(self, *args, user=None, **kwargs):

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 12:07+0200\n"
+"POT-Creation-Date: 2026-08-21 12:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,16 +43,15 @@ msgstr ""
 
 #: apps/ai/client.py:151
 msgid "Unexpected error: max retries exceeded without error"
-msgstr ""
-"Unerwarteter Fehler: Maximale Wiederholungen überschritten ohne Fehler"
+msgstr "Unerwarteter Fehler: Maximale Wiederholungen überschritten ohne Fehler"
 
 #: apps/ai/client.py:164
 #, python-brace-format
 msgid "Mock mode is active, but no mock samples are available (key: {key})."
 msgstr ""
 "Der Mock-Modus ist aktiv, aber es sind keine Mock-Beispiele verfügbar "
-"(Schlüssel: {key}).Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar"
-" (Schlüssel: {key})."
+"(Schlüssel: {key}).Mock-Modus ist aktiv, aber keine Mock-Beispiele verfügbar "
+"(Schlüssel: {key})."
 
 #: apps/ai/client.py:189
 msgid "Mock mode is disabled. Call generate_text() with real prompts instead."
@@ -168,12 +167,11 @@ msgstr "Betrag"
 #: apps/billing/templates/billing/invoice_list.html:35
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:26
 #: apps/contracts/templates/contracts/contract_list.html:37
-#: apps/core/templates/core/dashboard.html:17
-#: apps/core/templates/core/dashboard.html:50
+#: apps/core/templates/core/dashboard.html:24
+#: apps/core/templates/core/dashboard.html:57
 #: apps/core/templates/core/income_overview.html:32
 #: apps/core/templates/core/income_overview.html:104 apps/lessons/admin.py:32
-#: apps/lessons/admin.py:102
-#: apps/lessons/templates/lessons/lesson_list.html:19
+#: apps/lessons/admin.py:102 apps/lessons/templates/lessons/lesson_list.html:19
 #: apps/lessons/templates/lessons/lesson_month.html:16
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:27
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:23
@@ -197,8 +195,8 @@ msgstr "Posten"
 #: apps/billing/templates/billing/invoice_create.html:79
 #: apps/contracts/admin.py:78
 #: apps/contracts/templates/contracts/contract_list.html:31
-#: apps/core/templates/core/dashboard.html:16
-#: apps/core/templates/core/dashboard.html:49
+#: apps/core/templates/core/dashboard.html:23
+#: apps/core/templates/core/dashboard.html:56
 #: apps/core/templates/core/reports.html:99 apps/lessons/admin.py:45
 #: apps/lessons/admin.py:114
 #: apps/lessons/templates/lessons/conflict_detail.html:41
@@ -239,8 +237,7 @@ msgstr ""
 
 #: apps/billing/forms.py:60
 msgid ""
-"Optional: Filter by contract (only lessons from this contract will be "
-"billed)"
+"Optional: Filter by contract (only lessons from this contract will be billed)"
 msgstr ""
 "Optional: Nach Vertrag filtern (nur Unterrichtsstunden aus diesem Vertrag "
 "werden abgerechnet)"
@@ -356,10 +353,10 @@ msgid "Duration in minutes (copy)"
 msgstr "Dauer in Minuten (Kopie)"
 
 #: apps/billing/models.py:179
-msgid ""
-"Amount for this item (negative for deductions, e.g. TutorSpace no-show)."
+msgid "Amount for this item (negative for deductions, e.g. a tutor no-show)."
 msgstr ""
-"Betrag für diese Position (negativ für Abzüge, z. B. TutorSpace-Ausfall)."
+"Betrag für diese Position (negativ für Abzüge, z. B. bei einem Ausfall des "
+"Nachhilfelehrers)."
 
 #: apps/billing/models.py:185
 msgid "Invoice Item"
@@ -514,28 +511,37 @@ msgstr "%(institute)s – Stufenberechnung"
 #, python-format
 msgid ""
 "\n"
-"            Before this billing period you already have <strong>%(mins)s</strong> minutes of %(institute)s lessons that count toward the rate tier (that is <strong>%(fh)s</strong> full hours plus <strong>%(rm)s</strong> minutes). The tiered rate uses this history, not only the table below.\n"
+"            Before this billing period you already have <strong>%(mins)s</"
+"strong> minutes of %(institute)s lessons that count toward the rate tier "
+"(that is <strong>%(fh)s</strong> full hours plus <strong>%(rm)s</strong> "
+"minutes). The tiered rate uses this history, not only the table below.\n"
 "            "
 msgstr ""
 "\n"
-"            Vor diesem Abrechnungszeitraum hast du bereits <strong>%(mins)s</strong> Minuten %(institute)s-Stunden, die auf die Vergütungsstufe angerechnet werden (das sind <strong>%(fh)s</strong> volle Stunden plus <strong>%(rm)s</strong> Minuten). Der gestaffelte Satz berücksichtigt diese Vorgeschichte, nicht nur die Tabelle unten.\n"
+"            Vor diesem Abrechnungszeitraum hast du bereits <strong>%(mins)s</"
+"strong> Minuten %(institute)s-Stunden, die auf die Vergütungsstufe "
+"angerechnet werden (das sind <strong>%(fh)s</strong> volle Stunden plus "
+"<strong>%(rm)s</strong> Minuten). Der gestaffelte Satz berücksichtigt diese "
+"Vorgeschichte, nicht nur die Tabelle unten.\n"
 "            "
 
 #: apps/billing/templates/billing/invoice_create.html:62
 #, python-format
 msgid ""
 "\n"
-"            Your settings only count lessons from <strong>%(d)s</strong> onward toward the tier.\n"
+"            Your settings only count lessons from <strong>%(d)s</strong> "
+"onward toward the tier.\n"
 "            "
 msgstr ""
 "\n"
-"            Ihre Einstellungen zählen nur Stunden ab <strong>%(d)s</strong> zur Stufenberechnung.\n"
+"            Ihre Einstellungen zählen nur Stunden ab <strong>%(d)s</strong> "
+"zur Stufenberechnung.\n"
 "            "
 
 #: apps/billing/templates/billing/invoice_create.html:67
 msgid ""
-"Tip: If a higher rate appears too early, check your tier config in Settings,"
-" or remove old test lessons."
+"Tip: If a higher rate appears too early, check your tier config in Settings, "
+"or remove old test lessons."
 msgstr ""
 "Tipp: Falls ein höherer Satz zu früh erscheint, prüfe die "
 "Stufenkonfiguration unter Institute, oder entferne alte Test-Stunden."
@@ -560,9 +566,9 @@ msgstr ""
 #: apps/billing/templates/billing/invoice_create.html:77
 #: apps/billing/templates/billing/invoice_detail.html:202
 #: apps/billing/templates/billing/invoice_document.html:124
-#: apps/core/templates/core/dashboard.html:47
+#: apps/core/templates/core/dashboard.html:54
 #: apps/core/templates/core/expense_list.html:27
-#: apps/core/templates/core/tax_year.html:123 apps/core/views.py:623
+#: apps/core/templates/core/tax_year.html:123 apps/core/views.py:635
 #: apps/lessons/templates/lessons/conflict_detail.html:39
 #: apps/lessons/templates/lessons/email_booking_notification.html:15
 #: apps/lessons/templates/lessons/email_booking_notification.txt:7
@@ -574,8 +580,8 @@ msgstr "Datum"
 #: apps/billing/templates/billing/invoice_create.html:78
 #: apps/blocked_times/admin.py:23
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:24
-#: apps/core/templates/core/dashboard.html:15
-#: apps/core/templates/core/dashboard.html:48
+#: apps/core/templates/core/dashboard.html:22
+#: apps/core/templates/core/dashboard.html:55
 #: apps/lessons/templates/lessons/conflict_detail.html:40
 #: apps/lessons/templates/lessons/email_booking_notification.html:16
 #: apps/lessons/templates/lessons/email_booking_notification.txt:8
@@ -649,8 +655,8 @@ msgstr "Rechnungsdaten fehlen"
 #: apps/billing/templates/billing/invoice_detail.html:126
 #, python-format
 msgid ""
-"To generate a PDF, please fill in your <a href=\"%(url)s\">invoice "
-"details</a> first (name, address, optional tax number)."
+"To generate a PDF, please fill in your <a href=\"%(url)s\">invoice details</"
+"a> first (name, address, optional tax number)."
 msgstr ""
 "Um ein PDF zu erstellen, tragen Sie bitte zuerst Ihre <a "
 "href=\"%(url)s\">Rechnungsdaten</a> ein (Name, Adresse, optional "
@@ -689,7 +695,7 @@ msgid "Total Amount"
 msgstr "Gesamtbetrag"
 
 #: apps/billing/templates/billing/invoice_detail.html:164
-#: apps/core/templates/core/tax_year.html:125 apps/core/views.py:592
+#: apps/core/templates/core/tax_year.html:125 apps/core/views.py:604
 msgid "Recipient"
 msgstr "Empfänger"
 
@@ -725,17 +731,18 @@ msgid "Name"
 msgstr "Name"
 
 #: apps/billing/templates/billing/invoice_detail.html:184
-#: apps/core/templates/core/settings.html:243
+#: apps/core/templates/core/settings.html:244
 msgid "Address"
 msgstr "Adresse"
 
 #: apps/billing/templates/billing/invoice_detail.html:184
-#: apps/core/templates/core/settings.html:247
-#: apps/core/templates/core/settings.html:252
-#: apps/core/templates/core/settings.html:256
-#: apps/core/templates/core/settings.html:260
-#: apps/core/templates/core/settings.html:264
-#: apps/core/templates/core/settings.html:268
+#: apps/core/templates/core/register.html:35
+#: apps/core/templates/core/settings.html:248
+#: apps/core/templates/core/settings.html:253
+#: apps/core/templates/core/settings.html:257
+#: apps/core/templates/core/settings.html:261
+#: apps/core/templates/core/settings.html:265
+#: apps/core/templates/core/settings.html:269
 msgid "optional"
 msgstr "optional"
 
@@ -745,8 +752,8 @@ msgstr "optional"
 #: apps/contracts/templates/contracts/contract_form.html:61
 #: apps/contracts/templates/contracts/institute_form.html:81
 #: apps/core/templates/core/base.html:614
-#: apps/core/templates/core/settings.html:223
-#: apps/core/templates/core/settings.html:423
+#: apps/core/templates/core/settings.html:224
+#: apps/core/templates/core/settings.html:424
 #: apps/lessons/templates/lessons/lesson_form.html:196
 #: apps/students/templates/students/student_form.html:30
 msgid "Save"
@@ -761,7 +768,7 @@ msgstr "Rechnungspositionen"
 #: apps/blocked_times/recurring_forms.py:35
 #: apps/blocked_times/templates/blocked_times/blockedtime_detail.html:19
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:19
-#: apps/core/templates/core/expense_list.html:29 apps/core/views.py:623
+#: apps/core/templates/core/expense_list.html:29 apps/core/views.py:635
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -930,9 +937,9 @@ msgid ""
 "was created — <a href=\"{}\">upgrade to a paid plan</a> for unlimited "
 "invoices."
 msgstr ""
-"Kostenloser Plan: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine"
-" Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Plan "
-"upgraden</a> für unbegrenzte Rechnungen."
+"Kostenloser Plan: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine "
+"Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Plan upgraden</"
+"a> für unbegrenzte Rechnungen."
 
 #: apps/billing/views.py:295
 #, python-brace-format
@@ -1097,7 +1104,7 @@ msgid "When should the series end? (optional)"
 msgstr "Wann soll die Serie enden? (optional)"
 
 #: apps/blocked_times/forms.py:57 apps/blocked_times/recurring_forms.py:41
-#: apps/blocked_times/recurring_models.py:43 apps/core/forms.py:62
+#: apps/blocked_times/recurring_models.py:43 apps/core/forms.py:68
 #: apps/core/templates/core/settings.html:23 apps/lessons/forms.py:58
 #: apps/lessons/recurring_forms.py:49 apps/lessons/recurring_models.py:48
 #: apps/lessons/templates/lessons/lesson_form.html:160
@@ -1107,7 +1114,7 @@ msgid "Monday"
 msgstr "Montag"
 
 #: apps/blocked_times/forms.py:58 apps/blocked_times/recurring_forms.py:42
-#: apps/blocked_times/recurring_models.py:44 apps/core/forms.py:63
+#: apps/blocked_times/recurring_models.py:44 apps/core/forms.py:69
 #: apps/core/templates/core/settings.html:44 apps/lessons/forms.py:59
 #: apps/lessons/recurring_forms.py:50 apps/lessons/recurring_models.py:49
 #: apps/lessons/templates/lessons/lesson_form.html:164
@@ -1117,7 +1124,7 @@ msgid "Tuesday"
 msgstr "Dienstag"
 
 #: apps/blocked_times/forms.py:59 apps/blocked_times/recurring_forms.py:43
-#: apps/blocked_times/recurring_models.py:45 apps/core/forms.py:64
+#: apps/blocked_times/recurring_models.py:45 apps/core/forms.py:70
 #: apps/core/templates/core/settings.html:65 apps/lessons/forms.py:60
 #: apps/lessons/recurring_forms.py:51 apps/lessons/recurring_models.py:50
 #: apps/lessons/templates/lessons/lesson_form.html:168
@@ -1127,7 +1134,7 @@ msgid "Wednesday"
 msgstr "Mittwoch"
 
 #: apps/blocked_times/forms.py:60 apps/blocked_times/recurring_forms.py:44
-#: apps/blocked_times/recurring_models.py:46 apps/core/forms.py:65
+#: apps/blocked_times/recurring_models.py:46 apps/core/forms.py:71
 #: apps/core/templates/core/settings.html:86 apps/lessons/forms.py:61
 #: apps/lessons/recurring_forms.py:52 apps/lessons/recurring_models.py:51
 #: apps/lessons/templates/lessons/lesson_form.html:172
@@ -1137,7 +1144,7 @@ msgid "Thursday"
 msgstr "Donnerstag"
 
 #: apps/blocked_times/forms.py:61 apps/blocked_times/recurring_forms.py:45
-#: apps/blocked_times/recurring_models.py:47 apps/core/forms.py:66
+#: apps/blocked_times/recurring_models.py:47 apps/core/forms.py:72
 #: apps/core/templates/core/settings.html:107 apps/lessons/forms.py:62
 #: apps/lessons/recurring_forms.py:53 apps/lessons/recurring_models.py:52
 #: apps/lessons/templates/lessons/lesson_form.html:176
@@ -1147,7 +1154,7 @@ msgid "Friday"
 msgstr "Freitag"
 
 #: apps/blocked_times/forms.py:62 apps/blocked_times/recurring_forms.py:46
-#: apps/blocked_times/recurring_models.py:48 apps/core/forms.py:67
+#: apps/blocked_times/recurring_models.py:48 apps/core/forms.py:73
 #: apps/core/templates/core/settings.html:128 apps/lessons/forms.py:63
 #: apps/lessons/recurring_forms.py:54 apps/lessons/recurring_models.py:53
 #: apps/lessons/templates/lessons/lesson_form.html:180
@@ -1157,7 +1164,7 @@ msgid "Saturday"
 msgstr "Samstag"
 
 #: apps/blocked_times/forms.py:63 apps/blocked_times/recurring_forms.py:47
-#: apps/blocked_times/recurring_models.py:49 apps/core/forms.py:68
+#: apps/blocked_times/recurring_models.py:49 apps/core/forms.py:74
 #: apps/core/templates/core/settings.html:149 apps/lessons/forms.py:64
 #: apps/lessons/recurring_forms.py:55 apps/lessons/recurring_models.py:54
 #: apps/lessons/templates/lessons/lesson_form.html:184
@@ -1404,11 +1411,9 @@ msgstr[1] ""
 #: apps/blocked_times/recurring_views.py:149
 #, python-brace-format
 msgid "{created} blocked time successfully created, {skipped} skipped."
-msgid_plural ""
-"{created} blocked times successfully created, {skipped} skipped."
+msgid_plural "{created} blocked times successfully created, {skipped} skipped."
 msgstr[0] "{created} Sperrzeit erfolgreich erstellt, {skipped} übersprungen."
-msgstr[1] ""
-"{created} Sperrzeiten erfolgreich erstellt, {skipped} übersprungen."
+msgstr[1] "{created} Sperrzeiten erfolgreich erstellt, {skipped} übersprungen."
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:4
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:7
@@ -1418,9 +1423,10 @@ msgstr "Sperrzeit löschen"
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:8
 #, python-format
 msgid ""
-"Are you sure you want to delete the blocked time \"%(title)s\" "
-"(%(datetime)s)?"
-msgstr "Möchten Sie die Blockzeit \"%(title)s\" (%(datetime)s) wirklich löschen?"
+"Are you sure you want to delete the blocked time "
+"\"%(title)s\" (%(datetime)s)?"
+msgstr ""
+"Möchten Sie die Blockzeit \"%(title)s\" (%(datetime)s) wirklich löschen?"
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:12
 msgid "This blocked time is part of a series"
@@ -1541,8 +1547,8 @@ msgstr "Sperrzeitserie löschen"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_confirm_delete.html:8
 #, python-format
 msgid ""
-"Are you sure you want to delete the recurring blocked time \"%(title)s\" "
-"(%(weekdays)s, %(time)s)?"
+"Are you sure you want to delete the recurring blocked time "
+"\"%(title)s\" (%(weekdays)s, %(time)s)?"
 msgstr ""
 "Möchten Sie die wiederkehrende Blockzeit \"%(title)s\" (%(weekdays)s, "
 "%(time)s) wirklich löschen?"
@@ -1627,8 +1633,7 @@ msgid ""
 msgstr ""
 "Wiederkehrende Blockzeiten ermöglichen es Ihnen, sich wiederholende "
 "Blockzeiten zu erstellen (z.B. 'jeden Dienstag 18-20 Uhr'). Nach dem "
-"Speichern können Sie die Blockzeiten für den angegebenen Zeitraum "
-"generieren."
+"Speichern können Sie die Blockzeiten für den angegebenen Zeitraum generieren."
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_form.html:27
 #: apps/lessons/templates/lessons/recurringlesson_form.html:27
@@ -1661,8 +1666,8 @@ msgid ""
 "Every month on the same calendar day (e.g., every 15th of the month), if "
 "that day is a selected weekday."
 msgstr ""
-"Jeden Monat am gleichen Kalendertag (z.B. jeden 15. des Monats), wenn dieser"
-" Tag ein ausgewählter Wochentag ist."
+"Jeden Monat am gleichen Kalendertag (z.B. jeden 15. des Monats), wenn dieser "
+"Tag ein ausgewählter Wochentag ist."
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_generate.html:4
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_generate.html:20
@@ -1925,8 +1930,8 @@ msgid ""
 "For this institute, if you mark a lesson as tutor no-show: share of the "
 "usual lesson pay you keep. Only used when this institute has tiered pay."
 msgstr ""
-"Für dieses Institut, wenn du eine Stunde als Tutor-Ausfall markierst: Anteil"
-" der üblichen Vergütung, den du behältst. Wird nur verwendet, wenn dieses "
+"Für dieses Institut, wenn du eine Stunde als Tutor-Ausfall markierst: Anteil "
+"der üblichen Vergütung, den du behältst. Wird nur verwendet, wenn dieses "
 "Institut gestaffelte Vergütung hat."
 
 #: apps/contracts/models.py:168
@@ -1939,8 +1944,8 @@ msgid ""
 "date if the preview or amounts look wrong because many older lessons are "
 "included."
 msgstr ""
-"Leer: Jede bisherige Stunde dieses Instituts zählt für die Stufen. Setze ein"
-" Datum, wenn Vorschau oder Beträge falsch wirken, weil zu viele ältere "
+"Leer: Jede bisherige Stunde dieses Instituts zählt für die Stufen. Setze ein "
+"Datum, wenn Vorschau oder Beträge falsch wirken, weil zu viele ältere "
 "Stunden einfließen."
 
 #: apps/contracts/models.py:180
@@ -1984,7 +1989,7 @@ msgid "Last Name"
 msgstr "Nachname"
 
 #: apps/contracts/templates/contracts/contract_detail.html:22
-#: apps/core/templates/core/settings.html:256
+#: apps/core/templates/core/settings.html:257
 msgid "Phone"
 msgstr "Telefon"
 
@@ -2077,8 +2082,8 @@ msgid ""
 "private lessons."
 msgstr ""
 "Noch keine Institute angelegt. <a href=\"%(institute_list_url)s\">Institute "
-"verwalten</a>, um darüber abzurechnen, oder lasse es bei „Kein Institut“ für"
-" Privatunterricht."
+"verwalten</a>, um darüber abzurechnen, oder lasse es bei „Kein Institut“ für "
+"Privatunterricht."
 
 #: apps/contracts/templates/contracts/contract_form.html:26
 msgid "Monthly Planning"
@@ -2144,8 +2149,7 @@ msgstr ""
 #: apps/contracts/templates/contracts/contract_list.html:58
 #, python-format
 msgid "Planned: %(planned)s · Taught: %(taught)s · Remaining: %(remaining)s"
-msgstr ""
-"Geplant: %(planned)s · Erteilt: %(taught)s · Noch übrig: %(remaining)s"
+msgstr "Geplant: %(planned)s · Erteilt: %(taught)s · Noch übrig: %(remaining)s"
 
 #: apps/contracts/templates/contracts/contract_list.html:70
 msgid "Deactivate"
@@ -2232,8 +2236,8 @@ msgstr "Institut hinzufügen"
 
 #: apps/contracts/templates/contracts/institute_list.html:14
 msgid ""
-"Create an institute for each place you teach through, with its own pay tiers"
-" and tutor-no-show rule. On a student's contract, pick one of your "
+"Create an institute for each place you teach through, with its own pay tiers "
+"and tutor-no-show rule. On a student's contract, pick one of your "
 "institutes, or leave it as \"No institute\" for private lessons."
 msgstr ""
 "Lege für jeden Ort, über den du abrechnest, ein Institut mit eigenen "
@@ -2307,8 +2311,8 @@ msgstr "Institut gespeichert."
 
 #: apps/contracts/views.py:381
 msgid ""
-"This institute cannot be deleted because contracts are still assigned to it."
-" Reassign or remove those contracts first."
+"This institute cannot be deleted because contracts are still assigned to it. "
+"Reassign or remove those contracts first."
 msgstr ""
 "Dieses Institut kann nicht gelöscht werden, da ihm noch Verträge zugeordnet "
 "sind. Ordne diese Verträge zuerst um oder entferne sie."
@@ -2342,7 +2346,7 @@ msgstr "Premium-Status"
 msgid "User"
 msgstr "Benutzer"
 
-#: apps/core/admin.py:42 apps/core/templates/core/settings.html:299
+#: apps/core/admin.py:42 apps/core/templates/core/settings.html:300
 msgid "Subscription"
 msgstr "Abonnement"
 
@@ -2367,7 +2371,9 @@ msgid "This feature requires a higher subscription plan. Upgrade to access."
 msgstr ""
 "Diese Funktion erfordert ein höheres Abonnement. Upgrade für vollen Zugang."
 
-#: apps/core/forms.py:24 apps/core/templates/core/settings.html:217
+#: apps/core/forms.py:24 apps/core/forms.py:41
+#: apps/core/templates/core/register.html:35
+#: apps/core/templates/core/settings.html:217
 msgid "Email address"
 msgstr "E-Mail-Adresse"
 
@@ -2382,54 +2388,60 @@ msgstr ""
 msgid "Username"
 msgstr "Benutzername"
 
-#: apps/core/forms.py:40 apps/core/templates/core/landing.html:389
+#: apps/core/forms.py:43
+msgid ""
+"Optional. Enables automatic PDF invoices and appointment reminders; can only "
+"be changed later via support."
+msgstr ""
+
+#: apps/core/forms.py:46 apps/core/templates/core/landing.html:389
 #: apps/core/templates/core/landing.html:394
 #: apps/core/templates/core/login.html:27
-#: apps/core/templates/core/register.html:35
+#: apps/core/templates/core/register.html:50
 msgid "Password"
 msgstr "Passwort"
 
-#: apps/core/forms.py:41 apps/core/templates/core/register.html:48
+#: apps/core/forms.py:47 apps/core/templates/core/register.html:63
 msgid "Password confirmation"
 msgstr "Passwort bestätigen"
 
-#: apps/core/forms.py:44
+#: apps/core/forms.py:50
 msgid ""
 "Registration failed. Please try a different username or contact support."
 msgstr ""
 "Registrierung fehlgeschlagen. Bitte einen anderen Benutzernamen versuchen "
 "oder den Support kontaktieren."
 
-#: apps/core/forms.py:127
+#: apps/core/forms.py:133
 #, python-brace-format
 msgid "Start time must be before end time for {weekday}."
 msgstr "Die Startzeit muss vor der Endzeit für {weekday} liegen."
 
-#: apps/core/forms.py:143
+#: apps/core/forms.py:149
 msgid "Public transport (time-dependent)"
 msgstr "ÖPNV (zeitabhängig)"
 
-#: apps/core/forms.py:144
+#: apps/core/forms.py:150
 msgid "Bicycle (constant short buffer)"
 msgstr "Fahrrad (konstanter kurzer Puffer)"
 
-#: apps/core/forms.py:148 apps/core/templates/core/settings.html:188
+#: apps/core/forms.py:154 apps/core/templates/core/settings.html:188
 msgid "Travel mode for on-site appointments"
 msgstr "Anreise-Modus für Vor-Ort-Termine"
 
-#: apps/core/forms.py:150
+#: apps/core/forms.py:156
 msgid ""
 "Determines which time slots are offered for on-site appointments. Public "
 "transport uses time-dependent rules; bicycle uses a fixed buffer."
 msgstr ""
-"Legt fest, welche Zeitslots für Vor-Ort-Termine angeboten werden. ÖPNV nutzt"
-" zeitabhängige Regeln, Fahrrad einen festen Puffer."
+"Legt fest, welche Zeitslots für Vor-Ort-Termine angeboten werden. ÖPNV nutzt "
+"zeitabhängige Regeln, Fahrrad einen festen Puffer."
 
-#: apps/core/forms.py:159 apps/core/templates/core/settings.html:192
+#: apps/core/forms.py:165 apps/core/templates/core/settings.html:192
 msgid "Buffer (minutes) when using bicycle"
 msgstr "Puffer (Minuten) bei Fahrrad"
 
-#: apps/core/forms.py:160
+#: apps/core/forms.py:166
 msgid "Only used when bicycle is selected. Typical: 20–30 minutes."
 msgstr "Nur bei Auswahl Fahrrad. Üblich: 20–30 Minuten."
 
@@ -2469,8 +2481,8 @@ msgid ""
 "(weekday, start_time, end_time, buffer_minutes), no_go_windows. Weekday "
 "0=Monday."
 msgstr ""
-"Zeitabhängige Fahrtrichtlinie für Vor-Ort-Buchungen: aktiviert, buffer_rules"
-" (Wochentag, Startzeit, Endzeit, Pufferminuten), no_go_windows. Wochentag "
+"Zeitabhängige Fahrtrichtlinie für Vor-Ort-Buchungen: aktiviert, buffer_rules "
+"(Wochentag, Startzeit, Endzeit, Pufferminuten), no_go_windows. Wochentag "
 "0=Montag."
 
 #: apps/core/models.py:65
@@ -2500,8 +2512,8 @@ msgstr "Quelle des Premium-Status: 'stripe', 'manual' oder null"
 msgid "Last email synced to Stripe Customer (skip modify if unchanged)"
 msgstr ""
 "Zuletzt mit dem Stripe-Kunden synchronisierte E-Mail-Adresse (Änderung "
-"überspringen, falls unverändert)Zuletzt mit Stripe-Kunden synchronisierte "
-"E-Mail (Änderung überspringen, wenn unverändert)"
+"überspringen, falls unverändert)Zuletzt mit Stripe-Kunden synchronisierte E-"
+"Mail (Änderung überspringen, wenn unverändert)"
 
 #: apps/core/models.py:96
 msgid "When the user explicitly accepted AGB, AVV, and Datenschutzerklärung."
@@ -2515,8 +2527,7 @@ msgstr "Name / Firma"
 
 #: apps/core/models.py:107
 msgid "Dein vollständiger Name oder Firmenname, der auf Rechnungen erscheint."
-msgstr ""
-"Dein vollständiger Name oder Firmenname, der auf Rechnungen erscheint."
+msgstr "Dein vollständiger Name oder Firmenname, der auf Rechnungen erscheint."
 
 #: apps/core/models.py:111
 msgid "Adresse"
@@ -2550,7 +2561,7 @@ msgstr "Telefon"
 msgid "Deine Telefonnummer (optional)."
 msgstr "Deine Telefonnummer (optional)."
 
-#: apps/core/models.py:134 apps/core/templates/core/settings.html:260
+#: apps/core/models.py:134 apps/core/templates/core/settings.html:261
 msgid "Website"
 msgstr "Website"
 
@@ -2558,7 +2569,7 @@ msgstr "Website"
 msgid "Deine Website (optional, z. B. https://example.de)."
 msgstr "Deine Website (optional, z. B. https://example.de)."
 
-#: apps/core/models.py:140 apps/core/templates/core/settings.html:264
+#: apps/core/models.py:140 apps/core/templates/core/settings.html:265
 msgid "IBAN"
 msgstr "IBAN"
 
@@ -2566,7 +2577,7 @@ msgstr "IBAN"
 msgid "Bankverbindung für Rechnungen (optional)."
 msgstr "Bankverbindung für Rechnungen (optional)."
 
-#: apps/core/models.py:146 apps/core/templates/core/settings.html:268
+#: apps/core/models.py:146 apps/core/templates/core/settings.html:269
 msgid "BIC"
 msgstr "BIC"
 
@@ -2718,7 +2729,7 @@ msgstr "Ausgabe"
 #: apps/core/models.py:313 apps/core/templates/core/expense_list.html:5
 #: apps/core/templates/core/expense_list.html:8
 #: apps/core/templates/core/tax_year.html:36
-#: apps/core/templates/core/tax_year.html:145 apps/core/views.py:622
+#: apps/core/templates/core/tax_year.html:145 apps/core/views.py:634
 msgid "Expenses"
 msgstr "Ausgaben"
 
@@ -2932,20 +2943,20 @@ msgid "Push notifications are not supported in this browser."
 msgstr "Push-Benachrichtigungen werden von diesem Browser nicht unterstützt."
 
 #: apps/core/templates/core/base.html:845
-#: apps/core/templates/core/settings.html:427
+#: apps/core/templates/core/settings.html:428
 msgid "Push notifications are enabled on this device."
 msgstr "Push-Benachrichtigungen sind auf diesem Gerät aktiviert."
 
 #: apps/core/templates/core/base.html:1087
-#: apps/core/templates/core/settings.html:437
+#: apps/core/templates/core/settings.html:438
 msgid "Add to home screen"
 msgstr "Zum Startbildschirm hinzufügen"
 
 #: apps/core/templates/core/base.html:1088
 msgid "Add Preceptly to your home screen for quick, app-like access."
 msgstr ""
-"Füge Preceptly zu deinem Startbildschirm hinzu – für schnellen App-ähnlichen"
-" Zugriff."
+"Füge Preceptly zu deinem Startbildschirm hinzu – für schnellen App-ähnlichen "
+"Zugriff."
 
 #: apps/core/templates/core/base.html:1100
 msgid "Open Preceptly in Safari (not Chrome or Firefox)."
@@ -3008,44 +3019,54 @@ msgstr "Nicht jetzt"
 msgid "Premium"
 msgstr "Premium"
 
-#: apps/core/templates/core/dashboard.html:10
+#: apps/core/templates/core/dashboard.html:12
+msgid ""
+"Hinterlege deine E-Mail-Adresse, um automatische PDF-Rechnungen und "
+"Terminerinnerungen zu aktivieren."
+msgstr ""
+
+#: apps/core/templates/core/dashboard.html:13
+msgid "Jetzt hinzufügen →"
+msgstr ""
+
+#: apps/core/templates/core/dashboard.html:17
 msgid "Today's Lessons"
 msgstr "Heutige Stunden"
 
-#: apps/core/templates/core/dashboard.html:18
-#: apps/core/templates/core/dashboard.html:51
+#: apps/core/templates/core/dashboard.html:25
+#: apps/core/templates/core/dashboard.html:58
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:41
 #: apps/lessons/admin.py:37 apps/lessons/templates/lessons/lesson_list.html:20
 #: apps/lessons/templates/lessons/lesson_month.html:17
 msgid "Conflicts"
 msgstr "Konflikte"
 
-#: apps/core/templates/core/dashboard.html:29
-#: apps/core/templates/core/dashboard.html:63
+#: apps/core/templates/core/dashboard.html:36
+#: apps/core/templates/core/dashboard.html:70
 #, python-format
 msgid "%(counter)s conflict"
 msgid_plural "%(counter)s conflicts"
 msgstr[0] "%(counter)s Konflikt"
 msgstr[1] "%(counter)s Konflikte"
 
-#: apps/core/templates/core/dashboard.html:31
-#: apps/core/templates/core/dashboard.html:65
+#: apps/core/templates/core/dashboard.html:38
+#: apps/core/templates/core/dashboard.html:72
 msgid "OK"
 msgstr "OK"
 
-#: apps/core/templates/core/dashboard.html:39
+#: apps/core/templates/core/dashboard.html:46
 msgid "No lessons scheduled for today."
 msgstr "Keine Stunden für heute geplant."
 
-#: apps/core/templates/core/dashboard.html:42
+#: apps/core/templates/core/dashboard.html:49
 msgid "Upcoming Lessons (7 days)"
 msgstr "Nächste Stunden (7 Tage)"
 
-#: apps/core/templates/core/dashboard.html:73
+#: apps/core/templates/core/dashboard.html:80
 msgid "No upcoming lessons."
 msgstr "Keine kommenden Stunden."
 
-#: apps/core/templates/core/dashboard.html:76
+#: apps/core/templates/core/dashboard.html:83
 #: apps/core/templates/core/income_overview.html:9
 #: apps/core/templates/core/reports.html:9
 #: apps/core/templates/core/tax_year.html:9
@@ -3053,13 +3074,13 @@ msgstr "Keine kommenden Stunden."
 msgid "Income"
 msgstr "Einnahmen"
 
-#: apps/core/templates/core/dashboard.html:77
+#: apps/core/templates/core/dashboard.html:84
 #: apps/core/templates/core/income_overview.html:25
 #: apps/core/templates/core/income_overview.html:58
 msgid "Recognized revenue (paid invoices):"
 msgstr "Realisierte Einnahmen (bezahlte Rechnungen):"
 
-#: apps/core/templates/core/dashboard.html:77
+#: apps/core/templates/core/dashboard.html:84
 #: apps/core/templates/core/income_overview.html:25
 #: apps/core/templates/core/income_overview.html:58
 #, python-format
@@ -3068,7 +3089,7 @@ msgid_plural "(%(counter)s lessons)"
 msgstr[0] "(%(counter)s Unterrichtsstunde)"
 msgstr[1] "(%(counter)s Unterrichtsstunden)"
 
-#: apps/core/templates/core/dashboard.html:78
+#: apps/core/templates/core/dashboard.html:85
 msgid ""
 "Paid invoices only, grouped by billing period start month (not always the "
 "month lessons occurred)."
@@ -3076,16 +3097,16 @@ msgstr ""
 "Nur bezahlte Rechnungen, gruppiert nach Monat des Rechnungszeitraum-Beginns "
 "(nicht immer der Monat der Stunden)."
 
-#: apps/core/templates/core/dashboard.html:78
+#: apps/core/templates/core/dashboard.html:85
 #: apps/core/templates/core/landing.html:320
 msgid "Income overview"
 msgstr "Einnahmenübersicht"
 
-#: apps/core/templates/core/dashboard.html:78
+#: apps/core/templates/core/dashboard.html:85
 msgid "amounts by lesson status and notes."
 msgstr "Beträge nach Stundenstatus und Erläuterungen."
 
-#: apps/core/templates/core/dashboard.html:81
+#: apps/core/templates/core/dashboard.html:88
 #, python-format
 msgid "%(counter)s conflict in upcoming lessons!"
 msgid_plural "%(counter)s conflicts in upcoming lessons!"
@@ -3146,12 +3167,14 @@ msgstr "Ausgabe löschen"
 #, python-format
 msgid ""
 "\n"
-"        Are you sure you want to delete the expense <strong>%(desc)s</strong> (%(date)s, %(amount)s €)?\n"
+"        Are you sure you want to delete the expense <strong>%(desc)s</"
+"strong> (%(date)s, %(amount)s €)?\n"
 "        This action cannot be undone.\n"
 "    "
 msgstr ""
 "\n"
-"        Möchtest du die Ausgabe <strong>%(desc)s</strong> (%(date)s, %(amount)s €) wirklich löschen?\n"
+"        Möchtest du die Ausgabe <strong>%(desc)s</strong> (%(date)s, "
+"%(amount)s €) wirklich löschen?\n"
 "        Diese Aktion kann nicht rückgängig gemacht werden.\n"
 "    "
 
@@ -3173,7 +3196,7 @@ msgid "Save expense"
 msgstr "Ausgabe speichern"
 
 #: apps/core/templates/core/expense_list.html:28
-#: apps/core/templates/core/tax_year.html:151 apps/core/views.py:623
+#: apps/core/templates/core/tax_year.html:151 apps/core/views.py:635
 msgid "Category"
 msgstr "Kategorie"
 
@@ -3224,8 +3247,7 @@ msgstr "Zusammenfassung"
 #: apps/core/templates/core/income_overview.html:26
 msgid ""
 "Only invoices marked paid. Totals use the calendar month of each invoice "
-"billing period start date - not necessarily the month the lessons took "
-"place."
+"billing period start date - not necessarily the month the lessons took place."
 msgstr ""
 "Nur als bezahlt markierte Rechnungen. Die Summe gilt für den Kalendermonat "
 "des Rechnungszeitraum-Beginns – nicht unbedingt für den Monat, in dem die "
@@ -3267,9 +3289,8 @@ msgid ""
 "This total is the sum of recognized revenue for each month in %(yr)s. Each "
 "month counts only paid invoices whose billing period starts in that month."
 msgstr ""
-"Diese Summe ist die Summe der realisierten Einnahmen je Monat in %(yr)s. Pro"
-" Monat zählen nur bezahlte Rechnungen, deren Zeitraum in diesem Monat "
-"beginnt."
+"Diese Summe ist die Summe der realisierten Einnahmen je Monat in %(yr)s. Pro "
+"Monat zählen nur bezahlte Rechnungen, deren Zeitraum in diesem Monat beginnt."
 
 #: apps/core/templates/core/income_overview.html:61
 msgid "Monthly Breakdown"
@@ -3289,85 +3310,73 @@ msgstr "Realisierte Einnahmen"
 
 #: apps/core/templates/core/income_overview.html:76
 #: apps/core/templates/core/reports.html:23
-#: apps/core/templates/core/tax_year.html:44
-#: apps/lessons/views_calendar.py:292
+#: apps/core/templates/core/tax_year.html:44 apps/lessons/views_calendar.py:292
 msgid "January"
 msgstr "Januar"
 
 #: apps/core/templates/core/income_overview.html:77
 #: apps/core/templates/core/reports.html:24
-#: apps/core/templates/core/tax_year.html:45
-#: apps/lessons/views_calendar.py:293
+#: apps/core/templates/core/tax_year.html:45 apps/lessons/views_calendar.py:293
 msgid "February"
 msgstr "Februar"
 
 #: apps/core/templates/core/income_overview.html:78
 #: apps/core/templates/core/reports.html:25
-#: apps/core/templates/core/tax_year.html:46
-#: apps/lessons/views_calendar.py:294
+#: apps/core/templates/core/tax_year.html:46 apps/lessons/views_calendar.py:294
 msgid "March"
 msgstr "März"
 
 #: apps/core/templates/core/income_overview.html:79
 #: apps/core/templates/core/reports.html:26
-#: apps/core/templates/core/tax_year.html:47
-#: apps/lessons/views_calendar.py:295
+#: apps/core/templates/core/tax_year.html:47 apps/lessons/views_calendar.py:295
 msgid "April"
 msgstr "April"
 
 #: apps/core/templates/core/income_overview.html:80
 #: apps/core/templates/core/reports.html:27
-#: apps/core/templates/core/tax_year.html:48
-#: apps/lessons/views_calendar.py:296
+#: apps/core/templates/core/tax_year.html:48 apps/lessons/views_calendar.py:296
 msgid "May"
 msgstr "Mai"
 
 #: apps/core/templates/core/income_overview.html:81
 #: apps/core/templates/core/reports.html:28
-#: apps/core/templates/core/tax_year.html:49
-#: apps/lessons/views_calendar.py:297
+#: apps/core/templates/core/tax_year.html:49 apps/lessons/views_calendar.py:297
 msgid "June"
 msgstr "Juni"
 
 #: apps/core/templates/core/income_overview.html:82
 #: apps/core/templates/core/reports.html:29
-#: apps/core/templates/core/tax_year.html:50
-#: apps/lessons/views_calendar.py:298
+#: apps/core/templates/core/tax_year.html:50 apps/lessons/views_calendar.py:298
 msgid "July"
 msgstr "Juli"
 
 #: apps/core/templates/core/income_overview.html:83
 #: apps/core/templates/core/reports.html:30
-#: apps/core/templates/core/tax_year.html:51
-#: apps/lessons/views_calendar.py:299
+#: apps/core/templates/core/tax_year.html:51 apps/lessons/views_calendar.py:299
 msgid "August"
 msgstr "August"
 
 #: apps/core/templates/core/income_overview.html:84
 #: apps/core/templates/core/reports.html:31
-#: apps/core/templates/core/tax_year.html:52
-#: apps/lessons/views_calendar.py:300
+#: apps/core/templates/core/tax_year.html:52 apps/lessons/views_calendar.py:300
 msgid "September"
 msgstr "September"
 
 #: apps/core/templates/core/income_overview.html:85
 #: apps/core/templates/core/reports.html:32
-#: apps/core/templates/core/tax_year.html:53
-#: apps/lessons/views_calendar.py:301
+#: apps/core/templates/core/tax_year.html:53 apps/lessons/views_calendar.py:301
 msgid "October"
 msgstr "Oktober"
 
 #: apps/core/templates/core/income_overview.html:86
 #: apps/core/templates/core/reports.html:33
-#: apps/core/templates/core/tax_year.html:54
-#: apps/lessons/views_calendar.py:302
+#: apps/core/templates/core/tax_year.html:54 apps/lessons/views_calendar.py:302
 msgid "November"
 msgstr "November"
 
 #: apps/core/templates/core/income_overview.html:87
 #: apps/core/templates/core/reports.html:34
-#: apps/core/templates/core/tax_year.html:55
-#: apps/lessons/views_calendar.py:303
+#: apps/core/templates/core/tax_year.html:55 apps/lessons/views_calendar.py:303
 msgid "December"
 msgstr "Dezember"
 
@@ -3409,16 +3418,14 @@ msgid "Does this sound familiar?"
 msgstr "Kommt dir das bekannt vor?"
 
 #: apps/core/templates/core/landing.html:208
-msgid ""
-"Private tutors lose 2–3 hours every week to administrative tasks alone."
+msgid "Private tutors lose 2–3 hours every week to administrative tasks alone."
 msgstr ""
 "Nachhilfelehrer verlieren jede Woche 2–3 Stunden allein für "
 "Verwaltungsaufgaben."
 
 #: apps/core/templates/core/landing.html:211
 msgid ""
-"Double bookings and scheduling conflicts with multiple students or "
-"institutes"
+"Double bookings and scheduling conflicts with multiple students or institutes"
 msgstr ""
 "Doppelbuchungen und Terminüberschneidungen bei mehreren Schülern oder "
 "Instituten"
@@ -3438,8 +3445,7 @@ msgstr ""
 "Schülerdaten, Verträge und Stundennotizen verteilt auf verschiedene Tools"
 
 #: apps/core/templates/core/landing.html:220
-msgid ""
-"No clear overview of actual income — especially with multiple employers"
+msgid "No clear overview of actual income — especially with multiple employers"
 msgstr ""
 "Kein klarer Überblick über das tatsächliche Einkommen — besonders bei "
 "mehreren Auftraggebern"
@@ -3487,11 +3493,11 @@ msgstr ""
 
 #: apps/core/templates/core/landing.html:246
 msgid ""
-"Block off time windows for fixed commitments like lectures or appointments —"
-" one-off or as a recurring series."
+"Block off time windows for fixed commitments like lectures or appointments — "
+"one-off or as a recurring series."
 msgstr ""
-"Blockiere Zeitfenster für feste Verpflichtungen wie Vorlesungen oder Termine"
-" – einmalig oder als Serie."
+"Blockiere Zeitfenster für feste Verpflichtungen wie Vorlesungen oder Termine "
+"– einmalig oder als Serie."
 
 #: apps/core/templates/core/landing.html:250
 msgid "Students & Contracts"
@@ -3499,8 +3505,8 @@ msgstr "Schüler & Verträge"
 
 #: apps/core/templates/core/landing.html:251
 msgid ""
-"Manage student profiles, lesson rates, contract periods, monthly quotas, and"
-" multiple institutes in one place."
+"Manage student profiles, lesson rates, contract periods, monthly quotas, and "
+"multiple institutes in one place."
 msgstr ""
 "Schülerprofile, Stundensätze, Vertragslaufzeiten, monatliche Quoten und "
 "mehrere Institute zentral verwalten."
@@ -3535,8 +3541,8 @@ msgstr "Rechnungen & Abrechnung"
 
 #: apps/core/templates/core/landing.html:266
 msgid ""
-"Generate PDF invoices directly from taught lessons. Track payment status and"
-" send reminders."
+"Generate PDF invoices directly from taught lessons. Track payment status and "
+"send reminders."
 msgstr ""
 "PDF-Rechnungen direkt aus gehaltenen Stunden generieren. Zahlungsstatus "
 "verfolgen."
@@ -3600,22 +3606,21 @@ msgstr "KI-gestützte Stundenplanung"
 
 #: apps/core/templates/core/landing.html:300
 msgid ""
-"Generate structured lesson plans with AI — privacy-first, student data stays"
-" on your device."
+"Generate structured lesson plans with AI — privacy-first, student data stays "
+"on your device."
 msgstr ""
 "Strukturierte Stundenpläne mit KI erstellen — datenschutzkonform, "
 "Schülerdaten bleiben lokal."
 
 #: apps/core/templates/core/landing.html:309
 msgid "Costs less than one lesson — saves you hours of admin."
-msgstr ""
-"Kostet weniger als eine Stunde – spart dir Stunden Verwaltungsaufwand."
+msgstr "Kostet weniger als eine Stunde – spart dir Stunden Verwaltungsaufwand."
 
 #: apps/core/templates/core/landing.html:310
 msgid ""
 "Preceptly starts at 4.99 € per month — less than a single tutoring hour. If "
-"you still manage students in Excel, appointments in WhatsApp and invoices in"
-" Word: the switch pays for itself on the very first invoice."
+"you still manage students in Excel, appointments in WhatsApp and invoices in "
+"Word: the switch pays for itself on the very first invoice."
 msgstr ""
 "Preceptly ist kostenlos startbar - mehr Funktionen gibt's ab 4,99 Euro im "
 "Monat, weniger als eine einzige Nachhilfestunde. Wer Schüler noch in Excel, "
@@ -3623,7 +3628,7 @@ msgstr ""
 "sich ab der ersten Rechnung."
 
 #: apps/core/templates/core/landing.html:314
-#: apps/core/templates/core/settings.html:306
+#: apps/core/templates/core/settings.html:307
 msgid "Free"
 msgstr "Kostenlos"
 
@@ -3685,7 +3690,7 @@ msgid "Recommended"
 msgstr "Empfohlen"
 
 #: apps/core/templates/core/landing.html:344
-#: apps/core/templates/core/settings.html:352
+#: apps/core/templates/core/settings.html:353
 msgid "Everything in Starter"
 msgstr "Alles aus Starter"
 
@@ -3698,7 +3703,7 @@ msgid "EÜR tax export"
 msgstr "EÜR-Steuerexport"
 
 #: apps/core/templates/core/landing.html:347
-#: apps/core/templates/core/settings.html:362
+#: apps/core/templates/core/settings.html:363
 msgid "Parent portal"
 msgstr "Elternportal"
 
@@ -3707,7 +3712,7 @@ msgid "Integrated meeting rooms"
 msgstr "Integrierte Meeting-Räume"
 
 #: apps/core/templates/core/landing.html:349
-#: apps/core/templates/core/settings.html:352
+#: apps/core/templates/core/settings.html:353
 msgid "AI lesson plans"
 msgstr "KI-Stundenplanung"
 
@@ -3716,12 +3721,12 @@ msgid "Advanced reports"
 msgstr "Erweiterte Berichte"
 
 #: apps/core/templates/core/landing.html:359
-#: apps/core/templates/core/settings.html:362
+#: apps/core/templates/core/settings.html:363
 msgid "Everything in Pro"
 msgstr "Alles aus Pro"
 
 #: apps/core/templates/core/landing.html:360
-#: apps/core/templates/core/settings.html:362
+#: apps/core/templates/core/settings.html:363
 msgid "Priority support"
 msgstr "Vorrangiger Support"
 
@@ -3774,7 +3779,7 @@ msgstr "Ungültiger Benutzername oder Passwort. Bitte versuchen Sie es erneut."
 
 #: apps/core/templates/core/login.html:40
 #: apps/core/templates/core/register.html:8
-#: apps/core/templates/core/register.html:69
+#: apps/core/templates/core/register.html:84
 msgid "Register"
 msgstr "Registrieren"
 
@@ -3787,7 +3792,7 @@ msgid "Standard"
 msgstr "Standard"
 
 #: apps/core/templates/core/login.html:52
-#: apps/core/templates/core/register.html:81
+#: apps/core/templates/core/register.html:96
 msgid "Back to Landing Page"
 msgstr "Zurück zur Startseite"
 
@@ -3795,24 +3800,24 @@ msgstr "Zurück zur Startseite"
 msgid "Please correct the errors below."
 msgstr "Bitte korrigieren Sie die Fehler unten."
 
-#: apps/core/templates/core/register.html:59
+#: apps/core/templates/core/register.html:74
 msgid "Consent"
 msgstr "Einwilligung"
 
-#: apps/core/templates/core/register.html:63
+#: apps/core/templates/core/register.html:78
 #, python-format
 msgid ""
-"I accept the <a href=\"%(url_terms)s\" target=\"_blank\">Terms of "
-"Service</a>, <a href=\"%(url_avv)s\" target=\"_blank\">Data Processing "
-"Agreement (AVV)</a>, and <a href=\"%(url_privacy)s\" "
-"target=\"_blank\">Privacy Policy</a>."
+"I accept the <a href=\"%(url_terms)s\" target=\"_blank\">Terms of Service</"
+"a>, <a href=\"%(url_avv)s\" target=\"_blank\">Data Processing Agreement "
+"(AVV)</a>, and <a href=\"%(url_privacy)s\" target=\"_blank\">Privacy Policy</"
+"a>."
 msgstr ""
 "Ich akzeptiere die <a href=\"%(url_terms)s\" target=\"_blank\">AGB</a>, den "
 "<a href=\"%(url_avv)s\" target=\"_blank\">Auftragsverarbeitungsvertrag "
 "(AVV)</a> und die <a href=\"%(url_privacy)s\" "
 "target=\"_blank\">Datenschutzerklärung</a>."
 
-#: apps/core/templates/core/register.html:75
+#: apps/core/templates/core/register.html:90
 msgid "Already have an account? Log in"
 msgstr "Bereits ein Konto? Anmelden"
 
@@ -3883,11 +3888,11 @@ msgstr "Top 5 Schüler nach Umsatz (ausgewählter Monat)"
 
 #: apps/core/templates/core/reports.html:95
 msgid ""
-"Amounts from paid invoices linked to each contract; lesson count = "
-"taught/paid sessions dated in the selected month."
+"Amounts from paid invoices linked to each contract; lesson count = taught/"
+"paid sessions dated in the selected month."
 msgstr ""
-"Beträge aus bezahlten Rechnungen je Vertrag; Stundenanzahl = "
-"unterrichtet/bezahlt mit Datum im gewählten Monat."
+"Beträge aus bezahlten Rechnungen je Vertrag; Stundenanzahl = unterrichtet/"
+"bezahlt mit Datum im gewählten Monat."
 
 #: apps/core/templates/core/reports.html:117
 msgid "Revenue by institute (paid)"
@@ -3947,8 +3952,8 @@ msgid ""
 "Tiered pay, tutor no-show rules, and tier start dates are configured per "
 "institute — see \"Manage institutes\"."
 msgstr ""
-"Gestaffelte Vergütung, Tutor-Ausfall-Regeln und Stufen-Startdaten werden pro"
-" Institut eingestellt — siehe „Institute verwalten“."
+"Gestaffelte Vergütung, Tutor-Ausfall-Regeln und Stufen-Startdaten werden pro "
+"Institut eingestellt — siehe „Institute verwalten“."
 
 #: apps/core/templates/core/settings.html:15
 msgid "Default Working Hours"
@@ -3956,8 +3961,8 @@ msgstr "Standard-Arbeitszeiten"
 
 #: apps/core/templates/core/settings.html:16
 msgid ""
-"Set your default working hours. These will be used for student booking pages"
-" when a contract doesn't have specific working hours configured."
+"Set your default working hours. These will be used for student booking pages "
+"when a contract doesn't have specific working hours configured."
 msgstr ""
 "Standard-Arbeitszeiten festlegen. Diese werden für Schüler-Buchungsseiten "
 "verwendet, wenn für einen Vertrag keine spezifischen Arbeitszeiten "
@@ -4028,8 +4033,8 @@ msgid ""
 "Payment received. Subscription activation may take a moment. Refresh if "
 "Premium is not visible yet."
 msgstr ""
-"Zahlung eingegangen. Die Abo-Aktivierung kann einen Moment dauern. Seite neu"
-" laden, falls Premium noch nicht sichtbar ist."
+"Zahlung eingegangen. Die Abo-Aktivierung kann einen Moment dauern. Seite neu "
+"laden, falls Premium noch nicht sichtbar ist."
 
 #: apps/core/templates/core/settings.html:214
 msgid "For invoices and Stripe we recommend adding an email address."
@@ -4038,19 +4043,22 @@ msgstr ""
 
 #: apps/core/templates/core/settings.html:218
 msgid "Optional. Used for invoices and Stripe billing notifications."
-msgstr ""
-"Optional. Wird für Rechnungen und Stripe-Benachrichtigungen verwendet."
+msgstr "Optional. Wird für Rechnungen und Stripe-Benachrichtigungen verwendet."
 
-#: apps/core/templates/core/settings.html:228
+#: apps/core/templates/core/settings.html:219
+msgid "To change an existing email address, please contact support."
+msgstr "Um eine bestehende E-Mail-Adresse zu ändern, kontaktieren Sie bitte den Support."
+
+#: apps/core/templates/core/settings.html:229
 msgid "Invoice Details"
 msgstr "Rechnungsdaten"
 
-#: apps/core/templates/core/settings.html:229
+#: apps/core/templates/core/settings.html:230
 msgid "These details appear on every invoice you generate as a PDF."
 msgstr ""
 "Diese Angaben erscheinen auf jeder Rechnung, die du als PDF generierst."
 
-#: apps/core/templates/core/settings.html:232
+#: apps/core/templates/core/settings.html:233
 msgid ""
 "Your invoice details are not filled in yet. Generated PDFs will not contain "
 "a name or address."
@@ -4058,43 +4066,43 @@ msgstr ""
 "Deine Rechnungsdaten sind noch nicht ausgefüllt. Generierte PDFs enthalten "
 "keinen Namen und keine Adresse."
 
-#: apps/core/templates/core/settings.html:239
+#: apps/core/templates/core/settings.html:240
 msgid "Name / Company"
 msgstr "Name / Firma"
 
-#: apps/core/templates/core/settings.html:240
+#: apps/core/templates/core/settings.html:241
 msgid "e.g. Maria Müller"
 msgstr "z. B. Maria Müller"
 
-#: apps/core/templates/core/settings.html:244
+#: apps/core/templates/core/settings.html:245
 msgid "Street + no., ZIP City"
 msgstr "Straße Hausnr., PLZ Ort"
 
-#: apps/core/templates/core/settings.html:247
+#: apps/core/templates/core/settings.html:248
 msgid "Tax number / VAT ID"
 msgstr "Steuernummer / USt-IdNr."
 
-#: apps/core/templates/core/settings.html:248
+#: apps/core/templates/core/settings.html:249
 msgid "e.g. 123/456/78901 or DE123456789"
 msgstr "z. B. 123/456/78901 oder DE123456789"
 
-#: apps/core/templates/core/settings.html:249
+#: apps/core/templates/core/settings.html:250
 msgid "Format: Tax number (123/456/78901) or VAT ID (DE123456789)."
 msgstr "Format: Steuernummer (123/456/78901) oder USt-IdNr. (DE123456789)."
 
-#: apps/core/templates/core/settings.html:252
+#: apps/core/templates/core/settings.html:253
 msgid "E-mail address"
 msgstr "E-Mail-Adresse"
 
-#: apps/core/templates/core/settings.html:253
+#: apps/core/templates/core/settings.html:254
 msgid "e.g. contact@example.de"
 msgstr "z. B. kontakt@example.de"
 
-#: apps/core/templates/core/settings.html:257
+#: apps/core/templates/core/settings.html:258
 msgid "e.g. 0123 456789"
 msgstr "z. B. 0123 456789"
 
-#: apps/core/templates/core/settings.html:274
+#: apps/core/templates/core/settings.html:275
 msgid ""
 "Small business regulation (§19 UStG) – adds the note \"In accordance with "
 "§19 para. 1 UStG, no VAT is charged.\" to the invoice"
@@ -4102,11 +4110,11 @@ msgstr ""
 "Kleinunternehmerregelung (§19 UStG) – fügt den Hinweis „Gemäß §19 Abs. 1 "
 "UStG wird keine Umsatzsteuer berechnet.\" zur Rechnung hinzu"
 
-#: apps/core/templates/core/settings.html:279
+#: apps/core/templates/core/settings.html:280
 msgid "Save invoice details"
 msgstr "Rechnungsdaten speichern"
 
-#: apps/core/templates/core/settings.html:300
+#: apps/core/templates/core/settings.html:301
 msgid ""
 "Manage your Premium subscription. Premium unlocks unlimited public booking, "
 "reschedule, reports, Billing Pro, and AI lesson plans."
@@ -4114,136 +4122,131 @@ msgstr ""
 "Verwalten Sie Ihr Premium-Abo. Premium ermöglicht unbegrenztes Public "
 "Booking, Umbuchung, Berichte, Billing Pro und KI-Stundenpläne."
 
-#: apps/core/templates/core/settings.html:302
+#: apps/core/templates/core/settings.html:303
 msgid "Current plan"
 msgstr "Aktueller Plan"
 
-#: apps/core/templates/core/settings.html:310
+#: apps/core/templates/core/settings.html:311
 msgid "Demo account – Premium is enabled for demonstration purposes only."
 msgstr "Demo-Konto – Premium ist nur zu Demonstrationszwecken aktiviert."
 
-#: apps/core/templates/core/settings.html:312
+#: apps/core/templates/core/settings.html:313
 msgid "Manage subscription"
 msgstr "Abonnement verwalten"
 
-#: apps/core/templates/core/settings.html:314
+#: apps/core/templates/core/settings.html:315
 msgid "Premium (manually activated)"
 msgstr "Premium (manuell aktiviert)"
 
-#: apps/core/templates/core/settings.html:317
+#: apps/core/templates/core/settings.html:318
 msgid "First month free, cancel anytime during the trial."
 msgstr "Erster Monat kostenlos, während der Testphase jederzeit kündbar."
 
-#: apps/core/templates/core/settings.html:341
-#: apps/core/templates/core/settings.html:351
-#: apps/core/templates/core/settings.html:361
+#: apps/core/templates/core/settings.html:342
+#: apps/core/templates/core/settings.html:352
+#: apps/core/templates/core/settings.html:362
 msgid "month"
 msgstr "Monat"
 
-#: apps/core/templates/core/settings.html:342
+#: apps/core/templates/core/settings.html:343
 msgid "Unlimited students & lessons"
 msgstr "Unbegrenzte Schüler & Stunden"
 
-#: apps/core/templates/core/settings.html:342
+#: apps/core/templates/core/settings.html:343
 msgid "Invoices & contracts"
 msgstr "Rechnungen & Verträge"
 
-#: apps/core/templates/core/settings.html:342
+#: apps/core/templates/core/settings.html:343
 msgid "Public booking page"
 msgstr "Öffentliche Buchungsseite"
 
-#: apps/core/templates/core/settings.html:352
+#: apps/core/templates/core/settings.html:353
 msgid "Video meetings"
 msgstr "Video-Meetings"
 
-#: apps/core/templates/core/settings.html:352
+#: apps/core/templates/core/settings.html:353
 msgid "Reports & analytics"
 msgstr "Berichte & Auswertungen"
 
-#: apps/core/templates/core/settings.html:370
+#: apps/core/templates/core/settings.html:371
 msgid ""
 "I expressly agree to the performance of the contract before the end of the "
 "withdrawal period. I acknowledge that my right of withdrawal expires upon "
 "commencement of performance."
 msgstr ""
 "Ich stimme der Ausführung des Vertrages vor Ablauf der Widerrufsfrist "
-"ausdrücklich zu. Ich nehme zur Kenntnis, dass mein Widerrufsrecht mit Beginn"
-" der Ausführung erlischt."
+"ausdrücklich zu. Ich nehme zur Kenntnis, dass mein Widerrufsrecht mit Beginn "
+"der Ausführung erlischt."
 
-#: apps/core/templates/core/settings.html:373
+#: apps/core/templates/core/settings.html:374
 msgid "Subscribe now"
 msgstr "Jetzt abonnieren"
 
-#: apps/core/templates/core/settings.html:386
-#| msgid ""
-#| "To access Premium, please contact <a "
-#| "href=\"mailto:impressum@andicode.de\">impressum@andicode.de</a>."
+#: apps/core/templates/core/settings.html:387
 msgid ""
-"To access Premium, please contact <a "
-"href=\"mailto:info@preceptly.de\">info@preceptly.de</a>."
+"To access Premium, please contact <a href=\"mailto:info@preceptly."
+"de\">info@preceptly.de</a>."
 msgstr ""
-"Um Zugang zu Premium zu erhalten, kontaktiere bitte <a "
-"href=\"mailto:info@preceptly.de\">info@preceptly.de</a>."
+"Um Zugang zu Premium zu erhalten, kontaktiere bitte <a href=\"mailto:"
+"info@preceptly.de\">info@preceptly.de</a>."
 
-#: apps/core/templates/core/settings.html:391
+#: apps/core/templates/core/settings.html:392
 msgid "Invite friends"
 msgstr "Freunde einladen"
 
-#: apps/core/templates/core/settings.html:392
+#: apps/core/templates/core/settings.html:393
 msgid ""
-"Share your link. For every friend whose subscription becomes active, you get"
-" one free month."
+"Share your link. For every friend whose subscription becomes active, you get "
+"one free month."
 msgstr ""
 "Teile deinen Link. Für jeden Freund, dessen Abo aktiv wird, bekommst du "
 "einen kostenlosen Monat."
 
-#: apps/core/templates/core/settings.html:396
+#: apps/core/templates/core/settings.html:397
 msgid "Copy"
 msgstr "Kopieren"
 
-#: apps/core/templates/core/settings.html:399
+#: apps/core/templates/core/settings.html:400
 #, python-format
 msgid ""
 "%(months)s free month earned, applied on your next invoice once you have an "
 "active subscription."
 msgid_plural ""
-"%(months)s free months earned, applied on your next invoice once you have an"
-" active subscription."
+"%(months)s free months earned, applied on your next invoice once you have an "
+"active subscription."
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/core/templates/core/settings.html:404
-#| msgid "New Booking Notification"
+#: apps/core/templates/core/settings.html:405
 msgid "Notifications"
 msgstr "Benachrichtigungen"
 
-#: apps/core/templates/core/settings.html:405
+#: apps/core/templates/core/settings.html:406
 msgid "Choose how you want to be notified for each type of event."
 msgstr ""
 "Wähle, wie du für jede Art von Ereignis benachrichtigt werden möchtest."
 
-#: apps/core/templates/core/settings.html:410
-#| msgid "New Booking Notification"
+#: apps/core/templates/core/settings.html:411
 msgid "New booking via portal"
 msgstr "Neue Buchung über Portal"
 
-#: apps/core/templates/core/settings.html:414
+#: apps/core/templates/core/settings.html:415
 msgid "Email"
 msgstr "E-Mail"
 
-#: apps/core/templates/core/settings.html:418
+#: apps/core/templates/core/settings.html:419
 msgid "Push"
 msgstr "Push"
 
-#: apps/core/templates/core/settings.html:429
+#: apps/core/templates/core/settings.html:430
 msgid "Enable push notifications on this device"
 msgstr "Push-Benachrichtigungen auf diesem Gerät aktivieren"
 
-#: apps/core/templates/core/settings.html:433
+#: apps/core/templates/core/settings.html:434
 msgid "App on home screen"
 msgstr "App auf dem Startbildschirm"
 
-#: apps/core/templates/core/settings.html:434
+#: apps/core/templates/core/settings.html:435
 msgid ""
 "Use Preceptly as an app directly from your home screen – fast and "
 "convenient, without a browser."
@@ -4251,11 +4254,11 @@ msgstr ""
 "Nutze Preceptly als App direkt vom Startbildschirm – schnell und bequem, "
 "ohne Browser."
 
-#: apps/core/templates/core/settings.html:441
+#: apps/core/templates/core/settings.html:442
 msgid "Legal agreements"
 msgstr "Rechtliche Vereinbarungen"
 
-#: apps/core/templates/core/settings.html:446
+#: apps/core/templates/core/settings.html:447
 #, python-format
 msgid ""
 "\n"
@@ -4267,10 +4270,11 @@ msgstr ""
 "\n"
 "        Sie haben die <a href=\"%(url_terms)s\">AGB</a>,\n"
 "        den <a href=\"%(url_avv)s\">Auftragsverarbeitungsvertrag (AVV)</a>\n"
-"        und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a> am %(date)s akzeptiert.\n"
+"        und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a> am "
+"%(date)s akzeptiert.\n"
 "        "
 
-#: apps/core/templates/core/settings.html:454
+#: apps/core/templates/core/settings.html:455
 msgid ""
 "You have not yet explicitly accepted the Data Processing Agreement (AVV). "
 "This is required for GDPR-compliant use of Preceptly."
@@ -4279,11 +4283,11 @@ msgstr ""
 "akzeptiert. Dies ist für die DSGVO-konforme Nutzung von Preceptly "
 "erforderlich."
 
-#: apps/core/templates/core/settings.html:460
+#: apps/core/templates/core/settings.html:461
 msgid "Legal consent"
 msgstr "Rechtliche Einwilligung"
 
-#: apps/core/templates/core/settings.html:464
+#: apps/core/templates/core/settings.html:465
 #, python-format
 msgid ""
 "I accept the <a href=\"%(url_terms)s\">Terms of Service</a>, <a "
@@ -4294,11 +4298,11 @@ msgstr ""
 "href=\"%(url_avv)s\">Auftragsverarbeitungsvertrag (AVV, Art. 28 DSGVO)</a> "
 "und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a>."
 
-#: apps/core/templates/core/settings.html:468
+#: apps/core/templates/core/settings.html:469
 msgid "Accept agreements"
 msgstr "Vereinbarungen akzeptieren"
 
-#: apps/core/templates/core/settings.html:491
+#: apps/core/templates/core/settings.html:492
 msgid "Could not open billing portal."
 msgstr "Abrechnungsportal konnte nicht geöffnet werden."
 
@@ -4330,8 +4334,8 @@ msgstr "Grenze überschritten"
 #: apps/core/templates/core/tax_year.html:85
 #, python-format
 msgid ""
-"Your profit of %(total)s EUR exceeds the Kleinunternehmer limit of %(limit)s"
-" EUR. You may need to charge VAT."
+"Your profit of %(total)s EUR exceeds the Kleinunternehmer limit of %(limit)s "
+"EUR. You may need to charge VAT."
 msgstr ""
 "Dein Gewinn von %(total)s € überschreitet die Kleinunternehmergrenze von "
 "%(limit)s €. Du musst ggf. Umsatzsteuer ausweisen."
@@ -4374,7 +4378,7 @@ msgstr "Aktueller Gewinn"
 msgid "Remaining until limit"
 msgstr "Verbleibend bis zur Grenze"
 
-#: apps/core/templates/core/tax_year.html:124 apps/core/views.py:591
+#: apps/core/templates/core/tax_year.html:124 apps/core/views.py:603
 msgid "Invoice number"
 msgstr "Rechnungsnummer"
 
@@ -4405,12 +4409,12 @@ msgstr "Steuerübersicht – Premium-Funktion"
 
 #: apps/core/templates/core/tax_year.html:191
 msgid ""
-"Get a full income summary for your tax return (EÜR) based on invoice billing"
-" periods: monthly breakdown, Kleinunternehmer status check, invoice list, "
-"and CSV export."
+"Get a full income summary for your tax return (EÜR) based on invoice billing "
+"periods: monthly breakdown, Kleinunternehmer status check, invoice list, and "
+"CSV export."
 msgstr ""
-"Erhalte eine vollständige Einnahmenübersicht für deine Steuererklärung (EÜR)"
-" auf Basis der Rechnungszeiträume: Monatsaufschlüsselung, Kleinunternehmer-"
+"Erhalte eine vollständige Einnahmenübersicht für deine Steuererklärung (EÜR) "
+"auf Basis der Rechnungszeiträume: Monatsaufschlüsselung, Kleinunternehmer-"
 "Statusprüfung, Rechnungsliste und CSV-Export."
 
 #: apps/core/templates/core/tax_year.html:192
@@ -4421,59 +4425,63 @@ msgstr "Upgrade auf Premium für den vollen Zugang."
 msgid "Default working hours updated successfully."
 msgstr "Standard-Arbeitszeiten erfolgreich aktualisiert."
 
-#: apps/core/views.py:245
+#: apps/core/views.py:249
 msgid "To change your email address, please contact support."
 msgstr "Um Ihre E-Mail-Adresse zu ändern, kontaktieren Sie bitte den Support."
 
-#: apps/core/views.py:261
+#: apps/core/views.py:255
+msgid "Email address saved."
+msgstr "E-Mail-Adresse gespeichert."
+
+#: apps/core/views.py:273
 msgid "Travel mode for on-site appointments updated."
 msgstr "Anreise-Modus für Vor-Ort-Termine wurde aktualisiert."
 
-#: apps/core/views.py:276
+#: apps/core/views.py:288
 msgid "Timezone saved."
 msgstr "Zeitzone gespeichert."
 
-#: apps/core/views.py:278
+#: apps/core/views.py:290
 msgid "Invalid timezone."
 msgstr "Ungültige Zeitzone."
 
-#: apps/core/views.py:299
+#: apps/core/views.py:311
 msgid "Rechnungsdaten gespeichert."
 msgstr "Rechnungsdaten gespeichert."
 
-#: apps/core/views.py:318
+#: apps/core/views.py:330
 msgid "Notification settings saved."
 msgstr "Benachrichtigungseinstellungen gespeichert."
 
-#: apps/core/views.py:590
+#: apps/core/views.py:602
 msgid "Abrechnungszeitraum"
 msgstr "Abrechnungszeitraum"
 
-#: apps/core/views.py:593 apps/core/views.py:623
+#: apps/core/views.py:605 apps/core/views.py:635
 msgid "Amount (EUR)"
 msgstr "Betrag (EUR)"
 
-#: apps/core/views.py:690
+#: apps/core/views.py:702
 msgid "Expense saved."
 msgstr "Ausgabe gespeichert."
 
-#: apps/core/views.py:704
+#: apps/core/views.py:716
 msgid "Expense updated."
 msgstr "Ausgabe aktualisiert."
 
-#: apps/core/views.py:717
+#: apps/core/views.py:729
 msgid "Expense deleted."
 msgstr "Ausgabe gelöscht."
 
-#: apps/core/views.py:809
+#: apps/core/views.py:821
 msgid "Please confirm the legal agreements to proceed."
 msgstr "Bitte bestätigen Sie die rechtlichen Vereinbarungen, um fortzufahren."
 
-#: apps/core/views.py:817
+#: apps/core/views.py:829
 msgid "Legal agreements accepted."
 msgstr "Rechtliche Vereinbarungen akzeptiert."
 
-#: apps/core/views_auth.py:107
+#: apps/core/views_auth.py:108
 msgid "Registration failed. Please try again."
 msgstr "Registrierung fehlgeschlagen. Bitte versuche es erneut."
 
@@ -4515,12 +4523,10 @@ msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
 #: apps/core/views_stripe.py:295 apps/core/views_stripe.py:481
 msgid "Could not open billing portal. Please try again."
 msgstr ""
-"Das Abrechnungsportal konnte nicht geöffnet werden. Bitte versuche es "
-"erneut."
+"Das Abrechnungsportal konnte nicht geöffnet werden. Bitte versuche es erneut."
 
 #: apps/core/views_stripe.py:457
-msgid ""
-"No billing customer found. Subscribe first to manage your subscription."
+msgid "No billing customer found. Subscribe first to manage your subscription."
 msgstr ""
 "Kein Abrechnungskunde gefunden. Bitte abonniere zuerst, um dein Abonnement "
 "zu verwalten."
@@ -4657,8 +4663,8 @@ msgstr "KI-Lektionsplan"
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:108
 msgid ""
-"A lesson plan has already been generated for this lesson. You can regenerate"
-" it below."
+"A lesson plan has already been generated for this lesson. You can regenerate "
+"it below."
 msgstr ""
 "Für diese Unterrichtsstunde wurde bereits ein Lektionsplan generiert. Sie "
 "können ihn unten neu generieren."
@@ -4737,8 +4743,8 @@ msgid "Meeting-URL (Zoom/Meet)"
 msgstr "Meeting-URL (Zoom/Meet)"
 
 #: apps/lessons/forms.py:104
-msgid "I did not attend; student was waiting (TutorSpace / Abacus)"
-msgstr "Ich bin nicht erschienen; Schüler wartete (TutorSpace / Abacus)"
+msgid "I did not attend; student was waiting"
+msgstr "Ich bin nicht erschienen; Schüler wartete"
 
 #: apps/lessons/forms.py:161
 msgid "Inactive contracts cannot be used for new sessions."
@@ -4796,8 +4802,7 @@ msgstr ""
 #: apps/lessons/forms.py:283
 #, python-brace-format
 msgid ""
-"File '{name}' has an invalid type. File content does not match the "
-"extension."
+"File '{name}' has an invalid type. File content does not match the extension."
 msgstr ""
 "Datei '{name}' hat einen ungültigen Typ. Der Dateiinhalt stimmt nicht mit "
 "der Dateiendung überein."
@@ -4860,13 +4865,14 @@ msgstr "Zoom/Meet-Link für diese Stunde"
 
 #: apps/lessons/models.py:59
 msgid ""
-"Tutor did not attend while the student was waiting. TutorSpace: "
-"pay/deduction per your settings. Abacus: lesson is not billed (0). Other "
-"contracts: no effect on amount."
+"Tutor did not attend while the student was waiting. Depending on the "
+"institute's no-show rule, this may reduce or zero out the billed amount; "
+"contracts without such a rule are unaffected."
 msgstr ""
-"Nachhilfelehrer ist nicht erschienen, während der Schüler wartete. "
-"TutorSpace: Vergütung/Abzug gemäß Ihren Einstellungen. Abacus: Stunde wird "
-"nicht verrechnet (0 €). Andere Verträge: keine Auswirkung auf den Betrag."
+"Nachhilfelehrer ist nicht erschienen, während der Schüler wartete. Je nach "
+"Ausfallregel des Instituts kann sich der abgerechnete Betrag verringern "
+"oder auf 0 € reduzieren; Verträge ohne eine solche Regel sind davon nicht "
+"betroffen."
 
 #: apps/lessons/models.py:70
 msgid "Recurring series this session was generated from"
@@ -4914,8 +4920,8 @@ msgid ""
 "Contract quota exceeded: By the end of {month:02d}.{year}, {planned} units "
 "are planned, but {actual} hours are present/planned."
 msgstr ""
-"Vertragskontingent überschritten: Bis Ende {month:02d}.{year} sind {planned}"
-" Einheiten geplant, aber {actual} Stunden vorhanden/geplant."
+"Vertragskontingent überschritten: Bis Ende {month:02d}.{year} sind {planned} "
+"Einheiten geplant, aber {actual} Stunden vorhanden/geplant."
 
 #: apps/lessons/recurring_forms.py:45
 msgid "Duration (minutes)"
@@ -5188,11 +5194,13 @@ msgstr[1] "Vertragskontingent-Konflikte (%(counter)s)"
 #, python-format
 msgid ""
 "\n"
-"                Planned: %(planned)s units | Actual: %(actual)s units (%(month)s/%(year)s)\n"
+"                Planned: %(planned)s units | Actual: %(actual)s units "
+"(%(month)s/%(year)s)\n"
 "                "
 msgstr ""
 "\n"
-"                Geplant: %(planned)s Einheiten | Tatsächlich: %(actual)s Einheiten (%(month)s/%(year)s)\n"
+"                Geplant: %(planned)s Einheiten | Tatsächlich: %(actual)s "
+"Einheiten (%(month)s/%(year)s)\n"
 "                "
 
 #: apps/lessons/templates/lessons/conflict_detail.html:102
@@ -5344,8 +5352,7 @@ msgid ""
 "deleted, and new lessons will be created for newly selected weekdays."
 msgstr ""
 "Wochentage für diese Serie auswählen. Stunden an abgewählten Wochentagen "
-"werden gelöscht; für neu ausgewählte Wochentage werden neue Stunden "
-"erstellt."
+"werden gelöscht; für neu ausgewählte Wochentage werden neue Stunden erstellt."
 
 #: apps/lessons/templates/lessons/lesson_list.html:9
 #: apps/lessons/templates/lessons/week.html:12
@@ -5428,11 +5435,11 @@ msgstr "Serientermin löschen"
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:8
 #, python-format
 msgid ""
-"Are you sure you want to delete the recurring lesson for \"%(student)s\" "
-"(%(weekdays)s, %(time)s)?"
+"Are you sure you want to delete the recurring lesson for "
+"\"%(student)s\" (%(weekdays)s, %(time)s)?"
 msgstr ""
-"Möchten Sie die wiederkehrende Unterrichtsstunde für \"%(student)s\" "
-"(%(weekdays)s, %(time)s) wirklich löschen?"
+"Möchten Sie die wiederkehrende Unterrichtsstunde für "
+"\"%(student)s\" (%(weekdays)s, %(time)s) wirklich löschen?"
 
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:10
 #, python-format
@@ -5452,13 +5459,11 @@ msgstr "Bis Vertragsende"
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:30
 #, python-format
 msgid "This series would generate <strong>%(counter)s</strong> lesson."
-msgid_plural ""
-"This series would generate <strong>%(counter)s</strong> lessons."
+msgid_plural "This series would generate <strong>%(counter)s</strong> lessons."
 msgstr[0] ""
 "Diese Serie würde <strong>%(counter)s</strong> Unterrichtsstunde generieren."
 msgstr[1] ""
-"Diese Serie würde <strong>%(counter)s</strong> Unterrichtsstunden "
-"generieren."
+"Diese Serie würde <strong>%(counter)s</strong> Unterrichtsstunden generieren."
 
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:35
 #, python-format
@@ -5488,8 +5493,8 @@ msgstr "Was sind Serientermine?"
 
 #: apps/lessons/templates/lessons/recurringlesson_form.html:12
 msgid ""
-"Recurring lessons allow you to create repeating lessons (e.g., 'every Monday"
-" at 2 PM'). After saving, all lessons for the specified period will be "
+"Recurring lessons allow you to create repeating lessons (e.g., 'every Monday "
+"at 2 PM'). After saving, all lessons for the specified period will be "
 "automatically generated."
 msgstr ""
 "Wiederkehrende Unterrichtsstunden ermöglichen es Ihnen, sich wiederholende "
@@ -5814,8 +5819,8 @@ msgstr[1] "Unterrichtsserie erstellt und {count} Stunden generiert."
 
 #: apps/lessons/views_crud.py:250
 msgid ""
-"Recurring lesson series created, but no new lessons were generated (they may"
-" already exist)."
+"Recurring lesson series created, but no new lessons were generated (they may "
+"already exist)."
 msgstr ""
 "Serientermin erstellt, aber keine neuen Stunden generiert (möglicherweise "
 "existieren bereits alle)."
@@ -6004,8 +6009,8 @@ msgstr "Keine Schüler vorhanden."
 
 #: apps/students/views.py:65
 msgid ""
-"Free plan: the limit of 5 active students has been reached. Your student was"
-" saved — <a href=\"{}\">upgrade to a paid plan</a> for unlimited students."
+"Free plan: the limit of 5 active students has been reached. Your student was "
+"saved — <a href=\"{}\">upgrade to a paid plan</a> for unlimited students."
 msgstr ""
 "Kostenloser Plan: Die Grenze von 5 aktiven Schülern ist erreicht. Dein "
 "Schüler wurde gespeichert – <a href=\"{}\">Auf einen bezahlten Plan "
@@ -6055,13 +6060,13 @@ msgid ""
 "contracts, and invoices across different tools quickly became overwhelming."
 msgstr ""
 "Als freiberuflicher Nachhilfelehrer bei zwei Instituten wurde die "
-"Organisation von Stunden, Verträgen und Abrechnungen über verschiedene Tools"
-" schnell unübersichtlich."
+"Organisation von Stunden, Verträgen und Abrechnungen über verschiedene Tools "
+"schnell unübersichtlich."
 
 #: templates/legal/about.html:25
 msgid ""
-"Preceptly was built to have everything in one place — scheduling, contracts,"
-" invoices, and income — clearly arranged and without the chaos."
+"Preceptly was built to have everything in one place — scheduling, contracts, "
+"invoices, and income — clearly arranged and without the chaos."
 msgstr ""
 "Preceptly entstand, um alles an einem Ort zu haben – Terminplanung, "
 "Verträge, Rechnungen und Einnahmen – übersichtlich und ohne Chaos."
@@ -6072,8 +6077,8 @@ msgstr "Der Entwickler"
 
 #: templates/legal/about.html:30
 msgid ""
-"Preceptly is developed and used by Andreas Eirich, a freelance web developer"
-" from Ankum, Germany."
+"Preceptly is developed and used by Andreas Eirich, a freelance web developer "
+"from Ankum, Germany."
 msgstr ""
 "Preceptly wird von Andreas Eirich entwickelt und selbst genutzt. Er ist "
 "freiberuflicher Webentwickler aus Ankum und arbeitet auf Honorarbasis als "
@@ -6084,8 +6089,8 @@ msgid ""
 "He works as a tutor on a fee basis at TutorSpace and Abacus, and developed "
 "Preceptly because no suitable tool existed for his own tutoring work."
 msgstr ""
-"Für seine eigene Nachhilfearbeit fehlte ihm ein passendes Tool – deshalb hat"
-" er Preceptly entwickelt."
+"Für seine eigene Nachhilfearbeit fehlte ihm ein passendes Tool – deshalb hat "
+"er Preceptly entwickelt."
 
 #: templates/legal/about.html:32
 msgid ""
@@ -6121,24 +6126,21 @@ msgstr ""
 
 #: templates/legal/about.html:39
 msgid ""
-"The technology stack was chosen for its maturity, security track record, and"
-" long-term maintainability."
+"The technology stack was chosen for its maturity, security track record, and "
+"long-term maintainability."
 msgstr ""
 "Der Technologie-Stack wurde wegen seiner Reife, bewährten Sicherheit und "
 "langfristigen Wartbarkeit gewählt."
 
 #: templates/legal/about.html:44
 msgid ""
-"Preceptly is actively used by its developer for his own tutoring work and is"
-" in ongoing development."
+"Preceptly is actively used by its developer for his own tutoring work and is "
+"in ongoing development."
 msgstr ""
 "Preceptly wird vom Entwickler aktiv für seine eigene Nachhilfearbeit "
 "eingesetzt und befindet sich in laufender Weiterentwicklung."
 
 #: templates/legal/about.html:45
-#| msgid ""
-#| "There are no external testers yet — feedback and early access requests are "
-#| "welcome at impressum@andicode.de."
 msgid ""
 "There are no external testers yet — feedback and early access requests are "
 "welcome at info@preceptly.de."
@@ -6178,8 +6180,8 @@ msgid ""
 msgstr ""
 "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung "
 "(OS) bereit: <a href=\"https://ec.europa.eu/consumers/odr\" "
-"target=\"_blank\" rel=\"noopener "
-"noreferrer\">https://ec.europa.eu/consumers/odr</a>"
+"target=\"_blank\" rel=\"noopener noreferrer\">https://ec.europa.eu/consumers/"
+"odr</a>"
 
 #: templates/legal/privacy.html:4 templates/partials/footer.html:83
 msgid "Privacy Policy"
@@ -6198,9 +6200,9 @@ msgid ""
 "We process personal data only as far as necessary to provide Preceptly "
 "(student management, contracts, lessons, billing, and communication)."
 msgstr ""
-"Wir verarbeiten personenbezogene Daten nur soweit erforderlich, um Preceptly"
-" bereitzustellen (Schulerverwaltung, Vertrage, Unterrichtsstunden, "
-"Abrechnung und Kommunikation)."
+"Wir verarbeiten personenbezogene Daten nur soweit erforderlich, um Preceptly "
+"bereitzustellen (Schulerverwaltung, Vertrage, Unterrichtsstunden, Abrechnung "
+"und Kommunikation)."
 
 #: templates/legal/privacy.html:22
 msgid "2. Data we process"
@@ -6209,8 +6211,7 @@ msgstr "2. Daten, die wir verarbeiten"
 #: templates/legal/privacy.html:23
 msgid ""
 "Typical categories: account data, student master data, contract and lesson "
-"data, invoice/payment data, and technical logs required for secure "
-"operation."
+"data, invoice/payment data, and technical logs required for secure operation."
 msgstr ""
 "Typische Kategorien: Kontodaten, Schulerstammdaten, Vertrags- und "
 "Unterrichtsdaten, Rechnungs-/Zahlungsdaten sowie technische Protokolle fur "
@@ -6255,8 +6256,8 @@ msgid ""
 "Walnut, CA 91789, USA). All application data and the database are processed "
 "on Railway servers."
 msgstr ""
-"Preceptly wird bei Railway (Railway Corp., 340 S Lemon Ave #4133, Walnut, CA"
-" 91789, USA) gehostet. Alle Anwendungsdaten und die Datenbank werden auf "
+"Preceptly wird bei Railway (Railway Corp., 340 S Lemon Ave #4133, Walnut, CA "
+"91789, USA) gehostet. Alle Anwendungsdaten und die Datenbank werden auf "
 "Railway-Servern verarbeitet."
 
 #: templates/legal/privacy.html:38
@@ -6282,8 +6283,8 @@ msgid ""
 "action in the browser."
 msgstr ""
 "Der Pro-Tarif enthält eine integrierte Video-Meeting-Funktion. Kamera und "
-"Mikrofon werden optional und ausschließlich durch ausdrückliche Nutzeraktion"
-" im Browser aktiviert."
+"Mikrofon werden optional und ausschließlich durch ausdrückliche Nutzeraktion "
+"im Browser aktiviert."
 
 #: templates/legal/privacy.html:43
 msgid ""
@@ -6326,8 +6327,8 @@ msgstr ""
 
 #: templates/legal/privacy.html:50
 msgid ""
-"Personally identifiable information (name, email, telephone number, address,"
-" notes) is automatically filtered and removed before transmission. The data "
+"Personally identifiable information (name, email, telephone number, address, "
+"notes) is automatically filtered and removed before transmission. The data "
 "sent to Anthropic contains no student identifiers."
 msgstr ""
 "Personenbezogene Daten (Name, E-Mail, Telefonnummer, Adresse, Notizen) "
@@ -6361,35 +6362,34 @@ msgstr "Preceptly verwendet ausschließlich technisch notwendige Cookies:"
 
 #: templates/legal/privacy.html:59
 msgid ""
-"Session cookie for managing the logged-in state. Deleted when you log out or"
-" close the browser."
+"Session cookie for managing the logged-in state. Deleted when you log out or "
+"close the browser."
 msgstr ""
-"Sitzungs-Cookie zur Verwaltung des eingeloggten Zustands. Wird beim Abmelden"
-" oder Schließen des Browsers gelöscht."
+"Sitzungs-Cookie zur Verwaltung des eingeloggten Zustands. Wird beim Abmelden "
+"oder Schließen des Browsers gelöscht."
 
 #: templates/legal/privacy.html:60
 msgid ""
-"Security cookie to protect against cross-site request forgery (CSRF) "
-"attacks."
+"Security cookie to protect against cross-site request forgery (CSRF) attacks."
 msgstr ""
 "Sicherheits-Cookie zum Schutz vor seitenübergreifenden Anfragefälschungen "
 "(CSRF)."
 
 #: templates/legal/privacy.html:62
 msgid ""
-"In addition, Preceptly stores the selected display theme (light/dark) in the"
-" browser's localStorage. This is not a cookie and the data does not leave "
+"In addition, Preceptly stores the selected display theme (light/dark) in the "
+"browser's localStorage. This is not a cookie and the data does not leave "
 "your device."
 msgstr ""
-"Darüber hinaus speichert Preceptly die gewählte Darstellungs-Theme "
-"(Hell/Dunkel) im localStorage des Browsers. Dabei handelt es sich nicht um "
-"ein Cookie; die Daten verlassen das Gerät nicht."
+"Darüber hinaus speichert Preceptly die gewählte Darstellungs-Theme (Hell/"
+"Dunkel) im localStorage des Browsers. Dabei handelt es sich nicht um ein "
+"Cookie; die Daten verlassen das Gerät nicht."
 
 #: templates/legal/privacy.html:62
 msgid ""
 "Preceptly also stores in localStorage whether you have dismissed the hint "
-"about installing the app to your home screen, so it is not shown again. This"
-" data does not leave your device either."
+"about installing the app to your home screen, so it is not shown again. This "
+"data does not leave your device either."
 msgstr ""
 "Preceptly speichert im localStorage außerdem, ob Sie den Hinweis zur "
 "Installation der App auf Ihrem Startbildschirm weggeklickt haben, damit er "
@@ -6423,8 +6423,7 @@ msgstr ""
 #: templates/legal/privacy.html:69
 msgid ""
 "Provider: Apple Distribution International Ltd., Hollyhill Industrial "
-"Estate, Hollyhill, Cork, Irland (a subsidiary of Apple Inc., Cupertino, "
-"USA)."
+"Estate, Hollyhill, Cork, Irland (a subsidiary of Apple Inc., Cupertino, USA)."
 msgstr ""
 "Anbieter: Apple Distribution International Ltd., Hollyhill Industrial "
 "Estate, Hollyhill, Cork, Irland (eine Tochtergesellschaft der Apple Inc., "
@@ -6498,10 +6497,10 @@ msgstr ""
 msgid ""
 "Legal basis: fulfilment of a legal obligation (Art. 6 para. 1 lit. c GDPR) "
 "with regard to enabling the right of withdrawal, and legitimate interest in "
-"preventing abuse (Art. 6 para. 1 lit. f GDPR) for the bot-detection service."
-" All three providers were selected to allow GDPR-compliant use without a "
-"separate consent. A data processing agreement (Auftragsverarbeitungsvertrag)"
-" is in place with eRecht24."
+"preventing abuse (Art. 6 para. 1 lit. f GDPR) for the bot-detection service. "
+"All three providers were selected to allow GDPR-compliant use without a "
+"separate consent. A data processing agreement (Auftragsverarbeitungsvertrag) "
+"is in place with eRecht24."
 msgstr ""
 "Rechtsgrundlage: Erfüllung einer rechtlichen Verpflichtung (Art. 6 Abs. 1 "
 "lit. c DSGVO) zur Ermöglichung des Widerrufsrechts sowie berechtigtes "
