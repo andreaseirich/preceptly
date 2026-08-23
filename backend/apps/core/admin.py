@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
-from .models import UserProfile
+from .models import Review, UserProfile
 
 
 class UserProfileInline(admin.StackedInline):
@@ -42,3 +42,15 @@ class UserProfileAdmin(admin.ModelAdmin):
         (_("Subscription"), {"fields": ("subscription_tier", "premium_since")}),
         (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    """Moderation queue: reviews only appear on the public landing page
+    once is_approved is checked here."""
+
+    list_display = ["user", "rating", "is_approved", "created_at"]
+    list_editable = ["is_approved"]
+    list_filter = ["is_approved", "rating", "created_at"]
+    search_fields = ["user__username", "user__email", "comment"]
+    readonly_fields = ["created_at", "updated_at"]

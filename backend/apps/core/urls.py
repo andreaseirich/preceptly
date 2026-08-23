@@ -101,4 +101,5 @@ urlpatterns = [
     path("api/detect-timezone/", views.AutoDetectTimezoneView.as_view(), name="detect_timezone"),
     path("dev/stats/", DevStatsView.as_view(), name="dev_stats"),
     path("faq/", views.FaqView.as_view(), name="faq"),
+    path("review/submit/", views.SubmitReviewView.as_view(), name="submit_review"),
 ]

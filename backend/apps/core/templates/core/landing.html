@@ -369,12 +369,30 @@
 <div class="lp-section">
   <h2>{% trans "Built by a tutor, for tutors" %}</h2>
   <p class="lp-sub">{% trans "Preceptly grew out of real frustration with spreadsheets and calendar chaos." %}</p>
+
+  {% if review_count %}
+  <p style="font-size: 1.1em; margin-bottom: 20px;">
+    <strong style="color: var(--marker, #e2a33d);">{{ review_average|floatformat:1 }} ★</strong>
+    {% blocktrans count counter=review_count %}aus {{ counter }} Bewertung von Nachhilfelehrern{% plural %}aus {{ counter }} Bewertungen von Nachhilfelehrern{% endblocktrans %}
+  </p>
+  {% endif %}
+
   <div class="lp-card">
     <blockquote style="margin: 0;">
       <p>"{% trans "I used to spend Sunday evenings doing admin. Now it takes 10 minutes." %}"</p>
       <footer style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">— Andreas Eirich, {% trans "developer & tutor" %}</footer>
     </blockquote>
   </div>
+
+  {% for review in approved_reviews %}
+  <div class="lp-card" style="margin-top: 14px;">
+    <blockquote style="margin: 0;">
+      <p style="color: var(--marker, #e2a33d); letter-spacing: 2px; margin-bottom: 6px;">{{ review.stars_display }}</p>
+      <p>"{{ review.comment }}"</p>
+      <footer style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">— {{ review.user.first_name|default:review.user.username }}</footer>
+    </blockquote>
+  </div>
+  {% endfor %}
 </div>
 
 <!-- DEMO -->

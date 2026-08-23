@@ -14,6 +14,13 @@
 </div>
 {% endif %}
 
+{% if not user.review %}
+<div class="alert-info" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+    <span>{% blocktrans %}Wie zufrieden bist du mit Preceptly? Eine kurze Bewertung hilft anderen Nachhilfelehrern, das Tool zu entdecken.{% endblocktrans %}</span>
+    <button type="button" class="btn btn-secondary" id="openReviewModal" style="width:auto; white-space:nowrap;">⭐ {% trans "Bewertung abgeben" %}</button>
+</div>
+{% endif %}
+
 <h2>{% trans "Today's Lessons" %}</h2>
 {% if today_lessons %}
 <table aria-label="Heutige Stunden">
@@ -86,5 +93,54 @@
 
 {% if conflict_count > 0 %}
 <p class="conflict">⚠ {% blocktrans count counter=conflict_count %}{{ counter }} conflict in upcoming lessons!{% plural %}{{ counter }} conflicts in upcoming lessons!{% endblocktrans %}</p>
+{% endif %}
+
+{% if not user.review %}
+<div id="reviewModalOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+  <div class="pwa-modal">
+    <button class="pwa-modal-close" id="reviewModalClose" aria-label="{% trans 'Close' %}">&#215;</button>
+    <h2 id="reviewModalTitle">⭐ {% trans "Deine Bewertung" %}</h2>
+    <p class="pwa-modal-subtitle">{% trans "Deine Bewertung erscheint erst nach kurzer Prüfung öffentlich auf der Info-Seite." %}</p>
+    <form method="post" action="{% url 'core:submit_review' %}">
+      {% csrf_token %}
+      <div class="star-rating" style="display:flex; flex-direction:row-reverse; justify-content:flex-end; gap:4px; font-size:1.8em; margin-bottom:16px;">
+        {% for i in "54321" %}
+        <input type="radio" name="rating" value="{{ i }}" id="star-{{ i }}" style="display:none;">
+        <label for="star-{{ i }}" style="cursor:pointer; color:var(--border-color);">★</label>
+        {% endfor %}
+      </div>
+      <style>
+        .star-rating label:hover, .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label { color: var(--marker, #e2a33d) !important; }
+      </style>
+      <label for="id_review_comment" style="display:block; font-weight:600; margin-bottom:4px;">{% trans "Feedback (optional)" %}</label>
+      <textarea name="comment" id="id_review_comment" class="form-control" rows="3" style="width:100%; box-sizing:border-box;" placeholder="{% trans 'Was gefällt dir, was fehlt noch?' %}"></textarea>
+      <button type="submit" class="btn" style="margin-top:16px; width:auto;">{% trans "Absenden" %}</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if not user.review %}
+<script>
+(function () {
+  var openBtn = document.getElementById('openReviewModal');
+  var overlay = document.getElementById('reviewModalOverlay');
+  var closeBtn = document.getElementById('reviewModalClose');
+  if (!openBtn || !overlay) return;
+
+  function open() { overlay.classList.add('open'); }
+  function close() { overlay.classList.remove('open'); }
+
+  openBtn.addEventListener('click', open);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+  });
+})();
+</script>
 {% endif %}
 {% endblock %}

@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.models import Expense
+from apps.core.models import Expense, Review
 
 
 class UserEmailForm(forms.ModelForm):
@@ -198,3 +198,32 @@ class ExpenseForm(forms.ModelForm):
         self.fields["date"].input_formats = ["%Y-%m-%d"]
         if not self.instance.pk:
             self.fields["date"].initial = timezone.localdate()
+
+
+class ReviewForm(forms.ModelForm):
+    """Star rating + optional written feedback about Preceptly."""
+
+    class Meta:
+        model = Review
+        fields = ["rating", "comment"]
+        widgets = {
+            "rating": forms.RadioSelect(
+                choices=[(i, i) for i in range(1, 6)], attrs={"class": "star-rating-input"}
+            ),
+            "comment": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": _(
+                        "Optional: what do you like, what's missing, what should change?"
+                    ),
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["rating"].required = True
+        self.fields["comment"].required = False
+        self.fields["rating"].label = _("Your rating")
+        self.fields["comment"].label = _("Your feedback")

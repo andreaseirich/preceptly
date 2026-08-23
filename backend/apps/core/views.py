@@ -27,11 +27,12 @@ from django.views.generic import (
 from apps.billing.models import Invoice
 from apps.core.forms import (
     ExpenseForm,
+    ReviewForm,
     TravelPolicyForm,
     UserEmailForm,
     WorkingHoursForm,
 )
-from apps.core.models import Expense, UserProfile
+from apps.core.models import Expense, Review, UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.services import LessonConflictService, SessionQueryService
 from apps.lessons.status_service import SessionStatusUpdater
@@ -50,6 +51,45 @@ class LandingPageView(TemplateView):
         if request.user.is_authenticated:
             return redirect("core:dashboard")
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        from django.db.models import Avg, Count
+
+        context = super().get_context_data(**kwargs)
+        approved = list(
+            Review.objects.filter(is_approved=True).exclude(comment="").select_related("user")[:6]
+        )
+        for review in approved:
+            review.stars_display = "\u2605" * review.rating + "\u2606" * (5 - review.rating)
+        stats = Review.objects.filter(is_approved=True).aggregate(
+            avg=Avg("rating"), count=Count("id")
+        )
+        context["approved_reviews"] = approved
+        context["review_average"] = stats["avg"]
+        context["review_count"] = stats["count"]
+        return context
+
+
+class SubmitReviewView(LoginRequiredMixin, View):
+    """Tutor submits (or updates) their star rating + optional feedback.
+
+    Not shown publicly until an admin sets is_approved=True in Django admin.
+    """
+
+    def post(self, request, *args, **kwargs):
+        try:
+            review = Review.objects.get(user=request.user)
+        except Review.DoesNotExist:
+            review = Review(user=request.user)
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request, _("Thanks for your feedback! It'll appear publicly once reviewed.")
+            )
+        else:
+            messages.error(request, _("Please select a rating between 1 and 5 stars."))
+        return redirect("core:dashboard")
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
