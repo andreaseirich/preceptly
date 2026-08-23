@@ -607,6 +607,69 @@
 
     {% include 'partials/footer.html' %}
 
+    <!-- Beta Notice Modal -->
+    <div id="betaNoticeOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="betaNoticeTitle">
+      <div class="pwa-modal">
+        <button class="pwa-modal-close" id="betaNoticeClose" aria-label="{% trans 'Close' %}">&#215;</button>
+        <h2 id="betaNoticeTitle">🚧 {% trans "Preceptly is under active development" %}</h2>
+        <p class="pwa-modal-subtitle" style="margin-bottom: 12px;">
+          {% blocktrans %}You might run into the occasional bug — they get fixed as fast as possible. Thanks for your understanding, and please let me know if something doesn't work!{% endblocktrans %}
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;">
+          <a href="mailto:andreas@preceptly.de?subject=Preceptly%20Feedback" class="btn btn-secondary" style="width: auto;">✉️ {% trans "Report a bug / send feedback" %}</a>
+          <button type="button" class="btn btn-success" id="betaNoticeDismiss" style="width: auto;">{% trans "Got it" %}</button>
+        </div>
+        <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
+          <input type="checkbox" id="betaNoticeDontShow">
+          {% trans "Don't show this again" %}
+        </label>
+      </div>
+    </div>
+    <script>
+    (function () {
+      'use strict';
+      var FOREVER_KEY = 'beta_notice_dismissed_forever';
+      var SESSION_KEY = 'beta_notice_shown_session';
+
+      function closeModal() {
+        var overlay = document.getElementById('betaNoticeOverlay');
+        if (overlay) overlay.classList.remove('open');
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var overlay = document.getElementById('betaNoticeOverlay');
+        if (!overlay) return;
+
+        var dismissedForever = false;
+        try { dismissedForever = !!localStorage.getItem(FOREVER_KEY); } catch (e) {}
+        var shownThisSession = false;
+        try { shownThisSession = !!sessionStorage.getItem(SESSION_KEY); } catch (e) {}
+
+        if (!dismissedForever && !shownThisSession) {
+          overlay.classList.add('open');
+          try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) {}
+        }
+
+        function dismiss() {
+          var dontShow = document.getElementById('betaNoticeDontShow');
+          if (dontShow && dontShow.checked) {
+            try { localStorage.setItem(FOREVER_KEY, '1'); } catch (e) {}
+          }
+          closeModal();
+        }
+
+        var closeBtn = document.getElementById('betaNoticeClose');
+        if (closeBtn) closeBtn.addEventListener('click', dismiss);
+        var dismissBtn = document.getElementById('betaNoticeDismiss');
+        if (dismissBtn) dismissBtn.addEventListener('click', dismiss);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) dismiss(); });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && overlay.classList.contains('open')) dismiss();
+        });
+      });
+    })();
+    </script>
+
     <script>
     {% get_current_language as LANGUAGE_CODE %}
     window.DJANGO_LANGUAGE = "{{ LANGUAGE_CODE|default:'en'|escapejs }}";
