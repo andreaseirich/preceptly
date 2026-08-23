@@ -387,3 +387,46 @@ class PushSubscription(models.Model):
 
     def __str__(self):
         return f"Push subscription for {self.user} ({self.endpoint[:40]}...)"
+
+
+class Review(models.Model):
+    """A tutor's rating + optional written feedback about Preceptly.
+
+    One review per user (resubmitting updates and un-approves it again, so a
+    changed opinion doesn't keep showing the old approved text publicly).
+    Only shown on the public landing page once is_approved is set by an
+    admin - never auto-published.
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="review"
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="1 (schlecht) bis 5 (sehr gut)",
+    )
+    comment = models.TextField(blank=True)
+    is_approved = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Nur freigegebene Bewertungen erscheinen auf der öffentlichen Info-Seite.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Bewertung"
+        verbose_name_plural = "Bewertungen"
+
+    def __str__(self):
+        return f"{self.rating}\u2605 von {self.user} ({'freigegeben' if self.is_approved else 'ausstehend'})"
+
+    def save(self, *args, **kwargs):
+        # A resubmitted/edited review needs a fresh look before it can go
+        # public again - don't let a stale approval carry over silently.
+        if self.pk:
+            previous = Review.objects.filter(pk=self.pk).values_list("rating", "comment").first()
+            if previous and previous != (self.rating, self.comment):
+                self.is_approved = False
+        super().save(*args, **kwargs)
