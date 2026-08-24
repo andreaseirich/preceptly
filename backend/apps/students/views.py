@@ -291,6 +291,20 @@ class PortalInviteResendView(LoginRequiredMixin, View):
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         link = get_object_or_404(ParentStudentLink, contract=contract)
 
+        if link.is_active:
+            # Bug fix: this used to unconditionally deactivate the link and
+            # issue a fresh token, even for an already-active portal user -
+            # silently forcing them back through "set your password" and
+            # breaking their existing login. An already-active account needs
+            # a login reminder, not a new invite; don't touch it here.
+            messages.info(
+                request,
+                "Dieser Portal-Zugang ist bereits aktiv. Nutze stattdessen "
+                "die Login-Erinnerung, um keinen bestehenden Zugang zu "
+                "deaktivieren.",
+            )
+            return redirect("contracts:detail", pk=pk)
+
         # H7 - Invite-Token nach erneutem Senden invalidieren und neu generieren
         link.invite_token = secrets.token_urlsafe(32)
         link.invite_token_created_at = timezone.now()

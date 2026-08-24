@@ -108,6 +108,10 @@
       <strong>{{ pl.parent.user.email|default:pl.parent.user.username }}</strong>
       {% if pl.is_active %}
         <span style="color: #28a745;">— ✓ aktiv</span>
+        <form method="post" action="{% url 'students:portal_login_reminder' contract.pk %}" style="margin-top: 0.5em; display:inline-block;">
+          {% csrf_token %}
+          <button type="submit" class="btn-sm btn-sm-secondary">✉ Login-Erinnerung senden</button>
+        </form>
       {% else %}
         <span style="color: var(--text-secondary);">— ⏳ Einladung ausstehend</span>
         {% if pl.activation_url %}
@@ -116,11 +120,11 @@
           <code style="font-size: 0.8em; word-break: break-all; color: var(--text-primary);">{{ pl.activation_url }}</code>
         </div>
         {% endif %}
+        <form method="post" action="{% url 'students:portal_invite_resend' contract.pk %}" style="margin-top: 0.5em; display:inline-block;">
+          {% csrf_token %}
+          <button type="submit" class="btn-sm btn-sm-secondary">↻ Neue Einladung senden</button>
+        </form>
       {% endif %}
-      <form method="post" action="{% url 'students:portal_invite_resend' contract.pk %}" style="margin-top: 0.5em; display:inline-block;">
-        {% csrf_token %}
-        <button type="submit" class="btn-sm btn-sm-secondary">↻ Neue Einladung senden</button>
-      </form>
     </div>
     {% endfor %}
   {% else %}
