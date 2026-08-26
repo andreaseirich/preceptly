@@ -772,20 +772,22 @@
 
       // Whether push is "enabled" is per-device (per browser/service worker),
       // not something the server can know from a user's other devices' rows
-      // in the database - always ask the actual browser.
+      // in the database - always ask the actual browser. Note: some
+      // browsers (notably iOS Safari for installed home-screen apps)
+      // keep reporting Notification.permission === 'granted' even after
+      // the OS-level permission was revoked, so the button always stays
+      // visible too - a stuck "enabled" reading must never be the only
+      // way to retry.
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         if (pushUnsupportedText) pushUnsupportedText.style.display = '';
       } else {
+        pushBtn.style.display = '';
         navigator.serviceWorker.ready.then(function (registration) {
           registration.pushManager.getSubscription().then(function (subscription) {
             if (subscription && Notification.permission === 'granted') {
               if (pushEnabledText) pushEnabledText.style.display = '';
-            } else {
-              pushBtn.style.display = '';
             }
           });
-        }).catch(function () {
-          pushBtn.style.display = '';
         });
       }
     }
