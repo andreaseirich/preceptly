@@ -1827,7 +1827,6 @@ class PortalProfileEditView(View):
                 "portal_user": portal_user,
                 "contract": contract,
                 "notif_pref": notif_pref,
-                "has_push_subscription": portal_user.user.push_subscriptions.exists(),
             },
         )
 
@@ -1933,7 +1932,6 @@ class PortalProfileEditView(View):
                 "errors": errors,
                 "success_msgs": success_msgs,
                 "notif_pref": notif_pref,
-                "has_push_subscription": django_user.push_subscriptions.exists(),
             },
         )
 

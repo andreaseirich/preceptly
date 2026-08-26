@@ -915,11 +915,32 @@
 
         (function() {
             var btn = document.getElementById('pushSubscribeBtn');
-            if (btn) {
-                btn.addEventListener('click', function() {
-                    subscribeToPush('{% url "core:push_subscribe" %}', btn);
-                });
+            var enabledText = document.getElementById('pushEnabledText');
+            var unsupportedText = document.getElementById('pushUnsupportedText');
+            if (!btn) return;
+
+            btn.addEventListener('click', function() {
+                subscribeToPush('{% url "core:push_subscribe" %}', btn);
+            });
+
+            // Whether push is "enabled" is per-device (per browser/service worker),
+            // not something the server can know from a user's other devices' rows
+            // in the database - always ask the actual browser.
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                if (unsupportedText) unsupportedText.style.display = '';
+                return;
             }
+            navigator.serviceWorker.ready.then(function(registration) {
+                registration.pushManager.getSubscription().then(function(subscription) {
+                    if (subscription && Notification.permission === 'granted') {
+                        if (enabledText) enabledText.style.display = '';
+                    } else {
+                        btn.style.display = '';
+                    }
+                });
+            }).catch(function() {
+                btn.style.display = '';
+            });
         })();
         
         // PWA Install Prompt
