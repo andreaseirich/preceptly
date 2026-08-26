@@ -733,6 +733,8 @@
     }
 
     var pushBtn = document.getElementById('pushSubscribeBtn');
+    var pushEnabledText = document.getElementById('pushEnabledText');
+    var pushUnsupportedText = document.getElementById('pushUnsupportedText');
     if (pushBtn) {
       pushBtn.addEventListener('click', function () {
         var vapidPublicKey = '{{ vapid_public_key|escapejs }}';
@@ -767,6 +769,25 @@
           });
         });
       });
+
+      // Whether push is "enabled" is per-device (per browser/service worker),
+      // not something the server can know from a user's other devices' rows
+      // in the database - always ask the actual browser.
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        if (pushUnsupportedText) pushUnsupportedText.style.display = '';
+      } else {
+        navigator.serviceWorker.ready.then(function (registration) {
+          registration.pushManager.getSubscription().then(function (subscription) {
+            if (subscription && Notification.permission === 'granted') {
+              if (pushEnabledText) pushEnabledText.style.display = '';
+            } else {
+              pushBtn.style.display = '';
+            }
+          });
+        }).catch(function () {
+          pushBtn.style.display = '';
+        });
+      }
     }
   });
 

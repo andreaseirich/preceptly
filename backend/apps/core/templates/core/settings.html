@@ -424,11 +424,9 @@
     <button type="submit" name="save_notifications" class="btn btn-secondary" style="margin-top: 15px;">{% trans "Save" %}</button>
 </form>
 <div style="margin-top: 15px;">
-    {% if has_push_subscription %}
-        <span style="color: var(--text-secondary); font-size: 0.9em;">✓ {% trans "Push notifications are enabled on this device." %}</span>
-    {% else %}
-        <button type="button" class="btn" id="pushSubscribeBtn">🔔 {% trans "Enable push notifications on this device" %}</button>
-    {% endif %}
+    <span id="pushEnabledText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">✓ {% trans "Push notifications are enabled on this device." %}</span>
+    <button type="button" class="btn" id="pushSubscribeBtn" style="display: none;">🔔 {% trans "Enable push notifications on this device" %}</button>
+    <span id="pushUnsupportedText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">{% trans "Push notifications are not supported in this browser." %}</span>
 </div>
 
 <h2 style="margin-top: 40px;" id="pwa-install-section">{% trans "App on home screen" %}</h2>

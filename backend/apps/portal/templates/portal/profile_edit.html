@@ -83,11 +83,9 @@
     </form>
 
     <div style="margin-top:16px;">
-        {% if has_push_subscription %}
-            <span style="color:var(--text-secondary); font-size:0.9em;">✓ Push-Benachrichtigungen sind auf diesem Gerät aktiviert.</span>
-        {% else %}
-            <button type="button" class="btn btn-secondary" id="pushSubscribeBtn">🔔 Push-Benachrichtigungen auf diesem Gerät aktivieren</button>
-        {% endif %}
+        <span id="pushEnabledText" style="display:none; color:var(--text-secondary); font-size:0.9em;">✓ Push-Benachrichtigungen sind auf diesem Gerät aktiviert.</span>
+        <button type="button" class="btn btn-secondary" id="pushSubscribeBtn" style="display:none;">🔔 Push-Benachrichtigungen auf diesem Gerät aktivieren</button>
+        <span id="pushUnsupportedText" style="display:none; color:var(--text-secondary); font-size:0.9em;">Push-Benachrichtigungen werden von diesem Browser nicht unterstützt.</span>
     </div>
 </div>
 

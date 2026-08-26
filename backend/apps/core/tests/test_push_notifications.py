@@ -210,3 +210,35 @@ class TutorSettingsNotificationFormTest(TestCase):
         pref = NotificationPreference.objects.get(user=self.user)
         self.assertTrue(pref.notify_portal_booking_email)
         self.assertFalse(pref.notify_portal_booking_push)
+
+
+class SettingsPagePushStateIsClientSideTest(TestCase):
+    """Regression: whether push is "enabled" must be determined by the
+    browser (Notification.permission + an active PushManager subscription
+    on the current device), never by "does this user have any
+    PushSubscription row at all" server-side. A user with a subscription
+    from a different/old device must still see the enable button on a
+    fresh device instead of a false "already enabled" message - the old
+    server-side check hid the button and silently blocked the OS
+    permission prompt from ever being shown."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor2", password="pass")
+        self.client = Client()
+        self.client.login(username="tutor2", password="pass")
+
+    def test_settings_page_renders_both_states_hidden_regardless_of_other_device_subscription(self):
+        PushSubscription.objects.create(
+            user=self.user,
+            endpoint="https://push.example.com/other-device",
+            p256dh="p256dh-key",
+            auth="auth-key",
+        )
+        response = self.client.get("/settings/")
+        # Both elements are always rendered, hidden by default; only the
+        # client's JS (checking this browser's actual subscription state)
+        # decides which one to reveal - the server must never claim
+        # "already enabled" based on another device's row.
+        self.assertContains(response, 'id="pushEnabledText" style="display: none;')
+        self.assertContains(response, 'id="pushSubscribeBtn" style="display: none;')
+        self.assertNotContains(response, "has_push_subscription")

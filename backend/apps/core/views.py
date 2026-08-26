@@ -411,7 +411,6 @@ class SettingsView(LoginRequiredMixin, FormView):
 
         notif_pref, _created = NotificationPreference.objects.get_or_create(user=self.request.user)
         context["notif_pref"] = notif_pref
-        context["has_push_subscription"] = self.request.user.push_subscriptions.exists()
         q = self.request.GET
         context["show_stripe_success_banner"] = (
             q.get("stripe_success") == "1" or q.get("checkout") == "success"
