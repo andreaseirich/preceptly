@@ -78,6 +78,12 @@ if not ALLOWED_HOSTS:
 
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", default=[])
 
+# Friendly, German explanation instead of Django's technical 403 page - the
+# common real cause is a blocked/missing cookie on the visitor's device
+# (private browsing, iOS Screen Time content restrictions, an in-app
+# browser), not an actual attack.
+CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
+
 
 # Application definition
 

@@ -890,6 +890,18 @@ class AutoDetectTimezoneView(LoginRequiredMixin, View):
         return JsonResponse({"ok": True, "timezone": tz_value})
 
 
+def csrf_failure(request, reason=""):
+    """Custom CSRF_FAILURE_VIEW: replaces Django's technical 403 page with a
+    German explanation and concrete steps, since the far more common real
+    cause here is a blocked/missing cookie on the visitor's device (private
+    browsing, Screen Time content restrictions, an in-app browser) rather
+    than an actual attack - most visitors hitting this are portal users,
+    not developers who'd know what "CSRF cookie not set" means."""
+    from django.shortcuts import render
+
+    return render(request, "core/csrf_failure.html", status=403)
+
+
 class FaqView(TemplateView):
     """Public FAQ page — listed in robots.txt/sitemap.xml and shown to
     anonymous visitors in the nav, so it must not require login."""

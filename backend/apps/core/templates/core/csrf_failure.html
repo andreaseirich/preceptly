@@ -1,0 +1,60 @@
+{% load static %}<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitzung abgelaufen - Preceptly</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #2c3e50;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .box {
+            background: #34495e;
+            border-radius: 10px;
+            padding: 28px 24px;
+            max-width: 460px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 1.3em;
+            margin-top: 0;
+        }
+        ol {
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+        a.btn {
+            display: inline-block;
+            margin-top: 16px;
+            background: #2ecc71;
+            color: #16211f;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>⚠️ Sitzung abgelaufen oder Cookies blockiert</h1>
+        <p>Deine Anfrage konnte nicht sicher verarbeitet werden. Das passiert meistens, wenn dein Browser Cookies für diese Seite blockiert oder die Seite über einen alten Link/Lesezeichen geöffnet wurde.</p>
+        <p>So behebst du es:</p>
+        <ol>
+            <li>Öffne den Link direkt in Safari oder Chrome (nicht aus WhatsApp/Mail heraus antippen, sondern Link kopieren und im Browser einfügen)</li>
+            <li>Stelle sicher, dass Cookies für diese Seite nicht blockiert sind (Einstellungen → Safari → Cookies blockieren muss aus sein)</li>
+            <li>Falls auf dem iPhone eine Bildschirmzeit-Einschränkung aktiv ist ("Sperre für sensible Websites"/"Sperre für sensible Daten"), muss preceptly.de dort erlaubt sein</li>
+            <li>Lade die Seite neu und versuche es erneut</li>
+        </ol>
+        <a class="btn" href="/">Zur Startseite</a>
+    </div>
+</body>
+</html>
