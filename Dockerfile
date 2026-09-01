@@ -15,7 +15,14 @@ RUN apt-get update && apt-get install -y \
     git \
     postgresql-client \
     gettext \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Tailscale: lets the container reach a self-hosted Ollama instance on the
+# operator's own machine over the tailnet (userspace networking - Railway
+# containers get no /dev/net/tun, see scripts/entrypoint.sh for the
+# tailscaled startup and apps/ai/client.py for how it's used).
+RUN curl -fsSL https://tailscale.com/install.sh | sh
 
 # Install Python dependencies
 COPY requirements.txt .
