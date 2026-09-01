@@ -81,3 +81,54 @@ class LLMClientTest(TestCase):
         result = client.generate_text("Test-Prompt")
 
         self.assertIn("Lesson Plan", result)
+
+
+class LLMClientTailscaleOllamaTest(TestCase):
+    """The self-hosted-Ollama-over-Tailscale escape hatch must stay narrow:
+    only the exact configured tailnet host may skip the HTTPS/allowlist/
+    port checks that protect every other provider from SSRF."""
+
+    def setUp(self):
+        self.original_key = settings.LLM_API_KEY
+        self.original_base_url = settings.LLM_API_BASE_URL
+        settings.LLM_API_KEY = "ollama-no-key-needed"
+
+    def tearDown(self):
+        settings.LLM_API_KEY = self.original_key
+        settings.LLM_API_BASE_URL = self.original_base_url
+
+    @patch.dict("os.environ", {"MOCK_LLM": "0", "TAILSCALE_OLLAMA_HOST": "100.78.136.85"})
+    def test_plain_http_and_nonstandard_port_allowed_for_configured_tailscale_host(self):
+        settings.LLM_API_BASE_URL = "http://100.78.136.85:11434/v1"
+        client = LLMClient()  # must not raise
+        self.assertTrue(client._is_tailscale_ollama)
+
+    @patch.dict("os.environ", {"MOCK_LLM": "0", "TAILSCALE_OLLAMA_HOST": "100.78.136.85"})
+    def test_http_still_rejected_for_a_different_host_even_with_tailscale_host_configured(self):
+        settings.LLM_API_BASE_URL = "http://evil.example.com:11434/v1"
+        with self.assertRaises(LLMClientError):
+            LLMClient()
+
+    @patch.dict("os.environ", {"MOCK_LLM": "0"}, clear=True)
+    def test_http_rejected_when_no_tailscale_host_configured(self):
+        settings.LLM_API_BASE_URL = "http://100.78.136.85:11434/v1"
+        with self.assertRaises(LLMClientError):
+            LLMClient()
+
+    @patch.dict("os.environ", {"MOCK_LLM": "0", "TAILSCALE_OLLAMA_HOST": "100.78.136.85"})
+    @patch("apps.ai.client.requests.post")
+    def test_request_to_tailscale_host_routes_through_local_proxy(self, mock_post):
+        settings.LLM_API_BASE_URL = "http://100.78.136.85:11434/v1"
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.raise_for_status = Mock()
+        mock_response.json.return_value = {"choices": [{"message": {"content": "ok"}}]}
+        mock_post.return_value = mock_response
+
+        client = LLMClient()
+        client.generate_text("Test-Prompt")
+
+        _, kwargs = mock_post.call_args
+        self.assertEqual(
+            kwargs["proxies"], {"http": "http://127.0.0.1:1055", "https": "http://127.0.0.1:1055"}
+        )

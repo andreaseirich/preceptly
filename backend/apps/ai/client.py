@@ -27,6 +27,13 @@ _ALLOWED_LLM_HOSTS = frozenset(
     }
 )
 
+# Self-hosted Ollama, reachable only through the container's Tailscale
+# tailnet (tailscaled runs in userspace-networking mode as a sidecar, see
+# scripts/entrypoint.sh) - never reachable from the public internet, so
+# plain HTTP over the encrypted WireGuard tunnel is acceptable here even
+# though every other provider above requires HTTPS.
+_TAILSCALE_PROXY = "http://127.0.0.1:1055"
+
 _MAX_TIMEOUT_SECONDS = 120
 
 logger = logging.getLogger(__name__)
@@ -81,17 +88,28 @@ class LLMClient:
         # SSRF-Schutz: LLM_API_BASE_URL muss HTTPS und auf Allowlist sein
         if not self.mock_enabled:
             parsed = urlparse(self.api_base_url)
-            if parsed.scheme != "https":
-                raise LLMClientError(_("Invalid LLM_API_BASE_URL: HTTPS is required."))
-            if parsed.hostname not in _ALLOWED_LLM_HOSTS:
-                raise LLMClientError(_("Invalid LLM_API_BASE_URL: host is not on the allowlist."))
-            # [LOW][FIX] Port-Validierung: nur Standard-HTTPS-Port (443) oder kein Port erlaubt
-            if parsed.port not in (None, 443):
-                raise LLMClientError(_("Invalid LLM_API_BASE_URL: non-standard port."))
-            # [LOW][FIX] Userinfo (Benutzername/Passwort in URL) explizit ablehnen –
-            # verhindert URL-Konstrukte wie https://user:pw@api.openai.com/
-            if parsed.username or parsed.password:
-                raise LLMClientError(_("Invalid LLM_API_BASE_URL: userinfo not allowed."))
+            tailscale_host = os.environ.get("TAILSCALE_OLLAMA_HOST", "")
+            self._is_tailscale_ollama = bool(tailscale_host) and parsed.hostname == tailscale_host
+            if self._is_tailscale_ollama:
+                # Reachable only via the tailnet - HTTP is fine, any port is fine.
+                if parsed.username or parsed.password:
+                    raise LLMClientError(_("Invalid LLM_API_BASE_URL: userinfo not allowed."))
+            else:
+                if parsed.scheme != "https":
+                    raise LLMClientError(_("Invalid LLM_API_BASE_URL: HTTPS is required."))
+                if parsed.hostname not in _ALLOWED_LLM_HOSTS:
+                    raise LLMClientError(
+                        _("Invalid LLM_API_BASE_URL: host is not on the allowlist.")
+                    )
+                # [LOW][FIX] Port-Validierung: nur Standard-HTTPS-Port (443) oder kein Port erlaubt
+                if parsed.port not in (None, 443):
+                    raise LLMClientError(_("Invalid LLM_API_BASE_URL: non-standard port."))
+                # [LOW][FIX] Userinfo (Benutzername/Passwort in URL) explizit ablehnen –
+                # verhindert URL-Konstrukte wie https://user:pw@api.openai.com/
+                if parsed.username or parsed.password:
+                    raise LLMClientError(_("Invalid LLM_API_BASE_URL: userinfo not allowed."))
+        else:
+            self._is_tailscale_ollama = False
 
     def generate_text(
         self,
@@ -323,6 +341,9 @@ class LLMClient:
                 json=payload,
                 headers=headers,
                 timeout=self.timeout,
+                proxies={"http": _TAILSCALE_PROXY, "https": _TAILSCALE_PROXY}
+                if self._is_tailscale_ollama
+                else None,
             )
 
             # Try to parse error response for structured logging
