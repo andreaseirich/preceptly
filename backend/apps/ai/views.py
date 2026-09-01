@@ -84,7 +84,12 @@ def generate_lesson_plan(request, lesson_id):
             ),
         )
     except LessonPlanGenerationError as e:
-        messages.error(request, _("Ein Fehler ist aufgetreten. Bitte versuche es erneut."))
+        # The exception message is always a string we set ourselves in
+        # LessonPlanService (never raw provider/exception text), so it's
+        # safe to show directly - lets users tell "AI temporarily
+        # unreachable" apart from other failures instead of one opaque
+        # generic message for everything.
+        messages.error(request, str(e))
         logger.error(f"Lesson plan generation failed: {str(e)}", exc_info=True)
     except Exception as e:
         messages.error(request, _("Ein Fehler ist aufgetreten. Bitte versuche es erneut."))

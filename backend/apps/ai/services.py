@@ -11,7 +11,7 @@ from django.db import transaction
 from django.utils.html import escape
 from django.utils.translation import gettext_lazy as _
 
-from apps.ai.client import LLMClient, LLMClientError
+from apps.ai.client import LLMClient, LLMClientError, LLMServiceUnavailableError
 from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_student
 from apps.ai.utils_safety import sanitize_context, strip_injection_patterns
 from apps.lesson_plans.models import LessonPlan
@@ -152,6 +152,12 @@ class LessonPlanService:
                 max_tokens=1500,
                 temperature=0.7,
             )
+        except LLMServiceUnavailableError as e:
+            # Placeholder aufräumen damit ein erneuter Versuch möglich ist
+            placeholder.delete()
+            raise LessonPlanGenerationError(
+                _("The AI is temporarily unreachable. Please try again in a few minutes.")
+            ) from e
         except LLMClientError as e:
             # Placeholder aufräumen damit ein erneuter Versuch möglich ist
             placeholder.delete()

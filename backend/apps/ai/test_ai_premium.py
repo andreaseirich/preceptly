@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from apps.ai.client import LLMClientError
+from apps.ai.client import LLMClientError, LLMServiceUnavailableError
 from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_student
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.ai.utils_safety import REDACTED, sanitize_context
@@ -175,3 +175,23 @@ class LessonPlanServiceTest(TestCase):
         self.assertIn("student", context)
         self.assertIn("lesson", context)
         self.assertEqual(context["lesson"]["duration_minutes"], 60)
+
+    @patch("apps.ai.services.LLMClient")
+    def test_generate_lesson_plan_shows_unreachable_message_not_generic_error(
+        self, mock_client_class
+    ):
+        """Regression: a self-hosted provider (e.g. Ollama over Tailscale)
+        being offline must surface a clear "try again later" message, not
+        the generic "something went wrong" text used for other failures -
+        the two situations need different user reactions (wait vs. report
+        a bug)."""
+        mock_client = Mock()
+        mock_client.generate_text.side_effect = LLMServiceUnavailableError("connection failed")
+        mock_client_class.return_value = mock_client
+
+        service = LessonPlanService(client=mock_client)
+
+        with self.assertRaises(LessonPlanGenerationError) as ctx:
+            service.generate_lesson_plan(self.lesson, user=self.user)
+
+        self.assertIn("temporarily unreachable", str(ctx.exception))

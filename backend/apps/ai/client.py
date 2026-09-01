@@ -45,6 +45,16 @@ class LLMClientError(Exception):
     pass
 
 
+class LLMServiceUnavailableError(LLMClientError):
+    """The provider could not be reached at all (timeout/connection error),
+    as opposed to the provider responding with an actual error. Distinct
+    subclass so callers can show a clearer "try again later" message
+    instead of a generic failure - this is the case that fires when a
+    self-hosted Ollama instance (e.g. reached over Tailscale) is offline."""
+
+    pass
+
+
 SAMPLES_PATH = Path(__file__).resolve().parents[3] / "docs" / "llm_samples.json"
 
 
@@ -285,10 +295,10 @@ class LLMClient:
 
         except requests.exceptions.Timeout:
             logger.error("Anthropic API request timed out after %ss", self.timeout)
-            raise LLMClientError(_("AI service unavailable.")) from None
+            raise LLMServiceUnavailableError(_("AI service unavailable.")) from None
         except requests.exceptions.RequestException:
             logger.error("Anthropic request failed", exc_info=True)
-            raise LLMClientError(_("AI service unavailable.")) from None
+            raise LLMServiceUnavailableError(_("AI service unavailable.")) from None
         except (KeyError, ValueError):
             logger.error("Error parsing Anthropic response", exc_info=True)
             raise LLMClientError(_("Error parsing API response.")) from None
@@ -411,7 +421,7 @@ class LLMClient:
 
         except requests.exceptions.Timeout:
             logger.error("LLM API request timed out after %ss", self.timeout, exc_info=True)
-            raise LLMClientError(_("AI service unavailable.")) from None
+            raise LLMServiceUnavailableError(_("AI service unavailable.")) from None
         except requests.exceptions.HTTPError as e:
             # Handle other HTTP errors – Status-Code darf geloggt werden, kein Body-Leak
             status = e.response.status_code if e.response is not None else "unknown"
@@ -424,7 +434,7 @@ class LLMClient:
         except requests.exceptions.RequestException:
             # 'from None' verhindert Chain-Leak im Traceback (API-Key in Frames)
             logger.error("LLM request failed", exc_info=True)
-            raise LLMClientError(_("AI service unavailable.")) from None
+            raise LLMServiceUnavailableError(_("AI service unavailable.")) from None
         except (KeyError, ValueError):
             # [LOW] from None statt from e – verhindert Info-Leak über interne Response-Struktur
             logger.error("Error parsing API response", exc_info=True)
