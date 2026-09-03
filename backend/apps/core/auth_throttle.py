@@ -55,7 +55,7 @@ def _get_client_ip(request) -> str:
     xff_raw = request.META.get("HTTP_X_FORWARDED_FOR", "")
     is_trusted = _is_trusted_proxy(remote, trusted_proxies)
     logger.debug(
-        "[TRUSTED_PROXIES-DIAG] remote_addr=%s xff=%r trusted=%s", remote, xff_raw, is_trusted
+        "[TRUSTED_PROXIES-DIAG] remote_addr=%r xff=%r trusted=%s", remote, xff_raw, is_trusted
     )
     if is_trusted and xff_raw:
         ips = [ip.strip() for ip in xff_raw.split(",") if ip.strip()]

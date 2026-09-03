@@ -80,7 +80,7 @@ def _notify_admin(subject: str, body: str) -> None:
             fail_silently=True,
         )
     except Exception:
-        logger.exception("Revocation admin notification failed: %s", subject)
+        logger.exception("Revocation admin notification failed: %r", subject)
 
 
 def _admin_body(revocation: RevocationRequest) -> str:
@@ -187,7 +187,9 @@ class Erecht24RevocationWebhookView(View):
                 if int(content_length) > MAX_WEBHOOK_BYTES:
                     return JsonResponse({"code": 413, "message": "payload too large"}, status=413)
             except (ValueError, TypeError):
-                pass
+                # Malformed Content-Length header - fall through to the real
+                # body-length check below instead of trusting the header.
+                logger.debug("Malformed Content-Length header: %r", content_length)
         body = request.body
         if len(body) > MAX_WEBHOOK_BYTES:
             return JsonResponse({"code": 413, "message": "payload too large"}, status=413)
@@ -265,7 +267,7 @@ class Erecht24RevocationWebhookView(View):
             subject = f"Widerruf: keine Zuordnung gefunden ({safe_name})"
         _notify_admin(f"[Preceptly] {subject}", _admin_body(revocation))
 
-        logger.info("e-recht24 revocation %s recorded with status=%s", revo_id, status)
+        logger.info("e-recht24 revocation %r recorded with status=%s", revo_id, status)
         return JsonResponse({"status": status}, status=200)
 
 
@@ -385,7 +387,7 @@ class Erecht24RevocationConfirmView(View):
             body,
         )
         logger.info(
-            "Revocation %s confirmed; subscription %s cancelled (stripe_ok=%s)",
+            "Revocation %r confirmed; subscription %r cancelled (stripe_ok=%s)",
             revocation.revo_id,
             subscription_id,
             stripe_ok,

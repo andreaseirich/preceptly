@@ -33,13 +33,20 @@ def demo_block(request, message: str | None = None):
     """Redirect with error message for blocked demo actions."""
     from django.contrib import messages as msg
     from django.shortcuts import redirect
+    from django.utils.http import url_has_allowed_host_and_scheme
 
     msg.error(
         request,
         message or _("This action is not available in demo mode."),
     )
     referer = request.META.get("HTTP_REFERER")
-    return redirect(referer) if referer else redirect("core:dashboard")
+    # HTTP_REFERER is fully attacker-controlled - only follow it back if it
+    # actually points at this site, otherwise fall back to the dashboard.
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(referer)
+    return redirect("core:dashboard")
 
 
 def demo_ai_limit_reached(user) -> bool:

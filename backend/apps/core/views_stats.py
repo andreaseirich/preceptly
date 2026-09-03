@@ -1,4 +1,3 @@
-import hashlib
 import os
 import secrets
 from datetime import timedelta
@@ -25,10 +24,10 @@ def _check_password(raw: str) -> bool:
     expected = os.environ.get("DEV_STATS_PASSWORD", "")
     if not expected:
         return False
-    return secrets.compare_digest(
-        hashlib.sha256(raw.encode()).hexdigest(),
-        hashlib.sha256(expected.encode()).hexdigest(),
-    )
+    # Direct constant-time comparison - no need to hash first, and hashing
+    # a password with a fast general-purpose digest (even SHA-256) for
+    # comparison is exactly the pattern CodeQL's weak-hashing check flags.
+    return secrets.compare_digest(raw.encode(), expected.encode())
 
 
 class DevStatsView(View):

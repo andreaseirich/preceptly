@@ -13,6 +13,7 @@ from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 from django.views import View
@@ -631,4 +632,8 @@ class LessonRescheduleView(LoginRequiredMixin, View):
             f"Termin verschoben: {old_date.strftime('%d.%m.%Y')} → {new_date.strftime('%d.%m.%Y')} {new_time.strftime('%H:%M')} Uhr.",
         )
         next_url = request.GET.get("next") or get_last_calendar_url(request)
+        if not url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            next_url = get_last_calendar_url(request)
         return HttpResponseRedirect(next_url)

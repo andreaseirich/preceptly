@@ -427,16 +427,16 @@ class StudentDocumentListView(LoginRequiredMixin, View):
             ext = os.path.splitext(uploaded_file.name)[1].lower()
             if ext not in allowed_extensions:
                 messages.error(request, "Dateityp nicht erlaubt.")
-                return redirect(request.path)
+                return redirect("students:documents", pk=pk)
             if uploaded_file.size > max_size:
                 messages.error(request, "Datei ist zu groß (max. 50 MB).")
-                return redirect(request.path)
+                return redirect("students:documents", pk=pk)
             if not validate_file_magic(uploaded_file, ext):
                 messages.error(
                     request,
                     "Dateityp nicht erlaubt (Inhalt stimmt nicht mit Dateiendung überein).",
                 )
-                return redirect(request.path)
+                return redirect("students:documents", pk=pk)
         if not uploaded_file:
             messages.warning(request, "Keine Datei ausgewählt.")
             return redirect("students:documents", pk=pk)

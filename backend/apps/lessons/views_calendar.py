@@ -231,7 +231,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 except ValueError as exc:
                     logger.debug("Invalid date param ignored: %s", exc)
             else:
-                logger.debug("Invalid date param format ignored: %s", date_param)
+                logger.debug("Invalid date param format ignored: %r", date_param)
 
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")

@@ -296,12 +296,20 @@ class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """Verarbeitet Bulk-Edit-Aktionen."""
         from django.urls import reverse
+        from django.utils.http import url_has_allowed_host_and_scheme
 
         recurring_ids = request.POST.getlist("recurring_ids")
 
         if len(recurring_ids) > 100:
             messages.error(request, _("Too many items selected (max 100)."))
-            return redirect(request.META.get("HTTP_REFERER") or reverse("lessons:recurring_list"))
+            # HTTP_REFERER is fully attacker-controlled - only follow it
+            # back if it actually points at this site.
+            referer = request.META.get("HTTP_REFERER")
+            if referer and url_has_allowed_host_and_scheme(
+                referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(referer)
+            return redirect(reverse("lessons:recurring_list"))
 
         action = request.POST.get("action")
 
