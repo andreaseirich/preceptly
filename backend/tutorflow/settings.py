@@ -78,6 +78,11 @@ if not ALLOWED_HOSTS:
 
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", default=[])
 
+# Fernet key for encrypting stored CalDAV app-specific passwords at rest
+# (apps.calendar_sync.crypto) - separate from SECRET_KEY on purpose, see
+# that module's docstring. Only required once a tutor connects a calendar.
+CALDAV_ENCRYPTION_KEY = os.environ.get("CALDAV_ENCRYPTION_KEY", "")
+
 # Friendly, German explanation instead of Django's technical 403 page - the
 # common real cause is a blocked/missing cookie on the visitor's device
 # (private browsing, iOS Screen Time content restrictions, an in-app
@@ -105,6 +110,7 @@ INSTALLED_APPS = [
     "apps.billing",
     "apps.portal",
     "apps.meeting",
+    "apps.calendar_sync",
     "channels",
 ]
 
