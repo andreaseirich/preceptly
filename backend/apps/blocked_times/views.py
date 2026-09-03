@@ -2,6 +2,8 @@
 Views für BlockedTime-CRUD-Operationen.
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -10,6 +12,8 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from apps.blocked_times.forms import BlockedTimeForm
 from apps.blocked_times.models import BlockedTime
+
+logger = logging.getLogger(__name__)
 
 
 class BlockedTimeDetailView(LoginRequiredMixin, DetailView):
@@ -75,7 +79,9 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
 
             except (ValueError, TypeError):
-                pass
+                # Malformed start/end query params - just skip prefilling,
+                # the form still renders with empty fields.
+                logger.debug("Malformed start/end datetime query params ignored")
 
         # Fallback: date-Parameter (Rückwärtskompatibilität)
         if "start_datetime" not in initial:
@@ -91,7 +97,8 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     initial["start_datetime"] = start_dt
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
                 except ValueError:
-                    pass
+                    # Malformed date query param - just skip prefilling.
+                    logger.debug("Malformed date query param ignored: %r", date_str)
 
         return initial
 

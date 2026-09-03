@@ -196,7 +196,9 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                 if not room_lock.locked():
                     del cls._room_locks[self.group_name]
             except KeyError:
-                pass
+                # Another connection's cleanup already removed it - fine,
+                # that's the outcome we wanted anyway.
+                logger.debug("Room lock for %s already removed", self.group_name)
 
     async def receive(self, text_data):
         # Rate-Limit: max. 60 Nachrichten in 10 Sekunden pro Verbindung

@@ -227,7 +227,11 @@ class LLMClient:
         raise LLMClientError(_("Mock mode is active, but no mock samples are available."))
 
     def _is_anthropic(self) -> bool:
-        return "anthropic.com" in self.api_base_url
+        # Exact hostname match (not a substring check) - "anthropic.com" in
+        # self.api_base_url would also match a lookalike host such as
+        # "notanthropic.com.evil.example" or "fake-anthropic.com".
+        hostname = urlparse(self.api_base_url).hostname or ""
+        return hostname == "api.anthropic.com" or hostname.endswith(".anthropic.com")
 
     def _make_api_request(
         self,
@@ -356,40 +360,32 @@ class LLMClient:
                 else None,
             )
 
-            # Try to parse error response for structured logging
-            error_details = None
-            error_msg = None
-            error_type = "unknown"
-            try:
-                if response.status_code >= 400:
+            # Try to parse error response for structured logging (never
+            # surfaced to the user - see the generic messages below).
+            if response.status_code >= 400:
+                try:
                     error_response = response.json()
-                    if "error" in error_response:
-                        error_details = error_response["error"]
-                        if isinstance(error_details, dict):
-                            error_msg = error_details.get("message", "")
-                            error_type = error_details.get("type", "unknown")
-                            # Vollständige Details nur ins Log (nie zum User)
-                            logger.error(
-                                "LLM API error status=%s type=%r msg=%r",
-                                response.status_code,
-                                error_type,
-                                error_msg,
-                            )
-                        else:
-                            error_msg = str(error_details)
-                            logger.error(
-                                "LLM API error status=%s error=%r",
-                                response.status_code,
-                                error_msg,
-                            )
-            except (ValueError, KeyError):
-                # Parsing des Error-Body fehlgeschlagen – trotzdem loggen für Debugging
-                logger.debug(
-                    "Could not parse error body for status=%s",
-                    response.status_code,
-                    exc_info=True,
-                )
-                error_details = None
+                    error_details = error_response.get("error")
+                    if isinstance(error_details, dict):
+                        logger.error(
+                            "LLM API error status=%s type=%r msg=%r",
+                            response.status_code,
+                            error_details.get("type", "unknown"),
+                            error_details.get("message", ""),
+                        )
+                    elif error_details is not None:
+                        logger.error(
+                            "LLM API error status=%s error=%r",
+                            response.status_code,
+                            str(error_details),
+                        )
+                except (ValueError, KeyError):
+                    # Parsing des Error-Body fehlgeschlagen – trotzdem loggen für Debugging
+                    logger.debug(
+                        "Could not parse error body for status=%s",
+                        response.status_code,
+                        exc_info=True,
+                    )
 
             # Handle specific HTTP status codes – generische User-Messages (kein Leak)
             if response.status_code == 429:

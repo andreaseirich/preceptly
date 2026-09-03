@@ -31,7 +31,9 @@ class Erecht24PushView(View):
                 if int(content_length) > MAX_WEBHOOK_BYTES:
                     return JsonResponse({"code": 413, "message": "payload too large"}, status=413)
             except (ValueError, TypeError):
-                pass
+                # Malformed Content-Length header - fall through to the real
+                # body-length check below instead of trusting the header.
+                logger.debug("Malformed Content-Length header: %r", content_length)
 
         body = request.body
         if len(body) > MAX_WEBHOOK_BYTES:

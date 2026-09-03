@@ -451,6 +451,12 @@ class StudentBookingView(TemplateView):
                     }
                 )
 
+            else:
+                # Unrecognized or missing action - without this, post() would
+                # fall through and implicitly return None, which Django
+                # rejects ("did not return an HttpResponse object").
+                return JsonResponse({"success": False, "message": _("Unknown action.")}, status=400)
+
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": _("Invalid JSON data.")}, status=400)
         except Exception:

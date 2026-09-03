@@ -89,6 +89,7 @@ class RegisterView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
+        user = None
         try:
             with transaction.atomic():
                 user = form.save()
@@ -105,6 +106,12 @@ class RegisterView(CreateView):
                     profile.referred_by = referrer
                     profile.save(update_fields=["referred_by"])
         except IntegrityError:
+            form.add_error(None, _("Registration failed. Please try again."))
+            return self.form_invalid(form)
+        if user is None:
+            # Unreachable in practice (the atomic block above either fully
+            # succeeds or raises IntegrityError, handled above) - guards
+            # against ever calling login() with no user.
             form.add_error(None, _("Registration failed. Please try again."))
             return self.form_invalid(form)
         login(self.request, user)
