@@ -12,6 +12,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from apps.blocked_times.forms import BlockedTimeForm
 from apps.blocked_times.models import BlockedTime
+from apps.core.log_safety import safe_log_value
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +99,7 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
                     initial["end_datetime"] = start_dt + timedelta(hours=1)
                 except ValueError:
                     # Malformed date query param - just skip prefilling.
-                    logger.debug("Malformed date query param ignored: %r", date_str)
+                    logger.debug("Malformed date query param ignored: %s", safe_log_value(date_str))
 
         return initial
 

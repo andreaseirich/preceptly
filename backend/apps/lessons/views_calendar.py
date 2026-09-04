@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.generic import ListView, TemplateView
 
+from apps.core.log_safety import safe_log_value
 from apps.lessons.calendar_service import CalendarService
 from apps.lessons.models import Lesson
 from apps.lessons.services import LessonConflictService, LessonQueryService
@@ -231,7 +232,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
                 except ValueError as exc:
                     logger.debug("Invalid date param ignored: %s", exc)
             else:
-                logger.debug("Invalid date param format ignored: %r", date_param)
+                logger.debug("Invalid date param format ignored: %s", safe_log_value(date_param))
 
         year_param = self.request.GET.get("year")
         month_param = self.request.GET.get("month")

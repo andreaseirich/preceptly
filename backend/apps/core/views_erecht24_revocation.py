@@ -38,6 +38,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 
+from apps.core.log_safety import safe_log_value
 from apps.core.models import RevocationRequest, UserProfile
 from apps.core.views_stripe import _set_premium
 
@@ -80,7 +81,7 @@ def _notify_admin(subject: str, body: str) -> None:
             fail_silently=True,
         )
     except Exception:
-        logger.exception("Revocation admin notification failed: %r", subject)
+        logger.exception("Revocation admin notification failed: %s", safe_log_value(subject))
 
 
 def _admin_body(revocation: RevocationRequest) -> str:
@@ -211,7 +212,9 @@ class Erecht24RevocationWebhookView(View):
 
         event = payload.get("event") or request.headers.get("X-Webhook-Event", "")
         if event != "revocation.submitted":
-            logger.info("Ignoring e-recht24 revocation webhook event type: %r", event)
+            logger.info(
+                "Ignoring e-recht24 revocation webhook event type: %s", safe_log_value(event)
+            )
             return JsonResponse({"status": "ignored"}, status=200)
 
         data = payload.get("data")
@@ -267,7 +270,11 @@ class Erecht24RevocationWebhookView(View):
             subject = f"Widerruf: keine Zuordnung gefunden ({safe_name})"
         _notify_admin(f"[Preceptly] {subject}", _admin_body(revocation))
 
-        logger.info("e-recht24 revocation %r recorded with status=%s", revo_id, status)
+        logger.info(
+            "e-recht24 revocation %s recorded with status=%s",
+            safe_log_value(revo_id),
+            safe_log_value(status),
+        )
         return JsonResponse({"status": status}, status=200)
 
 
@@ -279,7 +286,10 @@ def _cancel_stripe_subscription(subscription_id: str) -> bool:
     dashboard.
     """
     if not getattr(settings, "STRIPE_SECRET_KEY", ""):
-        logger.warning("Stripe not configured — skipping remote cancel for %s", subscription_id)
+        logger.warning(
+            "Stripe not configured — skipping remote cancel for %s",
+            safe_log_value(subscription_id),
+        )
         return True
     try:
         stripe.Subscription.cancel(subscription_id)
@@ -288,12 +298,16 @@ def _cancel_stripe_subscription(subscription_id: str) -> bool:
         # Already cancelled / unknown at Stripe: nothing left to cancel remotely.
         logger.warning(
             "Stripe cancel for %s: subscription not cancellable (%s) — treating as done",
-            subscription_id,
-            getattr(e, "code", None),
+            safe_log_value(subscription_id),
+            safe_log_value(getattr(e, "code", None)),
         )
         return True
     except stripe.error.StripeError as e:
-        logger.exception("Stripe cancel failed for %s status=%s", subscription_id, e.http_status)
+        logger.exception(
+            "Stripe cancel failed for %s status=%s",
+            safe_log_value(subscription_id),
+            safe_log_value(e.http_status),
+        )
         return False
 
 
@@ -387,9 +401,9 @@ class Erecht24RevocationConfirmView(View):
             body,
         )
         logger.info(
-            "Revocation %r confirmed; subscription %r cancelled (stripe_ok=%s)",
-            revocation.revo_id,
-            subscription_id,
+            "Revocation %s confirmed; subscription %s cancelled (stripe_ok=%s)",
+            safe_log_value(revocation.revo_id),
+            safe_log_value(subscription_id),
             stripe_ok,
         )
         return render(request, self.template_name, {"state": "success"})
