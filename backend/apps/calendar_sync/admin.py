@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from apps.calendar_sync.models import CalendarConnection, ExternalCalendarEventMapping, SyncConflict
+from apps.calendar_sync.models import (
+    CalendarConnection,
+    ExternalCalendarEventMapping,
+    SyncConflict,
+    SyncedCalendar,
+)
 
 
 @admin.register(CalendarConnection)
@@ -9,6 +14,13 @@ class CalendarConnectionAdmin(admin.ModelAdmin):
     list_filter = ("provider", "sync_enabled")
     search_fields = ("user__username", "user__email")
     readonly_fields = ("encrypted_password", "created_at", "updated_at")
+
+
+@admin.register(SyncedCalendar)
+class SyncedCalendarAdmin(admin.ModelAdmin):
+    list_display = ("connection", "display_name", "role", "created_at")
+    list_filter = ("role",)
+    search_fields = ("display_name", "external_calendar_url")
 
 
 @admin.register(ExternalCalendarEventMapping)

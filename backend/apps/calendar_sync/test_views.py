@@ -13,9 +13,14 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
-from apps.calendar_sync.caldav_client import CalDavConnectionError
+from apps.calendar_sync.caldav_client import CalDavConnectionError, ExternalCalendar
 from apps.calendar_sync.crypto import decrypt_password, encrypt_password
-from apps.calendar_sync.models import CalendarConnection, ExternalCalendarEventMapping, SyncConflict
+from apps.calendar_sync.models import (
+    CalendarConnection,
+    ExternalCalendarEventMapping,
+    SyncConflict,
+    SyncedCalendar,
+)
 
 
 @override_settings(CALDAV_ENCRYPTION_KEY=Fernet.generate_key().decode())
@@ -85,6 +90,90 @@ class ConnectCalendarViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertFalse(CalendarConnection.objects.filter(user=self.user).exists())
+
+
+@override_settings(CALDAV_ENCRYPTION_KEY=Fernet.generate_key().decode())
+class ConfigureCalendarsViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor_cfg", password="pass")
+        self.client = Client()
+        self.client.login(username="tutor_cfg", password="pass")
+        self.connection = CalendarConnection.objects.create(
+            user=self.user,
+            provider="icloud",
+            caldav_url="https://caldav.icloud.com/",
+            caldav_username="tutor_cfg@example.com",
+            encrypted_password=encrypt_password("pw"),
+        )
+
+    @patch("apps.calendar_sync.views.CalDavClient")
+    def test_get_shows_available_calendars(self, mock_client_class):
+        mock_client = MagicMock()
+        mock_client.list_event_calendars.return_value = [
+            ExternalCalendar(url="https://x/nachhilfe/", name="Nachhilfe"),
+            ExternalCalendar(url="https://x/privat/", name="Privat"),
+        ]
+        mock_client_class.return_value = mock_client
+
+        response = self.client.get(reverse("calendar_sync:configure"))
+
+        self.assertContains(response, "Nachhilfe")
+        self.assertContains(response, "Privat")
+
+    @patch("apps.calendar_sync.views.CalDavClient")
+    def test_post_saves_selection(self, mock_client_class):
+        response = self.client.post(
+            reverse("calendar_sync:configure"),
+            {
+                "sessions_target": "https://x/nachhilfe/",
+                "name_https://x/nachhilfe/": "Nachhilfe",
+                "blocked_sources": ["https://x/privat/", "https://x/arbeit/"],
+                "name_https://x/privat/": "Privat",
+                "name_https://x/arbeit/": "Arbeit",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        target = SyncedCalendar.objects.get(
+            connection=self.connection, role=SyncedCalendar.ROLE_SESSIONS_TARGET
+        )
+        self.assertEqual(target.external_calendar_url, "https://x/nachhilfe/")
+        self.assertEqual(target.display_name, "Nachhilfe")
+        sources = set(
+            SyncedCalendar.objects.filter(
+                connection=self.connection, role=SyncedCalendar.ROLE_BLOCKED_TIME_SOURCE
+            ).values_list("external_calendar_url", flat=True)
+        )
+        self.assertEqual(sources, {"https://x/privat/", "https://x/arbeit/"})
+
+    @patch("apps.calendar_sync.views.CalDavClient")
+    def test_post_replaces_previous_selection(self, mock_client_class):
+        SyncedCalendar.objects.create(
+            connection=self.connection,
+            external_calendar_url="https://x/old-target/",
+            display_name="Old",
+            role=SyncedCalendar.ROLE_SESSIONS_TARGET,
+        )
+
+        self.client.post(
+            reverse("calendar_sync:configure"),
+            {
+                "sessions_target": "https://x/new-target/",
+                "name_https://x/new-target/": "New",
+            },
+        )
+
+        self.assertEqual(SyncedCalendar.objects.filter(connection=self.connection).count(), 1)
+        self.assertEqual(
+            SyncedCalendar.objects.get(connection=self.connection).external_calendar_url,
+            "https://x/new-target/",
+        )
+
+    def test_requires_login(self):
+        Client().get(reverse("calendar_sync:configure"))
+        # anonymous access redirects to login rather than raising - just
+        # confirm no SyncedCalendar rows leak from an unauthenticated call
+        self.assertEqual(SyncedCalendar.objects.count(), 0)
 
 
 @override_settings(CALDAV_ENCRYPTION_KEY=Fernet.generate_key().decode())

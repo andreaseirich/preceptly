@@ -13,8 +13,8 @@ from django.views.decorators.http import require_POST
 
 from apps.blocked_times.models import BlockedTime
 from apps.calendar_sync.caldav_client import CalDavClient, CalDavConnectionError
-from apps.calendar_sync.crypto import CalendarCredentialError, encrypt_password
-from apps.calendar_sync.models import CalendarConnection, SyncConflict
+from apps.calendar_sync.crypto import CalendarCredentialError, decrypt_password, encrypt_password
+from apps.calendar_sync.models import CalendarConnection, SyncConflict, SyncedCalendar
 
 # Well-known CalDAV discovery URLs - fixed per provider, so the tutor only
 # ever enters their account credentials, never a URL they'd have to look up.
@@ -77,8 +77,71 @@ def connect_calendar(request):
             "last_sync_error": "",
         },
     )
-    messages.success(request, _("Calendar connected. The first sync runs within a few minutes."))
-    return redirect(reverse("core:settings") + "#calendar-sync")
+    messages.success(request, _("Calendar connected. Now choose which calendars to sync."))
+    return redirect(reverse("calendar_sync:configure"))
+
+
+@login_required
+def configure_calendars(request):
+    connection = get_object_or_404(CalendarConnection, user=request.user)
+
+    if request.method == "POST":
+        sessions_target_url = request.POST.get("sessions_target", "").strip()
+        blocked_source_urls = set(request.POST.getlist("blocked_sources"))
+
+        SyncedCalendar.objects.filter(connection=connection).delete()
+        rows = []
+        if sessions_target_url:
+            rows.append(
+                SyncedCalendar(
+                    connection=connection,
+                    external_calendar_url=sessions_target_url,
+                    display_name=request.POST.get(f"name_{sessions_target_url}", ""),
+                    role=SyncedCalendar.ROLE_SESSIONS_TARGET,
+                )
+            )
+        for url in blocked_source_urls:
+            rows.append(
+                SyncedCalendar(
+                    connection=connection,
+                    external_calendar_url=url,
+                    display_name=request.POST.get(f"name_{url}", ""),
+                    role=SyncedCalendar.ROLE_BLOCKED_TIME_SOURCE,
+                )
+            )
+        SyncedCalendar.objects.bulk_create(rows)
+        messages.success(request, _("Calendar selection saved."))
+        return redirect(reverse("core:settings") + "#calendar-sync")
+
+    try:
+        password = decrypt_password(bytes(connection.encrypted_password))
+        client = CalDavClient(connection.caldav_url, connection.caldav_username, password)
+        available = client.list_event_calendars()
+    except CalDavConnectionError as e:
+        messages.error(request, _("Could not load your calendars: {error}").format(error=e))
+        return redirect(reverse("core:settings") + "#calendar-sync")
+
+    current_target = (
+        connection.synced_calendars.filter(role=SyncedCalendar.ROLE_SESSIONS_TARGET)
+        .values_list("external_calendar_url", flat=True)
+        .first()
+    )
+    current_sources = set(
+        connection.synced_calendars.filter(
+            role=SyncedCalendar.ROLE_BLOCKED_TIME_SOURCE
+        ).values_list("external_calendar_url", flat=True)
+    )
+
+    return render(
+        request,
+        "calendar_sync/configure_calendars.html",
+        {
+            "connection": connection,
+            "available_calendars": available,
+            "current_target": current_target,
+            "current_sources": current_sources,
+        },
+    )
 
 
 @login_required

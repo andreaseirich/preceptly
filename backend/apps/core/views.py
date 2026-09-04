@@ -412,7 +412,7 @@ class SettingsView(LoginRequiredMixin, FormView):
         notif_pref, _created = NotificationPreference.objects.get_or_create(user=self.request.user)
         context["notif_pref"] = notif_pref
 
-        from apps.calendar_sync.models import CalendarConnection, SyncConflict
+        from apps.calendar_sync.models import CalendarConnection, SyncConflict, SyncedCalendar
 
         calendar_connection = CalendarConnection.objects.filter(user=self.request.user).first()
         context["calendar_connection"] = calendar_connection
@@ -423,6 +423,15 @@ class SettingsView(LoginRequiredMixin, FormView):
             if calendar_connection
             else 0
         )
+        if calendar_connection:
+            context["calendar_sessions_target"] = calendar_connection.synced_calendars.filter(
+                role=SyncedCalendar.ROLE_SESSIONS_TARGET
+            ).first()
+            context["calendar_blocked_sources"] = list(
+                calendar_connection.synced_calendars.filter(
+                    role=SyncedCalendar.ROLE_BLOCKED_TIME_SOURCE
+                )
+            )
 
         q = self.request.GET
         context["show_stripe_success_banner"] = (
