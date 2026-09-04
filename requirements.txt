@@ -22,6 +22,7 @@ nh3>=0.3.6
 whitenoise>=6.7.0
 pywebpush>=2.0.3
 caldav==3.3.0
+icalendar==7.3.0
 cryptography==50.0.1
 
 # cache-bust: 2026-06-25

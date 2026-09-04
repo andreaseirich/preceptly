@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.portal import views
+from apps.portal.views_ical_feed import ical_feed
 
 app_name = "portal"
 
@@ -92,4 +93,5 @@ urlpatterns = [
     path("profile/", views.PortalProfileEditView.as_view(), name="profile"),
     path("push/subscribe/", views.PortalPushSubscribeView.as_view(), name="push_subscribe"),
     path("push/unsubscribe/", views.PortalPushUnsubscribeView.as_view(), name="push_unsubscribe"),
+    path("calendar-feed/<uuid:token>.ics", ical_feed, name="ical_feed"),
 ]
