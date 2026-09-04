@@ -411,6 +411,19 @@ class SettingsView(LoginRequiredMixin, FormView):
 
         notif_pref, _created = NotificationPreference.objects.get_or_create(user=self.request.user)
         context["notif_pref"] = notif_pref
+
+        from apps.calendar_sync.models import CalendarConnection, SyncConflict
+
+        calendar_connection = CalendarConnection.objects.filter(user=self.request.user).first()
+        context["calendar_connection"] = calendar_connection
+        context["calendar_sync_conflict_count"] = (
+            SyncConflict.objects.filter(
+                connection=calendar_connection, resolved_at__isnull=True
+            ).count()
+            if calendar_connection
+            else 0
+        )
+
         q = self.request.GET
         context["show_stripe_success_banner"] = (
             q.get("stripe_success") == "1" or q.get("checkout") == "success"

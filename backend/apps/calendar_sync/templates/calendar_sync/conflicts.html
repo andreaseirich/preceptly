@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Calendar Sync Conflicts" %} – Preceptly{% endblock %}
+
+{% block content %}
+<h1>{% trans "Calendar Sync Conflicts" %}</h1>
+<p>{% blocktrans %}These events changed both in Preceptly and in your external calendar since the last sync. Choose which version to keep.{% endblocktrans %}</p>
+
+<div class="btn-group" style="margin-bottom: 20px;">
+    <a href="{% url 'core:settings' %}#calendar-sync" class="btn btn-secondary">{% trans "Back to Settings" %}</a>
+</div>
+
+{% if not conflicts %}
+    <p>{% trans "No open conflicts." %} 🎉</p>
+{% else %}
+    {% for conflict in conflicts %}
+    <div class="box-section" style="margin-bottom: 16px; max-width: 640px;">
+        <p style="color: var(--text-secondary); font-size: 0.85em;">{{ conflict.created_at }}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0;">
+            <div>
+                <h4>{% trans "Preceptly version" %}</h4>
+                <p>{{ conflict.local_snapshot.title }}</p>
+                <p style="font-size: 0.85em; color: var(--text-secondary);">{{ conflict.local_snapshot.start }} – {{ conflict.local_snapshot.end }}</p>
+            </div>
+            <div>
+                <h4>{% trans "External version" %}</h4>
+                <p>{{ conflict.external_snapshot.title }}</p>
+                <p style="font-size: 0.85em; color: var(--text-secondary);">{{ conflict.external_snapshot.start }} – {{ conflict.external_snapshot.end }}</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <form method="post" action="{% url 'calendar_sync:resolve_conflict' conflict.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="resolution" value="local">
+                <button type="submit" class="btn btn-secondary">{% trans "Keep Preceptly version" %}</button>
+            </form>
+            <form method="post" action="{% url 'calendar_sync:resolve_conflict' conflict.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="resolution" value="external">
+                <button type="submit" class="btn btn-secondary">{% trans "Keep external version" %}</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
