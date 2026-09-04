@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -29,14 +30,24 @@ def connect_calendar(request):
     caldav_username = request.POST.get("caldav_username", "").strip()
     caldav_password = request.POST.get("caldav_password", "").strip()
 
+    # Only the (non-sensitive) username is ever echoed back on error - the
+    # password is never re-populated, so a failed attempt does not force
+    # retyping the Apple ID too.
+    error_redirect = (
+        reverse("core:settings")
+        + "?"
+        + urlencode({"calendar_username": caldav_username})
+        + "#calendar-sync"
+    )
+
     caldav_url = PROVIDER_CALDAV_URLS.get(provider)
     if not caldav_url:
         messages.error(request, _("Unsupported provider."))
-        return redirect(reverse("core:settings") + "#calendar-sync")
+        return redirect(error_redirect)
 
     if not (caldav_username and caldav_password):
         messages.error(request, _("Please fill in all fields."))
-        return redirect(reverse("core:settings") + "#calendar-sync")
+        return redirect(error_redirect)
 
     try:
         # Fail fast with a clear message instead of silently saving broken
@@ -45,7 +56,7 @@ def connect_calendar(request):
         CalDavClient(caldav_url, caldav_username, caldav_password)
     except CalDavConnectionError as e:
         messages.error(request, _("Could not connect: {error}").format(error=e))
-        return redirect(reverse("core:settings") + "#calendar-sync")
+        return redirect(error_redirect)
 
     try:
         encrypted = encrypt_password(caldav_password)
@@ -53,7 +64,7 @@ def connect_calendar(request):
         messages.error(
             request, _("Calendar sync is not available right now. Please try again later.")
         )
-        return redirect(reverse("core:settings") + "#calendar-sync")
+        return redirect(error_redirect)
 
     CalendarConnection.objects.update_or_create(
         user=request.user,

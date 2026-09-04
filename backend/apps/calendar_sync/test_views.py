@@ -62,6 +62,22 @@ class ConnectCalendarViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(CalendarConnection.objects.filter(user=self.user).exists())
 
+    @patch("apps.calendar_sync.views.CalDavClient")
+    def test_bad_credentials_redirect_prefills_username_not_password(self, mock_client_class):
+        mock_client_class.side_effect = CalDavConnectionError("auth failed")
+
+        response = self.client.post(
+            reverse("calendar_sync:connect"),
+            {
+                "provider": "icloud",
+                "caldav_username": "tutor@example.com",
+                "caldav_password": "wrong-pw",
+            },
+        )
+
+        self.assertIn("calendar_username=tutor%40example.com", response.url)
+        self.assertNotIn("wrong-pw", response.url)
+
     def test_missing_field_does_not_create_a_connection(self):
         response = self.client.post(
             reverse("calendar_sync:connect"),
