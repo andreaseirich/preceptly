@@ -16,6 +16,15 @@ class PortalUser(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="portal_users"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    ical_feed_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        help_text=_(
+            "Unguessable token identifying this user's read-only calendar "
+            "feed URL - the token itself is the auth, no login required."
+        ),
+    )
 
     class Meta:
         verbose_name = _("Portal User")

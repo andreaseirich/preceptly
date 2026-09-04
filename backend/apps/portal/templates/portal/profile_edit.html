@@ -89,6 +89,35 @@
     </div>
 </div>
 
+<!-- Kalender-Abo -->
+<div class="card" style="margin-bottom:24px;">
+    <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Kalender abonnieren</h2>
+    <p style="color:var(--text-secondary); font-size:0.9em; margin-top:0;">Trage diesen Link einmalig als Kalender-Abo in Google Kalender, iCloud oder Outlook ein – neue Termine erscheinen dann automatisch (Aktualisierung alle paar Stunden). Nur lesend: Änderungen im externen Kalender wirken sich nicht auf Preceptly aus.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" readonly value="{{ ical_feed_url }}" id="icalFeedUrl" style="flex:1; min-width:220px;" onclick="this.select();">
+        <button type="button" class="btn btn-secondary" id="icalFeedCopyBtn">Kopieren</button>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.8em; margin-top:8px;">⚠️ Dieser Link ist persönlich – nicht weitergeben.</p>
+</div>
+
+<script>
+(function() {
+    var btn = document.getElementById('icalFeedCopyBtn');
+    var input = document.getElementById('icalFeedUrl');
+    if (!btn || !input) return;
+    btn.addEventListener('click', function() {
+        input.select();
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(input.value);
+        } else {
+            document.execCommand('copy');
+        }
+        btn.textContent = 'Kopiert!';
+        setTimeout(function() { btn.textContent = 'Kopieren'; }, 2000);
+    });
+})();
+</script>
+
 <!-- App installieren -->
 <div class="card" style="margin-bottom:24px;">
     <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">App auf dem Home-Bildschirm</h2>

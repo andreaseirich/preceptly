@@ -1827,6 +1827,11 @@ class PortalProfileEditView(View):
         from apps.core.models import NotificationPreference
 
         notif_pref, _created = NotificationPreference.objects.get_or_create(user=portal_user.user)
+        from django.urls import reverse
+
+        ical_feed_url = request.build_absolute_uri(
+            reverse("portal:ical_feed", args=[portal_user.ical_feed_token])
+        )
         return render(
             request,
             self.template_name,
@@ -1834,6 +1839,7 @@ class PortalProfileEditView(View):
                 "portal_user": portal_user,
                 "contract": contract,
                 "notif_pref": notif_pref,
+                "ical_feed_url": ical_feed_url,
             },
         )
 
