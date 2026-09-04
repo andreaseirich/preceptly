@@ -359,7 +359,7 @@ def generate_euer_pdf(
 
     # ── Ergebnis-Zeile (Gewinn / Verlust) ───────────────────────────────────
     is_loss = profit < Decimal("0")
-    result_color = "#c0392b" if is_loss else "#1e293b"
+    result_color = (_COLOR_LOSS if is_loss else _COLOR_DARK).hexval().replace("0x", "#")
     display_profit = abs(profit) if is_loss else profit
     profit_str = _fmt_eur(display_profit)
     if is_loss:
