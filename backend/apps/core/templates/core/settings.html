@@ -429,6 +429,64 @@
     <span id="pushUnsupportedText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">{% trans "Push notifications are not supported in this browser." %}</span>
 </div>
 
+
+<div id="calendar-sync-section" style="display:none;">
+<h2 style="margin-top: 40px;">{% trans "Calendar Sync" %} <span style="font-size:0.6em; color:var(--text-secondary);">(Beta)</span></h2>
+<p>{% blocktrans %}Two-way sync between your Preceptly sessions/blocked times and your iCloud calendar. Changes on either side sync automatically every few minutes.{% endblocktrans %}</p>
+
+{% if calendar_connection %}
+    <div class="box-section" style="margin-top: 10px; max-width: 480px;">
+        <p><strong>{% trans "Status" %}:</strong>
+            {% if calendar_connection.last_sync_error %}
+                ⚠️ {{ calendar_connection.last_sync_error }}
+            {% elif calendar_connection.last_synced_at %}
+                ✓ {% blocktrans with when=calendar_connection.last_synced_at %}Last synced {{ when }}{% endblocktrans %}
+            {% else %}
+                {% trans "Waiting for first sync…" %}
+            {% endif %}
+        </p>
+        {% if calendar_sync_conflict_count %}
+            <p style="color: var(--accent-warning, #c0392b);">
+                ⚠️ <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
+            </p>
+        {% endif %}
+        <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+            <form method="post" action="{% url 'calendar_sync:toggle' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">
+                    {% if calendar_connection.sync_enabled %}{% trans "Pause sync" %}{% else %}{% trans "Resume sync" %}{% endif %}
+                </button>
+            </form>
+            <form method="post" action="{% url 'calendar_sync:disconnect' %}" onsubmit="return confirm('{% trans "Disconnect this calendar? Existing synced events stay as-is." %}');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">{% trans "Disconnect" %}</button>
+            </form>
+        </div>
+    </div>
+{% else %}
+    <form method="post" action="{% url 'calendar_sync:connect' %}" style="margin-top: 15px; max-width: 480px;">
+        {% csrf_token %}
+        <input type="hidden" name="provider" value="icloud">
+        <div style="margin-bottom: 12px;">
+            <label style="display:block; margin-bottom: 4px;">{% trans "CalDAV URL" %}</label>
+            <input type="url" name="caldav_url" placeholder="https://caldav.icloud.com" required style="width: 100%;">
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label style="display:block; margin-bottom: 4px;">{% trans "Apple ID (email)" %}</label>
+            <input type="email" name="caldav_username" required style="width: 100%;">
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label style="display:block; margin-bottom: 4px;">{% trans "App-specific password" %}</label>
+            <input type="password" name="caldav_password" required style="width: 100%;" autocomplete="off">
+            <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">
+                {% blocktrans %}Generate one at appleid.apple.com → Sign-In and Security → App-Specific Passwords. Never use your real Apple ID password here.{% endblocktrans %}
+            </p>
+        </div>
+        <button type="submit" class="btn">{% trans "Connect iCloud Calendar" %}</button>
+    </form>
+{% endif %}
+</div>
+
 <h2 style="margin-top: 40px;" id="pwa-install-section">{% trans "App on home screen" %}</h2>
 <p>{% trans "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser." %}</p>
 <div style="margin-top: 15px;">
@@ -493,5 +551,21 @@
 })();
 </script>
 {% endif %}
+
+
+<script>
+(function() {
+    // Apple-only: CalDAV against iCloud is only relevant on Apple devices/
+    // browsers. Detected client-side (not via server-side User-Agent
+    // sniffing) so the section reacts correctly even behind caching layers.
+    var ua = navigator.userAgent || '';
+    var platform = navigator.platform || '';
+    var isApple = /Mac|iPhone|iPad|iPod/.test(platform) || /Macintosh|iPhone|iPad|iPod/.test(ua);
+    if (isApple) {
+        var section = document.getElementById('calendar-sync-section');
+        if (section) section.style.display = '';
+    }
+})();
+</script>
 
 {% endblock %}

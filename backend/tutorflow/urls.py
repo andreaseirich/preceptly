@@ -37,6 +37,7 @@ urlpatterns = [
     path("billing/", include("apps.billing.urls")),
     path("ai/", include("apps.ai.urls")),
     path("lesson-plans/", include("apps.lesson_plans.urls")),
+    path("calendar-sync/", include("apps.calendar_sync.urls")),
     path("portal/", include("apps.portal.urls")),
 ]
 
