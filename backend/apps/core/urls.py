@@ -33,6 +33,7 @@ from apps.core.views_pwa import (
     service_worker_view,
 )
 from apps.core.views_reports import ReportsView
+from apps.core.views_review_moderation import ReviewModerationView, moderate_review
 from apps.core.views_seo import robots_txt
 from apps.core.views_stats import DevStatsView
 from apps.core.views_stripe import SubscriptionCheckoutView, SubscriptionPortalView
@@ -65,6 +66,8 @@ urlpatterns = [
     path("income/", views.IncomeOverviewView.as_view(), name="income"),
     path("reports/", ReportsView.as_view(), name="reports"),
     path("settings/", views.SettingsView.as_view(), name="settings"),
+    path("reviews/moderate/", ReviewModerationView.as_view(), name="review_moderation"),
+    path("reviews/moderate/<int:pk>/", moderate_review, name="moderate_review"),
     path(
         "settings/subscription/checkout/",
         SubscriptionCheckoutView.as_view(),

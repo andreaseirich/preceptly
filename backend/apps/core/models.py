@@ -394,8 +394,8 @@ class Review(models.Model):
 
     One review per user (resubmitting updates and un-approves it again, so a
     changed opinion doesn't keep showing the old approved text publicly).
-    Only shown on the public landing page once is_approved is set by an
-    admin - never auto-published.
+    Only shown on the public landing page once is_approved is set via the
+    review moderation page (core:review_moderation) - never auto-published.
     """
 
     user = models.OneToOneField(

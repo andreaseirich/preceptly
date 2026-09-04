@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Review Moderation" %} – Preceptly{% endblock %}
+
+{% block content %}
+<h1>{% trans "Review Moderation" %}</h1>
+<div class="btn-group" style="margin-bottom: 20px;">
+    <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">{% trans "Back to Dashboard" %}</a>
+</div>
+
+{% if not reviews %}
+    <p>{% trans "No reviews yet." %}</p>
+{% else %}
+    {% for review in reviews %}
+    <div class="box-section" style="margin-bottom: 16px; max-width: 640px;">
+        <p>
+            <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+            — {{ review.rating }}/5
+            {% if review.is_approved %}
+                <span style="color: var(--accent, #0d8069);">✓ {% trans "Approved" %}</span>
+            {% else %}
+                <span style="color: var(--text-secondary);">{% trans "Pending" %}</span>
+            {% endif %}
+        </p>
+        {% if review.comment %}
+        <p style="white-space: pre-wrap;">{{ review.comment }}</p>
+        {% endif %}
+        <p style="font-size: 0.85em; color: var(--text-secondary);">{{ review.updated_at }}</p>
+        <div style="display: flex; gap: 10px;">
+            {% if not review.is_approved %}
+            <form method="post" action="{% url 'core:moderate_review' review.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button type="submit" class="btn btn-success">{% trans "Approve" %}</button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'core:moderate_review' review.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <button type="submit" class="btn btn-secondary">{% trans "Reject" %}</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

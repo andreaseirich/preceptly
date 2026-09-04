@@ -129,3 +129,60 @@ class LandingPageReviewDisplayTest(TestCase):
 
         response = self.client.get(reverse("core:landing"))
         self.assertContains(response, "4,0")  # average of 5 and 3, German locale formatting
+
+
+class ReviewModerationViewTest(TestCase):
+    """The custom moderation page - Django Admin is deliberately disabled
+    for this project (apps/core/tests/test_admin_disabled.py), so this is
+    the only way to approve/reject a review."""
+
+    def setUp(self):
+        self.client = Client()
+        self.superuser = User.objects.create_user(
+            username="mod", password="test", is_superuser=True
+        )
+        self.regular_user = User.objects.create_user(username="regular", password="test")
+        self.review_author = User.objects.create_user(username="author", password="test")
+        self.review = Review.objects.create(user=self.review_author, rating=3, comment="Ganz ok")
+
+    def test_non_superuser_cannot_access_moderation_page(self):
+        self.client.login(username="regular", password="test")
+        response = self.client.get(reverse("core:review_moderation"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_anonymous_user_is_redirected_to_login(self):
+        response = self.client.get(reverse("core:review_moderation"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_superuser_sees_pending_review(self):
+        self.client.login(username="mod", password="test")
+        response = self.client.get(reverse("core:review_moderation"))
+        self.assertContains(response, "Ganz ok")
+
+    def test_superuser_can_approve(self):
+        self.client.login(username="mod", password="test")
+        response = self.client.post(
+            reverse("core:moderate_review", args=[self.review.pk]), {"action": "approve"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.review.refresh_from_db()
+        self.assertTrue(self.review.is_approved)
+
+    def test_superuser_can_reject_an_approved_review(self):
+        self.review.is_approved = True
+        self.review.save(update_fields=["is_approved"])
+        self.client.login(username="mod", password="test")
+        response = self.client.post(
+            reverse("core:moderate_review", args=[self.review.pk]), {"action": "reject"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.review.refresh_from_db()
+        self.assertFalse(self.review.is_approved)
+
+    def test_non_superuser_cannot_moderate(self):
+        self.client.login(username="regular", password="test")
+        self.client.post(
+            reverse("core:moderate_review", args=[self.review.pk]), {"action": "approve"}
+        )
+        self.review.refresh_from_db()
+        self.assertFalse(self.review.is_approved)

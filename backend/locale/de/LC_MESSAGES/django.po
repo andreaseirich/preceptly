@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 15:04+0200\n"
+"POT-Creation-Date: 2026-09-04 19:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1825,7 +1825,11 @@ msgid ""
 "Pick where your Preceptly sessions should be sent to, and which of your "
 "calendars should be imported as blocked times. You organize your own "
 "calendars however you like - Preceptly just needs to know which is which."
-msgstr "Wähle, wohin deine Preceptly-Stunden gesendet werden sollen und welche deiner Kalender als Blockzeiten importiert werden sollen. Du organisierst deine Kalender, wie du möchtest - Preceptly muss nur wissen, welcher welcher ist."
+msgstr ""
+"Wähle, wohin deine Preceptly-Stunden gesendet werden sollen und welche "
+"deiner Kalender als Blockzeiten importiert werden sollen. Du organisierst "
+"deine Kalender, wie du möchtest - Preceptly muss nur wissen, welcher welcher "
+"ist."
 
 #: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:11
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:11
@@ -1834,7 +1838,8 @@ msgstr "Zurück zu den Einstellungen"
 
 #: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:15
 msgid "No calendars supporting events were found in this account."
-msgstr "In diesem Account wurden keine Kalender gefunden, die Termine unterstützen."
+msgstr ""
+"In diesem Account wurden keine Kalender gefunden, die Termine unterstützen."
 
 #: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:21
 msgid "Sessions target"
@@ -1856,7 +1861,9 @@ msgstr "Quellen für Blockzeiten"
 msgid ""
 "Events from these calendars are imported into Preceptly as blocked times. "
 "Pick as many as you like."
-msgstr "Termine aus diesen Kalendern werden als Blockzeiten in Preceptly importiert. Wähle so viele du möchtest."
+msgstr ""
+"Termine aus diesen Kalendern werden als Blockzeiten in Preceptly importiert. "
+"Wähle so viele du möchtest."
 
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:4
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:7
@@ -1901,15 +1908,18 @@ msgid "Calendar sync is not available right now. Please try again later."
 msgstr ""
 "Kalender-Sync ist gerade nicht verfügbar. Bitte versuche es später erneut."
 
-#: apps/calendar_sync/views.py:81
+#: apps/calendar_sync/views.py:80
 msgid "Calendar connected. Now choose which calendars to sync."
-msgstr "Kalender verbunden. Wähle jetzt aus, welche Kalender synchronisiert werden sollen."
+msgstr ""
+"Kalender verbunden. Wähle jetzt aus, welche Kalender synchronisiert werden "
+"sollen."
 
-#: apps/calendar_sync/views.py:115
+#: apps/calendar_sync/views.py:113
 msgid "Calendar selection saved."
 msgstr "Kalenderauswahl gespeichert."
 
-#: apps/calendar_sync/views.py:123
+#: apps/calendar_sync/views.py:121
+#, python-brace-format
 msgid "Could not load your calendars: {error}"
 msgstr "Kalender konnten nicht geladen werden: {error}"
 
@@ -4217,9 +4227,35 @@ msgstr "realisierte Einnahmen"
 msgid "Upgrade to Premium for full reports."
 msgstr "Upgrade auf Premium für vollständige Berichte."
 
+#: apps/core/templates/core/review_moderation.html:4
+#: apps/core/templates/core/review_moderation.html:7
+msgid "Review Moderation"
+msgstr "Bewertungsmoderation"
+
+#: apps/core/templates/core/review_moderation.html:9
 #: apps/core/templates/core/settings.html:10
 msgid "Back to Dashboard"
 msgstr "Zurück zum Dashboard"
+
+#: apps/core/templates/core/review_moderation.html:13
+msgid "No reviews yet."
+msgstr "Noch keine Bewertungen."
+
+#: apps/core/templates/core/review_moderation.html:21
+msgid "Approved"
+msgstr "Freigegeben"
+
+#: apps/core/templates/core/review_moderation.html:23
+msgid "Pending"
+msgstr "Ausstehend"
+
+#: apps/core/templates/core/review_moderation.html:35
+msgid "Approve"
+msgstr "Freigeben"
+
+#: apps/core/templates/core/review_moderation.html:41
+msgid "Reject"
+msgstr "Ablehnen"
 
 #: apps/core/templates/core/settings.html:11
 msgid "Manage institutes"
@@ -4876,6 +4912,18 @@ msgstr "Rechtliche Vereinbarungen akzeptiert."
 #: apps/core/views_auth.py:109 apps/core/views_auth.py:115
 msgid "Registration failed. Please try again."
 msgstr "Registrierung fehlgeschlagen. Bitte versuche es erneut."
+
+#: apps/core/views_review_moderation.py:41
+msgid "Review approved."
+msgstr "Bewertung freigegeben."
+
+#: apps/core/views_review_moderation.py:45
+msgid "Review rejected."
+msgstr "Bewertung abgelehnt."
+
+#: apps/core/views_review_moderation.py:47 apps/lessons/views_booking.py:458
+msgid "Unknown action."
+msgstr "Unbekannte Aktion."
 
 #: apps/core/views_stripe.py:83
 msgid "Could not start redirect. Please try again."
@@ -6161,10 +6209,6 @@ msgstr "Ungültiges Enddatum-Format."
 msgid ""
 "Recurring lesson series successfully created. {count} lesson(s) generated."
 msgstr "Serientermin-Serie erfolgreich erstellt. {count} Stunde(n) generiert."
-
-#: apps/lessons/views_booking.py:458
-msgid "Unknown action."
-msgstr "Unbekannte Aktion."
 
 #: apps/lessons/views_booking.py:461
 msgid "Invalid JSON data."
