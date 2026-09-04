@@ -73,7 +73,7 @@ class LandingPageView(TemplateView):
 class SubmitReviewView(LoginRequiredMixin, View):
     """Tutor submits (or updates) their star rating + optional feedback.
 
-    Not shown publicly until an admin sets is_approved=True in Django admin.
+    Not shown publicly until approved via the review moderation page (core:review_moderation).
     """
 
     def post(self, request, *args, **kwargs):
