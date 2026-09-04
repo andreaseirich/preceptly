@@ -1,8 +1,8 @@
 """
-Thin wrapper around the `caldav` library: connect, discover the calendar to
-sync with, and CRUD individual events by UID. Kept separate from the sync
-orchestration (sync_service.py) so that logic can be tested without a real
-CalDAV server.
+Thin wrapper around the `caldav` library: connect, list available calendars,
+and CRUD individual events by UID within a specific calendar. Kept separate
+from the sync orchestration (sync_service.py) so that logic can be tested
+without a real CalDAV server.
 """
 
 from dataclasses import dataclass
@@ -20,6 +20,12 @@ class CalDavConnectionError(Exception):
 
 
 @dataclass
+class ExternalCalendar:
+    url: str
+    name: str
+
+
+@dataclass
 class ExternalEvent:
     uid: str
     etag: str
@@ -30,26 +36,47 @@ class ExternalEvent:
 
 
 class CalDavClient:
-    """One connection to one tutor's CalDAV account, scoped to a single
-    calendar (the first one found under the account's principal - good
-    enough for a first version; calendar selection can be added later)."""
+    """One connection to one tutor's CalDAV account. Does not bind to a
+    single calendar - the tutor may push Sessions to one calendar and pull
+    BlockedTimes from several others, so every operation below takes an
+    explicit calendar_url."""
 
     def __init__(self, url: str, username: str, password: str):
         try:
             self._client = caldav.DAVClient(url=url, username=username, password=password)
-            principal = self._client.principal()
-            calendars = principal.calendars()
+            self._principal = self._client.principal()
         except Exception as e:
             raise CalDavConnectionError(f"Could not connect to CalDAV server: {e}") from e
-        if not calendars:
-            raise CalDavConnectionError("No calendars found for this CalDAV account.")
-        self._calendar = calendars[0]
 
-    def list_events(self, start, end) -> list[ExternalEvent]:
-        """All events in [start, end), regardless of whether Preceptly
-        already knows about them."""
+    def list_event_calendars(self) -> list[ExternalCalendar]:
+        """Calendars that support VEVENT - excludes task/reminder lists
+        (VTODO-only, e.g. iCloud's default "Reminders" collection): PUTting
+        a VEVENT there is rejected by the server (403 Forbidden)."""
         try:
-            raw_events = self._calendar.search(start=start, end=end, event=True, expand=False)
+            calendars = self._principal.calendars()
+        except Exception as e:
+            raise CalDavConnectionError(f"Could not list calendars: {e}") from e
+
+        result = []
+        for cal in calendars:
+            try:
+                supported = cal.get_supported_components()
+            except Exception:
+                supported = None
+            if supported is None or "VEVENT" in supported:
+                result.append(ExternalCalendar(url=str(cal.url), name=cal.get_display_name()))
+        return result
+
+    def _calendar(self, calendar_url: str) -> caldav.Calendar:
+        return caldav.Calendar(client=self._client, url=calendar_url)
+
+    def list_events(self, calendar_url: str, start, end) -> list[ExternalEvent]:
+        """All events in [start, end) in the given calendar, regardless of
+        whether Preceptly already knows about them."""
+        try:
+            raw_events = self._calendar(calendar_url).search(
+                start=start, end=end, event=True, expand=False
+            )
         except Exception as e:
             raise CalDavConnectionError(f"Could not list CalDAV events: {e}") from e
 
@@ -75,9 +102,9 @@ class CalDavClient:
             )
         return events
 
-    def get_event(self, uid: str) -> Optional[ExternalEvent]:
+    def get_event(self, calendar_url: str, uid: str) -> Optional[ExternalEvent]:
         try:
-            raw = self._calendar.event_by_uid(uid)
+            raw = self._calendar(calendar_url).event_by_uid(uid)
         except NotFoundError:
             return None
         except Exception as e:
@@ -94,23 +121,27 @@ class CalDavClient:
             end=dtend.dt if dtend else None,
         )
 
-    def create_event(self, uid: str, summary: str, start, end, description: str = "") -> str:
+    def create_event(
+        self, calendar_url: str, uid: str, summary: str, start, end, description: str = ""
+    ) -> str:
         """Returns the new event's etag."""
         try:
-            raw = self._calendar.save_event(
+            raw = self._calendar(calendar_url).save_event(
                 uid=uid, summary=summary, dtstart=start, dtend=end, description=description
             )
         except Exception as e:
             raise CalDavConnectionError(f"Could not create CalDAV event: {e}") from e
         return raw.etag or ""
 
-    def update_event(self, uid: str, summary: str, start, end, description: str = "") -> str:
+    def update_event(
+        self, calendar_url: str, uid: str, summary: str, start, end, description: str = ""
+    ) -> str:
         """Returns the updated event's etag. Creates the event if it no
         longer exists on the server (e.g. deleted directly by the user)."""
         try:
-            raw = self._calendar.event_by_uid(uid)
+            raw = self._calendar(calendar_url).event_by_uid(uid)
         except NotFoundError:
-            return self.create_event(uid, summary, start, end, description)
+            return self.create_event(calendar_url, uid, summary, start, end, description)
         except Exception as e:
             raise CalDavConnectionError(f"Could not load CalDAV event {uid}: {e}") from e
 
@@ -126,9 +157,9 @@ class CalDavClient:
             raise CalDavConnectionError(f"Could not save CalDAV event {uid}: {e}") from e
         return raw.etag or ""
 
-    def delete_event(self, uid: str) -> None:
+    def delete_event(self, calendar_url: str, uid: str) -> None:
         try:
-            raw = self._calendar.event_by_uid(uid)
+            raw = self._calendar(calendar_url).event_by_uid(uid)
         except NotFoundError:
             return
         except Exception as e:

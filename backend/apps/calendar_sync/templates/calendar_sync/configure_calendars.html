@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Choose Calendars" %} – Preceptly{% endblock %}
+
+{% block content %}
+<h1>{% trans "Choose Calendars" %}</h1>
+<p>{% blocktrans %}Pick where your Preceptly sessions should be sent to, and which of your calendars should be imported as blocked times. You organize your own calendars however you like - Preceptly just needs to know which is which.{% endblocktrans %}</p>
+
+<div class="btn-group" style="margin-bottom: 20px;">
+    <a href="{% url 'core:settings' %}#calendar-sync" class="btn btn-secondary">{% trans "Back to Settings" %}</a>
+</div>
+
+{% if not available_calendars %}
+    <p>{% trans "No calendars supporting events were found in this account." %}</p>
+{% else %}
+<form method="post" style="max-width: 560px;">
+    {% csrf_token %}
+    {% for cal in available_calendars %}<input type="hidden" name="name_{{ cal.url }}" value="{{ cal.name }}">{% endfor %}
+
+    <h2>{% trans "Sessions target" %}</h2>
+    <p style="color: var(--text-secondary); font-size: 0.9em;">{% trans "Preceptly sessions are pushed here. Pick one." %}</p>
+    {% for cal in available_calendars %}
+    <label style="display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+        <input type="radio" name="sessions_target" value="{{ cal.url }}" {% if cal.url == current_target %}checked{% endif %}>
+        {{ cal.name }}
+    </label>
+    {% endfor %}
+    <label style="display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+        <input type="radio" name="sessions_target" value="" {% if not current_target %}checked{% endif %}>
+        {% trans "None (don't push sessions)" %}
+    </label>
+
+    <h2 style="margin-top: 32px;">{% trans "Blocked-time sources" %}</h2>
+    <p style="color: var(--text-secondary); font-size: 0.9em;">{% trans "Events from these calendars are imported into Preceptly as blocked times. Pick as many as you like." %}</p>
+    {% for cal in available_calendars %}
+    <label style="display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+        <input type="checkbox" name="blocked_sources" value="{{ cal.url }}" {% if cal.url in current_sources %}checked{% endif %}>
+        {{ cal.name }}
+    </label>
+    {% endfor %}
+
+    <button type="submit" class="btn" style="margin-top: 24px;">{% trans "Save" %}</button>
+</form>
+{% endif %}
+{% endblock %}

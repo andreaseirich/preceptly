@@ -99,5 +99,25 @@
   <h3>Warum stimmt der berechnete Betrag nicht mit meiner Institut-Abrechnung überein?</h3>
   <p>Mögliche Ursachen: Das Startdatum für die Stufenberechnung ist nicht korrekt gesetzt, die Stufenkonfiguration für das Institut weicht ab, oder es wurden Stunden manuell ohne passenden Vertrag erfasst. Prüfe in den Einstellungen das konfigurierte Startdatum sowie unter Institut-Tarife die hinterlegten Stufen.</p>
 </section>
+{# ======= KALENDER-SYNC ======= #}
+<section id="kalender-sync">
+  <h2>Kalender-Synchronisierung</h2>
+
+  <h3>Was macht die Kalender-Synchronisierung?</h3>
+  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> kannst du deinen iCloud-Kalender per CalDAV verbinden. Danach läuft automatisch alle paar Minuten Folgendes: Deine Preceptly-Stunden werden in einen Kalender deiner Wahl übertragen (z. B. „Nachhilfe"), und Termine aus einem oder mehreren anderen Kalendern deiner Wahl (z. B. „Privat") werden als Blockzeiten nach Preceptly übernommen. Diese Funktion ist aktuell nur auf Apple-Geräten sichtbar, da sie iCloud-Kalender verbindet.</p>
+
+  <h3>Läuft das in beide Richtungen?</h3>
+  <p>Nein, bewusst nicht. Stunden laufen nur von Preceptly zu iCloud: Änderst oder löschst du die übertragene Kopie direkt in iCloud, hat das keine Auswirkung auf die Stunde in Preceptly – Preceptly bleibt hier die Quelle der Wahrheit, damit eine abgerechnete Unterrichtsstunde nie unbemerkt verändert wird. Blockzeiten laufen nur von iCloud zu Preceptly: Legst du eine Blockzeit direkt in Preceptly an, wird sie nicht nach iCloud übertragen.</p>
+
+  <h3>Warum brauche ich ein „App-spezifisches Passwort"?</h3>
+  <p>Apple erlaubt aus Sicherheitsgründen keinen Zugriff auf CalDAV mit deinem normalen Apple-ID-Passwort. Erstelle stattdessen unter <a href="https://appleid.apple.com" rel="noopener">appleid.apple.com</a> → Anmeldung und Sicherheit → App-spezifische Passwörter ein eigenes Passwort nur für Preceptly. Es lässt sich jederzeit unabhängig von deinem Apple-ID-Passwort widerrufen.</p>
+
+  <h3>Welche Kalender soll ich auswählen?</h3>
+  <p>Das entscheidest du selbst – Preceptly gibt nichts vor. Sinnvoll ist z. B. ein eigener iCloud-Kalender nur für Nachhilfestunden als Ziel, und dein privater (und ggf. weitere) Kalender als Quelle für Blockzeiten. Du kannst die Auswahl jederzeit unter „Kalender auswählen" in den Einstellungen ändern.</p>
+
+  <h3>Was passiert mit bereits manuell eingetragenen Terminen?</h3>
+  <p>Blockzeiten, die du bereits manuell in Preceptly angelegt hast, werden nicht verändert oder gelöscht – der Import ergänzt nur neue, noch nicht vorhandene externe Termine.</p>
+</section>
+
 
 {% endblock %}

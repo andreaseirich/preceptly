@@ -458,7 +458,16 @@
                 ⚠️ <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
             </p>
         {% endif %}
+        <p style="font-size: 0.9em; margin-top: 10px;">
+            <strong>{% trans "Sessions go to" %}:</strong>
+            {% if calendar_sessions_target %}{{ calendar_sessions_target.display_name }}{% else %}<em>{% trans "not configured" %}</em>{% endif %}
+        </p>
+        <p style="font-size: 0.9em;">
+            <strong>{% trans "Blocked times come from" %}:</strong>
+            {% if calendar_blocked_sources %}{% for c in calendar_blocked_sources %}{{ c.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}<em>{% trans "not configured" %}</em>{% endif %}
+        </p>
         <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+            <a href="{% url 'calendar_sync:configure' %}" class="btn btn-secondary">{% trans "Choose calendars" %}</a>
             <form method="post" action="{% url 'calendar_sync:toggle' %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-secondary">

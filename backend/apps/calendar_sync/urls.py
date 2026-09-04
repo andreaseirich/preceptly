@@ -10,6 +10,7 @@ app_name = "calendar_sync"
 
 urlpatterns = [
     path("connect/", views.connect_calendar, name="connect"),
+    path("configure/", views.configure_calendars, name="configure"),
     path("disconnect/", views.disconnect_calendar, name="disconnect"),
     path("toggle/", views.toggle_calendar_sync, name="toggle"),
     path("conflicts/", views.conflict_list, name="conflicts"),
