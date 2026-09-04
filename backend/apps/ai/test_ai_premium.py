@@ -194,4 +194,4 @@ class LessonPlanServiceTest(TestCase):
         with self.assertRaises(LessonPlanGenerationError) as ctx:
             service.generate_lesson_plan(self.lesson, user=self.user)
 
-        self.assertIn("temporarily unreachable", str(ctx.exception))
+        self.assertIn("nicht erreichbar", str(ctx.exception))
