@@ -20,7 +20,9 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django_ratelimit.decorators import ratelimit
 
+from apps.core.log_safety import safe_log_value
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
+from apps.lessons.booking_service import BOOKING_MAX_YEAR, BOOKING_MIN_YEAR
 from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
 
@@ -115,31 +117,32 @@ class PortalLoginView(View):
                     logger.info("Portal-Login: E-Mail für User pk=%s nachgetragen", django_user.pk)
             except (_SPL.DoesNotExist, _SPL.MultipleObjectsReturned):
                 logger.warning(
-                    "Portal-Login fehlgeschlagen: kein Nutzer mit email=%r und portal_profile",
-                    email,
+                    "Portal-Login fehlgeschlagen: kein Nutzer mit email=%s und portal_profile",
+                    safe_log_value(email),
                 )
                 _check_password("dummy", _DUMMY_HASH)
                 return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
         except _User.MultipleObjectsReturned:
             logger.warning(
-                "Portal-Login fehlgeschlagen: mehrere Nutzer mit email=%r gefunden", email
+                "Portal-Login fehlgeschlagen: mehrere Nutzer mit email=%s gefunden",
+                safe_log_value(email),
             )
             _check_password("dummy", _DUMMY_HASH)
             return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
 
         if not django_user.is_active:
             logger.warning(
-                "Portal-Login fehlgeschlagen: Nutzer pk=%s (email=%r) ist nicht aktiv",
+                "Portal-Login fehlgeschlagen: Nutzer pk=%s (email=%s) ist nicht aktiv",
                 django_user.pk,
-                email,
+                safe_log_value(email),
             )
             _check_password("dummy", _DUMMY_HASH)
             return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
         elif not django_user.check_password(password):
             logger.warning(
-                "Portal-Login fehlgeschlagen: Passwort-Check fehlgeschlagen für pk=%s (email=%r)",
+                "Portal-Login fehlgeschlagen: Passwort-Check fehlgeschlagen für pk=%s (email=%s)",
                 django_user.pk,
-                email,
+                safe_log_value(email),
             )
             _check_password("dummy", _DUMMY_HASH)
             return render(request, self.template_name, {"error": _("Ungültige Zugangsdaten.")})
@@ -838,6 +841,7 @@ class PortalBookingView(View):
             day = int(request.GET.get("day", now.day))
         except (ValueError, TypeError):
             year, month, day = now.year, now.month, now.day
+        year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
         context = {
             "student": student,
             "contract": contract,
@@ -1025,6 +1029,7 @@ class PortalSessionRescheduleView(View):
             day = int(request.GET.get("day", now.day))
         except (ValueError, TypeError):
             year, month, day = now.year, now.month, now.day
+        year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
         context = {
             "session": session,
             "student": student,
@@ -1463,6 +1468,7 @@ class PortalCalendarView(View):
             month = int(request.GET.get("month", now.month))
         except (ValueError, TypeError):
             year, month = now.year, now.month
+        year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
 
         if month < 1:
             month = 12
@@ -1772,6 +1778,7 @@ class PortalWeekView(View):
             day = int(request.GET.get("day", now.day))
         except (ValueError, TypeError):
             year, month, day = now.year, now.month, now.day
+        year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
 
         context = {
             "student": student,

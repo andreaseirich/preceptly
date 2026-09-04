@@ -91,7 +91,7 @@ class RecurringBlockedTimeService:
         conflicts = []
         preview = []
 
-        while current_date <= end_date:
+        while current_date <= end_date and created + skipped < _MAX_BLOCKED_PER_GENERATION:
             weekday = current_date.weekday()  # 0=Montag, 6=Sonntag
 
             if weekday in active_weekdays:
@@ -138,7 +138,7 @@ class RecurringBlockedTimeService:
         # Zähle Wochen seit Start
         week_count = 0
 
-        while current_date <= end_date:
+        while current_date <= end_date and created + skipped < _MAX_BLOCKED_PER_GENERATION:
             weekday = current_date.weekday()
 
             if weekday in active_weekdays:
@@ -193,7 +193,7 @@ class RecurringBlockedTimeService:
 
         from calendar import monthrange
 
-        while current_date <= end_date:
+        while current_date <= end_date and created + skipped < _MAX_BLOCKED_PER_GENERATION:
             # Prüfe, ob aktuelles Datum der richtige Tag des Monats ist
             # UND ob es ein aktiver Wochentag ist
             target_day = start_day

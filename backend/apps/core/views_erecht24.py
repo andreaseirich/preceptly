@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 
 from apps.core.erecht24_service import handle_push
+from apps.core.log_safety import safe_log_value
 
 MAX_WEBHOOK_BYTES = 64 * 1024
 
@@ -33,7 +34,7 @@ class Erecht24PushView(View):
             except (ValueError, TypeError):
                 # Malformed Content-Length header - fall through to the real
                 # body-length check below instead of trusting the header.
-                logger.debug("Malformed Content-Length header: %r", content_length)
+                logger.debug("Malformed Content-Length header: %s", safe_log_value(content_length))
 
         body = request.body
         if len(body) > MAX_WEBHOOK_BYTES:

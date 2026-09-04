@@ -99,7 +99,7 @@ class RecurringSessionService:
         sessions = []  # Collect created sessions for email notifications
         dates_checked = []
 
-        while current_date <= end_date:
+        while current_date <= end_date and created + skipped < _MAX_SESSIONS_PER_GENERATION:
             weekday = current_date.weekday()  # 0=Monday, 6=Sunday
 
             if weekday in active_weekdays:
@@ -147,7 +147,7 @@ class RecurringSessionService:
         preview = []
         sessions = []  # Collect created sessions for email notifications
 
-        while current_date <= end_date:
+        while current_date <= end_date and created + skipped < _MAX_SESSIONS_PER_GENERATION:
             weekday = current_date.weekday()
 
             if weekday in active_weekdays:
@@ -201,7 +201,7 @@ class RecurringSessionService:
 
         from calendar import monthrange
 
-        while current_date <= end_date:
+        while current_date <= end_date and created + skipped < _MAX_SESSIONS_PER_GENERATION:
             # Check if current date is the correct day of month
             # AND if it is an active weekday
             target_day = start_day
