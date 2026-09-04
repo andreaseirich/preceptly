@@ -468,10 +468,6 @@
         {% csrf_token %}
         <input type="hidden" name="provider" value="icloud">
         <div style="margin-bottom: 12px;">
-            <label style="display:block; margin-bottom: 4px;">{% trans "CalDAV URL" %}</label>
-            <input type="url" name="caldav_url" placeholder="https://caldav.icloud.com" required style="width: 100%;">
-        </div>
-        <div style="margin-bottom: 12px;">
             <label style="display:block; margin-bottom: 4px;">{% trans "Apple ID (email)" %}</label>
             <input type="email" name="caldav_username" required style="width: 100%;">
         </div>

@@ -15,16 +15,26 @@ from apps.calendar_sync.caldav_client import CalDavClient, CalDavConnectionError
 from apps.calendar_sync.crypto import CalendarCredentialError, encrypt_password
 from apps.calendar_sync.models import CalendarConnection, SyncConflict
 
+# Well-known CalDAV discovery URLs - fixed per provider, so the tutor only
+# ever enters their account credentials, never a URL they'd have to look up.
+PROVIDER_CALDAV_URLS = {
+    CalendarConnection.PROVIDER_ICLOUD: "https://caldav.icloud.com/",
+}
+
 
 @login_required
 @require_POST
 def connect_calendar(request):
     provider = request.POST.get("provider", "icloud").strip()
-    caldav_url = request.POST.get("caldav_url", "").strip()
     caldav_username = request.POST.get("caldav_username", "").strip()
     caldav_password = request.POST.get("caldav_password", "").strip()
 
-    if not (caldav_url and caldav_username and caldav_password):
+    caldav_url = PROVIDER_CALDAV_URLS.get(provider)
+    if not caldav_url:
+        messages.error(request, _("Unsupported provider."))
+        return redirect(reverse("core:settings") + "#calendar-sync")
+
+    if not (caldav_username and caldav_password):
         messages.error(request, _("Please fill in all fields."))
         return redirect(reverse("core:settings") + "#calendar-sync")
 
