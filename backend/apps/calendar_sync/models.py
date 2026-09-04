@@ -37,6 +37,15 @@ class CalendarConnection(models.Model):
     sync_enabled = models.BooleanField(default=True)
     last_synced_at = models.DateTimeField(null=True, blank=True)
     last_sync_error = models.TextField(blank=True)
+    last_sync_summary = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=_(
+            "Counts from the most recent sync run (pushed/pulled/imported/"
+            "deleted/conflicts/errors), shown on the settings page so the "
+            "tutor can see what actually happened, not just a status dot."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

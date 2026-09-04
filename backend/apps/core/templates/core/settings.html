@@ -445,6 +445,14 @@
                 {% trans "Waiting for first sync…" %}
             {% endif %}
         </p>
+        {% with s=calendar_connection.last_sync_summary %}
+        {% if s %}
+        <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px;">
+            {% blocktrans with pushed=s.pushed pulled=s.pulled imported=s.imported deleted=s.deleted %}Last run: {{ pushed }} pushed, {{ pulled }} pulled, {{ imported }} imported, {{ deleted }} deleted{% endblocktrans %}
+            {% if s.errors %} · {% blocktrans count count=s.errors %}{{ count }} error{% plural %}{{ count }} errors{% endblocktrans %}{% endif %}
+        </p>
+        {% endif %}
+        {% endwith %}
         {% if calendar_sync_conflict_count %}
             <p style="color: var(--accent-warning, #c0392b);">
                 ⚠️ <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
@@ -469,7 +477,7 @@
         <input type="hidden" name="provider" value="icloud">
         <div style="margin-bottom: 12px;">
             <label style="display:block; margin-bottom: 4px;">{% trans "Apple ID (email)" %}</label>
-            <input type="email" name="caldav_username" required style="width: 100%;">
+            <input type="email" name="caldav_username" value="{{ request.GET.calendar_username }}" required style="width: 100%;">
         </div>
         <div style="margin-bottom: 12px;">
             <label style="display:block; margin-bottom: 4px;">{% trans "App-specific password" %}</label>

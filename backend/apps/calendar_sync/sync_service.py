@@ -173,7 +173,8 @@ def sync_connection(connection: CalendarConnection) -> dict:
 
     connection.last_synced_at = timezone.now()
     connection.last_sync_error = ""
-    connection.save(update_fields=["last_synced_at", "last_sync_error"])
+    connection.last_sync_summary = summary
+    connection.save(update_fields=["last_synced_at", "last_sync_error", "last_sync_summary"])
     return summary
 
 

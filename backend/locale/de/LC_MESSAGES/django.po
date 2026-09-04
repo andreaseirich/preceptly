@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 13:22+0200\n"
+"POT-Creation-Date: 2026-09-04 14:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -104,7 +104,9 @@ msgstr "Lektionsplan für {date}"
 
 #: apps/ai/services.py:159
 msgid "The AI is temporarily unreachable. Please try again in a few minutes."
-msgstr "Die KI ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten erneut."
+msgstr ""
+"Die KI ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten "
+"erneut."
 
 #: apps/ai/services.py:165
 msgid "The lesson plan could not be generated. Please try again."
@@ -1741,44 +1743,55 @@ msgid "Blocked time successfully deleted."
 msgstr "Blockzeit erfolgreich gelöscht."
 
 #: apps/calendar_sync/models.py:44
+msgid ""
+"Counts from the most recent sync run (pushed/pulled/imported/deleted/"
+"conflicts/errors), shown on the settings page so the tutor can see what "
+"actually happened, not just a status dot."
+msgstr "Zähler des letzten Sync-Laufs (gepusht/geholt/importiert/gelöscht/Konflikte/Fehler), auf der Einstellungsseite angezeigt, damit der Tutor sieht, was tatsächlich passiert ist, nicht nur einen Status-Punkt."
+
+#: apps/calendar_sync/models.py:53
 msgid "Calendar Connection"
 msgstr "Kalender-Verbindung"
 
-#: apps/calendar_sync/models.py:45
+#: apps/calendar_sync/models.py:54
 msgid "Calendar Connections"
 msgstr "Kalender-Verbindungen"
 
-#: apps/calendar_sync/models.py:69
+#: apps/calendar_sync/models.py:78
 msgid "Local object's updated_at as of the last successful sync."
-msgstr "Letzter Aktualisierungszeitpunkt des lokalen Objekts beim letzten erfolgreichen Sync."
+msgstr ""
+"Letzter Aktualisierungszeitpunkt des lokalen Objekts beim letzten "
+"erfolgreichen Sync."
 
-#: apps/calendar_sync/models.py:74
+#: apps/calendar_sync/models.py:83
 msgid "External event's last-modified as of the last successful sync."
-msgstr "Letzter Änderungszeitpunkt des externen Termins beim letzten erfolgreichen Sync."
+msgstr ""
+"Letzter Änderungszeitpunkt des externen Termins beim letzten erfolgreichen "
+"Sync."
 
-#: apps/calendar_sync/models.py:80
+#: apps/calendar_sync/models.py:89
 msgid "External Calendar Event Mapping"
 msgstr "Externe Kalender-Termin-Zuordnung"
 
-#: apps/calendar_sync/models.py:81
+#: apps/calendar_sync/models.py:90
 msgid "External Calendar Event Mappings"
 msgstr "Externe Kalender-Termin-Zuordnungen"
 
-#: apps/calendar_sync/models.py:106
+#: apps/calendar_sync/models.py:115
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:36
 msgid "Keep Preceptly version"
 msgstr "Preceptly-Version behalten"
 
-#: apps/calendar_sync/models.py:107
+#: apps/calendar_sync/models.py:116
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:41
 msgid "Keep external version"
 msgstr "Externe Version behalten"
 
-#: apps/calendar_sync/models.py:123
+#: apps/calendar_sync/models.py:132
 msgid "Sync Conflict"
 msgstr "Sync-Konflikt"
 
-#: apps/calendar_sync/models.py:124
+#: apps/calendar_sync/models.py:133
 msgid "Sync Conflicts"
 msgstr "Sync-Konflikte"
 
@@ -1791,7 +1804,9 @@ msgstr "Kalender-Sync-Konflikte"
 msgid ""
 "These events changed both in Preceptly and in your external calendar since "
 "the last sync. Choose which version to keep."
-msgstr "Diese Termine wurden sowohl in Preceptly als auch in deinem externen Kalender seit dem letzten Sync geändert. Wähle, welche Version gelten soll."
+msgstr ""
+"Diese Termine wurden sowohl in Preceptly als auch in deinem externen "
+"Kalender seit dem letzten Sync geändert. Wähle, welche Version gelten soll."
 
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:11
 msgid "Back to Settings"
@@ -1809,36 +1824,37 @@ msgstr "Preceptly-Version"
 msgid "External version"
 msgstr "Externe Version"
 
-#: apps/calendar_sync/views.py:34
+#: apps/calendar_sync/views.py:45
 msgid "Unsupported provider."
 msgstr "Nicht unterstützter Anbieter."
 
-#: apps/calendar_sync/views.py:38
+#: apps/calendar_sync/views.py:49
 msgid "Please fill in all fields."
 msgstr "Bitte fülle alle Felder aus."
 
-#: apps/calendar_sync/views.py:47
+#: apps/calendar_sync/views.py:58
 #, python-brace-format
 msgid "Could not connect: {error}"
 msgstr "Verbindung fehlgeschlagen: {error}"
 
-#: apps/calendar_sync/views.py:54
+#: apps/calendar_sync/views.py:65
 msgid "Calendar sync is not available right now. Please try again later."
-msgstr "Kalender-Sync ist gerade nicht verfügbar. Bitte versuche es später erneut."
+msgstr ""
+"Kalender-Sync ist gerade nicht verfügbar. Bitte versuche es später erneut."
 
-#: apps/calendar_sync/views.py:69
+#: apps/calendar_sync/views.py:80
 msgid "Calendar connected. The first sync runs within a few minutes."
 msgstr "Kalender verbunden. Der erste Sync läuft innerhalb weniger Minuten."
 
-#: apps/calendar_sync/views.py:77
+#: apps/calendar_sync/views.py:88
 msgid "Calendar disconnected."
 msgstr "Kalender getrennt."
 
-#: apps/calendar_sync/views.py:107
+#: apps/calendar_sync/views.py:118
 msgid "Invalid choice."
 msgstr "Ungültige Auswahl."
 
-#: apps/calendar_sync/views.py:132
+#: apps/calendar_sync/views.py:143
 msgid "Conflict resolved."
 msgstr "Konflikt gelöst."
 
@@ -2502,7 +2518,9 @@ msgstr "Benutzername"
 msgid ""
 "Optional. Enables automatic PDF invoices and appointment reminders; can only "
 "be changed later via support."
-msgstr "Optional. Aktiviert automatische PDF-Rechnungen und Terminerinnerungen; kann später nur über den Support geändert werden."
+msgstr ""
+"Optional. Aktiviert automatische PDF-Rechnungen und Terminerinnerungen; kann "
+"später nur über den Support geändert werden."
 
 #: apps/core/forms.py:46 apps/core/templates/core/landing.html:407
 #: apps/core/templates/core/landing.html:412
@@ -2986,7 +3004,10 @@ msgid ""
 "You might run into the occasional bug — they get fixed as fast as possible. "
 "Thanks for your understanding, and please let me know if something doesn't "
 "work!"
-msgstr "Hin und wieder kann es zu Fehlern kommen — sie werden schnellstmöglich behoben. Danke für dein Verständnis, und gib gerne Bescheid, wenn mal etwas nicht funktioniert!"
+msgstr ""
+"Hin und wieder kann es zu Fehlern kommen — sie werden schnellstmöglich "
+"behoben. Danke für dein Verständnis, und gib gerne Bescheid, wenn mal etwas "
+"nicht funktioniert!"
 
 #: apps/core/templates/core/base.html:619
 #: apps/portal/templates/portal/base.html:808
@@ -3099,7 +3120,7 @@ msgid "Push notifications are enabled on this device."
 msgstr "Push-Benachrichtigungen sind auf diesem Gerät aktiviert."
 
 #: apps/core/templates/core/base.html:1173
-#: apps/core/templates/core/settings.html:490
+#: apps/core/templates/core/settings.html:498
 msgid "Add to home screen"
 msgstr "Zum Startbildschirm hinzufügen"
 
@@ -4406,8 +4427,12 @@ msgid ""
 msgid_plural ""
 "%(months)s free months earned, applied on your next invoice once you have an "
 "active subscription."
-msgstr[0] "%(months)s Gratismonat verdient, wird bei deiner nächsten Rechnung angerechnet, sobald du ein aktives Abo hast."
-msgstr[1] "%(months)s Gratismonate verdient, werden bei deiner nächsten Rechnung angerechnet, sobald du ein aktives Abo hast."
+msgstr[0] ""
+"%(months)s Gratismonat verdient, wird bei deiner nächsten Rechnung "
+"angerechnet, sobald du ein aktives Abo hast."
+msgstr[1] ""
+"%(months)s Gratismonate verdient, werden bei deiner nächsten Rechnung "
+"angerechnet, sobald du ein aktives Abo hast."
 
 #: apps/core/templates/core/settings.html:405
 msgid "Notifications"
@@ -4442,9 +4467,13 @@ msgstr "Kalender-Synchronisierung"
 msgid ""
 "Two-way sync between your Preceptly sessions/blocked times and your iCloud "
 "calendar. Changes on either side sync automatically every few minutes."
-msgstr "Zwei-Wege-Synchronisierung zwischen deinen Preceptly-Stunden/Blockzeiten und deinem iCloud-Kalender. Änderungen auf beiden Seiten werden automatisch alle paar Minuten synchronisiert."
+msgstr ""
+"Zwei-Wege-Synchronisierung zwischen deinen Preceptly-Stunden/Blockzeiten und "
+"deinem iCloud-Kalender. Änderungen auf beiden Seiten werden automatisch alle "
+"paar Minuten synchronisiert."
 
 #: apps/core/templates/core/settings.html:443
+#, python-format
 msgid "Last synced %(when)s"
 msgstr "Zuletzt synchronisiert %(when)s"
 
@@ -4452,51 +4481,69 @@ msgstr "Zuletzt synchronisiert %(when)s"
 msgid "Waiting for first sync…"
 msgstr "Warte auf ersten Sync…"
 
-#: apps/core/templates/core/settings.html:450
+#: apps/core/templates/core/settings.html:451
+#, python-format
+msgid ""
+"Last run: %(pushed)s pushed, %(pulled)s pulled, %(imported)s imported, "
+"%(deleted)s deleted"
+msgstr "Letzter Lauf: %(pushed)s gepusht, %(pulled)s geholt, %(imported)s importiert, %(deleted)s gelöscht"
+
+#: apps/core/templates/core/settings.html:452
+msgid "%(count)s error"
+msgid_plural "%(count)s errors"
+msgstr[0] "%(count)s Fehler"
+msgstr[1] "%(count)s Fehler"
+
+#: apps/core/templates/core/settings.html:458
+#, python-format
 msgid "%(count)s conflict needs your attention"
 msgid_plural "%(count)s conflicts need your attention"
 msgstr[0] "%(count)s Konflikt braucht deine Aufmerksamkeit"
 msgstr[1] "%(count)s Konflikte brauchen deine Aufmerksamkeit"
 
-#: apps/core/templates/core/settings.html:457
+#: apps/core/templates/core/settings.html:465
 msgid "Pause sync"
 msgstr "Sync pausieren"
 
-#: apps/core/templates/core/settings.html:457
+#: apps/core/templates/core/settings.html:465
 msgid "Resume sync"
 msgstr "Sync fortsetzen"
 
-#: apps/core/templates/core/settings.html:460
+#: apps/core/templates/core/settings.html:468
 msgid "Disconnect this calendar? Existing synced events stay as-is."
-msgstr "Diesen Kalender trennen? Bereits synchronisierte Termine bleiben unverändert bestehen."
+msgstr ""
+"Diesen Kalender trennen? Bereits synchronisierte Termine bleiben unverändert "
+"bestehen."
 
-#: apps/core/templates/core/settings.html:462
+#: apps/core/templates/core/settings.html:470
 msgid "Disconnect"
 msgstr "Trennen"
 
-#: apps/core/templates/core/settings.html:471
+#: apps/core/templates/core/settings.html:479
 msgid "Apple ID (email)"
 msgstr "Apple-ID (E-Mail)"
 
-#: apps/core/templates/core/settings.html:475
+#: apps/core/templates/core/settings.html:483
 msgid "App-specific password"
 msgstr "App-spezifisches Passwort"
 
-#: apps/core/templates/core/settings.html:478
+#: apps/core/templates/core/settings.html:486
 msgid ""
 "Generate one at appleid.apple.com → Sign-In and Security → App-Specific "
 "Passwords. Never use your real Apple ID password here."
-msgstr "Erstelle eins unter appleid.apple.com → Anmeldung und Sicherheit → App-spezifische Passwörter. Verwende hier niemals dein echtes Apple-ID-Passwort."
+msgstr ""
+"Erstelle eins unter appleid.apple.com → Anmeldung und Sicherheit → App-"
+"spezifische Passwörter. Verwende hier niemals dein echtes Apple-ID-Passwort."
 
-#: apps/core/templates/core/settings.html:481
+#: apps/core/templates/core/settings.html:489
 msgid "Connect iCloud Calendar"
 msgstr "iCloud-Kalender verbinden"
 
-#: apps/core/templates/core/settings.html:486
+#: apps/core/templates/core/settings.html:494
 msgid "App on home screen"
 msgstr "App auf dem Startbildschirm"
 
-#: apps/core/templates/core/settings.html:487
+#: apps/core/templates/core/settings.html:495
 msgid ""
 "Use Preceptly as an app directly from your home screen – fast and "
 "convenient, without a browser."
@@ -4504,11 +4551,11 @@ msgstr ""
 "Nutze Preceptly als App direkt vom Startbildschirm – schnell und bequem, "
 "ohne Browser."
 
-#: apps/core/templates/core/settings.html:494
+#: apps/core/templates/core/settings.html:502
 msgid "Legal agreements"
 msgstr "Rechtliche Vereinbarungen"
 
-#: apps/core/templates/core/settings.html:499
+#: apps/core/templates/core/settings.html:507
 #, python-format
 msgid ""
 "\n"
@@ -4524,7 +4571,7 @@ msgstr ""
 "%(date)s akzeptiert.\n"
 "        "
 
-#: apps/core/templates/core/settings.html:507
+#: apps/core/templates/core/settings.html:515
 msgid ""
 "You have not yet explicitly accepted the Data Processing Agreement (AVV). "
 "This is required for GDPR-compliant use of Preceptly."
@@ -4533,11 +4580,11 @@ msgstr ""
 "akzeptiert. Dies ist für die DSGVO-konforme Nutzung von Preceptly "
 "erforderlich."
 
-#: apps/core/templates/core/settings.html:513
+#: apps/core/templates/core/settings.html:521
 msgid "Legal consent"
 msgstr "Rechtliche Einwilligung"
 
-#: apps/core/templates/core/settings.html:517
+#: apps/core/templates/core/settings.html:525
 #, python-format
 msgid ""
 "I accept the <a href=\"%(url_terms)s\">Terms of Service</a>, <a "
@@ -4548,11 +4595,11 @@ msgstr ""
 "href=\"%(url_avv)s\">Auftragsverarbeitungsvertrag (AVV, Art. 28 DSGVO)</a> "
 "und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a>."
 
-#: apps/core/templates/core/settings.html:521
+#: apps/core/templates/core/settings.html:529
 msgid "Accept agreements"
 msgstr "Vereinbarungen akzeptieren"
 
-#: apps/core/templates/core/settings.html:544
+#: apps/core/templates/core/settings.html:552
 msgid "Could not open billing portal."
 msgstr "Abrechnungsportal konnte nicht geöffnet werden."
 
@@ -6166,7 +6213,9 @@ msgstr "Elternteil"
 msgid ""
 "Unguessable token identifying this user's read-only calendar feed URL - the "
 "token itself is the auth, no login required."
-msgstr "Nicht erratbares Token, das die Nur-Lese-Kalender-Feed-URL dieses Nutzers identifiziert - das Token selbst ist die Authentifizierung, kein Login nötig."
+msgstr ""
+"Nicht erratbares Token, das die Nur-Lese-Kalender-Feed-URL dieses Nutzers "
+"identifiziert - das Token selbst ist die Authentifizierung, kein Login nötig."
 
 #: apps/portal/models.py:30
 msgid "Portal User"

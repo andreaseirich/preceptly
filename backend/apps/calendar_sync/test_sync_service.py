@@ -63,6 +63,8 @@ class SyncConnectionTest(TestCase):
         result = sync_connection(self.connection)
 
         self.assertEqual(result["pushed"], 1)
+        self.connection.refresh_from_db()
+        self.assertEqual(self.connection.last_sync_summary, result)
         self.assertEqual(
             ExternalCalendarEventMapping.objects.filter(
                 content_type=ContentType.objects.get_for_model(BlockedTime), object_id=bt.pk
