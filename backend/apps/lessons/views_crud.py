@@ -632,8 +632,8 @@ class LessonRescheduleView(LoginRequiredMixin, View):
             f"Termin verschoben: {old_date.strftime('%d.%m.%Y')} → {new_date.strftime('%d.%m.%Y')} {new_time.strftime('%H:%M')} Uhr.",
         )
         next_url = request.GET.get("next") or get_last_calendar_url(request)
-        if not url_has_allowed_host_and_scheme(
+        if url_has_allowed_host_and_scheme(
             next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
         ):
-            next_url = get_last_calendar_url(request)
-        return HttpResponseRedirect(next_url)
+            return HttpResponseRedirect(next_url)
+        return HttpResponseRedirect(get_last_calendar_url(request))
