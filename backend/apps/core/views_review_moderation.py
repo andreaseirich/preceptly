@@ -43,6 +43,9 @@ def moderate_review(request, pk):
         review.is_approved = False
         review.save(update_fields=["is_approved"])
         messages.success(request, _("Review rejected."))
+    elif action == "delete":
+        review.delete()
+        messages.success(request, _("Review deleted."))
     else:
         messages.error(request, _("Unknown action."))
     return redirect(reverse("core:review_moderation"))

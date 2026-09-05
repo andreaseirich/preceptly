@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 19:36+0200\n"
+"POT-Creation-Date: 2026-09-05 09:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1504,6 +1504,7 @@ msgstr "Löschen bestätigen"
 #: apps/contracts/templates/contracts/institute_list.html:58
 #: apps/core/templates/core/base.html:679
 #: apps/core/templates/core/expense_list.html:50
+#: apps/core/templates/core/review_moderation.html:47
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:11
 #: apps/students/templates/students/student_confirm_delete.html:15
 #: apps/students/templates/students/student_list.html:26
@@ -2544,8 +2545,8 @@ msgstr "N/V"
 msgid "Premium Status"
 msgstr "Premium-Status"
 
-#: apps/core/admin.py:41 apps/core/templates/core/landing.html:406
-#: apps/core/templates/core/landing.html:411
+#: apps/core/admin.py:41 apps/core/templates/core/landing.html:399
+#: apps/core/templates/core/landing.html:404
 msgid "User"
 msgstr "Benutzer"
 
@@ -2599,8 +2600,8 @@ msgstr ""
 "Optional. Aktiviert automatische PDF-Rechnungen und Terminerinnerungen; kann "
 "später nur über den Support geändert werden."
 
-#: apps/core/forms.py:46 apps/core/templates/core/landing.html:407
-#: apps/core/templates/core/landing.html:412
+#: apps/core/forms.py:46 apps/core/templates/core/landing.html:400
+#: apps/core/templates/core/landing.html:405
 #: apps/core/templates/core/login.html:27
 #: apps/core/templates/core/register.html:50
 msgid "Password"
@@ -4032,28 +4033,18 @@ msgid_plural "aus %(counter)s Bewertungen von Nachhilfelehrern"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/core/templates/core/landing.html:382
-msgid "I used to spend Sunday evenings doing admin. Now it takes 10 minutes."
-msgstr ""
-"Früher habe ich Sonntagabende mit Verwaltung verbracht. Jetzt dauert es 10 "
-"Minuten."
-
-#: apps/core/templates/core/landing.html:383
-msgid "developer & tutor"
-msgstr "Entwickler & Nachhilfelehrer"
-
-#: apps/core/templates/core/landing.html:400
+#: apps/core/templates/core/landing.html:393
 msgid "Try it now — no sign-up needed"
 msgstr "Jetzt ausprobieren — ohne Registrierung"
 
-#: apps/core/templates/core/landing.html:401
+#: apps/core/templates/core/landing.html:394
 msgid ""
 "Log in with demo credentials to explore all features with pre-loaded data."
 msgstr ""
 "Mit Demo-Zugangsdaten einloggen und alle Funktionen mit vorgeladenen Daten "
 "erkunden."
 
-#: apps/core/templates/core/landing.html:415
+#: apps/core/templates/core/landing.html:408
 msgid "Open Demo"
 msgstr "Demo öffnen"
 
@@ -4256,6 +4247,10 @@ msgstr "Freigeben"
 #: apps/core/templates/core/review_moderation.html:41
 msgid "Reject"
 msgstr "Ablehnen"
+
+#: apps/core/templates/core/review_moderation.html:44
+msgid "Delete this review permanently?"
+msgstr "Diese Bewertung dauerhaft löschen?"
 
 #: apps/core/templates/core/settings.html:11
 msgid "Manage institutes"
@@ -4921,7 +4916,11 @@ msgstr "Bewertung freigegeben."
 msgid "Review rejected."
 msgstr "Bewertung abgelehnt."
 
-#: apps/core/views_review_moderation.py:47 apps/lessons/views_booking.py:458
+#: apps/core/views_review_moderation.py:48
+msgid "Review deleted."
+msgstr "Bewertung gelöscht."
+
+#: apps/core/views_review_moderation.py:50 apps/lessons/views_booking.py:458
 msgid "Unknown action."
 msgstr "Unbekannte Aktion."
 
