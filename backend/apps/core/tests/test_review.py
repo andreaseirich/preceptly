@@ -186,3 +186,18 @@ class ReviewModerationViewTest(TestCase):
         )
         self.review.refresh_from_db()
         self.assertFalse(self.review.is_approved)
+
+    def test_superuser_can_delete(self):
+        self.client.login(username="mod", password="test")
+        response = self.client.post(
+            reverse("core:moderate_review", args=[self.review.pk]), {"action": "delete"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Review.objects.filter(pk=self.review.pk).exists())
+
+    def test_non_superuser_cannot_delete(self):
+        self.client.login(username="regular", password="test")
+        self.client.post(
+            reverse("core:moderate_review", args=[self.review.pk]), {"action": "delete"}
+        )
+        self.assertTrue(Review.objects.filter(pk=self.review.pk).exists())
