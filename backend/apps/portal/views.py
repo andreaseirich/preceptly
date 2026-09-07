@@ -716,10 +716,12 @@ def _get_busy_slots(tutor, date):
         s_start = _dt.datetime.combine(date, s.start_time)
         s_end = s_start + _dt.timedelta(minutes=s.duration_minutes)
         busy.append((s.start_time, s_end.time()))
+    _day_start_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(0, 0)))
+    _day_end_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(23, 59, 59)))
     blocked_times = BlockedTime.objects.filter(
         user=tutor,
-        start_datetime__date__lte=date,
-        end_datetime__date__gte=date,
+        start_datetime__lt=_day_end_aware,
+        end_datetime__gt=_day_start_aware,
     )
     for bt in blocked_times:
         clamped_start = max(
@@ -756,10 +758,12 @@ def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
         s_end = s_start + _dt.timedelta(minutes=s.duration_minutes)
         busy.append((s.start_time, s_end.time()))
 
+    _day_start_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(0, 0)))
+    _day_end_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(23, 59, 59)))
     blocked_times = BlockedTime.objects.filter(
         user=tutor,
-        start_datetime__date__lte=date,
-        end_datetime__date__gte=date,
+        start_datetime__lt=_day_end_aware,
+        end_datetime__gt=_day_start_aware,
     )
     day_start_dt = _dt.datetime.combine(date, _dt.time(0, 0))
     day_end_dt = _dt.datetime.combine(date, _dt.time(23, 59))
@@ -916,10 +920,12 @@ class PortalBookingView(View):
 
         day_start_dt = _dt.datetime.combine(session_date, _dt.time(0, 0))
         day_end_dt = _dt.datetime.combine(session_date, _dt.time(23, 59, 59))
+        day_start_aware = timezone.make_aware(day_start_dt)
+        day_end_aware = timezone.make_aware(day_end_dt)
         blocked_times = BlockedTime.objects.filter(
             user=student.user,
-            start_datetime__date__lte=session_date,
-            end_datetime__date__gte=session_date,
+            start_datetime__lt=day_end_aware,
+            end_datetime__gt=day_start_aware,
         )
         for bt in blocked_times:
             bt_start = max(_localtime(bt.start_datetime).replace(tzinfo=None), day_start_dt)
@@ -1671,17 +1677,19 @@ def _build_week_calendar(student, year, month, day):
     )
     busy_by_date_week = {}
     for _s in all_sessions_week:
+        _s_end_dt = _dt_mod.datetime.combine(_s.date, _s.start_time) + _dt_mod.timedelta(
+            minutes=_s.duration_minutes
+        )
+        _s_end_hour_exclusive = (
+            _s_end_dt.hour + 1 if _s_end_dt.minute or _s_end_dt.second else _s_end_dt.hour
+        )
         _entry = {
             "start": _s.start_time.strftime("%H:%M"),
-            "end": (
-                (
-                    _dt_mod.datetime.combine(_s.date, _s.start_time)
-                    + _dt_mod.timedelta(minutes=_s.duration_minutes)
-                ).time()
-            ).strftime("%H:%M"),
+            "end": _s_end_dt.time().strftime("%H:%M"),
             "start_hour": _s.start_time.hour,
             "start_min": _s.start_time.minute,
             "duration": _s.duration_minutes,
+            "hours_covered": list(range(_s.start_time.hour, _s_end_hour_exclusive)),
             "is_own": _s.contract == student,
         }
         busy_by_date_week.setdefault(_s.date, []).append(_entry)
@@ -1708,12 +1716,16 @@ def _build_week_calendar(student, year, month, day):
                     if _bt_date == _bt_end_local.date()
                     else _dt_mod.datetime.combine(_bt_date, _dt_mod.time(23, 59))
                 )
+                _end_hour_exclusive = (
+                    _bt_end_t.hour + 1 if _bt_end_t.minute or _bt_end_t.second else _bt_end_t.hour
+                )
                 _entry = {
                     "start": _bt_start_t.strftime("%H:%M"),
                     "end": _bt_end_t.strftime("%H:%M"),
                     "start_hour": _bt_start_t.hour,
                     "start_min": _bt_start_t.minute,
                     "duration": int((_bt_end_t - _bt_start_t).total_seconds() / 60),
+                    "hours_covered": list(range(_bt_start_t.hour, _end_hour_exclusive)),
                     "is_own": False,
                 }
                 busy_by_date_week.setdefault(_bt_date, []).append(_entry)
