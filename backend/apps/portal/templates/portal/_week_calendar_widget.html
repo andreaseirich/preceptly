@@ -24,7 +24,7 @@
                 {% for lesson in weekday.lessons %}{% if lesson.start_time.hour == hour %}
                 <div style="background: var(--accent); color:#fff; padding:1px 3px; border-radius:2px; margin-bottom:1px; white-space:nowrap; overflow:hidden;">{{ lesson.start_time|time:"H:i" }}</div>
                 {% endif %}{% endfor %}
-                {% for slot in weekday.busy %}{% if not slot.is_own and slot.start_hour == hour %}
+                {% for slot in weekday.busy %}{% if not slot.is_own and hour in slot.hours_covered %}
                 <div style="background: rgba(239,68,68,0.18); border-left:2px solid #ef4444; padding:1px 3px; color: var(--text-secondary); white-space:nowrap; overflow:hidden;">Belegt</div>
                 {% endif %}{% endfor %}
             </td>

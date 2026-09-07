@@ -6,10 +6,30 @@ without a real CalDAV server.
 """
 
 from dataclasses import dataclass
+from datetime import date as _date
+from datetime import datetime as _datetime
+from datetime import time as _time
 from typing import Optional
 
 import caldav
 from caldav.lib.error import NotFoundError
+from django.utils import timezone as _timezone
+
+
+def _normalize_event_dt(value):
+    """iCal all-day events carry DTSTART/DTEND as plain dates (no time, no
+    tzinfo) rather than datetimes - DTEND is exclusive per RFC 5545 (the
+    day *after* the last day). Passed straight through, Django's ORM
+    accepts a bare `date` for a DateTimeField but silently treats the
+    resulting naive midnight as UTC instead of the local day it actually
+    represents (logs a RuntimeWarning and gets it wrong), which is exactly
+    what let some blocked times fail to block an adjacent day. Convert
+    explicitly to a timezone-aware local midnight instead."""
+    if isinstance(value, _datetime):
+        return value
+    if isinstance(value, _date):
+        return _timezone.make_aware(_datetime.combine(value, _time.min))
+    return value
 
 
 class CalDavConnectionError(Exception):
@@ -96,8 +116,8 @@ class CalDavClient:
                     etag=raw.etag or "",
                     summary=str(vevent.get("summary", "")),
                     description=str(vevent.get("description", "")),
-                    start=dtstart.dt,
-                    end=dtend.dt,
+                    start=_normalize_event_dt(dtstart.dt),
+                    end=_normalize_event_dt(dtend.dt),
                 )
             )
         return events
@@ -117,8 +137,8 @@ class CalDavClient:
             etag=raw.etag or "",
             summary=str(vevent.get("summary", "")),
             description=str(vevent.get("description", "")),
-            start=dtstart.dt if dtstart else None,
-            end=dtend.dt if dtend else None,
+            start=_normalize_event_dt(dtstart.dt) if dtstart else None,
+            end=_normalize_event_dt(dtend.dt) if dtend else None,
         )
 
     def create_event(

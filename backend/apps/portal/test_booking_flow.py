@@ -221,3 +221,67 @@ class PortalBookingFlowTest(TestCase):
         resp = self.c.get(f"/portal/session/{session.pk}/reschedule/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "week-day-pick")
+
+
+class BlockedTimeDayBoundaryTest(TestCase):
+    """Regression: a BlockedTime ending shortly after local midnight used
+    to be silently excluded from the next day's conflict check, because
+    the query filtered on start_datetime__date/end_datetime__date - a
+    lookup on the *stored UTC* date, not the local one. In CET (UTC+1),
+    a blocked time from 23:30 to 00:30 local is stored as 22:30-23:30 UTC,
+    both still dated the first day, so a booking attempt the next morning
+    found no matching BlockedTime at all and was wrongly allowed."""
+
+    def setUp(self):
+        self.tutor = User.objects.create_user(
+            username="boundary_tutor", password="pass", email="boundary@flow.test"
+        )
+        self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
+
+        # A fixed CET (winter, UTC+1) date, no DST ambiguity.
+        self.day1 = dt.date(2026, 11, 14)
+        self.day2 = dt.date(2026, 11, 15)
+        for d in (self.day1, self.day2):
+            day_name = d.strftime("%A").lower()
+            self.profile.default_working_hours = self.profile.default_working_hours or {}
+            self.profile.default_working_hours[day_name] = [{"start": "00:00", "end": "23:00"}]
+        self.profile.save()
+
+        self.contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="Boundary",
+            last_name="Schüler",
+            hourly_rate=Decimal("20.00"),
+            start_date=dt.date(2025, 1, 1),
+            unit_duration_minutes=60,
+            is_active=True,
+        )
+        self.portal_django_user = User.objects.create_user(
+            username="boundary_portal_student", password="pass"
+        )
+        self.portal_user = PortalUser.objects.create(
+            user=self.portal_django_user, role="student", tutor=self.tutor
+        )
+        ParentStudentLink.objects.create(
+            parent=self.portal_user, contract=self.contract, is_active=True
+        )
+
+        # 23:30 (day1) to 00:30 (day2) local - crosses midnight.
+        local_start = tz.make_aware(dt.datetime.combine(self.day1, dt.time(23, 30)))
+        local_end = tz.make_aware(dt.datetime.combine(self.day2, dt.time(0, 30)))
+        BlockedTime.objects.create(
+            user=self.tutor, title="Spät dran", start_datetime=local_start, end_datetime=local_end
+        )
+
+        self.c = Client()
+        session = self.c.session
+        session["portal_user_id"] = self.portal_user.pk
+        session.save()
+
+    def test_booking_shortly_after_midnight_is_rejected(self):
+        response = self.c.post(
+            f"/portal/book/{self.contract.pk}/",
+            {"date": self.day2.isoformat(), "start_time": "00:00", "topic": "Zu frueh"},
+        )
+        self.assertContains(response, "Blockzeit")
+        self.assertIsNone(Session.objects.filter(contract=self.contract, date=self.day2).first())
