@@ -88,6 +88,7 @@ def configure_calendars(request):
     if request.method == "POST":
         sessions_target_url = request.POST.get("sessions_target", "").strip()
         blocked_source_urls = set(request.POST.getlist("blocked_sources"))
+        title_template = request.POST.get("title_template", "").strip() or "Nachhilfe - {student}"
 
         SyncedCalendar.objects.filter(connection=connection).delete()
         rows = []
@@ -98,6 +99,7 @@ def configure_calendars(request):
                     external_calendar_url=sessions_target_url,
                     display_name=request.POST.get(f"name_{sessions_target_url}", ""),
                     role=SyncedCalendar.ROLE_SESSIONS_TARGET,
+                    title_template=title_template,
                 )
             )
         for url in blocked_source_urls:
@@ -121,10 +123,12 @@ def configure_calendars(request):
         messages.error(request, _("Could not load your calendars: {error}").format(error=e))
         return redirect(reverse("core:settings") + "#calendar-sync")
 
-    current_target = (
-        connection.synced_calendars.filter(role=SyncedCalendar.ROLE_SESSIONS_TARGET)
-        .values_list("external_calendar_url", flat=True)
-        .first()
+    current_target_row = connection.synced_calendars.filter(
+        role=SyncedCalendar.ROLE_SESSIONS_TARGET
+    ).first()
+    current_target = current_target_row.external_calendar_url if current_target_row else None
+    current_title_template = (
+        current_target_row.title_template if current_target_row else "Nachhilfe - {student}"
     )
     current_sources = set(
         connection.synced_calendars.filter(
@@ -138,6 +142,7 @@ def configure_calendars(request):
         {
             "connection": connection,
             "available_calendars": available,
+            "current_title_template": current_title_template,
             "current_target": current_target,
             "current_sources": current_sources,
         },

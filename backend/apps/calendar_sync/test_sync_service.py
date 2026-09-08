@@ -26,7 +26,7 @@ from apps.calendar_sync.models import (
     ExternalCalendarEventMapping,
     SyncedCalendar,
 )
-from apps.calendar_sync.sync_service import sync_connection
+from apps.calendar_sync.sync_service import sync_all_active_connections, sync_connection
 from apps.contracts.models import Contract
 from apps.lessons.models import Session
 
@@ -127,6 +127,137 @@ class SyncConnectionTest(TestCase):
             content_type=ContentType.objects.get_for_model(Session), object_id=session.pk
         )
         self.assertEqual(mapping.connection, self.connection)
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_session_title_uses_calendar_title_template(self, mock_client_class):
+        self._add_sessions_target()
+        target = SyncedCalendar.objects.get(connection=self.connection)
+        target.title_template = "Nachhilfe - {student}"
+        target.save(update_fields=["title_template"])
+        mock = self._mock_client()
+        mock_client_class.return_value = mock
+        Session.objects.create(
+            contract=self.contract,
+            date=date.today() + timedelta(days=1),
+            start_time=timezone.now().time(),
+            duration_minutes=60,
+        )
+
+        sync_connection(self.connection)
+
+        mock.create_event.assert_called_once()
+        # create_event(calendar_url, uid, title, start, end)
+        self.assertEqual(mock.create_event.call_args[0][2], "Nachhilfe - Max Muster")
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_existing_event_at_same_time_is_adopted_not_duplicated(self, mock_client_class):
+        """A tutor who already manually created a calendar entry at the
+        exact time of a session must not get a second, duplicate event -
+        the existing one is adopted into the mapping instead."""
+        self._add_sessions_target()
+        session = Session.objects.create(
+            contract=self.contract,
+            date=date.today() + timedelta(days=1),
+            start_time=timezone.now().time().replace(microsecond=0),
+            duration_minutes=60,
+        )
+        from apps.calendar_sync.sync_service import _session_bounds
+
+        start, end = _session_bounds(session)
+        manually_created = ExternalEvent(
+            uid="tutors-own-uid-123",
+            etag="etag-manual",
+            summary="Nachhilfe Max",
+            start=start,
+            end=end,
+        )
+        mock = self._mock_client(list_events=MagicMock(return_value=[manually_created]))
+        mock_client_class.return_value = mock
+
+        result = sync_connection(self.connection)
+
+        self.assertEqual(result["pushed"], 1)
+        mock.create_event.assert_not_called()
+        mapping = ExternalCalendarEventMapping.objects.get(
+            content_type=ContentType.objects.get_for_model(Session), object_id=session.pk
+        )
+        self.assertEqual(mapping.external_uid, "tutors-own-uid-123")
+        self.assertEqual(mapping.external_etag, "etag-manual")
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_event_at_different_time_is_not_adopted(self, mock_client_class):
+        """An unrelated event that merely overlaps must never be claimed -
+        only an exact start/end match counts as "the tutor's own entry"."""
+        self._add_sessions_target()
+        session = Session.objects.create(
+            contract=self.contract,
+            date=date.today() + timedelta(days=1),
+            start_time=timezone.now().time().replace(microsecond=0),
+            duration_minutes=60,
+        )
+        from apps.calendar_sync.sync_service import _session_bounds
+
+        start, end = _session_bounds(session)
+        unrelated = ExternalEvent(
+            uid="unrelated-uid",
+            etag="etag-x",
+            summary="Anderer Termin",
+            start=start + timedelta(minutes=15),
+            end=end + timedelta(minutes=15),
+        )
+        mock = self._mock_client(list_events=MagicMock(return_value=[unrelated]))
+        mock_client_class.return_value = mock
+
+        sync_connection(self.connection)
+
+        mock.create_event.assert_called_once()
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_update_after_adoption_targets_the_adopted_uid(self, mock_client_class):
+        """Once an adopted (tutor-created) event's mapping exists, later
+        pushes for that session must update *that* external_uid, not the
+        Preceptly-generated one that was never actually created."""
+        self._add_sessions_target()
+        session = Session.objects.create(
+            contract=self.contract,
+            date=date.today() + timedelta(days=1),
+            start_time=timezone.now().time().replace(microsecond=0),
+            duration_minutes=60,
+        )
+        mapping = ExternalCalendarEventMapping.objects.create(
+            connection=self.connection,
+            content_type=ContentType.objects.get_for_model(Session),
+            object_id=session.pk,
+            external_uid="tutors-own-uid-123",
+            external_etag="etag-manual",
+            local_synced_at=session.updated_at - timedelta(minutes=5),
+        )
+        session.notes = "Thema geaendert"
+        session.save(update_fields=["notes"])
+
+        from apps.calendar_sync.sync_service import _session_bounds
+
+        start, end = _session_bounds(session)
+        current = ExternalEvent(
+            uid="tutors-own-uid-123",
+            etag="etag-manual",
+            summary="Nachhilfe Max",
+            start=start,
+            end=end,
+        )
+        mock = self._mock_client(
+            get_event=MagicMock(return_value=current),
+            update_event=MagicMock(return_value="etag-updated"),
+        )
+        mock_client_class.return_value = mock
+
+        sync_connection(self.connection)
+
+        mock.get_event.assert_called_once_with(SESSIONS_CAL, "tutors-own-uid-123")
+        mock.update_event.assert_called_once()
+        self.assertEqual(mock.update_event.call_args[0][1], "tutors-own-uid-123")
+        mapping.refresh_from_db()
+        self.assertEqual(mapping.external_uid, "tutors-own-uid-123")
 
     @patch("apps.calendar_sync.sync_service.CalDavClient")
     def test_session_never_pulled_back_from_external_edit(self, mock_client_class):
@@ -419,3 +550,73 @@ class SyncConnectionTest(TestCase):
 
         self.connection.refresh_from_db()
         self.assertEqual(self.connection.last_sync_summary, result)
+
+
+@override_settings(CALDAV_ENCRYPTION_KEY=Fernet.generate_key().decode())
+class SyncAllActiveConnectionsTest(TestCase):
+    """Regression: apps/calendar_sync/management/commands/sync_calendars.py
+    (the periodic cron job) imports this function by name - it silently
+    disappeared during the two-way -> one-way rewrite, so the cron job
+    failed on every single run (ImportError) until this was restored."""
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="tutor_a", password="pass")
+        self.user2 = User.objects.create_user(username="tutor_b", password="pass")
+        self.connection1 = CalendarConnection.objects.create(
+            user=self.user1,
+            provider="icloud",
+            caldav_url="https://caldav.icloud.com/",
+            caldav_username="a@example.com",
+            encrypted_password=encrypt_password("pw-a"),
+        )
+        self.connection2 = CalendarConnection.objects.create(
+            user=self.user2,
+            provider="icloud",
+            caldav_url="https://caldav.icloud.com/",
+            caldav_username="b@example.com",
+            encrypted_password=encrypt_password("pw-b"),
+            sync_enabled=False,
+        )
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_only_syncs_enabled_connections(self, mock_client_class):
+        mock = MagicMock()
+        mock.list_events.return_value = []
+        mock.get_event.return_value = None
+        mock.create_event.return_value = "etag-1"
+        mock_client_class.return_value = mock
+
+        totals = sync_all_active_connections()
+
+        mock_client_class.assert_called_once_with(
+            self.connection1.caldav_url, self.connection1.caldav_username, "pw-a"
+        )
+        self.assertEqual(
+            totals,
+            {"pushed": 0, "pulled": 0, "imported": 0, "conflicts": 0, "deleted": 0, "errors": 0},
+        )
+
+    @patch("apps.calendar_sync.sync_service.sync_connection")
+    def test_one_connections_exception_does_not_abort_the_rest(self, mock_sync_connection):
+        self.connection2.sync_enabled = True
+        self.connection2.save(update_fields=["sync_enabled"])
+
+        def side_effect(connection):
+            if connection.pk == self.connection1.pk:
+                raise RuntimeError("boom")
+            return {
+                "pushed": 1,
+                "pulled": 0,
+                "imported": 0,
+                "conflicts": 0,
+                "deleted": 0,
+                "errors": 0,
+            }
+
+        mock_sync_connection.side_effect = side_effect
+
+        totals = sync_all_active_connections()
+
+        self.assertEqual(mock_sync_connection.call_count, 2)
+        self.assertEqual(totals["errors"], 1)
+        self.assertEqual(totals["pushed"], 1)

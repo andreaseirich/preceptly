@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-05 09:09+0200\n"
+"POT-Creation-Date: 2026-09-08 23:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -756,7 +756,7 @@ msgstr "optional"
 #: apps/billing/templates/billing/invoice_detail.html:188
 #: apps/billing/templates/billing/invoice_set_paid_date.html:17
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_form.html:41
-#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:43
+#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:51
 #: apps/contracts/templates/contracts/contract_form.html:61
 #: apps/contracts/templates/contracts/institute_form.html:81
 #: apps/core/templates/core/base.html:677
@@ -1770,49 +1770,56 @@ msgstr "Stunden werden hierhin gepusht"
 msgid "Blocked times are imported from here"
 msgstr "Blockzeiten werden von hier importiert"
 
-#: apps/calendar_sync/models.py:97
+#: apps/calendar_sync/models.py:99
+#, python-brace-format
+msgid ""
+"Only used for sessions_target: how a pushed Session's title is built. "
+"Placeholders: {student} (full name), {subject}."
+msgstr ""
+
+#: apps/calendar_sync/models.py:106
 msgid "Synced Calendar"
 msgstr "Synchronisierter Kalender"
 
-#: apps/calendar_sync/models.py:98
+#: apps/calendar_sync/models.py:107
 msgid "Synced Calendars"
 msgstr "Synchronisierte Kalender"
 
-#: apps/calendar_sync/models.py:128
+#: apps/calendar_sync/models.py:137
 msgid "Local object's updated_at as of the last successful sync."
 msgstr ""
 "Letzter Aktualisierungszeitpunkt des lokalen Objekts beim letzten "
 "erfolgreichen Sync."
 
-#: apps/calendar_sync/models.py:133
+#: apps/calendar_sync/models.py:142
 msgid "External event's last-modified as of the last successful sync."
 msgstr ""
 "Letzter Änderungszeitpunkt des externen Termins beim letzten erfolgreichen "
 "Sync."
 
-#: apps/calendar_sync/models.py:139
+#: apps/calendar_sync/models.py:148
 msgid "External Calendar Event Mapping"
 msgstr "Externe Kalender-Termin-Zuordnung"
 
-#: apps/calendar_sync/models.py:140
+#: apps/calendar_sync/models.py:149
 msgid "External Calendar Event Mappings"
 msgstr "Externe Kalender-Termin-Zuordnungen"
 
-#: apps/calendar_sync/models.py:165
+#: apps/calendar_sync/models.py:174
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:36
 msgid "Keep Preceptly version"
 msgstr "Preceptly-Version behalten"
 
-#: apps/calendar_sync/models.py:166
+#: apps/calendar_sync/models.py:175
 #: apps/calendar_sync/templates/calendar_sync/conflicts.html:41
 msgid "Keep external version"
 msgstr "Externe Version behalten"
 
-#: apps/calendar_sync/models.py:182
+#: apps/calendar_sync/models.py:191
 msgid "Sync Conflict"
 msgstr "Sync-Konflikt"
 
-#: apps/calendar_sync/models.py:183
+#: apps/calendar_sync/models.py:192
 msgid "Sync Conflicts"
 msgstr "Sync-Konflikte"
 
@@ -1854,11 +1861,20 @@ msgstr "Preceptly-Stunden werden hierhin gepusht. Wähle einen aus."
 msgid "None (don't push sessions)"
 msgstr "Keiner (Stunden nicht senden)"
 
-#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:34
+#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:35
+msgid "Session title"
+msgstr "Termin-Titel"
+
+#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:38
+#, python-brace-format
+msgid "Placeholders: {student} (full name), {subject}."
+msgstr "Platzhalter: {student} (vollständiger Name), {subject}."
+
+#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:42
 msgid "Blocked-time sources"
 msgstr "Quellen für Blockzeiten"
 
-#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:35
+#: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:43
 msgid ""
 "Events from these calendars are imported into Preceptly as blocked times. "
 "Pick as many as you like."
@@ -1915,24 +1931,24 @@ msgstr ""
 "Kalender verbunden. Wähle jetzt aus, welche Kalender synchronisiert werden "
 "sollen."
 
-#: apps/calendar_sync/views.py:113
+#: apps/calendar_sync/views.py:115
 msgid "Calendar selection saved."
 msgstr "Kalenderauswahl gespeichert."
 
-#: apps/calendar_sync/views.py:121
+#: apps/calendar_sync/views.py:123
 #, python-brace-format
 msgid "Could not load your calendars: {error}"
 msgstr "Kalender konnten nicht geladen werden: {error}"
 
-#: apps/calendar_sync/views.py:151
+#: apps/calendar_sync/views.py:156
 msgid "Calendar disconnected."
 msgstr "Kalender getrennt."
 
-#: apps/calendar_sync/views.py:181
+#: apps/calendar_sync/views.py:186
 msgid "Invalid choice."
 msgstr "Ungültige Auswahl."
 
-#: apps/calendar_sync/views.py:206
+#: apps/calendar_sync/views.py:211
 msgid "Conflict resolved."
 msgstr "Konflikt gelöst."
 
