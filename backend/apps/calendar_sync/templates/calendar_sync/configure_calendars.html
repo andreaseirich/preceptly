@@ -31,6 +31,14 @@
         {% trans "None (don't push sessions)" %}
     </label>
 
+    <div style="margin-top: 12px;">
+        <label style="display: block; margin-bottom: 4px;">{% trans "Session title" %}</label>
+        <input type="text" name="title_template" value="{{ current_title_template }}" style="width: 100%;">
+        <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px;">
+            {% trans "Placeholders: {student} (full name), {subject}." %}
+        </p>
+    </div>
+
     <h2 style="margin-top: 32px;">{% trans "Blocked-time sources" %}</h2>
     <p style="color: var(--text-secondary); font-size: 0.9em;">{% trans "Events from these calendars are imported into Preceptly as blocked times. Pick as many as you like." %}</p>
     {% for cal in available_calendars %}

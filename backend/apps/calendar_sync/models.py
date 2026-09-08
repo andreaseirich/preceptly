@@ -91,6 +91,15 @@ class SyncedCalendar(models.Model):
     external_calendar_url = models.URLField(max_length=500)
     display_name = models.CharField(max_length=200, blank=True)
     role = models.CharField(max_length=30, choices=ROLE_CHOICES)
+    title_template = models.CharField(
+        max_length=200,
+        blank=True,
+        default="Nachhilfe - {student}",
+        help_text=_(
+            "Only used for sessions_target: how a pushed Session's title is "
+            "built. Placeholders: {student} (full name), {subject}."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

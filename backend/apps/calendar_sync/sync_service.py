@@ -72,6 +72,19 @@ def _session_bounds(session: Session):
     return LessonConflictService.calculate_time_block(session)
 
 
+def _render_session_title(template: str, contract) -> str:
+    """Fills {student}/{subject} placeholders in a tutor-chosen template
+    (e.g. "Nachhilfe - {student}"). Unknown placeholders and formatting
+    errors fall back to the raw template text rather than raising, since
+    this runs inside a background sync cycle."""
+    student = f"{contract.first_name} {contract.last_name}".strip()
+    subject = (contract.subjects or "").strip()
+    try:
+        return (template or "").format(student=student, subject=subject).strip()
+    except (KeyError, ValueError, IndexError):
+        return template or ""
+
+
 def sync_connection(connection: CalendarConnection) -> dict:
     """Runs one full sync cycle for a single connection. Returns a summary
     dict for logging/tests. Never raises for per-object failures - those
@@ -147,10 +160,7 @@ def _sync_sessions_out(
     for session in sessions:
         known_ids.add(session.pk)
         uid = _session_uid(session)
-        title = (
-            f"{session.contract.first_name} {session.contract.last_name}".strip()
-            or "Preceptly-Stunde"
-        )
+        title = _render_session_title(target.title_template, session.contract) or "Preceptly-Stunde"
         start, end = _session_bounds(session)
         try:
             _push_one(
@@ -205,6 +215,25 @@ def _push_one(
     ).first()
 
     if mapping is None:
+        # Don't create a second copy of an event the tutor already entered
+        # by hand at this exact time (e.g. before this sync feature
+        # existed, or just habit) - adopt it instead. Only an exact
+        # start+end match counts, so an unrelated event that happens to
+        # overlap is never silently claimed.
+        existing = _find_matching_event(client, calendar_url, start, end)
+        if existing is not None:
+            ExternalCalendarEventMapping.objects.create(
+                connection=connection,
+                content_type=content_type,
+                object_id=object_id,
+                external_uid=existing.uid,
+                external_etag=existing.etag,
+                local_synced_at=updated_at,
+                external_synced_at=timezone.now(),
+            )
+            summary["pushed"] += 1
+            return
+
         etag = client.create_event(calendar_url, uid, title, start, end)
         ExternalCalendarEventMapping.objects.create(
             connection=connection,
@@ -221,7 +250,10 @@ def _push_one(
     if updated_at <= mapping.local_synced_at:
         return  # nothing changed locally since the last push
 
-    current_external = client.get_event(calendar_url, uid)
+    # Always address the mapping's own external_uid, not the freshly
+    # computed `uid` - they differ whenever the mapping above adopted a
+    # tutor-created event instead of one Preceptly created itself.
+    current_external = client.get_event(calendar_url, mapping.external_uid)
     if current_external is None:
         # Pushed once, then removed on the external side - respect that,
         # do not resurrect it. Drop the mapping so a future edit doesn't
@@ -229,12 +261,25 @@ def _push_one(
         mapping.delete()
         return
 
-    etag = client.update_event(calendar_url, uid, title, start, end)
+    etag = client.update_event(calendar_url, mapping.external_uid, title, start, end)
     mapping.external_etag = etag
     mapping.local_synced_at = updated_at
     mapping.external_synced_at = timezone.now()
     mapping.save(update_fields=["external_etag", "local_synced_at", "external_synced_at"])
     summary["pushed"] += 1
+
+
+def _find_matching_event(client, calendar_url, start, end):
+    """An existing event in the target calendar with the exact same
+    start/end as the session about to be pushed, if any."""
+    try:
+        candidates = client.list_events(calendar_url, start, end)
+    except CalDavConnectionError:
+        return None
+    for ev in candidates:
+        if ev.start == start and ev.end == end:
+            return ev
+    return None
 
 
 def _sync_blocked_times_in(
@@ -312,3 +357,22 @@ def _sync_blocked_times_in(
             local_obj.delete()
         mapping.delete()
         summary["deleted"] += 1
+
+
+def sync_all_active_connections() -> dict:
+    """Runs sync_connection() for every CalendarConnection with
+    sync_enabled=True. Entry point for the periodic cron job
+    (management/commands/sync_calendars.py) - one bad connection's
+    exception is caught and counted as an error so it cannot abort the
+    cycle for every other tutor's connection."""
+    totals = {"pushed": 0, "pulled": 0, "imported": 0, "conflicts": 0, "deleted": 0, "errors": 0}
+    for connection in CalendarConnection.objects.filter(sync_enabled=True):
+        try:
+            result = sync_connection(connection)
+        except Exception:
+            logger.exception("Unhandled error syncing connection %s", connection.pk)
+            totals["errors"] += 1
+            continue
+        for key in totals:
+            totals[key] += result.get(key, 0)
+    return totals
