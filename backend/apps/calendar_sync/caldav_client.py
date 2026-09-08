@@ -12,7 +12,7 @@ from datetime import time as _time
 from typing import Optional
 
 import caldav
-from caldav.lib.error import NotFoundError
+from caldav.lib.error import NotFoundError, ReportError
 from django.utils import timezone as _timezone
 
 
@@ -37,6 +37,17 @@ class CalDavConnectionError(Exception):
     rejected - distinct from "event not found" style errors below."""
 
     pass
+
+
+def _is_stale_uid_report_error(exc: Exception) -> bool:
+    """iCloud sometimes answers a calendar-query REPORT for a UID that no
+    longer exists with 412 Precondition Failed instead of an empty result
+    set, which the caldav library surfaces as a ReportError rather than
+    the NotFoundError it raises for the more common cases - observed in
+    production for a Session whose pushed copy had already been deleted.
+    The library exposes no status-code attribute here, only this message
+    text, so string-matching is the only signal available."""
+    return isinstance(exc, ReportError) and "412" in str(exc)
 
 
 @dataclass
@@ -128,6 +139,8 @@ class CalDavClient:
         except NotFoundError:
             return None
         except Exception as e:
+            if _is_stale_uid_report_error(e):
+                return None
             raise CalDavConnectionError(f"Could not fetch CalDAV event {uid}: {e}") from e
         vevent = raw.icalendar_component
         dtstart = vevent.get("dtstart")
@@ -183,6 +196,8 @@ class CalDavClient:
         except NotFoundError:
             return
         except Exception as e:
+            if _is_stale_uid_report_error(e):
+                return
             raise CalDavConnectionError(f"Could not load CalDAV event {uid} for delete: {e}") from e
         try:
             raw.delete()
