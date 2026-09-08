@@ -151,17 +151,23 @@ def sync_connection(connection: CalendarConnection) -> dict:
 def _sync_sessions_out(
     client, connection, target, session_ct, tutor, window_start, window_end, summary
 ):
+    # Only sessions that have not happened yet get pushed/kept - a lesson
+    # already given has nothing left to prepare for, so it has no reason
+    # to occupy the tutor's calendar. Confirmed with the user 2026-09-09.
     calendar_url = target.external_calendar_url
+    now = timezone.now()
     sessions = Session.objects.filter(
-        contract__user=tutor, date__gte=window_start.date(), date__lte=window_end.date()
+        contract__user=tutor, date__gte=now.date(), date__lte=window_end.date()
     )
     known_ids = set()
 
     for session in sessions:
+        start, end = _session_bounds(session)
+        if end <= now:
+            continue
         known_ids.add(session.pk)
         uid = _session_uid(session)
         title = _render_session_title(target.title_template, session.contract) or "Preceptly-Stunde"
-        start, end = _session_bounds(session)
         try:
             _push_one(
                 client,
@@ -179,13 +185,13 @@ def _sync_sessions_out(
             summary["errors"] += 1
             logger.warning("CalDAV push failed for session %s: %s", session.pk, e)
 
-    # Sessions deleted locally since the last sync: their mapping's
-    # local_object is now None (GenericForeignKey does not cascade), but
-    # the mapping row itself is still there - delete the pushed copy too.
+    # Anything else with a mapping - deleted locally (GenericForeignKey
+    # does not cascade, so the mapping row outlives the Session) or simply
+    # in the past now - should not keep a pushed copy in the calendar.
     for mapping in ExternalCalendarEventMapping.objects.filter(
         connection=connection, content_type=session_ct
     ):
-        if mapping.object_id in known_ids or mapping.local_object is not None:
+        if mapping.object_id in known_ids:
             continue
         try:
             client.delete_event(calendar_url, mapping.external_uid)

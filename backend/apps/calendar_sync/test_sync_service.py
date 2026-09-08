@@ -8,7 +8,7 @@ only, one-way. No conflicts are possible under this model since each type
 only flows in one direction.
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
@@ -352,6 +352,80 @@ class SyncConnectionTest(TestCase):
         self.assertEqual(result["deleted"], 1)
         mock.delete_event.assert_called_once_with(SESSIONS_CAL, mapping.external_uid)
         self.assertFalse(ExternalCalendarEventMapping.objects.filter(pk=mapping.pk).exists())
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_past_session_is_not_pushed(self, mock_client_class):
+        """A lesson that already happened has nothing left to prepare for
+        - it must never be pushed to the calendar in the first place."""
+        self._add_sessions_target()
+        mock = self._mock_client()
+        mock_client_class.return_value = mock
+        Session.objects.create(
+            contract=self.contract,
+            date=date.today() - timedelta(days=1),
+            start_time=timezone.now().time(),
+            duration_minutes=60,
+        )
+
+        result = sync_connection(self.connection)
+
+        self.assertEqual(result["pushed"], 0)
+        mock.create_event.assert_not_called()
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_session_that_already_ended_today_is_not_pushed(self, mock_client_class):
+        """Same as above but for a session dated today whose end time has
+        already passed - the date alone isn't enough to tell. timezone.now()
+        is pinned to a fixed point on the session's day (only around the
+        sync_connection() call itself, so setup's own auto_now_add fields
+        are unaffected) so this can't flake depending on what wall-clock
+        time the test happens to run at."""
+        self._add_sessions_target()
+        mock = self._mock_client()
+        mock_client_class.return_value = mock
+        Session.objects.create(
+            contract=self.contract,
+            date=date.today(),
+            start_time=time(9, 0),
+            duration_minutes=60,
+        )
+        fixed_now = timezone.make_aware(datetime.combine(date.today(), time(12, 0)))
+
+        with patch("apps.calendar_sync.sync_service.timezone.now", return_value=fixed_now):
+            result = sync_connection(self.connection)
+
+        self.assertEqual(result["pushed"], 0)
+        mock.create_event.assert_not_called()
+
+    @patch("apps.calendar_sync.sync_service.CalDavClient")
+    def test_session_that_became_past_has_its_pushed_copy_deleted(self, mock_client_class):
+        """A session that was pushed while still upcoming, and has since
+        happened, must have its calendar copy removed on the next sync -
+        not just be skipped from then on."""
+        self._add_sessions_target()
+        session = Session.objects.create(
+            contract=self.contract,
+            date=date.today() - timedelta(days=1),
+            start_time=timezone.now().time(),
+            duration_minutes=60,
+        )
+        mapping = ExternalCalendarEventMapping.objects.create(
+            connection=self.connection,
+            content_type=ContentType.objects.get_for_model(Session),
+            object_id=session.pk,
+            external_uid=f"preceptly-session-{session.pk}@preceptly.de",
+            external_etag="etag",
+            local_synced_at=session.updated_at,
+        )
+        mock = self._mock_client()
+        mock_client_class.return_value = mock
+
+        result = sync_connection(self.connection)
+
+        self.assertEqual(result["deleted"], 1)
+        mock.delete_event.assert_called_once_with(SESSIONS_CAL, mapping.external_uid)
+        self.assertFalse(ExternalCalendarEventMapping.objects.filter(pk=mapping.pk).exists())
+        self.assertTrue(Session.objects.filter(pk=session.pk).exists())
 
     # --- blocked times: pull-only ---------------------------------------
 
