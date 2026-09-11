@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-08 23:55+0200\n"
+"POT-Creation-Date: 2026-09-11 17:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,44 +93,56 @@ msgstr "Fehler beim Parsen der API-Antwort."
 msgid "Payment required. Please check your API account balance."
 msgstr "Zahlung erforderlich. Bitte überprüfen Sie Ihr API-Kontoguthaben."
 
-#: apps/ai/services.py:111
+#: apps/ai/pdf_extract.py:33
+msgid "The PDF is too large (maximum 5 MB)."
+msgstr "Die PDF-Datei ist zu groß (maximal 5 MB)."
+
+#: apps/ai/pdf_extract.py:38
+msgid "The PDF could not be read."
+msgstr "Die PDF-Datei konnte nicht gelesen werden."
+
+#: apps/ai/pdf_extract.py:41
+msgid "Password-protected PDFs are not supported."
+msgstr "Passwortgeschützte PDF-Dateien werden nicht unterstützt."
+
+#: apps/ai/services.py:130
 msgid "Rate limit reached. Please try again later."
 msgstr "Anfragelimit erreicht. Bitte versuche es später erneut."
 
-#: apps/ai/services.py:138
+#: apps/ai/services.py:173
 #, python-brace-format
 msgid "Lesson plan for {date}"
 msgstr "Lektionsplan für {date}"
 
-#: apps/ai/services.py:159
+#: apps/ai/services.py:194
 msgid "The AI is temporarily unreachable. Please try again in a few minutes."
 msgstr ""
 "Die KI ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten "
 "erneut."
 
-#: apps/ai/services.py:165
+#: apps/ai/services.py:200
 msgid "The lesson plan could not be generated. Please try again."
 msgstr ""
 "Der Lektionsplan konnte nicht generiert werden. Bitte versuche es erneut."
 
-#: apps/ai/views.py:37
+#: apps/ai/views.py:38
 msgid "This function is only available for premium users."
 msgstr "Diese Funktion ist nur für Premium-Benutzer verfügbar."
 
-#: apps/ai/views.py:50
+#: apps/ai/views.py:51
 msgid "Demo limit reached: max 3 AI generations per day per demo account."
 msgstr "Demo-Limit erreicht: max. 3 KI-Generierungen pro Tag und Demo-Konto."
 
-#: apps/ai/views.py:68
+#: apps/ai/views.py:69
 msgid "Daily limit reached. Try again tomorrow."
 msgstr "Tageslimit erreicht. Versuche es morgen erneut."
 
-#: apps/ai/views.py:82
+#: apps/ai/views.py:102
 #, python-brace-format
 msgid "Lesson plan successfully generated! Model: {model}"
 msgstr "Lektionsplan erfolgreich generiert! Modell: {model}"
 
-#: apps/ai/views.py:95
+#: apps/ai/views.py:115
 msgid "Ein Fehler ist aufgetreten. Bitte versuche es erneut."
 msgstr "Ein Fehler ist aufgetreten. Bitte versuche es erneut."
 
@@ -3281,7 +3293,7 @@ msgstr "Nicht jetzt"
 #: apps/core/templates/core/reports.html:13
 #: apps/core/templates/core/tax_year.html:13
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:126
-#: apps/lessons/templates/lessons/lesson_detail.html:262
+#: apps/lessons/templates/lessons/lesson_detail.html:270
 msgid "Premium"
 msgstr "Premium"
 

@@ -2,12 +2,13 @@
 Tests für AI-Funktionen (Premium-Gating, LessonPlan-Generierung).
 """
 
-from datetime import date, time
+from datetime import date, time, timedelta
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.ai.client import LLMClientError, LLMServiceUnavailableError
 from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_student
@@ -16,6 +17,7 @@ from apps.ai.utils_safety import REDACTED, sanitize_context
 from apps.contracts.models import Contract
 from apps.core.models import UserProfile
 from apps.core.utils import is_premium_user
+from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 
 
@@ -97,6 +99,33 @@ class PromptBuildingTest(TestCase):
         self.assertIn(REDACTED, user_prompt)
         self.assertIn("10. Klasse", user_prompt)
         self.assertIn("60 Minuten", user_prompt)
+
+    def test_build_lesson_plan_prompt_includes_extra_notes_and_pdf_text(self):
+        """The tutor can supply extra context before generating (free text
+        and/or text extracted from an uploaded PDF) - both must reach the
+        prompt, clearly wrapped as untrusted data."""
+        safe_context = sanitize_context({"student": {}, "lesson": {}, "previous_lessons": []})
+
+        _, user_prompt = build_lesson_plan_prompt(
+            self.lesson,
+            safe_context,
+            extra_notes="Fokus auf Bruchrechnung",
+            extra_pdf_text="Aufgabe 3: Kürze 12/18",
+        )
+
+        self.assertIn("Fokus auf Bruchrechnung", user_prompt)
+        self.assertIn("Aufgabe 3: Kürze 12/18", user_prompt)
+        self.assertIn("<user_provided_untrusted>", user_prompt)
+
+    def test_build_lesson_plan_prompt_without_extra_context_unchanged(self):
+        """No extra_notes/extra_pdf_text supplied must not add empty
+        sections to the prompt."""
+        safe_context = sanitize_context({"student": {}, "lesson": {}, "previous_lessons": []})
+
+        _, user_prompt = build_lesson_plan_prompt(self.lesson, safe_context)
+
+        self.assertNotIn("Zusätzliche Hinweise", user_prompt)
+        self.assertNotIn("Material aus hochgeladenem PDF", user_prompt)
 
     def test_extract_subject_from_student(self):
         """Test: Fach wird korrekt extrahiert."""
@@ -195,3 +224,89 @@ class LessonPlanServiceTest(TestCase):
             service.generate_lesson_plan(self.lesson, user=self.user)
 
         self.assertIn("nicht erreichbar", str(ctx.exception))
+
+    @patch("apps.ai.services.LLMClient")
+    def test_regenerate_creates_a_fresh_plan_not_the_stale_one(self, mock_client_class):
+        """Regression: clicking "regenerate" on an already-completed plan
+        must actually call the AI again, not silently hand back the exact
+        same plan it made the first time."""
+        mock_client = Mock()
+        mock_client.generate_text.side_effect = ["Erster Plan", "Zweiter Plan"]
+        mock_client_class.return_value = mock_client
+
+        service = LessonPlanService(client=mock_client)
+        first = service.generate_lesson_plan(self.lesson, user=self.user)
+        second = service.generate_lesson_plan(self.lesson, user=self.user)
+
+        self.assertEqual(mock_client.generate_text.call_count, 2)
+        self.assertNotEqual(first.pk, second.pk)
+        self.assertIn("Erster Plan", first.content)
+        self.assertIn("Zweiter Plan", second.content)
+
+    @patch("apps.ai.services.LLMClient")
+    def test_concurrent_call_does_not_start_a_second_generation(self, mock_client_class):
+        """A generation already running (content="" placeholder, created
+        just now) for this lesson must not be raced by a second call -
+        e.g. a double form submit."""
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        in_progress = LessonPlan.objects.create(
+            lesson=self.lesson,
+            contract=self.student,
+            topic="Wird gerade erstellt",
+            subject="Mathe",
+            content="",
+        )
+
+        service = LessonPlanService(client=mock_client)
+        result = service.generate_lesson_plan(self.lesson, user=self.user)
+
+        mock_client.generate_text.assert_not_called()
+        self.assertEqual(result.pk, in_progress.pk)
+
+    @patch("apps.ai.services.LLMClient")
+    def test_stale_in_progress_placeholder_is_discarded(self, mock_client_class):
+        """A placeholder left behind by a request that died mid-flight
+        (gateway timeout, worker restart) before it could fill in the
+        content or clean up after itself must not block generation
+        forever - once it's older than the LLM call's own timeout window,
+        a fresh attempt must go ahead."""
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Neuer Plan"
+        mock_client_class.return_value = mock_client
+        stale = LessonPlan.objects.create(
+            lesson=self.lesson,
+            contract=self.student,
+            topic="Wird gerade erstellt",
+            subject="Mathe",
+            content="",
+        )
+        LessonPlan.objects.filter(pk=stale.pk).update(
+            created_at=timezone.now() - timedelta(minutes=10)
+        )
+
+        service = LessonPlanService(client=mock_client)
+        result = service.generate_lesson_plan(self.lesson, user=self.user)
+
+        mock_client.generate_text.assert_called_once()
+        self.assertNotEqual(result.pk, stale.pk)
+        self.assertIn("Neuer Plan", result.content)
+        self.assertFalse(LessonPlan.objects.filter(pk=stale.pk).exists())
+
+    @patch("apps.ai.services.LLMClient")
+    def test_extra_notes_and_pdf_text_reach_the_prompt_sent_to_the_llm(self, mock_client_class):
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Plan"
+        mock_client_class.return_value = mock_client
+
+        service = LessonPlanService(client=mock_client)
+        service.generate_lesson_plan(
+            self.lesson,
+            user=self.user,
+            extra_notes="Schüler braucht mehr Übung bei Textaufgaben",
+            extra_pdf_text="Arbeitsblatt: Prozentrechnung",
+        )
+
+        sent_prompt = mock_client.generate_text.call_args.kwargs["prompt"]
+        self.assertIn("Schüler braucht mehr Übung bei Textaufgaben", sent_prompt)
+        self.assertIn("Arbeitsblatt: Prozentrechnung", sent_prompt)

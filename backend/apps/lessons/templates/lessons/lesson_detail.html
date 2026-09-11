@@ -240,14 +240,22 @@
             {% endif %}
             <div style="margin-top: 10px; white-space: pre-wrap;">{{ latest_lesson_plan.content }}</div>
             {% if latest_lesson_plan.llm_model %}
-            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);"><em>Erstellt mit {{ model }}</em></p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);"><em>Erstellt mit {{ latest_lesson_plan.llm_model }}</em></p>
             {% endif %}
         </div>
     </div>
     {% endif %}
-    <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" style="margin-top: 15px;">
+    <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" enctype="multipart/form-data" style="margin-top: 15px;">
         {% csrf_token %}
         <input type="hidden" name="next" value="{% url 'lessons:detail' lesson.pk %}?year={{ year|default:lesson.date.year }}&month={{ month|default:lesson.date.month }}&day={{ day|default:lesson.date.day }}">
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; margin-bottom: 4px;">Zusätzliche Hinweise für die KI (optional)</label>
+            <textarea name="extra_notes" rows="3" maxlength="2000" style="width: 100%;" placeholder="z. B. Schwerpunkte, Schwächen des Schülers, besondere Wünsche..."></textarea>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; margin-bottom: 4px;">Material als PDF hochladen (optional, max. 5 MB)</label>
+            <input type="file" name="extra_pdf" accept="application/pdf">
+        </div>
         <button type="submit" class="btn" style="background: var(--accent); color: white;">
             {% if has_lesson_plan %}
                 🔄 KI-Lektionsplan neu generieren

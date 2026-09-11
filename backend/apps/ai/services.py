@@ -2,12 +2,14 @@
 High-level service for lesson plan generation.
 """
 
+from datetime import timedelta
 from typing import Any, Dict, Optional
 
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.utils import timezone
 from django.utils.html import escape
 from django.utils.translation import gettext_lazy as _
 
@@ -22,6 +24,14 @@ class LessonPlanGenerationError(Exception):
     """Exception for errors in lesson plan generation."""
 
     pass
+
+
+# A generation still running holds a placeholder row with content="" - if
+# a request dies mid-flight (gateway timeout, worker restart) before it
+# can clean that placeholder up, it would otherwise block every future
+# regeneration forever. Anything older than this is treated as dead, not
+# in-progress (the LLM call itself is capped at 120s, see ai/client.py).
+GENERATION_IN_PROGRESS_TIMEOUT_MINUTES = 3
 
 
 class LessonPlanService:
@@ -83,13 +93,22 @@ class LessonPlanService:
             "previous_lessons": previous_sessions_data,
         }
 
-    def generate_lesson_plan(self, session: Session, user=None) -> LessonPlan:
+    def generate_lesson_plan(
+        self, session: Session, user=None, extra_notes: str = "", extra_pdf_text: str = ""
+    ) -> LessonPlan:
         """
-        Generates an AI lesson plan for a session.
+        Generates an AI lesson plan for a session. Always generates a fresh
+        plan - a lesson can have several plans over time (e.g. "regenerate"
+        after adding more context), the newest one is what's shown.
 
         Args:
             session: Session object
             user: User performing the request (REQUIRED – no default)
+            extra_notes: Optional free text the tutor supplied for this
+                generation only (not persisted beyond the resulting plan's
+                prompt).
+            extra_pdf_text: Optional text already extracted from a tutor-
+                uploaded PDF, same scope as extra_notes.
 
         Returns:
             LessonPlan object
@@ -116,18 +135,34 @@ class LessonPlanService:
         safe_context = sanitize_context(raw_context)
 
         # Build prompt
-        system_prompt, user_prompt = build_lesson_plan_prompt(session, safe_context)
+        system_prompt, user_prompt = build_lesson_plan_prompt(
+            session, safe_context, extra_notes=extra_notes, extra_pdf_text=extra_pdf_text
+        )
 
-        # [MEDIUM] Lock entkoppeln: nur Existenz-Check + Placeholder in atomarer Transaktion,
-        # LLM-Call AUSSERHALB des Locks (verhindert DoS durch lange DB-Lock-Haltedauer)
+        # [MEDIUM] Lock entkoppeln: nur In-Progress-Check + Placeholder in atomarer
+        # Transaktion, LLM-Call AUSSERHALB des Locks (verhindert DoS durch lange
+        # DB-Lock-Haltedauer)
         with transaction.atomic():
-            existing = LessonPlan.objects.select_for_update().filter(lesson=session).first()
-            if existing is not None:
-                # Bereits ein aktueller Plan vorhanden – direkt zurückgeben
-                return existing
+            in_progress = (
+                LessonPlan.objects.select_for_update()
+                .filter(lesson=session, content="")
+                .order_by("-created_at")
+                .first()
+            )
+            if in_progress is not None:
+                stale_cutoff = timezone.now() - timedelta(
+                    minutes=GENERATION_IN_PROGRESS_TIMEOUT_MINUTES
+                )
+                if in_progress.created_at >= stale_cutoff:
+                    # A generation for this lesson is already running -
+                    # don't start a second one in parallel.
+                    return in_progress
+                # Left behind by a request that died mid-flight before it
+                # could clean up after itself - safe to discard and retry.
+                in_progress.delete()
 
             # Platzhalter-Row anlegen, damit parallele Requests denselben Plan nicht
-            # doppelt generieren (unique constraint auf lesson greift)
+            # doppelt generieren
             student = session.contract
             raw_subject = extract_subject_from_student(student)
             subject = strip_injection_patterns(raw_subject)[:100]
