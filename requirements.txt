@@ -24,5 +24,6 @@ pywebpush>=2.0.3
 caldav==3.3.0
 icalendar==7.3.0
 cryptography==50.0.1
+pypdf==6.18.1
 
 # cache-bust: 2026-06-25

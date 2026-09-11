@@ -13,6 +13,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
+from apps.ai.pdf_extract import PdfExtractionError, extract_pdf_text
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.core.demo_guard import demo_ai_increment, demo_ai_limit_reached, is_demo_user
 from apps.core.feature_flags import Feature, user_has_feature
@@ -73,10 +74,29 @@ def generate_lesson_plan(request, lesson_id):
             return redirect(next_url)
         return redirect("lessons:detail", pk=lesson_id)
 
+    # Optional extra context the tutor supplied for this generation
+    extra_notes = (request.POST.get("extra_notes") or "").strip()[:2000]
+
+    extra_pdf_text = ""
+    pdf_file = request.FILES.get("extra_pdf")
+    if pdf_file is not None:
+        try:
+            extra_pdf_text = extract_pdf_text(pdf_file)
+        except PdfExtractionError as e:
+            messages.error(request, str(e))
+            next_url = request.POST.get("next") or request.GET.get("next")
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(next_url)
+            return redirect("lessons:detail", pk=lesson_id)
+
     # Generate lesson plan
     try:
         service = LessonPlanService()
-        lesson_plan = service.generate_lesson_plan(session, user=request.user)
+        lesson_plan = service.generate_lesson_plan(
+            session, user=request.user, extra_notes=extra_notes, extra_pdf_text=extra_pdf_text
+        )
         messages.success(
             request,
             _("Lesson plan successfully generated! Model: {model}").format(
