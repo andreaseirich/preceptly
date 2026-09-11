@@ -20,7 +20,7 @@ urllib3==2.7.0
 django-ratelimit==4.1.0
 nh3>=0.3.6
 whitenoise>=6.7.0
-pywebpush>=2.0.3
+pywebpush>=2.5.0
 caldav==3.3.0
 icalendar==7.3.0
 cryptography==50.0.1
