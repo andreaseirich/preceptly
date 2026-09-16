@@ -15,6 +15,7 @@ from apps.core.finance_metrics import (
     breakdown_by_institute_recognized,
     pending_revenue,
     recognized_revenue,
+    top_students_by_recognized_revenue,
     total_billed_revenue,
 )
 from apps.core.selectors import IncomeSelector
@@ -222,3 +223,69 @@ class InstituteBreakdownTest(TestCase):
         inst_names = [r["institute"] for r in billed]
         self.assertIn("InstA", inst_names)
         self.assertIn("InstB", inst_names)
+
+
+class RevenueByLessonDateNotBillingPeriodTest(TestCase):
+    """
+    Regression: a billing period doesn't have to align to calendar months.
+    An invoice covering mid-Feb through mid-March, once paid, must split its
+    revenue across February and March by each lesson's own date - not dump
+    the whole invoice total into February just because that's when the
+    billing period starts.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tutor", password="test")
+        self.contract = Contract.objects.create(
+            user=self.user,
+            first_name="Test",
+            last_name="Student",
+            hourly_rate=Decimal("20"),
+            unit_duration_minutes=60,
+            start_date=date(2025, 1, 1),
+        )
+        self.feb_lesson = Lesson.objects.create(
+            contract=self.contract,
+            date=date(2025, 2, 20),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        self.mar_lesson = Lesson.objects.create(
+            contract=self.contract,
+            date=date(2025, 3, 5),
+            start_time=time(10, 0),
+            duration_minutes=60,
+            status="taught",
+        )
+        # period_start is in February even though a lesson falls in March.
+        self.invoice = InvoiceService.create_invoice_from_lessons(
+            date(2025, 2, 15), date(2025, 3, 15), contract=self.contract, user=self.user
+        )
+        InvoiceService.mark_invoice_as_paid(self.invoice)
+
+    def test_revenue_split_by_lesson_month_not_period_start(self):
+        feb_revenue = recognized_revenue(self.user, 2025, 2)
+        mar_revenue = recognized_revenue(self.user, 2025, 3)
+
+        self.assertEqual(feb_revenue, Decimal("20.00"))
+        self.assertEqual(mar_revenue, Decimal("20.00"))
+        self.assertEqual(feb_revenue + mar_revenue, self.invoice.total_amount)
+
+    def test_top_students_split_by_lesson_month_not_period_start(self):
+        feb_top = top_students_by_recognized_revenue(self.user, 2025, 2)
+        mar_top = top_students_by_recognized_revenue(self.user, 2025, 3)
+
+        self.assertEqual(feb_top[0]["income"], Decimal("20.00"))
+        self.assertEqual(mar_top[0]["income"], Decimal("20.00"))
+
+    def test_institute_breakdown_split_by_lesson_month_not_period_start(self):
+        inst = Institute.objects.create(user=self.user, institute_name="InstSplit")
+        self.contract.institute_fk = inst
+        self.contract.save(update_fields=["institute_fk"])
+
+        feb_breakdown = breakdown_by_institute_recognized(self.user, 2025, 2)
+        mar_breakdown = breakdown_by_institute_recognized(self.user, 2025, 3)
+
+        self.assertEqual(feb_breakdown[0]["revenue"], Decimal("20.00"))
+        self.assertEqual(mar_breakdown[0]["revenue"], Decimal("20.00"))

@@ -3,10 +3,12 @@ Canonical definitions for revenue and statistics.
 
 All metrics are owner-scoped (Invoice.owner / Lesson via contract->student->user).
 
-Recognized revenue: sum of ``Invoice.total_amount`` for invoices with status PAID,
-bucketed by the **calendar month of** ``Invoice.period_start`` (billing period start),
-not by individual lesson dates. This matches the Income/Reports “recognized revenue”
-figures.
+Recognized revenue: sum of ``InvoiceItem.amount`` for items whose parent Invoice has
+status PAID, bucketed by the **calendar month of each item's own lesson date**
+(``InvoiceItem.date``) - not by the invoice's billing period start. A billing period
+doesn't have to align to calendar months, so attributing by period_start could put
+units actually taught (and paid for) in one month under a different month's total.
+This matches the Income/Reports “recognized revenue” figures.
 
 Lesson counts and “taught hours” use lesson **session dates** in the selected month.
 
@@ -69,10 +71,15 @@ def _invoices_for_month(user: User, year: int, month: int, status_filter: list[s
 
 
 def recognized_revenue(user: User, year: int, month: int) -> Decimal:
-    """Sum of Invoice.total_amount where status == PAID. Owner-scoped."""
-    total = _invoices_for_month(user, year, month, [InvoiceStatus.PAID]).aggregate(
-        s=Sum("total_amount")
-    )["s"] or Decimal("0")
+    """Sum of InvoiceItem.amount for PAID invoices, bucketed by each item's
+    own lesson date - not the invoice's billing period start. Owner-scoped."""
+    start_d, end_d = _month_range(year, month)
+    total = InvoiceItem.objects.filter(
+        invoice__owner=user,
+        invoice__status=InvoiceStatus.PAID,
+        date__gte=start_d,
+        date__lt=end_d,
+    ).aggregate(s=Sum("amount"))["s"] or Decimal("0")
     return total
 
 
@@ -172,14 +179,22 @@ def hours_per_month_last_n(user: User, now, n: int = 6) -> list[dict]:
 
 
 def breakdown_by_institute_recognized(user: User, year: int, month: int) -> list[dict]:
-    """Revenue by institute, PAID invoices only. Owner-scoped."""
-    invs = _invoices_for_month(user, year, month, [InvoiceStatus.PAID]).select_related("contract")
+    """Revenue by institute, PAID invoices only, bucketed by each item's own
+    lesson date - not the invoice's billing period start. Owner-scoped."""
+    start_d, end_d = _month_range(year, month)
+    items = InvoiceItem.objects.filter(
+        invoice__owner=user,
+        invoice__status=InvoiceStatus.PAID,
+        date__gte=start_d,
+        date__lt=end_d,
+    ).select_related("invoice__contract")
     by_inst = {}
-    for inv in invs:
-        inst = (inv.contract.institute or "").strip() if inv.contract else ""
+    for item in items:
+        contract = item.invoice.contract
+        inst = (contract.institute or "").strip() if contract else ""
         if not inst:
             inst = "-"
-        by_inst[inst] = by_inst.get(inst, Decimal("0")) + inv.total_amount
+        by_inst[inst] = by_inst.get(inst, Decimal("0")) + item.amount
     return [{"institute": k, "revenue": v} for k, v in sorted(by_inst.items(), key=lambda x: -x[1])]
 
 
@@ -227,26 +242,28 @@ def top_students_by_recognized_revenue(
     user: User, year: int, month: int, limit: int = 5
 ) -> list[dict]:
     """
-    Top students by recognized revenue (PAID invoices) for the month.
-    Returns list of {contract, lessons, income} where income is from PAID invoices
-    for that contract.
+    Top students by recognized revenue (PAID invoices) for the month, bucketed
+    by each invoiced unit's own lesson date - not the invoice's billing period
+    start. Returns list of {contract, lessons, income}.
     """
-    invs = (
-        _invoices_for_month(user, year, month, [InvoiceStatus.PAID])
-        .filter(contract__isnull=False)
-        .select_related("contract")
-    )
+    start_d, end_d = _month_range(year, month)
+    items = InvoiceItem.objects.filter(
+        invoice__owner=user,
+        invoice__status=InvoiceStatus.PAID,
+        invoice__contract__isnull=False,
+        date__gte=start_d,
+        date__lt=end_d,
+    ).select_related("invoice__contract")
     by_contract = {}
-    for inv in invs:
-        c = inv.contract
+    for item in items:
+        c = item.invoice.contract
         if c.id not in by_contract:
             by_contract[c.id] = {
                 "contract": c,
                 "lessons": 0,
                 "income": Decimal("0"),
             }
-        by_contract[c.id]["income"] += inv.total_amount
-    start_d, end_d = _month_range(year, month)
+        by_contract[c.id]["income"] += item.amount
     for cid, data in by_contract.items():
         lessons = Lesson.objects.filter(
             contract_id=cid,
