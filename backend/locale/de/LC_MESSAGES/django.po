@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-11 17:06+0200\n"
+"POT-Creation-Date: 2026-09-16 17:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3556,12 +3556,13 @@ msgstr "Zusammenfassung"
 
 #: apps/core/templates/core/income_overview.html:26
 msgid ""
-"Only invoices marked paid. Totals use the calendar month of each invoice "
-"billing period start date - not necessarily the month the lessons took place."
+"Only lessons on invoices marked paid. Each lesson counts in the calendar "
+"month it actually took place - not the month the invoice's billing period "
+"starts."
 msgstr ""
-"Nur als bezahlt markierte Rechnungen. Die Summe gilt für den Kalendermonat "
-"des Rechnungszeitraum-Beginns – nicht unbedingt für den Monat, in dem die "
-"Stunden stattfanden."
+"Nur Stunden auf als bezahlt markierten Rechnungen. Jede Stunde zählt in dem "
+"Kalendermonat, in dem sie tatsächlich stattfand – nicht in dem Monat, in dem "
+"der Abrechnungszeitraum der Rechnung beginnt."
 
 #: apps/core/templates/core/income_overview.html:28
 #: apps/core/templates/core/income_overview.html:100
@@ -3597,10 +3598,11 @@ msgstr "Jahreszusammenfassung"
 #, python-format
 msgid ""
 "This total is the sum of recognized revenue for each month in %(yr)s. Each "
-"month counts only paid invoices whose billing period starts in that month."
+"month counts only lessons on paid invoices that took place in that month."
 msgstr ""
 "Diese Summe ist die Summe der realisierten Einnahmen je Monat in %(yr)s. Pro "
-"Monat zählen nur bezahlte Rechnungen, deren Zeitraum in diesem Monat beginnt."
+"Monat zählen nur Stunden auf bezahlten Rechnungen, die in diesem Monat "
+"stattfanden."
 
 #: apps/core/templates/core/income_overview.html:61
 msgid "Monthly Breakdown"
@@ -3608,11 +3610,11 @@ msgstr "Monatsaufschlüsselung"
 
 #: apps/core/templates/core/income_overview.html:62
 msgid ""
-"The recognized revenue column is paid invoice totals for that month (by "
-"billing period start)."
+"The recognized revenue column sums lessons that took place in that month and "
+"are on a paid invoice."
 msgstr ""
-"Die Spalte Realisierte Einnahmen enthält die Summe bezahlter Rechnungen "
-"dieses Monats (nach Zeitraum-Beginn)."
+"Die Spalte Realisierte Einnahmen summiert Stunden, die in diesem Monat "
+"stattfanden und auf einer bezahlten Rechnung stehen."
 
 #: apps/core/templates/core/income_overview.html:68
 msgid "Recognized revenue"
@@ -4172,10 +4174,11 @@ msgstr "Umsatz (bezahlte Rechnungen, letzte 6 Monate)"
 
 #: apps/core/templates/core/reports.html:73
 msgid ""
-"Each row: recognized revenue for that calendar month (billing period start)."
+"Each row: recognized revenue for lessons that took place in that calendar "
+"month and are on a paid invoice."
 msgstr ""
-"Jede Zeile: realisierte Einnahmen dieses Kalendermonats (Rechnungszeitraum-"
-"Beginn)."
+"Jede Zeile: realisierte Einnahmen für Stunden, die in diesem Kalendermonat "
+"stattfanden und auf einer bezahlten Rechnung stehen."
 
 #: apps/core/templates/core/reports.html:75
 msgid "Revenue"

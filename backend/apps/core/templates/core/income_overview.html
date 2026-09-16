@@ -23,7 +23,7 @@
 
 <h3>{% trans "Summary" %}</h3>
 <p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ monthly_income.total_income|euro }} {% blocktrans count counter=monthly_income.lesson_count %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
-<p class="tutorflow-kpi-hint">{% trans "Only invoices marked paid. Totals use the calendar month of each invoice billing period start date - not necessarily the month the lessons took place." %}</p>
+<p class="tutorflow-kpi-hint">{% trans "Only lessons on invoices marked paid. Each lesson counts in the calendar month it actually took place - not the month the invoice's billing period starts." %}</p>
 
 <h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% trans "lessons dated in this month" %})</span></h3>
 <table aria-label="Beträge nach Stundenstatus">
@@ -56,10 +56,10 @@
 
 <h3>{% trans "Year Summary" %}</h3>
 <p><strong>{% trans "Recognized revenue (paid invoices):" %}</strong> {{ yearly_income.total_income|euro }} {% blocktrans count counter=yearly_income.total_lessons %}({{ counter }} lesson){% plural %}({{ counter }} lessons){% endblocktrans %}</p>
-<p class="tutorflow-kpi-hint">{% blocktrans with yr=year %}This total is the sum of recognized revenue for each month in {{ yr }}. Each month counts only paid invoices whose billing period starts in that month.{% endblocktrans %}</p>
+<p class="tutorflow-kpi-hint">{% blocktrans with yr=year %}This total is the sum of recognized revenue for each month in {{ yr }}. Each month counts only lessons on paid invoices that took place in that month.{% endblocktrans %}</p>
 
 <h3>{% trans "Monthly Breakdown" %}</h3>
-<p class="tutorflow-kpi-hint">{% trans "The recognized revenue column is paid invoice totals for that month (by billing period start)." %}</p>
+<p class="tutorflow-kpi-hint">{% trans "The recognized revenue column sums lessons that took place in that month and are on a paid invoice." %}</p>
 <table class="table" aria-label="Monatsübersicht">
     <thead>
         <tr>
