@@ -34,6 +34,7 @@
 {% else %}
 <h2 style="margin-top:0;">Wochenübersicht</h2>
 <p style="color:var(--text-secondary); font-size:0.88em; margin-top:-8px;">Klicke auf einen Tag, um die freien Zeiten darunter zu laden.</p>
+{% include "portal/_buffer_hint.html" %}
 {% include "portal/_week_calendar_widget.html" with nav_url_name="portal:book" nav_pk=student.pk %}
 
 <div class="box-section">
@@ -47,6 +48,7 @@
 
     <div style="margin-bottom:16px;">
       <label style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Freie Zeitslots</label>
+      {% include "portal/_buffer_hint.html" with compact=True %}
       <div class="tz-note" id="tz-note" style="display:none;"></div>
       <div class="slot-grid" id="slot-grid" aria-live="polite" aria-label="Verfügbare Zeitslots">
         <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>

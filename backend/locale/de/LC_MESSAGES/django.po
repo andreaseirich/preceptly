@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-16 17:21+0200\n"
+"POT-Creation-Date: 2026-09-18 09:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -189,7 +189,7 @@ msgstr "Betrag"
 #: apps/core/templates/core/dashboard.html:64
 #: apps/core/templates/core/income_overview.html:32
 #: apps/core/templates/core/income_overview.html:104
-#: apps/core/templates/core/settings.html:439 apps/lessons/admin.py:32
+#: apps/core/templates/core/settings.html:326 apps/lessons/admin.py:32
 #: apps/lessons/admin.py:102 apps/lessons/templates/lessons/lesson_list.html:19
 #: apps/lessons/templates/lessons/lesson_month.html:16
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:27
@@ -345,9 +345,11 @@ msgstr "Rechnung"
 #: apps/billing/models.py:87
 #: apps/billing/templates/billing/invoice_detail.html:110
 #: apps/billing/templates/billing/invoice_list.html:8
-#: apps/core/templates/core/base.html:534
-#: apps/core/templates/core/base.html:546
+#: apps/core/templates/core/base.html:535
+#: apps/core/templates/core/base.html:547
 #: apps/core/templates/core/reports.html:54
+#: apps/core/templates/core/settings.html:60
+#: apps/core/templates/core/settings.html:390
 msgid "Invoices"
 msgstr "Rechnungen"
 
@@ -457,10 +459,9 @@ msgstr "Ja, löschen"
 #: apps/contracts/templates/contracts/institute_confirm_delete.html:15
 #: apps/contracts/templates/contracts/institute_form.html:10
 #: apps/contracts/templates/contracts/institute_form.html:82
-#: apps/core/templates/core/base.html:678
+#: apps/core/templates/core/base.html:679
 #: apps/core/templates/core/expense_confirm_delete.html:19
 #: apps/core/templates/core/expense_form.html:36
-#: apps/core/templates/core/settings.html:178
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:44
 #: apps/lessons/templates/lessons/lesson_form.html:197
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:96
@@ -485,7 +486,7 @@ msgid "Zeitraum von:"
 msgstr "Zeitraum von:"
 
 #: apps/billing/templates/billing/invoice_create.html:19
-#: apps/core/templates/core/base.html:701
+#: apps/core/templates/core/base.html:702
 #: apps/lessons/templates/lessons/student_booking.html:419
 #: apps/lessons/templates/lessons/week.html:71
 #: apps/lessons/templates/lessons/week.html:197
@@ -587,7 +588,7 @@ msgstr ""
 #: apps/billing/templates/billing/invoice_document.html:124
 #: apps/core/templates/core/dashboard.html:61
 #: apps/core/templates/core/expense_list.html:27
-#: apps/core/templates/core/tax_year.html:123 apps/core/views.py:696
+#: apps/core/templates/core/tax_year.html:123 apps/core/views.py:727
 #: apps/lessons/templates/lessons/conflict_detail.html:39
 #: apps/lessons/templates/lessons/email_booking_notification.html:15
 #: apps/lessons/templates/lessons/email_booking_notification.txt:7
@@ -714,7 +715,7 @@ msgid "Total Amount"
 msgstr "Gesamtbetrag"
 
 #: apps/billing/templates/billing/invoice_detail.html:164
-#: apps/core/templates/core/tax_year.html:125 apps/core/views.py:665
+#: apps/core/templates/core/tax_year.html:125 apps/core/views.py:696
 msgid "Recipient"
 msgstr "Empfänger"
 
@@ -725,7 +726,7 @@ msgstr "Empfänger"
 #: apps/contracts/templates/contracts/contract_detail.html:11
 #: apps/contracts/templates/contracts/contract_list.html:66
 #: apps/contracts/templates/contracts/institute_list.html:58
-#: apps/core/templates/core/base.html:680
+#: apps/core/templates/core/base.html:681
 #: apps/core/templates/core/expense_list.html:48
 #: apps/lessons/templates/lessons/conflict_detail.html:53
 #: apps/lessons/templates/lessons/lesson_list.html:51
@@ -750,18 +751,18 @@ msgid "Name"
 msgstr "Name"
 
 #: apps/billing/templates/billing/invoice_detail.html:184
-#: apps/core/templates/core/settings.html:244
+#: apps/core/templates/core/settings.html:408
 msgid "Address"
 msgstr "Adresse"
 
 #: apps/billing/templates/billing/invoice_detail.html:184
 #: apps/core/templates/core/register.html:35
-#: apps/core/templates/core/settings.html:248
-#: apps/core/templates/core/settings.html:253
-#: apps/core/templates/core/settings.html:257
-#: apps/core/templates/core/settings.html:261
-#: apps/core/templates/core/settings.html:265
-#: apps/core/templates/core/settings.html:269
+#: apps/core/templates/core/settings.html:412
+#: apps/core/templates/core/settings.html:417
+#: apps/core/templates/core/settings.html:421
+#: apps/core/templates/core/settings.html:425
+#: apps/core/templates/core/settings.html:429
+#: apps/core/templates/core/settings.html:433
 msgid "optional"
 msgstr "optional"
 
@@ -771,9 +772,10 @@ msgstr "optional"
 #: apps/calendar_sync/templates/calendar_sync/configure_calendars.html:51
 #: apps/contracts/templates/contracts/contract_form.html:61
 #: apps/contracts/templates/contracts/institute_form.html:81
-#: apps/core/templates/core/base.html:677
-#: apps/core/templates/core/settings.html:224
-#: apps/core/templates/core/settings.html:424
+#: apps/core/templates/core/base.html:678
+#: apps/core/templates/core/settings.html:175
+#: apps/core/templates/core/settings.html:316
+#: apps/core/templates/core/settings.html:479
 #: apps/lessons/templates/lessons/lesson_form.html:196
 #: apps/students/templates/students/student_form.html:30
 msgid "Save"
@@ -788,7 +790,7 @@ msgstr "Rechnungspositionen"
 #: apps/blocked_times/recurring_forms.py:35
 #: apps/blocked_times/templates/blocked_times/blockedtime_detail.html:19
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:19
-#: apps/core/templates/core/expense_list.html:29 apps/core/views.py:696
+#: apps/core/templates/core/expense_list.html:29 apps/core/views.py:727
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -821,7 +823,7 @@ msgstr "PDF neu erzeugen"
 
 #: apps/billing/templates/billing/invoice_detail.html:238
 #: apps/billing/templates/billing/invoice_detail.html:250
-#: apps/core/templates/core/base.html:691
+#: apps/core/templates/core/base.html:692
 msgid "Generate PDF"
 msgstr "PDF erzeugen"
 
@@ -843,7 +845,7 @@ msgid "View Document"
 msgstr "Dokument anzeigen"
 
 #: apps/billing/templates/billing/invoice_detail.html:269
-#: apps/core/templates/core/base.html:693
+#: apps/core/templates/core/base.html:694
 msgid "Mark as sent"
 msgstr "Als gesendet markieren"
 
@@ -851,12 +853,12 @@ msgstr "Als gesendet markieren"
 #: apps/billing/templates/billing/invoice_mark_paid.html:4
 #: apps/billing/templates/billing/invoice_mark_paid.html:7
 #: apps/billing/templates/billing/invoice_mark_paid.html:17
-#: apps/core/templates/core/base.html:694
+#: apps/core/templates/core/base.html:695
 msgid "Mark as paid"
 msgstr "Als bezahlt markieren"
 
 #: apps/billing/templates/billing/invoice_detail.html:282
-#: apps/core/templates/core/base.html:695
+#: apps/core/templates/core/base.html:696
 msgid "Undo payment"
 msgstr "Bezahlung rückgängig"
 
@@ -865,10 +867,10 @@ msgid "Delete invoice"
 msgstr "Rechnung löschen"
 
 #: apps/billing/templates/billing/invoice_detail.html:306
-#: apps/core/templates/core/base.html:613
-#: apps/core/templates/core/base.html:1172
+#: apps/core/templates/core/base.html:614
+#: apps/core/templates/core/base.html:1173
 #: apps/core/templates/core/dashboard.html:101
-#: apps/portal/templates/portal/base.html:802
+#: apps/portal/templates/portal/base.html:803
 msgid "Close"
 msgstr "Schließen"
 
@@ -1128,8 +1130,8 @@ msgstr "Wann soll die Serie enden? (optional)"
 
 #: apps/blocked_times/forms.py:57 apps/blocked_times/recurring_forms.py:41
 #: apps/blocked_times/recurring_models.py:43 apps/core/forms.py:68
-#: apps/core/templates/core/settings.html:23 apps/lessons/forms.py:58
-#: apps/lessons/recurring_forms.py:49 apps/lessons/recurring_models.py:48
+#: apps/lessons/forms.py:58 apps/lessons/recurring_forms.py:49
+#: apps/lessons/recurring_models.py:48
 #: apps/lessons/templates/lessons/lesson_form.html:160
 #: apps/lessons/templates/lessons/student_booking.html:254
 #: apps/lessons/views_calendar.py:116 apps/lessons/views_calendar.py:307
@@ -1138,8 +1140,8 @@ msgstr "Montag"
 
 #: apps/blocked_times/forms.py:58 apps/blocked_times/recurring_forms.py:42
 #: apps/blocked_times/recurring_models.py:44 apps/core/forms.py:69
-#: apps/core/templates/core/settings.html:44 apps/lessons/forms.py:59
-#: apps/lessons/recurring_forms.py:50 apps/lessons/recurring_models.py:49
+#: apps/lessons/forms.py:59 apps/lessons/recurring_forms.py:50
+#: apps/lessons/recurring_models.py:49
 #: apps/lessons/templates/lessons/lesson_form.html:164
 #: apps/lessons/templates/lessons/student_booking.html:255
 #: apps/lessons/views_calendar.py:117 apps/lessons/views_calendar.py:308
@@ -1148,8 +1150,8 @@ msgstr "Dienstag"
 
 #: apps/blocked_times/forms.py:59 apps/blocked_times/recurring_forms.py:43
 #: apps/blocked_times/recurring_models.py:45 apps/core/forms.py:70
-#: apps/core/templates/core/settings.html:65 apps/lessons/forms.py:60
-#: apps/lessons/recurring_forms.py:51 apps/lessons/recurring_models.py:50
+#: apps/lessons/forms.py:60 apps/lessons/recurring_forms.py:51
+#: apps/lessons/recurring_models.py:50
 #: apps/lessons/templates/lessons/lesson_form.html:168
 #: apps/lessons/templates/lessons/student_booking.html:256
 #: apps/lessons/views_calendar.py:118 apps/lessons/views_calendar.py:309
@@ -1158,8 +1160,8 @@ msgstr "Mittwoch"
 
 #: apps/blocked_times/forms.py:60 apps/blocked_times/recurring_forms.py:44
 #: apps/blocked_times/recurring_models.py:46 apps/core/forms.py:71
-#: apps/core/templates/core/settings.html:86 apps/lessons/forms.py:61
-#: apps/lessons/recurring_forms.py:52 apps/lessons/recurring_models.py:51
+#: apps/lessons/forms.py:61 apps/lessons/recurring_forms.py:52
+#: apps/lessons/recurring_models.py:51
 #: apps/lessons/templates/lessons/lesson_form.html:172
 #: apps/lessons/templates/lessons/student_booking.html:257
 #: apps/lessons/views_calendar.py:119 apps/lessons/views_calendar.py:310
@@ -1168,8 +1170,8 @@ msgstr "Donnerstag"
 
 #: apps/blocked_times/forms.py:61 apps/blocked_times/recurring_forms.py:45
 #: apps/blocked_times/recurring_models.py:47 apps/core/forms.py:72
-#: apps/core/templates/core/settings.html:107 apps/lessons/forms.py:62
-#: apps/lessons/recurring_forms.py:53 apps/lessons/recurring_models.py:52
+#: apps/lessons/forms.py:62 apps/lessons/recurring_forms.py:53
+#: apps/lessons/recurring_models.py:52
 #: apps/lessons/templates/lessons/lesson_form.html:176
 #: apps/lessons/templates/lessons/student_booking.html:258
 #: apps/lessons/views_calendar.py:120 apps/lessons/views_calendar.py:311
@@ -1178,8 +1180,8 @@ msgstr "Freitag"
 
 #: apps/blocked_times/forms.py:62 apps/blocked_times/recurring_forms.py:46
 #: apps/blocked_times/recurring_models.py:48 apps/core/forms.py:73
-#: apps/core/templates/core/settings.html:128 apps/lessons/forms.py:63
-#: apps/lessons/recurring_forms.py:54 apps/lessons/recurring_models.py:53
+#: apps/lessons/forms.py:63 apps/lessons/recurring_forms.py:54
+#: apps/lessons/recurring_models.py:53
 #: apps/lessons/templates/lessons/lesson_form.html:180
 #: apps/lessons/templates/lessons/student_booking.html:259
 #: apps/lessons/views_calendar.py:121 apps/lessons/views_calendar.py:312
@@ -1188,8 +1190,8 @@ msgstr "Samstag"
 
 #: apps/blocked_times/forms.py:63 apps/blocked_times/recurring_forms.py:47
 #: apps/blocked_times/recurring_models.py:49 apps/core/forms.py:74
-#: apps/core/templates/core/settings.html:149 apps/lessons/forms.py:64
-#: apps/lessons/recurring_forms.py:55 apps/lessons/recurring_models.py:54
+#: apps/lessons/forms.py:64 apps/lessons/recurring_forms.py:55
+#: apps/lessons/recurring_models.py:54
 #: apps/lessons/templates/lessons/lesson_form.html:184
 #: apps/lessons/templates/lessons/student_booking.html:260
 #: apps/lessons/views_calendar.py:122 apps/lessons/views_calendar.py:313
@@ -1282,26 +1284,14 @@ msgstr "Enddatum"
 
 #: apps/blocked_times/recurring_forms.py:38
 #: apps/blocked_times/recurring_models.py:28
-#: apps/core/templates/core/settings.html:33
-#: apps/core/templates/core/settings.html:54
-#: apps/core/templates/core/settings.html:75
-#: apps/core/templates/core/settings.html:96
-#: apps/core/templates/core/settings.html:117
-#: apps/core/templates/core/settings.html:138
-#: apps/core/templates/core/settings.html:159 apps/lessons/models.py:29
+#: apps/core/templates/core/settings.html:263 apps/lessons/models.py:29
 #: apps/lessons/recurring_forms.py:44 apps/lessons/recurring_models.py:25
 msgid "Start time"
 msgstr "Startzeit"
 
 #: apps/blocked_times/recurring_forms.py:39
 #: apps/blocked_times/recurring_models.py:29
-#: apps/core/templates/core/settings.html:37
-#: apps/core/templates/core/settings.html:58
-#: apps/core/templates/core/settings.html:79
-#: apps/core/templates/core/settings.html:100
-#: apps/core/templates/core/settings.html:121
-#: apps/core/templates/core/settings.html:142
-#: apps/core/templates/core/settings.html:163
+#: apps/core/templates/core/settings.html:266
 msgid "End time"
 msgstr "Endzeit"
 
@@ -1514,7 +1504,7 @@ msgstr "Löschen bestätigen"
 #: apps/contracts/templates/contracts/contract_list.html:75
 #: apps/contracts/templates/contracts/institute_confirm_delete.html:14
 #: apps/contracts/templates/contracts/institute_list.html:58
-#: apps/core/templates/core/base.html:679
+#: apps/core/templates/core/base.html:680
 #: apps/core/templates/core/expense_list.html:50
 #: apps/core/templates/core/review_moderation.html:47
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:11
@@ -1599,7 +1589,7 @@ msgid "Inactive"
 msgstr "Inaktiv"
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:31
-#: apps/core/templates/core/base.html:692
+#: apps/core/templates/core/base.html:693
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:29
 msgid "Preview"
 msgstr "Vorschau"
@@ -1919,48 +1909,48 @@ msgstr "Preceptly-Version"
 msgid "External version"
 msgstr "Externe Version"
 
-#: apps/calendar_sync/views.py:45
+#: apps/calendar_sync/views.py:44
 msgid "Unsupported provider."
 msgstr "Nicht unterstützter Anbieter."
 
-#: apps/calendar_sync/views.py:49
+#: apps/calendar_sync/views.py:48
 msgid "Please fill in all fields."
 msgstr "Bitte fülle alle Felder aus."
 
-#: apps/calendar_sync/views.py:58
+#: apps/calendar_sync/views.py:57
 #, python-brace-format
 msgid "Could not connect: {error}"
 msgstr "Verbindung fehlgeschlagen: {error}"
 
-#: apps/calendar_sync/views.py:65
+#: apps/calendar_sync/views.py:64
 msgid "Calendar sync is not available right now. Please try again later."
 msgstr ""
 "Kalender-Sync ist gerade nicht verfügbar. Bitte versuche es später erneut."
 
-#: apps/calendar_sync/views.py:80
+#: apps/calendar_sync/views.py:79
 msgid "Calendar connected. Now choose which calendars to sync."
 msgstr ""
 "Kalender verbunden. Wähle jetzt aus, welche Kalender synchronisiert werden "
 "sollen."
 
-#: apps/calendar_sync/views.py:115
+#: apps/calendar_sync/views.py:114
 msgid "Calendar selection saved."
 msgstr "Kalenderauswahl gespeichert."
 
-#: apps/calendar_sync/views.py:123
+#: apps/calendar_sync/views.py:122
 #, python-brace-format
 msgid "Could not load your calendars: {error}"
 msgstr "Kalender konnten nicht geladen werden: {error}"
 
-#: apps/calendar_sync/views.py:156
+#: apps/calendar_sync/views.py:155
 msgid "Calendar disconnected."
 msgstr "Kalender getrennt."
 
-#: apps/calendar_sync/views.py:186
+#: apps/calendar_sync/views.py:185
 msgid "Invalid choice."
 msgstr "Ungültige Auswahl."
 
-#: apps/calendar_sync/views.py:211
+#: apps/calendar_sync/views.py:210
 msgid "Conflict resolved."
 msgstr "Konflikt gelöst."
 
@@ -2194,7 +2184,7 @@ msgstr "Institut"
 #: apps/contracts/models.py:181
 #: apps/contracts/templates/contracts/institute_list.html:4
 #: apps/contracts/templates/contracts/institute_list.html:7
-#: apps/core/templates/core/base.html:525
+#: apps/core/templates/core/base.html:526
 msgid "Institutes"
 msgstr "Institute"
 
@@ -2221,7 +2211,7 @@ msgid "Last Name"
 msgstr "Nachname"
 
 #: apps/contracts/templates/contracts/contract_detail.html:22
-#: apps/core/templates/core/settings.html:257
+#: apps/core/templates/core/settings.html:421
 msgid "Phone"
 msgstr "Telefon"
 
@@ -2334,7 +2324,7 @@ msgid "Year"
 msgstr "Jahr"
 
 #: apps/contracts/templates/contracts/contract_form.html:34
-#: apps/core/templates/core/base.html:705
+#: apps/core/templates/core/base.html:706
 #: apps/core/templates/core/income_overview.html:66
 #: apps/core/templates/core/reports.html:21
 #: apps/core/templates/core/reports.html:75
@@ -2356,7 +2346,7 @@ msgstr ""
 "Anzahl von geplanten Einheiten."
 
 #: apps/contracts/templates/contracts/contract_list.html:35
-#: apps/core/templates/core/base.html:700
+#: apps/core/templates/core/base.html:701
 #: apps/lessons/templates/lessons/week.html:70
 msgid "From"
 msgstr "Von"
@@ -2578,7 +2568,7 @@ msgstr "Premium-Status"
 msgid "User"
 msgstr "Benutzer"
 
-#: apps/core/admin.py:42 apps/core/templates/core/settings.html:300
+#: apps/core/admin.py:42 apps/core/templates/core/settings.html:72
 msgid "Subscription"
 msgstr "Abonnement"
 
@@ -2605,7 +2595,8 @@ msgstr ""
 
 #: apps/core/forms.py:24 apps/core/forms.py:41
 #: apps/core/templates/core/register.html:35
-#: apps/core/templates/core/settings.html:217
+#: apps/core/templates/core/settings.html:162
+#: apps/core/templates/core/settings.html:172
 msgid "Email address"
 msgstr "E-Mail-Adresse"
 
@@ -2659,7 +2650,7 @@ msgstr "ÖPNV (zeitabhängig)"
 msgid "Bicycle (constant short buffer)"
 msgstr "Fahrrad (konstanter kurzer Puffer)"
 
-#: apps/core/forms.py:154 apps/core/templates/core/settings.html:188
+#: apps/core/forms.py:154 apps/core/templates/core/settings.html:287
 msgid "Travel mode for on-site appointments"
 msgstr "Anreise-Modus für Vor-Ort-Termine"
 
@@ -2671,7 +2662,7 @@ msgstr ""
 "Legt fest, welche Zeitslots für Vor-Ort-Termine angeboten werden. ÖPNV nutzt "
 "zeitabhängige Regeln, Fahrrad einen festen Puffer."
 
-#: apps/core/forms.py:165 apps/core/templates/core/settings.html:192
+#: apps/core/forms.py:165 apps/core/templates/core/settings.html:289
 msgid "Buffer (minutes) when using bicycle"
 msgstr "Puffer (Minuten) bei Fahrrad"
 
@@ -2807,7 +2798,7 @@ msgstr "Telefon"
 msgid "Deine Telefonnummer (optional)."
 msgstr "Deine Telefonnummer (optional)."
 
-#: apps/core/models.py:134 apps/core/templates/core/settings.html:261
+#: apps/core/models.py:134 apps/core/templates/core/settings.html:425
 msgid "Website"
 msgstr "Website"
 
@@ -2815,7 +2806,7 @@ msgstr "Website"
 msgid "Deine Website (optional, z. B. https://example.de)."
 msgstr "Deine Website (optional, z. B. https://example.de)."
 
-#: apps/core/models.py:140 apps/core/templates/core/settings.html:265
+#: apps/core/models.py:140 apps/core/templates/core/settings.html:429
 msgid "IBAN"
 msgstr "IBAN"
 
@@ -2823,7 +2814,7 @@ msgstr "IBAN"
 msgid "Bankverbindung für Rechnungen (optional)."
 msgstr "Bankverbindung für Rechnungen (optional)."
 
-#: apps/core/models.py:146 apps/core/templates/core/settings.html:269
+#: apps/core/models.py:146 apps/core/templates/core/settings.html:433
 msgid "BIC"
 msgstr "BIC"
 
@@ -2877,105 +2868,105 @@ msgstr ""
 "Als Werbender verdiente Freimonate, noch nicht als Stripe-Guthaben "
 "angewendet (z. B. weil dieser Nutzer noch keinen Stripe-Kunden/Preis hat)."
 
-#: apps/core/models.py:194
+#: apps/core/models.py:195
 msgid "User Profile"
 msgstr "Benutzerprofil"
 
-#: apps/core/models.py:195
+#: apps/core/models.py:196
 msgid "User Profiles"
 msgstr "Benutzerprofile"
 
-#: apps/core/models.py:210
+#: apps/core/models.py:211
 msgid "Set only after successful processing"
 msgstr "Wird erst nach erfolgreicher Verarbeitung gesetzt"
 
-#: apps/core/models.py:215
+#: apps/core/models.py:216
 msgid "Stripe Webhook Event"
 msgstr "Stripe-Webhook-Ereignis"
 
-#: apps/core/models.py:216
+#: apps/core/models.py:217
 msgid "Stripe Webhook Events"
 msgstr "Stripe-Webhook-Ereignisse"
 
-#: apps/core/models.py:229
+#: apps/core/models.py:230
 msgid "Pending confirmation"
 msgstr "Bestätigung ausstehend"
 
-#: apps/core/models.py:230
+#: apps/core/models.py:231
 msgid "Confirmed and cancelled"
 msgstr "Bestätigt und storniert"
 
-#: apps/core/models.py:231
+#: apps/core/models.py:232
 msgid "No matching account"
 msgstr "Kein passendes Konto gefunden"
 
-#: apps/core/models.py:232
+#: apps/core/models.py:233
 msgid "Ambiguous match"
 msgstr "Mehrdeutiger Treffer"
 
-#: apps/core/models.py:233
+#: apps/core/models.py:234
 msgid "Confirmation token expired"
 msgstr "Bestätigungstoken abgelaufen"
 
-#: apps/core/models.py:239
+#: apps/core/models.py:240
 msgid "e-recht24 revocation ID (idempotency key for webhook retries)"
 msgstr ""
 "e-recht24-Widerrufs-ID (Idempotenzschlüssel für Webhook-Wiederholungen)"
 
-#: apps/core/models.py:254
+#: apps/core/models.py:255
 msgid "Set to None once used or expired so the link cannot be reused"
 msgstr ""
 "Wird nach Nutzung oder Ablauf auf None gesetzt, damit der Link nicht erneut "
 "verwendet werden kann"
 
-#: apps/core/models.py:268
+#: apps/core/models.py:269
 msgid "Revocation Request"
 msgstr "Widerrufsanfrage"
 
-#: apps/core/models.py:269
+#: apps/core/models.py:270
 msgid "Revocation Requests"
 msgstr "Widerrufsanfragen"
 
-#: apps/core/models.py:279
+#: apps/core/models.py:280
 msgid "Work materials"
 msgstr "Arbeitsmittel"
 
-#: apps/core/models.py:280
+#: apps/core/models.py:281
 msgid "Travel"
 msgstr "Fahrtkosten"
 
-#: apps/core/models.py:281
+#: apps/core/models.py:282
 msgid "Education"
 msgstr "Fortbildung"
 
-#: apps/core/models.py:282
+#: apps/core/models.py:283
 msgid "Office"
 msgstr "Büro/Arbeitszimmer"
 
-#: apps/core/models.py:283
+#: apps/core/models.py:284
 msgid "Communication"
 msgstr "Kommunikation"
 
-#: apps/core/models.py:284
+#: apps/core/models.py:285
 msgid "Other"
 msgstr "Sonstiges"
 
-#: apps/core/models.py:304
+#: apps/core/models.py:305
 msgid "Business use (%)"
 msgstr "Betriebliche Nutzung (%)"
 
-#: apps/core/models.py:305
+#: apps/core/models.py:306
 msgid "Percentage of this expense used for business purposes (1\\u2013100)."
 msgstr "Prozentualer Anteil dieser Ausgabe für betriebliche Zwecke (1–100)."
 
-#: apps/core/models.py:312
+#: apps/core/models.py:313
 msgid "Expense"
 msgstr "Ausgabe"
 
-#: apps/core/models.py:313 apps/core/templates/core/expense_list.html:5
+#: apps/core/models.py:314 apps/core/templates/core/expense_list.html:5
 #: apps/core/templates/core/expense_list.html:8
 #: apps/core/templates/core/tax_year.html:36
-#: apps/core/templates/core/tax_year.html:145 apps/core/views.py:695
+#: apps/core/templates/core/tax_year.html:145 apps/core/views.py:726
 msgid "Expenses"
 msgstr "Ausgaben"
 
@@ -2987,125 +2978,125 @@ msgstr ""
 "Preceptly - Verwaltungssoftware für Nachhilfelehrer: Schüler, Termine, "
 "Verträge und Rechnungen an einem Ort."
 
-#: apps/core/templates/core/base.html:503
+#: apps/core/templates/core/base.html:504
 msgid "Skip to main content"
 msgstr "Zum Hauptinhalt springen"
 
-#: apps/core/templates/core/base.html:505
+#: apps/core/templates/core/base.html:506
 msgid "Main navigation"
 msgstr "Hauptnavigation"
 
-#: apps/core/templates/core/base.html:511
+#: apps/core/templates/core/base.html:512
 msgid "Toggle menu"
 msgstr "Menü ein-/ausblenden"
 
-#: apps/core/templates/core/base.html:517
+#: apps/core/templates/core/base.html:518
 #: apps/core/templates/core/dashboard.html:8
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: apps/core/templates/core/base.html:520
+#: apps/core/templates/core/base.html:521
 msgctxt "main nav dropdown"
 msgid "Management"
 msgstr "Verwaltung"
 
-#: apps/core/templates/core/base.html:523 apps/students/models.py:28
+#: apps/core/templates/core/base.html:524 apps/students/models.py:28
 #: apps/students/templates/students/student_list.html:7
 msgid "Students"
 msgstr "Schüler"
 
-#: apps/core/templates/core/base.html:524
+#: apps/core/templates/core/base.html:525
 msgid "Calendar"
 msgstr "Kalender"
 
-#: apps/core/templates/core/base.html:526
+#: apps/core/templates/core/base.html:527
 #: apps/core/templates/core/settings.html:4
-#: apps/core/templates/core/settings.html:7
+#: apps/core/templates/core/settings.html:47
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: apps/core/templates/core/base.html:531
+#: apps/core/templates/core/base.html:532
 msgctxt "main nav dropdown"
 msgid "Billing"
 msgstr "Abrechnung"
 
-#: apps/core/templates/core/base.html:535
+#: apps/core/templates/core/base.html:536
 msgid "Finance"
 msgstr "Finanzen"
 
-#: apps/core/templates/core/base.html:541
+#: apps/core/templates/core/base.html:542
 msgid "FAQ"
 msgstr "FAQ"
 
-#: apps/core/templates/core/base.html:544
+#: apps/core/templates/core/base.html:545
 msgctxt "FAQ nav dropdown"
 msgid "Overview"
 msgstr "Übersicht"
 
-#: apps/core/templates/core/base.html:545
+#: apps/core/templates/core/base.html:546
 msgctxt "FAQ nav dropdown"
 msgid "Income & billing"
 msgstr "Einnahmen & Abrechnung"
 
-#: apps/core/templates/core/base.html:547
+#: apps/core/templates/core/base.html:548
 msgctxt "FAQ nav dropdown"
 msgid "Lessons"
 msgstr "Stunden"
 
-#: apps/core/templates/core/base.html:548
+#: apps/core/templates/core/base.html:549
 msgctxt "FAQ nav dropdown"
 msgid "Taxes & EÜR"
 msgstr "Steuern & EÜR"
 
-#: apps/core/templates/core/base.html:549
+#: apps/core/templates/core/base.html:550
 msgctxt "FAQ nav dropdown"
 msgid "Reports"
 msgstr "Berichte"
 
-#: apps/core/templates/core/base.html:550
+#: apps/core/templates/core/base.html:551
 msgctxt "FAQ nav dropdown"
 msgid "Tiered pay"
 msgstr "Gestaffelte Vergütung"
 
-#: apps/core/templates/core/base.html:554
+#: apps/core/templates/core/base.html:555
 msgid "Messages"
 msgstr "Nachrichten"
 
-#: apps/core/templates/core/base.html:559
+#: apps/core/templates/core/base.html:560
 msgid "Toggle dark mode"
 msgstr "Dunkelmodus umschalten"
 
-#: apps/core/templates/core/base.html:565
+#: apps/core/templates/core/base.html:566
 msgid "Logout"
 msgstr "Abmelden"
 
-#: apps/core/templates/core/base.html:569
+#: apps/core/templates/core/base.html:570
 msgid "Home"
 msgstr "Startseite"
 
-#: apps/core/templates/core/base.html:570
-#: apps/core/templates/core/base.html:572
+#: apps/core/templates/core/base.html:571
+#: apps/core/templates/core/base.html:573
 #: apps/core/templates/core/login.html:35
 msgid "Login"
 msgstr "Anmelden"
 
-#: apps/core/templates/core/base.html:580
+#: apps/core/templates/core/base.html:581
 msgid "Change language"
 msgstr "Sprache ändern"
 
-#: apps/core/templates/core/base.html:592
+#: apps/core/templates/core/base.html:593
 msgid "Demo account — data resets hourly. Do not enter real personal data."
 msgstr ""
 "Demo-Konto — Daten werden stündlich zurückgesetzt. Gib keine echten "
 "personenbezogenen Daten ein."
 
-#: apps/core/templates/core/base.html:614
-#: apps/portal/templates/portal/base.html:803
+#: apps/core/templates/core/base.html:615
+#: apps/portal/templates/portal/base.html:804
 msgid "Preceptly is under active development"
 msgstr "Preceptly befindet sich in aktiver Entwicklung"
 
-#: apps/core/templates/core/base.html:616
-#: apps/portal/templates/portal/base.html:805
+#: apps/core/templates/core/base.html:617
+#: apps/portal/templates/portal/base.html:806
 msgid ""
 "You might run into the occasional bug — they get fixed as fast as possible. "
 "Thanks for your understanding, and please let me know if something doesn't "
@@ -3115,176 +3106,176 @@ msgstr ""
 "behoben. Danke für dein Verständnis, und gib gerne Bescheid, wenn mal etwas "
 "nicht funktioniert!"
 
-#: apps/core/templates/core/base.html:619
-#: apps/portal/templates/portal/base.html:808
+#: apps/core/templates/core/base.html:620
+#: apps/portal/templates/portal/base.html:809
 msgid "Report a bug / send feedback"
 msgstr "Fehler melden / Feedback geben"
 
-#: apps/core/templates/core/base.html:620
-#: apps/portal/templates/portal/base.html:809
+#: apps/core/templates/core/base.html:621
+#: apps/portal/templates/portal/base.html:810
 msgid "Got it"
 msgstr "Verstanden"
 
-#: apps/core/templates/core/base.html:624
-#: apps/portal/templates/portal/base.html:813
+#: apps/core/templates/core/base.html:625
+#: apps/portal/templates/portal/base.html:814
 msgid "Don't show this again"
 msgstr "Nicht mehr anzeigen"
 
-#: apps/core/templates/core/base.html:681
+#: apps/core/templates/core/base.html:682
 #: apps/lessons/templates/lessons/week.html:226
 msgid "Create"
 msgstr "Erstellen"
 
-#: apps/core/templates/core/base.html:682
+#: apps/core/templates/core/base.html:683
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: apps/core/templates/core/base.html:683
+#: apps/core/templates/core/base.html:684
 msgid "Back"
 msgstr "Zurück"
 
-#: apps/core/templates/core/base.html:684
+#: apps/core/templates/core/base.html:685
 msgid "Next"
 msgstr "Weiter"
 
-#: apps/core/templates/core/base.html:685
+#: apps/core/templates/core/base.html:686
 msgid "Confirm"
 msgstr "Bestätigen"
 
-#: apps/core/templates/core/base.html:686
+#: apps/core/templates/core/base.html:687
 msgid "Search"
 msgstr "Suchen"
 
-#: apps/core/templates/core/base.html:687
+#: apps/core/templates/core/base.html:688
 msgid "Verify"
 msgstr "Prüfen"
 
-#: apps/core/templates/core/base.html:688
+#: apps/core/templates/core/base.html:689
 msgid "Reschedule"
 msgstr "Umbuchen"
 
-#: apps/core/templates/core/base.html:689
+#: apps/core/templates/core/base.html:690
 msgid "Book"
 msgstr "Buchen"
 
-#: apps/core/templates/core/base.html:690
+#: apps/core/templates/core/base.html:691
 msgid "Download"
 msgstr "Herunterladen"
 
-#: apps/core/templates/core/base.html:696
+#: apps/core/templates/core/base.html:697
 #: apps/lessons/templates/lessons/student_booking.html:282
 msgid "Loading..."
 msgstr "Laden..."
 
-#: apps/core/templates/core/base.html:697
+#: apps/core/templates/core/base.html:698
 msgid "No data"
 msgstr "Keine Daten"
 
-#: apps/core/templates/core/base.html:698
+#: apps/core/templates/core/base.html:699
 msgid "Error"
 msgstr "Fehler"
 
-#: apps/core/templates/core/base.html:699
+#: apps/core/templates/core/base.html:700
 msgid "Network error: Please check your internet connection."
 msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
 
-#: apps/core/templates/core/base.html:702
+#: apps/core/templates/core/base.html:703
 #: apps/lessons/templates/lessons/week.html:72
 msgid "on"
 msgstr "am"
 
-#: apps/core/templates/core/base.html:703
+#: apps/core/templates/core/base.html:704
 msgid "Today"
 msgstr "Heute"
 
-#: apps/core/templates/core/base.html:704
+#: apps/core/templates/core/base.html:705
 msgid "Week"
 msgstr "Woche"
 
-#: apps/core/templates/core/base.html:706
+#: apps/core/templates/core/base.html:707
 #: apps/lessons/templates/lessons/student_booking.html:219
 #: apps/lessons/templates/lessons/week.html:18
 msgid "Jump to date:"
 msgstr "Zum Datum springen:"
 
-#: apps/core/templates/core/base.html:707
+#: apps/core/templates/core/base.html:708
 msgid "Reload"
 msgstr "Neu laden"
 
-#: apps/core/templates/core/base.html:885
+#: apps/core/templates/core/base.html:886
 msgid "Push notifications are not configured on this server."
 msgstr "Push-Benachrichtigungen sind auf diesem Server nicht konfiguriert."
 
-#: apps/core/templates/core/base.html:889
-#: apps/core/templates/core/settings.html:429
+#: apps/core/templates/core/base.html:890
+#: apps/core/templates/core/settings.html:485
 msgid "Push notifications are not supported in this browser."
 msgstr "Push-Benachrichtigungen werden von diesem Browser nicht unterstützt."
 
-#: apps/core/templates/core/base.html:908
-#: apps/core/templates/core/settings.html:427
+#: apps/core/templates/core/base.html:909
+#: apps/core/templates/core/settings.html:483
 msgid "Push notifications are enabled on this device."
 msgstr "Push-Benachrichtigungen sind auf diesem Gerät aktiviert."
 
-#: apps/core/templates/core/base.html:1173
-#: apps/core/templates/core/settings.html:507
+#: apps/core/templates/core/base.html:1174
+#: apps/core/templates/core/settings.html:493
 msgid "Add to home screen"
 msgstr "Zum Startbildschirm hinzufügen"
 
-#: apps/core/templates/core/base.html:1174
+#: apps/core/templates/core/base.html:1175
 msgid "Add Preceptly to your home screen for quick, app-like access."
 msgstr ""
 "Füge Preceptly zu deinem Startbildschirm hinzu – für schnellen App-ähnlichen "
 "Zugriff."
 
-#: apps/core/templates/core/base.html:1186
+#: apps/core/templates/core/base.html:1187
 msgid "Open Preceptly in Safari (not Chrome or Firefox)."
 msgstr "Öffne Preceptly in Safari (nicht Chrome oder Firefox)."
 
-#: apps/core/templates/core/base.html:1191
+#: apps/core/templates/core/base.html:1192
 msgid "Tap the Share button at the bottom of the browser."
 msgstr "Tippe auf das Teilen-Symbol am unteren Rand des Browsers."
 
-#: apps/core/templates/core/base.html:1196
+#: apps/core/templates/core/base.html:1197
 msgid "Select \"Add to Home Screen\"."
 msgstr "Wähle \"Zum Home-Bildschirm hinzufügen\"."
 
-#: apps/core/templates/core/base.html:1206
+#: apps/core/templates/core/base.html:1207
 msgid "Open the browser menu (three dots in the top right)."
 msgstr "Öffne das Browser-Menü (drei Punkte oben rechts)."
 
-#: apps/core/templates/core/base.html:1211
+#: apps/core/templates/core/base.html:1212
 msgid "Tap \"Install app\" or \"Add to Home Screen\"."
 msgstr "Tippe auf \"App installieren\" oder \"Zum Startbildschirm\"."
 
-#: apps/core/templates/core/base.html:1215
+#: apps/core/templates/core/base.html:1216
 msgid "Or tap the button below:"
 msgstr "Oder tippe auf die Schaltfläche unten:"
 
-#: apps/core/templates/core/base.html:1216
+#: apps/core/templates/core/base.html:1217
 msgid "Install Preceptly"
 msgstr "Preceptly installieren"
 
-#: apps/core/templates/core/base.html:1225
+#: apps/core/templates/core/base.html:1226
 msgid "Click the install icon in the browser address bar."
 msgstr "Klicke auf das Installieren-Symbol in der Adressleiste."
 
-#: apps/core/templates/core/base.html:1230
+#: apps/core/templates/core/base.html:1231
 msgid "Or open the browser menu and select \"Install Preceptly\"."
 msgstr "Oder öffne das Browser-Menü und wähle \"Preceptly installieren\"."
 
-#: apps/core/templates/core/base.html:1237
+#: apps/core/templates/core/base.html:1238
 msgid "App installation hint"
 msgstr "Hinweis: App installieren"
 
-#: apps/core/templates/core/base.html:1238
+#: apps/core/templates/core/base.html:1239
 msgid "Preceptly can be used as an app on your home screen."
 msgstr "Preceptly kann als App auf deinem Startbildschirm genutzt werden."
 
-#: apps/core/templates/core/base.html:1240
+#: apps/core/templates/core/base.html:1241
 msgid "Show me how"
 msgstr "Zeig mir wie"
 
-#: apps/core/templates/core/base.html:1241
+#: apps/core/templates/core/base.html:1242
 msgid "Not now"
 msgstr "Nicht jetzt"
 
@@ -3506,7 +3497,7 @@ msgid "Save expense"
 msgstr "Ausgabe speichern"
 
 #: apps/core/templates/core/expense_list.html:28
-#: apps/core/templates/core/tax_year.html:151 apps/core/views.py:696
+#: apps/core/templates/core/tax_year.html:151 apps/core/views.py:727
 msgid "Category"
 msgstr "Kategorie"
 
@@ -3888,6 +3879,7 @@ msgstr ""
 "und Absagen."
 
 #: apps/core/templates/core/landing.html:287
+#: apps/core/templates/core/settings.html:305
 msgid "Student & Parent Portal"
 msgstr "Schüler- und Elternportal"
 
@@ -3940,7 +3932,7 @@ msgstr ""
 "sich ab der ersten Rechnung."
 
 #: apps/core/templates/core/landing.html:314
-#: apps/core/templates/core/settings.html:307
+#: apps/core/templates/core/settings.html:78
 msgid "Free"
 msgstr "Kostenlos"
 
@@ -4002,7 +3994,7 @@ msgid "Recommended"
 msgstr "Empfohlen"
 
 #: apps/core/templates/core/landing.html:344
-#: apps/core/templates/core/settings.html:353
+#: apps/core/templates/core/settings.html:124
 msgid "Everything in Starter"
 msgstr "Alles aus Starter"
 
@@ -4015,7 +4007,7 @@ msgid "EÜR tax export"
 msgstr "EÜR-Steuerexport"
 
 #: apps/core/templates/core/landing.html:347
-#: apps/core/templates/core/settings.html:363
+#: apps/core/templates/core/settings.html:134
 msgid "Parent portal"
 msgstr "Elternportal"
 
@@ -4024,7 +4016,7 @@ msgid "Integrated meeting rooms"
 msgstr "Integrierte Meeting-Räume"
 
 #: apps/core/templates/core/landing.html:349
-#: apps/core/templates/core/settings.html:353
+#: apps/core/templates/core/settings.html:124
 msgid "AI lesson plans"
 msgstr "KI-Stundenplanung"
 
@@ -4033,12 +4025,12 @@ msgid "Advanced reports"
 msgstr "Erweiterte Berichte"
 
 #: apps/core/templates/core/landing.html:359
-#: apps/core/templates/core/settings.html:363
+#: apps/core/templates/core/settings.html:134
 msgid "Everything in Pro"
 msgstr "Alles aus Pro"
 
 #: apps/core/templates/core/landing.html:360
-#: apps/core/templates/core/settings.html:363
+#: apps/core/templates/core/settings.html:134
 msgid "Priority support"
 msgstr "Vorrangiger Support"
 
@@ -4255,7 +4247,6 @@ msgid "Review Moderation"
 msgstr "Bewertungsmoderation"
 
 #: apps/core/templates/core/review_moderation.html:9
-#: apps/core/templates/core/settings.html:10
 msgid "Back to Dashboard"
 msgstr "Zurück zum Dashboard"
 
@@ -4283,92 +4274,7 @@ msgstr "Ablehnen"
 msgid "Delete this review permanently?"
 msgstr "Diese Bewertung dauerhaft löschen?"
 
-#: apps/core/templates/core/settings.html:11
-msgid "Manage institutes"
-msgstr "Institute verwalten"
-
-#: apps/core/templates/core/settings.html:13
-msgid ""
-"Tiered pay, tutor no-show rules, and tier start dates are configured per "
-"institute — see \"Manage institutes\"."
-msgstr ""
-"Gestaffelte Vergütung, Tutor-Ausfall-Regeln und Stufen-Startdaten werden pro "
-"Institut eingestellt — siehe „Institute verwalten“."
-
-#: apps/core/templates/core/settings.html:15
-msgid "Default Working Hours"
-msgstr "Standard-Arbeitszeiten"
-
-#: apps/core/templates/core/settings.html:16
-msgid ""
-"Set your default working hours. These will be used for student booking pages "
-"when a contract doesn't have specific working hours configured."
-msgstr ""
-"Standard-Arbeitszeiten festlegen. Diese werden für Schüler-Buchungsseiten "
-"verwendet, wenn für einen Vertrag keine spezifischen Arbeitszeiten "
-"konfiguriert sind."
-
-#: apps/core/templates/core/settings.html:25
-msgid "Monday enabled"
-msgstr "Montag aktiviert"
-
-#: apps/core/templates/core/settings.html:28
-#: apps/core/templates/core/settings.html:49
-#: apps/core/templates/core/settings.html:70
-#: apps/core/templates/core/settings.html:91
-#: apps/core/templates/core/settings.html:112
-#: apps/core/templates/core/settings.html:133
-#: apps/core/templates/core/settings.html:154
-msgid "Enabled"
-msgstr "Aktiviert"
-
-#: apps/core/templates/core/settings.html:46
-msgid "Tuesday enabled"
-msgstr "Dienstag aktiviert"
-
-#: apps/core/templates/core/settings.html:67
-msgid "Wednesday enabled"
-msgstr "Mittwoch aktiviert"
-
-#: apps/core/templates/core/settings.html:88
-msgid "Thursday enabled"
-msgstr "Donnerstag aktiviert"
-
-#: apps/core/templates/core/settings.html:109
-msgid "Friday enabled"
-msgstr "Freitag aktiviert"
-
-#: apps/core/templates/core/settings.html:130
-msgid "Saturday enabled"
-msgstr "Samstag aktiviert"
-
-#: apps/core/templates/core/settings.html:151
-msgid "Sunday enabled"
-msgstr "Sonntag aktiviert"
-
-#: apps/core/templates/core/settings.html:177
-msgid "Save Working Hours"
-msgstr "Arbeitszeiten speichern"
-
-#: apps/core/templates/core/settings.html:182
-msgid "On-site appointments: Travel mode"
-msgstr "Vor-Ort-Termine: Anreise-Modus"
-
-#: apps/core/templates/core/settings.html:183
-msgid ""
-"Choose how you usually get to on-site appointments. This affects which time "
-"slots are offered in the public booking calendar (e.g. more slots with "
-"bicycle, fewer with public transport)."
-msgstr ""
-"Wählen Sie, wie Sie üblicherweise zu Vor-Ort-Terminen anreisen. Das "
-"beeinflusst, welche Zeitslots im Buchungskalender angeboten werden (z. B. "
-"mehr Slots mit Fahrrad, weniger mit ÖPNV)."
-
-#: apps/core/templates/core/settings.html:200
-msgid "Save travel mode"
-msgstr "Anreise-Modus speichern"
-
-#: apps/core/templates/core/settings.html:209
+#: apps/core/templates/core/settings.html:51
 msgid ""
 "Payment received. Subscription activation may take a moment. Refresh if "
 "Premium is not visible yet."
@@ -4376,87 +4282,26 @@ msgstr ""
 "Zahlung eingegangen. Die Abo-Aktivierung kann einen Moment dauern. Seite neu "
 "laden, falls Premium noch nicht sichtbar ist."
 
-#: apps/core/templates/core/settings.html:214
-msgid "For invoices and Stripe we recommend adding an email address."
-msgstr ""
-"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
+#: apps/core/templates/core/settings.html:56
+msgid "Settings sections"
+msgstr "Einstellungsbereiche"
 
-#: apps/core/templates/core/settings.html:218
-msgid "Optional. Used for invoices and Stripe billing notifications."
-msgstr "Optional. Wird für Rechnungen und Stripe-Benachrichtigungen verwendet."
+#: apps/core/templates/core/settings.html:58
+#: apps/core/templates/core/settings.html:69
+msgid "Account & subscription"
+msgstr "Konto & Abo"
 
-#: apps/core/templates/core/settings.html:219
-msgid "To change an existing email address, please contact support."
-msgstr ""
-"Um eine bestehende E-Mail-Adresse zu ändern, kontaktieren Sie bitte den "
-"Support."
-
-#: apps/core/templates/core/settings.html:229
-msgid "Invoice Details"
-msgstr "Rechnungsdaten"
-
-#: apps/core/templates/core/settings.html:230
-msgid "These details appear on every invoice you generate as a PDF."
-msgstr ""
-"Diese Angaben erscheinen auf jeder Rechnung, die du als PDF generierst."
-
-#: apps/core/templates/core/settings.html:233
-msgid ""
-"Your invoice details are not filled in yet. Generated PDFs will not contain "
-"a name or address."
-msgstr ""
-"Deine Rechnungsdaten sind noch nicht ausgefüllt. Generierte PDFs enthalten "
-"keinen Namen und keine Adresse."
-
-#: apps/core/templates/core/settings.html:240
-msgid "Name / Company"
-msgstr "Name / Firma"
-
-#: apps/core/templates/core/settings.html:241
-msgid "e.g. Maria Müller"
-msgstr "z. B. Maria Müller"
-
-#: apps/core/templates/core/settings.html:245
-msgid "Street + no., ZIP City"
-msgstr "Straße Hausnr., PLZ Ort"
-
+#: apps/core/templates/core/settings.html:59
 #: apps/core/templates/core/settings.html:248
-msgid "Tax number / VAT ID"
-msgstr "Steuernummer / USt-IdNr."
+msgid "Scheduling & booking"
+msgstr "Termine & Buchung"
 
-#: apps/core/templates/core/settings.html:249
-msgid "e.g. 123/456/78901 or DE123456789"
-msgstr "z. B. 123/456/78901 oder DE123456789"
+#: apps/core/templates/core/settings.html:61
+#: apps/core/templates/core/settings.html:458
+msgid "Notifications & app"
+msgstr "Benachrichtigungen & App"
 
-#: apps/core/templates/core/settings.html:250
-msgid "Format: Tax number (123/456/78901) or VAT ID (DE123456789)."
-msgstr "Format: Steuernummer (123/456/78901) oder USt-IdNr. (DE123456789)."
-
-#: apps/core/templates/core/settings.html:253
-msgid "E-mail address"
-msgstr "E-Mail-Adresse"
-
-#: apps/core/templates/core/settings.html:254
-msgid "e.g. contact@example.de"
-msgstr "z. B. kontakt@example.de"
-
-#: apps/core/templates/core/settings.html:258
-msgid "e.g. 0123 456789"
-msgstr "z. B. 0123 456789"
-
-#: apps/core/templates/core/settings.html:275
-msgid ""
-"Small business regulation (§19 UStG) – adds the note \"In accordance with "
-"§19 para. 1 UStG, no VAT is charged.\" to the invoice"
-msgstr ""
-"Kleinunternehmerregelung (§19 UStG) – fügt den Hinweis „Gemäß §19 Abs. 1 "
-"UStG wird keine Umsatzsteuer berechnet.\" zur Rechnung hinzu"
-
-#: apps/core/templates/core/settings.html:280
-msgid "Save invoice details"
-msgstr "Rechnungsdaten speichern"
-
-#: apps/core/templates/core/settings.html:301
+#: apps/core/templates/core/settings.html:73
 msgid ""
 "Manage your Premium subscription. Premium unlocks unlimited public booking, "
 "reschedule, reports, Billing Pro, and AI lesson plans."
@@ -4464,53 +4309,53 @@ msgstr ""
 "Verwalten Sie Ihr Premium-Abo. Premium ermöglicht unbegrenztes Public "
 "Booking, Umbuchung, Berichte, Billing Pro und KI-Stundenpläne."
 
-#: apps/core/templates/core/settings.html:303
+#: apps/core/templates/core/settings.html:74
 msgid "Current plan"
 msgstr "Aktueller Plan"
 
-#: apps/core/templates/core/settings.html:311
+#: apps/core/templates/core/settings.html:82
 msgid "Demo account – Premium is enabled for demonstration purposes only."
 msgstr "Demo-Konto – Premium ist nur zu Demonstrationszwecken aktiviert."
 
-#: apps/core/templates/core/settings.html:313
+#: apps/core/templates/core/settings.html:84
 msgid "Manage subscription"
 msgstr "Abonnement verwalten"
 
-#: apps/core/templates/core/settings.html:315
+#: apps/core/templates/core/settings.html:86
 msgid "Premium (manually activated)"
 msgstr "Premium (manuell aktiviert)"
 
-#: apps/core/templates/core/settings.html:318
+#: apps/core/templates/core/settings.html:89
 msgid "First month free, cancel anytime during the trial."
 msgstr "Erster Monat kostenlos, während der Testphase jederzeit kündbar."
 
-#: apps/core/templates/core/settings.html:342
-#: apps/core/templates/core/settings.html:352
-#: apps/core/templates/core/settings.html:362
+#: apps/core/templates/core/settings.html:113
+#: apps/core/templates/core/settings.html:123
+#: apps/core/templates/core/settings.html:133
 msgid "month"
 msgstr "Monat"
 
-#: apps/core/templates/core/settings.html:343
+#: apps/core/templates/core/settings.html:114
 msgid "Unlimited students & lessons"
 msgstr "Unbegrenzte Schüler & Stunden"
 
-#: apps/core/templates/core/settings.html:343
+#: apps/core/templates/core/settings.html:114
 msgid "Invoices & contracts"
 msgstr "Rechnungen & Verträge"
 
-#: apps/core/templates/core/settings.html:343
+#: apps/core/templates/core/settings.html:114
 msgid "Public booking page"
 msgstr "Öffentliche Buchungsseite"
 
-#: apps/core/templates/core/settings.html:353
+#: apps/core/templates/core/settings.html:124
 msgid "Video meetings"
 msgstr "Video-Meetings"
 
-#: apps/core/templates/core/settings.html:353
+#: apps/core/templates/core/settings.html:124
 msgid "Reports & analytics"
 msgstr "Berichte & Auswertungen"
 
-#: apps/core/templates/core/settings.html:371
+#: apps/core/templates/core/settings.html:142
 msgid ""
 "I expressly agree to the performance of the contract before the end of the "
 "withdrawal period. I acknowledge that my right of withdrawal expires upon "
@@ -4520,11 +4365,11 @@ msgstr ""
 "ausdrücklich zu. Ich nehme zur Kenntnis, dass mein Widerrufsrecht mit Beginn "
 "der Ausführung erlischt."
 
-#: apps/core/templates/core/settings.html:374
+#: apps/core/templates/core/settings.html:145
 msgid "Subscribe now"
 msgstr "Jetzt abonnieren"
 
-#: apps/core/templates/core/settings.html:387
+#: apps/core/templates/core/settings.html:157
 msgid ""
 "To access Premium, please contact <a href=\"mailto:info@preceptly."
 "de\">info@preceptly.de</a>."
@@ -4532,11 +4377,27 @@ msgstr ""
 "Um Zugang zu Premium zu erhalten, kontaktiere bitte <a href=\"mailto:"
 "info@preceptly.de\">info@preceptly.de</a>."
 
-#: apps/core/templates/core/settings.html:392
+#: apps/core/templates/core/settings.html:165
+msgid "For invoices and Stripe we recommend adding an email address."
+msgstr ""
+"Für Rechnungen und Stripe empfehlen wir, eine E-Mail-Adresse zu hinterlegen."
+
+#: apps/core/templates/core/settings.html:168
+msgid "Optional. Used for invoices and Stripe billing notifications."
+msgstr "Optional. Wird für Rechnungen und Stripe-Benachrichtigungen verwendet."
+
+#: apps/core/templates/core/settings.html:169
+msgid "To change an existing email address, please contact support."
+msgstr ""
+"Um eine bestehende E-Mail-Adresse zu ändern, kontaktieren Sie bitte den "
+"Support."
+
+#: apps/core/templates/core/settings.html:200
+#: apps/core/templates/core/settings.html:203
 msgid "Invite friends"
 msgstr "Freunde einladen"
 
-#: apps/core/templates/core/settings.html:393
+#: apps/core/templates/core/settings.html:201
 msgid ""
 "Share your link. For every friend whose subscription becomes active, you get "
 "one free month."
@@ -4544,11 +4405,11 @@ msgstr ""
 "Teile deinen Link. Für jeden Freund, dessen Abo aktiv wird, bekommst du "
 "einen kostenlosen Monat."
 
-#: apps/core/templates/core/settings.html:397
+#: apps/core/templates/core/settings.html:205
 msgid "Copy"
 msgstr "Kopieren"
 
-#: apps/core/templates/core/settings.html:400
+#: apps/core/templates/core/settings.html:208
 #, python-format
 msgid ""
 "%(months)s free month earned, applied on your next invoice once you have an "
@@ -4563,148 +4424,11 @@ msgstr[1] ""
 "%(months)s Gratismonate verdient, werden bei deiner nächsten Rechnung "
 "angerechnet, sobald du ein aktives Abo hast."
 
-#: apps/core/templates/core/settings.html:405
-msgid "Notifications"
-msgstr "Benachrichtigungen"
-
-#: apps/core/templates/core/settings.html:406
-msgid "Choose how you want to be notified for each type of event."
-msgstr ""
-"Wähle, wie du für jede Art von Ereignis benachrichtigt werden möchtest."
-
-#: apps/core/templates/core/settings.html:411
-msgid "New booking via portal"
-msgstr "Neue Buchung über Portal"
-
-#: apps/core/templates/core/settings.html:415
-msgid "Email"
-msgstr "E-Mail"
-
-#: apps/core/templates/core/settings.html:419
-msgid "Push"
-msgstr "Push"
-
-#: apps/core/templates/core/settings.html:428
-msgid "Enable push notifications on this device"
-msgstr "Push-Benachrichtigungen auf diesem Gerät aktivieren"
-
-#: apps/core/templates/core/settings.html:434
-msgid "Calendar Sync"
-msgstr "Kalender-Synchronisierung"
-
-#: apps/core/templates/core/settings.html:435
-msgid ""
-"Two-way sync between your Preceptly sessions/blocked times and your iCloud "
-"calendar. Changes on either side sync automatically every few minutes."
-msgstr ""
-"Zwei-Wege-Synchronisierung zwischen deinen Preceptly-Stunden/Blockzeiten und "
-"deinem iCloud-Kalender. Änderungen auf beiden Seiten werden automatisch alle "
-"paar Minuten synchronisiert."
-
-#: apps/core/templates/core/settings.html:443
-#, python-format
-msgid "Last synced %(when)s"
-msgstr "Zuletzt synchronisiert %(when)s"
-
-#: apps/core/templates/core/settings.html:445
-msgid "Waiting for first sync…"
-msgstr "Warte auf ersten Sync…"
-
-#: apps/core/templates/core/settings.html:451
-#, python-format
-msgid ""
-"Last run: %(pushed)s pushed, %(pulled)s pulled, %(imported)s imported, "
-"%(deleted)s deleted"
-msgstr ""
-"Letzter Lauf: %(pushed)s gepusht, %(pulled)s geholt, %(imported)s "
-"importiert, %(deleted)s gelöscht"
-
-#: apps/core/templates/core/settings.html:452
-#, python-format
-msgid "%(count)s error"
-msgid_plural "%(count)s errors"
-msgstr[0] "%(count)s Fehler"
-msgstr[1] "%(count)s Fehler"
-
-#: apps/core/templates/core/settings.html:458
-#, python-format
-msgid "%(count)s conflict needs your attention"
-msgid_plural "%(count)s conflicts need your attention"
-msgstr[0] "%(count)s Konflikt braucht deine Aufmerksamkeit"
-msgstr[1] "%(count)s Konflikte brauchen deine Aufmerksamkeit"
-
-#: apps/core/templates/core/settings.html:462
-msgid "Sessions go to"
-msgstr "Stunden gehen an"
-
-#: apps/core/templates/core/settings.html:463
-#: apps/core/templates/core/settings.html:467
-msgid "not configured"
-msgstr "nicht konfiguriert"
-
-#: apps/core/templates/core/settings.html:466
-msgid "Blocked times come from"
-msgstr "Blockzeiten kommen von"
-
-#: apps/core/templates/core/settings.html:470
-msgid "Choose calendars"
-msgstr "Kalender auswählen"
-
-#: apps/core/templates/core/settings.html:474
-msgid "Pause sync"
-msgstr "Sync pausieren"
-
-#: apps/core/templates/core/settings.html:474
-msgid "Resume sync"
-msgstr "Sync fortsetzen"
-
-#: apps/core/templates/core/settings.html:477
-msgid "Disconnect this calendar? Existing synced events stay as-is."
-msgstr ""
-"Diesen Kalender trennen? Bereits synchronisierte Termine bleiben unverändert "
-"bestehen."
-
-#: apps/core/templates/core/settings.html:479
-msgid "Disconnect"
-msgstr "Trennen"
-
-#: apps/core/templates/core/settings.html:488
-msgid "Apple ID (email)"
-msgstr "Apple-ID (E-Mail)"
-
-#: apps/core/templates/core/settings.html:492
-msgid "App-specific password"
-msgstr "App-spezifisches Passwort"
-
-#: apps/core/templates/core/settings.html:495
-msgid ""
-"Generate one at appleid.apple.com → Sign-In and Security → App-Specific "
-"Passwords. Never use your real Apple ID password here."
-msgstr ""
-"Erstelle eins unter appleid.apple.com → Anmeldung und Sicherheit → App-"
-"spezifische Passwörter. Verwende hier niemals dein echtes Apple-ID-Passwort."
-
-#: apps/core/templates/core/settings.html:498
-msgid "Connect iCloud Calendar"
-msgstr "iCloud-Kalender verbinden"
-
-#: apps/core/templates/core/settings.html:503
-msgid "App on home screen"
-msgstr "App auf dem Startbildschirm"
-
-#: apps/core/templates/core/settings.html:504
-msgid ""
-"Use Preceptly as an app directly from your home screen – fast and "
-"convenient, without a browser."
-msgstr ""
-"Nutze Preceptly als App direkt vom Startbildschirm – schnell und bequem, "
-"ohne Browser."
-
-#: apps/core/templates/core/settings.html:511
+#: apps/core/templates/core/settings.html:214
 msgid "Legal agreements"
 msgstr "Rechtliche Vereinbarungen"
 
-#: apps/core/templates/core/settings.html:516
+#: apps/core/templates/core/settings.html:218
 #, python-format
 msgid ""
 "\n"
@@ -4720,7 +4444,7 @@ msgstr ""
 "%(date)s akzeptiert.\n"
 "        "
 
-#: apps/core/templates/core/settings.html:524
+#: apps/core/templates/core/settings.html:226
 msgid ""
 "You have not yet explicitly accepted the Data Processing Agreement (AVV). "
 "This is required for GDPR-compliant use of Preceptly."
@@ -4729,11 +4453,11 @@ msgstr ""
 "akzeptiert. Dies ist für die DSGVO-konforme Nutzung von Preceptly "
 "erforderlich."
 
-#: apps/core/templates/core/settings.html:530
+#: apps/core/templates/core/settings.html:232
 msgid "Legal consent"
 msgstr "Rechtliche Einwilligung"
 
-#: apps/core/templates/core/settings.html:534
+#: apps/core/templates/core/settings.html:236
 #, python-format
 msgid ""
 "I accept the <a href=\"%(url_terms)s\">Terms of Service</a>, <a "
@@ -4744,11 +4468,277 @@ msgstr ""
 "href=\"%(url_avv)s\">Auftragsverarbeitungsvertrag (AVV, Art. 28 DSGVO)</a> "
 "und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a>."
 
-#: apps/core/templates/core/settings.html:538
+#: apps/core/templates/core/settings.html:240
 msgid "Accept agreements"
 msgstr "Vereinbarungen akzeptieren"
 
-#: apps/core/templates/core/settings.html:561
+#: apps/core/templates/core/settings.html:251
+msgid "Default Working Hours"
+msgstr "Standard-Arbeitszeiten"
+
+#: apps/core/templates/core/settings.html:252
+msgid ""
+"Set your default working hours. These will be used for student booking pages "
+"when a contract doesn't have specific working hours configured."
+msgstr ""
+"Standard-Arbeitszeiten festlegen. Diese werden für Schüler-Buchungsseiten "
+"verwendet, wenn für einen Vertrag keine spezifischen Arbeitszeiten "
+"konfiguriert sind."
+
+#: apps/core/templates/core/settings.html:276
+msgid "Save Working Hours"
+msgstr "Arbeitszeiten speichern"
+
+#: apps/core/templates/core/settings.html:282
+msgid "On-site appointments: Travel mode"
+msgstr "Vor-Ort-Termine: Anreise-Modus"
+
+#: apps/core/templates/core/settings.html:283
+msgid ""
+"Choose how you usually get to on-site appointments. This affects which time "
+"slots are offered in the public booking calendar (e.g. more slots with "
+"bicycle, fewer with public transport)."
+msgstr ""
+"Wählen Sie, wie Sie üblicherweise zu Vor-Ort-Terminen anreisen. Das "
+"beeinflusst, welche Zeitslots im Buchungskalender angeboten werden (z. B. "
+"mehr Slots mit Fahrrad, weniger mit ÖPNV)."
+
+#: apps/core/templates/core/settings.html:299
+msgid "Save travel mode"
+msgstr "Anreise-Modus speichern"
+
+#: apps/core/templates/core/settings.html:306
+msgid ""
+"When students or parents book, reschedule or set up recurring lessons in the "
+"portal, they can see a hint asking them to leave buffer time around your "
+"appointments and blocked times."
+msgstr "Wenn Schüler oder Eltern im Portal Stunden buchen, verschieben oder Serientermine anlegen, können sie einen Hinweis sehen, rund um deine Termine und Blockzeiten etwas Puffer einzuplanen."
+
+#: apps/core/templates/core/settings.html:311
+msgid "Show buffer-time hint when booking"
+msgstr "Hinweis zu Pufferzeiten beim Buchen anzeigen"
+
+#: apps/core/templates/core/settings.html:313
+msgid "Preview (what students and parents see):"
+msgstr "Vorschau (so sehen es Schüler und Eltern):"
+
+#: apps/core/templates/core/settings.html:322
+msgid "Calendar Sync"
+msgstr "Kalender-Synchronisierung"
+
+#: apps/core/templates/core/settings.html:323
+msgid ""
+"Your Preceptly sessions are copied to an iCloud calendar of your choice, and "
+"events from your other calendars are imported as blocked times. Runs "
+"automatically every few minutes."
+msgstr "Deine Preceptly-Stunden werden in einen iCloud-Kalender deiner Wahl übertragen, und Termine aus deinen anderen Kalendern werden als Blockzeiten übernommen. Läuft automatisch alle paar Minuten."
+
+#: apps/core/templates/core/settings.html:330
+#, python-format
+msgid "Last synced %(when)s"
+msgstr "Zuletzt synchronisiert %(when)s"
+
+#: apps/core/templates/core/settings.html:332
+msgid "Waiting for first sync…"
+msgstr "Warte auf ersten Sync…"
+
+#: apps/core/templates/core/settings.html:338
+#, python-format
+msgid ""
+"Last run: %(pushed)s pushed, %(pulled)s pulled, %(imported)s imported, "
+"%(deleted)s deleted"
+msgstr ""
+"Letzter Lauf: %(pushed)s gepusht, %(pulled)s geholt, %(imported)s "
+"importiert, %(deleted)s gelöscht"
+
+#: apps/core/templates/core/settings.html:339
+#, python-format
+msgid "%(count)s error"
+msgid_plural "%(count)s errors"
+msgstr[0] "%(count)s Fehler"
+msgstr[1] "%(count)s Fehler"
+
+#: apps/core/templates/core/settings.html:345
+#, python-format
+msgid "%(count)s conflict needs your attention"
+msgid_plural "%(count)s conflicts need your attention"
+msgstr[0] "%(count)s Konflikt braucht deine Aufmerksamkeit"
+msgstr[1] "%(count)s Konflikte brauchen deine Aufmerksamkeit"
+
+#: apps/core/templates/core/settings.html:349
+msgid "Sessions go to"
+msgstr "Stunden gehen an"
+
+#: apps/core/templates/core/settings.html:350
+#: apps/core/templates/core/settings.html:354
+msgid "not configured"
+msgstr "nicht konfiguriert"
+
+#: apps/core/templates/core/settings.html:353
+msgid "Blocked times come from"
+msgstr "Blockzeiten kommen von"
+
+#: apps/core/templates/core/settings.html:357
+msgid "Choose calendars"
+msgstr "Kalender auswählen"
+
+#: apps/core/templates/core/settings.html:361
+msgid "Pause sync"
+msgstr "Sync pausieren"
+
+#: apps/core/templates/core/settings.html:361
+msgid "Resume sync"
+msgstr "Sync fortsetzen"
+
+#: apps/core/templates/core/settings.html:364
+msgid "Disconnect this calendar? Existing synced events stay as-is."
+msgstr ""
+"Diesen Kalender trennen? Bereits synchronisierte Termine bleiben unverändert "
+"bestehen."
+
+#: apps/core/templates/core/settings.html:366
+msgid "Disconnect"
+msgstr "Trennen"
+
+#: apps/core/templates/core/settings.html:373
+msgid "Apple ID (email)"
+msgstr "Apple-ID (E-Mail)"
+
+#: apps/core/templates/core/settings.html:375
+msgid "App-specific password"
+msgstr "App-spezifisches Passwort"
+
+#: apps/core/templates/core/settings.html:378
+msgid ""
+"Generate one at appleid.apple.com → Sign-In and Security → App-Specific "
+"Passwords. Never use your real Apple ID password here."
+msgstr ""
+"Erstelle eins unter appleid.apple.com → Anmeldung und Sicherheit → App-"
+"spezifische Passwörter. Verwende hier niemals dein echtes Apple-ID-Passwort."
+
+#: apps/core/templates/core/settings.html:381
+msgid "Connect iCloud Calendar"
+msgstr "iCloud-Kalender verbinden"
+
+#: apps/core/templates/core/settings.html:393
+msgid "Invoice Details"
+msgstr "Rechnungsdaten"
+
+#: apps/core/templates/core/settings.html:394
+msgid "These details appear on every invoice you generate as a PDF."
+msgstr ""
+"Diese Angaben erscheinen auf jeder Rechnung, die du als PDF generierst."
+
+#: apps/core/templates/core/settings.html:397
+msgid ""
+"Your invoice details are not filled in yet. Generated PDFs will not contain "
+"a name or address."
+msgstr ""
+"Deine Rechnungsdaten sind noch nicht ausgefüllt. Generierte PDFs enthalten "
+"keinen Namen und keine Adresse."
+
+#: apps/core/templates/core/settings.html:404
+msgid "Name / Company"
+msgstr "Name / Firma"
+
+#: apps/core/templates/core/settings.html:405
+msgid "e.g. Maria Müller"
+msgstr "z. B. Maria Müller"
+
+#: apps/core/templates/core/settings.html:409
+msgid "Street + no., ZIP City"
+msgstr "Straße Hausnr., PLZ Ort"
+
+#: apps/core/templates/core/settings.html:412
+msgid "Tax number / VAT ID"
+msgstr "Steuernummer / USt-IdNr."
+
+#: apps/core/templates/core/settings.html:413
+msgid "e.g. 123/456/78901 or DE123456789"
+msgstr "z. B. 123/456/78901 oder DE123456789"
+
+#: apps/core/templates/core/settings.html:414
+msgid "Format: Tax number (123/456/78901) or VAT ID (DE123456789)."
+msgstr "Format: Steuernummer (123/456/78901) oder USt-IdNr. (DE123456789)."
+
+#: apps/core/templates/core/settings.html:417
+msgid "E-mail address"
+msgstr "E-Mail-Adresse"
+
+#: apps/core/templates/core/settings.html:418
+msgid "e.g. contact@example.de"
+msgstr "z. B. kontakt@example.de"
+
+#: apps/core/templates/core/settings.html:422
+msgid "e.g. 0123 456789"
+msgstr "z. B. 0123 456789"
+
+#: apps/core/templates/core/settings.html:439
+msgid ""
+"Small business regulation (§19 UStG) – adds the note \"In accordance with "
+"§19 para. 1 UStG, no VAT is charged.\" to the invoice"
+msgstr ""
+"Kleinunternehmerregelung (§19 UStG) – fügt den Hinweis „Gemäß §19 Abs. 1 "
+"UStG wird keine Umsatzsteuer berechnet.\" zur Rechnung hinzu"
+
+#: apps/core/templates/core/settings.html:444
+msgid "Save invoice details"
+msgstr "Rechnungsdaten speichern"
+
+#: apps/core/templates/core/settings.html:450
+msgid "Institutes & tiered pay"
+msgstr "Institute & Staffelvergütung"
+
+#: apps/core/templates/core/settings.html:451
+msgid ""
+"Tiered pay, tutor no-show rules, and tier start dates are configured per "
+"institute — see \"Manage institutes\"."
+msgstr ""
+"Gestaffelte Vergütung, Tutor-Ausfall-Regeln und Stufen-Startdaten werden pro "
+"Institut eingestellt — siehe „Institute verwalten“."
+
+#: apps/core/templates/core/settings.html:452
+msgid "Manage institutes"
+msgstr "Institute verwalten"
+
+#: apps/core/templates/core/settings.html:461
+msgid "Notifications"
+msgstr "Benachrichtigungen"
+
+#: apps/core/templates/core/settings.html:462
+msgid "Choose how you want to be notified for each type of event."
+msgstr ""
+"Wähle, wie du für jede Art von Ereignis benachrichtigt werden möchtest."
+
+#: apps/core/templates/core/settings.html:466
+msgid "New booking via portal"
+msgstr "Neue Buchung über Portal"
+
+#: apps/core/templates/core/settings.html:470
+msgid "Email"
+msgstr "E-Mail"
+
+#: apps/core/templates/core/settings.html:474
+msgid "Push"
+msgstr "Push"
+
+#: apps/core/templates/core/settings.html:484
+msgid "Enable push notifications on this device"
+msgstr "Push-Benachrichtigungen auf diesem Gerät aktivieren"
+
+#: apps/core/templates/core/settings.html:490
+msgid "App on home screen"
+msgstr "App auf dem Startbildschirm"
+
+#: apps/core/templates/core/settings.html:491
+msgid ""
+"Use Preceptly as an app directly from your home screen – fast and "
+"convenient, without a browser."
+msgstr ""
+"Nutze Preceptly als App direkt vom Startbildschirm – schnell und bequem, "
+"ohne Browser."
+
+#: apps/core/templates/core/settings.html:519
 msgid "Could not open billing portal."
 msgstr "Abrechnungsportal konnte nicht geöffnet werden."
 
@@ -4824,7 +4814,7 @@ msgstr "Aktueller Gewinn"
 msgid "Remaining until limit"
 msgstr "Verbleibend bis zur Grenze"
 
-#: apps/core/templates/core/tax_year.html:124 apps/core/views.py:664
+#: apps/core/templates/core/tax_year.html:124 apps/core/views.py:695
 msgid "Invoice number"
 msgstr "Rechnungsnummer"
 
@@ -4875,63 +4865,67 @@ msgstr "Danke für dein Feedback! Es erscheint nach kurzer Prüfung öffentlich.
 msgid "Please select a rating between 1 and 5 stars."
 msgstr "Bitte wähle eine Bewertung zwischen 1 und 5 Sternen."
 
-#: apps/core/views.py:277
+#: apps/core/views.py:285
 msgid "Default working hours updated successfully."
 msgstr "Standard-Arbeitszeiten erfolgreich aktualisiert."
 
-#: apps/core/views.py:289
+#: apps/core/views.py:302
 msgid "To change your email address, please contact support."
 msgstr "Um Ihre E-Mail-Adresse zu ändern, kontaktieren Sie bitte den Support."
 
-#: apps/core/views.py:295
+#: apps/core/views.py:308
 msgid "Email address saved."
 msgstr "E-Mail-Adresse gespeichert."
 
-#: apps/core/views.py:313
+#: apps/core/views.py:326
 msgid "Travel mode for on-site appointments updated."
 msgstr "Anreise-Modus für Vor-Ort-Termine wurde aktualisiert."
 
-#: apps/core/views.py:328
+#: apps/core/views.py:341
 msgid "Timezone saved."
 msgstr "Zeitzone gespeichert."
 
-#: apps/core/views.py:330
+#: apps/core/views.py:343
 msgid "Invalid timezone."
 msgstr "Ungültige Zeitzone."
 
-#: apps/core/views.py:351
+#: apps/core/views.py:364
 msgid "Rechnungsdaten gespeichert."
 msgstr "Rechnungsdaten gespeichert."
 
-#: apps/core/views.py:370
+#: apps/core/views.py:383
 msgid "Notification settings saved."
 msgstr "Benachrichtigungseinstellungen gespeichert."
 
-#: apps/core/views.py:663
+#: apps/core/views.py:389
+msgid "Portal settings saved."
+msgstr "Portal-Einstellungen gespeichert."
+
+#: apps/core/views.py:694
 msgid "Abrechnungszeitraum"
 msgstr "Abrechnungszeitraum"
 
-#: apps/core/views.py:666 apps/core/views.py:696
+#: apps/core/views.py:697 apps/core/views.py:727
 msgid "Amount (EUR)"
 msgstr "Betrag (EUR)"
 
-#: apps/core/views.py:763
+#: apps/core/views.py:794
 msgid "Expense saved."
 msgstr "Ausgabe gespeichert."
 
-#: apps/core/views.py:777
+#: apps/core/views.py:808
 msgid "Expense updated."
 msgstr "Ausgabe aktualisiert."
 
-#: apps/core/views.py:790
+#: apps/core/views.py:821
 msgid "Expense deleted."
 msgstr "Ausgabe gelöscht."
 
-#: apps/core/views.py:882
+#: apps/core/views.py:913
 msgid "Please confirm the legal agreements to proceed."
 msgstr "Bitte bestätigen Sie die rechtlichen Vereinbarungen, um fortzufahren."
 
-#: apps/core/views.py:890
+#: apps/core/views.py:921
 msgid "Legal agreements accepted."
 msgstr "Rechtliche Vereinbarungen akzeptiert."
 

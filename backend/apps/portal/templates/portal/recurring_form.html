@@ -9,6 +9,7 @@
 {% if not contract %}
 <div class="alert-warning" role="alert">Kein aktiver Vertrag vorhanden.</div>
 {% else %}
+{% include "portal/_buffer_hint.html" %}
 <div class="box-section">
   <form method="post">
     {% csrf_token %}

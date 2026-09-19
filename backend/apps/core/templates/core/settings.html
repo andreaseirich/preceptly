@@ -4,540 +4,498 @@
 {% block title %}{% trans "Settings" %} – Preceptly{% endblock %}
 
 {% block content %}
+<style>
+.settings-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 16px; }
+.settings-nav { position: sticky; top: 90px; }
+.settings-tabs { display: flex; flex-direction: column; gap: 4px; }
+.settings-tab { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1px solid transparent; color: var(--text-primary); text-decoration: none; font-weight: 500; line-height: 1.3; }
+.settings-tab:hover { background: var(--bg-secondary); }
+.settings-tab[aria-selected="true"] { background: var(--accent-tint); border-color: var(--accent); font-weight: 600; }
+.settings-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.settings-tab-icon { font-size: 1.15em; flex-shrink: 0; }
+.settings-panel[hidden] { display: none !important; }
+.settings-panel:focus { outline: none; }
+.settings-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.settings-card > h3 { margin: 0 0 6px; font-size: 1.1em; color: var(--text-primary); }
+.settings-desc { color: var(--text-secondary); font-size: 0.92em; margin: 0 0 16px; }
+.settings-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.settings-check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.settings-check input { margin-top: 3px; flex-shrink: 0; }
+.settings-label { display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary); }
+.settings-preview-label { font-size: 0.85em; color: var(--text-secondary); margin: 16px 0 6px; }
+
+.wh-list { display: flex; flex-direction: column; gap: 8px; }
+.wh-row { display: grid; grid-template-columns: 160px minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; }
+.wh-day { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+.wh-times { display: flex; align-items: center; gap: 8px; }
+.wh-times input[type="time"] { width: auto; flex: 1 1 110px; max-width: 150px; margin: 0; }
+.wh-row:has(.wh-day input:not(:checked)) .wh-times { opacity: 0.45; }
+
+@media (max-width: 768px) {
+    .settings-layout { grid-template-columns: 1fr; gap: 16px; }
+    .settings-nav { position: static; }
+    .settings-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .settings-tab { justify-content: center; text-align: center; padding: 10px 8px; font-size: 0.92em; border-color: var(--border-color); background: var(--bg-secondary); }
+    .settings-card { padding: 16px; }
+}
+@media (max-width: 480px) {
+    .wh-row { grid-template-columns: 1fr; gap: 8px; }
+    .wh-times input[type="time"] { max-width: none; }
+}
+</style>
+
 <h1>{% trans "Settings" %}</h1>
-
-<div class="btn-group">
-    <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">{% trans "Back to Dashboard" %}</a>
-    <a href="{% url 'contracts:institute_list' %}" class="btn btn-secondary">{% trans "Manage institutes" %}</a>
-</div>
-<p style="color:var(--text-secondary); font-size:0.9em; margin-top:8px;">{% blocktrans %}Tiered pay, tutor no-show rules, and tier start dates are configured per institute — see "Manage institutes".{% endblocktrans %}</p>
-
-<h2>{% trans "Default Working Hours" %}</h2>
-<p>{% trans "Set your default working hours. These will be used for student booking pages when a contract doesn't have specific working hours configured." %}</p>
-
-<form method="post">
-    {% csrf_token %}
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Monday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Monday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.monday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_monday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.monday_start }}
-                </div>
-                <div>
-                    <label for="id_monday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.monday_end }}
-                </div>
-            </div>
-        </div>
-
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Tuesday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Tuesday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.tuesday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_tuesday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.tuesday_start }}
-                </div>
-                <div>
-                    <label for="id_tuesday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.tuesday_end }}
-                </div>
-            </div>
-        </div>
-
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Wednesday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Wednesday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.wednesday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_wednesday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.wednesday_start }}
-                </div>
-                <div>
-                    <label for="id_wednesday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.wednesday_end }}
-                </div>
-            </div>
-        </div>
-
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Thursday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Thursday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.thursday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_thursday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.thursday_start }}
-                </div>
-                <div>
-                    <label for="id_thursday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.thursday_end }}
-                </div>
-            </div>
-        </div>
-
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Friday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Friday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.friday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_friday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.friday_start }}
-                </div>
-                <div>
-                    <label for="id_friday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.friday_end }}
-                </div>
-            </div>
-        </div>
-
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Saturday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Saturday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.saturday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_saturday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.saturday_start }}
-                </div>
-                <div>
-                    <label for="id_saturday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.saturday_end }}
-                </div>
-            </div>
-        </div>
-
-        <div style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; background: var(--bg-secondary);">
-            <h3 style="margin-top: 0; color: var(--text-secondary);">{% trans "Sunday" %}</h3>
-            <fieldset style="border: none; padding: 0; margin: 0 0 10px 0;">
-                <legend class="sr-only">{% trans "Sunday enabled" %}</legend>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    {{ form.sunday_enabled }}
-                    <span>{% trans "Enabled" %}</span>
-                </label>
-            </fieldset>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label for="id_sunday_start" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Start time" %}</label>
-                    {{ form.sunday_start }}
-                </div>
-                <div>
-                    <label for="id_sunday_end" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "End time" %}</label>
-                    {{ form.sunday_end }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {% if form.non_field_errors %}
-    <div class="message error" style="margin-top: 20px;" role="alert">
-        {{ form.non_field_errors }}
-    </div>
-    {% endif %}
-
-    <div class="btn-group" style="margin-top: 30px;">
-        <button type="submit" class="btn btn-success">{% trans "Save Working Hours" %}</button>
-        <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
-    </div>
-</form>
-
-<h2 style="margin-top: 40px;">{% trans "On-site appointments: Travel mode" %}</h2>
-<p>{% trans "Choose how you usually get to on-site appointments. This affects which time slots are offered in the public booking calendar (e.g. more slots with bicycle, fewer with public transport)." %}</p>
-<form method="post" style="margin-top: 15px;">
-    {% csrf_token %}
-    <div style="max-width: 480px;">
-        <p style="margin-bottom: 8px;">
-            <label for="id_transport_mode">{% trans "Travel mode for on-site appointments" %}</label>
-        </p>
-        {{ travel_form.transport_mode }}
-        <p style="margin: 15px 0 8px 0;">
-            <label for="id_fahrrad_buffer_minutes">{% trans "Buffer (minutes) when using bicycle" %}</label>
-        </p>
-        {{ travel_form.fahrrad_buffer_minutes }}
-        {% if travel_form.fahrrad_buffer_minutes.help_text %}
-        <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 4px;">{{ travel_form.fahrrad_buffer_minutes.help_text }}</p>
-        {% endif %}
-    </div>
-    <div style="margin-top: 15px;">
-        <button type="submit" name="save_travel" class="btn btn-success">{% trans "Save travel mode" %}</button>
-    </div>
-    {% if travel_form.non_field_errors %}
-    <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ travel_form.non_field_errors }}</p>
-    {% endif %}
-</form>
 
 {% if show_stripe_success_banner %}
 <div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(40, 167, 69, 0.12); border: 1px solid rgba(40, 167, 69, 0.4); border-radius: 4px; color: var(--text-primary);" role="alert">
     {% trans "Payment received. Subscription activation may take a moment. Refresh if Premium is not visible yet." %}
 </div>
 {% endif %}
-{% if show_email_recommendation %}
-<div class="message" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.4); border-radius: 4px; color: var(--text-primary);" role="alert">
-    {% trans "For invoices and Stripe we recommend adding an email address." %}
-</div>
-{% endif %}
-<h2 style="margin-top: 40px;">{% trans "Email address" %}</h2>
-<p>{% trans "Optional. Used for invoices and Stripe billing notifications." %}
-{% if user.email %} {% trans "To change an existing email address, please contact support." %}{% endif %}</p>
-<form method="post" style="margin-top: 15px;">
-    {% csrf_token %}
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        {{ email_form.email }}
-        <button type="submit" name="save_email" class="btn btn-secondary">{% trans "Save" %}</button>
-    </div>
-    {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
-</form>
 
-<h2 style="margin-top: 40px;">{% trans "Invoice Details" %}</h2>
-<p>{% trans "These details appear on every invoice you generate as a PDF." %}</p>
-{% if not profile.billing_name %}
-<div class="message warning" style="margin-bottom: 14px;" role="alert">
-    {% trans "Your invoice details are not filled in yet. Generated PDFs will not contain a name or address." %}
-</div>
-{% endif %}
-<form method="post" style="margin-top: 15px;">
-    {% csrf_token %}
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 680px;">
-        <div style="grid-column: 1 / -1;">
-            <label for="id_billing_name" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Name / Company" %} <span style="color: #dc3545;">*</span></label>
-            <input type="text" name="billing_name" id="id_billing_name" maxlength="200" value="{{ profile.billing_name }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. Maria Müller" %}" required>
-        </div>
-        <div style="grid-column: 1 / -1;">
-            <label for="id_billing_address" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Address" %} <span style="color: #dc3545;">*</span></label>
-            <textarea name="billing_address" id="id_billing_address" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "Street + no., ZIP City" %}" required>{{ profile.billing_address }}</textarea>
-        </div>
-        <div>
-            <label for="id_billing_tax_number" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Tax number / VAT ID" %} <span style="color: var(--text-secondary); font-weight: normal;">({% trans "optional" %})</span></label>
-            <input type="text" name="billing_tax_number" id="id_billing_tax_number" maxlength="50" value="{{ profile.billing_tax_number }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. 123/456/78901 or DE123456789" %}">
-            <p style="font-size: 0.82em; color: var(--text-secondary); margin-top: 4px;">{% trans "Format: Tax number (123/456/78901) or VAT ID (DE123456789)." %}</p>
-        </div>
-        <div>
-            <label for="id_billing_email" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "E-mail address" %} <span style="color: var(--text-secondary); font-weight: normal;">({% trans "optional" %})</span></label>
-            <input type="email" name="billing_email" id="id_billing_email" maxlength="254" value="{{ profile.billing_email }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. contact@example.de" %}">
-        </div>
-        <div>
-            <label for="id_billing_phone" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Phone" %} <span style="color: var(--text-secondary); font-weight: normal;">({% trans "optional" %})</span></label>
-            <input type="tel" name="billing_phone" id="id_billing_phone" maxlength="30" value="{{ profile.billing_phone }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. 0123 456789" %}">
-        </div>
-        <div>
-            <label for="id_billing_website" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "Website" %} <span style="color: var(--text-secondary); font-weight: normal;">({% trans "optional" %})</span></label>
-            <input type="url" name="billing_website" id="id_billing_website" maxlength="200" value="{{ profile.billing_website }}" style="width: 100%; box-sizing: border-box;" placeholder="https://example.de">
-        </div>
-        <div>
-            <label for="id_billing_bank_iban" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "IBAN" %} <span style="color: var(--text-secondary); font-weight: normal;">({% trans "optional" %})</span></label>
-            <input type="text" name="billing_bank_iban" id="id_billing_bank_iban" maxlength="34" value="{{ profile.billing_bank_iban }}" style="width: 100%; box-sizing: border-box;" placeholder="DE00 0000 0000 0000 0000 00">
-        </div>
-        <div>
-            <label for="id_billing_bank_bic" style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text-secondary);">{% trans "BIC" %} <span style="color: var(--text-secondary); font-weight: normal;">({% trans "optional" %})</span></label>
-            <input type="text" name="billing_bank_bic" id="id_billing_bank_bic" maxlength="11" value="{{ profile.billing_bank_bic }}" style="width: 100%; box-sizing: border-box;" placeholder="XXXXXXXX">
-        </div>
-        <div style="grid-column: 1 / -1; margin-top: 4px;">
-            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                <input type="checkbox" name="billing_kleinunternehmer" id="id_billing_kleinunternehmer"{% if profile.billing_kleinunternehmer %} checked{% endif %} style="margin-top: 3px; flex-shrink: 0;">
-                <span style="font-size: 0.9em; color: var(--text-secondary);">{% trans 'Small business regulation (§19 UStG) – adds the note "In accordance with §19 para. 1 UStG, no VAT is charged." to the invoice' %}</span>
-            </label>
+<div class="settings-layout" id="settings-layout" data-initial-section="{{ settings_initial_section|default:'' }}">
+    <div class="settings-nav">
+        <div class="settings-tabs" aria-label="{% trans 'Settings sections' %}">
+            <a class="settings-tab" href="#settings-account"><span class="settings-tab-icon" aria-hidden="true">👤</span><span>{% trans "Account & subscription" %}</span></a>
+            <a class="settings-tab" href="#settings-scheduling"><span class="settings-tab-icon" aria-hidden="true">📅</span><span>{% trans "Scheduling & booking" %}</span></a>
+            <a class="settings-tab" href="#settings-billing"><span class="settings-tab-icon" aria-hidden="true">🧾</span><span>{% trans "Invoices" %}</span></a>
+            <a class="settings-tab" href="#settings-notifications"><span class="settings-tab-icon" aria-hidden="true">🔔</span><span>{% trans "Notifications & app" %}</span></a>
         </div>
     </div>
-    <div style="margin-top: 15px;">
-        <button type="submit" name="save_billing_profile" class="btn btn-success">{% trans "Save invoice details" %}</button>
-    </div>
-</form>
 
+    <div class="settings-panels">
 
-<h2 style="margin-top: 40px;">Zeitzone</h2>
-<p>Deine Zeitzone bestimmt, wie Uhrzeiten für dich und deine Schüler im Portal angezeigt werden. Wähle die Zeitzone, in der du Nachhilfe gibst.</p>
-<form method="post" style="margin-top: 15px;">
-    {% csrf_token %}
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <label for="id_timezone" class="sr-only">Zeitzone</label>
-        <select name="timezone" id="id_timezone" style="max-width: 300px;">
-            {% for tz in all_timezones %}
-            <option value="{{ tz }}"{% if tz == profile_timezone %} selected{% endif %}>{{ tz }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" name="save_timezone" class="btn btn-secondary">Speichern</button>
-    </div>
-</form>
+    {# ─────────────────────────── Konto & Abo ─────────────────────────── #}
+    <section class="settings-panel" id="settings-account">
+        <h2 class="sr-only">{% trans "Account & subscription" %}</h2>
 
-<h2 style="margin-top: 40px;">{% trans "Subscription" %}</h2>
-<p>{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
-<div style="margin-top: 20px; padding: 20px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
-    <p style="margin: 0 0 15px 0;"><strong>{% trans "Current plan" %}:</strong>
-        {% if is_premium %}
-            <span class="premium-badge">{{ profile.subscription_tier|title }}</span>
-        {% else %}
-            {% trans "Free" %}
-        {% endif %}
-    </p>
-    {% if is_demo_user %}
-        <span style="color: var(--text-secondary);">{% trans "Demo account – Premium is enabled for demonstration purposes only." %}</span>
-    {% elif is_premium and profile.stripe_customer_id %}
-        <button type="button" class="btn" id="stripe-portal-btn">{% trans "Manage subscription" %}</button>
-    {% elif is_premium %}
-        <span style="color: var(--text-secondary);">{% trans "Premium (manually activated)" %}</span>
-    {% elif stripe_premium_checkout_enabled or stripe_enabled %}
-        {% if trial_available %}
-        <p style="margin: 0 0 14px 0; color: var(--accent); font-weight: 600;">{% trans "First month free, cancel anytime during the trial." %}</p>
-        {% endif %}
-        {% url 'stripe_checkout' as checkout_url_stripe %}{% url 'core:subscription_checkout' as checkout_url_sub %}
-        {% with checkout_url=checkout_url_stripe|default:checkout_url_sub %}
-        <style>
-        .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
-        .tier-card { border: 2px solid var(--border-color); border-radius: 8px; padding: 16px 14px; background: var(--bg-primary); cursor: pointer; transition: border-color 0.15s; }
-        .tier-card:has(input:checked) { border-color: var(--accent); background: var(--accent-tint); }
-        .tier-card label { cursor: pointer; display: block; }
-        .tier-card input[type=radio] { display: none; }
-        .tier-name { font-weight: 700; font-size: 1.05em; color: var(--text-primary); }
-        .tier-price { font-size: 1.4em; font-weight: 800; color: var(--text-primary); margin: 4px 0; }
-        .tier-price span { font-size: 0.6em; font-weight: 400; color: var(--text-secondary); }
-        .tier-features { font-size: 0.82em; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
-        </style>
-        <form method="post" action="{{ checkout_url }}" id="tier-checkout-form">
-            {% csrf_token %}
-            <input type="hidden" name="tier" id="selected-tier" value="pro">
-            <div class="tier-grid">
-                {% if stripe_price_starter %}
-                <div class="tier-card" onclick="selectTier('starter', this)">
-                    <label>
-                        <input type="radio" name="_tier_ui" value="starter">
-                        <div class="tier-name">Starter</div>
-                        <div class="tier-price">€ 4,99 <span>/ {% trans "month" %}</span></div>
-                        <div class="tier-features">{% trans "Unlimited students & lessons" %}<br>{% trans "Invoices & contracts" %}<br>{% trans "Public booking page" %}</div>
-                    </label>
-                </div>
+        <section class="settings-card" id="subscription" aria-labelledby="subscription-title">
+            <h3 id="subscription-title">{% trans "Subscription" %}</h3>
+            <p class="settings-desc">{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
+            <p style="margin: 0 0 15px 0;"><strong>{% trans "Current plan" %}:</strong>
+                {% if is_premium %}
+                    <span class="premium-badge">{{ profile.subscription_tier|title }}</span>
+                {% else %}
+                    {% trans "Free" %}
                 {% endif %}
-                {% if stripe_price_pro %}
-                <div class="tier-card" onclick="selectTier('pro', this)" id="tier-card-pro">
-                    <label>
-                        <input type="radio" name="_tier_ui" value="pro" checked>
-                        <div class="tier-name">Pro</div>
-                        <div class="tier-price">€ 9,99 <span>/ {% trans "month" %}</span></div>
-                        <div class="tier-features">{% trans "Everything in Starter" %}<br>{% trans "Video meetings" %}<br>{% trans "AI lesson plans" %}<br>{% trans "Reports & analytics" %}</div>
-                    </label>
-                </div>
+            </p>
+            {% if is_demo_user %}
+                <span style="color: var(--text-secondary);">{% trans "Demo account – Premium is enabled for demonstration purposes only." %}</span>
+            {% elif is_premium and profile.stripe_customer_id %}
+                <button type="button" class="btn" id="stripe-portal-btn">{% trans "Manage subscription" %}</button>
+            {% elif is_premium %}
+                <span style="color: var(--text-secondary);">{% trans "Premium (manually activated)" %}</span>
+            {% elif stripe_premium_checkout_enabled or stripe_enabled %}
+                {% if trial_available %}
+                <p style="margin: 0 0 14px 0; color: var(--accent); font-weight: 600;">{% trans "First month free, cancel anytime during the trial." %}</p>
                 {% endif %}
-                {% if stripe_price_business %}
-                <div class="tier-card" onclick="selectTier('business', this)">
-                    <label>
-                        <input type="radio" name="_tier_ui" value="business">
-                        <div class="tier-name">Business</div>
-                        <div class="tier-price">€ 19,99 <span>/ {% trans "month" %}</span></div>
-                        <div class="tier-features">{% trans "Everything in Pro" %}<br>{% trans "Parent portal" %}<br>{% trans "Priority support" %}</div>
-                    </label>
-                </div>
-                {% endif %}
-            </div>
-            <div style="margin-bottom: 0.75rem; max-width: 480px;">
-                <label style="display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
-                    <input type="checkbox" name="withdrawal_consent" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
-                    <span>{% blocktrans %}I expressly agree to the performance of the contract before the end of the withdrawal period. I acknowledge that my right of withdrawal expires upon commencement of performance.{% endblocktrans %}</span>
-                </label>
-            </div>
-            <button type="submit" class="btn btn-success">{% trans "Subscribe now" %} →</button>
-        </form>
-        <script>
-        function selectTier(tier, card) {
-            document.querySelectorAll('.tier-card').forEach(function(c) { c.querySelector('input[type=radio]').checked = false; });
-            card.querySelector('input[type=radio]').checked = true;
-            document.getElementById('selected-tier').value = tier;
-        }
-        // init: highlight Pro if present
-        (function(){ var p = document.getElementById('tier-card-pro'); if(p) selectTier('pro', p); })();
-        </script>
-        {% endwith %}
-    {% else %}
-        <p style="margin: 0; color: var(--text-secondary); font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:info@preceptly.de">info@preceptly.de</a>.{% endblocktrans %}</p>
-    {% endif %}
-</div>
-
-{% if referral_link %}
-<h2 style="margin-top: 40px;">{% trans "Invite friends" %}</h2>
-<p>{% trans "Share your link. For every friend whose subscription becomes active, you get one free month." %}</p>
-<div style="margin-top: 15px; padding: 20px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-        <input type="text" readonly value="{{ referral_link }}" id="referral-link-input" style="flex: 1; min-width: 220px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);">
-        <button type="button" class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('referral-link-input').value)">{% trans "Copy" %}</button>
-    </div>
-    {% if referral_free_months_pending %}
-    <p style="margin: 12px 0 0 0; color: var(--text-secondary); font-size: 0.9em;">{% blocktrans count months=referral_free_months_pending %}{{ months }} free month earned, applied on your next invoice once you have an active subscription.{% plural %}{{ months }} free months earned, applied on your next invoice once you have an active subscription.{% endblocktrans %}</p>
-    {% endif %}
-</div>
-{% endif %}
-
-<h2 style="margin-top: 40px;">{% trans "Notifications" %}</h2>
-<p>{% trans "Choose how you want to be notified for each type of event." %}</p>
-<form method="post" style="margin-top: 15px;">
-    {% csrf_token %}
-    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 480px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px;">
-            <span>{% trans "New booking via portal" %}</span>
-            <span style="display: flex; gap: 14px;">
-                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9em;">
-                    <input type="checkbox" name="notify_portal_booking_email" {% if notif_pref.notify_portal_booking_email %}checked{% endif %}>
-                    {% trans "Email" %}
-                </label>
-                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9em;">
-                    <input type="checkbox" name="notify_portal_booking_push" {% if notif_pref.notify_portal_booking_push %}checked{% endif %}>
-                    {% trans "Push" %}
-                </label>
-            </span>
-        </div>
-    </div>
-    <button type="submit" name="save_notifications" class="btn btn-secondary" style="margin-top: 15px;">{% trans "Save" %}</button>
-</form>
-<div style="margin-top: 15px;">
-    <span id="pushEnabledText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">✓ {% trans "Push notifications are enabled on this device." %}</span>
-    <button type="button" class="btn" id="pushSubscribeBtn" style="display: none;">🔔 {% trans "Enable push notifications on this device" %}</button>
-    <span id="pushUnsupportedText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">{% trans "Push notifications are not supported in this browser." %}</span>
-</div>
-
-
-<div id="calendar-sync-section" style="display:none;">
-<h2 style="margin-top: 40px;">{% trans "Calendar Sync" %} <span style="font-size:0.6em; color:var(--text-secondary);">(Beta)</span></h2>
-<p>{% blocktrans %}Two-way sync between your Preceptly sessions/blocked times and your iCloud calendar. Changes on either side sync automatically every few minutes.{% endblocktrans %}</p>
-
-{% if calendar_connection %}
-    <div class="box-section" style="margin-top: 10px; max-width: 480px;">
-        <p><strong>{% trans "Status" %}:</strong>
-            {% if calendar_connection.last_sync_error %}
-                ⚠️ {{ calendar_connection.last_sync_error }}
-            {% elif calendar_connection.last_synced_at %}
-                ✓ {% blocktrans with when=calendar_connection.last_synced_at %}Last synced {{ when }}{% endblocktrans %}
+                {% url 'stripe_checkout' as checkout_url_stripe %}{% url 'core:subscription_checkout' as checkout_url_sub %}
+                {% with checkout_url=checkout_url_stripe|default:checkout_url_sub %}
+                <style>
+                .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
+                .tier-card { border: 2px solid var(--border-color); border-radius: 8px; padding: 16px 14px; background: var(--bg-primary); cursor: pointer; transition: border-color 0.15s; }
+                .tier-card:has(input:checked) { border-color: var(--accent); background: var(--accent-tint); }
+                .tier-card label { cursor: pointer; display: block; }
+                .tier-card input[type=radio] { display: none; }
+                .tier-name { font-weight: 700; font-size: 1.05em; color: var(--text-primary); }
+                .tier-price { font-size: 1.4em; font-weight: 800; color: var(--text-primary); margin: 4px 0; }
+                .tier-price span { font-size: 0.6em; font-weight: 400; color: var(--text-secondary); }
+                .tier-features { font-size: 0.82em; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
+                </style>
+                <form method="post" action="{{ checkout_url }}" id="tier-checkout-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="tier" id="selected-tier" value="pro">
+                    <div class="tier-grid">
+                        {% if stripe_price_starter %}
+                        <div class="tier-card" onclick="selectTier('starter', this)">
+                            <label>
+                                <input type="radio" name="_tier_ui" value="starter">
+                                <div class="tier-name">Starter</div>
+                                <div class="tier-price">€ 4,99 <span>/ {% trans "month" %}</span></div>
+                                <div class="tier-features">{% trans "Unlimited students & lessons" %}<br>{% trans "Invoices & contracts" %}<br>{% trans "Public booking page" %}</div>
+                            </label>
+                        </div>
+                        {% endif %}
+                        {% if stripe_price_pro %}
+                        <div class="tier-card" onclick="selectTier('pro', this)" id="tier-card-pro">
+                            <label>
+                                <input type="radio" name="_tier_ui" value="pro" checked>
+                                <div class="tier-name">Pro</div>
+                                <div class="tier-price">€ 9,99 <span>/ {% trans "month" %}</span></div>
+                                <div class="tier-features">{% trans "Everything in Starter" %}<br>{% trans "Video meetings" %}<br>{% trans "AI lesson plans" %}<br>{% trans "Reports & analytics" %}</div>
+                            </label>
+                        </div>
+                        {% endif %}
+                        {% if stripe_price_business %}
+                        <div class="tier-card" onclick="selectTier('business', this)">
+                            <label>
+                                <input type="radio" name="_tier_ui" value="business">
+                                <div class="tier-name">Business</div>
+                                <div class="tier-price">€ 19,99 <span>/ {% trans "month" %}</span></div>
+                                <div class="tier-features">{% trans "Everything in Pro" %}<br>{% trans "Parent portal" %}<br>{% trans "Priority support" %}</div>
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div style="margin-bottom: 0.75rem; max-width: 480px;">
+                        <label style="display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" name="withdrawal_consent" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
+                            <span>{% blocktrans %}I expressly agree to the performance of the contract before the end of the withdrawal period. I acknowledge that my right of withdrawal expires upon commencement of performance.{% endblocktrans %}</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-success">{% trans "Subscribe now" %} →</button>
+                </form>
+                <script>
+                function selectTier(tier, card) {
+                    document.querySelectorAll('.tier-card').forEach(function(c) { c.querySelector('input[type=radio]').checked = false; });
+                    card.querySelector('input[type=radio]').checked = true;
+                    document.getElementById('selected-tier').value = tier;
+                }
+                (function(){ var p = document.getElementById('tier-card-pro'); if(p) selectTier('pro', p); })();
+                </script>
+                {% endwith %}
             {% else %}
-                {% trans "Waiting for first sync…" %}
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.95em;">{% blocktrans %}To access Premium, please contact <a href="mailto:info@preceptly.de">info@preceptly.de</a>.{% endblocktrans %}</p>
             {% endif %}
-        </p>
-        {% with s=calendar_connection.last_sync_summary %}
-        {% if s %}
-        <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px;">
-            {% blocktrans with pushed=s.pushed pulled=s.pulled imported=s.imported deleted=s.deleted %}Last run: {{ pushed }} pushed, {{ pulled }} pulled, {{ imported }} imported, {{ deleted }} deleted{% endblocktrans %}
-            {% if s.errors %} · {% blocktrans count count=s.errors %}{{ count }} error{% plural %}{{ count }} errors{% endblocktrans %}{% endif %}
-        </p>
-        {% endif %}
-        {% endwith %}
-        {% if calendar_sync_conflict_count %}
-            <p style="color: var(--accent-warning, #c0392b);">
-                ⚠️ <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
-            </p>
-        {% endif %}
-        <p style="font-size: 0.9em; margin-top: 10px;">
-            <strong>{% trans "Sessions go to" %}:</strong>
-            {% if calendar_sessions_target %}{{ calendar_sessions_target.display_name }}{% else %}<em>{% trans "not configured" %}</em>{% endif %}
-        </p>
-        <p style="font-size: 0.9em;">
-            <strong>{% trans "Blocked times come from" %}:</strong>
-            {% if calendar_blocked_sources %}{% for c in calendar_blocked_sources %}{{ c.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}<em>{% trans "not configured" %}</em>{% endif %}
-        </p>
-        <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
-            <a href="{% url 'calendar_sync:configure' %}" class="btn btn-secondary">{% trans "Choose calendars" %}</a>
-            <form method="post" action="{% url 'calendar_sync:toggle' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-secondary">
-                    {% if calendar_connection.sync_enabled %}{% trans "Pause sync" %}{% else %}{% trans "Resume sync" %}{% endif %}
-                </button>
-            </form>
-            <form method="post" action="{% url 'calendar_sync:disconnect' %}" onsubmit="return confirm('{% trans "Disconnect this calendar? Existing synced events stay as-is." %}');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-secondary">{% trans "Disconnect" %}</button>
-            </form>
-        </div>
-    </div>
-{% else %}
-    <form method="post" action="{% url 'calendar_sync:connect' %}" style="margin-top: 15px; max-width: 480px;">
-        {% csrf_token %}
-        <input type="hidden" name="provider" value="icloud">
-        <div style="margin-bottom: 12px;">
-            <label style="display:block; margin-bottom: 4px;">{% trans "Apple ID (email)" %}</label>
-            <input type="email" name="caldav_username" value="{{ request.GET.calendar_username }}" required style="width: 100%;">
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display:block; margin-bottom: 4px;">{% trans "App-specific password" %}</label>
-            <input type="password" name="caldav_password" required style="width: 100%;" autocomplete="off">
-            <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">
-                {% blocktrans %}Generate one at appleid.apple.com → Sign-In and Security → App-Specific Passwords. Never use your real Apple ID password here.{% endblocktrans %}
-            </p>
-        </div>
-        <button type="submit" class="btn">{% trans "Connect iCloud Calendar" %}</button>
-    </form>
-{% endif %}
-</div>
+        </section>
 
-<h2 style="margin-top: 40px;" id="pwa-install-section">{% trans "App on home screen" %}</h2>
-<p>{% trans "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser." %}</p>
-<div style="margin-top: 15px;">
-    <button type="button" class="btn" id="pwaSettingsInstallBtn">
-        📲 {% trans "Add to home screen" %}
-    </button>
-</div>
+        <section class="settings-card" id="email" aria-labelledby="email-title">
+            <h3 id="email-title">{% trans "Email address" %}</h3>
+            {% if show_email_recommendation %}
+            <div class="message" style="margin-bottom: 14px; padding: 12px 16px; background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.4); border-radius: 4px; color: var(--text-primary);" role="alert">
+                {% trans "For invoices and Stripe we recommend adding an email address." %}
+            </div>
+            {% endif %}
+            <p class="settings-desc">{% trans "Optional. Used for invoices and Stripe billing notifications." %}
+            {% if user.email %} {% trans "To change an existing email address, please contact support." %}{% endif %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <label for="id_email" class="sr-only">{% trans "Email address" %}</label>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    {{ email_form.email }}
+                    <button type="submit" name="save_email" class="btn btn-secondary">{% trans "Save" %}</button>
+                </div>
+                {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
+            </form>
+        </section>
 
-<h2 style="margin-top: 40px;">{% trans "Legal agreements" %}</h2>
-<div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
-{% if profile.avv_accepted_at %}
-    {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
-    <p style="margin: 0; color: var(--text-secondary);">
-        {% blocktrans with date=profile.avv_accepted_at|date:"SHORT_DATE_FORMAT" url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}
+        <section class="settings-card" id="timezone" aria-labelledby="timezone-title">
+            <h3 id="timezone-title">Zeitzone</h3>
+            <p class="settings-desc">Deine Zeitzone bestimmt, wie Uhrzeiten für dich und deine Schüler im Portal angezeigt werden. Wähle die Zeitzone, in der du Nachhilfe gibst.</p>
+            <form method="post">
+                {% csrf_token %}
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <label for="id_timezone" class="sr-only">Zeitzone</label>
+                    <select name="timezone" id="id_timezone" style="max-width: 300px;">
+                        {% for tz in all_timezones %}
+                        <option value="{{ tz }}"{% if tz == profile_timezone %} selected{% endif %}>{{ tz }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" name="save_timezone" class="btn btn-secondary">Speichern</button>
+                </div>
+            </form>
+        </section>
+
+        {% if referral_link %}
+        <section class="settings-card" id="referral" aria-labelledby="referral-title">
+            <h3 id="referral-title">{% trans "Invite friends" %}</h3>
+            <p class="settings-desc">{% trans "Share your link. For every friend whose subscription becomes active, you get one free month." %}</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <label for="referral-link-input" class="sr-only">{% trans "Invite friends" %}</label>
+                <input type="text" readonly value="{{ referral_link }}" id="referral-link-input" style="flex: 1; min-width: 220px;">
+                <button type="button" class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('referral-link-input').value)">{% trans "Copy" %}</button>
+            </div>
+            {% if referral_free_months_pending %}
+            <p style="margin: 12px 0 0 0; color: var(--text-secondary); font-size: 0.9em;">{% blocktrans count months=referral_free_months_pending %}{{ months }} free month earned, applied on your next invoice once you have an active subscription.{% plural %}{{ months }} free months earned, applied on your next invoice once you have an active subscription.{% endblocktrans %}</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <section class="settings-card" id="legal" aria-labelledby="legal-title">
+            <h3 id="legal-title">{% trans "Legal agreements" %}</h3>
+            {% if profile.avv_accepted_at %}
+                {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
+                <p style="margin: 0; color: var(--text-secondary);">
+                    {% blocktrans with date=profile.avv_accepted_at|date:"SHORT_DATE_FORMAT" url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}
         You accepted the <a href="{{ url_terms }}">Terms of Service</a>,
         <a href="{{ url_avv }}">Data Processing Agreement (AVV)</a>,
         and <a href="{{ url_privacy }}">Privacy Policy</a> on {{ date }}.
         {% endblocktrans %}
-    </p>
-{% else %}
-    <p style="margin-bottom: 12px; color: var(--text-secondary);">
-        {% trans "You have not yet explicitly accepted the Data Processing Agreement (AVV). This is required for GDPR-compliant use of Preceptly." %}
-    </p>
-    <form method="post" action="{% url 'core:accept_avv' %}">
-        {% csrf_token %}
-        {% url 'core:legal_terms' as url_terms2 %}{% url 'core:legal_avv' as url_avv2 %}{% url 'core:legal_privacy' as url_privacy2 %}
-        <fieldset style="border: none; padding: 0; margin: 0 0 14px 0;">
-            <legend class="sr-only">{% trans "Legal consent" %}</legend>
-            <label for="id_avv_consent_settings" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                <input type="checkbox" name="avv_consent" id="id_avv_consent_settings" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
-                <span style="color: var(--text-secondary); font-size: 0.95em;">
-                    {% blocktrans with url_terms=url_terms2 url_avv=url_avv2 url_privacy=url_privacy2 %}I accept the <a href="{{ url_terms }}">Terms of Service</a>, <a href="{{ url_avv }}">Data Processing Agreement (AVV, Art. 28 GDPR)</a>, and <a href="{{ url_privacy }}">Privacy Policy</a>.{% endblocktrans %}
-                </span>
-            </label>
-        </fieldset>
-        <button type="submit" class="btn">{% trans "Accept agreements" %}</button>
-    </form>
-{% endif %}
+                </p>
+            {% else %}
+                <p style="margin-bottom: 12px; color: var(--text-secondary);">
+                    {% trans "You have not yet explicitly accepted the Data Processing Agreement (AVV). This is required for GDPR-compliant use of Preceptly." %}
+                </p>
+                <form method="post" action="{% url 'core:accept_avv' %}">
+                    {% csrf_token %}
+                    {% url 'core:legal_terms' as url_terms2 %}{% url 'core:legal_avv' as url_avv2 %}{% url 'core:legal_privacy' as url_privacy2 %}
+                    <fieldset style="border: none; padding: 0; margin: 0 0 14px 0;">
+                        <legend class="sr-only">{% trans "Legal consent" %}</legend>
+                        <label for="id_avv_consent_settings" class="settings-check">
+                            <input type="checkbox" name="avv_consent" id="id_avv_consent_settings" required aria-required="true">
+                            <span style="color: var(--text-secondary); font-size: 0.95em;">
+                                {% blocktrans with url_terms=url_terms2 url_avv=url_avv2 url_privacy=url_privacy2 %}I accept the <a href="{{ url_terms }}">Terms of Service</a>, <a href="{{ url_avv }}">Data Processing Agreement (AVV, Art. 28 GDPR)</a>, and <a href="{{ url_privacy }}">Privacy Policy</a>.{% endblocktrans %}
+                            </span>
+                        </label>
+                    </fieldset>
+                    <button type="submit" class="btn">{% trans "Accept agreements" %}</button>
+                </form>
+            {% endif %}
+        </section>
+    </section>
+
+    {# ──────────────────────── Termine & Buchung ──────────────────────── #}
+    <section class="settings-panel" id="settings-scheduling">
+        <h2 class="sr-only">{% trans "Scheduling & booking" %}</h2>
+
+        <section class="settings-card" id="working-hours" aria-labelledby="working-hours-title">
+            <h3 id="working-hours-title">{% trans "Default Working Hours" %}</h3>
+            <p class="settings-desc">{% trans "Set your default working hours. These will be used for student booking pages when a contract doesn't have specific working hours configured." %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="wh-list">
+                    {% for row in working_hour_rows %}
+                    <div class="wh-row">
+                        <label class="wh-day" for="{{ row.enabled.id_for_label }}">
+                            {{ row.enabled }}
+                            <span>{{ row.label }}</span>
+                        </label>
+                        <div class="wh-times">
+                            <label class="sr-only" for="{{ row.start.id_for_label }}">{{ row.label }}: {% trans "Start time" %}</label>
+                            {{ row.start }}
+                            <span aria-hidden="true">–</span>
+                            <label class="sr-only" for="{{ row.end.id_for_label }}">{{ row.label }}: {% trans "End time" %}</label>
+                            {{ row.end }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if form.non_field_errors %}
+                <div class="message error" style="margin-top: 16px;" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <div class="settings-actions">
+                    <button type="submit" class="btn btn-success">{% trans "Save Working Hours" %}</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-card" id="travel" aria-labelledby="travel-title">
+            <h3 id="travel-title">{% trans "On-site appointments: Travel mode" %}</h3>
+            <p class="settings-desc">{% trans "Choose how you usually get to on-site appointments. This affects which time slots are offered in the public booking calendar (e.g. more slots with bicycle, fewer with public transport)." %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <div style="max-width: 480px;">
+                    <label for="id_transport_mode" class="settings-label">{% trans "Travel mode for on-site appointments" %}</label>
+                    {{ travel_form.transport_mode }}
+                    <label for="id_fahrrad_buffer_minutes" class="settings-label" style="margin-top: 14px;">{% trans "Buffer (minutes) when using bicycle" %}</label>
+                    {{ travel_form.fahrrad_buffer_minutes }}
+                    {% if travel_form.fahrrad_buffer_minutes.help_text %}
+                    <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 4px;">{{ travel_form.fahrrad_buffer_minutes.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% if travel_form.non_field_errors %}
+                <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ travel_form.non_field_errors }}</p>
+                {% endif %}
+                <div class="settings-actions">
+                    <button type="submit" name="save_travel" class="btn btn-success">{% trans "Save travel mode" %}</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-card" id="portal" aria-labelledby="portal-title">
+            <h3 id="portal-title">{% trans "Student & Parent Portal" %}</h3>
+            <p class="settings-desc">{% trans "When students or parents book, reschedule or set up recurring lessons in the portal, they can see a hint asking them to leave buffer time around your appointments and blocked times." %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <label class="settings-check" for="id_portal_buffer_hint_enabled">
+                    <input type="checkbox" name="portal_buffer_hint_enabled" id="id_portal_buffer_hint_enabled"{% if profile.portal_buffer_hint_enabled %} checked{% endif %}>
+                    <span>{% trans "Show buffer-time hint when booking" %}</span>
+                </label>
+                <p class="settings-preview-label">{% trans "Preview (what students and parents see):" %}</p>
+                {% include "portal/_buffer_hint.html" with show_buffer_hint=True %}
+                <div class="settings-actions">
+                    <button type="submit" name="save_portal" class="btn btn-success">{% trans "Save" %}</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-card" id="calendar-sync" aria-labelledby="calendar-sync-title" style="display:none;">
+            <h3 id="calendar-sync-title">{% trans "Calendar Sync" %} <span style="font-size:0.75em; font-weight: normal; color:var(--text-secondary);">(Beta)</span></h3>
+            <p class="settings-desc">{% blocktrans %}Your Preceptly sessions are copied to an iCloud calendar of your choice, and events from your other calendars are imported as blocked times. Runs automatically every few minutes.{% endblocktrans %}</p>
+
+            {% if calendar_connection %}
+                <p><strong>{% trans "Status" %}:</strong>
+                    {% if calendar_connection.last_sync_error %}
+                        ⚠️ {{ calendar_connection.last_sync_error }}
+                    {% elif calendar_connection.last_synced_at %}
+                        ✓ {% blocktrans with when=calendar_connection.last_synced_at %}Last synced {{ when }}{% endblocktrans %}
+                    {% else %}
+                        {% trans "Waiting for first sync…" %}
+                    {% endif %}
+                </p>
+                {% with s=calendar_connection.last_sync_summary %}
+                {% if s %}
+                <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px;">
+                    {% blocktrans with pushed=s.pushed pulled=s.pulled imported=s.imported deleted=s.deleted %}Last run: {{ pushed }} pushed, {{ pulled }} pulled, {{ imported }} imported, {{ deleted }} deleted{% endblocktrans %}
+                    {% if s.errors %} · {% blocktrans count count=s.errors %}{{ count }} error{% plural %}{{ count }} errors{% endblocktrans %}{% endif %}
+                </p>
+                {% endif %}
+                {% endwith %}
+                {% if calendar_sync_conflict_count %}
+                    <p style="color: var(--accent-warning, #c0392b);">
+                        ⚠️ <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
+                    </p>
+                {% endif %}
+                <p style="font-size: 0.9em; margin-top: 10px;">
+                    <strong>{% trans "Sessions go to" %}:</strong>
+                    {% if calendar_sessions_target %}{{ calendar_sessions_target.display_name }}{% else %}<em>{% trans "not configured" %}</em>{% endif %}
+                </p>
+                <p style="font-size: 0.9em;">
+                    <strong>{% trans "Blocked times come from" %}:</strong>
+                    {% if calendar_blocked_sources %}{% for c in calendar_blocked_sources %}{{ c.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}<em>{% trans "not configured" %}</em>{% endif %}
+                </p>
+                <div class="settings-actions">
+                    <a href="{% url 'calendar_sync:configure' %}" class="btn btn-secondary">{% trans "Choose calendars" %}</a>
+                    <form method="post" action="{% url 'calendar_sync:toggle' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">
+                            {% if calendar_connection.sync_enabled %}{% trans "Pause sync" %}{% else %}{% trans "Resume sync" %}{% endif %}
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'calendar_sync:disconnect' %}" onsubmit="return confirm('{% trans "Disconnect this calendar? Existing synced events stay as-is." %}');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">{% trans "Disconnect" %}</button>
+                    </form>
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'calendar_sync:connect' %}" style="max-width: 480px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="provider" value="icloud">
+                    <label for="id_caldav_username" class="settings-label">{% trans "Apple ID (email)" %}</label>
+                    <input type="email" name="caldav_username" id="id_caldav_username" value="{{ request.GET.calendar_username }}" required style="width: 100%;">
+                    <label for="id_caldav_password" class="settings-label" style="margin-top: 12px;">{% trans "App-specific password" %}</label>
+                    <input type="password" name="caldav_password" id="id_caldav_password" required style="width: 100%;" autocomplete="off">
+                    <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">
+                        {% blocktrans %}Generate one at appleid.apple.com → Sign-In and Security → App-Specific Passwords. Never use your real Apple ID password here.{% endblocktrans %}
+                    </p>
+                    <div class="settings-actions">
+                        <button type="submit" class="btn">{% trans "Connect iCloud Calendar" %}</button>
+                    </div>
+                </form>
+            {% endif %}
+        </section>
+    </section>
+
+    {# ──────────────────────────── Rechnungen ─────────────────────────── #}
+    <section class="settings-panel" id="settings-billing">
+        <h2 class="sr-only">{% trans "Invoices" %}</h2>
+
+        <section class="settings-card" id="billing" aria-labelledby="billing-title">
+            <h3 id="billing-title">{% trans "Invoice Details" %}</h3>
+            <p class="settings-desc">{% trans "These details appear on every invoice you generate as a PDF." %}</p>
+            {% if not profile.billing_name %}
+            <div class="message warning" style="margin-bottom: 14px;" role="alert">
+                {% trans "Your invoice details are not filled in yet. Generated PDFs will not contain a name or address." %}
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; max-width: 680px;">
+                    <div style="grid-column: 1 / -1;">
+                        <label for="id_billing_name" class="settings-label">{% trans "Name / Company" %} <span style="color: #dc3545;">*</span></label>
+                        <input type="text" name="billing_name" id="id_billing_name" maxlength="200" value="{{ profile.billing_name }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. Maria Müller" %}" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label for="id_billing_address" class="settings-label">{% trans "Address" %} <span style="color: #dc3545;">*</span></label>
+                        <textarea name="billing_address" id="id_billing_address" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "Street + no., ZIP City" %}" required>{{ profile.billing_address }}</textarea>
+                    </div>
+                    <div>
+                        <label for="id_billing_tax_number" class="settings-label">{% trans "Tax number / VAT ID" %} ({% trans "optional" %})</label>
+                        <input type="text" name="billing_tax_number" id="id_billing_tax_number" maxlength="50" value="{{ profile.billing_tax_number }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. 123/456/78901 or DE123456789" %}">
+                        <p style="font-size: 0.82em; color: var(--text-secondary); margin-top: 4px;">{% trans "Format: Tax number (123/456/78901) or VAT ID (DE123456789)." %}</p>
+                    </div>
+                    <div>
+                        <label for="id_billing_email" class="settings-label">{% trans "E-mail address" %} ({% trans "optional" %})</label>
+                        <input type="email" name="billing_email" id="id_billing_email" maxlength="254" value="{{ profile.billing_email }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. contact@example.de" %}">
+                    </div>
+                    <div>
+                        <label for="id_billing_phone" class="settings-label">{% trans "Phone" %} ({% trans "optional" %})</label>
+                        <input type="tel" name="billing_phone" id="id_billing_phone" maxlength="30" value="{{ profile.billing_phone }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. 0123 456789" %}">
+                    </div>
+                    <div>
+                        <label for="id_billing_website" class="settings-label">{% trans "Website" %} ({% trans "optional" %})</label>
+                        <input type="url" name="billing_website" id="id_billing_website" maxlength="200" value="{{ profile.billing_website }}" style="width: 100%; box-sizing: border-box;" placeholder="https://example.de">
+                    </div>
+                    <div>
+                        <label for="id_billing_bank_iban" class="settings-label">{% trans "IBAN" %} ({% trans "optional" %})</label>
+                        <input type="text" name="billing_bank_iban" id="id_billing_bank_iban" maxlength="34" value="{{ profile.billing_bank_iban }}" style="width: 100%; box-sizing: border-box;" placeholder="DE00 0000 0000 0000 0000 00">
+                    </div>
+                    <div>
+                        <label for="id_billing_bank_bic" class="settings-label">{% trans "BIC" %} ({% trans "optional" %})</label>
+                        <input type="text" name="billing_bank_bic" id="id_billing_bank_bic" maxlength="11" value="{{ profile.billing_bank_bic }}" style="width: 100%; box-sizing: border-box;" placeholder="XXXXXXXX">
+                    </div>
+                    <div style="grid-column: 1 / -1; margin-top: 4px;">
+                        <label class="settings-check" for="id_billing_kleinunternehmer">
+                            <input type="checkbox" name="billing_kleinunternehmer" id="id_billing_kleinunternehmer"{% if profile.billing_kleinunternehmer %} checked{% endif %}>
+                            <span style="font-size: 0.9em; color: var(--text-secondary);">{% trans 'Small business regulation (§19 UStG) – adds the note "In accordance with §19 para. 1 UStG, no VAT is charged." to the invoice' %}</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button type="submit" name="save_billing_profile" class="btn btn-success">{% trans "Save invoice details" %}</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-card" id="institutes" aria-labelledby="institutes-title">
+            <h3 id="institutes-title">{% trans "Institutes & tiered pay" %}</h3>
+            <p class="settings-desc">{% blocktrans %}Tiered pay, tutor no-show rules, and tier start dates are configured per institute — see "Manage institutes".{% endblocktrans %}</p>
+            <a href="{% url 'contracts:institute_list' %}" class="btn btn-secondary">{% trans "Manage institutes" %}</a>
+        </section>
+    </section>
+
+    {# ─────────────────────── Benachrichtigungen & App ─────────────────────── #}
+    <section class="settings-panel" id="settings-notifications">
+        <h2 class="sr-only">{% trans "Notifications & app" %}</h2>
+
+        <section class="settings-card" id="notifications" aria-labelledby="notifications-title">
+            <h3 id="notifications-title">{% trans "Notifications" %}</h3>
+            <p class="settings-desc">{% trans "Choose how you want to be notified for each type of event." %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; max-width: 520px;">
+                    <span>{% trans "New booking via portal" %}</span>
+                    <span style="display: flex; gap: 14px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9em;">
+                            <input type="checkbox" name="notify_portal_booking_email" {% if notif_pref.notify_portal_booking_email %}checked{% endif %}>
+                            {% trans "Email" %}
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9em;">
+                            <input type="checkbox" name="notify_portal_booking_push" {% if notif_pref.notify_portal_booking_push %}checked{% endif %}>
+                            {% trans "Push" %}
+                        </label>
+                    </span>
+                </div>
+                <div class="settings-actions">
+                    <button type="submit" name="save_notifications" class="btn btn-secondary">{% trans "Save" %}</button>
+                </div>
+            </form>
+            <div style="margin-top: 15px;">
+                <span id="pushEnabledText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">✓ {% trans "Push notifications are enabled on this device." %}</span>
+                <button type="button" class="btn" id="pushSubscribeBtn" style="display: none;">🔔 {% trans "Enable push notifications on this device" %}</button>
+                <span id="pushUnsupportedText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">{% trans "Push notifications are not supported in this browser." %}</span>
+            </div>
+        </section>
+
+        <section class="settings-card" id="pwa-install-section" aria-labelledby="pwa-install-title">
+            <h3 id="pwa-install-title">{% trans "App on home screen" %}</h3>
+            <p class="settings-desc">{% trans "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser." %}</p>
+            <button type="button" class="btn" id="pwaSettingsInstallBtn">
+                📲 {% trans "Add to home screen" %}
+            </button>
+        </section>
+    </section>
+
+    </div>
 </div>
 
 {% if stripe_premium_checkout_enabled and is_premium and profile.stripe_customer_id %}
@@ -565,19 +523,88 @@
 </script>
 {% endif %}
 
-
 <script>
 (function() {
-    // Apple-only: CalDAV against iCloud is only relevant on Apple devices/
-    // browsers. Detected client-side (not via server-side User-Agent
-    // sniffing) so the section reacts correctly even behind caching layers.
+    // CalDAV against iCloud is only relevant on Apple devices. Detected
+    // client-side so the card reacts correctly even behind caching layers.
     var ua = navigator.userAgent || '';
     var platform = navigator.platform || '';
-    var isApple = /Mac|iPhone|iPad|iPod/.test(platform) || /Macintosh|iPhone|iPad|iPod/.test(ua);
-    if (isApple) {
-        var section = document.getElementById('calendar-sync-section');
+    if (/Mac|iPhone|iPad|iPod/.test(platform) || /Macintosh|iPhone|iPad|iPod/.test(ua)) {
+        var section = document.getElementById('calendar-sync');
         if (section) section.style.display = '';
     }
+})();
+
+(function() {
+    var layout = document.getElementById('settings-layout');
+    if (!layout) return;
+    var tablist = layout.querySelector('.settings-tabs');
+    var tabs = Array.prototype.slice.call(tablist.querySelectorAll('.settings-tab'));
+    var panels = tabs.map(function(tab) { return document.getElementById(tab.getAttribute('href').slice(1)); });
+
+    tablist.setAttribute('role', 'tablist');
+    tabs.forEach(function(tab, i) {
+        tab.id = 'tab-' + panels[i].id;
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-controls', panels[i].id);
+        panels[i].setAttribute('role', 'tabpanel');
+        panels[i].setAttribute('aria-labelledby', tab.id);
+        panels[i].setAttribute('tabindex', '-1');
+    });
+
+    function activate(index, focusTab) {
+        tabs.forEach(function(tab, i) {
+            var selected = i === index;
+            tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+            tab.tabIndex = selected ? 0 : -1;
+            panels[i].hidden = !selected;
+        });
+        if (focusTab) tabs[index].focus();
+    }
+
+    function select(index, focusTab) {
+        activate(index, focusTab);
+        history.replaceState(null, '', location.pathname + '#' + panels[index].id);
+    }
+
+    tabs.forEach(function(tab, i) {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            select(i, false);
+        });
+        tab.addEventListener('keydown', function(e) {
+            var next = null;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') next = 0;
+            else if (e.key === 'End') next = tabs.length - 1;
+            if (next !== null) {
+                e.preventDefault();
+                select(next, true);
+            }
+        });
+    });
+
+    // Activates the tab that contains the element with this id (a whole
+    // panel, a card like "billing", or a field like "id_email").
+    function showElement(id) {
+        if (!id) return false;
+        var el = document.getElementById(id);
+        var panel = el && (el.classList.contains('settings-panel') ? el : el.closest('.settings-panel'));
+        var index = panel ? panels.indexOf(panel) : -1;
+        if (index < 0) return false;
+        activate(index, false);
+        return true;
+    }
+
+    var hashTarget = decodeURIComponent(location.hash.slice(1));
+    if (!showElement(hashTarget) && !showElement(layout.getAttribute('data-initial-section'))) {
+        activate(0, false);
+    }
+
+    window.addEventListener('hashchange', function() {
+        showElement(decodeURIComponent(location.hash.slice(1)));
+    });
 })();
 </script>
 
