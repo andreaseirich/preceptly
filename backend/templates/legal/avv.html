@@ -9,7 +9,7 @@
 <div class="legal-page">
 {% if LANGUAGE_CODE == "de" %}
 <h1>Auftragsverarbeitungsvertrag (AVV)</h1>
-<p class="legal-meta">gemäß Art. 28 DSGVO</p>
+<p class="legal-meta">gemäß Art. 28 DSGVO · Stand: 19.09.2026</p>
 
 <div class="legal-placeholder-box">
 <strong>zwischen</strong><br>
@@ -36,6 +36,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
     <li>Termindaten (Stundentermine, Notizen, Hausaufgabenvermerke)</li>
     <li>Elternportal-Daten (Namen und E-Mail-Adressen von Erziehungsberechtigten, sofern genutzt)</li>
     <li>Rechnungsdaten (erbrachte Leistungen, Beträge)</li>
+    <li>Unterrichtspläne einschließlich optionaler Zusatzhinweise und PDF-Materialien, die der Verantwortliche für die KI-Unterrichtsplanung bereitstellt (Hinweise und PDF-Inhalte werden nur für die jeweilige Erstellung verarbeitet und nicht gespeichert)</li>
 </ul>
 <p>2.2 Betroffene Personengruppen:</p>
 <ul>
@@ -66,6 +67,9 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
     <li>Zugangsbeschränkung auf authentifizierte Nutzer</li>
     <li>Regelmäßige Datensicherungen</li>
     <li>Protokollierung sicherheitsrelevanter Ereignisse</li>
+    <li>Verschlüsselte Speicherung der Zugangsdaten für die Kalender-Synchronisierung</li>
+    <li>KI-Unterrichtsplanung ausschließlich auf eigener Hardware des Auftragsverarbeiters in Deutschland; Zugriff nur über ein Ende-zu-Ende-verschlüsseltes privates Netzwerk (WireGuard), nicht aus dem öffentlichen Internet erreichbar</li>
+    <li>Automatische Entfernung von Namen, Kontaktdaten und Notizen vor der KI-Verarbeitung; in Zusatzhinweisen und PDF-Material werden Schülername, E-Mail-Adressen und Telefonnummern maskiert</li>
 </ul>
 </div>
 
@@ -87,15 +91,30 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
     <td style="padding:8px; border:1px solid var(--border-color);">Standardvertragsklauseln (SCCs)</td>
 </tr>
 <tr>
-    <td style="padding:8px; border:1px solid var(--border-color);">Anthropic, PBC</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">KI-Unterrichtsplanung (nur Pro-Tarif)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Cloudflare, Inc.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Netzwerkschutz und Auslieferung (CDN, DNS, DDoS-Schutz); der gesamte Datenverkehr läuft über Cloudflare</td>
     <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Standardvertragsklauseln (SCCs)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">EU-US Data Privacy Framework, Standardvertragsklauseln (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Apple Distribution International Ltd.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">E-Mail-Versand über iCloud Mail (z. B. Portal-Einladungen und Benachrichtigungen)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Irland (Konzernmutter in den USA)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">EU; etwaige Übermittlungen in die USA auf Basis von Standardvertragsklauseln (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Tailscale Inc.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Verschlüsselte Netzwerkverbindung zum KI-Rechner (nur Pro-Tarif); kein Zugriff auf Inhalte</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Kanada</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Angemessenheitsbeschluss der EU-Kommission</td>
 </tr>
 </tbody>
 </table>
 <p><small>Stripe, Inc. verarbeitet ausschließlich Zahlungsdaten des Verantwortlichen (Abo-Gebühren) und ist damit kein Unterauftragsverarbeiter für Schülerdaten im Sinne dieses AVV. Stripe ist in der allgemeinen Datenschutzerklärung separat ausgewiesen.</small></p>
-<p>6.2 Änderungen hinsichtlich der eingesetzten Unterauftragsverarbeiter werden dem Verantwortlichen durch eine Aktualisierung dieser Seite mitgeteilt. Der Verantwortliche kann innerhalb von 14 Tagen nach Bekanntgabe Einspruch erheben.</p>
+<p>6.2 Die KI-Unterrichtsplanung wird nicht von einem externen KI-Anbieter erbracht, sondern auf eigener Hardware des Auftragsverarbeiters in Deutschland (Sprachmodell Qwen 2.5, ausgeführt über Ollama).</p>
+<p>6.3 Nutzt der Verantwortliche die Kalender-Synchronisierung, überträgt der Auftragsverarbeiter auf dessen Weisung Termindaten (einschließlich des Schülernamens im Termintitel, sofern die Titelvorlage ihn enthält) in das vom Verantwortlichen selbst verbundene iCloud-Konto und liest dort Termine als Blockzeiten ein. Apple ist insoweit Dienstleister des Verantwortlichen und kein Unterauftragsverarbeiter des Auftragsverarbeiters.</p>
+<p>6.4 Push-Benachrichtigungen werden Ende-zu-Ende-verschlüsselt über den Push-Dienst des jeweiligen Browser- bzw. Betriebssystemanbieters zugestellt; dieser erhält keinen Zugriff auf die Inhalte.</p>
+<p>6.5 Änderungen hinsichtlich der eingesetzten Unterauftragsverarbeiter werden dem Verantwortlichen durch eine Aktualisierung dieser Seite mitgeteilt. Der Verantwortliche kann innerhalb von 14 Tagen nach Bekanntgabe Einspruch erheben.</p>
 </div>
 
 <div class="legal-section">
@@ -122,7 +141,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
 
 {% else %}
 <h1>Data Processing Agreement (DPA)</h1>
-<p class="legal-meta">pursuant to Art. 28 GDPR</p>
+<p class="legal-meta">pursuant to Art. 28 GDPR · Last updated: 19 Sep 2026</p>
 
 <div class="legal-placeholder-box">
 <strong>between</strong><br>
@@ -149,6 +168,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
     <li>Scheduling data (lesson appointments, notes, homework remarks)</li>
     <li>Parent portal data (names and email addresses of guardians, if used)</li>
     <li>Invoice data (services rendered, amounts)</li>
+    <li>Lesson plans, including optional additional notes and PDF material the Controller provides for AI lesson planning (notes and PDF content are processed only for the respective generation and are not stored)</li>
 </ul>
 <p>2.2 Categories of data subjects:</p>
 <ul>
@@ -179,6 +199,9 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
     <li>Access restricted to authenticated users</li>
     <li>Regular data backups</li>
     <li>Logging of security-relevant events</li>
+    <li>Encrypted storage of the credentials used for calendar sync</li>
+    <li>AI lesson planning exclusively on the Processor's own hardware in Germany; accessible only through an end-to-end encrypted private network (WireGuard), not reachable from the public internet</li>
+    <li>Automatic removal of names, contact details and notes before AI processing; in additional notes and PDF material, the student's name, email addresses and phone numbers are masked</li>
 </ul>
 </div>
 
@@ -200,15 +223,30 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
     <td style="padding:8px; border:1px solid var(--border-color);">Standard Contractual Clauses (SCCs)</td>
 </tr>
 <tr>
-    <td style="padding:8px; border:1px solid var(--border-color);">Anthropic, PBC</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">AI lesson planning (Pro plan only)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Cloudflare, Inc.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Network protection and delivery (CDN, DNS, DDoS protection); all traffic passes through Cloudflare</td>
     <td style="padding:8px; border:1px solid var(--border-color);">USA</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Standard Contractual Clauses (SCCs)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">EU-US Data Privacy Framework, Standard Contractual Clauses (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Apple Distribution International Ltd.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Email delivery via iCloud Mail (e.g. portal invitations and notifications)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Ireland (parent company in the USA)</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">EU; any transfers to the USA based on Standard Contractual Clauses (SCCs)</td>
+</tr>
+<tr>
+    <td style="padding:8px; border:1px solid var(--border-color);">Tailscale Inc.</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Encrypted network connection to the AI computer (Pro plan only); no access to content</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">Canada</td>
+    <td style="padding:8px; border:1px solid var(--border-color);">EU Commission adequacy decision</td>
 </tr>
 </tbody>
 </table>
 <p><small>Stripe, Inc. processes payment data of the Controller (subscription fees) only and is therefore not a sub-processor for student data within the scope of this DPA. Stripe is listed separately in the general privacy policy.</small></p>
-<p>6.2 Changes to sub-processors will be communicated to the Controller by updating this page. The Controller may object within 14 days of notification.</p>
+<p>6.2 AI lesson planning is not provided by an external AI provider but runs on the Processor's own hardware in Germany (language model Qwen 2.5, run via Ollama).</p>
+<p>6.3 If the Controller uses calendar sync, the Processor transfers scheduling data on the Controller's instruction (including the student's name in the event title, if the title template contains it) into the iCloud account the Controller has connected, and imports events from it as blocked times. Apple acts as the Controller's own service provider in this respect and is not a sub-processor of the Processor.</p>
+<p>6.4 Push notifications are delivered end-to-end encrypted via the push service of the respective browser or operating system provider, which has no access to their content.</p>
+<p>6.5 Changes to sub-processors will be communicated to the Controller by updating this page. The Controller may object within 14 days of notification.</p>
 </div>
 
 <div class="legal-section">

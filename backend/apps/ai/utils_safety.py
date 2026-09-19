@@ -161,3 +161,36 @@ def wrap_untrusted(text: str) -> str:
         flags=re.IGNORECASE,
     )
     return f"<user_provided_untrusted>\n{sanitized}\n</user_provided_untrusted>"
+
+
+# Stricter than PHONE_PATTERN on purpose: free text and uploaded worksheets
+# are full of number sequences ("1 2 3 4", dates, decimals) the broader
+# pattern would mask. Only numbers that start like a phone number (+/00
+# country code, or a 0 area/mobile prefix) count here. Separators between
+# digit groups are mandatory, so there is no ambiguous backtracking.
+FREE_TEXT_PHONE_PATTERN = re.compile(
+    r"(?<![\w+])(?:"
+    r"(?:\+|00)[1-9][0-9]{0,3}(?:[ /-][0-9]{2,10}){1,5}"
+    r"|(?:\+|00)[1-9][0-9]{6,14}"
+    r"|0[1-9][0-9]{1,4}(?:[ /-][0-9]{2,10}){1,4}"
+    r"|0[1-9][0-9]{6,13}"
+    r")(?!\w)"
+)
+STUDENT_PLACEHOLDER = "[Schüler]"
+
+
+def redact_free_text(text: str, names=()) -> str:
+    """Best-effort masking for free text a tutor typed or uploaded: the given
+    names (the student's), email addresses and phone numbers."""
+    if not text:
+        return text
+    # Contact details first: a name inside an email address ("max@...") must
+    # not be replaced before the address as a whole is recognised.
+    text = EMAIL_PATTERN.sub(REDACTED, text)
+    text = FREE_TEXT_PHONE_PATTERN.sub(REDACTED, text)
+    unique_names = {n.strip() for n in names if n and len(n.strip()) >= 2}
+    for name in sorted(unique_names, key=len, reverse=True):
+        text = re.sub(
+            rf"(?<!\w){re.escape(name)}(?!\w)", STUDENT_PLACEHOLDER, text, flags=re.IGNORECASE
+        )
+    return text

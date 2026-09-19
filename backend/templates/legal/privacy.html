@@ -30,6 +30,7 @@
     {% endif %}
     <div class="legal-section" style="margin-top:2rem; border-top: 2px solid var(--border-color); padding-top:1.5rem;">
         <h2>{% trans "Preceptly-specific data processing" %}</h2>
+        <p class="legal-meta">{% blocktrans with date="19.09.2026" %}Last updated: {{ date }}{% endblocktrans %}</p>
         <p><em>{% trans "The following sections supplement the general privacy policy above with information specific to the Preceptly platform." %}</em></p>
     </div>
     <div class="legal-section">
@@ -45,12 +46,29 @@
         <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)." %}</p>
     </div>
     <div class="legal-section">
-        <h2>{% trans "AI-assisted lesson plans (Anthropic Claude)" %}</h2>
-        <p>{% trans "The Pro plan includes AI-generated lesson plan suggestions. When this feature is used, anonymised lesson data (subject, grade level, lesson date and duration) is transmitted to the Anthropic API." %}</p>
-        <p>{% trans "Personally identifiable information (name, email, telephone number, address, notes) is automatically filtered and removed before transmission. The data sent to Anthropic contains no student identifiers." %}</p>
-        <p>{% trans "AI provider: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA 94104, USA. Data transfers to the USA are based on the standard contractual clauses of the EU Commission." %}</p>
-        <p>{% trans "Anthropic does not use API data to train its models. Further information:" %} <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/legal/privacy</a></p>
+        <h2>{% trans "AI-assisted lesson plans" %}</h2>
+        <p>{% trans "The Pro plan includes AI-generated lesson plan suggestions. We run the AI model (Qwen 2.5, executed via Ollama) ourselves on our own hardware in Germany. No data is transmitted to external AI providers." %}</p>
+        <p>{% trans "Transmitted are the subject, grade level, date, duration and status of the lesson and of previous lessons, plus any additional notes and PDF material the tutor provides for the generation. Names, contact details and notes stored in Preceptly are removed beforehand. In additional notes and uploaded PDFs, the student's name, email addresses and phone numbers are masked automatically. Because free text cannot be checked completely, tutors should not enter any further personal data there. Notes and PDF content are used only for the respective generation and are not stored." %}</p>
+        <p>{% trans "The connection between Preceptly and this computer runs through an end-to-end encrypted private network (WireGuard, provided by Tailscale Inc., Toronto, Canada). If no direct connection is possible, the encrypted traffic may be relayed via Tailscale servers; Tailscale cannot read its content. Canada is covered by an adequacy decision of the EU Commission." %}</p>
         <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)." %}</p>
+    </div>
+    <div class="legal-section">
+        <h2>{% trans "Student and parent portal" %}</h2>
+        <p>{% trans "Tutors can give their students and the students' parents access to a portal (booking and rescheduling lessons, appointments, messages, documents). For the personal data processed there, the respective tutor is the controller; Preceptly processes it on the tutor's behalf on the basis of a data processing agreement (Art. 28 GDPR). Requests concerning this data are best addressed directly to the tutor; we forward requests we receive." %}</p>
+        <p>{% trans "The portal uses only the technically necessary cookies described below." %}</p>
+    </div>
+    <div class="legal-section">
+        <h2>{% trans "Calendar sync (iCloud)" %}</h2>
+        <p>{% trans "Tutors can optionally connect their own iCloud calendar. Preceptly then copies their lessons into a calendar of their choice (by default the event title contains the student's name; the title can be changed in the settings) and imports events from other calendars they select as blocked times (title, time and description)." %}</p>
+        <p>{% trans "For this we store the Apple ID and an app-specific password in encrypted form; the regular Apple ID password is never requested. The sync can be paused or disconnected at any time in the settings." %}</p>
+        <p>{% trans "Recipient is Apple Distribution International Ltd., Hollyhill Industrial Estate, Hollyhill, Cork, Ireland, within the tutor's own iCloud account. Data transfers to the USA are based on the standard contractual clauses of the EU Commission." %}</p>
+        <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract, at the tutor's request)." %}</p>
+    </div>
+    <div class="legal-section">
+        <h2>{% trans "Push notifications" %}</h2>
+        <p>{% trans "If you enable push notifications on a device, notifications (e.g. about a new booking, including the student's name and the time) are delivered via the push service of your browser or operating system provider (e.g. Google, Apple or Mozilla). The content is end-to-end encrypted in accordance with the Web Push standard; the push service only processes the technical data required for delivery." %}</p>
+        <p>{% trans "Push notifications can be switched off at any time in the settings or in the browser." %}</p>
+        <p>{% trans "Legal basis: Art. 6 para. 1 lit. a GDPR (consent given via the browser permission prompt)." %}</p>
     </div>
     <div class="legal-section">
         <h2>{% trans "Cookies and technical storage" %}</h2>
