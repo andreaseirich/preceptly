@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.ai.client import LLMClient, LLMClientError, LLMServiceUnavailableError
 from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_student
-from apps.ai.utils_safety import sanitize_context, strip_injection_patterns
+from apps.ai.utils_safety import redact_free_text, sanitize_context, strip_injection_patterns
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Session
 
@@ -133,6 +133,14 @@ class LessonPlanService:
         # Gather context and apply PII protection
         raw_context = self.gather_context(session)
         safe_context = sanitize_context(raw_context)
+        contract = session.contract
+        student_names = [
+            f"{contract.first_name} {contract.last_name}",
+            contract.first_name,
+            contract.last_name,
+        ]
+        extra_notes = redact_free_text(extra_notes, student_names)
+        extra_pdf_text = redact_free_text(extra_pdf_text, student_names)
 
         # Build prompt
         system_prompt, user_prompt = build_lesson_plan_prompt(

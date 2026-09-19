@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from apps.ai.utils_safety import REDACTED, sanitize_context
+from apps.ai.utils_safety import REDACTED, STUDENT_PLACEHOLDER, redact_free_text, sanitize_context
 
 
 class SanitizeContextTest(SimpleTestCase):
@@ -93,3 +93,33 @@ class StripInjectionPatternsTest(SimpleTestCase):
         }
         result = sanitize_context(ctx)
         self.assertNotIn("Ignore all previous instructions", result["lesson"]["notes"])
+
+
+class RedactFreeTextTest(SimpleTestCase):
+    """Free text / PDF content a tutor passes to the AI: the student's name,
+    email addresses and phone numbers are masked, ordinary (math) content
+    is left alone."""
+
+    NAMES = ["Max Muster", "Max", "Muster"]
+
+    def test_student_name_masked_case_insensitive(self):
+        result = redact_free_text("max muster hat Probleme, MUSTER übt zu wenig", self.NAMES)
+        self.assertNotIn("max", result.lower())
+        self.assertNotIn("muster", result.lower())
+        self.assertIn(STUDENT_PLACEHOLDER, result)
+
+    def test_name_inside_email_does_not_break_email_masking(self):
+        result = redact_free_text("Mail: max@muster.de", self.NAMES)
+        self.assertEqual(result, f"Mail: {REDACTED}")
+
+    def test_phone_numbers_masked(self):
+        for number in ("0151 12345678", "+49 151 1234567", "030/1234567", "015112345678"):
+            with self.subTest(number=number):
+                self.assertEqual(redact_free_text(f"Tel {number}", []), f"Tel {REDACTED}")
+
+    def test_math_and_dates_left_alone(self):
+        text = "Wertetabelle: 1 2 3 4 5, Datum 12.03.2026, x = 0,5, Aufgabe 1.2.3"
+        self.assertEqual(redact_free_text(text, self.NAMES), text)
+
+    def test_name_only_replaced_as_whole_word(self):
+        self.assertEqual(redact_free_text("Maximum bei x=3", self.NAMES), "Maximum bei x=3")

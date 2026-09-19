@@ -310,3 +310,22 @@ class LessonPlanServiceTest(TestCase):
         sent_prompt = mock_client.generate_text.call_args.kwargs["prompt"]
         self.assertIn("Schüler braucht mehr Übung bei Textaufgaben", sent_prompt)
         self.assertIn("Arbeitsblatt: Prozentrechnung", sent_prompt)
+
+    @patch("apps.ai.services.LLMClient")
+    def test_student_name_in_extra_context_is_masked_before_sending(self, mock_client_class):
+        mock_client = Mock()
+        mock_client.generate_text.return_value = "Plan"
+        mock_client_class.return_value = mock_client
+
+        service = LessonPlanService(client=mock_client)
+        service.generate_lesson_plan(
+            self.lesson,
+            user=self.user,
+            extra_notes="Max Mustermann verwechselt Zähler und Nenner",
+            extra_pdf_text="Name: Max Mustermann, Tel. 0151 2345678",
+        )
+
+        sent_prompt = mock_client.generate_text.call_args.kwargs["prompt"]
+        self.assertNotIn("Mustermann", sent_prompt)
+        self.assertNotIn("0151", sent_prompt)
+        self.assertIn("verwechselt Zähler und Nenner", sent_prompt)

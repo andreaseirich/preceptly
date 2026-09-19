@@ -1,0 +1,27 @@
+{% autoescape off %}Guten Tag,
+
+vielen Dank für Ihr Abonnement bei Preceptly. Hiermit bestätigen wir den Abschluss Ihres Vertrags.
+{% if plan %}
+Tarif: {{ plan }}{% endif %}{% if price %}
+Preis: {{ price }}{% if interval %} pro {{ interval }}{% endif %}{% endif %}{% if trial_end %}
+Kostenloser Testzeitraum bis: {{ trial_end|date:"d.m.Y" }} – die erste Zahlung erfolgt erst danach.{% endif %}
+
+Das Abonnement verlängert sich automatisch und kann jederzeit zum Ende des laufenden Abrechnungszeitraums gekündigt werden – in Preceptly unter Einstellungen → Konto & Abo → „Abonnement verwalten“.
+{% if waiver_at %}
+Zustimmung zur sofortigen Vertragsausführung
+Beim Abschluss am {{ waiver_at|date:"d.m.Y" }} um {{ waiver_at|date:"H:i" }} Uhr haben Sie folgende Erklärung abgegeben:
+
+„{{ waiver_text }}“
+{% endif %}
+Allgemeine Geschäftsbedingungen: {{ site_url }}/legal/terms/
+Widerrufsbelehrung: {{ site_url }}/legal/withdrawal/
+Datenschutzerklärung: {{ site_url }}/legal/privacy/
+
+Ihr Vertragspartner:
+andicode / Preceptly, Inhaber Andreas Eirich
+Birkenweg 7, 49577 Ankum
+info@preceptly.de
+
+Viele Grüße
+Ihr Preceptly-Team
+{% endautoescape %}

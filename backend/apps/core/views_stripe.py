@@ -6,11 +6,14 @@ Premium status is set ONLY via verified webhook events (source of truth).
 
 import logging
 import time
+from datetime import UTC, datetime
+from decimal import Decimal
 
 import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.http import (
     HttpRequest,
@@ -20,6 +23,7 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -40,6 +44,19 @@ logger = logging.getLogger(__name__)
 
 # One-time free trial granted on a user's first subscription (see UserProfile.trial_used)
 TRIAL_PERIOD_DAYS = 30
+
+WITHDRAWAL_WAIVER_TEXT = (
+    "Ich stimme der Ausführung des Vertrages vor Ablauf der Widerrufsfrist ausdrücklich zu. "
+    "Ich nehme zur Kenntnis, dass mein Widerrufsrecht mit Beginn der Ausführung erlischt."
+)
+
+
+def _withdrawal_waiver_timestamp():
+    # Minute precision on purpose: the value goes into the Checkout Session
+    # params, whose idempotency key is per minute - a seconds-precise value
+    # would make Stripe reject a quick second click as a mismatched retry.
+    return timezone.now().replace(second=0, microsecond=0)
+
 
 # Initialize Stripe API key once at module load time (not per-request)
 if hasattr(settings, "STRIPE_SECRET_KEY") and settings.STRIPE_SECRET_KEY:
@@ -223,7 +240,13 @@ class SubscriptionCheckoutView(View):
             or f"{base_url}{reverse('core:settings')}?checkout=cancelled"
         )
 
-        subscription_data = {"metadata": {"user_id": str(user.id)}}
+        waiver_at = _withdrawal_waiver_timestamp()
+        subscription_data = {
+            "metadata": {
+                "user_id": str(user.id),
+                "withdrawal_waiver_accepted_at": waiver_at.isoformat(),
+            }
+        }
         if not profile.trial_used:
             subscription_data["trial_period_days"] = TRIAL_PERIOD_DAYS
 
@@ -239,7 +262,10 @@ class SubscriptionCheckoutView(View):
                 ],
                 success_url=success_url,
                 cancel_url=cancel_url,
-                metadata={"user_id": str(user.id)},
+                metadata={
+                    "user_id": str(user.id),
+                    "withdrawal_waiver_accepted_at": waiver_at.isoformat(),
+                },
                 subscription_data=subscription_data,
                 idempotency_key=f"checkout:{user.id}:{int(time.time() // 60)}",
             )
@@ -252,6 +278,7 @@ class SubscriptionCheckoutView(View):
             )
             return _stripe_checkout_error_response(request)
 
+        UserProfile.objects.filter(pk=profile.pk).update(withdrawal_waiver_accepted_at=waiver_at)
         return _safe_stripe_redirect(request, session.url)
 
 
@@ -410,7 +437,13 @@ class StripeCheckoutView(View):
             else:
                 _maybe_update_stripe_customer_email(profile, user)
 
-        subscription_data = {"metadata": {"user_id": str(user.id)}}
+        waiver_at = _withdrawal_waiver_timestamp()
+        subscription_data = {
+            "metadata": {
+                "user_id": str(user.id),
+                "withdrawal_waiver_accepted_at": waiver_at.isoformat(),
+            }
+        }
         if not profile.trial_used:
             subscription_data["trial_period_days"] = TRIAL_PERIOD_DAYS
 
@@ -421,7 +454,10 @@ class StripeCheckoutView(View):
                 line_items=[{"price": price_id, "quantity": 1}],
                 success_url=success_url,
                 cancel_url=cancel_url,
-                metadata={"user_id": str(user.id)},
+                metadata={
+                    "user_id": str(user.id),
+                    "withdrawal_waiver_accepted_at": waiver_at.isoformat(),
+                },
                 subscription_data=subscription_data,
                 idempotency_key=f"checkout:{user.id}:{int(time.time() // 60)}",
             )
@@ -434,6 +470,7 @@ class StripeCheckoutView(View):
             )
             return _stripe_checkout_error_response(request)
 
+        UserProfile.objects.filter(pk=profile.pk).update(withdrawal_waiver_accepted_at=waiver_at)
         return _safe_stripe_redirect(request, session.url)
 
 
@@ -554,13 +591,7 @@ def stripe_webhook_view(request):
     return HttpResponse(status=200)
 
 
-def _price_id_to_tier(price_id: str | None) -> str:
-    """Map a Stripe price ID to a subscription tier string.
-
-    Fail-closed: an unknown or missing price ID must never grant a paid tier.
-    Unknown IDs indicate a tier-escalation attempt or a misconfiguration and
-    are logged as an alert.
-    """
+def _price_tier_mapping() -> dict:
     mapping = {
         getattr(settings, "STRIPE_PRICE_ID_STARTER", None): "starter",
         getattr(settings, "STRIPE_PRICE_ID_PRO", None): "pro",
@@ -569,6 +600,17 @@ def _price_id_to_tier(price_id: str | None) -> str:
         getattr(settings, "STRIPE_PRICE_ID_YEARLY", None): "pro",
     }
     mapping.pop(None, None)  # unconfigured settings must not match price_id=None
+    return mapping
+
+
+def _price_id_to_tier(price_id: str | None) -> str:
+    """Map a Stripe price ID to a subscription tier string.
+
+    Fail-closed: an unknown or missing price ID must never grant a paid tier.
+    Unknown IDs indicate a tier-escalation attempt or a misconfiguration and
+    are logged as an alert.
+    """
+    mapping = _price_tier_mapping()
     if price_id in mapping:
         return mapping[price_id]
     if price_id:
@@ -627,6 +669,7 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
 
     # Stripe API call OUTSIDE transaction (H11)
     sub_status = None
+    sub = None
     if sub_id:
         try:
             sub = stripe.Subscription.retrieve(sub_id)
@@ -661,6 +704,60 @@ def _handle_checkout_session_completed(event: dict, session: dict) -> None:
 
         if sub_status is not None:
             _set_premium(profile, is_premium_subscription_status(sub_status))
+
+    if sub is not None and is_premium_subscription_status(sub_status):
+        _send_subscription_confirmation(profile, session, sub)
+
+
+def _send_subscription_confirmation(profile: UserProfile, session: dict, sub) -> None:
+    """Contract confirmation on a durable medium (§ 312f BGB), including the
+    consumer's express consent to immediate performance and acknowledgement
+    that the right of withdrawal lapses (§ 356 Abs. 5 BGB). Sent last in the
+    webhook handler and never raises, so a mail failure can't make Stripe
+    retry the event (which would re-run everything above)."""
+    try:
+        user = profile.user
+        customer_details = session.get("customer_details") or {}
+        recipient = user.email or customer_details.get("email")
+        if not recipient:
+            logger.warning("No email address for subscription confirmation user=%s", user.pk)
+            return
+
+        price = {}
+        items = (sub.get("items") or {}).get("data") or []
+        if items:
+            price = items[0].get("price") or {}
+        amount = price.get("unit_amount")
+        interval = (price.get("recurring") or {}).get("interval")
+        trial_end = sub.get("trial_end")
+        waiver_raw = (session.get("metadata") or {}).get("withdrawal_waiver_accepted_at")
+
+        context = {
+            "plan": _price_tier_mapping().get(price.get("id"), "").title(),
+            "price": (
+                f"{Decimal(amount) / 100:.2f}".replace(".", ",") + " €"
+                if amount is not None
+                else ""
+            ),
+            "interval": {"month": "Monat", "year": "Jahr"}.get(interval, interval or ""),
+            "trial_end": (
+                timezone.localtime(datetime.fromtimestamp(trial_end, tz=UTC)) if trial_end else None
+            ),
+            "waiver_at": (
+                timezone.localtime(datetime.fromisoformat(waiver_raw)) if waiver_raw else None
+            ),
+            "waiver_text": WITHDRAWAL_WAIVER_TEXT,
+            "site_url": getattr(settings, "SITE_URL", "https://preceptly.de").rstrip("/"),
+        }
+        send_mail(
+            subject="Ihr Preceptly-Abo – Vertragsbestätigung",
+            message=render_to_string("core/email/subscription_confirmation.txt", context),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception("Subscription confirmation email failed user=%s", profile.user_id)
 
 
 def _handle_subscription_created_or_updated(subscription: dict) -> None:

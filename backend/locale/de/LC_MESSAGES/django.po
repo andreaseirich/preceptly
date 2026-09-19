@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 09:46+0200\n"
+"POT-Creation-Date: 2026-09-19 09:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,18 +109,18 @@ msgstr "Passwortgeschützte PDF-Dateien werden nicht unterstützt."
 msgid "Rate limit reached. Please try again later."
 msgstr "Anfragelimit erreicht. Bitte versuche es später erneut."
 
-#: apps/ai/services.py:173
+#: apps/ai/services.py:181
 #, python-brace-format
 msgid "Lesson plan for {date}"
 msgstr "Lektionsplan für {date}"
 
-#: apps/ai/services.py:194
+#: apps/ai/services.py:202
 msgid "The AI is temporarily unreachable. Please try again in a few minutes."
 msgstr ""
 "Die KI ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten "
 "erneut."
 
-#: apps/ai/services.py:200
+#: apps/ai/services.py:208
 msgid "The lesson plan could not be generated. Please try again."
 msgstr ""
 "Der Lektionsplan konnte nicht generiert werden. Bitte versuche es erneut."
@@ -870,7 +870,7 @@ msgstr "Rechnung löschen"
 #: apps/core/templates/core/base.html:614
 #: apps/core/templates/core/base.html:1173
 #: apps/core/templates/core/dashboard.html:101
-#: apps/portal/templates/portal/base.html:803
+#: apps/portal/templates/portal/base.html:804
 msgid "Close"
 msgstr "Schließen"
 
@@ -2868,102 +2868,102 @@ msgstr ""
 "Als Werbender verdiente Freimonate, noch nicht als Stripe-Guthaben "
 "angewendet (z. B. weil dieser Nutzer noch keinen Stripe-Kunden/Preis hat)."
 
-#: apps/core/models.py:195
+#: apps/core/models.py:196
 msgid "User Profile"
 msgstr "Benutzerprofil"
 
-#: apps/core/models.py:196
+#: apps/core/models.py:197
 msgid "User Profiles"
 msgstr "Benutzerprofile"
 
-#: apps/core/models.py:211
+#: apps/core/models.py:212
 msgid "Set only after successful processing"
 msgstr "Wird erst nach erfolgreicher Verarbeitung gesetzt"
 
-#: apps/core/models.py:216
+#: apps/core/models.py:217
 msgid "Stripe Webhook Event"
 msgstr "Stripe-Webhook-Ereignis"
 
-#: apps/core/models.py:217
+#: apps/core/models.py:218
 msgid "Stripe Webhook Events"
 msgstr "Stripe-Webhook-Ereignisse"
 
-#: apps/core/models.py:230
+#: apps/core/models.py:231
 msgid "Pending confirmation"
 msgstr "Bestätigung ausstehend"
 
-#: apps/core/models.py:231
+#: apps/core/models.py:232
 msgid "Confirmed and cancelled"
 msgstr "Bestätigt und storniert"
 
-#: apps/core/models.py:232
+#: apps/core/models.py:233
 msgid "No matching account"
 msgstr "Kein passendes Konto gefunden"
 
-#: apps/core/models.py:233
+#: apps/core/models.py:234
 msgid "Ambiguous match"
 msgstr "Mehrdeutiger Treffer"
 
-#: apps/core/models.py:234
+#: apps/core/models.py:235
 msgid "Confirmation token expired"
 msgstr "Bestätigungstoken abgelaufen"
 
-#: apps/core/models.py:240
+#: apps/core/models.py:241
 msgid "e-recht24 revocation ID (idempotency key for webhook retries)"
 msgstr ""
 "e-recht24-Widerrufs-ID (Idempotenzschlüssel für Webhook-Wiederholungen)"
 
-#: apps/core/models.py:255
+#: apps/core/models.py:256
 msgid "Set to None once used or expired so the link cannot be reused"
 msgstr ""
 "Wird nach Nutzung oder Ablauf auf None gesetzt, damit der Link nicht erneut "
 "verwendet werden kann"
 
-#: apps/core/models.py:269
+#: apps/core/models.py:270
 msgid "Revocation Request"
 msgstr "Widerrufsanfrage"
 
-#: apps/core/models.py:270
+#: apps/core/models.py:271
 msgid "Revocation Requests"
 msgstr "Widerrufsanfragen"
 
-#: apps/core/models.py:280
+#: apps/core/models.py:281
 msgid "Work materials"
 msgstr "Arbeitsmittel"
 
-#: apps/core/models.py:281
+#: apps/core/models.py:282
 msgid "Travel"
 msgstr "Fahrtkosten"
 
-#: apps/core/models.py:282
+#: apps/core/models.py:283
 msgid "Education"
 msgstr "Fortbildung"
 
-#: apps/core/models.py:283
+#: apps/core/models.py:284
 msgid "Office"
 msgstr "Büro/Arbeitszimmer"
 
-#: apps/core/models.py:284
+#: apps/core/models.py:285
 msgid "Communication"
 msgstr "Kommunikation"
 
-#: apps/core/models.py:285
+#: apps/core/models.py:286
 msgid "Other"
 msgstr "Sonstiges"
 
-#: apps/core/models.py:305
+#: apps/core/models.py:306
 msgid "Business use (%)"
 msgstr "Betriebliche Nutzung (%)"
 
-#: apps/core/models.py:306
+#: apps/core/models.py:307
 msgid "Percentage of this expense used for business purposes (1\\u2013100)."
 msgstr "Prozentualer Anteil dieser Ausgabe für betriebliche Zwecke (1–100)."
 
-#: apps/core/models.py:313
+#: apps/core/models.py:314
 msgid "Expense"
 msgstr "Ausgabe"
 
-#: apps/core/models.py:314 apps/core/templates/core/expense_list.html:5
+#: apps/core/models.py:315 apps/core/templates/core/expense_list.html:5
 #: apps/core/templates/core/expense_list.html:8
 #: apps/core/templates/core/tax_year.html:36
 #: apps/core/templates/core/tax_year.html:145 apps/core/views.py:726
@@ -3091,12 +3091,12 @@ msgstr ""
 "personenbezogenen Daten ein."
 
 #: apps/core/templates/core/base.html:615
-#: apps/portal/templates/portal/base.html:804
+#: apps/portal/templates/portal/base.html:805
 msgid "Preceptly is under active development"
 msgstr "Preceptly befindet sich in aktiver Entwicklung"
 
 #: apps/core/templates/core/base.html:617
-#: apps/portal/templates/portal/base.html:806
+#: apps/portal/templates/portal/base.html:807
 msgid ""
 "You might run into the occasional bug — they get fixed as fast as possible. "
 "Thanks for your understanding, and please let me know if something doesn't "
@@ -3107,17 +3107,17 @@ msgstr ""
 "nicht funktioniert!"
 
 #: apps/core/templates/core/base.html:620
-#: apps/portal/templates/portal/base.html:809
+#: apps/portal/templates/portal/base.html:810
 msgid "Report a bug / send feedback"
 msgstr "Fehler melden / Feedback geben"
 
 #: apps/core/templates/core/base.html:621
-#: apps/portal/templates/portal/base.html:810
+#: apps/portal/templates/portal/base.html:811
 msgid "Got it"
 msgstr "Verstanden"
 
 #: apps/core/templates/core/base.html:625
-#: apps/portal/templates/portal/base.html:814
+#: apps/portal/templates/portal/base.html:815
 msgid "Don't show this again"
 msgstr "Nicht mehr anzeigen"
 
@@ -4282,7 +4282,7 @@ msgstr ""
 "Zahlung eingegangen. Die Abo-Aktivierung kann einen Moment dauern. Seite neu "
 "laden, falls Premium noch nicht sichtbar ist."
 
-#: apps/core/templates/core/settings.html:56
+#: apps/core/templates/core/settings.html:57
 msgid "Settings sections"
 msgstr "Einstellungsbereiche"
 
@@ -4512,7 +4512,10 @@ msgid ""
 "When students or parents book, reschedule or set up recurring lessons in the "
 "portal, they can see a hint asking them to leave buffer time around your "
 "appointments and blocked times."
-msgstr "Wenn Schüler oder Eltern im Portal Stunden buchen, verschieben oder Serientermine anlegen, können sie einen Hinweis sehen, rund um deine Termine und Blockzeiten etwas Puffer einzuplanen."
+msgstr ""
+"Wenn Schüler oder Eltern im Portal Stunden buchen, verschieben oder "
+"Serientermine anlegen, können sie einen Hinweis sehen, rund um deine Termine "
+"und Blockzeiten etwas Puffer einzuplanen."
 
 #: apps/core/templates/core/settings.html:311
 msgid "Show buffer-time hint when booking"
@@ -4531,7 +4534,10 @@ msgid ""
 "Your Preceptly sessions are copied to an iCloud calendar of your choice, and "
 "events from your other calendars are imported as blocked times. Runs "
 "automatically every few minutes."
-msgstr "Deine Preceptly-Stunden werden in einen iCloud-Kalender deiner Wahl übertragen, und Termine aus deinen anderen Kalendern werden als Blockzeiten übernommen. Läuft automatisch alle paar Minuten."
+msgstr ""
+"Deine Preceptly-Stunden werden in einen iCloud-Kalender deiner Wahl "
+"übertragen, und Termine aus deinen anderen Kalendern werden als Blockzeiten "
+"übernommen. Läuft automatisch alle paar Minuten."
 
 #: apps/core/templates/core/settings.html:330
 #, python-format
@@ -4949,20 +4955,20 @@ msgstr "Bewertung gelöscht."
 msgid "Unknown action."
 msgstr "Unbekannte Aktion."
 
-#: apps/core/views_stripe.py:83
+#: apps/core/views_stripe.py:100
 msgid "Could not start redirect. Please try again."
 msgstr "Weiterleitung konnte nicht gestartet werden. Bitte erneut versuchen."
 
-#: apps/core/views_stripe.py:88
+#: apps/core/views_stripe.py:105
 msgid "Invalid redirect URL."
 msgstr "Ungültige Weiterleitungs-URL."
 
-#: apps/core/views_stripe.py:109
+#: apps/core/views_stripe.py:126
 msgid "Could not start checkout. Please try again in a moment."
 msgstr ""
 "Checkout konnte nicht gestartet werden. Bitte versuche es gleich erneut."
 
-#: apps/core/views_stripe.py:138
+#: apps/core/views_stripe.py:155
 msgid ""
 "You already have an active subscription. Please use the billing portal to "
 "manage or change your plan."
@@ -4970,26 +4976,26 @@ msgstr ""
 "Du hast bereits ein aktives Abo. Bitte nutze das Abrechnungsportal, um "
 "deinen Plan zu verwalten oder zu ändern."
 
-#: apps/core/views_stripe.py:155 apps/core/views_stripe.py:346
+#: apps/core/views_stripe.py:172 apps/core/views_stripe.py:373
 msgid "Please confirm the withdrawal notice to proceed."
 msgstr "Bitte bestätige die Widerrufsbelehrung, um fortzufahren."
 
-#: apps/core/views_stripe.py:159 apps/core/views_stripe.py:350
+#: apps/core/views_stripe.py:176 apps/core/views_stripe.py:377
 msgid "Stripe checkout is not available in demo mode."
 msgstr "Stripe-Checkout ist im Demo-Modus nicht verfügbar."
 
-#: apps/core/views_stripe.py:163 apps/core/views_stripe.py:182
-#: apps/core/views_stripe.py:267 apps/core/views_stripe.py:354
-#: apps/core/views_stripe.py:373 apps/core/views_stripe.py:449
+#: apps/core/views_stripe.py:180 apps/core/views_stripe.py:199
+#: apps/core/views_stripe.py:294 apps/core/views_stripe.py:381
+#: apps/core/views_stripe.py:400 apps/core/views_stripe.py:486
 msgid "Payment is not configured. Please contact support."
 msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
 
-#: apps/core/views_stripe.py:295 apps/core/views_stripe.py:481
+#: apps/core/views_stripe.py:322 apps/core/views_stripe.py:518
 msgid "Could not open billing portal. Please try again."
 msgstr ""
 "Das Abrechnungsportal konnte nicht geöffnet werden. Bitte versuche es erneut."
 
-#: apps/core/views_stripe.py:457
+#: apps/core/views_stripe.py:494
 msgid "No billing customer found. Subscribe first to manage your subscription."
 msgstr ""
 "Kein Abrechnungskunde gefunden. Bitte abonniere zuerst, um dein Abonnement "
@@ -6513,7 +6519,7 @@ msgid "About Preceptly"
 msgstr "Über Preceptly"
 
 #: templates/legal/about.html:10 templates/legal/imprint.html:12
-#: templates/legal/privacy.html:12
+#: templates/legal/privacy.html:12 templates/legal/privacy.html:33
 #, python-format
 msgid "Last updated: %(date)s"
 msgstr "Letzte Aktualisierung: %(date)s"
@@ -6710,7 +6716,7 @@ msgstr "Bei Datenschutzanfragen kontaktieren Sie"
 msgid "Preceptly-specific data processing"
 msgstr "Preceptly-spezifische Datenverarbeitung"
 
-#: templates/legal/privacy.html:33
+#: templates/legal/privacy.html:34
 msgid ""
 "The following sections supplement the general privacy policy above with "
 "information specific to the Preceptly platform."
@@ -6718,11 +6724,11 @@ msgstr ""
 "Die folgenden Abschnitte ergänzen die allgemeine Datenschutzerklärung oben "
 "um Informationen, die spezifisch für die Preceptly-Plattform gelten."
 
-#: templates/legal/privacy.html:36
+#: templates/legal/privacy.html:37
 msgid "Hosting and infrastructure (Railway)"
 msgstr "Hosting und Infrastruktur (Railway)"
 
-#: templates/legal/privacy.html:37
+#: templates/legal/privacy.html:38
 msgid ""
 "Preceptly is hosted on Railway (Railway Corp., 340 S Lemon Ave #4133, "
 "Walnut, CA 91789, USA). All application data and the database are processed "
@@ -6732,7 +6738,7 @@ msgstr ""
 "91789, USA) gehostet. Alle Anwendungsdaten und die Datenbank werden auf "
 "Railway-Servern verarbeitet."
 
-#: templates/legal/privacy.html:38
+#: templates/legal/privacy.html:39
 msgid ""
 "The legal basis is our legitimate interest in reliable and secure operation "
 "of the service (Art. 6 para. 1 lit. f GDPR). Data transfers to the USA are "
@@ -6744,11 +6750,11 @@ msgstr ""
 "Datenübertragungen in die USA stützen sich auf die Standardvertragsklauseln "
 "der EU-Kommission. Weitere Informationen:"
 
-#: templates/legal/privacy.html:41
+#: templates/legal/privacy.html:42
 msgid "Video meetings (Meeting Rooms)"
 msgstr "Video-Meetings (Meeting Rooms)"
 
-#: templates/legal/privacy.html:42
+#: templates/legal/privacy.html:43
 msgid ""
 "The Pro plan includes an integrated video meeting function. Camera and "
 "microphone access is optional and only activated by the user's explicit "
@@ -6758,7 +6764,7 @@ msgstr ""
 "Mikrofon werden optional und ausschließlich durch ausdrückliche Nutzeraktion "
 "im Browser aktiviert."
 
-#: templates/legal/privacy.html:43
+#: templates/legal/privacy.html:44
 msgid ""
 "Video and audio data is transmitted directly between participants (peer-to-"
 "peer via WebRTC). No audio or video is stored on Preceptly servers."
@@ -6767,7 +6773,7 @@ msgstr ""
 "(Peer-to-Peer via WebRTC). Auf Preceptly-Servern werden keine Audio- oder "
 "Videodaten gespeichert."
 
-#: templates/legal/privacy.html:44
+#: templates/legal/privacy.html:45
 msgid ""
 "To establish the connection, IP addresses are transmitted to STUN servers "
 "(Google: stun.l.google.com). Google's privacy policy applies: <a "
@@ -6779,60 +6785,183 @@ msgstr ""
 "Google: <a href=\"https://policies.google.com/privacy\" target=\"_blank\" "
 "rel=\"noopener noreferrer\">policies.google.com/privacy</a>."
 
-#: templates/legal/privacy.html:45 templates/legal/privacy.html:53
+#: templates/legal/privacy.html:46 templates/legal/privacy.html:53
 msgid "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)."
 msgstr "Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)."
 
-#: templates/legal/privacy.html:48
-msgid "AI-assisted lesson plans (Anthropic Claude)"
-msgstr "KI-gestützte Stundenpläne (Anthropic Claude)"
-
 #: templates/legal/privacy.html:49
-msgid ""
-"The Pro plan includes AI-generated lesson plan suggestions. When this "
-"feature is used, anonymised lesson data (subject, grade level, lesson date "
-"and duration) is transmitted to the Anthropic API."
-msgstr ""
-"Der Pro-Tarif enthält KI-generierte Unterrichtsplanvorschläge. Bei Nutzung "
-"dieser Funktion werden anonymisierte Stundeninformationen (Fach, "
-"Klassenstufe, Datum und Dauer der Stunde) an die Anthropic-API übertragen."
+msgid "AI-assisted lesson plans"
+msgstr "KI-gestützte Unterrichtspläne"
 
 #: templates/legal/privacy.html:50
 msgid ""
-"Personally identifiable information (name, email, telephone number, address, "
-"notes) is automatically filtered and removed before transmission. The data "
-"sent to Anthropic contains no student identifiers."
+"The Pro plan includes AI-generated lesson plan suggestions. We run the AI "
+"model (Qwen 2.5, executed via Ollama) ourselves on our own hardware in "
+"Germany. No data is transmitted to external AI providers."
 msgstr ""
-"Personenbezogene Daten (Name, E-Mail, Telefonnummer, Adresse, Notizen) "
-"werden vor der Übertragung automatisch gefiltert und entfernt. Die an "
-"Anthropic gesendeten Daten enthalten keine Schülerkennzeichen."
+"Der Pro-Tarif enthält KI-generierte Vorschläge für Unterrichtspläne. Das KI-"
+"Modell (Qwen 2.5, ausgeführt über Ollama) betreiben wir selbst auf eigener "
+"Hardware in Deutschland. Es werden keine Daten an externe KI-Anbieter "
+"übermittelt."
 
 #: templates/legal/privacy.html:51
 msgid ""
-"AI provider: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA "
-"94104, USA. Data transfers to the USA are based on the standard contractual "
-"clauses of the EU Commission."
+"Transmitted are the subject, grade level, date, duration and status of the "
+"lesson and of previous lessons, plus any additional notes and PDF material "
+"the tutor provides for the generation. Names, contact details and notes "
+"stored in Preceptly are removed beforehand. In additional notes and uploaded "
+"PDFs, the student's name, email addresses and phone numbers are masked "
+"automatically. Because free text cannot be checked completely, tutors should "
+"not enter any further personal data there. Notes and PDF content are used "
+"only for the respective generation and are not stored."
 msgstr ""
-"KI-Anbieter: Anthropic, PBC, 548 Market St PMB 90375, San Francisco, CA "
-"94104, USA. Datenübertragungen in die USA stützen sich auf die "
-"Standardvertragsklauseln der EU-Kommission."
+"Übertragen werden Fach, Klassenstufe, Datum, Dauer und Status der Stunde "
+"sowie vorheriger Stunden, außerdem etwaige Zusatzhinweise und PDF-"
+"Materialien, die die Lehrkraft für die Erstellung bereitstellt. In Preceptly "
+"gespeicherte Namen, Kontaktdaten und Notizen werden vorher entfernt. In "
+"Zusatzhinweisen und hochgeladenen PDFs werden der Name des Schülers, E-Mail-"
+"Adressen und Telefonnummern automatisch unkenntlich gemacht. Da Freitext "
+"nicht vollständig geprüft werden kann, sollten Lehrkräfte dort keine "
+"weiteren personenbezogenen Daten eingeben. Zusatzhinweise und PDF-Inhalte "
+"werden nur für die jeweilige Erstellung verwendet und nicht gespeichert."
 
 #: templates/legal/privacy.html:52
 msgid ""
-"Anthropic does not use API data to train its models. Further information:"
+"The connection between Preceptly and this computer runs through an end-to-"
+"end encrypted private network (WireGuard, provided by Tailscale Inc., "
+"Toronto, Canada). If no direct connection is possible, the encrypted traffic "
+"may be relayed via Tailscale servers; Tailscale cannot read its content. "
+"Canada is covered by an adequacy decision of the EU Commission."
 msgstr ""
-"Anthropic verwendet API-Daten nicht zum Training seiner Modelle. Weitere "
-"Informationen:"
+"Die Verbindung zwischen Preceptly und diesem Rechner läuft über ein Ende-zu-"
+"Ende-verschlüsseltes privates Netzwerk (WireGuard, bereitgestellt von "
+"Tailscale Inc., Toronto, Kanada). Ist keine direkte Verbindung möglich, kann "
+"der verschlüsselte Datenverkehr über Server von Tailscale weitergeleitet "
+"werden; Tailscale kann die Inhalte nicht lesen. Für Kanada besteht ein "
+"Angemessenheitsbeschluss der EU-Kommission."
 
 #: templates/legal/privacy.html:56
+msgid "Student and parent portal"
+msgstr "Schüler- und Elternportal"
+
+#: templates/legal/privacy.html:57
+msgid ""
+"Tutors can give their students and the students' parents access to a portal "
+"(booking and rescheduling lessons, appointments, messages, documents). For "
+"the personal data processed there, the respective tutor is the controller; "
+"Preceptly processes it on the tutor's behalf on the basis of a data "
+"processing agreement (Art. 28 GDPR). Requests concerning this data are best "
+"addressed directly to the tutor; we forward requests we receive."
+msgstr ""
+"Lehrkräfte können ihren Schülern und deren Eltern Zugang zu einem Portal "
+"geben (Stunden buchen und verschieben, Termine, Nachrichten, Dokumente). "
+"Verantwortlicher für die dort verarbeiteten personenbezogenen Daten ist die "
+"jeweilige Lehrkraft; Preceptly verarbeitet sie in deren Auftrag auf "
+"Grundlage eines Auftragsverarbeitungsvertrags (Art. 28 DSGVO). Anfragen zu "
+"diesen Daten richten Sie am besten direkt an die Lehrkraft; bei uns "
+"eingehende Anfragen leiten wir weiter."
+
+#: templates/legal/privacy.html:58
+msgid "The portal uses only the technically necessary cookies described below."
+msgstr ""
+"Im Portal werden ausschließlich die unten beschriebenen technisch "
+"notwendigen Cookies verwendet."
+
+#: templates/legal/privacy.html:61
+msgid "Calendar sync (iCloud)"
+msgstr "Kalender-Synchronisierung (iCloud)"
+
+#: templates/legal/privacy.html:62
+msgid ""
+"Tutors can optionally connect their own iCloud calendar. Preceptly then "
+"copies their lessons into a calendar of their choice (by default the event "
+"title contains the student's name; the title can be changed in the settings) "
+"and imports events from other calendars they select as blocked times (title, "
+"time and description)."
+msgstr ""
+"Lehrkräfte können optional ihren eigenen iCloud-Kalender verbinden. "
+"Preceptly überträgt dann ihre Unterrichtsstunden in einen Kalender ihrer "
+"Wahl (der Termintitel enthält standardmäßig den Namen des Schülers; der "
+"Titel lässt sich in den Einstellungen ändern) und übernimmt Termine aus "
+"weiteren ausgewählten Kalendern als Blockzeiten (Titel, Zeit und "
+"Beschreibung)."
+
+#: templates/legal/privacy.html:63
+msgid ""
+"For this we store the Apple ID and an app-specific password in encrypted "
+"form; the regular Apple ID password is never requested. The sync can be "
+"paused or disconnected at any time in the settings."
+msgstr ""
+"Dazu speichern wir die Apple-ID und ein app-spezifisches Passwort "
+"verschlüsselt; das reguläre Apple-ID-Passwort wird nie abgefragt. Die "
+"Synchronisierung lässt sich in den Einstellungen jederzeit pausieren oder "
+"trennen."
+
+#: templates/legal/privacy.html:64
+msgid ""
+"Recipient is Apple Distribution International Ltd., Hollyhill Industrial "
+"Estate, Hollyhill, Cork, Ireland, within the tutor's own iCloud account. "
+"Data transfers to the USA are based on the standard contractual clauses of "
+"the EU Commission."
+msgstr ""
+"Empfänger ist Apple Distribution International Ltd., Hollyhill Industrial "
+"Estate, Hollyhill, Cork, Irland, im eigenen iCloud-Konto der Lehrkraft. "
+"Datenübertragungen in die USA stützen sich auf die Standardvertragsklauseln "
+"der EU-Kommission."
+
+#: templates/legal/privacy.html:65
+msgid ""
+"Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract, at the "
+"tutor's request)."
+msgstr ""
+"Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung, auf "
+"Veranlassung der Lehrkraft)."
+
+#: templates/legal/privacy.html:68
+msgid "Push notifications"
+msgstr "Push-Benachrichtigungen"
+
+#: templates/legal/privacy.html:69
+msgid ""
+"If you enable push notifications on a device, notifications (e.g. about a "
+"new booking, including the student's name and the time) are delivered via "
+"the push service of your browser or operating system provider (e.g. Google, "
+"Apple or Mozilla). The content is end-to-end encrypted in accordance with "
+"the Web Push standard; the push service only processes the technical data "
+"required for delivery."
+msgstr ""
+"Wenn Sie Push-Benachrichtigungen auf einem Gerät aktivieren, werden "
+"Benachrichtigungen (z. B. über eine neue Buchung einschließlich Name des "
+"Schülers und Uhrzeit) über den Push-Dienst Ihres Browser- bzw. "
+"Betriebssystemanbieters zugestellt (z. B. Google, Apple oder Mozilla). Die "
+"Inhalte sind gemäß Web-Push-Standard Ende-zu-Ende-verschlüsselt; der Push-"
+"Dienst verarbeitet nur die für die Zustellung nötigen technischen Daten."
+
+#: templates/legal/privacy.html:70
+msgid ""
+"Push notifications can be switched off at any time in the settings or in the "
+"browser."
+msgstr ""
+"Push-Benachrichtigungen lassen sich jederzeit in den Einstellungen oder im "
+"Browser abschalten."
+
+#: templates/legal/privacy.html:71
+msgid ""
+"Legal basis: Art. 6 para. 1 lit. a GDPR (consent given via the browser "
+"permission prompt)."
+msgstr ""
+"Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung über die "
+"Berechtigungsabfrage des Browsers)."
+
+#: templates/legal/privacy.html:74
 msgid "Cookies and technical storage"
 msgstr "Cookies und technische Speicherung"
 
-#: templates/legal/privacy.html:57
+#: templates/legal/privacy.html:75
 msgid "Preceptly uses only technically necessary cookies:"
 msgstr "Preceptly verwendet ausschließlich technisch notwendige Cookies:"
 
-#: templates/legal/privacy.html:59
+#: templates/legal/privacy.html:77
 msgid ""
 "Session cookie for managing the logged-in state. Deleted when you log out or "
 "close the browser."
@@ -6840,14 +6969,14 @@ msgstr ""
 "Sitzungs-Cookie zur Verwaltung des eingeloggten Zustands. Wird beim Abmelden "
 "oder Schließen des Browsers gelöscht."
 
-#: templates/legal/privacy.html:60
+#: templates/legal/privacy.html:78
 msgid ""
 "Security cookie to protect against cross-site request forgery (CSRF) attacks."
 msgstr ""
 "Sicherheits-Cookie zum Schutz vor seitenübergreifenden Anfragefälschungen "
 "(CSRF)."
 
-#: templates/legal/privacy.html:62
+#: templates/legal/privacy.html:80
 msgid ""
 "In addition, Preceptly stores the selected display theme (light/dark) in the "
 "browser's localStorage. This is not a cookie and the data does not leave "
@@ -6857,7 +6986,7 @@ msgstr ""
 "Dunkel) im localStorage des Browsers. Dabei handelt es sich nicht um ein "
 "Cookie; die Daten verlassen das Gerät nicht."
 
-#: templates/legal/privacy.html:62
+#: templates/legal/privacy.html:80
 msgid ""
 "Preceptly also stores in localStorage whether you have dismissed the hint "
 "about installing the app to your home screen, so it is not shown again. This "
@@ -6867,7 +6996,7 @@ msgstr ""
 "Installation der App auf Ihrem Startbildschirm weggeklickt haben, damit er "
 "nicht erneut erscheint. Auch diese Daten verlassen das Gerät nicht."
 
-#: templates/legal/privacy.html:63
+#: templates/legal/privacy.html:81
 msgid ""
 "No tracking, analytics, or advertising cookies are used. A cookie consent "
 "banner is therefore not required."
@@ -6875,15 +7004,15 @@ msgstr ""
 "Es werden keine Tracking-, Analyse- oder Werbe-Cookies eingesetzt. Ein "
 "Cookie-Consent-Banner ist daher nicht erforderlich."
 
-#: templates/legal/privacy.html:64
+#: templates/legal/privacy.html:82
 msgid "Legal basis: Art. 6 para. 1 lit. b and f GDPR."
 msgstr "Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO."
 
-#: templates/legal/privacy.html:67
+#: templates/legal/privacy.html:85
 msgid "Email (iCloud Mail)"
 msgstr "E-Mail (iCloud Mail)"
 
-#: templates/legal/privacy.html:68
+#: templates/legal/privacy.html:86
 msgid ""
 "We use Apple's iCloud Mail with a custom email domain to send and receive "
 "emails under the preceptly.de domain (e.g., info@preceptly.de)."
@@ -6892,7 +7021,7 @@ msgstr ""
 "um E-Mails unter der Domain preceptly.de zu senden und zu empfangen (z. B. "
 "info@preceptly.de)."
 
-#: templates/legal/privacy.html:69
+#: templates/legal/privacy.html:87
 msgid ""
 "Provider: Apple Distribution International Ltd., Hollyhill Industrial "
 "Estate, Hollyhill, Cork, Irland (a subsidiary of Apple Inc., Cupertino, USA)."
@@ -6901,7 +7030,7 @@ msgstr ""
 "Estate, Hollyhill, Cork, Irland (eine Tochtergesellschaft der Apple Inc., "
 "Cupertino, USA)."
 
-#: templates/legal/privacy.html:70
+#: templates/legal/privacy.html:88
 msgid ""
 "Data transfers to the USA are based on the standard contractual clauses of "
 "the EU Commission."
@@ -6909,7 +7038,7 @@ msgstr ""
 "Datenübertragungen in die USA erfolgen auf Grundlage der "
 "Standardvertragsklauseln der EU-Kommission."
 
-#: templates/legal/privacy.html:71
+#: templates/legal/privacy.html:89
 msgid ""
 "Legal basis: legitimate interest in reliable and professional business "
 "communication (Art. 6 para. 1 lit. f GDPR)."
@@ -6917,11 +7046,11 @@ msgstr ""
 "Rechtsgrundlage: berechtigtes Interesse an einer zuverlässigen und "
 "professionellen Geschäftskommunikation (Art. 6 Abs. 1 lit. f DSGVO)."
 
-#: templates/legal/privacy.html:74
+#: templates/legal/privacy.html:92
 msgid "Revocation button (e-Recht24)"
 msgstr "Widerrufs-Button (e-Recht24)"
 
-#: templates/legal/privacy.html:75
+#: templates/legal/privacy.html:93
 msgid ""
 "Our website includes a revocation button provided by e-Recht24 (eRecht24 "
 "GmbH &amp; Co. KG, Lietzenburger Str. 94, 10719 Berlin, Germany). Its "
@@ -6933,7 +7062,7 @@ msgstr ""
 "Er ermöglicht Verbrauchern, ihr gesetzliches Widerrufsrecht bequem und "
 "dokumentiert auszuüben."
 
-#: templates/legal/privacy.html:76
+#: templates/legal/privacy.html:94
 msgid ""
 "When the revocation button is used, the following data processors and "
 "services are involved:"
@@ -6941,7 +7070,7 @@ msgstr ""
 "Bei Nutzung des Widerrufs-Buttons sind folgende Auftragsverarbeiter und "
 "Dienste beteiligt:"
 
-#: templates/legal/privacy.html:78
+#: templates/legal/privacy.html:96
 msgid ""
 "bot detection and abuse prevention (Friendly Captcha GmbH, Am Anger 3-5, "
 "82237 Wörthsee, Germany)."
@@ -6949,7 +7078,7 @@ msgstr ""
 "Bot-Erkennung und Missbrauchsprävention (Friendly Captcha GmbH, Am Anger "
 "3-5, 82237 Wörthsee, Deutschland)."
 
-#: templates/legal/privacy.html:79
+#: templates/legal/privacy.html:97
 msgid ""
 "transactional email delivery for withdrawal confirmation emails (MailPace "
 "Ltd., United Kingdom)."
@@ -6957,7 +7086,7 @@ msgstr ""
 "Transaktionaler E-Mail-Versand für Widerrufsbestätigungs-E-Mails (MailPace "
 "Ltd., Vereinigtes Königreich)."
 
-#: templates/legal/privacy.html:80
+#: templates/legal/privacy.html:98
 msgid ""
 "data processor for handling the revocation form submission on our behalf "
 "(eRecht24 GmbH &amp; Co. KG, Berlin, Germany)."
@@ -6965,7 +7094,7 @@ msgstr ""
 "Auftragsverarbeiter für die Bearbeitung der Widerrufsformular-Übermittlung "
 "in unserem Auftrag (eRecht24 GmbH & Co. KG, Berlin, Deutschland)."
 
-#: templates/legal/privacy.html:82
+#: templates/legal/privacy.html:100
 msgid ""
 "Legal basis: fulfilment of a legal obligation (Art. 6 para. 1 lit. c GDPR) "
 "with regard to enabling the right of withdrawal, and legitimate interest in "
