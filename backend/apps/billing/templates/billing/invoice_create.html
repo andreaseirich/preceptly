@@ -64,7 +64,7 @@
             {% endblocktrans %}
         </p>
         {% else %}
-        <p style="margin: 8px 0 0 0;">{% trans 'Tip: If a higher rate appears too early, check your tier config in Settings, or remove old test lessons.' %} <a href="{% url 'core:settings' %}">{% trans "Open settings" %}</a></p>
+        <p style="margin: 8px 0 0 0;">{% trans 'Tip: If a higher rate appears too early, check your tier config in Settings, or remove old test lessons.' %} <a href="{% url 'core:settings' %}#institutes">{% trans "Open settings" %}</a></p>
         {% endif %}
     </div>
     {% endif %}

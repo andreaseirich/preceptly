@@ -269,6 +269,14 @@ class SettingsView(LoginRequiredMixin, FormView):
         kwargs["initial_working_hours"] = profile.default_working_hours or {}
         return kwargs
 
+    def _section_url(self, section):
+        # A query param, not a #fragment: the browser would scroll to the
+        # fragment and hide the "saved" message rendered at the top of the page.
+        return f"{reverse('core:settings')}?section={section}"
+
+    def get_success_url(self):
+        return self._section_url("working-hours")
+
     def form_valid(self, form):
         """Save working hours to user profile."""
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
@@ -276,6 +284,11 @@ class SettingsView(LoginRequiredMixin, FormView):
         profile.save()
         messages.success(self.request, _("Default working hours updated successfully."))
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(
+            self.get_context_data(form=form, settings_initial_section="working-hours")
+        )
 
     def post(self, request, *args, **kwargs):
         """Handle WorkingHoursForm, UserEmailForm, and TravelPolicyForm."""
@@ -288,13 +301,13 @@ class SettingsView(LoginRequiredMixin, FormView):
                     request,
                     _("To change your email address, please contact support."),
                 )
-                return redirect(self.success_url)
+                return redirect(self._section_url("email"))
             email_form = UserEmailForm(request.POST, instance=request.user)
             if email_form.is_valid():
                 email_form.save()
                 messages.success(request, _("Email address saved."))
-                return redirect(self.success_url)
-            context = self.get_context_data()
+                return redirect(self._section_url("email"))
+            context = self.get_context_data(settings_initial_section="email")
             context["email_form"] = email_form
             return self.render_to_response(context)
         if "save_travel" in request.POST:
@@ -312,8 +325,8 @@ class SettingsView(LoginRequiredMixin, FormView):
                     request,
                     _("Travel mode for on-site appointments updated."),
                 )
-                return redirect(self.success_url)
-            context = self.get_context_data()
+                return redirect(self._section_url("travel"))
+            context = self.get_context_data(settings_initial_section="travel")
             context["travel_form"] = travel_form
             return self.render_to_response(context)
         if "save_timezone" in request.POST:
@@ -328,7 +341,7 @@ class SettingsView(LoginRequiredMixin, FormView):
                 messages.success(request, _("Timezone saved."))
             except (KeyError, zoneinfo.ZoneInfoNotFoundError):
                 messages.error(request, _("Invalid timezone."))
-            return redirect(self.success_url)
+            return redirect(self._section_url("timezone"))
         if "save_billing_profile" in request.POST:
             from apps.core.validators import validate_billing_tax_number
 
@@ -336,7 +349,7 @@ class SettingsView(LoginRequiredMixin, FormView):
             tax_error = validate_billing_tax_number(tax_raw) if tax_raw else None
             if tax_error:
                 messages.error(request, tax_error)
-                return redirect(self.success_url)
+                return redirect(self._section_url("billing"))
             profile, _created = UserProfile.objects.get_or_create(user=request.user)
             profile.billing_name = request.POST.get("billing_name", "").strip()[:200]
             profile.billing_address = request.POST.get("billing_address", "").strip()[:2000]
@@ -349,7 +362,7 @@ class SettingsView(LoginRequiredMixin, FormView):
             profile.billing_kleinunternehmer = "billing_kleinunternehmer" in request.POST
             profile.save()
             messages.success(request, _("Rechnungsdaten gespeichert."))
-            return redirect(self.success_url)
+            return redirect(self._section_url("billing"))
         if "save_notifications" in request.POST:
             from apps.core.models import NotificationPreference
 
@@ -368,7 +381,13 @@ class SettingsView(LoginRequiredMixin, FormView):
                 ]
             )
             messages.success(request, _("Notification settings saved."))
-            return redirect(self.success_url)
+            return redirect(self._section_url("notifications"))
+        if "save_portal" in request.POST:
+            profile, _created = UserProfile.objects.get_or_create(user=request.user)
+            profile.portal_buffer_hint_enabled = "portal_buffer_hint_enabled" in request.POST
+            profile.save(update_fields=["portal_buffer_hint_enabled", "updated_at"])
+            messages.success(request, _("Portal settings saved."))
+            return redirect(self._section_url("portal"))
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -468,6 +487,18 @@ class SettingsView(LoginRequiredMixin, FormView):
 
         context["profile_timezone"] = profile.timezone or "Europe/Berlin"
         context["all_timezones"] = sorted(zoneinfo.available_timezones())
+
+        form = context["form"]
+        context["working_hour_rows"] = [
+            {
+                "label": label,
+                "enabled": form[f"{key}_enabled"],
+                "start": form[f"{key}_start"],
+                "end": form[f"{key}_end"],
+            }
+            for key, label in WorkingHoursForm.WEEKDAYS
+        ]
+        context.setdefault("settings_initial_section", self.request.GET.get("section", ""))
         return context
 
 

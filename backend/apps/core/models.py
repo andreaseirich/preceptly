@@ -187,6 +187,7 @@ class UserProfile(models.Model):
             "(e.g. because this user has no Stripe customer/price yet)."
         ),
     )
+    portal_buffer_hint_enabled = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

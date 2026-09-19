@@ -36,8 +36,7 @@ def connect_calendar(request):
     error_redirect = (
         reverse("core:settings")
         + "?"
-        + urlencode({"calendar_username": caldav_username})
-        + "#calendar-sync"
+        + urlencode({"calendar_username": caldav_username, "section": "calendar-sync"})
     )
 
     caldav_url = PROVIDER_CALDAV_URLS.get(provider)
@@ -113,7 +112,7 @@ def configure_calendars(request):
             )
         SyncedCalendar.objects.bulk_create(rows)
         messages.success(request, _("Calendar selection saved."))
-        return redirect(reverse("core:settings") + "#calendar-sync")
+        return redirect(reverse("core:settings") + "?section=calendar-sync")
 
     try:
         password = decrypt_password(bytes(connection.encrypted_password))
@@ -121,7 +120,7 @@ def configure_calendars(request):
         available = client.list_event_calendars()
     except CalDavConnectionError as e:
         messages.error(request, _("Could not load your calendars: {error}").format(error=e))
-        return redirect(reverse("core:settings") + "#calendar-sync")
+        return redirect(reverse("core:settings") + "?section=calendar-sync")
 
     current_target_row = connection.synced_calendars.filter(
         role=SyncedCalendar.ROLE_SESSIONS_TARGET
@@ -154,7 +153,7 @@ def configure_calendars(request):
 def disconnect_calendar(request):
     CalendarConnection.objects.filter(user=request.user).delete()
     messages.success(request, _("Calendar disconnected."))
-    return redirect(reverse("core:settings") + "#calendar-sync")
+    return redirect(reverse("core:settings") + "?section=calendar-sync")
 
 
 @login_required
@@ -163,7 +162,7 @@ def toggle_calendar_sync(request):
     connection = get_object_or_404(CalendarConnection, user=request.user)
     connection.sync_enabled = not connection.sync_enabled
     connection.save(update_fields=["sync_enabled"])
-    return redirect(reverse("core:settings") + "#calendar-sync")
+    return redirect(reverse("core:settings") + "?section=calendar-sync")
 
 
 @login_required

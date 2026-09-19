@@ -123,7 +123,7 @@
     <span style="font-size:1.3em; flex-shrink:0;">⚠️</span>
     <div>
         <strong>{% trans "Invoice details missing" %}</strong><br>
-        {% blocktrans with url=settings_url %}To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, optional tax number).{% endblocktrans %}
+        {% blocktrans with url=settings_url|add:"#billing" %}To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, optional tax number).{% endblocktrans %}
     </div>
 </div>
 {% endif %}

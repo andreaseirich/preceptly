@@ -23,6 +23,7 @@
 
 <h2 style="margin-top:0;">Wochenübersicht</h2>
 <p style="color:var(--text-secondary); font-size:0.88em; margin-top:-8px;">Klicke auf einen Tag, um die freien Zeiten darunter zu laden.</p>
+{% include "portal/_buffer_hint.html" %}
 {% include "portal/_week_calendar_widget.html" with nav_url_name="portal:session_reschedule" nav_pk=session.pk %}
 
 <div class="box-section">
@@ -35,6 +36,7 @@
     </div>
     <div style="margin-bottom:20px;">
       <label for="id_start_time" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neue Uhrzeit</label>
+      {% include "portal/_buffer_hint.html" with compact=True %}
       <div class="slot-grid" id="slot-grid" role="group" aria-label="Verfügbare Uhrzeiten">
         <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
       </div>

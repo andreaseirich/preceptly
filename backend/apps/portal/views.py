@@ -654,6 +654,11 @@ class StudentLessonDetailView(View):
 # ════════════════════════════════════════════════════════════════════════
 
 
+def _buffer_hint_enabled(contract) -> bool:
+    profile = getattr(contract.user, "profile", None)
+    return profile is None or profile.portal_buffer_hint_enabled
+
+
 def _get_portal_student(portal_user, student_pk):
     """Gibt den Vertrag zurück, falls portal_user Zugriff darauf hat, sonst None."""
     link = ParentStudentLink.objects.filter(
@@ -852,6 +857,7 @@ class PortalBookingView(View):
             "error": error,
             "success": success,
             "portal_user": get_portal_user(request),
+            "show_buffer_hint": _buffer_hint_enabled(student),
         }
         context.update(_build_week_calendar(student, year, month, day))
         context["today"] = today.isoformat()
@@ -1041,6 +1047,7 @@ class PortalSessionRescheduleView(View):
             "student": student,
             "portal_user": portal_user,
             "error": error,
+            "show_buffer_hint": _buffer_hint_enabled(student),
         }
         context.update(_build_week_calendar(student, year, month, day))
         context["today"] = today.isoformat()
@@ -1175,6 +1182,7 @@ class PortalRecurringCreateView(View):
                 "portal_user": portal_user,
                 "weekday_fields": list(zip(self.WEEKDAY_FIELDS, self.WEEKDAY_LABELS, strict=True)),
                 "today": _dt.date.today().isoformat(),
+                "show_buffer_hint": _buffer_hint_enabled(student),
             },
         )
 
