@@ -37,7 +37,26 @@
 </div>
 {% endfor %}
 {% else %}
-<div class="empty-state"><p>Keine aktiven Serientermine.</p></div>
+<div class="empty-state"><p>Aktuell läuft keine Serie.</p></div>
+{% endif %}
+
+{% if ended_series %}
+<h2 style="margin-top:28px;">Beendete Serien</h2>
+{% for rs in ended_series %}
+<div class="box-section" style="margin-bottom:12px; opacity:0.75;">
+  <strong>{{ rs.start_time|time:"H:i" }} Uhr</strong>
+  &middot; {{ rs.duration_minutes }} Min.
+  &middot; <span style="color:var(--text-secondary); font-size:0.88em;">{{ rs.get_active_weekdays_display }}</span><br>
+  <small style="color:var(--text-secondary);">
+    {% if rs.end_date %}Ausgelaufen am {{ rs.end_date|date:"d.m.Y" }}{% else %}Ausgelaufen (Vertragsende){% endif %}
+    &middot; lief ab {{ rs.start_date|date:"d.m.Y" }}
+  </small>
+</div>
+{% endfor %}
+<p style="color:var(--text-secondary); font-size:0.9em;">
+  Für diese Zeiten werden keine Termine mehr angelegt. Buche einen Einzeltermin oder lege eine neue Serie an –
+  bereits vergebene Zeiten stehen dabei möglicherweise nicht mehr zur Verfügung.
+</p>
 {% endif %}
 
 <div style="margin-top:20px;">
