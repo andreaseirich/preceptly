@@ -1141,16 +1141,18 @@ class PortalRecurringManageView(View):
         if not student:
             return HttpResponseForbidden()
         contract = _get_active_contract(student)
-        series = RecurringSession.objects.filter(
-            contract=student,
-            is_active=True,
-        ).order_by("start_date")
+        series = (
+            RecurringSession.objects.filter(contract=student, is_active=True)
+            .select_related("contract")
+            .order_by("start_date")
+        )
         return render(
             request,
             self.template_name,
             {
                 "student": student,
-                "series": series,
+                "series": [s for s in series if not s.has_ended],
+                "ended_series": [s for s in series if s.has_ended],
                 "contract": contract,
                 "portal_user": portal_user,
             },

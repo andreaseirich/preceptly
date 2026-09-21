@@ -63,6 +63,19 @@ class RecurringSession(models.Model):
         verbose_name = _("Recurring Session")
         verbose_name_plural = _("Recurring Sessions")
 
+    @property
+    def has_ended(self) -> bool:
+        """True once the series' last date has passed. is_active stays True
+        on a finished series, so anything user-facing has to check this too -
+        otherwise a series that ran out weeks ago still looks current."""
+        from django.utils import timezone
+
+        today = timezone.localdate()
+        if self.end_date:
+            return self.end_date < today
+        contract_end = getattr(self.contract, "end_date", None)
+        return bool(contract_end and contract_end < today)
+
     def __str__(self):
         weekdays = self.get_active_weekdays_display()
         return f"{self.contract} - {weekdays} {self.start_time} (from {self.start_date})"
