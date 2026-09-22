@@ -178,6 +178,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 
 ROOT_URLCONF = "tutorflow.urls"
@@ -244,6 +245,7 @@ TRUSTED_PROXIES = env_list("TRUSTED_PROXIES", default=["100.64.0.0/10"])
 # Without this, every django-ratelimit key="ip" limit sees Railway's proxy
 # address in REMOTE_ADDR - i.e. one shared counter for all visitors.
 RATELIMIT_IP_META_KEY = "apps.core.auth_throttle.ratelimit_client_ip"
+RATELIMIT_VIEW = "apps.core.views.ratelimited"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
