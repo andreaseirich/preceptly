@@ -24,7 +24,13 @@ from django.views.generic import DeleteView, ListView
 from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
 from apps.core.upload_validation import validate_file_magic
-from apps.portal.models import ParentStudentLink, PortalUser, ProgressNote
+from apps.portal.identity import portal_login_conflict
+from apps.portal.models import (
+    ParentStudentLink,
+    PortalUser,
+    ProgressNote,
+    StudentPortalLink,
+)
 from apps.students.booking_code_service import set_booking_code
 
 logger = logging.getLogger(__name__)
@@ -223,7 +229,7 @@ class PortalInviteView(LoginRequiredMixin, View):
             existing_link = (
                 ParentStudentLink.objects.select_for_update().filter(contract=contract).first()
             )
-            if existing_link:
+            if existing_link or StudentPortalLink.objects.filter(contract=contract).exists():
                 messages.info(request, "Portal-Zugang bereits vorhanden.")
                 return redirect("contracts:detail", pk=pk)
 
@@ -251,6 +257,21 @@ class PortalInviteView(LoginRequiredMixin, View):
                     request,
                     "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto — "
                     "als Familien-Zugang mit diesem Kind verknüpft.",
+                )
+                return redirect("contracts:detail", pk=pk)
+
+            # Alt-Zugänge werden beim Login über die Vertrags-E-Mail gefunden:
+            # Ein neuer Account mit derselben Adresse würde sie verdecken.
+            if portal_login_conflict(email, exclude_contract_pk=contract.pk):
+                logger.warning(
+                    "Portal invite blocked: email belongs to another portal login "
+                    "(tutor=%s contract_id=%s)",
+                    request.user.id,
+                    contract.pk,
+                )
+                messages.error(
+                    request,
+                    "Diese E-Mail-Adresse gehört bereits zu einem anderen Portal-Zugang.",
                 )
                 return redirect("contracts:detail", pk=pk)
 

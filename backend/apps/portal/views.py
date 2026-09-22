@@ -1908,22 +1908,21 @@ class PortalProfileEditView(View):
             new_phone = request.POST.get("phone", "").strip()
 
             if new_email and new_email != (django_user.email or "").lower():
-                from django.contrib.auth import get_user_model as _gum
-
                 from apps.contracts.models import Contract as _Contract
+                from apps.portal.identity import portal_login_conflict
 
-                _User = _gum()
-                duplicate_user = (
-                    _User.objects.filter(email__iexact=new_email, portal_profile__isnull=False)
-                    .exclude(pk=django_user.pk)
-                    .exists()
+                contract_pk = contract.pk if contract else None
+                duplicate_login = portal_login_conflict(
+                    new_email,
+                    exclude_user_pk=django_user.pk,
+                    exclude_contract_pk=contract_pk,
                 )
                 duplicate_contract = (
                     _Contract.objects.filter(email__iexact=new_email, parent_links__isnull=False)
-                    .exclude(pk=contract.pk if contract else None)
+                    .exclude(pk=contract_pk)
                     .exists()
                 )
-                if duplicate_user or duplicate_contract:
+                if duplicate_login or duplicate_contract:
                     errors.append(
                         "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet."
                     )
