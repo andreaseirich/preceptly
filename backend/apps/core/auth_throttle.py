@@ -201,6 +201,36 @@ def throttle_login(request):
     return None
 
 
+def throttle_portal_login(request):
+    """Per-account throttle for the student/parent portal login, mirroring
+    throttle_login() for tutors. The IP limit alone does not stop someone
+    working through one parent account from many networks. Returns a 429
+    response when throttled, otherwise None."""
+    email_raw = (request.POST.get("email") or "").strip()
+    email = unicodedata.normalize("NFKC", email_raw).casefold()[:254]
+    if not email:
+        return None
+
+    allowed, retry = _throttle_check("portal_login_user", email, max_attempts=5, window_seconds=300)
+    if allowed:
+        return None
+
+    response = render(
+        request,
+        "portal/login.html",
+        {
+            "error": (
+                "Zu viele Anmeldeversuche für diese E-Mail-Adresse. "
+                "Bitte warte ein paar Minuten und versuche es dann erneut."
+            ),
+            "next": request.POST.get("next", ""),
+        },
+        status=429,
+    )
+    response["Retry-After"] = str(retry)
+    return response
+
+
 def throttle_register(request):
     """
     Throttle Registrierungsversuche. Vor der Verarbeitung aufrufen.

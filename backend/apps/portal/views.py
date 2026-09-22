@@ -20,6 +20,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django_ratelimit.decorators import ratelimit
 
+from apps.core.auth_throttle import throttle_portal_login
 from apps.core.log_safety import safe_log_value
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.booking_service import BOOKING_MAX_YEAR, BOOKING_MIN_YEAR
@@ -69,6 +70,10 @@ class PortalLoginView(View):
     @method_decorator(ratelimit(key="ip", rate="10/m", method="POST", block=True))
     def post(self, request):
         from django.contrib.auth.hashers import check_password as _check_password
+
+        throttled = throttle_portal_login(request)
+        if throttled is not None:
+            return throttled
 
         _DUMMY_HASH = "pbkdf2_sha256$600000$dummy$dummyhashfortimingnoop="
 
