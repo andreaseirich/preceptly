@@ -3,6 +3,11 @@ updates:
   # Python dependencies
   - package-ecosystem: "pip"
     directory: "/"
+    # Only touch a requirement when the new version falls outside it. For the
+    # >= entries the build already installs the newest release, so raising the
+    # lower bound was a no-op PR that the auto-merge filter (patch/minor only)
+    # never picked up.
+    versioning-strategy: "increase-if-necessary"
     schedule:
       interval: "daily"
       time: "06:00"
