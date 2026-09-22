@@ -241,6 +241,9 @@ else:
 # On Railway (and similar PaaS), set TRUSTED_PROXIES to the internal proxy
 # range so X-Forwarded-For is evaluated and rate limits apply per real client IP.
 TRUSTED_PROXIES = env_list("TRUSTED_PROXIES", default=["100.64.0.0/10"])
+# Without this, every django-ratelimit key="ip" limit sees Railway's proxy
+# address in REMOTE_ADDR - i.e. one shared counter for all visitors.
+RATELIMIT_IP_META_KEY = "apps.core.auth_throttle.ratelimit_client_ip"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

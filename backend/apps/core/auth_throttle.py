@@ -72,6 +72,19 @@ def _get_client_ip(request) -> str:
     return remote or "unknown"
 
 
+def ratelimit_client_ip(request) -> str:
+    """Client IP for django-ratelimit (settings.RATELIMIT_IP_META_KEY): same
+    proxy handling as the login throttle above. Always returns a parseable
+    address - django-ratelimit feeds it into ipaddress.ip_network(), so a
+    garbage X-Forwarded-For value must not turn into a 500."""
+    for candidate in (_get_client_ip(request), request.META.get("REMOTE_ADDR") or ""):
+        try:
+            return str(ipaddress.ip_address(candidate))
+        except ValueError:
+            continue
+    return "0.0.0.0"
+
+
 def _throttle_check(
     prefix: str,
     identifier: str,
