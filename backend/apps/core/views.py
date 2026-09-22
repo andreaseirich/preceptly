@@ -955,6 +955,26 @@ def csrf_failure(request, reason=""):
     return render(request, "core/csrf_failure.html", status=403)
 
 
+RATELIMIT_MESSAGE = "Zu viele Anfragen. Bitte warte einen Moment und versuche es dann erneut."
+
+
+def ratelimited(request, exception):
+    """RATELIMIT_VIEW: 429 instead of django-ratelimit's default 403, and
+    without the traceback Django logs for PermissionDenied - a client
+    hitting a limit is expected, not an error. Only clients that ask for
+    HTML get the page; fetch() calls (Accept: */*) and webhooks get JSON,
+    because e.g. the public booking page shows data.message from it."""
+    from django.http import JsonResponse
+    from django.shortcuts import render
+
+    if "text/html" in request.headers.get("Accept", ""):
+        response = render(request, "core/ratelimited.html", status=429)
+    else:
+        response = JsonResponse({"success": False, "message": RATELIMIT_MESSAGE}, status=429)
+    response["Retry-After"] = "60"
+    return response
+
+
 class FaqView(TemplateView):
     """Public FAQ page — listed in robots.txt/sitemap.xml and shown to
     anonymous visitors in the nav, so it must not require login."""

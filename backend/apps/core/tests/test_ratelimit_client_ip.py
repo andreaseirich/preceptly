@@ -45,18 +45,35 @@ class PortalLoginRateLimitPerClientTest(TestCase):
         cache.clear()
         self.url = reverse("portal:login")
 
-    def _post(self, client_ip):
+    def _post(self, client_ip, accept="text/html,application/xhtml+xml"):
         return self.client.post(
             self.url,
             {"email": "nobody@example.com", "password": "wrong"},
             REMOTE_ADDR=PROXY,
             HTTP_X_FORWARDED_FOR=f"{client_ip}, 152.233.12.241",
+            HTTP_ACCEPT=accept,
         )
 
     def test_one_visitor_hitting_the_limit_does_not_lock_out_another(self):
         for _ in range(10):
-            self.assertNotIn(self._post("203.0.113.7").status_code, (403, 429))
-        self.assertIn(self._post("203.0.113.7").status_code, (403, 429))
+            self.assertEqual(self._post("203.0.113.7").status_code, 200)
+        self.assertEqual(self._post("203.0.113.7").status_code, 429)
 
         # same Railway proxy, different real visitor
-        self.assertNotIn(self._post("198.51.100.23").status_code, (403, 429))
+        self.assertEqual(self._post("198.51.100.23").status_code, 200)
+
+    def test_blocked_browser_gets_friendly_page_with_retry_after(self):
+        for _ in range(10):
+            self._post("203.0.113.8")
+        response = self._post("203.0.113.8")
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response["Retry-After"], "60")
+        self.assertContains(response, "Zu viele Anfragen", status_code=429)
+
+    def test_blocked_fetch_call_gets_json(self):
+        for _ in range(10):
+            self._post("203.0.113.9", accept="*/*")
+        response = self._post("203.0.113.9", accept="*/*")
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response.json()["success"], False)
+        self.assertIn("Zu viele Anfragen", response.json()["message"])
