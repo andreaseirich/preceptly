@@ -255,7 +255,21 @@ a.doc-item { text-decoration: none; }
 #lobby-join:focus-visible { outline: 3px solid #6ee0c5; outline-offset: 2px; }
 #lobby-err { font-size: 0.82em; color: #e74c3c; text-align: center; min-height: 1.2em; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// pdf.js ships as an ES module since v4, and module scripts run deferred -
+// so the viewer code below waits on this promise instead of testing a global.
+window.pdfjsReady = new Promise((resolve, reject) => {
+    document.addEventListener("pdfjs:ready", () => resolve(), { once: true });
+    setTimeout(() => reject(new Error("pdf.js load timeout")), 15000);
+});
+window.pdfjsReady.catch(() => {});  // no unhandled rejection when no PDF is opened
+</script>
+<script type="module">
+import * as pdfjsLib from "{% static 'js/pdfjs/pdf.min.mjs' %}";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "{% static 'js/pdfjs/pdf.worker.min.mjs' %}";
+window.pdfjsLib = pdfjsLib;
+document.dispatchEvent(new Event("pdfjs:ready"));
+</script>
 </head>
 <body>
 
@@ -528,17 +542,6 @@ new ResizeObserver(() => requestAnimationFrame(resizeCanvas))
 window.addEventListener("resize", () => requestAnimationFrame(resizeCanvas));
 wbCtx.lineCap = "round"; wbCtx.lineJoin = "round";
 
-// PDF.js worker – als Blob-Worker laden, damit er same-origin laeuft (verhindert
-// Cross-Origin-Worker-Restrictions in Firefox und iOS Safari).
-if (typeof pdfjsLib !== "undefined") {
-    const _pdfWorkerCdn = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    const _pdfWorkerBlob = new Blob(
-        ['importScripts("' + _pdfWorkerCdn + '")'],
-        { type: "application/javascript" }
-    );
-    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(_pdfWorkerBlob);
-}
-
 function redrawAll() {
     wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
     wbCtx.save();
@@ -566,8 +569,11 @@ async function loadBackground(url, name, broadcast, docId, filename) {
     const ext = (extSrc.split("?")[0].split(".").pop() || "").toLowerCase();
     if (ext === "pdf") {
         // PDF via PDF.js – erste Seite als Bild
-        if (typeof pdfjsLib === "undefined") {
-            alert("PDF.js nicht geladen – bitte Seite neu laden.");
+        try {
+            await window.pdfjsReady;
+        } catch (e) {
+            _loadBgInProgress = false;
+            alert("PDF-Anzeige konnte nicht geladen werden – bitte Seite neu laden.");
             return;
         }
         try {
@@ -612,6 +618,7 @@ async function loadBackground(url, name, broadcast, docId, filename) {
         try {
             await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error("Bild konnte nicht geladen werden (evtl. fehlende Berechtigung oder ungültiges Format).")); });
         } catch(e) {
+            _loadBgInProgress = false;
             alert("Dokument konnte nicht geöffnet werden: " + e.message);
             return;
         }
@@ -619,6 +626,7 @@ async function loadBackground(url, name, broadcast, docId, filename) {
     } else {
         // Nicht darstellbar → in neuem Tab öffnen
         window.open(url, "_blank");
+        _loadBgInProgress = false;
         return;
     }
     // Tab-Wechsel VOR fitDocToView/redrawAll, damit Canvas sichtbar und korrekt dimensioniert ist
