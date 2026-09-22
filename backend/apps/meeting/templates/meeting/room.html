@@ -581,10 +581,10 @@ async function loadBackground(url, name, broadcast, docId, filename) {
                 console.log("[PDF] fetch OK, arrayBuffer()...");
                 const data = await resp.arrayBuffer();
                 console.log("[PDF] arrayBuffer OK, byteLength:", data.byteLength, "getDocument()...");
-                pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(data) }).promise;
+                pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(data), isEvalSupported: false }).promise;
             } else {
                 console.log("[PDF] getDocument mit URL startet...");
-                pdfDoc = await pdfjsLib.getDocument({ url, withCredentials: true }).promise;
+                pdfDoc = await pdfjsLib.getDocument({ url, withCredentials: true, isEvalSupported: false }).promise;
             }
             console.log("[PDF] getDocument OK, getPage(1)...");
             const page   = await pdfDoc.getPage(1);

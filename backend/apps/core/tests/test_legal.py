@@ -61,12 +61,9 @@ class LegalTextsMatchActualProcessingTests(TestCase):
     def test_avv_lists_actual_sub_processors(self):
         response = self.client.get(reverse("core:legal_avv"), HTTP_ACCEPT_LANGUAGE="de")
         self.assertNotContains(response, "Anthropic")
-        for name in (
-            "Railway Corp.",
-            "Cloudflare, Inc.",
-            "Apple Distribution International",
-            "Tailscale Inc.",
-        ):
+        # Cloudflare only hosts the DNS zone; no traffic or personal data passes through it
+        self.assertNotContains(response, "Cloudflare")
+        for name in ("Railway Corp.", "Apple Distribution International", "Tailscale Inc."):
             self.assertContains(response, name)
 
 

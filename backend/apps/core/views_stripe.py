@@ -523,8 +523,6 @@ class StripePortalView(View):
 
 @csrf_exempt
 @require_POST
-@csrf_exempt
-@require_POST
 def stripe_webhook_view(request):
     """
     Handle Stripe webhooks. Verify signature, process events, update premium status.

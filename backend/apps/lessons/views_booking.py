@@ -511,8 +511,6 @@ def _get_week_data_json(contract, year: int, month: int, day: int):
 
 @require_http_methods(["GET"])
 @ratelimit(key="ip", rate="30/m", block=True)
-@require_http_methods(["GET"])
-@ratelimit(key="ip", rate="30/m", block=True)
 def student_booking_week_api(request, token):
     """API for fetching week booking data (for AJAX week navigation)."""
     try:
@@ -534,8 +532,6 @@ def student_booking_week_api(request, token):
     return JsonResponse({"success": True, "week_data": data})
 
 
-@require_http_methods(["POST"])
-@ratelimit(key="ip", rate="10/m", block=True)
 @require_http_methods(["POST"])
 @ratelimit(key="ip", rate="10/m", block=True)
 @ratelimit(
