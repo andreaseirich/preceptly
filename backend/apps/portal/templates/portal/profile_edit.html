@@ -98,6 +98,12 @@
         <button type="button" class="btn btn-secondary" id="icalFeedCopyBtn">Kopieren</button>
     </div>
     <p style="color:var(--text-secondary); font-size:0.8em; margin-top:8px;">⚠️ Dieser Link ist persönlich – nicht weitergeben.</p>
+    <form method="post" action="{% url 'portal:ical_feed_renew' %}" style="margin-top:4px;"
+          onsubmit="return confirm('Neuen Link erstellen? Der bisherige Link funktioniert danach nicht mehr und muss in deinem Kalender ersetzt werden.');">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-sm-secondary">Link erneuern</button>
+        <span style="color:var(--text-secondary); font-size:0.8em; margin-left:6px;">falls du ihn versehentlich weitergegeben hast</span>
+    </form>
 </div>
 
 <script>

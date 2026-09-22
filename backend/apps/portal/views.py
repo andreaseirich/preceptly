@@ -1831,6 +1831,27 @@ class PortalFAQView(View):
         return render(request, self.template_name, {"portal_user": portal_user})
 
 
+class PortalIcalFeedRenewView(View):
+    """Issues a new calendar feed token. Feed URLs end up in Google/Apple
+    calendars and get shared around; without this the only way to undo that
+    was deleting the portal account."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        portal_user = get_portal_user(request)
+        if not portal_user:
+            return redirect("portal:login")
+        portal_user.ical_feed_token = uuid.uuid4()
+        portal_user.save(update_fields=["ical_feed_token"])
+        messages.success(
+            request,
+            "Neuer Kalender-Link erstellt. Der alte Link funktioniert ab sofort nicht mehr – "
+            "trage den neuen Link in deinem Kalender ein.",
+        )
+        return redirect("portal:profile")
+
+
 class PortalProfileEditView(View):
     """Schüler/Elternteil kann eigene Kontaktdaten und Passwort ändern."""
 

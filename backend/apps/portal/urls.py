@@ -91,6 +91,11 @@ urlpatterns = [
     ),
     path("faq/", views.PortalFAQView.as_view(), name="faq"),
     path("profile/", views.PortalProfileEditView.as_view(), name="profile"),
+    path(
+        "profile/calendar-feed/renew/",
+        views.PortalIcalFeedRenewView.as_view(),
+        name="ical_feed_renew",
+    ),
     path("push/subscribe/", views.PortalPushSubscribeView.as_view(), name="push_subscribe"),
     path("push/unsubscribe/", views.PortalPushUnsubscribeView.as_view(), name="push_unsubscribe"),
     path("calendar-feed/<uuid:token>.ics", ical_feed, name="ical_feed"),

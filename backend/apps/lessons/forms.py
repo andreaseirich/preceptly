@@ -99,9 +99,16 @@ class SessionForm(forms.ModelForm):
             "tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         labels = {
+            "notes": _("Notiz (für Schüler und Eltern sichtbar)"),
             "homework": _("Hausaufgaben für nächste Stunde"),
             "meeting_url": _("Meeting-URL (Zoom/Meet)"),
             "tutor_no_show": _("I did not attend; student was waiting"),
+        }
+        help_texts = {
+            "notes": _(
+                "Erscheint im Portal und in der Terminbeschreibung des Kalender-Abos "
+                "der Eltern. Interne Vermerke gehören nicht hierher."
+            ),
         }
 
     def __init__(self, *args, user=None, **kwargs):

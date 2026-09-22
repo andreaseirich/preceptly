@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 09:30+0200\n"
+"POT-Creation-Date: 2026-09-22 20:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -463,7 +463,7 @@ msgstr "Ja, löschen"
 #: apps/core/templates/core/expense_confirm_delete.html:19
 #: apps/core/templates/core/expense_form.html:36
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:44
-#: apps/lessons/templates/lessons/lesson_form.html:197
+#: apps/lessons/templates/lessons/lesson_form.html:198
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:96
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:17
 #: apps/lessons/templates/lessons/recurringlesson_form.html:42
@@ -776,7 +776,7 @@ msgstr "optional"
 #: apps/core/templates/core/settings.html:175
 #: apps/core/templates/core/settings.html:316
 #: apps/core/templates/core/settings.html:479
-#: apps/lessons/templates/lessons/lesson_form.html:196
+#: apps/lessons/templates/lessons/lesson_form.html:197
 #: apps/students/templates/students/student_form.html:30
 msgid "Save"
 msgstr "Speichern"
@@ -1035,7 +1035,7 @@ msgstr "Rechnung als bezahlt markiert."
 msgid "Invoice is not marked as paid."
 msgstr "Rechnung ist nicht als bezahlt markiert."
 
-#: apps/billing/views.py:430 apps/lessons/views_booking.py:531
+#: apps/billing/views.py:430 apps/lessons/views_booking.py:529
 msgid "Invalid date."
 msgstr "Ungültiges Datum."
 
@@ -1132,7 +1132,7 @@ msgstr "Wann soll die Serie enden? (optional)"
 #: apps/blocked_times/recurring_models.py:43 apps/core/forms.py:68
 #: apps/lessons/forms.py:58 apps/lessons/recurring_forms.py:49
 #: apps/lessons/recurring_models.py:48
-#: apps/lessons/templates/lessons/lesson_form.html:160
+#: apps/lessons/templates/lessons/lesson_form.html:161
 #: apps/lessons/templates/lessons/student_booking.html:254
 #: apps/lessons/views_calendar.py:116 apps/lessons/views_calendar.py:307
 msgid "Monday"
@@ -1142,7 +1142,7 @@ msgstr "Montag"
 #: apps/blocked_times/recurring_models.py:44 apps/core/forms.py:69
 #: apps/lessons/forms.py:59 apps/lessons/recurring_forms.py:50
 #: apps/lessons/recurring_models.py:49
-#: apps/lessons/templates/lessons/lesson_form.html:164
+#: apps/lessons/templates/lessons/lesson_form.html:165
 #: apps/lessons/templates/lessons/student_booking.html:255
 #: apps/lessons/views_calendar.py:117 apps/lessons/views_calendar.py:308
 msgid "Tuesday"
@@ -1152,7 +1152,7 @@ msgstr "Dienstag"
 #: apps/blocked_times/recurring_models.py:45 apps/core/forms.py:70
 #: apps/lessons/forms.py:60 apps/lessons/recurring_forms.py:51
 #: apps/lessons/recurring_models.py:50
-#: apps/lessons/templates/lessons/lesson_form.html:168
+#: apps/lessons/templates/lessons/lesson_form.html:169
 #: apps/lessons/templates/lessons/student_booking.html:256
 #: apps/lessons/views_calendar.py:118 apps/lessons/views_calendar.py:309
 msgid "Wednesday"
@@ -1162,7 +1162,7 @@ msgstr "Mittwoch"
 #: apps/blocked_times/recurring_models.py:46 apps/core/forms.py:71
 #: apps/lessons/forms.py:61 apps/lessons/recurring_forms.py:52
 #: apps/lessons/recurring_models.py:51
-#: apps/lessons/templates/lessons/lesson_form.html:172
+#: apps/lessons/templates/lessons/lesson_form.html:173
 #: apps/lessons/templates/lessons/student_booking.html:257
 #: apps/lessons/views_calendar.py:119 apps/lessons/views_calendar.py:310
 msgid "Thursday"
@@ -1172,7 +1172,7 @@ msgstr "Donnerstag"
 #: apps/blocked_times/recurring_models.py:47 apps/core/forms.py:72
 #: apps/lessons/forms.py:62 apps/lessons/recurring_forms.py:53
 #: apps/lessons/recurring_models.py:52
-#: apps/lessons/templates/lessons/lesson_form.html:176
+#: apps/lessons/templates/lessons/lesson_form.html:177
 #: apps/lessons/templates/lessons/student_booking.html:258
 #: apps/lessons/views_calendar.py:120 apps/lessons/views_calendar.py:311
 msgid "Friday"
@@ -1182,7 +1182,7 @@ msgstr "Freitag"
 #: apps/blocked_times/recurring_models.py:48 apps/core/forms.py:73
 #: apps/lessons/forms.py:63 apps/lessons/recurring_forms.py:54
 #: apps/lessons/recurring_models.py:53
-#: apps/lessons/templates/lessons/lesson_form.html:180
+#: apps/lessons/templates/lessons/lesson_form.html:181
 #: apps/lessons/templates/lessons/student_booking.html:259
 #: apps/lessons/views_calendar.py:121 apps/lessons/views_calendar.py:312
 msgid "Saturday"
@@ -1192,7 +1192,7 @@ msgstr "Samstag"
 #: apps/blocked_times/recurring_models.py:49 apps/core/forms.py:74
 #: apps/lessons/forms.py:64 apps/lessons/recurring_forms.py:55
 #: apps/lessons/recurring_models.py:54
-#: apps/lessons/templates/lessons/lesson_form.html:184
+#: apps/lessons/templates/lessons/lesson_form.html:185
 #: apps/lessons/templates/lessons/student_booking.html:260
 #: apps/lessons/views_calendar.py:122 apps/lessons/views_calendar.py:313
 msgid "Sunday"
@@ -1201,7 +1201,7 @@ msgstr "Sonntag"
 #: apps/blocked_times/forms.py:65
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_detail.html:21
 #: apps/lessons/admin.py:120 apps/lessons/forms.py:66
-#: apps/lessons/templates/lessons/lesson_form.html:147
+#: apps/lessons/templates/lessons/lesson_form.html:148
 #: apps/lessons/templates/lessons/recurringlesson_bulk_edit.html:24
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:18
 #: apps/lessons/templates/lessons/recurringlesson_list.html:17
@@ -1296,7 +1296,7 @@ msgid "End time"
 msgstr "Endzeit"
 
 #: apps/blocked_times/recurring_forms.py:40 apps/lessons/recurring_forms.py:48
-#: apps/lessons/templates/lessons/lesson_form.html:146
+#: apps/lessons/templates/lessons/lesson_form.html:147
 msgid "Recurrence type"
 msgstr "Wiederholungstyp"
 
@@ -1462,7 +1462,7 @@ msgstr "Serienzeitraum:"
 #: apps/contracts/templates/contracts/contract_list.html:51
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:21
 #: apps/lessons/templates/lessons/lesson_form.html:17
-#: apps/lessons/templates/lessons/lesson_form.html:148
+#: apps/lessons/templates/lessons/lesson_form.html:149
 msgid "unlimited"
 msgstr "unbegrenzt"
 
@@ -2572,15 +2572,15 @@ msgstr "Benutzer"
 msgid "Subscription"
 msgstr "Abonnement"
 
-#: apps/core/auth_throttle.py:139 apps/core/auth_throttle.py:180
+#: apps/core/auth_throttle.py:152 apps/core/auth_throttle.py:193
 msgid "Too many attempts. Please try again later."
 msgstr "Zu viele Versuche. Bitte später erneut versuchen."
 
-#: apps/core/auth_throttle.py:162
+#: apps/core/auth_throttle.py:175
 msgid "Too many demo login attempts. Please try again later."
 msgstr "Zu viele Demo-Anmeldeversuche. Bitte versuche es später erneut."
 
-#: apps/core/auth_throttle.py:206
+#: apps/core/auth_throttle.py:249
 msgid "Too many registration attempts. Please try again later."
 msgstr "Zu viele Registrierungsversuche. Bitte später erneut versuchen."
 
@@ -5205,62 +5205,72 @@ msgid "Select weekdays for the recurring session"
 msgstr "Wochentage für die Serienstunde auswählen"
 
 #: apps/lessons/forms.py:102
+msgid "Notiz (für Schüler und Eltern sichtbar)"
+msgstr ""
+
+#: apps/lessons/forms.py:103
 msgid "Hausaufgaben für nächste Stunde"
 msgstr "Hausaufgaben für nächste Stunde"
 
-#: apps/lessons/forms.py:103
+#: apps/lessons/forms.py:104
 msgid "Meeting-URL (Zoom/Meet)"
 msgstr "Meeting-URL (Zoom/Meet)"
 
-#: apps/lessons/forms.py:104
+#: apps/lessons/forms.py:105
 msgid "I did not attend; student was waiting"
 msgstr "Ich bin nicht erschienen; Schüler wartete"
 
-#: apps/lessons/forms.py:161
+#: apps/lessons/forms.py:109
+msgid ""
+"Erscheint im Portal und in der Terminbeschreibung des Kalender-Abos der "
+"Eltern. Interne Vermerke gehören nicht hierher."
+msgstr ""
+
+#: apps/lessons/forms.py:168
 msgid "Inactive contracts cannot be used for new sessions."
 msgstr "Inaktive Verträge können nicht für neue Stunden verwendet werden."
 
-#: apps/lessons/forms.py:175
+#: apps/lessons/forms.py:182
 msgid "Please select a repeat pattern when creating a recurring session."
 msgstr "Bitte ein Wiederholungsmuster für den Serientermin auswählen."
 
-#: apps/lessons/forms.py:180
+#: apps/lessons/forms.py:187
 msgid "Please select at least one weekday when creating a recurring session."
 msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
 
-#: apps/lessons/forms.py:200
+#: apps/lessons/forms.py:207
 msgid "Optional: Document name"
 msgstr "Optional: Dokumentname"
 
-#: apps/lessons/forms.py:211
+#: apps/lessons/forms.py:218
 #, python-brace-format
 msgid "File size must be less than 10 MB. Current size: {size} MB"
 msgstr "Dateigröße muss unter 10 MB liegen. Aktuelle Größe: {size} MB"
 
-#: apps/lessons/forms.py:221
+#: apps/lessons/forms.py:228
 msgid "File type not allowed. Allowed types: PDF, DOC, DOCX, TXT, JPG, PNG"
 msgstr "Dateityp nicht erlaubt. Erlaubte Typen: PDF, DOC, DOCX, TXT, JPG, PNG"
 
-#: apps/lessons/forms.py:226
+#: apps/lessons/forms.py:233
 msgid "File type not allowed. File content does not match the extension."
 msgstr ""
 "Dateityp nicht erlaubt. Der Dateiinhalt stimmt nicht mit der Dateiendung "
 "überein."
 
-#: apps/lessons/forms.py:253
+#: apps/lessons/forms.py:260
 msgid "You can upload multiple files at once"
 msgstr "Mehrere Dateien können gleichzeitig hochgeladen werden"
 
-#: apps/lessons/forms.py:260
+#: apps/lessons/forms.py:267
 msgid "Please select at least one file."
 msgstr "Bitte mindestens eine Datei auswählen."
 
-#: apps/lessons/forms.py:268
+#: apps/lessons/forms.py:275
 #, python-brace-format
 msgid "File '{name}' is too large. Maximum size: 10 MB"
 msgstr "Datei '{name}' ist zu groß. Maximalgröße: 10 MB"
 
-#: apps/lessons/forms.py:276
+#: apps/lessons/forms.py:283
 #, python-brace-format
 msgid ""
 "File '{name}' has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, JPG, "
@@ -5269,7 +5279,7 @@ msgstr ""
 "Datei '{name}' hat einen ungültigen Typ. Erlaubte Typen: PDF, DOC, DOCX, "
 "TXT, JPG, PNG"
 
-#: apps/lessons/forms.py:283
+#: apps/lessons/forms.py:290
 #, python-brace-format
 msgid ""
 "File '{name}' has an invalid type. File content does not match the extension."
@@ -5768,35 +5778,31 @@ msgstr "Fahrzeit vorher (Minuten):"
 msgid "Fahrzeit nachher (Minuten):"
 msgstr "Fahrzeit nachher (Minuten):"
 
-#: apps/lessons/templates/lessons/lesson_form.html:66
-msgid "Notizen:"
-msgstr "Notizen:"
-
-#: apps/lessons/templates/lessons/lesson_form.html:97
+#: apps/lessons/templates/lessons/lesson_form.html:98
 msgid "Recurrence (Optional)"
 msgstr "Wiederholung (Optional)"
 
-#: apps/lessons/templates/lessons/lesson_form.html:101
+#: apps/lessons/templates/lessons/lesson_form.html:102
 msgid "Repeat this lesson"
 msgstr "Diese Stunde wiederholen"
 
-#: apps/lessons/templates/lessons/lesson_form.html:110
+#: apps/lessons/templates/lessons/lesson_form.html:111
 msgid "Wiederholungsmuster:"
 msgstr "Wiederholungsmuster:"
 
-#: apps/lessons/templates/lessons/lesson_form.html:114
+#: apps/lessons/templates/lessons/lesson_form.html:115
 msgid "Enddatum (optional):"
 msgstr "Enddatum (optional):"
 
-#: apps/lessons/templates/lessons/lesson_form.html:121
+#: apps/lessons/templates/lessons/lesson_form.html:122
 msgid "Wochentage"
 msgstr "Wochentage"
 
-#: apps/lessons/templates/lessons/lesson_form.html:140
+#: apps/lessons/templates/lessons/lesson_form.html:141
 msgid "Series Settings"
 msgstr "Serieneinstellungen"
 
-#: apps/lessons/templates/lessons/lesson_form.html:141
+#: apps/lessons/templates/lessons/lesson_form.html:142
 msgid ""
 "When editing the entire series, changes to the following fields will be "
 "applied to all lessons in the series:"
@@ -5804,19 +5810,19 @@ msgstr ""
 "Beim Bearbeiten der gesamten Serie werden Änderungen an folgenden Feldern "
 "auf alle bestehenden Stunden der Serie angewendet:"
 
-#: apps/lessons/templates/lessons/lesson_form.html:144
+#: apps/lessons/templates/lessons/lesson_form.html:145
 msgid "Current series configuration:"
 msgstr "Aktuelle Serienkonfiguration:"
 
-#: apps/lessons/templates/lessons/lesson_form.html:148
+#: apps/lessons/templates/lessons/lesson_form.html:149
 msgid "Series period"
 msgstr "Serienzeitraum"
 
-#: apps/lessons/templates/lessons/lesson_form.html:154
+#: apps/lessons/templates/lessons/lesson_form.html:155
 msgid "Change weekdays:"
 msgstr "Wochentage:"
 
-#: apps/lessons/templates/lessons/lesson_form.html:189
+#: apps/lessons/templates/lessons/lesson_form.html:190
 msgid ""
 "Select the weekdays for this series. Lessons on deselected weekdays will be "
 "deleted, and new lessons will be created for newly selected weekdays."
@@ -6257,7 +6263,7 @@ msgstr "Ungültige JSON-Daten."
 msgid "An unexpected error occurred."
 msgstr "Ein unerwarteter Fehler ist aufgetreten."
 
-#: apps/lessons/views_booking.py:521
+#: apps/lessons/views_booking.py:519
 msgid "Booking link not found."
 msgstr "Buchungslink nicht gefunden."
 
@@ -6435,8 +6441,8 @@ msgstr "Portal-Nachricht"
 msgid "Portal Messages"
 msgstr "Portalnachrichten"
 
-#: apps/portal/views.py:124 apps/portal/views.py:131 apps/portal/views.py:140
-#: apps/portal/views.py:148 apps/portal/views.py:154
+#: apps/portal/views.py:129 apps/portal/views.py:136 apps/portal/views.py:145
+#: apps/portal/views.py:153 apps/portal/views.py:159
 msgid "Ungültige Zugangsdaten."
 msgstr "Ungültige Zugangsdaten."
 

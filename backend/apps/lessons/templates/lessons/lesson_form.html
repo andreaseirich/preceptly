@@ -63,8 +63,9 @@
             {% if form.travel_time_after_minutes.errors %}<div id="{{ form.travel_time_after_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.travel_time_after_minutes.errors }}</div>{% endif %}
         </p>
         <p>
-            <label for="{{ form.notes.id_for_label }}">{% trans "Notizen:" %}</label>
+            <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
             {{ form.notes }}
+            {% if form.notes.help_text %}<span class="form-help" style="display:block; font-size:0.85em; color: var(--text-secondary); margin-top:4px;">{{ form.notes.help_text }}</span>{% endif %}
             {% if form.notes.errors %}<div id="{{ form.notes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.notes.errors }}</div>{% endif %}
         </p>
         {% if form.homework %}
