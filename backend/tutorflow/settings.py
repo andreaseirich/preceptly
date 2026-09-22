@@ -368,6 +368,9 @@ LOGGING = {
             "style": "{",
         },
     },
+    "filters": {
+        "skip_not_found": {"()": "apps.core.log_filters.SkipNotFound"},
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -408,6 +411,12 @@ LOGGING = {
         "django": {
             "handlers": ["console", "mail_admins", "bark"],
             "level": "INFO",
+            # root also writes to the console - propagating printed every
+            # Django message twice
+            "propagate": False,
+        },
+        "django.request": {
+            "filters": ["skip_not_found"],
         },
     },
     "root": {
