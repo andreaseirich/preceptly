@@ -9,7 +9,7 @@ on:
       - 'backend/**'
       - 'docs/**'
       - 'scripts/**'
-      - 'requirements.txt'
+      - 'requirements*.txt'
       - 'pyproject.toml'
       - '.github/workflows/**'
   workflow_dispatch:
