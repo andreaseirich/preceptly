@@ -144,28 +144,29 @@ ASGI_APPLICATION = "tutorflow.asgi.application"
 # ICE servers for WebRTC
 # TURN auf ai-server (46.224.151.16:3478). Credential über Env-Var überschreibbar.
 _TURN_URL = env("TURN_URL", default="turn:46.224.151.16:3478")
-_TURN_USER = env("TURN_USER", default="preceptly")
-_TURN_CREDENTIAL = env("TURN_CREDENTIAL")
-if not _TURN_CREDENTIAL:
+TURN_USER = env("TURN_USER", default="preceptly")
+TURN_CREDENTIAL = env("TURN_CREDENTIAL")
+
+# Gemeinsames Geheimnis für kurzlebige Zugangsdaten (coturn: use-auth-secret).
+# Ist es gesetzt, wird das statische Passwort nicht mehr ausgeliefert.
+TURN_STATIC_AUTH_SECRET = env("TURN_STATIC_AUTH_SECRET", default="")
+TURN_CREDENTIAL_TTL_SECONDS = int(env("TURN_CREDENTIAL_TTL_SECONDS", default="28800"))
+
+if not TURN_CREDENTIAL and not TURN_STATIC_AUTH_SECRET:
     if DEBUG or "test" in sys.argv:
-        _TURN_CREDENTIAL = "dummy-turn-credential-for-development-only"
+        TURN_CREDENTIAL = "dummy-turn-credential-for-development-only"
     else:
         from django.core.exceptions import ImproperlyConfigured
 
         raise ImproperlyConfigured(
-            "TURN_CREDENTIAL environment variable must be set in production (DEBUG=False)."
+            "TURN_CREDENTIAL or TURN_STATIC_AUTH_SECRET must be set in production (DEBUG=False)."
         )
 
-MEETING_ICE_SERVERS = [
-    {"urls": "stun:stun.l.google.com:19302"},
-    {"urls": "stun:stun1.l.google.com:19302"},
-    {"urls": _TURN_URL, "username": _TURN_USER, "credential": _TURN_CREDENTIAL},
-    {
-        "urls": _TURN_URL.replace("turn:", "turn:") + "?transport=tcp",
-        "username": _TURN_USER,
-        "credential": _TURN_CREDENTIAL,
-    },
+MEETING_STUN_URLS = [
+    "stun:stun.l.google.com:19302",
+    "stun:stun1.l.google.com:19302",
 ]
+MEETING_TURN_URLS = [_TURN_URL, f"{_TURN_URL}?transport=tcp"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

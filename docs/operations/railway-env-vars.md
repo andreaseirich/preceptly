@@ -96,8 +96,15 @@ Achtung: Eine Preis-ID, die hier **nicht** hinterlegt ist, ordnet der Webhook ke
 | Variable | Beschreibung | Fehlt sie? |
 |----------|--------------|------------|
 | `TURN_URL` | TURN-Server | Default `turn:46.224.151.16:3478` |
-| `TURN_USER` | Benutzername | Default `preceptly` |
-| `TURN_CREDENTIAL` | Passwort | **Meetings hinter NAT/Firewall kommen nicht zustande** — im Heimnetz oft unauffällig, im Mobilfunk nicht |
+| `TURN_USER` | Benutzername für den statischen Zugang | Default `preceptly` |
+| `TURN_CREDENTIAL` | Festes Passwort (nur ohne `TURN_STATIC_AUTH_SECRET` nötig) | **Meetings hinter NAT/Firewall kommen nicht zustande** — im Heimnetz oft unauffällig, im Mobilfunk nicht |
+| `TURN_STATIC_AUTH_SECRET` | Gemeinsames Geheimnis mit coturn (`use-auth-secret`) für kurzlebige Zugangsdaten | Fällt auf das feste Passwort zurück, das dann im Quelltext jeder Meeting-Seite steht |
+| `TURN_CREDENTIAL_TTL_SECONDS` | Gültigkeit der kurzlebigen Zugangsdaten | Default `28800` (8 Stunden) |
+
+Mindestens eine der beiden Varianten muss gesetzt sein, sonst startet die App
+nicht. Sind beide gesetzt, gewinnt `TURN_STATIC_AUTH_SECRET`. Das Geheimnis
+muss exakt dem `static-auth-secret` in `/etc/turnserver.conf` entsprechen —
+wird nur eine der beiden Seiten geändert, scheitert die Relay-Verbindung.
 
 ## eRecht24 (Rechtstexte und Widerrufs-Button)
 

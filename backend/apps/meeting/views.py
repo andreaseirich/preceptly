@@ -7,7 +7,6 @@ import os
 import uuid
 from urllib.parse import quote, urlencode
 
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse
@@ -18,6 +17,7 @@ from django.views import View
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
+from apps.meeting.turn_auth import ice_servers
 from apps.portal.models import ParentStudentLink
 from apps.portal.views import get_portal_user
 
@@ -240,7 +240,7 @@ class MeetingRoomView(View):
         lesson = room.lesson
         import json as _json
 
-        turn_servers = _json.dumps(getattr(settings, "MEETING_ICE_SERVERS", []))
+        turn_servers = _json.dumps(ice_servers())
 
         # ── 1. Tutor-Zugang zuerst prüfen (höchste Priorität) ─────────────────
         # Tutor-Check kommt vor Portal-Check, damit ein Tutor mit aktiver Portal-
