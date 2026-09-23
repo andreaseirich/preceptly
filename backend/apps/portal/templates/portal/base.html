@@ -253,6 +253,12 @@
         input:focus, textarea:focus, select:focus {
             outline: none; box-shadow: 0 0 0 3px var(--input-focus); border-color: var(--accent);
         }
+        /* Die Regel oben gilt sonst auch für Kontrollkästchen: Sie werden dann
+           über die volle Breite gezogen und ihre Beschriftung rutscht weg. */
+        input[type="checkbox"], input[type="radio"] {
+            width: auto; padding: 0; margin-bottom: 0;
+            accent-color: var(--accent);
+        }
         label { display: block; font-size: 0.87em; color: var(--text-secondary);
                 margin-bottom: 4px; font-weight: 500; }
 
