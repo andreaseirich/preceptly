@@ -2,7 +2,7 @@
 
 **Datum:** 2026-07-11
 **Autor:** Fable (Security-Audit-Agent)
-**Status:** 6 von 7 behoben, L4 teilweise (Stand 22.09.2026)
+**Status:** alle 7 behoben (Stand 23.09.2026)
 
 **Umfang:** Commit-Range `2f22ea1..HEAD` (140 Commits), Fokus auf die sieben Feature-Bereiche: Portal-Auth, Meeting/WebRTC-Consumer, Datei-Uploads, Abrechnung/PDF, e-recht24-Webhook, CanonicalDomainMiddleware, Dependency-Bumps. Nur Lese-/Analysezugriff, kein Code geändert.
 
@@ -89,6 +89,6 @@ Der Reset recycelt den Einladungs-Token-Mechanismus und setzt dabei **`link.is_a
 | L1 | Portal-Passwörter umgehen Django-Passwort-Validatoren | `portal/views.py:472`, `:1849` | ✅ behoben – `validate_password` an allen drei Stellen |
 | L2 | e-Recht24-Webhook ohne Rate-Limiting / Replay-Schutz | `core/views_erecht24.py`, `core/erecht24_service.py:204` | ✅ behoben – Rate-Limit 10/min; seit 22.09. zählt es pro echter Client-IP (`RATELIMIT_IP_META_KEY`) |
 | L3 | Tutor-Upload-Pfad ohne Magic-Byte-Prüfung | `students/views.py:391-428` | ✅ behoben – `validate_file_magic` |
-| L4 | Keine E-Mail-Eindeutigkeit zwischen `contract.email` und Django-User-E-Mail | `portal/views.py:79-113`, `:1816-1835` | ⚠️ teilweise – Prüfung gegen Portal-Konten und Eltern-Verträge; Schüler-Verknüpfungen (`StudentPortalLink`) noch offen, siehe Code-Review 22.09.2026, Befund 6 |
+| L4 | Keine E-Mail-Eindeutigkeit zwischen `contract.email` und Django-User-E-Mail | `portal/views.py:79-113`, `:1816-1835` | ✅ behoben 23.09.2026 – `portal/identity.py` prüft beide Anmeldewege (Django-User **und** `StudentPortalLink`-Vertrags-E-Mail); benutzt in Profil-Änderung und Einladung, Tests in `portal/test_email_uniqueness.py` |
 | L5 | Passwortänderung rotiert Session nicht / invalidiert andere Sessions nicht | `portal/views.py:1857` | ✅ behoben – `cycle_key()` nach jedem `set_password` |
 | Bug | `file_exists()` als Property falsch aufgerufen → Portal-Downloads defekt (500) | `portal/views.py:1287`, `students/models.py:69` | ✅ behoben – `if not doc.file_exists:` |
