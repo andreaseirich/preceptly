@@ -34,6 +34,9 @@ coverage/
 backend/media/
 backend/staticfiles/
 
+# Private Notizen, die nicht ins öffentliche Repository gehören
+/SECURITY_PLAN.md
+
 # Editor und Betriebssystem
 .vscode/
 .idea/
