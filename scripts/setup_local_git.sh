@@ -3,8 +3,9 @@
 # Run once after clone. The hook is NOT versioned.
 # Usage: ./scripts/setup_local_git.sh
 #
-# Note: This repo does not track .gitignore. Use a local .gitignore for
-# ignored files. Hygiene is enforced by repo_hygiene_check.sh + CI.
+# Note: The repo tracks a root .gitignore as a first line of defence - it works
+# from the moment you clone. This hook and the CI run repo_hygiene_check.sh on
+# top, which also catches files forced in with "git add -f".
 
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

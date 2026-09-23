@@ -1,0 +1,45 @@
+# Erste Verteidigungslinie: greift schon vor dem ersten Commit.
+# Ergänzend prüft scripts/repo_hygiene_check.sh (pre-commit und CI), ob doch
+# etwas Verbotenes im Index gelandet ist - etwa mit "git add -f".
+
+# Zugangsdaten und Umgebung
+.env
+.env.*
+!.env.example
+secrets.*
+*.pem
+*.key
+id_rsa*
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+.venv/
+env/
+
+# Werkzeug-Caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage/
+
+# Laufzeitdaten
+*.log
+*.sqlite3
+backend/media/
+backend/staticfiles/
+
+# Editor und Betriebssystem
+.vscode/
+.idea/
+.cursor/
+.cursorrules
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db

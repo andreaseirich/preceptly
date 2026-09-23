@@ -1,5 +1,5 @@
 # Hygiene: block forbidden paths on every push/PR.
-# Runs regardless of changed paths. Fails if .gitignore, .cursorrules, .env, etc. are tracked.
+# Runs regardless of changed paths. Fails if .cursorrules, .env, caches, keys etc. are tracked.
 
 name: Hygiene
 

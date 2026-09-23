@@ -3,7 +3,8 @@
 # Usage:
 #   bash scripts/repo_hygiene_check.sh        # CI: check all tracked files
 #   bash scripts/repo_hygiene_check.sh --staged   # Pre-commit: check only staged files
-# No .gitignore dependency; untracked files are ignored.
+# Zweite Linie hinter der .gitignore: Diese Prüfung greift auch dann, wenn eine
+# Datei bewusst mit "git add -f" erzwungen wurde. Untracked files are ignored.
 
 set -euo pipefail
 
@@ -34,7 +35,8 @@ check() {
   fi
 }
 
-check '^\.gitignore$' '.gitignore'
+# .gitignore im Stamm ist seit 23.09.2026 erwünscht: Sie greift schon beim
+# Klonen, während dieser Check erst beim Commit oder in der CI läuft.
 check '^\.cursorrules$' '.cursorrules'
 check 'cursor_master_prompt\.txt$' 'cursor_master_prompt.txt'
 check '^\.cursor/' '.cursor/'
