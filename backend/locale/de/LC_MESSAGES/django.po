@@ -7148,3 +7148,23 @@ msgstr "Für Schüler und Eltern"
 #: apps/core/templates/core/landing.html:217 apps/core/templates/core/login.html:48
 msgid "Go to the portal login"
 msgstr "Zum Portal-Login"
+
+#: templates/legal/privacy.html
+msgid "Access logs"
+msgstr "Zugriffsprotokolle"
+
+#: templates/legal/privacy.html
+msgid "Every call to preceptly.de is recorded in our database: the requested address, the HTTP method, the status code, the processing time, the IP address, the browser identification (user agent), the referring page, a pseudonymous identifier for your session and, if you are logged in, your user account. Requests for static files, the health check and payment webhooks are excluded."
+msgstr "Jeder Aufruf von preceptly.de wird in unserer Datenbank festgehalten: die aufgerufene Adresse, die HTTP-Methode, der Statuscode, die Verarbeitungsdauer, die IP-Adresse, die Browser-Kennung (User-Agent), die verweisende Seite, eine pseudonyme Kennung Ihrer Sitzung und, falls Sie angemeldet sind, Ihr Benutzerkonto. Aufrufe statischer Dateien, des Health-Checks und der Zahlungs-Webhooks sind ausgenommen."
+
+#: templates/legal/privacy.html
+msgid "Purpose: detecting and fending off attacks, troubleshooting, and simple usage statistics. The data is not passed on to third parties and is not used for advertising or profiling."
+msgstr "Zweck: Angriffe erkennen und abwehren, Fehler eingrenzen sowie einfache Nutzungsstatistiken. Die Daten werden nicht weitergegeben und nicht für Werbung oder Profilbildung verwendet."
+
+#: templates/legal/privacy.html
+msgid "Entries older than 30 days are deleted automatically."
+msgstr "Einträge, die älter als 30 Tage sind, werden automatisch gelöscht."
+
+#: templates/legal/privacy.html
+msgid "Legal basis: legitimate interest in the secure and reliable operation of the service (Art. 6 para. 1 lit. f GDPR)."
+msgstr "Rechtsgrundlage: berechtigtes Interesse am sicheren und zuverlässigen Betrieb des Dienstes (Art. 6 Abs. 1 lit. f DSGVO)."

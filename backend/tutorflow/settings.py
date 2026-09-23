@@ -180,7 +180,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_ratelimit.middleware.RatelimitMiddleware",
+    # Ganz am Ende: protokolliert die fertige Antwort inklusive Statuscode.
+    "apps.core.middleware.RequestLogMiddleware",
 ]
+
+# Aufbewahrungsfrist der Zugriffsprotokolle (/dev/stats/). Ältere Einträge
+# werden automatisch gelöscht - die Frist steht so auch in der
+# Datenschutzerklärung.
+REQUEST_LOG_RETENTION_DAYS = int(env("REQUEST_LOG_RETENTION_DAYS", default="30"))
 
 ROOT_URLCONF = "tutorflow.urls"
 
