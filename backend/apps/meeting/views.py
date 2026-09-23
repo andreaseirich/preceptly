@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class StartMeetingView(LoginRequiredMixin, View):
     """Tutor startet/betritt ein Meeting für eine bestimmte Stunde."""
 
-    def get(self, request, lesson_pk):
+    def post(self, request, lesson_pk):
         lesson = get_object_or_404(Session, pk=lesson_pk, contract__user=request.user)
         with transaction.atomic():
             room, _ = MeetingRoom.objects.select_for_update().get_or_create(lesson=lesson)
@@ -36,8 +36,10 @@ class StartMeetingView(LoginRequiredMixin, View):
                 room.save(update_fields=["is_active"])
         return redirect("meeting:room", token=room.token)
 
-    def post(self, request, lesson_pk):
-        return self.get(request, lesson_pk)
+    def get(self, request, lesson_pk):
+        """Kein Raum wird per GET aktiviert: Ein Link — oder ein Prefetch des
+        Browsers — darf kein Meeting öffnen."""
+        return redirect("lessons:detail", pk=lesson_pk)
 
 
 class MeetingDocumentUploadView(View):

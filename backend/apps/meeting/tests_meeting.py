@@ -52,7 +52,7 @@ class StartMeetingViewTest(TestCase):
     def test_tutor_can_start_meeting(self):
         self.client.force_login(self.tutor)
         url = reverse("meeting:start", kwargs={"lesson_pk": self.lesson.pk})
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertIn(response.status_code, [200, 302])
         self.assertTrue(MeetingRoom.objects.filter(lesson=self.lesson, is_active=True).exists())
 
@@ -60,8 +60,15 @@ class StartMeetingViewTest(TestCase):
         other = make_user()
         self.client.force_login(other)
         url = reverse("meeting:start", kwargs={"lesson_pk": self.lesson.pk})
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 404)
+
+    def test_get_does_not_open_a_room(self):
+        self.client.force_login(self.tutor)
+        url = reverse("meeting:start", kwargs={"lesson_pk": self.lesson.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(MeetingRoom.objects.filter(lesson=self.lesson).exists())
 
 
 class EndMeetingViewTest(TestCase):

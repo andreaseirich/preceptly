@@ -11,7 +11,10 @@
     <a href="{% url 'lessons:update' lesson.pk %}?year={{ year|default:lesson.date.year }}&month={{ month|default:lesson.date.month }}&day={{ day|default:lesson.date.day }}" class="btn">✏️ Bearbeiten</a>
     <a href="{% url 'lessons:reschedule' lesson.pk %}?next={{ request.path|urlencode }}" class="btn">📅 Verschieben</a>
     <a href="{% url 'lessons:delete' lesson.pk %}" class="btn btn-danger">🗑️ Löschen</a>
-    <a href="{% url 'meeting:start' lesson.pk %}" class="btn" style="background:#27ae60;">📹 Meeting starten</a>
+    <form method="post" action="{% url 'meeting:start' lesson.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="background:#27ae60;">📹 Meeting starten</button>
+    </form>
 </div>
 
 {% if tutor_no_show %}
