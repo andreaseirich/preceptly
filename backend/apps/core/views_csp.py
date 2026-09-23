@@ -3,10 +3,17 @@
 Der Browser schickt hierher einen kleinen JSON-Bericht, sobald eine Seite gegen
 die Richtlinie verstößt. Gleiche Verstöße werden nur einmal pro Stunde
 protokolliert — sonst füllt ein einzelner Bot oder eine Browser-Erweiterung die
-Logs."""
+Logs.
+
+Die Meldestelle ist offen erreichbar, der Inhalt der Berichte kommt also vom
+Absender. Deshalb: Länge begrenzt, pro Stunde höchstens MAX_DISTINCT_PER_HOUR
+verschiedene Meldungen im Cache — sonst könnte jemand mit erfundenen Berichten
+den gemeinsamen Cache vollschreiben, in dem auch die Zähler der Rate-Limits
+liegen."""
 
 import json
 import logging
+from urllib.parse import urlsplit
 
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -17,6 +24,29 @@ logger = logging.getLogger(__name__)
 
 MAX_REPORT_BYTES = 8192
 DEDUPE_SECONDS = 60 * 60
+MAX_DISTINCT_PER_HOUR = 200
+_COUNTER_KEY = "csp-report:distinct"
+
+
+def _source_origin(value: str) -> str:
+    """Nur Schema und Host - der Pfad macht sonst jeden Bericht einzigartig."""
+    parts = urlsplit(value)
+    if parts.scheme and parts.netloc:
+        return f"{parts.scheme}://{parts.netloc}"
+    return value[:60]
+
+
+def _should_log(directive: str, blocked: str) -> bool:
+    key = f"csp-report:{directive[:40]}:{_source_origin(blocked)}"
+    if not cache.add(key, "1", DEDUPE_SECONDS):
+        return False
+    try:
+        cache.add(_COUNTER_KEY, 0, DEDUPE_SECONDS)
+        distinct = cache.incr(_COUNTER_KEY)
+    except ValueError:  # Zähler war zwischenzeitlich abgelaufen
+        cache.set(_COUNTER_KEY, 1, DEDUPE_SECONDS)
+        distinct = 1
+    return distinct <= MAX_DISTINCT_PER_HOUR
 
 
 @csrf_exempt
@@ -37,8 +67,7 @@ def csp_report(request):
     blocked = str(report.get("blocked-uri") or "?")
     document = str(report.get("document-uri") or "?")
 
-    key = f"csp-report:{directive}:{blocked}"[:200]
-    if cache.add(key, "1", DEDUPE_SECONDS):
+    if _should_log(directive, blocked):
         logger.warning(
             "CSP-Verstoß: %s blockierte %s auf %s",
             directive[:100],

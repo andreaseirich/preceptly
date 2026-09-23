@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from apps.core.csp import ContentSecurityPolicyMiddleware, policy_value
 from apps.core.models import RequestLog
+from apps.core.views_csp import MAX_DISTINCT_PER_HOUR
 
 REPORT_ONLY = "Content-Security-Policy-Report-Only"
 ENFORCED = "Content-Security-Policy"
@@ -91,6 +92,51 @@ class ReportEndpointTest(TestCase):
         payload = {"csp-report": {"blocked-uri": "x" * 9000}}
 
         self.assertEqual(self._post(payload).status_code, 400)
+
+    def test_only_the_origin_counts_for_deduplication(self):
+        first = {
+            "csp-report": {
+                "effective-directive": "img-src",
+                "blocked-uri": "https://x.example.com/a.png",
+            }
+        }
+        second = {
+            "csp-report": {
+                "effective-directive": "img-src",
+                "blocked-uri": "https://x.example.com/b.png",
+            }
+        }
+
+        with self.assertLogs("apps.core.views_csp", level="WARNING"):
+            self._post(first)
+        # Gleiche Quelle, anderer Pfad: kein zweiter Logeintrag.
+        with self.assertNoLogs("apps.core.views_csp", level="WARNING"):
+            self._post(second)
+
+    # Ohne Drosselung, sonst greift vor der Mengenbegrenzung das Rate-Limit.
+    @override_settings(RATELIMIT_ENABLE=False)
+    def test_flood_of_distinct_sources_stops_being_logged(self):
+        for i in range(MAX_DISTINCT_PER_HOUR):
+            self._post(
+                {
+                    "csp-report": {
+                        "effective-directive": "img-src",
+                        "blocked-uri": f"https://h{i}.example.com/a.png",
+                    }
+                }
+            )
+
+        with self.assertNoLogs("apps.core.views_csp", level="WARNING"):
+            response = self._post(
+                {
+                    "csp-report": {
+                        "effective-directive": "img-src",
+                        "blocked-uri": "https://spaet.example.com/a.png",
+                    }
+                }
+            )
+        # Angenommen wird der Bericht weiterhin, nur eben nicht mehr protokolliert.
+        self.assertEqual(response.status_code, 204)
 
     def test_reports_do_not_show_up_in_the_access_statistics(self):
         RequestLog.objects.all().delete()
