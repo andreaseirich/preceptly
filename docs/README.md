@@ -12,3 +12,9 @@
 | JUDGING_GUIDE.md | Quick-start guide for reviewers/judges |
 | ETHICS.md | Ethical guidelines |
 | llm_samples.json | Mock LLM response samples for demo mode |
+| ACCESSIBILITY.md | Accessibility (WCAG) notes |
+| CONTEXT_RECOVERY.md | How to pick work back up after a break |
+| operations/railway-env-vars.md | Every environment variable and what breaks without it |
+| operations/turn-server.md | coturn setup, short-lived credentials, how to verify |
+| audits/ | Security and legal reviews with their follow-up status |
+| features/ | Per-feature specifications |
