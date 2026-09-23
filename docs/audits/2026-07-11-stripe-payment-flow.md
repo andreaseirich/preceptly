@@ -63,7 +63,7 @@ Best-Practice-Empfehlungen: processed_at-Flag fuer StripeWebhookEvent; Starter-C
 
 | Fund | Beschreibung | Status | Commit |
 |------|-------------|--------|--------|
-| Fund 4 (Medium-High) | Webhook-Retry wirkungslos — Event vor Verarbeitung als verarbeitet markiert; `processed_at`-Feld + Retry-Logik-Fix; `logger.warning` fuer `subscription.deleted` und `invoice.payment_failed` ergaenzt | Behoben | 43cd022 |
-| Zusatzfund (Medium) | Preis-Whitelist tot — `STRIPE_PREMIUM_PRICE_IDS` nicht definiert; Default-"pro" auf fail-closed (free + Alarm) umgestellt; Setting scharf geschaltet | Behoben | a6ade0e |
-| Fund 5 (Medium) | Doppel-Abo moeglich — serverseitiger Guard vor Checkout-Session-Erstellung eingefuegt | Behoben | 0f563b2 |
-| Anmerkung A (Medium-Low) | `invoice.payment_failed` API-versionsabhaengig — Handler liest jetzt robust ueber beide Stripe-API-Versionen (legacy `subscription` und `parent.subscription_details.subscription`) | Behoben | 864fa9c |
+| Fund 4 (Medium-High) | Webhook-Retry wirkungslos — Event vor Verarbeitung als verarbeitet markiert; `processed_at`-Feld + Retry-Logik-Fix; `logger.warning` fuer `subscription.deleted` und `invoice.payment_failed` ergaenzt | Behoben | 775913c |
+| Zusatzfund (Medium) | Preis-Whitelist tot — `STRIPE_PREMIUM_PRICE_IDS` nicht definiert; Default-"pro" auf fail-closed (free + Alarm) umgestellt; Setting scharf geschaltet | Behoben | bfe3094 |
+| Fund 5 (Medium) | Doppel-Abo moeglich — serverseitiger Guard vor Checkout-Session-Erstellung eingefuegt | Behoben | 5332cde |
+| Anmerkung A (Medium-Low) | `invoice.payment_failed` API-versionsabhaengig — Handler liest jetzt robust ueber beide Stripe-API-Versionen (legacy `subscription` und `parent.subscription_details.subscription`) | Behoben | b1a9bd3 |

@@ -4,7 +4,7 @@
 **Autor:** Fable (Security-Audit-Agent)
 **Status:** alle 7 behoben (Stand 23.09.2026)
 
-**Umfang:** Commit-Range `2f22ea1..HEAD` (140 Commits), Fokus auf die sieben Feature-Bereiche: Portal-Auth, Meeting/WebRTC-Consumer, Datei-Uploads, Abrechnung/PDF, e-recht24-Webhook, CanonicalDomainMiddleware, Dependency-Bumps. Nur Lese-/Analysezugriff, kein Code geändert.
+**Umfang:** Commit-Range `47f7c72..HEAD` (140 Commits), Fokus auf die sieben Feature-Bereiche: Portal-Auth, Meeting/WebRTC-Consumer, Datei-Uploads, Abrechnung/PDF, e-recht24-Webhook, CanonicalDomainMiddleware, Dependency-Bumps. Nur Lese-/Analysezugriff, kein Code geändert.
 
 ---
 
@@ -15,7 +15,7 @@ Ich habe alle sieben Bereiche direkt im Code geprüft (kein Haiku-Unteragent nö
 
 # Sicherheits-Audit Preceptly — Feature-Änderungen 24.06.–11.07.2026
 
-**Umfang:** Commit-Range `2f22ea1..HEAD` (140 Commits), Fokus auf die sieben genannten Feature-Bereiche. Nur Lese-/Analysezugriff, kein Code geändert.
+**Umfang:** Commit-Range `47f7c72..HEAD` (140 Commits), Fokus auf die sieben genannten Feature-Bereiche. Nur Lese-/Analysezugriff, kein Code geändert.
 
 **Gesamturteil: Keine kritischen Funde.** Die Architektur ist durchweg solide — WebSocket-Auth, IDOR-Schutz und PDF-Injection sind sauber gelöst. Es gibt **einen mittleren Fund** (unauthentifizierter Griefing/DoS über Passwort-Reset) und mehrere Härtungsempfehlungen (low). Ich habe nichts erfunden — die meisten geprüften Punkte sind tatsächlich korrekt umgesetzt.
 

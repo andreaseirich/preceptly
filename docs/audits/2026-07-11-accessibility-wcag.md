@@ -66,15 +66,15 @@ Alle mittelschweren Funde behoben:
 
 | Fund | Beschreibung | Status | Commit |
 |------|-------------|--------|--------|
-| #1 | Tab-Tastaturnavigation im PWA-Modal fehlt (Roving-Tabindex, Pfeiltasten) | Behoben | e41c638 |
-| #2 | Fokus-Restore laeuft ins Leere wenn Modal aus Banner geoeffnet wird | Behoben | e41c638 |
-| #3 | Aktive Tab-Farbe im PWA-Modal unter WCAG-AA-Kontrast (#3498db, ~3.15:1) | Behoben | e41c638 |
-| #8 | Feature-Checkmark-Kontrast Pricing unterhalb AA (#28a745 auf weiss, ~3.05:1) | Behoben | 29b392f |
-| #12 | Status-Pills Invoice-Detailseite schlagen AA-Kontrast im Light-Mode (Draft, Sent, Paid) | Behoben | c1184a8 |
-| #13 | Disabled PDF-Button kein echtes `button disabled`-Element (span mit pointer-events:none) | Behoben | c1184a8 |
-| #14 | Zurueck-Link ohne Text-Dekoration + grau, nicht als Link erkennbar | Behoben | c1184a8 |
-| #19 | Kein Fokus-Trap in Meeting-Lobby trotz aria-modal=true | Behoben | 08ebd67 |
-| #20 | Kein sichtbarer Fokus auf .lobby-toggle und #lobby-join | Behoben | 08ebd67 |
-| #21 | Fehler-Region ohne Live-Region-Semantik (#lobby-err kein role=alert/aria-live) | Behoben | 08ebd67 |
-| #22 | Join-Button-Kontrast (weiss auf #27ae60, ~3.15:1) | Behoben | 08ebd67 |
-| #23 | Toggle-Buttons ohne aria-pressed | Behoben | 08ebd67 |
+| #1 | Tab-Tastaturnavigation im PWA-Modal fehlt (Roving-Tabindex, Pfeiltasten) | Behoben | 7aedc07 |
+| #2 | Fokus-Restore laeuft ins Leere wenn Modal aus Banner geoeffnet wird | Behoben | 7aedc07 |
+| #3 | Aktive Tab-Farbe im PWA-Modal unter WCAG-AA-Kontrast (#3498db, ~3.15:1) | Behoben | 7aedc07 |
+| #8 | Feature-Checkmark-Kontrast Pricing unterhalb AA (#28a745 auf weiss, ~3.05:1) | Behoben | 070a1e5 |
+| #12 | Status-Pills Invoice-Detailseite schlagen AA-Kontrast im Light-Mode (Draft, Sent, Paid) | Behoben | 6fe7ebb |
+| #13 | Disabled PDF-Button kein echtes `button disabled`-Element (span mit pointer-events:none) | Behoben | 6fe7ebb |
+| #14 | Zurueck-Link ohne Text-Dekoration + grau, nicht als Link erkennbar | Behoben | 6fe7ebb |
+| #19 | Kein Fokus-Trap in Meeting-Lobby trotz aria-modal=true | Behoben | 8a5fff6 |
+| #20 | Kein sichtbarer Fokus auf .lobby-toggle und #lobby-join | Behoben | 8a5fff6 |
+| #21 | Fehler-Region ohne Live-Region-Semantik (#lobby-err kein role=alert/aria-live) | Behoben | 8a5fff6 |
+| #22 | Join-Button-Kontrast (weiss auf #27ae60, ~3.15:1) | Behoben | 8a5fff6 |
+| #23 | Toggle-Buttons ohne aria-pressed | Behoben | 8a5fff6 |

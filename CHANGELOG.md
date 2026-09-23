@@ -14,7 +14,7 @@ Three security/quality audits completed; all medium findings fixed. Findings doc
 - [Monitoring/logging audit](docs/audits/2026-07-11-monitoring-logging.md) (Sonnet) — no error tracking, silent Stripe events; decision: implement Django mail_admins + SMTP (Option B)
 
 ### Audit (2026-07-11) — 2-Wochen-Security-Review — Fixes ausstehend
-Security audit over commit range `2f22ea1..HEAD` (140 commits), covering Portal-Auth, Meeting/WebRTC-Consumer, file uploads, billing/PDF, e-recht24 webhook, CanonicalDomainMiddleware, dependency bumps. No critical findings. Findings documented in [`docs/audits/2026-07-11-security-2weeks-review.md`](docs/audits/2026-07-11-security-2weeks-review.md):
+Security audit over commit range `47f7c72..HEAD` (140 commits), covering Portal-Auth, Meeting/WebRTC-Consumer, file uploads, billing/PDF, e-recht24 webhook, CanonicalDomainMiddleware, dependency bumps. No critical findings. Findings documented in [`docs/audits/2026-07-11-security-2weeks-review.md`](docs/audits/2026-07-11-security-2weeks-review.md):
 - **M1** — unauthenticated griefing/DoS via password-reset deactivating portal links (`portal/views.py:531`) — **fix pending**
 - **L1** — portal passwords bypass Django validators (`portal/views.py:472`, `:1849`) — fix pending
 - **L2** — e-recht24 webhook missing rate-limit / replay protection (`core/erecht24_service.py:204`) — fix pending
