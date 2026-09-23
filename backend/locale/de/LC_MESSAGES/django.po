@@ -7140,3 +7140,11 @@ msgstr "Widerrufsbelehrung"
 #: tutorflow/views.py:16
 msgid "The requested resource was not found."
 msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+#: apps/core/templates/core/landing.html:216 apps/core/templates/core/login.html:46
+msgid "For students and parents"
+msgstr "Für Schüler und Eltern"
+
+#: apps/core/templates/core/landing.html:217 apps/core/templates/core/login.html:48
+msgid "Go to the portal login"
+msgstr "Zum Portal-Login"

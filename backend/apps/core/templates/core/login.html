@@ -40,6 +40,13 @@
         {% trans "Register" %}
     </a>
 
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center;">
+        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9em;">{% trans "For students and parents" %}</p>
+        <a href="{% url 'portal:login' %}" style="display: inline-block; margin-top: 4px; padding: 8px 4px; color: var(--accent); text-decoration: underline; font-size: 0.95em;">
+            {% trans "Go to the portal login" %}
+        </a>
+    </div>
+
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary); font-size: 0.9em;">
         <p style="margin: 0 0 10px 0;"><strong>{% trans "Demo Logins" %}:</strong></p>
         <p style="margin: 5px 0;">{% trans "Premium" %}: <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo_premium</code> / <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo123</code></p>

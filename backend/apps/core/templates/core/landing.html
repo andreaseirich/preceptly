@@ -190,6 +190,18 @@
     padding-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
   }
+
+  .lp-portal-hint {
+    margin-top: 18px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+  .lp-portal-hint a {
+    display: inline-block;
+    padding: 8px 4px;
+    color: var(--accent);
+    text-decoration: underline;
+  }
 </style>
 
 <!-- HERO -->
@@ -200,6 +212,10 @@
     <a href="{% url 'core:register' %}" class="btn">{% trans "Sign Up for Free" %}</a>
     <a href="{% url 'core:login' %}" class="btn btn-secondary">{% trans "Try Demo" %}</a>
   </div>
+  <p class="lp-portal-hint">
+    {% trans "For students and parents" %}:
+    <a href="{% url 'portal:login' %}">{% trans "Go to the portal login" %}</a>
+  </p>
 </div>
 
 <!-- PROBLEM -->
