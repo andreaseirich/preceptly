@@ -2,8 +2,8 @@
 
 **Quelle:** Code-Review von außen (Datei `preceptly-codereview-2026-09-22.md`)
 **Bearbeitet:** 22.–23.09.2026
-**Stand:** 10 von 10 Befunden erledigt, P3 bis auf einen Punkt erledigt.
-Offen bleibt bewusst nur das Scharfschalten der Content-Security-Policy.
+**Stand:** 10 von 10 Befunden und alle P3-Punkte erledigt.
+Offen bleibt nur das Scharfschalten der Content-Security-Policy.
 
 ## P1 — zeitnah beheben
 
@@ -32,7 +32,7 @@ Offen bleibt bewusst nur das Scharfschalten der Content-Security-Policy.
 | `StartMeetingView` ändert per GET den Zustand | Raum wird nur noch per POST aus einem CSRF-geschützten Formular geöffnet; GET leitet zur Stunde zurück (`77b0a62`) |
 | `/dev/stats/` ohne Daten, Middleware nie eingehängt | Bewusst aktiviert — mit Löschfrist von 30 Tagen, pseudonymer Sitzungskennung und einem Abschnitt in der Datenschutzerklärung (`2ab9197`) |
 | Doppelte `PII_KEYS`/`PHONE_PATTERN` in `apps/ai/utils_safety.py` | Je eine Definition entfernt, samt des Kommentars, der die Entfernung schon behauptet hatte (`77b0a62`) |
-| Keine `.gitignore` im Projektstamm | **Offen, bewusst.** `scripts/repo_hygiene_check.sh` verbietet eine versionierte Stamm-`.gitignore` ausdrücklich und bricht den Commit ab. Der Einwand des Reviews bleibt gültig: Ein frischer Klon ohne `setup_local_git.sh` hat bis zum Push keinen Schutz, und bei einem öffentlichen Repository kommt die CI-Prüfung zu spät. Eine Änderung dieser Regel ist eine Entscheidung von Andreas |
+| Keine `.gitignore` im Projektstamm | Regel auf Wunsch von Andreas gelockert: Der Hygiene-Check verbietet die Datei nicht mehr, stattdessen ist sie angelegt (`ce237e3`). Sie wirkt ab dem Klonen; `repo_hygiene_check.sh` bleibt als zweite Linie und greift auch bei erzwungenem `git add -f` |
 
 ## Nicht aus dem Review, im selben Zug erledigt
 
