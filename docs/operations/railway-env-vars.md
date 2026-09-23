@@ -124,6 +124,8 @@ wird nur eine der beiden Seiten geändert, scheitert die Relay-Verbindung.
 | `BARK_DEVICE_KEY` | Geräteschlüssel | wie oben |
 | `BARK_AUTH_USER` / `BARK_AUTH_PASSWORD` | Basic-Auth des Bark-Servers | nur nötig, wenn der Server sie verlangt |
 | `DEV_STATS_PASSWORD` | Passwort für `/dev/stats/` | Seite bleibt gesperrt |
+| `REQUEST_LOG_RETENTION_DAYS` | Aufbewahrungsfrist der Zugriffsprotokolle | Default `30` — steht so auch in der Datenschutzerklärung |
+| `CSP_REPORT_ONLY` | `1` meldet Verstöße nur, `0` schaltet die Content-Security-Policy scharf | Default `1` (nur melden) |
 | `BACKUP_DIR` | Zielverzeichnis für `manage.py backup_db` | Default: Projektverzeichnis |
 | `BACKUP_KEEP` | Anzahl aufzubewahrender Backups | Default `7` |
 

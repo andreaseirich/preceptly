@@ -17,6 +17,7 @@ from apps.core.views import (
     TaxYearView,
 )
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
+from apps.core.views_csp import csp_report
 from apps.core.views_email_test import test_email
 from apps.core.views_erecht24 import Erecht24PushView
 from apps.core.views_erecht24_revocation import (
@@ -103,6 +104,7 @@ urlpatterns = [
     path("students/<int:pk>/messages/", TutorMessageView.as_view(), name="tutor_messages"),
     path("api/detect-timezone/", views.AutoDetectTimezoneView.as_view(), name="detect_timezone"),
     path("dev/stats/", DevStatsView.as_view(), name="dev_stats"),
+    path("csp-report/", csp_report, name="csp_report"),
     path("faq/", views.FaqView.as_view(), name="faq"),
     path("review/submit/", views.SubmitReviewView.as_view(), name="submit_review"),
 ]

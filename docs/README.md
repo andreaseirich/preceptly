@@ -16,5 +16,6 @@
 | CONTEXT_RECOVERY.md | How to pick work back up after a break |
 | operations/railway-env-vars.md | Every environment variable and what breaks without it |
 | operations/turn-server.md | coturn setup, short-lived credentials, how to verify |
+| operations/content-security-policy.md | CSP: report-only rollout, what the policy allows |
 | audits/ | Security and legal reviews with their follow-up status |
 | features/ | Per-feature specifications |

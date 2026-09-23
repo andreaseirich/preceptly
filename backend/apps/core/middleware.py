@@ -42,6 +42,7 @@ EXCLUDED_PATHS = (
     "/webhooks/",
     "/sw.js",
     "/manifest.json",
+    "/csp-report/",
 )
 
 

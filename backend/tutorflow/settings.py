@@ -180,9 +180,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_ratelimit.middleware.RatelimitMiddleware",
+    "apps.core.csp.ContentSecurityPolicyMiddleware",
     # Ganz am Ende: protokolliert die fertige Antwort inklusive Statuscode.
     "apps.core.middleware.RequestLogMiddleware",
 ]
+
+# Content-Security-Policy: solange True, meldet der Browser nur, statt zu
+# blockieren. Zum Scharfschalten CSP_REPORT_ONLY=0 setzen.
+CSP_REPORT_ONLY = env_bool("CSP_REPORT_ONLY", True)
 
 # Aufbewahrungsfrist der Zugriffsprotokolle (/dev/stats/). Ältere Einträge
 # werden automatisch gelöscht - die Frist steht so auch in der
