@@ -28,7 +28,6 @@ from apps.billing.models import Invoice
 from apps.core.forms import (
     ExpenseForm,
     ReviewForm,
-    TravelPolicyForm,
     UserEmailForm,
     WorkingHoursForm,
 )
@@ -289,7 +288,7 @@ class SettingsView(LoginRequiredMixin, FormView):
         )
 
     def post(self, request, *args, **kwargs):
-        """Handle WorkingHoursForm, UserEmailForm, and TravelPolicyForm."""
+        """Handle WorkingHoursForm and UserEmailForm."""
         if "save_email" in request.POST:
             if request.user.email:
                 # Changing an existing email is blocked in the UI (security
@@ -307,25 +306,6 @@ class SettingsView(LoginRequiredMixin, FormView):
                 return redirect(self._section_url("email"))
             context = self.get_context_data(settings_initial_section="email")
             context["email_form"] = email_form
-            return self.render_to_response(context)
-        if "save_travel" in request.POST:
-            travel_form = TravelPolicyForm(request.POST)
-            if travel_form.is_valid():
-                profile, _created = UserProfile.objects.get_or_create(user=request.user)
-                policy = dict(profile.travel_policy or {})
-                policy["transport_mode"] = travel_form.cleaned_data["transport_mode"]
-                buffer = travel_form.cleaned_data.get("fahrrad_buffer_minutes")
-                policy["fahrrad_buffer_minutes"] = buffer if buffer is not None else 25
-                policy["enabled"] = True
-                profile.travel_policy = policy
-                profile.save()
-                messages.success(
-                    request,
-                    _("Travel mode for on-site appointments updated."),
-                )
-                return redirect(self._section_url("travel"))
-            context = self.get_context_data(settings_initial_section="travel")
-            context["travel_form"] = travel_form
             return self.render_to_response(context)
         if "save_timezone" in request.POST:
             tz_value = request.POST.get("timezone", "Europe/Berlin").strip()
@@ -392,7 +372,6 @@ class SettingsView(LoginRequiredMixin, FormView):
         """Add profile, contracts, and booking links to context."""
         from django.conf import settings
 
-        from apps.contracts.models import Contract
         from apps.core.feature_flags import is_premium_user
         from apps.core.stripe_utils import _is_valid_email_for_stripe
 
@@ -459,28 +438,8 @@ class SettingsView(LoginRequiredMixin, FormView):
             self.request.user.email
         )
         context["email_form"] = UserEmailForm(instance=self.request.user)
-        policy = getattr(profile, "travel_policy", None) or {}
-        context["travel_form"] = TravelPolicyForm(
-            initial={
-                "transport_mode": policy.get("transport_mode", "oepnv"),
-                "fahrrad_buffer_minutes": policy.get("fahrrad_buffer_minutes", 25),
-            }
-        )
-        contracts = Contract.objects.filter(is_active=True, user=self.request.user).order_by(
-            "last_name", "first_name"
-        )
         context["profile"] = profile
         context["current_working_hours"] = profile.default_working_hours or {}
-        context["contracts"] = contracts
-        context["contract_booking_urls"] = [
-            {
-                "contract": c,
-                "url": self.request.build_absolute_uri(
-                    reverse("lessons:student_booking", kwargs={"token": c.booking_token})
-                ),
-            }
-            for c in contracts
-        ]
         import zoneinfo
 
         context["profile_timezone"] = profile.timezone or "Europe/Berlin"

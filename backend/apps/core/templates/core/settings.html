@@ -249,7 +249,7 @@
 
         <section class="settings-card" id="working-hours" aria-labelledby="working-hours-title">
             <h3 id="working-hours-title">{% trans "Default Working Hours" %}</h3>
-            <p class="settings-desc">{% trans "Set your default working hours. These will be used for student booking pages when a contract doesn't have specific working hours configured." %}</p>
+            <p class="settings-desc">{% trans "Set your default working hours. Students and parents can only book lessons in the portal within these hours." %}</p>
             <form method="post">
                 {% csrf_token %}
                 <div class="wh-list">
@@ -274,29 +274,6 @@
                 {% endif %}
                 <div class="settings-actions">
                     <button type="submit" class="btn btn-success">{% trans "Save Working Hours" %}</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="settings-card" id="travel" aria-labelledby="travel-title">
-            <h3 id="travel-title">{% trans "On-site appointments: Travel mode" %}</h3>
-            <p class="settings-desc">{% trans "Choose how you usually get to on-site appointments. This affects which time slots are offered in the public booking calendar (e.g. more slots with bicycle, fewer with public transport)." %}</p>
-            <form method="post">
-                {% csrf_token %}
-                <div style="max-width: 480px;">
-                    <label for="id_transport_mode" class="settings-label">{% trans "Travel mode for on-site appointments" %}</label>
-                    {{ travel_form.transport_mode }}
-                    <label for="id_fahrrad_buffer_minutes" class="settings-label" style="margin-top: 14px;">{% trans "Buffer (minutes) when using bicycle" %}</label>
-                    {{ travel_form.fahrrad_buffer_minutes }}
-                    {% if travel_form.fahrrad_buffer_minutes.help_text %}
-                    <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 4px;">{{ travel_form.fahrrad_buffer_minutes.help_text }}</p>
-                    {% endif %}
-                </div>
-                {% if travel_form.non_field_errors %}
-                <p style="color: #dc3545; margin-top: 8px;" role="alert">{{ travel_form.non_field_errors }}</p>
-                {% endif %}
-                <div class="settings-actions">
-                    <button type="submit" name="save_travel" class="btn btn-success">{% trans "Save travel mode" %}</button>
                 </div>
             </form>
         </section>

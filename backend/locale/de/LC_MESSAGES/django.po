@@ -7168,3 +7168,11 @@ msgstr "Einträge, die älter als 30 Tage sind, werden automatisch gelöscht."
 #: templates/legal/privacy.html
 msgid "Legal basis: legitimate interest in the secure and reliable operation of the service (Art. 6 para. 1 lit. f GDPR)."
 msgstr "Rechtsgrundlage: berechtigtes Interesse am sicheren und zuverlässigen Betrieb des Dienstes (Art. 6 Abs. 1 lit. f DSGVO)."
+
+#: apps/core/templates/core/settings.html
+msgid ""
+"Set your default working hours. Students and parents can only book lessons in "
+"the portal within these hours."
+msgstr ""
+"Standard-Arbeitszeiten festlegen. Schüler und Eltern können im Portal nur "
+"innerhalb dieser Zeiten Stunden buchen."

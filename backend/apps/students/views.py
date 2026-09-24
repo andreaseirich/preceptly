@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -31,7 +31,6 @@ from apps.portal.models import (
     ProgressNote,
     StudentPortalLink,
 )
-from apps.students.booking_code_service import set_booking_code
 
 logger = logging.getLogger(__name__)
 _MAX_DOC_NAME_LEN = 200
@@ -405,16 +404,6 @@ class ProgressNoteCreateView(LoginRequiredMixin, View):
         if text:
             ProgressNote.objects.create(contract=contract, tutor=request.user, text=text)
         return redirect("contracts:detail", pk=pk)
-
-
-class StudentRegenerateBookingCodeView(LoginRequiredMixin, View):
-    def post(self, request, pk):
-        try:
-            contract = Contract.objects.get(pk=pk, user=request.user)
-        except Contract.DoesNotExist:
-            return JsonResponse({"success": False, "message": _("Student not found.")}, status=404)
-        new_code = set_booking_code(contract)
-        return JsonResponse({"success": True, "booking_code": new_code})
 
 
 class StudentDocumentListView(LoginRequiredMixin, View):

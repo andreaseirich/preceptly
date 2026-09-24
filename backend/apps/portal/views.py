@@ -23,11 +23,15 @@ from django_ratelimit.decorators import ratelimit
 from apps.core.auth_throttle import throttle_portal_login
 from apps.core.log_safety import safe_log_value
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
-from apps.lessons.booking_service import BOOKING_MAX_YEAR, BOOKING_MIN_YEAR
 from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
 
 logger = logging.getLogger(__name__)
+
+# Grenzen für die Jahresnavigation im Portal-Kalender (vorher in
+# lessons/booking_service.py, das mit der alten Buchungsseite entfallen ist).
+BOOKING_MIN_YEAR = 2020
+BOOKING_MAX_YEAR = 2031
 
 _ALLOWED_UPLOAD_EXTENSIONS = {
     ".pdf",

@@ -26,7 +26,6 @@ from apps.core.auth_throttle import (
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.referrals import ensure_referral_code, resolve_referrer_user
-from apps.core.utils_booking import ensure_public_booking_token
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +97,6 @@ class RegisterView(CreateView):
                 if avv_consent and not profile.avv_accepted_at:
                     profile.avv_accepted_at = timezone.now()
                     profile.save(update_fields=["avv_accepted_at"])
-                ensure_public_booking_token(profile)
                 ensure_referral_code(profile)
                 ref_code = self.request.session.pop("referral_code", None)
                 referrer = resolve_referrer_user(ref_code)

@@ -90,11 +90,3 @@ class StudentOwnershipIsolationTest(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Contract.objects.filter(pk=self.student_a.pk).exists())
-
-    def test_tutor_b_gets_404_for_regenerate_booking_code_on_tutor_a_student(self):
-        self.client.force_login(self.tutor_b)
-        response = self.client.post(
-            reverse("students:regenerate_booking_code", kwargs={"pk": self.student_a.pk}),
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 404)

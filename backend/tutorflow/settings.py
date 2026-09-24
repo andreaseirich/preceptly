@@ -417,11 +417,6 @@ LOGGING = {
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
-        "apps.lessons.views_booking": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG" if DEBUG else "INFO",
-            "propagate": False,
-        },
         "django": {
             "handlers": ["console", "mail_admins", "bark"],
             "level": "INFO",

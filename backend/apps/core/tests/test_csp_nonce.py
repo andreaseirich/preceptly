@@ -31,7 +31,6 @@ ENTRY_TEMPLATES = {
     "core/base.html",
     "portal/base.html",
     "meeting/room.html",
-    "lessons/student_booking.html",
     "core/ratelimited.html",
 }
 
