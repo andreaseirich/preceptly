@@ -25,6 +25,9 @@ class PortalBookingFlowTest(TestCase):
         self.tutor = User.objects.create_user(
             username="flow_tutor", password="pass", email="tutor@flow.test"
         )
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion ab Starter/Pro
         self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
 
         self.test_date = dt.date.today() + dt.timedelta(days=1)
@@ -236,6 +239,9 @@ class BlockedTimeDayBoundaryTest(TestCase):
         self.tutor = User.objects.create_user(
             username="boundary_tutor", password="pass", email="boundary@flow.test"
         )
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion ab Starter/Pro
         self.profile, _ = UserProfile.objects.get_or_create(user=self.tutor)
 
         # A fixed CET (winter, UTC+1) date, no DST ambiguity.

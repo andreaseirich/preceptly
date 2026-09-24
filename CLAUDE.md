@@ -39,7 +39,7 @@ backend/
                       # Rechtstexte, PWA/Push, CSP, Zugriffsprotokoll
     students/         # Schülerverwaltung (auf Basis von Contract), Dokumente, Portal-Einladung
     contracts/        # Verträge und Institute
-    lessons/          # Stunden, Serien, Kalender, Konflikte, öffentliche Buchung
+    lessons/          # Stunden, Serien, Kalender, Konflikte
     blocked_times/    # Sperrzeiten
     lesson_plans/     # Gespeicherte Unterrichtspläne
     ai/               # KI-Generierung (inkl. PDF-/Text-Kontext, PII-Schwärzung)
@@ -63,7 +63,7 @@ scripts/              # Hygiene-Check, Git-Hooks einrichten, Entrypoint
 | `/` | core (Landing, Dashboard, Auth, Einstellungen, Rechtstexte) |
 | `/students/` | students |
 | `/contracts/` | contracts |
-| `/lessons/` | lessons (inkl. öffentliche Buchung) |
+| `/lessons/` | lessons |
 | `/lesson-plans/` | lesson_plans |
 | `/blocked-times/` | blocked_times |
 | `/billing/` | billing |
@@ -92,6 +92,8 @@ müssen grün sein.
 - Übersetzungen: englische `msgid`, deutsche `msgstr` in `locale/de/`; danach `compilemessages`
 - Echte Unicode-Zeichen: ä, ö, ü, ß — nicht ae, oe, ue, ss
 - Keine „God-Files": lieber mehrere kleine, klar benannte Module
+- Tarif-Grenzen nur über `apps/core/feature_flags.py` prüfen, nie über den Tarifnamen
+  direkt — und jede neue Grenze in `test_tier_limits.py` abdecken
 - Dateinamen mit `credentials` blockiert der Hygiene-Check (Schutz vor Schlüsseldateien)
 - **Vorlagen:** jedes `<script>` mit `nonce="{{ csp_nonce }}"`; **keine** Inline-Handler
   (`onclick=…`, `onsubmit=…`, `href="javascript:…"`) — stattdessen `data-click` &

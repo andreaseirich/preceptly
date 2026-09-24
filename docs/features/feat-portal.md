@@ -68,12 +68,20 @@ Tutor-Login; der Portal-Login verlinkt zurück zum Tutor-Login.
 
 ## Tarife
 
-| Funktion | ab Tarif |
-|---|---|
-| Schüler-Portal, Portal-Buchung | Starter |
-| Eltern-Portal, Meeting-Räume | Pro |
+| Funktion | Free | Starter | Pro / Business |
+|---|---|---|---|
+| Einzeltermine buchen | — | höchstens 3 je Monat (je Tutor, alle Schüler zusammen) | unbegrenzt |
+| Serien selbst anlegen | — | — | ja |
+| Dateien hochladen | — | bis 3 Dokumente je Schüler (Tutor und Portal zusammen) | unbegrenzt |
+| Eltern-Portal, Meeting-Räume | laut Preisseite ab Pro, **derzeit nicht geprüft** | | |
 
-Maßgeblich ist `backend/apps/core/feature_flags.py`.
+Ist eine Grenze erreicht, sehen Schüler und Eltern einen Hinweis ohne
+Tarif-Details („bitte sprich den Termin direkt mit deinem Nachhilfelehrer ab"),
+das Formular wird gar nicht erst angezeigt. Bestehende Serien und Dokumente
+bleiben erhalten und lassen sich weiter absagen bzw. herunterladen.
+
+Maßgeblich ist `backend/apps/core/feature_flags.py`; Tests:
+`backend/apps/core/tests/test_tier_limits.py`.
 
 ## Einladungsflow
 

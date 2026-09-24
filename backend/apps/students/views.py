@@ -23,6 +23,7 @@ from django.views.generic import DeleteView, ListView
 
 from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
+from apps.core.feature_flags import document_limit, document_limit_reached
 from apps.core.upload_validation import validate_file_magic
 from apps.portal.identity import portal_login_conflict
 from apps.portal.models import (
@@ -413,13 +414,31 @@ class StudentDocumentListView(LoginRequiredMixin, View):
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
         docs = StudentDocument.objects.filter(student=contract, student__user=request.user)
         return render(
-            request, "students/student_documents.html", {"student": contract, "documents": docs}
+            request,
+            "students/student_documents.html",
+            {
+                "student": contract,
+                "documents": docs,
+                "document_limit": document_limit(request.user),
+                "document_limit_reached": document_limit_reached(request.user, contract.pk),
+            },
         )
 
     def post(self, request, pk):
         from apps.students.models import StudentDocument
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        if document_limit_reached(request.user, contract.pk):
+            limit = document_limit(request.user)
+            if limit == 0:
+                messages.error(request, "Dokumente gibt es ab dem Starter-Tarif.")
+            else:
+                messages.error(
+                    request,
+                    f"Im Starter-Tarif sind höchstens {limit} Dokumente je Schüler möglich. "
+                    "Mit Pro sind es unbegrenzt viele.",
+                )
+            return redirect("students:documents", pk=pk)
         uploaded_file = request.FILES.get("file")
         if uploaded_file:
             allowed_extensions = {

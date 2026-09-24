@@ -920,7 +920,7 @@ def ratelimited(request, exception):
     without the traceback Django logs for PermissionDenied - a client
     hitting a limit is expected, not an error. Only clients that ask for
     HTML get the page; fetch() calls (Accept: */*) and webhooks get JSON,
-    because e.g. the public booking page shows data.message from it."""
+    because JavaScript callers show data.message from it."""
     from django.http import JsonResponse
     from django.shortcuts import render
 

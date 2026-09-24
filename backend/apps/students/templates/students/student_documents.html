@@ -10,6 +10,23 @@
     <a href="{% url 'contracts:detail' student.pk %}" class="btn-sm btn-sm-secondary">&larr; Zum Schüler</a>
   </div>
 
+  {% if document_limit == 0 %}
+  <div class="alert-warning" style="margin-bottom:24px;">
+    Dokumente gibt es ab dem Starter-Tarif.
+    <a href="{% url 'core:settings' %}#subscription">Tarife ansehen</a>
+  </div>
+  {% elif document_limit_reached %}
+  <div class="alert-warning" style="margin-bottom:24px;">
+    Für diesen Schüler sind alle {{ document_limit }} Dokumente des Starter-Tarifs belegt.
+    Lösche ein Dokument oder wechsle zu Pro — dort sind es unbegrenzt viele.
+    <a href="{% url 'core:settings' %}#subscription">Tarife ansehen</a>
+  </div>
+  {% else %}
+  {% if document_limit %}
+  <p style="color:var(--text-secondary); font-size:0.88em; margin:0 0 8px 0;">
+    {{ documents|length }} von {{ document_limit }} Dokumenten im Starter-Tarif belegt.
+  </p>
+  {% endif %}
   <form method="post" enctype="multipart/form-data" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:24px;">
     {% csrf_token %}
     <div style="flex:1; min-width:160px;">
@@ -22,6 +39,7 @@
     </div>
     <button type="submit" class="btn-sm btn-sm-primary" style="white-space:nowrap;">Hochladen</button>
   </form>
+  {% endif %}
 
   {% if documents %}
   <table style="width:100%; border-collapse:collapse;">

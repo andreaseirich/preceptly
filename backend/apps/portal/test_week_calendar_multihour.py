@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.lessons.models import Session
 from apps.portal.models import ParentStudentLink, PortalUser
 from apps.portal.views import _build_week_calendar
@@ -25,6 +26,9 @@ from apps.portal.views import _build_week_calendar
 class WeekCalendarMultiHourBlockedTimeTest(TestCase):
     def setUp(self):
         self.tutor = User.objects.create_user(username="tutor_wk", password="pass")
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion ab Starter/Pro
         self.contract = Contract.objects.create(
             user=self.tutor,
             first_name="Max",

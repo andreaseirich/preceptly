@@ -70,9 +70,9 @@
 
         <section class="settings-card" id="subscription" aria-labelledby="subscription-title">
             <h3 id="subscription-title">{% trans "Subscription" %}</h3>
-            <p class="settings-desc">{% trans "Manage your Premium subscription. Premium unlocks unlimited public booking, reschedule, reports, Billing Pro, and AI lesson plans." %}</p>
+            <p class="settings-desc">{% trans "Manage your subscription. What each plan includes is listed below." %}</p>
             <p style="margin: 0 0 15px 0;"><strong>{% trans "Current plan" %}:</strong>
-                {% if is_premium %}
+                {% if profile.subscription_tier and profile.subscription_tier != "free" %}
                     <span class="premium-badge">{{ profile.subscription_tier|title }}</span>
                 {% else %}
                     {% trans "Free" %}
@@ -111,7 +111,7 @@
                                 <input type="radio" name="_tier_ui" value="starter">
                                 <div class="tier-name">Starter</div>
                                 <div class="tier-price">€ 4,99 <span>/ {% trans "month" %}</span></div>
-                                <div class="tier-features">{% trans "Unlimited students & lessons" %}<br>{% trans "Invoices & contracts" %}<br>{% trans "Public booking page" %}</div>
+                                <div class="tier-features">{% trans "Recurring lessons & blocked times" %}<br>{% trans "Documents (3 per student)" %}<br>{% trans "Billing Pro" %}<br>{% trans "Student portal" %}<br>{% trans "Portal bookings (3/month)" %}</div>
                             </label>
                         </div>
                         {% endif %}
@@ -121,7 +121,7 @@
                                 <input type="radio" name="_tier_ui" value="pro" checked>
                                 <div class="tier-name">Pro</div>
                                 <div class="tier-price">€ 9,99 <span>/ {% trans "month" %}</span></div>
-                                <div class="tier-features">{% trans "Everything in Starter" %}<br>{% trans "Video meetings" %}<br>{% trans "AI lesson plans" %}<br>{% trans "Reports & analytics" %}</div>
+                                <div class="tier-features">{% trans "Everything in Starter" %}<br>{% trans "Unlimited documents" %}<br>{% trans "Unlimited portal bookings & series" %}<br>{% trans "Parent portal" %}<br>{% trans "Integrated meeting rooms" %}<br>{% trans "AI lesson plans" %}<br>{% trans "EÜR tax export" %}<br>{% trans "Advanced reports" %}</div>
                             </label>
                         </div>
                         {% endif %}
@@ -131,7 +131,7 @@
                                 <input type="radio" name="_tier_ui" value="business">
                                 <div class="tier-name">Business</div>
                                 <div class="tier-price">€ 19,99 <span>/ {% trans "month" %}</span></div>
-                                <div class="tier-features">{% trans "Everything in Pro" %}<br>{% trans "Parent portal" %}<br>{% trans "Priority support" %}</div>
+                                <div class="tier-features">{% trans "Everything in Pro" %}<br>{% trans "Priority support" %}<br>{% trans "Early access to new features" %}</div>
                             </label>
                         </div>
                         {% endif %}

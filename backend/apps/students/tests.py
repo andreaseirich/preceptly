@@ -7,6 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 
 
 class StudentModelTest(TestCase):
@@ -39,6 +40,9 @@ class TutorDocumentUploadMagicByteTest(TestCase):
         self.user = User.objects.create_user(
             username="tutor_magic", password="testpass123", email="tutor_magic@example.com"
         )
+        UserProfile.objects.update_or_create(
+            user=self.user, defaults={"subscription_tier": "pro"}
+        )  # Funktion ab Starter/Pro
         self.client = Client()
         self.client.login(username="tutor_magic", password="testpass123")
         self.contract = Contract.objects.create(

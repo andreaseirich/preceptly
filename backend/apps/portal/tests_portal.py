@@ -8,6 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.core.models import UserProfile
 from apps.portal.models import ParentStudentLink, PortalUser
 
 User = get_user_model()
@@ -602,6 +603,9 @@ class PortalDocumentUploadMagicByteTest(TestCase):
         from apps.contracts.models import Contract
 
         self.tutor = User.objects.create_user(username="tutor_upload", password="pw")
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion ab Starter/Pro
         self.contract = Contract.objects.create(
             user=self.tutor,
             first_name="Upload",

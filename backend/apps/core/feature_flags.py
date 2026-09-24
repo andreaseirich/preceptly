@@ -41,6 +41,9 @@ class Feature(StrEnum):
     FEATURE_EUE_EXPORT = "eue_export"
     FEATURE_PARENT_PORTAL = "parent_portal"
     FEATURE_MEETING_ROOMS = "meeting_rooms"
+    # Serien, die Schüler/Eltern selbst im Portal anlegen. Im Starter-Tarif nur
+    # Einzelbuchungen - eine Serie würde die Monatsgrenze sofort aushebeln.
+    FEATURE_PORTAL_RECURRING = "portal_recurring"
     FEATURE_AI_LESSON_PLANS = "ai_lesson_plans"
     FEATURE_REPORTS = "reports"
 
@@ -55,6 +58,7 @@ FEATURE_MIN_TIER: dict[Feature, Tier] = {
     Feature.FEATURE_EUE_EXPORT: Tier.PRO,
     Feature.FEATURE_PARENT_PORTAL: Tier.PRO,
     Feature.FEATURE_MEETING_ROOMS: Tier.PRO,
+    Feature.FEATURE_PORTAL_RECURRING: Tier.PRO,
     Feature.FEATURE_AI_LESSON_PLANS: Tier.PRO,
     Feature.FEATURE_REPORTS: Tier.PRO,
 }
@@ -113,6 +117,15 @@ def get_document_count_for_contract(contract_id: int) -> int:
     from apps.students.models import StudentDocument
 
     return StudentDocument.objects.filter(student_id=contract_id).count()
+
+
+def document_limit(user: User | None) -> int | None:
+    """Höchstzahl Dokumente je Schüler: 0 = gar keine, None = unbegrenzt."""
+    if not user_has_feature(user, Feature.FEATURE_DOCUMENTS):
+        return 0
+    if get_user_tier(user) == Tier.STARTER:
+        return STARTER_DOCUMENT_LIMIT
+    return None
 
 
 def document_limit_reached(user: User | None, contract_id: int) -> bool:

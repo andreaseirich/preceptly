@@ -7176,3 +7176,19 @@ msgid ""
 msgstr ""
 "Standard-Arbeitszeiten festlegen. Schüler und Eltern können im Portal nur "
 "innerhalb dieser Zeiten Stunden buchen."
+
+#: apps/core/templates/core/settings.html
+msgid "Unlimited portal bookings & series"
+msgstr "Unbegrenzte Portal-Buchungen und Serien"
+
+#: apps/core/templates/core/settings.html
+msgid "Manage your subscription. What each plan includes is listed below."
+msgstr "Abo verwalten. Was die einzelnen Tarife enthalten, steht unten."
+
+#: apps/core/templates/core/landing.html
+msgid "Booking in the portal"
+msgstr "Buchung im Portal"
+
+#: apps/core/templates/core/landing.html
+msgid "Students and parents book, reschedule and cancel lessons themselves in the portal — within your working hours."
+msgstr "Schüler und Eltern buchen, verschieben und sagen Stunden selbst im Portal ab – innerhalb deiner Arbeitszeiten."

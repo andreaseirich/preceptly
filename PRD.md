@@ -32,7 +32,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 - **Serientermine** mit Massenbearbeitung und Ende nach Vertragslaufzeit
 - **Konfliktprüfung**: Überschneidungen, Fahrzeiten, Sperrzeiten
 - **Sperrzeiten** (Urlaub, private Termine)
-- Buchung durch Schüler läuft über das **Portal** (siehe unten). Die frühere öffentliche Buchungsseite (`/lessons/booking/<token>/`) wurde mit dem Tarif-Umbau aus der Oberfläche genommen, Adresse und View bestehen aber noch — und brechen mit einem Serverfehler ab, sobald der Schüler in der gezeigten Woche einen Termin hat (Stand 24.09.2026, Entscheidung offen: entfernen oder reparieren)
+- Buchung durch Schüler läuft über das **Portal** (siehe unten). Die frühere öffentliche Buchungsseite ist seit 24.09.2026 entfernt.
 - **iCloud-Kalender-Sync** (CalDAV): zukünftige Stunden werden übertragen, vergangene entfernt; Konflikte sichtbar
 
 ### Abrechnung und Einnahmen
@@ -71,15 +71,29 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 
 | Tarif | Umfang |
 |---|---|
-| **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 höchstens 5 Schüler und 8 Rechnungen pro Monat (durchgesetzt) |
-| **Starter** | + Serientermine, Sperrzeiten, Dokumente, erweiterte Abrechnung, Schüler-Portal, Portal-Buchung |
-| **Pro** | + Eltern-Portal, Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
-| **Business** | alles aus Pro |
+| **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 höchstens 5 Schüler und 8 Rechnungen pro Monat. Keine Dokumente, keine Portal-Buchung |
+| **Starter** | + Serientermine, Sperrzeiten, erweiterte Abrechnung, Schüler-Portal; **höchstens 3 Dokumente je Schüler**, **höchstens 3 Portal-Buchungen je Monat** (nur Einzeltermine) |
+| **Pro** | + unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und **Serien im Portal**, Eltern-Portal, Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
+| **Business** | alles aus Pro, dazu bevorzugter Support und früher Zugang zu neuen Funktionen |
 
 Abos laufen über Stripe Checkout, Verwaltung über das Stripe-Kundenportal.
 Maßgeblich ist `backend/apps/core/feature_flags.py`.
 
-**Abweichung (Stand 24.09.2026):** Die Preisseite bewirbt Starter mit „3 Dokumente je Schüler" und „3 Portal-Buchungen pro Monat", Pro mit „unbegrenzten Dokumenten". Die Grenzen sind in `feature_flags.py` als `STARTER_DOCUMENT_LIMIT` und `STARTER_PORTAL_BOOKING_MONTHLY_LIMIT` definiert, werden aber **nirgends durchgesetzt** — Starter-Kunden haben beides derzeit unbegrenzt. Entscheidung offen: Grenzen einbauen oder von der Preisseite nehmen.
+**Was der Code durchsetzt (Stand 24.09.2026):**
+
+| Grenze | Wo |
+|---|---|
+| Free: 5 Schüler, 8 Rechnungen/Monat (Konten ab 02.07.2026) | `students/views.py`, `billing/views.py` |
+| Dokumente: Free keine, Starter 3 je Schüler — beim Tutor und im Portal | `document_limit_reached()` |
+| Portal-Buchungen: Free keine, Starter 3 je Tutor und Kalendermonat, gezählt nach Anlagedatum | `portal_booking_limit_reached()` |
+| Serien im Portal selbst anlegen: erst ab Pro | `Feature.FEATURE_PORTAL_RECURRING` |
+| KI-Pläne, Berichte, erweiterte Abrechnung | `user_has_feature()` in den jeweiligen Views |
+
+**Noch nicht durchgesetzt**, obwohl auf der Preisseite einem Tarif zugeordnet:
+Sperrzeiten und Serien auf Tutor-Seite (Starter), Schüler-Portal (Starter),
+Eltern-Portal und Meeting-Räume (Pro). Diese Funktionen stehen derzeit jedem
+Tarif offen. Entscheidung offen: nachziehen — dann mit Blick darauf, wer sie
+heute schon nutzt — oder bewusst offen lassen.
 
 **Wichtig:** Stripe rechnet nur die Abos der Tutoren ab. Zahlungen der Schüler
 an den Tutor laufen außerhalb von Preceptly; Preceptly erstellt die Rechnung

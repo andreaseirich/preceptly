@@ -16,6 +16,9 @@ HINT = "etwa eine halbe Stunde Puffer"
 class PortalBufferHintTest(TestCase):
     def setUp(self):
         self.tutor = User.objects.create_user(username="tutor_bh", password="pass")
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion ab Starter/Pro
         self.contract = Contract.objects.create(
             user=self.tutor,
             first_name="Max",

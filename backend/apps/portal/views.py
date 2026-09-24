@@ -21,6 +21,12 @@ from django.views import View
 from django_ratelimit.decorators import ratelimit
 
 from apps.core.auth_throttle import throttle_portal_login
+from apps.core.feature_flags import (
+    Feature,
+    document_limit_reached,
+    portal_booking_limit_reached,
+    user_has_feature,
+)
 from apps.core.log_safety import safe_log_value
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Lesson as _Lesson
@@ -32,6 +38,21 @@ logger = logging.getLogger(__name__)
 # lessons/booking_service.py, das mit der alten Buchungsseite entfallen ist).
 BOOKING_MIN_YEAR = 2020
 BOOKING_MAX_YEAR = 2031
+
+# Hinweise für Schüler und Eltern, wenn der Tarif des Tutors etwas nicht
+# (mehr) zulässt. Bewusst ohne Tarif-Details - das ist Sache des Tutors.
+BOOKING_BLOCKED_MESSAGE = (
+    "Online-Buchungen sind im Moment nicht möglich. "
+    "Bitte sprich den Termin direkt mit deinem Nachhilfelehrer ab."
+)
+UPLOAD_BLOCKED_MESSAGE = (
+    "Für diesen Schüler können gerade keine weiteren Dateien hochgeladen werden. "
+    "Bitte wende dich an deinen Nachhilfelehrer."
+)
+SERIES_BLOCKED_MESSAGE = (
+    "Feste Serientermine kannst du hier nicht selbst anlegen. "
+    "Bitte sprich sie direkt mit deinem Nachhilfelehrer ab."
+)
 
 _ALLOWED_UPLOAD_EXTENSIONS = {
     ".pdf",
@@ -867,6 +888,8 @@ class PortalBookingView(View):
             "success": success,
             "portal_user": get_portal_user(request),
             "show_buffer_hint": _buffer_hint_enabled(student),
+            "booking_blocked": portal_booking_limit_reached(student.user),
+            "booking_blocked_message": BOOKING_BLOCKED_MESSAGE,
         }
         context.update(_build_week_calendar(student, year, month, day))
         context["today"] = today.isoformat()
@@ -894,6 +917,8 @@ class PortalBookingView(View):
         contract = _get_active_contract(student)
         if not contract:
             return self._render(request, student, None, error="Kein aktiver Vertrag gefunden.")
+        if portal_booking_limit_reached(student.user):
+            return self._render(request, student, contract, error=BOOKING_BLOCKED_MESSAGE)
 
         date_str = request.POST.get("date", "").strip()
         time_str = request.POST.get("start_time", "").strip()
@@ -1164,8 +1189,14 @@ class PortalRecurringManageView(View):
                 "ended_series": [s for s in series if s.has_ended],
                 "contract": contract,
                 "portal_user": portal_user,
+                "can_create_series": _portal_series_allowed(student),
             },
         )
+
+
+def _portal_series_allowed(student):
+    """Serien im Portal selbst anlegen: erst ab Pro (siehe FEATURE_PORTAL_RECURRING)."""
+    return user_has_feature(student.user, Feature.FEATURE_PORTAL_RECURRING)
 
 
 class PortalRecurringCreateView(View):
@@ -1183,6 +1214,9 @@ class PortalRecurringCreateView(View):
         student = _get_portal_student(portal_user, student_pk)
         if not student:
             return HttpResponseForbidden()
+        if not _portal_series_allowed(student):
+            messages.info(request, SERIES_BLOCKED_MESSAGE)
+            return redirect("portal:recurring_manage", student_pk=student_pk)
         contract = _get_active_contract(student)
         return render(
             request,
@@ -1207,6 +1241,9 @@ class PortalRecurringCreateView(View):
         student = _get_portal_student(portal_user, student_pk)
         if not student:
             return HttpResponseForbidden()
+        if not _portal_series_allowed(student):
+            messages.info(request, SERIES_BLOCKED_MESSAGE)
+            return redirect("portal:recurring_manage", student_pk=student_pk)
         contract = _get_active_contract(student)
         if not contract:
             messages.warning(request, "Kein aktiver Vertrag vorhanden.")
@@ -1305,6 +1342,7 @@ class PortalDocumentsView(View):
                 "student": student,
                 "documents": docs,
                 "portal_user": portal_user,
+                "upload_allowed": not document_limit_reached(student.user, student.pk),
             },
         )
 
@@ -1317,6 +1355,10 @@ class PortalDocumentsView(View):
         student = _get_portal_student(portal_user, student_pk)
         if not student:
             return HttpResponseForbidden()
+
+        if document_limit_reached(student.user, student.pk):
+            messages.error(request, UPLOAD_BLOCKED_MESSAGE)
+            return redirect("portal:documents", student_pk=student_pk)
 
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
