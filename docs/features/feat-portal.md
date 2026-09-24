@@ -1,83 +1,95 @@
 # Feature: Eltern/Schüler-Portal
 
+**Stand:** 24.09.2026 — live auf https://preceptly.de/portal/
+
 ## Ziel
 
-Das Eltern/Schüler-Portal gibt Eltern und Schülern einen dedizierten, sicheren Zugang zu relevanten Unterrichtsinformationen und ermöglicht die bidirektionale Kommunikation mit dem Tutor. Eltern erhalten Einblick in den Fortschritt ihrer Kinder und anstehende Stunden, Schüler können ihre Hausaufgaben und Unterrichtsmaterialien einsehen.
+Schüler und Eltern bekommen einen eigenen, sicheren Zugang zu allem, was ihre
+Stunden betrifft: Termine sehen, buchen, verschieben und absagen, Hausaufgaben
+und Fortschritt, Dokumente, Nachrichten an den Tutor. Der Tutor spart sich
+dadurch Abstimmung per Telefon und Messenger.
 
 ## Nutzer-Rollen
 
 | Rolle | Sicht | Aktionen |
 |-------|-------|----------|
-| **Tutor** | Administrationsoberfläche | Einladungslinks generieren, ProgressNotes erstellen, Hausaufgaben/Meeting-Links setzen, Nachrichten lesen + antworten |
-| **Elternteil** | Portal-Dashboard | Alle verknüpften Kinder sehen, Fortschrittsnotizen lesen, Stundenplan einsehen, mit Tutor kommunizieren |
-| **Schüler** | Portal-Dashboard | Eigene kommende Stunden, Hausaufgaben, Unterrichtsmaterialien, direktes Messaging mit Tutor |
+| **Tutor** | Verwaltungsoberfläche | Portal-Einladung verschicken, Fortschrittsnotizen, Hausaufgaben und Meeting-Links setzen, Nachrichten beantworten |
+| **Schüler** | Portal | Eigene Stunden, Hausaufgaben, Dokumente, Buchung, Serien, Nachrichten, Meeting beitreten |
+| **Elternteil** | Portal | Alle verknüpften Kinder, Fortschritt, Kalender je Kind, Nachrichten (Tarif Pro) |
+
+Ein Portal-Konto kann mehrere Verträge verwalten (Familien-Zugang): Der Tutor
+verknüpft weitere Kinder mit demselben Konto.
 
 ## Datenmodell
 
+Schüler sind **Verträge** (`contracts.Contract`) — ein eigenes Schüler-Modell
+gibt es nicht mehr.
+
 | Modell | Schlüsselfelder | Beziehung |
 |--------|-----------------|-----------|
-| **PortalUser** | user (OneToOne → User), role (parent/student), tutor (FK → User), created_at | Basis für Portal-Accounts |
-| **StudentPortalLink** | portal_user (FK), student (OneToOne), invite_token (UUID), is_active | Verknüpfung Schüler ↔ Portal |
-| **ParentStudentLink** | parent (FK → PortalUser), student (FK → Student) | M2M: mehrere Eltern/Kinder |
-| **ProgressNote** | student (FK), tutor (FK → User), date, text, created_at | Fortschrittsnotizen pro Schüler |
-| **PortalMessage** | sender_portal_user (FK), sender_is_tutor, student (FK), text, created_at, read_by_tutor, read_by_portal | Nachrichten Tutor ↔ Portal |
+| **PortalUser** | `user` (1:1 → User), `role` (parent/student), `tutor` (→ User), `ical_feed_token` | Basis jedes Portal-Kontos |
+| **ParentStudentLink** | `parent` (→ PortalUser), `contract` (→ Contract), Einladungs- und Reset-Token | **Aktuelle** Verknüpfung Konto ↔ Vertrag, auch für Schüler |
+| **StudentPortalLink** | `portal_user` (1:1), `contract` (1:1), Einladungs- und Reset-Token | **Alt-Zugänge**; neue Einladungen legen sie nicht mehr an, der Login findet sie aber weiterhin |
+| **ProgressNote** | `contract`, `tutor`, `text`, `date` | Fortschrittsnotizen |
+| **PortalMessage** | `sender_portal_user`, `sender_is_tutor`, `contract`, `text`, `read_by_tutor`, `read_by_portal` | Nachrichten Tutor ↔ Portal |
 
-**Erweiterungen bestehender Modelle:**
-- `lessons.Session`: `homework` (TextField), `meeting_url` (CharField)
+Erweiterungen an `lessons.Session`: `homework`, `meeting_url`.
+
+**E-Mail-Eindeutigkeit:** Ein Login wird über die E-Mail des Django-Users oder —
+bei Alt-Zugängen — über die Vertrags-E-Mail gefunden. `apps/portal/identity.py`
+stellt sicher, dass keine E-Mail zwei Konten gleichzeitig erreicht.
 
 ## URL-Struktur
 
-| URL | Beschreibung | Rolle |
-|-----|--------------|-------|
-| `/portal/` | Dispatch (Weiterleitung je nach Rolle) | Alle |
-| `/portal/login/` | Portal-Login | Anonym |
-| `/portal/logout/` | Portal-Logout | Authentifiziert |
-| `/portal/student/` | Schüler-Startseite (kommende Stunden, Hausaufgaben) | Schüler |
-| `/portal/student/lessons/` | Stundenhistorie | Schüler |
-| `/portal/parent/` | Eltern-Startseite (Kinder-Übersicht) | Eltern |
-| `/portal/parent/<pk>/` | Detail-Ansicht eines Kindes | Eltern |
-| `/portal/messages/<student_pk>/` | Nachrichtenthread | Eltern/Schüler |
+| URL | Zweck |
+|-----|-------|
+| `/portal/` | Weiterleitung je nach Rolle |
+| `/portal/login/`, `/portal/logout/` | Anmeldung (gedrosselt pro IP und pro Konto) |
+| `/portal/activate/<token>/` | Einladung annehmen, Passwort setzen |
+| `/portal/password-reset/`, `…/confirm/<token>/` | Passwort zurücksetzen |
+| `/portal/student/`, `/portal/student/lessons/`, `…/<pk>/` | Schüler: Übersicht, Stundenliste, Stunde im Detail |
+| `/portal/parent/`, `/portal/parent/<student_pk>/` | Eltern: Übersicht, Kind im Detail |
+| `/portal/calendar/`, `…/week/` | Kalender (Monat, Woche) |
+| `/portal/calendar/<student_pk>/`, `…/week/` | Kalender eines Kindes (Eltern) |
+| `/portal/book/<student_pk>/`, `/portal/availability/<student_pk>/` | Stunde buchen, freie Zeiten |
+| `/portal/session/<pk>/cancel/`, `…/reschedule/` | Stunde absagen, verschieben |
+| `/portal/recurring/<student_pk>/`, `…/create/…`, `…/<pk>/cancel/` | Serien verwalten |
+| `/portal/messages/<student_pk>/` | Nachrichten |
+| `/portal/documents/<student_pk>/`, `…/<doc_pk>/download/` | Dokumente |
+| `/portal/meeting/<lesson_pk>/`, `…/status/` | Warteraum vor dem Meeting |
+| `/portal/profile/` | Kontaktdaten, Passwort, Benachrichtigungen |
+| `/portal/profile/calendar-feed/renew/` | Kalenderfeed-Link erneuern |
+| `/portal/calendar-feed/<token>.ics` | Kalenderfeed (Token ist die Anmeldung) |
+| `/portal/push/subscribe/`, `…/unsubscribe/` | Push-Benachrichtigungen |
+| `/portal/faq/` | Hilfe |
 
-## Implementierungs-Status
+Einstieg ohne Konto: Link „Zum Portal-Login" auf der Startseite und unter dem
+Tutor-Login; der Portal-Login verlinkt zurück zum Tutor-Login.
 
-- [x] Modelldesign und DB-Architektur
-- [x] PortalUser, StudentPortalLink, ParentStudentLink, ProgressNote, PortalMessage
-- [x] Session homework/meeting_url Felder + Migrationen
-- [x] App-Struktur (urls.py, views.py, settings.py Integration)
-- [x] PortalLoginView + Authentication (Stub vorhanden)
-- [x] Student/Parent HomeViews + Templates
-- [x] Nachrichten-Views + Templates
-- [x] Tutor-seitige UI (Einladungslinks, ProgressNotes, Session-Formular)
-- [x] TutorMessageView + Template
-- [x] Ungelesene-Nachrichten-Badge im Tutor-Menü
-- [x] Einladungs-E-Mail (Token-Versand)
-- [ ] Sicherheitstests (Cross-Tutor-Zugriff)
-- [ ] Deployment-Test auf Railway
+## Tarife
 
-## Offene Punkte / TODOs
+| Funktion | ab Tarif |
+|---|---|
+| Schüler-Portal, Portal-Buchung | Starter |
+| Eltern-Portal, Meeting-Räume | Pro |
 
-- Einladungs-E-Mail-Template und Versand
-- Mobile Responsive Design für Portal-Templates
-- Datenschutz: Eltern-Zugriff auf Schüler-Daten (Einwilligung dokumentieren)
+Maßgeblich ist `backend/apps/core/feature_flags.py`.
 
-## E-Mail-Einladungsflow
+## Einladungsflow
 
-> **Railway-Konfiguration:** Siehe [docs/operations/railway-env-vars.md](../operations/railway-env-vars.md)
+1. Tutor verschickt die Einladung auf der Schülerseite (E-Mail aus dem Vertrag oder frei eingegeben).
+2. Gibt es schon ein Portal-Konto mit dieser Adresse **beim selben Tutor**, wird der Vertrag nur verknüpft (Familien-Zugang). Bei einem anderen Tutor: allgemeine Fehlermeldung, keine Auskunft über das fremde Konto.
+3. Sonst: neues Konto, `ParentStudentLink` mit Einladungs-Token, E-Mail über `portal/email_service.py`.
+4. Empfänger öffnet `/portal/activate/<token>/`, setzt sein Passwort und ist angemeldet.
 
-1. Tutor erstellt Portal-Account (Schüler oder Elternteil) auf der Schüler-Detailseite
-2. System generiert `invite_token` (UUID) in `StudentPortalLink`
-3. E-Mail wird automatisch an die eingegebene Adresse gesendet (via `portal/email_service.py`)
-4. Empfänger klickt Aktivierungslink: `/portal/activate/<token>/`
-5. Empfänger setzt eigenes Passwort -> Account wird aktiv
-6. Sofort eingeloggt, Weiterleitung zum Portal-Dashboard
+E-Mail-Versand und alle Variablen: [`docs/operations/railway-env-vars.md`](../operations/railway-env-vars.md).
 
-**Umgebungsvariablen für E-Mail (Railway):**
-| Variable | Beispiel |
-|----------|---------|
-| `EMAIL_HOST` | `smtp.gmail.com` |
-| `EMAIL_PORT` | `587` |
-| `EMAIL_USE_TLS` | `True` |
-| `EMAIL_HOST_USER` | `deine@email.de` |
-| `EMAIL_HOST_PASSWORD` | `app-passwort` |
-| `DEFAULT_FROM_EMAIL` | `noreply@preceptly.app` |
-| `SITE_URL` | `https://preceptly.de` |
+## Sicherheit
+
+- Login gedrosselt: pro IP und zusätzlich pro E-Mail (5 Versuche in 5 Minuten), Antwort 429 mit `Retry-After`
+- Zugriff immer über die Verknüpfung Konto ↔ Vertrag geprüft; Tests gegen Zugriff über Tutor-Grenzen hinweg: `test_booking_flow.py`, `test_ical_feed.py`, `test_email_uniqueness.py`, `students/test_portal_invite.py`
+- Uploads werden am Dateiinhalt geprüft, nicht nur an der Endung
+
+## Offene Punkte
+
+- **Datenschutz Minderjähriger:** Einwilligung für den Eltern-Zugriff auf Schülerdaten dokumentieren — Frage für die rechtliche Prüfung.

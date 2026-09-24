@@ -248,8 +248,6 @@ class IncomeOverviewView(LoginRequiredMixin, TemplateView):
         return context
 
 
-# TODO: Add rate limiting on POST (install django_ratelimit, then:
-# @method_decorator(ratelimit(key="user", rate="20/m", method="POST", block=False), name="post")
 class SettingsView(LoginRequiredMixin, FormView):
     """Settings view for managing default working hours."""
 

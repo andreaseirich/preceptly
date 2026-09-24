@@ -55,9 +55,9 @@ urlpatterns = [
         name="erecht24_revocation_confirm",
     ),
     path("health/", health_status, name="health"),
-    # TODO: Requires @staff_member_required — verify in views_log_test.py
+    # Diagnose-Endpunkte: nur mit DEBUG=True erreichbar, in Produktion 404
+    # (die Prüfung steht in den Views selbst).
     path("test-logs/", test_logs, name="test_logs"),
-    # TODO: Requires @staff_member_required — verify in views_email_test.py
     path("test-email/", test_email, name="test_email"),
     path("login/", TutorFlowLoginView.as_view(), name="login"),
     path("logout/", TutorFlowLogoutView.as_view(), name="logout"),
