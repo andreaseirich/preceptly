@@ -10,9 +10,23 @@ Umschalten auf Durchsetzung: Umgebungsvariable ``CSP_REPORT_ONLY=0``.
 
 from django.conf import settings
 
-# e-Recht24 liefert den gesetzlich nötigen Widerrufs-Button als Fremdskript
-# aus; ohne diese Quelle wäre die Schaltfläche im Fußbereich tot.
-ERECHT24 = "https://widerrufsbutton-cdn.e-recht24.de"
+# Der gesetzlich vorgeschriebene Widerrufs-Button von e-Recht24 braucht mehrere
+# fremde Quellen. Ermittelt am 24.09.2026 im Melde-Modus und aus den Skripten
+# selbst - das Absenden lässt sich nicht gefahrlos ausprobieren:
+#   - Skripte und Stylesheet des Fensters kommen vom CDN,
+#   - der abgeschickte Widerruf geht an eine ANDERE Adresse (die API),
+#   - das Formular bindet Friendly Captcha ein: Widget von jsDelivr, Rätsel vom
+#     Friendly-Captcha-Server, gelöst per WebAssembly in einem Blob-Worker.
+# Fehlt eine davon, öffnet sich das Fenster zwar, aber der Widerruf kommt nie an.
+ERECHT24_CDN = "https://widerrufsbutton-cdn.e-recht24.de"
+ERECHT24_API = "https://widerrufsbutton.e-recht24.de"
+FRIENDLY_CAPTCHA_API = "https://api.friendlycaptcha.com"
+# jsDelivr steht bewusst als ganzer Host drin: Die Version des Widgets legt
+# e-Recht24 fest (derzeit friendly-challenge@0.9.14). Ein festgenagelter Pfad
+# würde das Formular beim nächsten Update stillschweigend lahmlegen. Solange
+# script-src 'unsafe-inline' enthält, kostet das keinen Schutz - beim Umstieg
+# auf Nonces nachschärfen.
+JSDELIVR = "https://cdn.jsdelivr.net"
 
 POLICY_DIRECTIVES = [
     "default-src 'self'",
@@ -25,11 +39,13 @@ POLICY_DIRECTIVES = [
     "font-src 'self' data:",
     # Inline-Styles und Inline-Skripte stecken derzeit in fast jeder Vorlage.
     # Sie fallen erst weg, wenn die Vorlagen auf Nonces umgestellt sind.
-    "style-src 'self' 'unsafe-inline'",
-    f"script-src 'self' 'unsafe-inline' {ERECHT24}",
-    f"connect-src 'self' {ERECHT24}",
-    f"frame-src {ERECHT24}",
-    # pdf.js legt seinen Arbeitsprozess als Blob an.
+    f"style-src 'self' 'unsafe-inline' {ERECHT24_CDN}",
+    # 'wasm-unsafe-eval' erlaubt nur das Übersetzen von WebAssembly (für den
+    # Captcha-Rechenkern), kein eval() von JavaScript.
+    f"script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' {ERECHT24_CDN} {JSDELIVR}",
+    f"connect-src 'self' {ERECHT24_CDN} {ERECHT24_API} {FRIENDLY_CAPTCHA_API}",
+    f"frame-src {ERECHT24_CDN}",
+    # pdf.js und Friendly Captcha legen ihre Arbeitsprozesse als Blob an.
     "worker-src 'self' blob:",
 ]
 

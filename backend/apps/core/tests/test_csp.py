@@ -23,13 +23,36 @@ class PolicyHeaderTest(TestCase):
         self.assertIn("report-uri /csp-report/", response[REPORT_ONLY])
         self.assertIn("default-src 'self'", response[REPORT_ONLY])
 
-    def test_erecht24_revocation_script_is_allowed(self):
-        # Ohne diese Quelle wäre der gesetzlich nötige Widerrufs-Button tot.
-        policy = policy_value()
+    def test_revocation_form_can_load_and_submit(self):
+        """Der gesetzlich nötige Widerruf muss sich öffnen UND absenden lassen.
 
-        self.assertIn(
-            "script-src 'self' 'unsafe-inline' https://widerrufsbutton-cdn.e-recht24.de", policy
-        )
+        Quellen ermittelt am 24.09.2026 im Melde-Modus und aus den Skripten von
+        e-Recht24. Fehlt die API in connect-src, öffnet sich das Fenster, aber
+        der Widerruf wird beim Absenden blockiert - ohne sichtbaren Fehler."""
+        directives = _parse(policy_value())
+        needed = {
+            "style-src": ["https://widerrufsbutton-cdn.e-recht24.de"],
+            "script-src": [
+                "https://widerrufsbutton-cdn.e-recht24.de",
+                "https://cdn.jsdelivr.net",
+                "'wasm-unsafe-eval'",
+            ],
+            "connect-src": [
+                "https://widerrufsbutton.e-recht24.de",
+                "https://api.friendlycaptcha.com",
+            ],
+            "worker-src": ["blob:"],
+        }
+        for directive, sources in needed.items():
+            for source in sources:
+                with self.subTest(richtlinie=directive, quelle=source):
+                    self.assertIn(source, directives[directive])
+
+    def test_no_eval_for_javascript(self):
+        # WebAssembly ja, eval() nein - das wäre ein Freibrief für jedes Skript.
+        directives = _parse(policy_value())
+
+        self.assertNotIn("'unsafe-eval'", directives["script-src"])
 
     def test_non_html_responses_stay_untouched(self):
         response = self.client.get("/health/")
@@ -43,6 +66,16 @@ class PolicyHeaderTest(TestCase):
 
         self.assertIn(ENFORCED, response)
         self.assertNotIn(REPORT_ONLY, response)
+
+
+def _parse(policy):
+    """Richtlinie in {Richtlinie: [Quellen]} zerlegen."""
+    result = {}
+    for part in policy.split(";"):
+        tokens = part.split()
+        if tokens:
+            result[tokens[0]] = tokens[1:]
+    return result
 
 
 def _html_response():
