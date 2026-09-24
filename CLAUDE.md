@@ -93,6 +93,10 @@ müssen grün sein.
 - Echte Unicode-Zeichen: ä, ö, ü, ß — nicht ae, oe, ue, ss
 - Keine „God-Files": lieber mehrere kleine, klar benannte Module
 - Dateinamen mit `credentials` blockiert der Hygiene-Check (Schutz vor Schlüsseldateien)
+- **Vorlagen:** jedes `<script>` mit `nonce="{{ csp_nonce }}"`; **keine** Inline-Handler
+  (`onclick=…`, `onsubmit=…`, `href="javascript:…"`) — stattdessen `data-click` &
+  Co. aus `apps/core/static/js/actions.js`. Ein Wächter-Test erzwingt beides.
+  Details: `docs/operations/content-security-policy.md`
 
 ## Sicherheit
 

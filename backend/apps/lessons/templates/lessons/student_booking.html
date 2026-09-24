@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'de' }}">
 <head>
@@ -205,6 +205,7 @@
         .btn-action.btn-outline-danger { background: transparent; color: #dc3545; border: 1px solid #dc3545; }
         .btn-action.btn-outline-danger:hover { background: rgba(220, 53, 69, 0.15); }
     </style>
+    <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
 <body>
     <div class="container">
@@ -213,15 +214,15 @@
         <div id="messages"></div>
         
         <div class="btn-group">
-            <button class="btn" onclick="previousWeek()">← {% trans "Previous Week" %}</button>
-            <button class="btn" onclick="nextWeek()">{% trans "Next Week" %} →</button>
+            <button class="btn" data-click="previousWeek">← {% trans "Previous Week" %}</button>
+            <button class="btn" data-click="nextWeek">{% trans "Next Week" %} →</button>
             <label style="margin-left: 15px; display: inline-flex; align-items: center; gap: 8px;">
                 {% trans "Jump to date:" %}
                 <input type="date" id="jump-to-date" value="{{ current_date|date:'Y-m-d' }}" 
                        style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                       onchange="jumpToDate(this.value)">
+                       data-change="jumpToDate" data-change-args='["$value"]'>
             </label>
-            <button class="btn btn-secondary" onclick="showRecurringBookingModal()">{% trans "Book Recurring Lesson" %}</button>
+            <button class="btn btn-secondary" data-click="showRecurringBookingModal">{% trans "Book Recurring Lesson" %}</button>
         </div>
         
         <!-- Modal für Serientermin-Buchung -->
@@ -265,8 +266,8 @@
                     <input type="date" id="recurring-end-date" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
                 <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="closeRecurringBookingModal()">{% trans "Cancel" %}</button>
-                    <button class="btn btn-success recurring-confirm-btn" onclick="confirmRecurringBooking()">{% trans "Book Recurring Lesson" %}</button>
+                    <button class="btn btn-secondary" data-click="closeRecurringBookingModal">{% trans "Cancel" %}</button>
+                    <button class="btn btn-success recurring-confirm-btn" data-click="confirmRecurringBooking">{% trans "Book Recurring Lesson" %}</button>
                 </div>
             </div>
         </div>
@@ -276,8 +277,8 @@
             <p>{% trans "Click on a time slot to select one lesson block (duration from your contract)." %}</p>
             <div id="selected-slots-info" style="margin: 15px 0; padding: 10px; background: rgba(255, 193, 7, 0.2); border-radius: 4px; display: none;">
                 <strong>{% trans "Selected:" %}</strong> <span id="selected-range"></span>
-                <button class="btn btn-success" onclick="confirmBooking()" style="margin-left: 15px;">{% trans "Book Selected Slots" %}</button>
-                <button class="btn btn-secondary" onclick="clearSelection()" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
+                <button class="btn btn-success" data-click="confirmBooking" style="margin-left: 15px;">{% trans "Book Selected Slots" %}</button>
+                <button class="btn btn-secondary" data-click="clearSelection" style="margin-left: 10px;">{% trans "Clear Selection" %}</button>
             </div>
             <div id="week-calendar-loading" style="display: none;" class="loading">{% trans "Loading..." %}</div>
             <div id="week-calendar-days">
@@ -294,7 +295,7 @@
                              data-date="{{ day.date|date:'Y-m-d' }}" 
                              data-start="{{ slot.0|time:'H:i' }}" 
                              data-end="{{ slot.1|time:'H:i' }}"
-                             onclick="toggleSlot(this)">
+                             data-click="toggleSlot" data-click-args='["$el"]'>
                             <div class="time-slot-label">
                                 {{ slot.0|time:'H:i' }}
                             </div>
@@ -308,10 +309,10 @@
                             <div class="occupied-label">{% if bi.own %}{{ bi.label }}{% else %}{% trans "Booked" %}{% endif %}</div>
                             {% if bi.own and bi.cancellable %}
                             <div class="lesson-actions">
-                                <button class="btn-action" onclick="cancelLesson({{ bi.lesson_id }}, event)">{% trans "Cancel" %}</button>
+                                <button class="btn-action" data-click="cancelLesson" data-click-args='[{{ bi.lesson_id }}, "$event"]'>{% trans "Cancel" %}</button>
                                 {% if bi.in_series %}
-                                <button class="btn-action btn-outline-danger" onclick="cancelSeries({{ bi.lesson_id }}, event)">{% trans "Cancel Series" %}</button>
-                                <button class="btn-action btn-secondary-sm" onclick="showEditSeriesModal({{ bi.lesson_id }}, event)">{% trans "Edit Series" %}</button>
+                                <button class="btn-action btn-outline-danger" data-click="cancelSeries" data-click-args='[{{ bi.lesson_id }}, "$event"]'>{% trans "Cancel Series" %}</button>
+                                <button class="btn-action btn-secondary-sm" data-click="showEditSeriesModal" data-click-args='[{{ bi.lesson_id }}, "$event"]'>{% trans "Edit Series" %}</button>
                                 {% endif %}
                             </div>
                             {% endif %}
@@ -337,7 +338,7 @@
         </div>
     </div>
     
-    <script>
+    <script nonce="{{ csp_nonce }}">
         const token = '{{ contract.booking_token }}';
         const currentYear = {{ current_date.year }};
         const currentMonth = {{ current_date.month }};
@@ -492,7 +493,7 @@
                 if (day.working_hours && day.working_hours.length > 0) {
                     html += '<div class="time-slots">';
                     for (const slot of day.available_slots) {
-                        html += `<div class="time-slot" data-date="${day.date}" data-start="${slot[0]}" data-end="${slot[1]}" onclick="toggleSlot(this)">
+                        html += `<div class="time-slot" data-date="${day.date}" data-start="${slot[0]}" data-end="${slot[1]}" data-click="toggleSlot" data-click-args='["$el"]'>
                             <div class="time-slot-label">${slot[0]}</div></div>`;
                     }
                     var intervals = day.busy_intervals || [];
@@ -503,10 +504,10 @@
                             var actionsHtml = '';
                             if (bi.own && bi.cancellable && bi.lesson_id) {
                                 actionsHtml += `<div class="lesson-actions">
-                                    <button class="btn-action" onclick="cancelLesson(${bi.lesson_id}, event)">${cancelLabel}</button>`;
+                                    <button class="btn-action" data-click="cancelLesson" data-click-args='[${bi.lesson_id}, "$event"]'>${cancelLabel}</button>`;
                                 if (bi.in_series) {
-                                    actionsHtml += `<button class="btn-action btn-outline-danger" onclick="cancelSeries(${bi.lesson_id}, event)">${cancelSeriesLabel}</button>
-                                        <button class="btn-action btn-secondary-sm" onclick="showEditSeriesModal(${bi.lesson_id}, event)">${editSeriesLabel}</button>`;
+                                    actionsHtml += `<button class="btn-action btn-outline-danger" data-click="cancelSeries" data-click-args='[${bi.lesson_id}, "$event"]'>${cancelSeriesLabel}</button>
+                                        <button class="btn-action btn-secondary-sm" data-click="showEditSeriesModal" data-click-args='[${bi.lesson_id}, "$event"]'>${editSeriesLabel}</button>`;
                                 }
                                 actionsHtml += '</div>';
                             }

@@ -5,8 +5,15 @@ Der Browser blockiert nichts, meldet Verstöße aber an ``/csp-report/``. So lä
 sich vor dem Scharfschalten sehen, was eine echte Sperre kaputt machen würde —
 gerade im Videoraum, wo ein Fehlschlag ein laufendes Meeting beenden würde.
 
+Skripte laufen nur mit Nonce: Jede Antwort bekommt eine neue Zufallszahl, die
+Vorlagen über ``{{ csp_nonce }}`` an jedes ``<script>`` setzen. Eingeschleuster
+Code kennt sie nicht. Inline-Handler (``onclick="…"``) können keine Nonce tragen;
+ihre Aufgabe übernimmt ``static/js/actions.js`` über Daten-Attribute.
+
 Umschalten auf Durchsetzung: Umgebungsvariable ``CSP_REPORT_ONLY=0``.
 """
+
+import secrets
 
 from django.conf import settings
 
@@ -21,11 +28,6 @@ from django.conf import settings
 ERECHT24_CDN = "https://widerrufsbutton-cdn.e-recht24.de"
 ERECHT24_API = "https://widerrufsbutton.e-recht24.de"
 FRIENDLY_CAPTCHA_API = "https://api.friendlycaptcha.com"
-# jsDelivr steht bewusst als ganzer Host drin: Die Version des Widgets legt
-# e-Recht24 fest (derzeit friendly-challenge@0.9.14). Ein festgenagelter Pfad
-# würde das Formular beim nächsten Update stillschweigend lahmlegen. Solange
-# script-src 'unsafe-inline' enthält, kostet das keinen Schutz - beim Umstieg
-# auf Nonces nachschärfen.
 JSDELIVR = "https://cdn.jsdelivr.net"
 
 POLICY_DIRECTIVES = [
@@ -37,27 +39,44 @@ POLICY_DIRECTIVES = [
     "img-src 'self' data: blob:",
     "media-src 'self' blob:",
     "font-src 'self' data:",
-    # Inline-Styles und Inline-Skripte stecken derzeit in fast jeder Vorlage.
-    # Sie fallen erst weg, wenn die Vorlagen auf Nonces umgestellt sind.
+    # Inline-Styles stecken derzeit in fast jeder Vorlage.
     f"style-src 'self' 'unsafe-inline' {ERECHT24_CDN}",
-    # 'wasm-unsafe-eval' erlaubt nur das Übersetzen von WebAssembly (für den
-    # Captcha-Rechenkern), kein eval() von JavaScript.
-    f"script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' {ERECHT24_CDN} {JSDELIVR}",
     f"connect-src 'self' {ERECHT24_CDN} {ERECHT24_API} {FRIENDLY_CAPTCHA_API}",
     f"frame-src {ERECHT24_CDN}",
     # pdf.js und Friendly Captcha legen ihre Arbeitsprozesse als Blob an.
     "worker-src 'self' blob:",
 ]
 
+# Skripte, gestaffelt nach Browsergeneration („Strict CSP"):
+#   - Aktuelle Browser: nur Skripte mit Nonce und was diese per JavaScript
+#     nachladen ('strict-dynamic'). Hostliste und 'unsafe-inline' zählen dann
+#     nicht - ein eingeschleustes <script src="…jsdelivr…"> hat keine Nonce und
+#     wird abgewiesen. Das e-Recht24-Skript trägt die Nonce und darf deshalb
+#     Fenster und Captcha nachladen, in welcher Version auch immer.
+#   - Ältere Browser ohne 'strict-dynamic': Nonce plus Hostliste.
+#   - Uralte Browser ohne Nonces: Hostliste plus 'unsafe-inline'.
+# 'wasm-unsafe-eval' erlaubt nur das Übersetzen von WebAssembly (Captcha-
+# Rechenkern), kein eval() von JavaScript.
+SCRIPT_FALLBACK_SOURCES = ["'self'", ERECHT24_CDN, JSDELIVR, "'unsafe-inline'"]
+
 REPORT_PATH = "/csp-report/"
 
 
-def policy_value():
-    return "; ".join([*POLICY_DIRECTIVES, f"report-uri {REPORT_PATH}"])
+def new_nonce():
+    return secrets.token_urlsafe(16)
+
+
+def policy_value(nonce=None):
+    script = ["script-src"]
+    if nonce:
+        # 'strict-dynamic' nur mit Nonce: ohne sie wäre gar nichts mehr erlaubt.
+        script += [f"'nonce-{nonce}'", "'strict-dynamic'"]
+    script += ["'wasm-unsafe-eval'", *SCRIPT_FALLBACK_SOURCES]
+    return "; ".join([*POLICY_DIRECTIVES, " ".join(script), f"report-uri {REPORT_PATH}"])
 
 
 class ContentSecurityPolicyMiddleware:
-    """Setzt die Richtlinie auf HTML-Antworten (andere Inhalte laden nichts nach)."""
+    """Vergibt je Anfrage eine Nonce und setzt die Richtlinie auf HTML-Antworten."""
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -66,11 +85,12 @@ class ContentSecurityPolicyMiddleware:
             if getattr(settings, "CSP_REPORT_ONLY", True)
             else "Content-Security-Policy"
         )
-        self.value = policy_value()
 
     def __call__(self, request):
+        # Vor der View setzen: Vorlagen lesen sie über den Context-Processor.
+        request.csp_nonce = new_nonce()
         response = self.get_response(request)
         content_type = response.get("Content-Type", "")
         if content_type.startswith("text/html") and not response.has_header(self.header):
-            response[self.header] = self.value
+            response[self.header] = policy_value(request.csp_nonce)
         return response

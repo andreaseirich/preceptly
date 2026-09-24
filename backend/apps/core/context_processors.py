@@ -27,3 +27,11 @@ def vapid_public_key(request):
     """Exposes the (non-secret) VAPID public key to every template, for the
     push-notification subscribe flow. Empty string if push is not configured."""
     return {"vapid_public_key": getattr(settings, "VAPID_PUBLIC_KEY", "")}
+
+
+def csp_nonce(request):
+    """Nonce der Content-Security-Policy für <script nonce="{{ csp_nonce }}">.
+
+    Gesetzt von ContentSecurityPolicyMiddleware; ohne sie (etwa beim Rendern
+    von E-Mails) bleibt der Wert leer."""
+    return {"csp_nonce": getattr(request, "csp_nonce", "")}

@@ -92,7 +92,7 @@
 </style>
 
 {{ form.tiers.value|default:"[]"|json_script:"initialTiers" }}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   const _tiersRaw = JSON.parse(document.getElementById('initialTiers').textContent);
   const initialTiers = typeof _tiersRaw === 'string' ? JSON.parse(_tiersRaw) : (Array.isArray(_tiersRaw) ? _tiersRaw : []);
@@ -112,7 +112,7 @@
         ' value="' + escapeHtml(label || '') + '"' +
         ' placeholder="{% trans "e.g. 14 €/h" %}"></td>' +
       '<td><button type="button" class="btn btn-danger" style="padding:4px 10px;"' +
-        ' onclick="this.closest(\'tr\').remove()">×</button></td>';
+        ' data-remove-closest="tr">×</button></td>';
     tbody.appendChild(tr);
   }
 

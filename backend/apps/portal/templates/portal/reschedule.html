@@ -47,14 +47,14 @@
         style="padding:9px 24px; background:var(--accent); color:#fff; border:none; border-radius:4px; font-size:0.95em; font-weight:600; cursor:pointer;">
         Termin verschieben
       </button>
-      <a href="javascript:history.back()" class="btn-sm btn-sm-secondary" style="padding:9px 16px;">Abbrechen</a>
+      <a href="{% url 'portal:home' %}" data-history-back class="btn-sm btn-sm-secondary" style="padding:9px 16px;">Abbrechen</a>
     </div>
   </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
   var dateInput = document.getElementById('id_date');
   var slotGrid  = document.getElementById('slot-grid');

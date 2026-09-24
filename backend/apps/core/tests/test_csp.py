@@ -3,7 +3,7 @@
 import json
 
 from django.core.cache import cache
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from apps.core.csp import ContentSecurityPolicyMiddleware, policy_value
@@ -62,7 +62,7 @@ class PolicyHeaderTest(TestCase):
     def test_enforcing_mode_uses_the_other_header(self):
         with override_settings(CSP_REPORT_ONLY=False):
             middleware = ContentSecurityPolicyMiddleware(lambda request: _html_response())
-            response = middleware(None)
+            response = middleware(RequestFactory().get("/"))
 
         self.assertIn(ENFORCED, response)
         self.assertNotIn(REPORT_ONLY, response)

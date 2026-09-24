@@ -106,7 +106,7 @@
                     <input type="hidden" name="tier" id="selected-tier" value="pro">
                     <div class="tier-grid">
                         {% if stripe_price_starter %}
-                        <div class="tier-card" onclick="selectTier('starter', this)">
+                        <div class="tier-card" data-click="selectTier" data-click-args='["starter", "$el"]'>
                             <label>
                                 <input type="radio" name="_tier_ui" value="starter">
                                 <div class="tier-name">Starter</div>
@@ -116,7 +116,7 @@
                         </div>
                         {% endif %}
                         {% if stripe_price_pro %}
-                        <div class="tier-card" onclick="selectTier('pro', this)" id="tier-card-pro">
+                        <div class="tier-card" data-click="selectTier" data-click-args='["pro", "$el"]' id="tier-card-pro">
                             <label>
                                 <input type="radio" name="_tier_ui" value="pro" checked>
                                 <div class="tier-name">Pro</div>
@@ -126,7 +126,7 @@
                         </div>
                         {% endif %}
                         {% if stripe_price_business %}
-                        <div class="tier-card" onclick="selectTier('business', this)">
+                        <div class="tier-card" data-click="selectTier" data-click-args='["business", "$el"]'>
                             <label>
                                 <input type="radio" name="_tier_ui" value="business">
                                 <div class="tier-name">Business</div>
@@ -144,7 +144,7 @@
                     </div>
                     <button type="submit" class="btn btn-success">{% trans "Subscribe now" %} →</button>
                 </form>
-                <script>
+                <script nonce="{{ csp_nonce }}">
                 function selectTier(tier, card) {
                     document.querySelectorAll('.tier-card').forEach(function(c) { c.querySelector('input[type=radio]').checked = false; });
                     card.querySelector('input[type=radio]').checked = true;
@@ -202,7 +202,7 @@
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <label for="referral-link-input" class="sr-only">{% trans "Invite friends" %}</label>
                 <input type="text" readonly value="{{ referral_link }}" id="referral-link-input" style="flex: 1; min-width: 220px;">
-                <button type="button" class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('referral-link-input').value)">{% trans "Copy" %}</button>
+                <button type="button" class="btn btn-secondary" data-copy-from="referral-link-input">{% trans "Copy" %}</button>
             </div>
             {% if referral_free_months_pending %}
             <p style="margin: 12px 0 0 0; color: var(--text-secondary); font-size: 0.9em;">{% blocktrans count months=referral_free_months_pending %}{{ months }} free month earned, applied on your next invoice once you have an active subscription.{% plural %}{{ months }} free months earned, applied on your next invoice once you have an active subscription.{% endblocktrans %}</p>
@@ -361,7 +361,7 @@
                             {% if calendar_connection.sync_enabled %}{% trans "Pause sync" %}{% else %}{% trans "Resume sync" %}{% endif %}
                         </button>
                     </form>
-                    <form method="post" action="{% url 'calendar_sync:disconnect' %}" onsubmit="return confirm('{% trans "Disconnect this calendar? Existing synced events stay as-is." %}');">
+                    <form method="post" action="{% url 'calendar_sync:disconnect' %}" data-confirm="{% trans "Disconnect this calendar? Existing synced events stay as-is." %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-secondary">{% trans "Disconnect" %}</button>
                     </form>
@@ -499,7 +499,7 @@
 </div>
 
 {% if stripe_premium_checkout_enabled and is_premium and profile.stripe_customer_id %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
     var btn = document.getElementById('stripe-portal-btn');
     if (!btn) return;
@@ -523,7 +523,7 @@
 </script>
 {% endif %}
 
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
     // CalDAV against iCloud is only relevant on Apple devices. Detected
     // client-side so the card reacts correctly even behind caching layers.

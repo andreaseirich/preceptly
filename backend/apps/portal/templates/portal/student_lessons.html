@@ -54,10 +54,10 @@
             <button type="button" class="btn-sm btn-sm-danger"
                     data-session-pk="{{ lesson.pk }}"
                     data-recurring-pk="{{ lesson.recurring_session_id }}"
-                    onclick="openCancelModal(this)">Absagen</button>
+                    data-click="openCancelModal" data-click-args='["$el"]'>Absagen</button>
             {% else %}
             <form method="post" action="{% url 'portal:session_cancel' lesson.pk %}" style="display:inline"
-                  onsubmit="return confirm('Termin wirklich absagen?')">
+                  data-confirm="Termin wirklich absagen?">
               {% csrf_token %}
               <button type="submit" class="btn-sm btn-sm-danger">Absagen</button>
             </form>
@@ -85,10 +85,10 @@
       {% csrf_token %}
       <button type="submit" class="btn btn-sm-danger">Gesamte Serie</button>
     </form>
-    <button type="button" class="btn btn-secondary" onclick="document.getElementById('cancelModal').close()">Abbrechen</button>
+    <button type="button" class="btn btn-secondary" data-close-dialog="cancelModal">Abbrechen</button>
   </div>
 </dialog>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var singleBase = "{% url 'portal:session_cancel' 999999 %}";
   var seriesBase = "{% url 'portal:recurring_cancel' 999999 %}";

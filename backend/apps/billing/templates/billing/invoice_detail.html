@@ -162,7 +162,7 @@
     <div class="inv-card">
         <div class="inv-card-header">
             {% trans "Recipient" %}
-            <button class="edit-toggle" type="button" onclick="togglePayerEdit()" id="payer-toggle-btn" aria-expanded="false">✎ {% trans "Edit" %}</button>
+            <button class="edit-toggle" type="button" data-click="togglePayerEdit" id="payer-toggle-btn" aria-expanded="false">✎ {% trans "Edit" %}</button>
         </div>
         <div class="inv-card-body" id="payer-display">
             <strong>{{ invoice.payer_name }}</strong>
@@ -186,7 +186,7 @@
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button type="submit" class="btn btn-success" style="padding:8px 16px; font-size:0.9em;">{% trans "Save" %}</button>
-                    <button type="button" class="btn btn-secondary" style="padding:8px 16px; font-size:0.9em;" onclick="togglePayerEdit()">{% trans "Cancel" %}</button>
+                    <button type="button" class="btn btn-secondary" style="padding:8px 16px; font-size:0.9em;" data-click="togglePayerEdit">{% trans "Cancel" %}</button>
                 </div>
             </form>
         </div>
@@ -295,7 +295,7 @@
 
 </div>{# end .inv-grid #}
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function togglePayerEdit() {
     var form = document.getElementById('payer-edit-form');
     var display = document.getElementById('payer-display');

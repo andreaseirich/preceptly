@@ -40,7 +40,7 @@
     <a href="{% url nav_url_name nav_pk %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn-sm btn-sm-secondary">Nächste Woche →</a>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
     function init() {
         var pickers = document.querySelectorAll('.week-day-pick');

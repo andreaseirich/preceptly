@@ -104,7 +104,7 @@
 {% endblock %}
 
 {% block content %}
-<a class="btn-sm btn-sm-secondary" href="javascript:history.back()" style="margin-bottom:20px; display:inline-block;">
+<a class="btn-sm btn-sm-secondary" href="{% url 'portal:home' %}" data-history-back style="margin-bottom:20px; display:inline-block;">
     &larr; Zurück
 </a>
 
@@ -141,7 +141,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ csp_nonce }}">
     (function() {
         var w = document.getElementById("chat-wrapper");
         if (w) { w.scrollTop = w.scrollHeight; }

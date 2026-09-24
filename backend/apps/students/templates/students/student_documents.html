@@ -51,7 +51,7 @@
           <a href="{% url 'students:document_download' student.pk doc.pk %}" class="btn-sm btn-sm-secondary">⬇</a>
         {% endif %}
         <form method="post" action="{% url 'students:document_delete' student.pk doc.pk %}"
-          style="display:inline" onsubmit="return confirm('Dokument löschen?')">
+          style="display:inline" data-confirm="Dokument löschen?">
           {% csrf_token %}
           <button type="submit" class="btn-sm btn-sm-danger">✕</button>
         </form>

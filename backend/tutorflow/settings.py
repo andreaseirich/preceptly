@@ -210,6 +210,7 @@ TEMPLATES = [
                 "apps.core.context_processors.unread_portal_messages",
                 "apps.core.context_processors.demo_context",
                 "apps.core.context_processors.vapid_public_key",
+                "apps.core.context_processors.csp_nonce",
             ],
         },
     },

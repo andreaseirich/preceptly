@@ -199,7 +199,7 @@
     </div>
 </form>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function toggleRecurrenceFields() {
     const isRecurring = document.getElementById('{{ form.is_recurring.id_for_label }}');
     const recurrenceFields = document.getElementById('recurrence-fields');

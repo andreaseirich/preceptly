@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -38,13 +38,14 @@
             font-weight: 600;
         }
     </style>
+    <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
 <body>
     <main class="box">
         <h1>⏳ Zu viele Anfragen</h1>
         <p>Von deinem Gerät kamen in kurzer Zeit sehr viele Anfragen. Zum Schutz vor Missbrauch ist diese Aktion deshalb kurz gesperrt.</p>
         <p>Bitte warte etwa eine Minute und versuche es dann erneut.</p>
-        <a class="btn" href="javascript:history.back()">Zurück</a>
+        <a class="btn" href="/" data-history-back>Zurück</a>
     </main>
 </body>
 </html>

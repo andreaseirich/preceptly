@@ -29,7 +29,7 @@
       {% if rs.notes %}<p style="margin:6px 0 0; font-size:0.88em;">{{ rs.notes }}</p>{% endif %}
     </div>
     <form method="post" action="{% url 'portal:recurring_cancel' rs.pk %}"
-      onsubmit="return confirm('Serientermin wirklich beenden und alle zukünftigen Termine absagen?')">
+      data-confirm="Serientermin wirklich beenden und alle zukünftigen Termine absagen?">
       {% csrf_token %}
       <button type="submit" class="btn-sm btn-sm-danger">Serie beenden</button>
     </form>

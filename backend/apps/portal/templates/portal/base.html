@@ -388,6 +388,7 @@
         .pwa-banner-btns .btn{width:auto;min-width:auto;font-size:.85em;padding:8px 12px;}
     </style>
     {% block extra_css %}{% endblock %}
+    <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
@@ -513,7 +514,7 @@
     <button type="button" class="btn btn-secondary" id="pwaBannerDismiss">Nicht jetzt</button>
   </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
     var html = document.documentElement;
     var saved = null;
@@ -562,7 +563,7 @@
     }
 })();
 </script>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   'use strict';
   var BANNER_KEY = 'pwa_install_dismissed_portal';
@@ -822,7 +823,7 @@
     </label>
   </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   'use strict';
   var FOREVER_KEY = 'beta_notice_dismissed_forever_portal';

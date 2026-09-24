@@ -40,7 +40,7 @@
         <small class="form-text text-muted">{% trans "If selected, only lessons from this contract will be billed." %}</small>
     </div>
     
-    <button type="button" onclick="loadLessons()" class="btn">{% trans "Show Preview" %}</button>
+    <button type="button" data-click="loadLessons" class="btn">{% trans "Show Preview" %}</button>
 
     {% if period_error %}
     <div class="alert-warning" role="alert" style="margin-top: 20px;">
@@ -118,7 +118,7 @@
     </div>
 </form>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function loadLessons() {
     const periodStart = document.getElementById('{{ form.period_start.id_for_label }}').value;
     const periodEnd = document.getElementById('{{ form.period_end.id_for_label }}').value;

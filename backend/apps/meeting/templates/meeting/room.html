@@ -255,7 +255,7 @@ a.doc-item { text-decoration: none; }
 #lobby-join:focus-visible { outline: 3px solid #6ee0c5; outline-offset: 2px; }
 #lobby-err { font-size: 0.82em; color: #e74c3c; text-align: center; min-height: 1.2em; }
 </style>
-<script>
+<script nonce="{{ csp_nonce }}">
 // pdf.js ships as an ES module since v4, and module scripts run deferred -
 // so the viewer code below waits on this promise instead of testing a global.
 window.pdfjsReady = new Promise((resolve, reject) => {
@@ -264,12 +264,13 @@ window.pdfjsReady = new Promise((resolve, reject) => {
 });
 window.pdfjsReady.catch(() => {});  // no unhandled rejection when no PDF is opened
 </script>
-<script type="module">
+<script nonce="{{ csp_nonce }}" type="module">
 import * as pdfjsLib from "{% static 'js/pdfjs/pdf.min.mjs' %}";
 pdfjsLib.GlobalWorkerOptions.workerSrc = "{% static 'js/pdfjs/pdf.worker.min.mjs' %}";
 window.pdfjsLib = pdfjsLib;
 document.dispatchEvent(new Event("pdfjs:ready"));
 </script>
+    <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
 <body>
 
@@ -285,15 +286,15 @@ document.dispatchEvent(new Event("pdfjs:ready"));
         </div>
 
         <div id="lobby-toggles">
-            <button id="lobby-btn-mic" class="lobby-toggle active" type="button" aria-pressed="true" onclick="lobbyToggleMic()">🎤 Mikrofon an</button>
-            <button id="lobby-btn-cam" class="lobby-toggle active" type="button" aria-pressed="true" onclick="lobbyToggleCam()">📷 Kamera an</button>
+            <button id="lobby-btn-mic" class="lobby-toggle active" type="button" aria-pressed="true" data-click="lobbyToggleMic">🎤 Mikrofon an</button>
+            <button id="lobby-btn-cam" class="lobby-toggle active" type="button" aria-pressed="true" data-click="lobbyToggleCam">📷 Kamera an</button>
         </div>
 
         <div id="lobby-name-row">Du beitrittst als <strong>{{ display_name }}</strong></div>
 
         <div id="lobby-err" role="alert"></div>
 
-        <button id="lobby-join" type="button" onclick="lobbyJoin()">Beitreten →</button>
+        <button id="lobby-join" type="button" data-click="lobbyJoin">Beitreten →</button>
     </div>
 </div>
 
@@ -312,7 +313,7 @@ document.dispatchEvent(new Event("pdfjs:ready"));
         {% else %}
         <a href="{{ back_url }}" class="ctrl-btn" style="font-size:0.78em; text-decoration:none;">← Zurück</a>
         {% endif %}
-        <button onclick="hangUp()" class="ctrl-btn danger" style="font-size:0.78em;">✕ Meeting verlassen</button>
+        <button data-click="hangUp" class="ctrl-btn danger" style="font-size:0.78em;">✕ Meeting verlassen</button>
     </div>
 </div>
 
@@ -331,19 +332,19 @@ document.dispatchEvent(new Event("pdfjs:ready"));
             <!-- Remote tiles added by JS -->
         </div>
         <div id="controls">
-            <button class="ctrl-btn active" id="btn-mic" onclick="toggleMic()">🎤 Mikrofon</button>
-            <button class="ctrl-btn active" id="btn-cam" onclick="toggleCam()">📷 Kamera</button>
-            <button class="ctrl-btn" id="btn-screen" onclick="toggleScreen()">🖥 Teilen</button>
-            <button class="ctrl-btn danger" id="btn-hang" onclick="hangUp()">📵 Auflegen</button>
+            <button class="ctrl-btn active" id="btn-mic" data-click="toggleMic">🎤 Mikrofon</button>
+            <button class="ctrl-btn active" id="btn-cam" data-click="toggleCam">📷 Kamera</button>
+            <button class="ctrl-btn" id="btn-screen" data-click="toggleScreen">🖥 Teilen</button>
+            <button class="ctrl-btn danger" id="btn-hang" data-click="hangUp">📵 Auflegen</button>
         </div>
     </div>
 
     <!-- Side Panel -->
     <div id="side-panel">
         <div id="tabs">
-            <button class="tab-btn active" onclick="switchTab('whiteboard', this)">✏️ Whiteboard</button>
-            <button class="tab-btn" onclick="switchTab('docs', this)">📄 Dokumente</button>
-            <button class="tab-btn" onclick="switchTab('chat', this)" id="tab-chat-btn">💬 Chat</button>
+            <button class="tab-btn active" data-click="switchTab" data-click-args='["whiteboard", "$el"]'>✏️ Whiteboard</button>
+            <button class="tab-btn" data-click="switchTab" data-click-args='["docs", "$el"]'>📄 Dokumente</button>
+            <button class="tab-btn" data-click="switchTab" data-click-args='["chat", "$el"]' id="tab-chat-btn">💬 Chat</button>
         </div>
 
         <div id="tab-panels">
@@ -354,39 +355,39 @@ document.dispatchEvent(new Event("pdfjs:ready"));
                     <div id="wb-toolbar">
                         <!-- Werkzeuge -->
                         <div class="tb-group">
-                            <button class="ctrl-btn active" id="wbt-pen"    onclick="setTool('pen')"    title="Stift"      style="padding:3px 7px;font-size:0.8em;">✏️</button>
-                            <button class="ctrl-btn"        id="wbt-eraser" onclick="setTool('eraser')" title="Radierer"   style="padding:3px 7px;font-size:0.8em;">🧹</button>
-                            <button class="ctrl-btn"        id="wbt-line"   onclick="setTool('line')"   title="Linie"      style="padding:3px 8px;font-size:0.8em;">╱</button>
-                            <button class="ctrl-btn"        id="wbt-arrow"  onclick="setTool('arrow')"  title="Pfeil"      style="padding:3px 8px;font-size:0.8em;">→</button>
-                            <button class="ctrl-btn"        id="wbt-rect"   onclick="setTool('rect')"   title="Rechteck"   style="padding:3px 8px;font-size:0.8em;">▭</button>
-                            <button class="ctrl-btn"        id="wbt-circle" onclick="setTool('circle')" title="Ellipse"    style="padding:3px 8px;font-size:0.8em;">○</button>
-                            <button class="ctrl-btn"        id="wbt-text"   onclick="setTool('text')"   title="Textfeld"   style="padding:3px 8px;font-size:0.8em;font-weight:700;">T</button>
+                            <button class="ctrl-btn active" id="wbt-pen"    data-click="setTool" data-click-args='["pen"]'    title="Stift"      style="padding:3px 7px;font-size:0.8em;">✏️</button>
+                            <button class="ctrl-btn"        id="wbt-eraser" data-click="setTool" data-click-args='["eraser"]' title="Radierer"   style="padding:3px 7px;font-size:0.8em;">🧹</button>
+                            <button class="ctrl-btn"        id="wbt-line"   data-click="setTool" data-click-args='["line"]'   title="Linie"      style="padding:3px 8px;font-size:0.8em;">╱</button>
+                            <button class="ctrl-btn"        id="wbt-arrow"  data-click="setTool" data-click-args='["arrow"]'  title="Pfeil"      style="padding:3px 8px;font-size:0.8em;">→</button>
+                            <button class="ctrl-btn"        id="wbt-rect"   data-click="setTool" data-click-args='["rect"]'   title="Rechteck"   style="padding:3px 8px;font-size:0.8em;">▭</button>
+                            <button class="ctrl-btn"        id="wbt-circle" data-click="setTool" data-click-args='["circle"]' title="Ellipse"    style="padding:3px 8px;font-size:0.8em;">○</button>
+                            <button class="ctrl-btn"        id="wbt-text"   data-click="setTool" data-click-args='["text"]'   title="Textfeld"   style="padding:3px 8px;font-size:0.8em;font-weight:700;">T</button>
                         </div>
                         <!-- Farbe (per JS befüllt) -->
                         <div class="tb-group" id="wb-colors"></div>
                         <!-- Linienstärke -->
                         <div class="tb-group">
-                            <button class="ctrl-btn wb-size active" onclick="setSize(2)"  data-size="2"  title="Dünn"      style="padding:3px 7px;font-size:0.8em;min-width:26px;">─</button>
-                            <button class="ctrl-btn wb-size"        onclick="setSize(4)"  data-size="4"  title="Mittel"    style="padding:3px 7px;font-size:0.85em;min-width:26px;font-weight:700;">━</button>
-                            <button class="ctrl-btn wb-size"        onclick="setSize(8)"  data-size="8"  title="Dick"      style="padding:3px 7px;font-size:0.9em;min-width:26px;">▬</button>
-                            <button class="ctrl-btn wb-size"        onclick="setSize(16)" data-size="16" title="Sehr dick" style="padding:3px 7px;font-size:0.8em;min-width:26px;">█</button>
+                            <button class="ctrl-btn wb-size active" data-click="setSize" data-click-args='[2]'  data-size="2"  title="Dünn"      style="padding:3px 7px;font-size:0.8em;min-width:26px;">─</button>
+                            <button class="ctrl-btn wb-size"        data-click="setSize" data-click-args='[4]'  data-size="4"  title="Mittel"    style="padding:3px 7px;font-size:0.85em;min-width:26px;font-weight:700;">━</button>
+                            <button class="ctrl-btn wb-size"        data-click="setSize" data-click-args='[8]'  data-size="8"  title="Dick"      style="padding:3px 7px;font-size:0.9em;min-width:26px;">▬</button>
+                            <button class="ctrl-btn wb-size"        data-click="setSize" data-click-args='[16]' data-size="16" title="Sehr dick" style="padding:3px 7px;font-size:0.8em;min-width:26px;">█</button>
                         </div>
                         <!-- Linienstil -->
                         <div class="tb-group">
-                            <button class="ctrl-btn wb-dash active" onclick="setDash('solid')"  data-dash="solid"  title="Durchgehend" style="padding:3px 8px;font-size:0.8em;letter-spacing:1px;">———</button>
-                            <button class="ctrl-btn wb-dash"        onclick="setDash('dashed')" data-dash="dashed" title="Gestrichelt" style="padding:3px 8px;font-size:0.8em;letter-spacing:2px;">╌╌</button>
-                            <button class="ctrl-btn wb-dash"        onclick="setDash('dotted')" data-dash="dotted" title="Gepunktet"   style="padding:3px 8px;font-size:0.9em;letter-spacing:3px;">···</button>
+                            <button class="ctrl-btn wb-dash active" data-click="setDash" data-click-args='["solid"]'  data-dash="solid"  title="Durchgehend" style="padding:3px 8px;font-size:0.8em;letter-spacing:1px;">———</button>
+                            <button class="ctrl-btn wb-dash"        data-click="setDash" data-click-args='["dashed"]' data-dash="dashed" title="Gestrichelt" style="padding:3px 8px;font-size:0.8em;letter-spacing:2px;">╌╌</button>
+                            <button class="ctrl-btn wb-dash"        data-click="setDash" data-click-args='["dotted"]' data-dash="dotted" title="Gepunktet"   style="padding:3px 8px;font-size:0.9em;letter-spacing:3px;">···</button>
                         </div>
                         <!-- Aktionen -->
                         <div class="tb-group">
-                            <button class="ctrl-btn" onclick="undoWhiteboard()"    title="Rückgängig (Strg+Z)"       style="padding:3px 8px;font-size:0.8em;">↩</button>
-                            <button class="ctrl-btn" onclick="clearWhiteboard(true)" title="Alles löschen"           style="padding:3px 8px;font-size:0.8em;">🗑</button>
-                            <button class="ctrl-btn" id="wb-bg-btn" onclick="clearWbBackground(true)" title="Hintergrund entfernen" style="padding:3px 8px;font-size:0.8em;display:none;">📄✕</button>
+                            <button class="ctrl-btn" data-click="undoWhiteboard"    title="Rückgängig (Strg+Z)"       style="padding:3px 8px;font-size:0.8em;">↩</button>
+                            <button class="ctrl-btn" data-click="clearWhiteboard" data-click-args='[true]' title="Alles löschen"           style="padding:3px 8px;font-size:0.8em;">🗑</button>
+                            <button class="ctrl-btn" id="wb-bg-btn" data-click="clearWbBackground" data-click-args='[true]' title="Hintergrund entfernen" style="padding:3px 8px;font-size:0.8em;display:none;">📄✕</button>
                         </div>
                         <!-- Ansicht -->
                         <div class="tb-group">
-                            <button class="ctrl-btn" id="wb-pan-btn" onclick="togglePanMode()" title="Verschieben (Leertaste+Ziehen)" style="padding:3px 8px;font-size:0.8em;">🖐</button>
-                            <button class="ctrl-btn" onclick="fitDocToView()" title="Einpassen (Strg+0)" style="padding:3px 8px;font-size:0.8em;">⊡</button>
+                            <button class="ctrl-btn" id="wb-pan-btn" data-click="togglePanMode" title="Verschieben (Leertaste+Ziehen)" style="padding:3px 8px;font-size:0.8em;">🖐</button>
+                            <button class="ctrl-btn" data-click="fitDocToView" title="Einpassen (Strg+0)" style="padding:3px 8px;font-size:0.8em;">⊡</button>
                             <span id="wb-zoom-label" style="font-size:0.72em;color:var(--text2);min-width:36px;text-align:center;">100%</span>
                         </div>
                         <span id="wb-bg-label" style="font-size:0.72em;color:var(--text2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
@@ -410,11 +411,15 @@ document.dispatchEvent(new Event("pdfjs:ready"));
                             <div class="doc-date">{{ doc.uploaded_at|date:"d.m.Y" }}</div>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:3px; flex-shrink:0;">
-                            <button onclick="openDocAsBackground('{% url "meeting:doc_serve" room.token doc.pk %}','{{ doc.name|default:doc.file.name|escapejs }}',{{ doc.pk }},'{{ doc.file.name|escapejs }}')"
+                            <button type="button" data-click="openDocFromButton" data-click-args='["$el"]'
+                                    data-doc-url="{% url "meeting:doc_serve" room.token doc.pk %}"
+                                    data-doc-name="{{ doc.name|default:doc.file.name }}"
+                                    data-doc-id="{{ doc.pk }}"
+                                    data-doc-file="{{ doc.file.name }}"
                                     style="padding:2px 7px; background:var(--blue); color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.74em; white-space:nowrap;">
                                 📌 Öffnen
                             </button>
-                            <button onclick="deleteDoc({{ doc.pk }}, this)"
+                            <button data-click="deleteDoc" data-click-args='[{{ doc.pk }}, "$el"]'
                                     style="padding:2px 7px; background:#c0392b; color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.74em; white-space:nowrap;">
                                 🗑 Löschen
                             </button>
@@ -435,7 +440,7 @@ document.dispatchEvent(new Event("pdfjs:ready"));
                                    style="flex:1; min-width:0; font-size:0.8em; color:var(--text);
                                           background:var(--bg3); border:1px solid var(--border);
                                           border-radius:4px; padding:4px 6px; cursor:pointer;">
-                            <button onclick="uploadDoc()"
+                            <button data-click="uploadDoc"
                                     style="padding:5px 12px; background:var(--blue); color:#fff;
                                            border:none; border-radius:4px; cursor:pointer; font-size:0.82em;
                                            white-space:nowrap;">
@@ -457,7 +462,7 @@ document.dispatchEvent(new Event("pdfjs:ready"));
                 <div id="chat-msgs"></div>
                 <div id="chat-input-row">
                     <input type="text" id="chat-input" placeholder="Nachricht …" maxlength="500">
-                    <button id="chat-send" onclick="sendChat()">→</button>
+                    <button id="chat-send" data-click="sendChat">→</button>
                 </div>
             </div>
 
@@ -471,7 +476,7 @@ document.dispatchEvent(new Event("pdfjs:ready"));
     <span id="timer">00:00</span>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 // ─────────────────────────────────────────────────────────────────────────────
 // Configuration
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1494,17 +1499,36 @@ function addDocToPanel(name, url, date, docId, filename) {
     const div = document.createElement("div");
     div.className = "doc-item";
     if (docId) div.id = `doc-${docId}`;
-    const delBtn = docId
-        ? `<button onclick="deleteDoc(${docId}, this)" style="padding:2px 7px;background:#c0392b;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">🗑 Löschen</button>`
-        : '';
     div.innerHTML =
         `<span class="doc-icon">📄</span>` +
-        `<div style="flex:1;min-width:0;"><div class="doc-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>` +
-        `<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">` +
-        `<button onclick="openDocAsBackground('${serveUrl}','${escHtml(name)}',${docId || 0},'${escHtml(filename || name)}')" style="padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;">📌 Öffnen</button>` +
-        delBtn +
-        `</div>`;
+        `<div style="flex:1;min-width:0;"><div class="doc-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(name)}</div><div class="doc-date">${escHtml(date)}</div></div>`;
+
+    // Knöpfe per DOM: Werte gehen direkt an die Funktion, nie durch HTML oder
+    // JavaScript-Quelltext — ein Dokumentname kann so nichts ausführen.
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;flex-direction:column;gap:3px;flex-shrink:0;";
+    const openBtn = document.createElement("button");
+    openBtn.type = "button";
+    openBtn.style.cssText = "padding:2px 7px;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;";
+    openBtn.textContent = "📌 Öffnen";
+    openBtn.addEventListener("click", () => openDocAsBackground(serveUrl, name, docId || 0, filename || name));
+    actions.appendChild(openBtn);
+    if (docId) {
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.style.cssText = "padding:2px 7px;background:#c0392b;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.74em;white-space:nowrap;";
+        delBtn.textContent = "🗑 Löschen";
+        delBtn.addEventListener("click", () => deleteDoc(docId, delBtn));
+        actions.appendChild(delBtn);
+    }
+    div.appendChild(actions);
     panel.insertBefore(div, panel.querySelector("#doc-upload-area"));
+}
+
+// Für die serverseitig gerenderte Dokumentliste: Werte aus den Daten-Attributen.
+function openDocFromButton(btn) {
+    const d = btn.dataset;
+    openDocAsBackground(d.docUrl, d.docName, Number(d.docId) || 0, d.docFile);
 }
 
 function deleteDoc(docId, btn) {

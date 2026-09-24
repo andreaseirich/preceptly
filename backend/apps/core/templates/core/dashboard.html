@@ -124,7 +124,7 @@
 
 {% block extra_js %}
 {% if not user.review %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   var openBtn = document.getElementById('openReviewModal');
   var overlay = document.getElementById('reviewModalOverlay');

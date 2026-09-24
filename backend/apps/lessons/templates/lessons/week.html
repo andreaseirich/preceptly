@@ -19,7 +19,7 @@
         <input type="date" id="date-select" name="date" value="{{ week_start|date:'Y-m-d' }}"
                style="margin-left: 10px; padding: 5px;">
     </form>
-    <script>
+    <script nonce="{{ csp_nonce }}">
         (function () {
             // Navigate only once the whole date (including the year) has been
             // entered - either after a short typing pause, or immediately on
@@ -65,7 +65,7 @@
 <p class="calendar-note" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9em;">
     <strong>{% trans "Note:" %}</strong> {% trans "Lessons and blocked times can be created by clicking in a time block; drag-to-create is not implemented." %}
 </p>
-<script>
+<script nonce="{{ csp_nonce }}">
 window.I18N = Object.assign(window.I18N || {}, {
     timeFrom: "{% trans 'From' %}",
     timeTo: "{% trans 'to' %}",
@@ -97,7 +97,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                     data-date="{{ weekday.date|date:'Y-m-d' }}" 
                     data-hour="{{ hour }}"
                     style="border: 1px solid var(--border-color); padding: 0; position: relative; vertical-align: top; cursor: pointer; overflow: visible; background: var(--bg-secondary);"
-                    onclick="openCreateFromSlot(this)">
+                    data-click="openCreateFromSlot" data-click-args='["$el"]'>
                     <div class="slot-content" style="position: relative; height: 100%; width: 100%; overflow: visible; min-height: 60px;">
                         {% for lesson in weekday.lessons %}
                             {% comment %}Render block in the hour row where lesson starts{% endcomment %}
@@ -127,9 +127,9 @@ window.I18N = Object.assign(window.I18N || {}, {
                                         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
                                         transition: all 0.2s;
                                         {% if lesson.id in conflicts_by_lesson %}border: 2px solid #dc3545;{% endif %}"
-                                 onmouseover="showLessonPreview(this, event); this.style.transform='scale(1.02)'; this.style.zIndex='20';"
-                                 onmouseout="hideLessonPreview(); this.style.transform='scale(1)'; this.style.zIndex='10';"
-                                 onclick="event.stopPropagation(); window.location.href='{% url 'lessons:detail' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"
+                                 data-mouseover="showLessonPreview" data-mouseover-args='["$el", "$event"]'
+                                 data-mouseout="hideLessonPreview"
+                                 data-href="{% url 'lessons:detail' lesson.pk %}?year={{ weekday.date.year }}&amp;month={{ weekday.date.month }}&amp;day={{ weekday.date.day }}"
                                  title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %} - {% trans 'Click to view lesson plan' %}">
                                 {% if lesson.travel_time_before_minutes > 0 %}
                                 <div style="background: rgba(255,255,255,0.15); padding: 1px 4px; margin: -2px -4px 2px -4px; font-size: 0.7em; border-radius: 3px 3px 0 0;">
@@ -141,7 +141,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                                         <span style="font-size: 1.1em; margin-right: 4px;">📚</span> <strong>{{ lesson.contract.student.first_name }}</strong>
                                         {% if lesson.id in conflicts_by_lesson %}
                                         {% with conflict_reasons_text=conflicts_by_lesson|dict_get:lesson.id|conflict_reasons %}
-                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" style="color: #ffeb3b; font-size: 1.1em; margin-left: 4px; text-decoration: none;" title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Conflict - Click for details' %}{% endif %}" aria-label="{% trans 'View Conflicts' %}" onclick="event.stopPropagation();">⚠️</a>
+                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" style="color: #ffeb3b; font-size: 1.1em; margin-left: 4px; text-decoration: none;" title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Conflict - Click for details' %}{% endif %}" aria-label="{% trans 'View Conflicts' %}" data-stop-propagation>⚠️</a>
                                         {% endwith %}
                                         {% endif %}<br>
                                         <small style="opacity: 0.9;">{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans "Min." %}</small>
@@ -150,7 +150,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                                     <a href="{% url 'lessons:update' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}" 
                                        style="color: white; text-decoration: none; font-size: 1.1em; padding: 2px 4px; background: rgba(255,255,255,0.2); border-radius: 3px; margin-left: 4px; flex-shrink: 0;"
                                        title="{% trans 'Edit lesson' %}" aria-label="{% trans 'Edit Lesson' %}"
-                                       onclick="event.stopPropagation();">
+                                       data-stop-propagation>
                                         ✏️
                                     </a>
                                 </div>
@@ -189,9 +189,9 @@ window.I18N = Object.assign(window.I18N || {}, {
                                         overflow: hidden;
                                         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
                                         transition: all 0.2s;"
-                                 onmouseover="showBlockedTimePreview(this, event); this.style.background='#e68900'; this.style.transform='scale(1.02)'; this.style.zIndex='20';"
-                                 onmouseout="hideBlockedTimePreview(); this.style.background='#ff9800'; this.style.transform='scale(1)'; this.style.zIndex='10';"
-                                 {% if blocked_time.pk %}onclick="event.stopPropagation(); window.location.href='{% url 'blocked_times:detail' blocked_time.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}'"{% endif %}
+                                 data-mouseover="showBlockedTimePreview" data-mouseover-args='["$el", "$event"]'
+                                 data-mouseout="hideBlockedTimePreview"
+                                 {% if blocked_time.pk %}data-href="{% url 'blocked_times:detail' blocked_time.pk %}?year={{ weekday.date.year }}&amp;month={{ weekday.date.month }}&amp;day={{ weekday.date.day }}"{% endif %}
                                  title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} {% trans 'to' %} {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
                                 <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
                                 {% if blocked_time.is_start_day and blocked_time.is_end_day %}<small>{{ blocked_time.start_datetime|time:'H:i' }} – {{ blocked_time.end_datetime|time:'H:i' }}</small>{% elif not blocked_time.is_start_day and not blocked_time.is_end_day %}<small>↑ Forts. ↓</small>{% elif not blocked_time.is_start_day %}<small>↑ Forts. bis {{ blocked_time.end_datetime|time:'H:i' }}</small>{% else %}<small>{{ blocked_time.start_datetime|time:'H:i' }} – {{ blocked_time.end_datetime|date:'d.m.' }} {{ blocked_time.end_datetime|time:'H:i' }} ↓</small>{% endif %}
@@ -221,14 +221,23 @@ window.I18N = Object.assign(window.I18N || {}, {
         </label>
     </div>
     <div class="btn-group">
-        <button onclick="confirmCreate()" class="btn btn-success" aria-label="{% trans 'Create Lesson' %}">{% trans "Create" %}</button>
-        <button onclick="cancelCreate()" class="btn btn-secondary" aria-label="{% trans 'Cancel' %}">{% trans "Cancel" %}</button>
+        <button data-click="confirmCreate" class="btn btn-success" aria-label="{% trans 'Create Lesson' %}">{% trans "Create" %}</button>
+        <button data-click="cancelCreate" class="btn btn-secondary" aria-label="{% trans 'Cancel' %}">{% trans "Cancel" %}</button>
     </div>
 </div>
 
 <div id="dialog-overlay" class="create-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
 
 <style>
+/* Hover-Hervorhebung der Blöcke (früher per onmouseover im Inline-Stil gesetzt;
+   !important, weil der Grundwert im style-Attribut steht) */
+.lesson-block:hover {
+    transform: scale(1.02) !important;
+    z-index: 20 !important;
+}
+.blocked-time-block:hover {
+    background: #e68900 !important;
+}
 .time-slot:hover {
     background: rgba(255,255,255,0.05);
 }
@@ -247,7 +256,7 @@ window.I18N = Object.assign(window.I18N || {}, {
 }
 </style>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function openCreateFromSlot(cell) {
     const date = cell.dataset.date;
     const hour = parseInt(cell.dataset.hour);

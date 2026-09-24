@@ -74,7 +74,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
   var dateInput = document.getElementById('id_date');
   var slotGrid  = document.getElementById('slot-grid');

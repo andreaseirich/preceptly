@@ -11,9 +11,51 @@ zu bekommen, lädt der Browser es nicht.
 
 | | |
 |---|---|
-| Richtlinie und Middleware | `backend/apps/core/csp.py` |
+| Richtlinie, Nonce und Middleware | `backend/apps/core/csp.py` |
+| Nonce für die Vorlagen | Context-Processor `csp_nonce` in `backend/apps/core/context_processors.py` |
+| Ersatz für Inline-Handler | `backend/apps/core/static/js/actions.js` |
 | Meldestelle für Verstöße | `backend/apps/core/views_csp.py`, URL `/csp-report/` |
+| Wächter-Tests | `backend/apps/core/tests/test_csp_nonce.py` |
 | Schalter | Umgebungsvariable `CSP_REPORT_ONLY` (Standard: `1` = nur melden) |
+
+## Skripte: nur mit Nonce
+
+Jede Antwort bekommt eine neue Zufallszahl (Nonce). Sie steht im Kopf der
+Richtlinie und an jedem `<script>` der Seite:
+
+```html
+<script nonce="{{ csp_nonce }}">…</script>
+<script src="{% static 'js/…' %}" nonce="{{ csp_nonce }}"></script>
+```
+
+Eingeschleuster Code kennt die Nonce nicht und läuft deshalb nicht. Zusätzlich
+steht `'strict-dynamic'` in der Richtlinie: Aktuelle Browser erlauben dann nur
+Skripte mit Nonce und was diese per JavaScript nachladen. Hostliste und
+`'unsafe-inline'` bleiben nur als Rückfall für ältere Browser drin und zählen
+in aktuellen nicht.
+
+**Inline-Handler gibt es nicht mehr.** `onclick="…"`, `onsubmit="…"` und
+`href="javascript:…"` können keine Nonce tragen und würden blockiert. Ihre
+Aufgabe übernehmen Daten-Attribute, die `actions.js` auswertet:
+
+| statt | jetzt |
+|---|---|
+| `onclick="setTool('pen')"` | `data-click="setTool" data-click-args='["pen"]'` |
+| `onclick="switchTab('chat', this)"` | `data-click="switchTab" data-click-args='["chat", "$el"]'` |
+| `onchange="jumpToDate(this.value)"` | `data-change="jumpToDate" data-change-args='["$value"]'` |
+| `onsubmit="return confirm('…')"` | `data-confirm="…"` am Formular |
+| `onchange="this.form.submit()"` | `data-autosubmit` |
+| `onclick="event.stopPropagation()"` | `data-stop-propagation` |
+| `href="javascript:history.back()"` | echtes `href` als Rückfall plus `data-history-back` |
+
+Alle Varianten stehen im Kopf von `actions.js`. Aufgerufen werden globale
+Funktionen — dieselbe Voraussetzung wie früher bei den Inline-Handlern.
+Elemente, die JavaScript zur Laufzeit baut, bekommen ihre Listener am besten
+direkt per `addEventListener` (Beispiel: Dokumentliste im Meeting-Raum).
+
+**Wächter:** `test_csp_nonce.py` durchsucht alle Vorlagen und schlägt fehl,
+sobald ein Inline-Handler, ein `javascript:`-Link oder ein `<script>` ohne Nonce
+auftaucht.
 
 ## Warum zuerst nur melden
 
@@ -36,8 +78,9 @@ railway logs --service preceptly --since 24h | grep CSP-Verstoß
 ## Was die Richtlinie erlaubt
 
 - `default-src 'self'` — alles nur von der eigenen Domain.
-- `script-src` zusätzlich `'unsafe-inline'` sowie die Quellen des
-  Widerrufsformulars (siehe unten).
+- `script-src`: Nonce plus `'strict-dynamic'` (siehe oben); dahinter als
+  Rückfall für ältere Browser `'self'`, die Quellen des Widerrufsformulars und
+  `'unsafe-inline'`.
 - `style-src` zusätzlich `'unsafe-inline'` — Inline-Styles stecken derzeit in
   fast jeder Vorlage — und das Stylesheet des Widerrufsfensters.
 - `img-src`/`media-src` zusätzlich `data:` und `blob:` — Vorschaubilder und
@@ -47,9 +90,9 @@ railway logs --service preceptly --since 24h | grep CSP-Verstoß
   `form-action 'self'` — Plugins, Einbettung in fremde Seiten, untergeschobene
   Basis-URLs und Formular-Umleitungen sind ausgeschlossen.
 
-`'unsafe-inline'` bei Skripten ist der wunde Punkt: Solange es drinsteht,
-schützt die Richtlinie nicht gegen eingeschleusten Inline-Code. Das fällt erst
-weg, wenn die Vorlagen ihre Inline-Skripte über Nonces ausweisen.
+Offen bleibt `'unsafe-inline'` bei **Styles**: Inline-Styles stecken in fast
+jeder Vorlage. Das ist deutlich weniger gefährlich als bei Skripten, wäre aber
+der nächste Schritt.
 
 ## Widerrufsformular (e-Recht24)
 
@@ -75,11 +118,13 @@ Absenden steht in `revocation-modal.min.js` als `apiUrl` und liegt auf einem
 Richtlinie hätte sich das Fenster also geöffnet, der Widerruf wäre aber beim
 Absenden stillschweigend blockiert worden.
 
-**Warum jsDelivr als ganzer Host:** Die Widget-Version legt e-Recht24 in ihrem
-Skript fest. Ein festgenagelter Pfad (`…/friendly-challenge@0.9.14/`) würde das
-Formular beim nächsten Update von e-Recht24 lahmlegen, ohne dass es jemand
-merkt. Solange `script-src` ohnehin `'unsafe-inline'` enthält, verliert man
-dadurch keinen Schutz. Beim Umstieg auf Nonces hier nachschärfen.
+**Warum das trotz Hostliste sicher ist:** Mit `'strict-dynamic'` ignorieren
+aktuelle Browser die Hostliste. Das e-Recht24-Skript im Fußbereich trägt die
+Nonce und darf deshalb Fenster und Captcha nachladen — egal, welche
+Widget-Version e-Recht24 gerade einbindet. Ein eingeschleustes
+`<script src="https://cdn.jsdelivr.net/…">` hat dagegen keine Nonce und wird
+abgewiesen. Die Hostliste gilt nur noch für ältere Browser ohne
+`'strict-dynamic'`.
 
 **Nach Änderungen bei e-Recht24 erneut prüfen:**
 

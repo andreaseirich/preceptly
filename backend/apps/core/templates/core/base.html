@@ -501,6 +501,7 @@
         .pwa-banner-btns .btn{width:auto;min-width:auto;font-size:.85em;padding:8px 12px;}
     </style>
     {% block extra_css %}{% endblock %}
+    <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
 <body>
     <a href="#main-content" class="skip-link">{% trans "Skip to main content" %}</a>
@@ -580,7 +581,7 @@
                     <input name="next" type="hidden" value="{{ request.get_full_path }}">
                         {% get_current_language as LANGUAGE_CODE %}
                         {% get_available_languages as LANGUAGES %}
-                    <select name="language" onchange="this.form.submit()" title="{% trans 'Change language' %}" aria-label="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
+                    <select name="language" data-autosubmit title="{% trans 'Change language' %}" aria-label="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
                         {% for lang_code, lang_name in LANGUAGES %}
                         <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{% if lang_code == 'de' %}DE{% elif lang_code == 'en' %}EN{% else %}{{ lang_code|upper }}{% endif %}</option>
                         {% endfor %}
@@ -628,7 +629,7 @@
         </label>
       </div>
     </div>
-    <script>
+    <script nonce="{{ csp_nonce }}">
     (function () {
       'use strict';
       var FOREVER_KEY = 'beta_notice_dismissed_forever';
@@ -673,7 +674,7 @@
     })();
     </script>
 
-    <script>
+    <script nonce="{{ csp_nonce }}">
     {% get_current_language as LANGUAGE_CODE %}
     window.DJANGO_LANGUAGE = "{{ LANGUAGE_CODE|default:'en'|escapejs }}";
     window.I18N = Object.assign(window.I18N || {}, {
@@ -710,7 +711,7 @@
         reload: "{% trans 'Reload' %}",
     });
     </script>
-    <script>
+    <script nonce="{{ csp_nonce }}">
     // Dark Mode Toggle
     (function() {
         const themeToggle = document.getElementById('themeToggle');
@@ -1153,7 +1154,7 @@
     </script>
     {% block extra_js %}{% endblock %}
     {% if user.is_authenticated %}
-    <script>
+    <script nonce="{{ csp_nonce }}">
     (function() {
       try {
         var detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1244,7 +1245,7 @@
     <button type="button" class="btn btn-secondary" id="pwaBannerDismiss">{% trans "Not now" %}</button>
   </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
 (function () {
   'use strict';
   var BANNER_KEY = 'pwa_install_dismissed';

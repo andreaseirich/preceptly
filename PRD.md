@@ -32,7 +32,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 - **Serientermine** mit Massenbearbeitung und Ende nach Vertragslaufzeit
 - **Konfliktprüfung**: Überschneidungen, Fahrzeiten, Sperrzeiten
 - **Sperrzeiten** (Urlaub, private Termine)
-- **Öffentliche Buchung** über einen Buchungscode, inklusive Verschieben
+- Buchung durch Schüler läuft über das **Portal** (siehe unten). Die frühere öffentliche Buchungsseite (`/lessons/booking/<token>/`) wurde mit dem Tarif-Umbau aus der Oberfläche genommen, Adresse und View bestehen aber noch — und brechen mit einem Serverfehler ab, sobald der Schüler in der gezeigten Woche einen Termin hat (Stand 24.09.2026, Entscheidung offen: entfernen oder reparieren)
 - **iCloud-Kalender-Sync** (CalDAV): zukünftige Stunden werden übertragen, vergangene entfernt; Konflikte sichtbar
 
 ### Abrechnung und Einnahmen

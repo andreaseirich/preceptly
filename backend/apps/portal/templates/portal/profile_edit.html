@@ -94,19 +94,19 @@
     <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Kalender abonnieren</h2>
     <p style="color:var(--text-secondary); font-size:0.9em; margin-top:0;">Trage diesen Link einmalig als Kalender-Abo in Google Kalender, iCloud oder Outlook ein – neue Termine erscheinen dann automatisch (Aktualisierung alle paar Stunden). Nur lesend: Änderungen im externen Kalender wirken sich nicht auf Preceptly aus.</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <input type="text" readonly value="{{ ical_feed_url }}" id="icalFeedUrl" style="flex:1; min-width:220px;" onclick="this.select();">
+        <input type="text" readonly value="{{ ical_feed_url }}" id="icalFeedUrl" style="flex:1; min-width:220px;" data-select-on-click>
         <button type="button" class="btn btn-secondary" id="icalFeedCopyBtn">Kopieren</button>
     </div>
     <p style="color:var(--text-secondary); font-size:0.8em; margin-top:8px;">⚠️ Dieser Link ist persönlich – nicht weitergeben.</p>
     <form method="post" action="{% url 'portal:ical_feed_renew' %}" style="margin-top:4px;"
-          onsubmit="return confirm('Neuen Link erstellen? Der bisherige Link funktioniert danach nicht mehr und muss in deinem Kalender ersetzt werden.');">
+          data-confirm="Neuen Link erstellen? Der bisherige Link funktioniert danach nicht mehr und muss in deinem Kalender ersetzt werden.">
         {% csrf_token %}
         <button type="submit" class="btn-sm btn-sm-secondary">Link erneuern</button>
         <span style="color:var(--text-secondary); font-size:0.8em; margin-left:6px;">falls du ihn versehentlich weitergegeben hast</span>
     </form>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 (function() {
     var btn = document.getElementById('icalFeedCopyBtn');
     var input = document.getElementById('icalFeedUrl');
