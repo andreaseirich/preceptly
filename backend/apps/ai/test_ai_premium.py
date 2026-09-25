@@ -15,8 +15,8 @@ from apps.ai.prompts import build_lesson_plan_prompt, extract_subject_from_stude
 from apps.ai.services import LessonPlanGenerationError, LessonPlanService
 from apps.ai.utils_safety import REDACTED, sanitize_context
 from apps.contracts.models import Contract
+from apps.core.feature_flags import is_premium_user
 from apps.core.models import UserProfile
-from apps.core.utils import is_premium_user
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 

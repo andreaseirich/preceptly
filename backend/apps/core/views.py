@@ -130,7 +130,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
 
         # Premium status
-        from apps.core.utils import is_premium_user
+        from apps.core.feature_flags import is_premium_user
 
         context["is_premium"] = (
             is_premium_user(self.request.user) if self.request.user.is_authenticated else False

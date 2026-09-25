@@ -107,11 +107,6 @@ def is_premium_user(user: User | None) -> bool:
     return get_user_tier(user) in (Tier.PRO, Tier.BUSINESS)
 
 
-def is_starter_or_above(user: User | None) -> bool:
-    """True for Starter, Pro, and Business tiers."""
-    return get_user_tier(user) != Tier.FREE
-
-
 def get_document_count_for_contract(contract_id: int) -> int:
     """Count uploaded documents for a given contract/student."""
     from apps.students.models import StudentDocument
@@ -170,15 +165,3 @@ def is_new_free_user(user: User | None) -> bool:
     if get_user_tier(user) != Tier.FREE:
         return False
     return user.date_joined >= FREE_PLAN_LIMITS_SINCE
-
-
-def require_feature_json(user: User | None, feature: Feature, message: str | None = None):
-    """For API views: returns (False, JsonResponse) if feature denied, else (True, None)."""
-    from django.http import JsonResponse
-    from django.utils.translation import gettext as _
-
-    if user_has_feature(user, feature):
-        return (True, None)
-
-    default_msg = _("This feature requires a higher subscription plan. Upgrade to access.")
-    return (False, JsonResponse({"success": False, "message": message or default_msg}, status=403))

@@ -385,12 +385,22 @@ LOGGING = {
     },
     "filters": {
         "skip_not_found": {"()": "apps.core.log_filters.SkipNotFound"},
+        "below_error": {"()": "apps.core.log_filters.BelowError"},
     },
     "handlers": {
+        # Bis WARNING nach stdout, ab ERROR nach stderr: Railway wertet stderr
+        # als Fehler, so bleibt sein Fehlerfilter aussagekräftig.
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-            "stream": sys.stdout,  # Use stdout for better visibility in Railway/Gunicorn logs
+            "stream": sys.stdout,
+            "filters": ["below_error"],
+        },
+        "console_errors": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+            "stream": sys.stderr,
+            "level": "ERROR",
         },
         "file": {
             "class": "logging.FileHandler",
@@ -409,17 +419,12 @@ LOGGING = {
     },
     "loggers": {
         "apps.ai": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG" if DEBUG else "INFO",
-            "propagate": False,
-        },
-        "apps.lessons.email_service": {
-            "handlers": ["console", "file"],
+            "handlers": ["console", "console_errors", "file"],
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
         "django": {
-            "handlers": ["console", "mail_admins", "bark"],
+            "handlers": ["console", "console_errors", "mail_admins", "bark"],
             "level": "INFO",
             # root also writes to the console - propagating printed every
             # Django message twice
@@ -430,7 +435,7 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["console", "console_errors"],
         "level": "INFO",  # Always INFO to see email logs
     },
 }
