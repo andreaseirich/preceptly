@@ -211,6 +211,7 @@ TEMPLATES = [
                 "apps.core.context_processors.demo_context",
                 "apps.core.context_processors.vapid_public_key",
                 "apps.core.context_processors.csp_nonce",
+                "apps.core.context_processors.plan_features",
             ],
         },
     },

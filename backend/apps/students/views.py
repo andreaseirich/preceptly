@@ -23,7 +23,13 @@ from django.views.generic import DeleteView, ListView
 
 from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
-from apps.core.feature_flags import document_limit, document_limit_reached
+from apps.core.feature_flags import (
+    Feature,
+    document_limit,
+    document_limit_reached,
+    user_has_feature,
+)
+from apps.core.tier_gate import deny
 from apps.core.upload_validation import validate_file_magic
 from apps.portal.identity import portal_login_conflict
 from apps.portal.models import (
@@ -150,6 +156,8 @@ class FamilyLinkView(LoginRequiredMixin, View):
     def post(self, request, pk, other_pk):
         from apps.portal.models import ParentStudentLink
 
+        if not user_has_feature(request.user, Feature.FEATURE_PARENT_PORTAL):
+            return deny(request, Feature.FEATURE_PARENT_PORTAL, "contracts:list")
         contract_a = get_object_or_404(Contract, pk=pk, user=request.user)
         contract_b = get_object_or_404(Contract, pk=other_pk, user=request.user)
 
@@ -208,6 +216,8 @@ class PortalInviteView(LoginRequiredMixin, View):
         from apps.portal.email_service import send_portal_invite
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        if not user_has_feature(request.user, Feature.FEATURE_STUDENT_PORTAL):
+            return deny(request, Feature.FEATURE_STUDENT_PORTAL, "contracts:detail", pk=pk)
 
         email = (
             request.POST.get("email", "").strip()
@@ -252,6 +262,14 @@ class PortalInviteView(LoginRequiredMixin, View):
                     return redirect("contracts:detail", pk=pk)
 
                 # Familien-Zugang: bestehenden Account mit diesem Vertrag verknüpfen
+                if not user_has_feature(request.user, Feature.FEATURE_PARENT_PORTAL):
+                    messages.error(
+                        request,
+                        "Diese E-Mail-Adresse hat schon ein Portal-Konto. Mehrere Kinder an "
+                        "einem Konto (Familien-Zugang) gibt es ab dem Pro-Tarif - bitte eine "
+                        "andere E-Mail-Adresse verwenden.",
+                    )
+                    return redirect("contracts:detail", pk=pk)
                 ParentStudentLink.objects.get_or_create(parent=existing_portal, contract=contract)
                 messages.warning(
                     request,
@@ -310,6 +328,8 @@ class PortalInviteResendView(LoginRequiredMixin, View):
         from apps.portal.email_service import send_portal_invite
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
+        if not user_has_feature(request.user, Feature.FEATURE_STUDENT_PORTAL):
+            return deny(request, Feature.FEATURE_STUDENT_PORTAL, "contracts:detail", pk=pk)
         link = get_object_or_404(ParentStudentLink, contract=contract)
 
         if link.is_active:

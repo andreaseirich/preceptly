@@ -22,6 +22,8 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.core.models import UserProfile
+
 
 class WeekViewDateJumpTest(TestCase):
     def setUp(self):
@@ -51,6 +53,9 @@ class BlockedTimeWholeDayToggleTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.tutor = User.objects.create_user(username="tutor", password="test")
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.client.force_login(self.tutor)
 
     def test_create_form_has_whole_day_toggle(self):

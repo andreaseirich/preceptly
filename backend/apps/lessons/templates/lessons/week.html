@@ -215,10 +215,10 @@ window.I18N = Object.assign(window.I18N || {}, {
     <div style="margin-bottom: 15px;">
         <label>
             <input type="radio" name="event-type" value="lesson" checked> {% trans "Tutoring Lesson" %}
-        </label><br>
+        </label>{% if plan.blocked_times %}<br>
         <label>
             <input type="radio" name="event-type" value="blocked_time"> {% trans "Blocked Time/Other Appointment" %}
-        </label>
+        </label>{% endif %}
     </div>
     <div class="btn-group">
         <button data-click="confirmCreate" class="btn btn-success" aria-label="{% trans 'Create Lesson' %}">{% trans "Create" %}</button>

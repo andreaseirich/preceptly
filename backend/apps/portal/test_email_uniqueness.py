@@ -13,6 +13,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.portal.identity import portal_login_conflict
 from apps.portal.models import ParentStudentLink, PortalUser, StudentPortalLink
 
@@ -127,6 +128,9 @@ class PortalProfileEmailChangeTest(TestCase):
 class PortalInviteEmailConflictTest(TestCase):
     def setUp(self):
         self.tutor = User.objects.create_user(username="tutor", password="pass")
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.client = Client()
         self.client.force_login(self.tutor)
 

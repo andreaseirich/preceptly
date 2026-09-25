@@ -7,7 +7,7 @@
 <h1>Schüler</h1>
 <a href="{% url 'contracts:create' %}" class="btn">Neuer Schüler</a>
 
-{% if family_suggestions %}
+{% if family_suggestions and plan.family_access %}
 <div class="box-section" style="margin-top: 1em; margin-bottom: 1.5em;">
   <h3 style="margin-top: 0;">Mögliche Familien erkannt</h3>
   {% for s in family_suggestions %}

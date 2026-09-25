@@ -10,6 +10,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 
@@ -134,7 +135,13 @@ class RecurringLessonOwnershipIsolationTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
+        UserProfile.objects.update_or_create(
+            user=self.tutor_a, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
+        UserProfile.objects.update_or_create(
+            user=self.tutor_b, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
 
         self.contract_a = Contract.objects.create(
             user=self.tutor_a,

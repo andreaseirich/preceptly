@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
+from apps.core.models import UserProfile
 
 
 class BlockedTimeOwnershipIsolationTest(TestCase):
@@ -19,7 +20,13 @@ class BlockedTimeOwnershipIsolationTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.tutor_a = User.objects.create_user(username="tutor_a", password="test")
+        UserProfile.objects.update_or_create(
+            user=self.tutor_a, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.tutor_b = User.objects.create_user(username="tutor_b", password="test")
+        UserProfile.objects.update_or_create(
+            user=self.tutor_b, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
 
         base = timezone.make_aware(datetime(2025, 3, 10, 9, 0))
         self.bt_a = BlockedTime.objects.create(

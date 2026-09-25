@@ -19,6 +19,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.portal.models import ParentStudentLink, PortalUser
 
 User = get_user_model()
@@ -29,6 +30,9 @@ class ResendInviteDoesNotDeactivateActiveLinkTest(TestCase):
         self.tutor = User.objects.create_user(
             username="resend_tutor", password="pass", email="tutor@resend.test"
         )
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.client = Client()
         self.client.login(username="resend_tutor", password="pass")
 

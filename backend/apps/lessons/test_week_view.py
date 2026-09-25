@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.lessons.week_service import WeekService
 
@@ -219,6 +220,9 @@ class BlockedTimeCreateViewWithStartEndTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser_bt", password="testpass123")
+        UserProfile.objects.update_or_create(
+            user=self.user, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.client = Client()
         self.client.force_login(self.user)
 

@@ -88,12 +88,30 @@ Maßgeblich ist `backend/apps/core/feature_flags.py`.
 | Portal-Buchungen: Free keine, Starter 3 je Tutor und Kalendermonat, gezählt nach Anlagedatum | `portal_booking_limit_reached()` |
 | Serien im Portal selbst anlegen: erst ab Pro | `Feature.FEATURE_PORTAL_RECURRING` |
 | KI-Pläne, Berichte, erweiterte Abrechnung | `user_has_feature()` in den jeweiligen Views |
+| Sperrzeiten anlegen/ändern (Starter) | `BlockedTimeCreateView`, `BlockedTimeUpdateView` |
+| Serien anlegen/ändern/fortschreiben, auch über das Stunden-Formular (Starter) | Serien-Views, `SessionForm.series_locked` |
+| Portal-Einladungen (Starter) | `PortalInviteView`, `PortalInviteResendView` |
+| Familien-Zugang: mehrere Kinder an einem Portal-Konto (Pro) | `FamilyLinkView`, Einladung an vorhandene E-Mail |
+| Meeting-Raum öffnen (Pro) | `StartMeetingView` |
 
-**Noch nicht durchgesetzt**, obwohl auf der Preisseite einem Tarif zugeordnet:
-Sperrzeiten und Serien auf Tutor-Seite (Starter), Schüler-Portal (Starter),
-Eltern-Portal und Meeting-Räume (Pro). Diese Funktionen stehen derzeit jedem
-Tarif offen. Entscheidung offen: nachziehen — dann mit Blick darauf, wer sie
-heute schon nutzt — oder bewusst offen lassen.
+Seit 25.09.2026 setzt der Code **alle** Tarif-Zuordnungen der Preisseite durch.
+Gemeinsamer Baustein: `apps/core/tier_gate.py`; für Vorlagen der
+Context-Processor `plan_features` (`{% if plan.meetings %}` usw.).
+
+**Regel für gesperrte Funktionen:** Neues anlegen und Ändern erst ab dem Tarif.
+Ansehen, Absagen und Löschen bleiben immer möglich, bestehende Portal-Konten
+bleiben aktiv und können sich weiter anmelden. Läuft ein Abo aus, verlieren
+Schüler und Eltern also nicht, was schon da ist — sie können nur nichts Neues
+buchen oder hochladen.
+
+**„Eltern-Portal" heißt im Code Familien-Zugang:** Es gibt keine getrennten
+Eltern-Konten; ein Portal-Konto gehört zu einem Vertrag. Hängen mehrere Kinder
+an einem Konto, zeigt das Portal die Familien-Übersicht. Im Starter-Tarif
+braucht deshalb jedes Kind eine eigene E-Mail-Adresse.
+
+**Ausnahme:** Der iCloud-Kalender-Sync legt weiterhin Sperrzeiten an, auch im
+Free-Tarif — er spiegelt Termine aus dem Kalender, damit nichts doppelt gebucht
+wird. Gesperrt ist nur das eigene Anlegen über die Oberfläche.
 
 **Wichtig:** Stripe rechnet nur die Abos der Tutoren ab. Zahlungen der Schüler
 an den Tutor laufen außerhalb von Preceptly; Preceptly erstellt die Rechnung

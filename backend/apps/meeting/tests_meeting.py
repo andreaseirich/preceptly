@@ -7,6 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
+from apps.core.models import UserProfile
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
 
@@ -46,6 +47,9 @@ def make_room(lesson, *, is_active=False):
 class StartMeetingViewTest(TestCase):
     def setUp(self):
         self.tutor = make_user()
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion erst ab Pro
         self.contract = make_contract(self.tutor)
         self.lesson = make_session(self.contract)
 

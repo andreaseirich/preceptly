@@ -12,6 +12,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.portal.models import ParentStudentLink
 
 User = get_user_model()
@@ -22,6 +23,9 @@ class PortalInviteViewTest(TestCase):
         self.tutor = User.objects.create_user(
             username="invite_tutor", password="pass", email="tutor@invite.test"
         )
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion erst ab Pro
         self.client = Client()
         self.client.login(username="invite_tutor", password="pass")
 
@@ -90,6 +94,11 @@ class PortalInviteViewTest(TestCase):
         gehört, darf nicht verknüpft werden."""
         other_tutor = User.objects.create_user(
             username="other_tutor", password="pass", email="other@invite.test"
+        )
+        # Der fremde Tutor muss selbst einladen dürfen, sonst entsteht das Konto
+        # gar nicht, gegen das hier die Mandantentrennung geprüft wird.
+        UserProfile.objects.update_or_create(
+            user=other_tutor, defaults={"subscription_tier": "starter"}
         )
         other_contract = Contract.objects.create(
             user=other_tutor,

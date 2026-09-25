@@ -16,6 +16,9 @@
         <p><strong>{% trans "Series period:" %}</strong> {{ matching_recurring.start_date }}
         {% if matching_recurring.end_date %}- {{ matching_recurring.end_date }}{% else %}({% trans "unlimited" %}){% endif %}</p>
 
+        {% if form.series_locked %}
+        <p style="margin-top: 15px;">Änderungen gelten nur für diese Stunde. Ganze Serien bearbeiten gibt es ab dem Starter-Tarif.</p>
+        {% else %}
         <fieldset style="border: none; padding: 0; margin-top: 15px;">
             <legend><strong>{% trans "What do you want to edit?" %}</strong></legend>
             <div style="margin-top: 10px;">
@@ -27,6 +30,7 @@
                 {% endfor %}
             </div>
         </fieldset>
+        {% endif %}
     </div>
     {% endif %}
     
@@ -93,7 +97,7 @@
         {% endif %}
     </div>
     
-    {% if not object %}
+    {% if not object and not form.series_locked %}
     <div id="recurrence-section" class="box-section" style="margin-bottom: 20px;">
         <h3>{% trans "Recurrence (Optional)" %}</h3>
         <p>

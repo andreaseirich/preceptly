@@ -93,7 +93,12 @@ müssen grün sein.
 - Echte Unicode-Zeichen: ä, ö, ü, ß — nicht ae, oe, ue, ss
 - Keine „God-Files": lieber mehrere kleine, klar benannte Module
 - Tarif-Grenzen nur über `apps/core/feature_flags.py` prüfen, nie über den Tarifnamen
-  direkt — und jede neue Grenze in `test_tier_limits.py` abdecken
+  direkt. Views sperren mit `FeatureRequiredMixin` bzw. `deny()` aus
+  `apps/core/tier_gate.py`, Vorlagen fragen `plan.<funktion>` ab. Regel: Neues
+  anlegen/ändern sperren, Ansehen/Absagen/Löschen nie. Tests:
+  `test_tier_limits.py`, `test_feature_gates.py`
+- Tests, die eine tarifabhängige Funktion benutzen, müssen den Test-Tutor auf den
+  passenden Tarif setzen (`UserProfile.objects.update_or_create(... subscription_tier=...)`)
 - Dateinamen mit `credentials` blockiert der Hygiene-Check (Schutz vor Schlüsseldateien)
 - **Vorlagen:** jedes `<script>` mit `nonce="{{ csp_nonce }}"`; **keine** Inline-Handler
   (`onclick=…`, `onsubmit=…`, `href="javascript:…"`) — stattdessen `data-click` &

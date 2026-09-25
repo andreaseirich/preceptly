@@ -14,6 +14,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 
+from apps.core.feature_flags import Feature, user_has_feature
+from apps.core.tier_gate import deny
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Session, SessionDocument
 from apps.meeting.models import MeetingRoom
@@ -29,6 +31,8 @@ class StartMeetingView(LoginRequiredMixin, View):
 
     def post(self, request, lesson_pk):
         lesson = get_object_or_404(Session, pk=lesson_pk, contract__user=request.user)
+        if not user_has_feature(request.user, Feature.FEATURE_MEETING_ROOMS):
+            return deny(request, Feature.FEATURE_MEETING_ROOMS, "lessons:detail", pk=lesson_pk)
         with transaction.atomic():
             room, _ = MeetingRoom.objects.select_for_update().get_or_create(lesson=lesson)
             if not room.is_active:

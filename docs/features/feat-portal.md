@@ -73,12 +73,16 @@ Tutor-Login; der Portal-Login verlinkt zurück zum Tutor-Login.
 | Einzeltermine buchen | — | höchstens 3 je Monat (je Tutor, alle Schüler zusammen) | unbegrenzt |
 | Serien selbst anlegen | — | — | ja |
 | Dateien hochladen | — | bis 3 Dokumente je Schüler (Tutor und Portal zusammen) | unbegrenzt |
-| Eltern-Portal, Meeting-Räume | laut Preisseite ab Pro, **derzeit nicht geprüft** | | |
+| Portal-Einladung verschicken | — | ja | ja |
+| Mehrere Kinder an einem Konto (Familien-Zugang) | — | — | ja |
+| Meeting beitreten (Tutor öffnet den Raum) | — | — | ja |
 
 Ist eine Grenze erreicht, sehen Schüler und Eltern einen Hinweis ohne
 Tarif-Details („bitte sprich den Termin direkt mit deinem Nachhilfelehrer ab"),
 das Formular wird gar nicht erst angezeigt. Bestehende Serien und Dokumente
-bleiben erhalten und lassen sich weiter absagen bzw. herunterladen.
+bleiben erhalten und lassen sich weiter absagen bzw. herunterladen. Bestehende
+Portal-Konten bleiben aktiv, auch wenn das Abo des Tutors ausläuft — es kommen
+nur keine neuen Einladungen mehr hinzu.
 
 Maßgeblich ist `backend/apps/core/feature_flags.py`; Tests:
 `backend/apps/core/tests/test_tier_limits.py`.

@@ -99,8 +99,13 @@
   <h3>{% trans "Portal-Zugang" %}</h3>
   <p style="font-size: 0.88em; color: var(--text-secondary); margin-top: -0.5em;">
     Eltern und Schüler teilen sich einen gemeinsamen Portal-Account pro Kind.
+    {% if plan.family_access %}
     Für mehrere Kinder derselben Familie dieselbe E-Mail-Adresse einladen —
     der bestehende Account wird dann automatisch mitverknüpft.
+    {% elif plan.student_portal %}
+    Mehrere Kinder an einem Konto (Familien-Zugang) gibt es ab dem Pro-Tarif; bis dahin
+    braucht jedes Kind eine eigene E-Mail-Adresse.
+    {% endif %}
   </p>
   {% if portal_links %}
     {% for pl in portal_links %}
@@ -120,13 +125,17 @@
           <code style="font-size: 0.8em; word-break: break-all; color: var(--text-primary);">{{ pl.activation_url }}</code>
         </div>
         {% endif %}
+        {% if plan.student_portal %}
         <form method="post" action="{% url 'students:portal_invite_resend' contract.pk %}" style="margin-top: 0.5em; display:inline-block;">
           {% csrf_token %}
           <button type="submit" class="btn-sm btn-sm-secondary">↻ Neue Einladung senden</button>
         </form>
+        {% endif %}
       {% endif %}
     </div>
     {% endfor %}
+  {% elif not plan.student_portal %}
+    <p>Das Schüler-Portal gibt es ab dem Starter-Tarif (Einstellungen → Abo).</p>
   {% else %}
     <form method="post" action="{% url 'students:portal_invite' contract.pk %}" style="display: flex; gap: 6px; flex-wrap: wrap;">
       {% csrf_token %}

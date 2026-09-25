@@ -5,6 +5,7 @@ Forms for Session model.
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.feature_flags import Feature, user_has_feature
 from apps.core.upload_validation import validate_file_magic
 from apps.lessons.models import Session, SessionDocument
 
@@ -150,6 +151,20 @@ class SessionForm(forms.ModelForm):
         else:
             # When creating: hide edit_scope
             self.fields["edit_scope"].widget = forms.HiddenInput()
+
+        # Serien erst ab Starter: Felder gesperrt, nicht nur ausgeblendet -
+        # disabled ignoriert auch nachträglich eingeschleuste Formularwerte.
+        self.series_locked = user is not None and not user_has_feature(
+            user, Feature.FEATURE_RECURRING_LESSONS
+        )
+        if self.series_locked:
+            self.fields["is_recurring"].initial = False
+            self.fields["edit_scope"].initial = "single"
+            for name in ("is_recurring", "recurrence_type", "recurrence_end_date", "edit_scope"):
+                self.fields[name].disabled = True
+                self.fields[name].widget = forms.HiddenInput()
+            self.fields["recurrence_weekdays"].disabled = True
+            self.fields["recurrence_weekdays"].widget = forms.MultipleHiddenInput()
 
     def clean_contract(self):
         """Disallow creating sessions with inactive contracts."""

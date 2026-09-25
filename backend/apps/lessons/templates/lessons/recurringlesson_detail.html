@@ -7,7 +7,7 @@
 <h1>{% trans "Recurring Lesson" %}</h1>
 
 <div class="btn-group">
-    <a href="{% url 'lessons:recurring_update' recurring_lesson.pk %}" class="btn">{% trans "Edit" %}</a>
+    {% if plan.recurring %}<a href="{% url 'lessons:recurring_update' recurring_lesson.pk %}" class="btn">{% trans "Edit" %}</a>{% endif %}
     <a href="{% url 'lessons:recurring_delete' recurring_lesson.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
     <a href="{% url 'lessons:recurring_list' %}" class="btn btn-secondary">{% trans "Back to List" %}</a>
 </div>
@@ -37,10 +37,12 @@
 </ul>
 {% endif %}
 
+{% if plan.recurring %}
 <h2>{% trans "Actions" %}</h2>
 <form method="post" action="{% url 'lessons:recurring_generate' recurring_lesson.pk %}">
     {% csrf_token %}
     <button type="submit" class="btn btn-success">{% trans "Generate lessons from this series" %}</button>
 </form>
 <p><small>{% trans "Note: Existing lessons will be skipped." %}</small></p>
+{% endif %}
 {% endblock %}

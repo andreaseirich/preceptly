@@ -10,6 +10,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 
@@ -20,6 +21,9 @@ class RecurrenceWeekdaysTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="testuser", password="password")
+        UserProfile.objects.update_or_create(
+            user=self.user, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.client.login(username="testuser", password="password")
 
         self.student = Contract.objects.create(

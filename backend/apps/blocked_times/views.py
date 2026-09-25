@@ -12,7 +12,9 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from apps.blocked_times.forms import BlockedTimeForm
 from apps.blocked_times.models import BlockedTime
+from apps.core.feature_flags import Feature
 from apps.core.log_safety import safe_log_value
+from apps.core.tier_gate import FeatureRequiredMixin
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +30,11 @@ class BlockedTimeDetailView(LoginRequiredMixin, DetailView):
         return super().get_queryset().filter(user=self.request.user)
 
 
-class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
+class BlockedTimeCreateView(LoginRequiredMixin, FeatureRequiredMixin, CreateView):
     """Neue Blockzeit erstellen."""
+
+    required_feature = Feature.FEATURE_BLOCKED_TIMES
+    feature_denied_redirect = "lessons:calendar"
 
     model = BlockedTime
     form_class = BlockedTimeForm
@@ -277,8 +282,11 @@ class BlockedTimeCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class BlockedTimeUpdateView(LoginRequiredMixin, UpdateView):
+class BlockedTimeUpdateView(LoginRequiredMixin, FeatureRequiredMixin, UpdateView):
     """Blockzeit bearbeiten."""
+
+    required_feature = Feature.FEATURE_BLOCKED_TIMES
+    feature_denied_redirect = "lessons:calendar"
 
     model = BlockedTime
     form_class = BlockedTimeForm

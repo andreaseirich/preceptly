@@ -38,11 +38,11 @@
                        title="{% trans 'Create new lesson' %}">
                         {{ day.date.day }}
                     </a>
-                    <a href="{% url 'blocked_times:create' %}?date={{ day.date|date:'Y-m-d' }}&year={{ year }}&month={{ month }}" 
+                    {% if plan.blocked_times %}<a href="{% url 'blocked_times:create' %}?date={{ day.date|date:'Y-m-d' }}&year={{ year }}&month={{ month }}" 
                        style="color: var(--text-secondary); text-decoration: none; margin-left: 5px; font-size: 0.8em;"
                        title="{% trans 'Add blocked time' %}">
                         🚫
-                    </a>
+                    </a>{% endif %}
                     {% else %}
                     {{ day.date.day }}
                     {% endif %}

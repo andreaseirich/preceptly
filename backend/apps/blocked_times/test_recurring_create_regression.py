@@ -18,6 +18,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
+from apps.core.models import UserProfile
 
 
 def _next_future_datetime(hour, minute):
@@ -35,6 +36,9 @@ class RecurringBlockedTimeCreateRegressionTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.tutor = User.objects.create_user(username="tutor", password="test")
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "starter"}
+        )  # Funktion erst ab Starter
         self.client.force_login(self.tutor)
 
     def _post_data(self, start, end, weekday_code):

@@ -11,6 +11,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.contracts.models import Contract
+from apps.core.models import UserProfile
 from apps.portal.models import ParentStudentLink
 
 User = get_user_model()
@@ -21,6 +22,9 @@ class FamilyDetectionAndLinkTest(TestCase):
         self.tutor = User.objects.create_user(
             username="family_tutor", password="pass", email="tutor@family.test"
         )
+        UserProfile.objects.update_or_create(
+            user=self.tutor, defaults={"subscription_tier": "pro"}
+        )  # Funktion erst ab Pro
         self.client = Client()
         self.client.login(username="family_tutor", password="pass")
 
