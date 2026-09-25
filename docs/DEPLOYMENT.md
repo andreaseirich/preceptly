@@ -183,19 +183,9 @@ sudo systemctl reload nginx
 
 ## Backup Strategy
 
-**Database backup:**
-```bash
-# PostgreSQL
-pg_dump -U tutorflow_user tutorflow > backup_$(date +%Y%m%d).sql
-
-# Restore
-psql -U tutorflow_user tutorflow < backup_20231205.sql
-```
-
-**Automated backups:**
-- Set up cron job for daily database backups
-- Store backups in secure, off-site location
-- Test restore procedure regularly
+Production (Railway) is backed up daily, encrypted and off-site — see
+[`operations/backup.md`](operations/backup.md). The Docker commands further
+below only apply to a self-hosted setup.
 
 ## Monitoring
 

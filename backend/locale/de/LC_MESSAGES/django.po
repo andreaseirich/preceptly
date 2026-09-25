@@ -7192,3 +7192,15 @@ msgstr "Buchung im Portal"
 #: apps/core/templates/core/landing.html
 msgid "Students and parents book, reschedule and cancel lessons themselves in the portal — within your working hours."
 msgstr "Schüler und Eltern buchen, verschieben und sagen Stunden selbst im Portal ab – innerhalb deiner Arbeitszeiten."
+
+#: templates/legal/privacy.html
+msgid "Backups (Hetzner)"
+msgstr "Datensicherung (Hetzner)"
+
+#: templates/legal/privacy.html
+msgid "To protect against data loss, we back up the database and uploaded documents once a day. The backups are stored on a server of Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen, Germany) located in Germany. They are encrypted before they are stored; the key needed to decrypt them is not kept on that server, so Hetzner has no access to the content."
+msgstr "Zum Schutz vor Datenverlust sichern wir die Datenbank und hochgeladene Dokumente einmal täglich. Die Sicherungen liegen auf einem Server der Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen) in Deutschland. Sie werden vor dem Speichern verschlüsselt; der Schlüssel zum Entschlüsseln liegt nicht auf diesem Server, Hetzner hat daher keinen Zugriff auf die Inhalte."
+
+#: templates/legal/privacy.html
+msgid "Backups are deleted automatically after 30 days. Data you delete in Preceptly is therefore also removed from the backups after 30 days at the latest."
+msgstr "Sicherungen werden nach 30 Tagen automatisch gelöscht. Daten, die Sie in Preceptly löschen, sind damit spätestens nach 30 Tagen auch aus den Sicherungen entfernt."
