@@ -112,6 +112,21 @@ class ReportEndpointTest(TestCase):
         with self.assertNoLogs("apps.core.views_csp", level="WARNING"):
             self.assertEqual(self._post(payload).status_code, 204)
 
+    def test_line_breaks_cannot_forge_log_lines(self):
+        payload = {
+            "csp-report": {
+                "document-uri": "https://preceptly.de/\nERROR gefälschte Zeile",
+                "effective-directive": "script-src\r\nCRITICAL noch eine",
+                "blocked-uri": "https://boese.example.com/\u2028x.js",
+            }
+        }
+
+        with self.assertLogs("apps.core.views_csp", level="WARNING") as logs:
+            self.assertEqual(self._post(payload).status_code, 204)
+        message = logs.records[0].getMessage()
+        self.assertEqual(len(message.splitlines()), 1)
+        self.assertIn("gefälschte Zeile", message)  # Inhalt bleibt lesbar
+
     def test_garbage_is_rejected(self):
         response = self.client.post(
             reverse("core:csp_report"),

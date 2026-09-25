@@ -52,7 +52,7 @@ class NonceHeaderTest(TestCase):
         nonce = _script_nonce(response[HEADER])
         self.assertTrue(nonce)
         body = response.content.decode()
-        scripts = re.findall(r"<script\b[^>]*>", body)
+        scripts = re.findall(r"<script\b[^>]*>", body, re.IGNORECASE)
         self.assertTrue(scripts)
         for tag in scripts:
             with self.subTest(tag=tag[:80]):
@@ -76,7 +76,8 @@ class TemplateGuardTest(TestCase):
     def test_no_inline_event_handlers(self):
         found = []
         for path in _templates():
-            for m in re.finditer(r"""\son[a-z]+\s*=\s*["']""", path.read_text(encoding="utf-8")):
+            text = path.read_text(encoding="utf-8")
+            for m in re.finditer(r"""\son[a-z]+\s*=\s*["']""", text, re.IGNORECASE):
                 found.append(f"{path.relative_to(BACKEND)}: {m.group(0).strip()}")
         self.assertEqual(
             found, [], "Inline-Handler gefunden - stattdessen data-click usw. (actions.js)"
@@ -86,14 +87,17 @@ class TemplateGuardTest(TestCase):
         found = [
             str(p.relative_to(BACKEND))
             for p in _templates()
-            if re.search(r"""href\s*=\s*["']\s*javascript:""", p.read_text(encoding="utf-8"))
+            if re.search(
+                r"""href\s*=\s*["']\s*javascript:""", p.read_text(encoding="utf-8"), re.IGNORECASE
+            )
         ]
         self.assertEqual(found, [])
 
     def test_every_script_tag_has_the_nonce(self):
         missing = []
         for path in _templates():
-            for tag in re.findall(r"<script\b[^>]*>", path.read_text(encoding="utf-8")):
+            text = path.read_text(encoding="utf-8")
+            for tag in re.findall(r"<script\b[^>]*>", text, re.IGNORECASE):
                 if 'nonce="{{ csp_nonce }}"' not in tag:
                     missing.append(f"{path.relative_to(BACKEND)}: {tag}")
         self.assertEqual(missing, [])

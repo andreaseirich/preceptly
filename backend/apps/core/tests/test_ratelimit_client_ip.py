@@ -65,7 +65,7 @@ class PortalLoginRateLimitPerClientTest(TestCase):
             response = self._post(client_ip, accept)
             if response.status_code == 429:
                 return response
-        self.fail("rate limit never kicked in")
+        raise self.failureException("rate limit never kicked in")
 
     def test_one_visitor_hitting_the_limit_does_not_lock_out_another(self):
         self._post_until_blocked("203.0.113.7")

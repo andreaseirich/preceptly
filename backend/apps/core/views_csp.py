@@ -13,6 +13,7 @@ liegen."""
 
 import json
 import logging
+import re
 from urllib.parse import urlsplit
 
 from django.core.cache import cache
@@ -26,6 +27,7 @@ MAX_REPORT_BYTES = 8192
 DEDUPE_SECONDS = 60 * 60
 MAX_DISTINCT_PER_HOUR = 200
 _COUNTER_KEY = "csp-report:distinct"
+_CONTROL_CHARS = re.compile(r"[\x00-\x1f\x7f\u0085\u2028\u2029]")
 
 
 def _source_origin(value: str) -> str:
@@ -34,6 +36,13 @@ def _source_origin(value: str) -> str:
     if parts.scheme and parts.netloc:
         return f"{parts.scheme}://{parts.netloc}"
     return value[:60]
+
+
+def _for_log(value: str, limit: int) -> str:
+    """Absenderdaten ohne Steuerzeichen - ein Zeilenumbruch im Bericht würde
+    sonst eine gefälschte Log-Zeile erzeugen. replace() steht vorn, weil CodeQL
+    nur daran eine Bereinigung erkennt; der Regex fängt den Rest."""
+    return _CONTROL_CHARS.sub("?", value[:limit].replace("\n", "?"))
 
 
 def _should_log(directive: str, blocked: str) -> bool:
@@ -70,8 +79,8 @@ def csp_report(request):
     if _should_log(directive, blocked):
         logger.warning(
             "CSP-Verstoß: %s blockierte %s auf %s",
-            directive[:100],
-            blocked[:200],
-            document[:200],
+            _for_log(directive, 100),
+            _for_log(blocked, 200),
+            _for_log(document, 200),
         )
     return HttpResponse(status=204)
