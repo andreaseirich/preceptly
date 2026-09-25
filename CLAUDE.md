@@ -110,7 +110,8 @@ müssen grün sein.
 - Rate-Limits zählen pro Besucher über die echte Client-IP (`RATELIMIT_IP_META_KEY`)
 - Content-Security-Policy im Melde-Modus: `docs/operations/content-security-policy.md`
 - TURN-Zugangsdaten verfallen nach 8 Stunden: `docs/operations/turn-server.md`
-- Tägliches verschlüsseltes Backup von Datenbank und Dokumenten: `docs/operations/backup.md`
+- Backups: Railway-Snapshots aller Volumes, täglich, 6 Tage — die CLI zeigt sie nicht:
+  `docs/operations/backup.md`
 - Alle Umgebungsvariablen: `docs/operations/railway-env-vars.md`
 
 ## Barrierefreiheit

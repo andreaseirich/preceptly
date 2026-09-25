@@ -9,7 +9,7 @@
 <div class="legal-page">
 {% if LANGUAGE_CODE == "de" %}
 <h1>Auftragsverarbeitungsvertrag (AVV)</h1>
-<p class="legal-meta">gemäß Art. 28 DSGVO · Stand: 25.09.2026</p>
+<p class="legal-meta">gemäß Art. 28 DSGVO · Stand: 19.09.2026</p>
 
 <div class="legal-placeholder-box">
 <strong>zwischen</strong><br>
@@ -65,7 +65,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
     <li>Sicheres Passwort-Hashing (PBKDF2/bcrypt)</li>
     <li>Mandantentrennung: jeder Nutzer sieht ausschließlich seine eigenen Daten</li>
     <li>Zugangsbeschränkung auf authentifizierte Nutzer</li>
-    <li>Tägliche Datensicherung an einem zweiten Standort in Deutschland, vor dem Speichern verschlüsselt; der Schlüssel zum Entschlüsseln liegt nicht auf dem Backup-Server; Aufbewahrung 30 Tage</li>
+    <li>Regelmäßige Datensicherungen</li>
     <li>Protokollierung sicherheitsrelevanter Ereignisse</li>
     <li>Verschlüsselte Speicherung der Zugangsdaten für die Kalender-Synchronisierung</li>
     <li>KI-Unterrichtsplanung ausschließlich auf eigener Hardware des Auftragsverarbeiters in Deutschland; Zugriff nur über ein Ende-zu-Ende-verschlüsseltes privates Netzwerk (WireGuard), nicht aus dem öffentlichen Internet erreichbar</li>
@@ -102,12 +102,6 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
     <td style="padding:8px; border:1px solid var(--border-color);">Kanada</td>
     <td style="padding:8px; border:1px solid var(--border-color);">Angemessenheitsbeschluss der EU-Kommission</td>
 </tr>
-<tr>
-    <td style="padding:8px; border:1px solid var(--border-color);">Hetzner Online GmbH</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Tägliche Datensicherung (Backup-Server), vor dem Speichern verschlüsselt; kein Zugriff auf Inhalte</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Deutschland</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Keine Drittlandübermittlung</td>
-</tr>
 </tbody>
 </table>
 <p><small>Stripe, Inc. verarbeitet ausschließlich Zahlungsdaten des Verantwortlichen (Abo-Gebühren) und ist damit kein Unterauftragsverarbeiter für Schülerdaten im Sinne dieses AVV. Stripe ist in der allgemeinen Datenschutzerklärung separat ausgewiesen.</small></p>
@@ -141,7 +135,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
 
 {% else %}
 <h1>Data Processing Agreement (DPA)</h1>
-<p class="legal-meta">pursuant to Art. 28 GDPR · Last updated: 25 Sep 2026</p>
+<p class="legal-meta">pursuant to Art. 28 GDPR · Last updated: 19 Sep 2026</p>
 
 <div class="legal-placeholder-box">
 <strong>between</strong><br>
@@ -197,7 +191,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
     <li>Secure password hashing (PBKDF2/bcrypt)</li>
     <li>Multi-tenant data separation (each user sees only their own data)</li>
     <li>Access restricted to authenticated users</li>
-    <li>Daily backups at a second location in Germany, encrypted before storage; the decryption key is not kept on the backup server; kept for 30 days</li>
+    <li>Regular data backups</li>
     <li>Logging of security-relevant events</li>
     <li>Encrypted storage of the credentials used for calendar sync</li>
     <li>AI lesson planning exclusively on the Processor's own hardware in Germany; accessible only through an end-to-end encrypted private network (WireGuard), not reachable from the public internet</li>
@@ -233,12 +227,6 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
     <td style="padding:8px; border:1px solid var(--border-color);">Encrypted network connection to the AI computer (Pro plan only); no access to content</td>
     <td style="padding:8px; border:1px solid var(--border-color);">Canada</td>
     <td style="padding:8px; border:1px solid var(--border-color);">EU Commission adequacy decision</td>
-</tr>
-<tr>
-    <td style="padding:8px; border:1px solid var(--border-color);">Hetzner Online GmbH</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Daily backups (backup server), encrypted before storage; no access to content</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">Germany</td>
-    <td style="padding:8px; border:1px solid var(--border-color);">No transfer to third countries</td>
 </tr>
 </tbody>
 </table>

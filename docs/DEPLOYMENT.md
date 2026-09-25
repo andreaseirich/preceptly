@@ -183,9 +183,9 @@ sudo systemctl reload nginx
 
 ## Backup Strategy
 
-Production (Railway) is backed up daily, encrypted and off-site — see
-[`operations/backup.md`](operations/backup.md). The Docker commands further
-below only apply to a self-hosted setup.
+In production, Railway snapshots every volume daily and keeps the snapshots
+for 6 days — see [`operations/backup.md`](operations/backup.md). The Docker
+commands further below only apply to a self-hosted setup.
 
 ## Monitoring
 

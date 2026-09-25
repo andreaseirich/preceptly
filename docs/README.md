@@ -17,6 +17,6 @@
 | operations/railway-env-vars.md | Every environment variable and what breaks without it |
 | operations/turn-server.md | coturn setup, short-lived credentials, how to verify |
 | operations/content-security-policy.md | CSP: report-only rollout, what the policy allows |
-| operations/backup.md | Daily encrypted backup of database and documents: where, retention, restore |
+| operations/backup.md | Backups: Railway's daily volume snapshots, where to find and restore them |
 | audits/ | Security and legal reviews with their follow-up status |
 | features/ | Per-feature specifications |
