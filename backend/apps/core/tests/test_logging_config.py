@@ -1,8 +1,9 @@
 import logging
 
+from django.conf import settings
 from django.test import Client, SimpleTestCase, TestCase
 
-from apps.core.log_filters import SkipNotFound
+from apps.core.log_filters import BelowError, SkipNotFound
 
 
 class SkipNotFoundFilterTest(SimpleTestCase):
@@ -36,3 +37,29 @@ class RequestLoggingTest(TestCase):
         with self.assertLogs("django.security.csrf", level="WARNING"):
             response = client.post("/login/", {}, HTTP_ACCEPT="text/html")
         self.assertEqual(response.status_code, 403)
+
+
+class ErrorStreamTest(SimpleTestCase):
+    """Railway wertet stderr als Fehler - dort dürfen nur echte Fehler landen."""
+
+    def test_below_error_filter(self):
+        f = BelowError()
+        self.assertTrue(f.filter(logging.makeLogRecord({"levelno": logging.WARNING})))
+        self.assertFalse(f.filter(logging.makeLogRecord({"levelno": logging.ERROR})))
+        self.assertFalse(f.filter(logging.makeLogRecord({"levelno": logging.CRITICAL})))
+
+    def test_console_splits_by_level(self):
+        handlers = settings.LOGGING["handlers"]
+
+        self.assertEqual(getattr(handlers["console"]["stream"], "name", ""), "<stdout>")
+        self.assertIn("below_error", handlers["console"]["filters"])
+        self.assertEqual(getattr(handlers["console_errors"]["stream"], "name", ""), "<stderr>")
+        self.assertEqual(handlers["console_errors"]["level"], "ERROR")
+
+    def test_every_console_logger_also_reports_errors(self):
+        loggers = {**settings.LOGGING["loggers"], "root": settings.LOGGING["root"]}
+        for name, cfg in loggers.items():
+            handlers = cfg.get("handlers", [])
+            if "console" in handlers:
+                with self.subTest(logger=name):
+                    self.assertIn("console_errors", handlers)
