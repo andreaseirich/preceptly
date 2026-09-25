@@ -558,6 +558,8 @@ class PortalPasswordResetRequestView(View):
                     from django.core.mail import send_mail
                     from django.template.loader import render_to_string
 
+                    from apps.core.background import run_in_background
+
                     site_url = getattr(settings, "SITE_URL", "https://preceptly.de")
                     reset_url = f"{site_url}/portal/password-reset/confirm/{link.reset_token}/"
                     context = {
@@ -567,7 +569,11 @@ class PortalPasswordResetRequestView(View):
                     }
                     html = render_to_string("portal/email/password_reset.html", context)
                     plain = render_to_string("portal/email/password_reset.txt", context)
-                    send_mail(
+                    # Im Hintergrund: Sonst verrät die Wartezeit auf den
+                    # Mailserver, dass es zu dieser Adresse ein Konto gibt.
+                    run_in_background(
+                        "Portal-Passwort-Reset",
+                        send_mail,
                         subject="Reset your Preceptly Portal password",
                         message=plain,
                         from_email=settings.DEFAULT_FROM_EMAIL,
@@ -987,14 +993,17 @@ class PortalBookingView(View):
             notes=topic or None,
             created_via="portal_booking",
         )
-        try:
-            from apps.portal.email_service import send_booking_notification_portal
+        from apps.core.background import run_in_background
+        from apps.portal.email_service import send_booking_notification_portal
 
-            send_booking_notification_portal(session, student.user)
-        except Exception:
-            import logging as _logging
-
-            _logging.getLogger(__name__).exception("Portal-Buchungsbenachrichtigung fehlgeschlagen")
+        # E-Mail und Push an den Tutor im Hintergrund - der Schüler soll nicht
+        # auf Mailserver und Push-Dienste warten. Fehler landen im Log.
+        run_in_background(
+            "Portal-Buchungsbenachrichtigung",
+            send_booking_notification_portal,
+            session,
+            student.user,
+        )
         return self._render(
             request,
             student,

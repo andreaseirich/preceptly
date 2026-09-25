@@ -478,6 +478,10 @@ SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 # Email timeout configuration (for TimeoutSMTPEmailBackend)
 # Socket timeout for SMTP connections (prevents hanging)
 EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", default="10"))  # 10 seconds default
+# Mails der Registrierung, des Portal-Passwort-Resets und der Portal-Buchung
+# gehen nach der Antwort im Hintergrund raus (apps/core/background.py). In Tests
+# synchron, damit mail.outbox direkt nach der Anfrage stimmt.
+RUN_IN_BACKGROUND = env_bool("RUN_IN_BACKGROUND", default=not _testing)
 
 # Email notification settings
 NOTIFICATION_EMAIL = env("NOTIFICATION_EMAIL", default="")

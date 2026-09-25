@@ -23,6 +23,7 @@ from apps.core.auth_throttle import (
     throttle_login,
     throttle_register,
 )
+from apps.core.background import run_in_background
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.referrals import ensure_referral_code, resolve_referrer_user
@@ -131,17 +132,13 @@ class RegisterView(CreateView):
         }
         html_message = render_to_string("core/email/registration_notification.html", context)
         plain_message = render_to_string("core/email/registration_notification.txt", context)
-        try:
-            send_mail(
-                subject=f"[Preceptly] Neue Registrierung: {safe_username}",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient],
-                html_message=html_message,
-                fail_silently=True,
-            )
-        except Exception:
-            logger.exception(
-                "Registration notification email failed for user %s",
-                safe_username,
-            )
+        run_in_background(
+            f"Registrierungs-Benachrichtigung für {safe_username}",
+            send_mail,
+            subject=f"[Preceptly] Neue Registrierung: {safe_username}",
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient],
+            html_message=html_message,
+            fail_silently=True,
+        )

@@ -49,6 +49,7 @@ Spalte **Fehlt sie?** sagt, was passiert, wenn die Variable nicht gesetzt ist. D
 | `INVOICE_FROM_EMAIL` | Absender für Rechnungen | Default `noreply@preceptly.de` |
 | `SERVER_EMAIL` | Absender für Fehler-Mails | Default = `DEFAULT_FROM_EMAIL` |
 | `EMAIL_TIMEOUT` | SMTP-Timeout in Sekunden | Default `10` |
+| `RUN_IN_BACKGROUND` | Mails von Registrierung, Portal-Passwort-Reset und Portal-Buchung nach der Antwort im Hintergrund verschicken (`apps/core/background.py`) | Default `true`, in Tests `false` |
 | `EMAIL_BACKEND` | abweichendes Backend (z. B. Konsole) | Default SMTP mit Timeout-Wrapper |
 | `NOTIFICATION_EMAIL` | Empfänger für Buchungsbenachrichtigungen | Benachrichtigung wird übersprungen, nur Log-Warnung |
 | `ADMIN_NOTIFICATION_EMAIL` | Empfänger für Admin-Meldungen | Default `info@preceptly.de` |

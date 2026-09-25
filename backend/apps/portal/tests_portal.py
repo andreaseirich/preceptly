@@ -2,9 +2,10 @@ import io
 import secrets as _secrets
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -456,6 +457,21 @@ class PortalPasswordResetM1Test(TestCase):
         self.link = _make_student_link(self.student_pu, self.contract, active=True)
         self.student_pu.user.email = "m1student@example.com"
         self.student_pu.user.save()
+
+    def test_reset_request_sends_the_mail(self):
+        self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["m1student@example.com"])
+
+    @override_settings(RUN_IN_BACKGROUND=True)
+    def test_reset_mail_goes_out_after_the_response(self):
+        """Die Antwort wartet nicht auf den Mailserver - sonst verrät die
+        Wartezeit, dass es zu dieser Adresse ein Konto gibt."""
+        with self.captureOnCommitCallbacks() as callbacks:
+            self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+
+        self.assertEqual(mail.outbox, [])
+        self.assertEqual(len(callbacks), 1)
 
     def test_reset_request_preserves_link_is_active(self):
         """A password-reset request must not set is_active=False on the portal link."""
