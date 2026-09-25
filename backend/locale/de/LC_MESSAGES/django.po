@@ -5934,12 +5934,12 @@ msgstr "Bis Vertragsende"
 
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:30
 #, python-format
-msgid "This series would generate <strong>%(counter)s</strong> lesson."
-msgid_plural "This series would generate <strong>%(counter)s</strong> lessons."
+msgid "This series would generate <strong>%(counter)s%(more)s</strong> lesson."
+msgid_plural "This series would generate <strong>%(counter)s%(more)s</strong> lessons."
 msgstr[0] ""
-"Diese Serie würde <strong>%(counter)s</strong> Unterrichtsstunde generieren."
+"Diese Serie würde <strong>%(counter)s%(more)s</strong> Unterrichtsstunde generieren."
 msgstr[1] ""
-"Diese Serie würde <strong>%(counter)s</strong> Unterrichtsstunden generieren."
+"Diese Serie würde <strong>%(counter)s%(more)s</strong> Unterrichtsstunden generieren."
 
 #: apps/lessons/templates/lessons/recurringlesson_detail.html:35
 #, python-format

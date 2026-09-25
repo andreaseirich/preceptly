@@ -18,6 +18,8 @@ from django.views.generic import (
     UpdateView,
 )
 
+from apps.core.feature_flags import Feature, user_has_feature
+from apps.core.tier_gate import FeatureRequiredMixin, deny
 from apps.lessons.models import Session
 from apps.lessons.recurring_forms import RecurringLessonForm
 from apps.lessons.recurring_models import RecurringLesson
@@ -55,13 +57,19 @@ class RecurringLessonDetailView(LoginRequiredMixin, DetailView):
             preview = RecurringLessonService.preview_lessons(self.object, limit=11)
         except TypeError:
             preview = RecurringLessonService.preview_lessons(self.object)[:11]
-        context["preview_count"] = "10+" if len(preview) > 10 else str(len(preview))
+        # Zahl, kein Text: {% blocktrans count %} verlangt eine Zahl und brach
+        # mit "10+" bzw. str(...) die ganze Seite ab (seit 18.06.2026).
+        context["preview_count"] = min(len(preview), 10)
+        context["preview_more"] = "+" if len(preview) > 10 else ""
         context["preview"] = preview[:10]
         return context
 
 
-class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
+class RecurringLessonCreateView(LoginRequiredMixin, FeatureRequiredMixin, CreateView):
     """Neue wiederholende Unterrichtsstunde erstellen."""
+
+    required_feature = Feature.FEATURE_RECURRING_LESSONS
+    feature_denied_redirect = "lessons:recurring_list"
 
     model = RecurringLesson
     form_class = RecurringLessonForm
@@ -120,8 +128,11 @@ class RecurringLessonCreateView(LoginRequiredMixin, CreateView):
             return response
 
 
-class RecurringLessonUpdateView(LoginRequiredMixin, UpdateView):
+class RecurringLessonUpdateView(LoginRequiredMixin, FeatureRequiredMixin, UpdateView):
     """Wiederholende Unterrichtsstunde bearbeiten."""
+
+    required_feature = Feature.FEATURE_RECURRING_LESSONS
+    feature_denied_redirect = "lessons:recurring_list"
 
     model = RecurringLesson
     form_class = RecurringLessonForm
@@ -233,6 +244,8 @@ class RecurringLessonDeleteView(LoginRequiredMixin, DeleteView):
 def generate_lessons_from_recurring(request, pk):
     """Generiert Lessons aus einer RecurringLesson."""
     recurring_lesson = get_object_or_404(RecurringLesson, pk=pk, contract__user=request.user)
+    if not user_has_feature(request.user, Feature.FEATURE_RECURRING_LESSONS):
+        return deny(request, Feature.FEATURE_RECURRING_LESSONS, "lessons:recurring_detail", pk=pk)
 
     result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
 
@@ -281,8 +294,11 @@ def generate_lessons_from_recurring(request, pk):
     return redirect("lessons:recurring_detail", pk=pk)
 
 
-class RecurringLessonBulkEditView(LoginRequiredMixin, TemplateView):
+class RecurringLessonBulkEditView(LoginRequiredMixin, FeatureRequiredMixin, TemplateView):
     """Bulk-Edit-Ansicht für mehrere Serientermine."""
+
+    required_feature = Feature.FEATURE_RECURRING_LESSONS
+    feature_denied_redirect = "lessons:recurring_list"
 
     template_name = "lessons/recurringlesson_bulk_edit.html"
 

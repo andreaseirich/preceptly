@@ -27,7 +27,7 @@
 </table>
 
 <h2>{% trans "Preview" %}</h2>
-<p>{% blocktrans count counter=preview_count %}This series would generate <strong>{{ counter }}</strong> lesson.{% plural %}This series would generate <strong>{{ counter }}</strong> lessons.{% endblocktrans %}</p>
+<p>{% blocktrans count counter=preview_count with more=preview_more %}This series would generate <strong>{{ counter }}{{ more }}</strong> lesson.{% plural %}This series would generate <strong>{{ counter }}{{ more }}</strong> lessons.{% endblocktrans %}</p>
 {% if preview %}
 <p>{% trans "First 10 appointments:" %}</p>
 <ul>
