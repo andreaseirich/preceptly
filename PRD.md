@@ -73,7 +73,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 |---|---|
 | **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 höchstens 5 Schüler und 8 Rechnungen pro Monat. Keine Dokumente, keine Portal-Buchung |
 | **Starter** | + Serientermine, Sperrzeiten, erweiterte Abrechnung, Schüler-Portal; **höchstens 3 Dokumente je Schüler**, **höchstens 3 Portal-Buchungen je Monat** (nur Einzeltermine) |
-| **Pro** | + unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und **Serien im Portal**, Eltern-Portal, Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
+| **Pro** | + unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und **Serien im Portal**, Familien-Zugang (mehrere Kinder an einem Konto), Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
 | **Business** | alles aus Pro, dazu bevorzugter Support und früher Zugang zu neuen Funktionen |
 
 Abos laufen über Stripe Checkout, Verwaltung über das Stripe-Kundenportal.
@@ -104,10 +104,12 @@ bleiben aktiv und können sich weiter anmelden. Läuft ein Abo aus, verlieren
 Schüler und Eltern also nicht, was schon da ist — sie können nur nichts Neues
 buchen oder hochladen.
 
-**„Eltern-Portal" heißt im Code Familien-Zugang:** Es gibt keine getrennten
-Eltern-Konten; ein Portal-Konto gehört zu einem Vertrag. Hängen mehrere Kinder
-an einem Konto, zeigt das Portal die Familien-Übersicht. Im Starter-Tarif
-braucht deshalb jedes Kind eine eigene E-Mail-Adresse.
+**Familien-Zugang (Pro):** Es gibt keine getrennten Eltern-Konten — ein
+Portal-Konto gehört zu einem Vertrag, und Eltern nutzen ab Starter das Konto
+ihres Kindes. Pro erlaubt zusätzlich, mehrere Kinder an ein Konto zu hängen;
+dann zeigt das Portal die Familien-Übersicht. Im Starter-Tarif braucht jedes
+Kind eine eigene E-Mail-Adresse. Auf der Preisseite hieß das bis 25.09.2026
+„Elternportal" und klang, als hätten Eltern bei Starter keinen Zugang.
 
 **Ausnahme:** Der iCloud-Kalender-Sync legt weiterhin Sperrzeiten an, auch im
 Free-Tarif — er spiegelt Termine aus dem Kalender, damit nichts doppelt gebucht

@@ -4008,8 +4008,8 @@ msgstr "EÜR-Steuerexport"
 
 #: apps/core/templates/core/landing.html:347
 #: apps/core/templates/core/settings.html:134
-msgid "Parent portal"
-msgstr "Elternportal"
+msgid "Family access (several children, one account)"
+msgstr "Familien-Zugang (mehrere Kinder, ein Konto)"
 
 #: apps/core/templates/core/landing.html:348
 msgid "Integrated meeting rooms"

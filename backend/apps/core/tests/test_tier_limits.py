@@ -281,5 +281,13 @@ class PricingConsistencyTest(TestCase):
         self.assertIn("Portal-Buchungen", body)
         self.assertIn("Unbegrenzte Portal-Buchungen und Serien", body)
 
+    def test_pro_advertises_family_access_not_a_separate_parent_portal(self):
+        """Eltern nutzen das Portal schon ab Starter mit dem Konto des Kindes;
+        Pro bringt mehrere Kinder an einem Konto."""
+        body = self.client.get(reverse("core:landing"), HTTP_ACCEPT_LANGUAGE="de").content.decode()
+
+        self.assertIn("Familien-Zugang (mehrere Kinder, ein Konto)", body)
+        self.assertNotIn("<li>Elternportal</li>", body)
+
     def test_old_booking_url_is_gone(self):
         self.assertEqual(self.client.get("/lessons/booking/irgendwas/").status_code, 404)
