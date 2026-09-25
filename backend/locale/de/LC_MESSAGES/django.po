@@ -3987,7 +3987,7 @@ msgstr "Schülerportal"
 
 #: apps/core/templates/core/landing.html:334
 msgid "Portal bookings (3/month)"
-msgstr "Portalbuchen (3/Monat)"
+msgstr "Portal-Buchungen (3 pro Monat)"
 
 #: apps/core/templates/core/landing.html:339
 msgid "Recommended"
