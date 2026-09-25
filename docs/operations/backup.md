@@ -2,11 +2,23 @@
 
 **Stand:** 25.09.2026 — eingerichtet, erster Lauf wiederhergestellt und geprüft.
 
-Der AVV sagt Tutoren tägliche Datensicherungen zu (Abschnitt 5, TOMs). Bis
-25.09.2026 gab es keine automatische Sicherung; `manage.py backup_db` schreibt
-ins Dateisystem des Containers und hilft auf Railway nicht.
+Der AVV sagt Tutoren tägliche Datensicherungen zu (Abschnitt 5, TOMs). Es gibt
+zwei Ebenen:
 
-## Überblick
+| Ebene | Aufbewahrung | Wo | Hilft bei |
+|---|---|---|---|
+| Railway-Snapshots aller Volumes, täglich; vor Sicherheitspatches zusätzlich ein Stand | 6 Tage, Patch-Stände 30 Tage | bei Railway | Fehlbedienung, kaputtem Deploy |
+| Eigenes Backup (dieses Dokument), seit 25.09.2026 | 30 Tage | außerhalb von Railway, bei Hetzner in Deutschland | Verlust des Railway-Kontos oder -Projekts, längerem Ausfall bei Railway, Fehlern, die erst nach einer Woche auffallen |
+
+Die Railway-Snapshots zeigt die `railway`-CLI nicht, nur das Dashboard (Dienst →
+Backups). **Keine manuellen Railway-Backups ohne Ablaufdatum anlegen:** Die
+Datenschutzerklärung sagt zu, dass gelöschte Daten spätestens nach 30 Tagen auch
+aus den Sicherungen verschwinden.
+
+`manage.py backup_db` schreibt ins Dateisystem des Containers und ist für
+Railway nicht gedacht.
+
+## Eigenes Backup im Überblick
 
 | | |
 |---|---|
