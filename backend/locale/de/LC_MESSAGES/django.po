@@ -3978,8 +3978,8 @@ msgid "Documents (3 per student)"
 msgstr "Dokumente (3 pro Schüler)"
 
 #: apps/core/templates/core/landing.html:332
-msgid "Billing Pro"
-msgstr "Billing Pro"
+msgid "Sequential invoice numbers & status filter"
+msgstr "Fortlaufende Rechnungsnummern & Statusfilter"
 
 #: apps/core/templates/core/landing.html:333
 msgid "Student portal"

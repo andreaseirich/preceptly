@@ -72,7 +72,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 | Tarif | Umfang |
 |---|---|
 | **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 höchstens 5 Schüler und 8 Rechnungen pro Monat. Keine Dokumente, keine Portal-Buchung |
-| **Starter** | + Serientermine, Sperrzeiten, erweiterte Abrechnung, Schüler-Portal; **höchstens 3 Dokumente je Schüler**, **höchstens 3 Portal-Buchungen je Monat** (nur Einzeltermine) |
+| **Starter** | + Serientermine, Sperrzeiten, fortlaufende eigene Rechnungsnummern (`INV-0001` …) und Statusfilter der Rechnungsliste, Schüler-Portal; **höchstens 3 Dokumente je Schüler**, **höchstens 3 Portal-Buchungen je Monat** (nur Einzeltermine) |
 | **Pro** | + unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und **Serien im Portal**, Familien-Zugang (mehrere Kinder an einem Konto), Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
 | **Business** | alles aus Pro, dazu bevorzugter Support und früher Zugang zu neuen Funktionen |
 
@@ -87,7 +87,7 @@ Maßgeblich ist `backend/apps/core/feature_flags.py`.
 | Dokumente: Free keine, Starter 3 je Schüler — beim Tutor und im Portal | `document_limit_reached()` |
 | Portal-Buchungen: Free keine, Starter 3 je Tutor und Kalendermonat, gezählt nach Anlagedatum | `portal_booking_limit_reached()` |
 | Serien im Portal selbst anlegen: erst ab Pro | `Feature.FEATURE_PORTAL_RECURRING` |
-| KI-Pläne, Berichte, erweiterte Abrechnung | `user_has_feature()` in den jeweiligen Views |
+| KI-Pläne, Berichte, fortlaufende Rechnungsnummern + Statusfilter („Billing Pro") | `user_has_feature()` in den jeweiligen Views |
 | Sperrzeiten anlegen/ändern (Starter) | `BlockedTimeCreateView`, `BlockedTimeUpdateView` |
 | Serien anlegen/ändern/fortschreiben, auch über das Stunden-Formular (Starter) | Serien-Views, `SessionForm.series_locked` |
 | Portal-Einladungen (Starter) | `PortalInviteView`, `PortalInviteResendView` |
