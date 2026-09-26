@@ -598,7 +598,11 @@ class PortalPasswordResetConfirmView(View):
     def _get_link(self, token):
         from datetime import timedelta
 
-        cutoff = timezone.now() - timedelta(days=7)
+        from django.conf import settings
+
+        # Gleiche Frist wie der Tutor-Reset (PASSWORD_RESET_TIMEOUT, 1 Stunde);
+        # bis 26.09.2026 galt der Link 7 Tage.
+        cutoff = timezone.now() - timedelta(seconds=settings.PASSWORD_RESET_TIMEOUT)
         link = StudentPortalLink.objects.filter(
             reset_token=token, reset_token_created_at__gte=cutoff
         ).first()

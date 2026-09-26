@@ -298,9 +298,9 @@ TIME_ZONE = "Europe/Berlin"
 
 # Authentication
 LOGIN_URL = "/login/"
-# „Passwort vergessen" für Tutoren (apps/core/views_password.py): Link 1 Stunde
-# gültig. core/password_reset_*.html und core/email/password_reset.* nennen die
-# Dauer - bei Änderung mitziehen.
+# „Passwort vergessen": Link 1 Stunde gültig - für Tutoren
+# (apps/core/views_password.py) und im Portal (PortalPasswordResetConfirmView).
+# Die Reset-Seiten und -Mails beider Seiten nennen die Dauer - bei Änderung mitziehen.
 PASSWORD_RESET_TIMEOUT = 60 * 60
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"

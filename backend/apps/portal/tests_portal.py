@@ -534,6 +534,21 @@ class PortalPasswordResetM1Test(TestCase):
         self.link.refresh_from_db()
         self.assertIsNone(self.link.reset_token)
 
+    def test_reset_link_expires_after_one_hour(self):
+        from datetime import timedelta
+
+        self.link.reset_token = _secrets.token_urlsafe(32)
+        self.link.reset_token_created_at = timezone.now() - timedelta(hours=2)
+        self.link.save(update_fields=["reset_token", "reset_token_created_at"])
+        url = reverse("portal:password_reset_confirm", kwargs={"token": self.link.reset_token})
+
+        self.assertContains(self.client.get(url), "abgelaufen")
+
+    def test_reset_mail_names_the_validity(self):
+        self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+
+        self.assertIn("eine Stunde gültig", mail.outbox[0].body)
+
     def test_confirm_view_invalid_token_shows_expired_error(self):
         """Confirm view with an unknown token must show an expiry error, not 500."""
         url = reverse("portal:password_reset_confirm", kwargs={"token": "no-such-token-xyz"})

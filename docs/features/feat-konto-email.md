@@ -35,6 +35,8 @@ Portal-Konten — Schüler und Eltern haben ihren eigenen Reset im Portal.
 - Ändern nur mit dem aktuellen Passwort. Der Link gilt nur für das Konto, das
   ihn angefordert hat, und nur solange die alte Adresse noch gilt.
 - Mit dem neuen Passwort meldet Django alle anderen Sitzungen ab.
+- Der Reset im Portal (Schüler, Eltern) hat seit 26.09.2026 dieselbe Frist von
+  einer Stunde; vorher galt sein Link 7 Tage.
 
 ## Bewusst nicht gemacht
 
