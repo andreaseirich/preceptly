@@ -63,14 +63,16 @@ class EmailRequiredTest(TestCase):
     def test_banner_on_every_page_until_the_address_exists(self):
         self.client.force_login(self.user)
         self.assertContains(
-            self.client.get(reverse("core:settings")), reverse("core:email_required")
+            self.client.get(reverse("core:settings")),
+            f'href="{reverse("core:email_required")}?next=',
         )
 
         self.user.email = "da@example.com"
         self.user.save()
 
         self.assertNotContains(
-            self.client.get(reverse("core:settings")), reverse("core:email_required")
+            self.client.get(reverse("core:settings")),
+            f'href="{reverse("core:email_required")}?next=',
         )
 
     def test_demo_accounts_are_not_asked(self):

@@ -333,7 +333,10 @@ class SettingsView(LoginRequiredMixin, FormView):
                 return redirect(self._section_url("email"))
             email_form = UserEmailForm(request.POST, instance=request.user)
             if email_form.is_valid():
+                from apps.core.views_account_email import send_verification
+
                 email_form.save()
+                send_verification(request.user)
                 messages.success(request, _("Email address saved."))
                 return redirect(self._section_url("email"))
             context = self.get_context_data(settings_initial_section="email")

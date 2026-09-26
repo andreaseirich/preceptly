@@ -58,10 +58,10 @@ class DashboardOnboardingBannerTest(TestCase):
         User.objects.create_user(username="noemail2", password="test")
         self.client.login(username="noemail2", password="test")
         response = self.client.get(reverse("core:dashboard"))
-        self.assertContains(response, reverse("core:email_required"))
+        self.assertContains(response, f'href="{reverse("core:email_required")}?next=')
 
     def test_banner_hidden_when_email_present(self):
         User.objects.create_user(username="hasemail2", password="test", email="tutor@example.com")
         self.client.login(username="hasemail2", password="test")
         response = self.client.get(reverse("core:dashboard"))
-        self.assertNotContains(response, reverse("core:email_required"))
+        self.assertNotContains(response, f'href="{reverse("core:email_required")}?next=')

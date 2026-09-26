@@ -1,0 +1,11 @@
+{% autoescape off %}Preceptly — E-Mail-Adresse bestätigen
+=====================================
+
+Bitte bestätige, dass diese Adresse zu deinem Preceptly-Konto „{{ username }}“ gehört:
+{{ verify_url }}
+
+Der Link ist 7 Tage gültig. Wenn du kein Preceptly-Konto angelegt hast, kannst du diese E-Mail ignorieren.
+
+---
+Preceptly — {{ site_url }}
+{% endautoescape %}

@@ -2,7 +2,6 @@
 Tests for registration flow and premium default.
 """
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.cache import cache
@@ -173,17 +172,16 @@ class RegistrationAdminNotificationTest(TestCase):
                 "password2": "SecurePass123!",
             },
         )
-        self.assertEqual(len(mail.outbox), 1)
-        msg = mail.outbox[0]
-        self.assertEqual(msg.to, ["admin@preceptly.de"])
+        admin_mails = [m for m in mail.outbox if m.to == ["admin@preceptly.de"]]
+        self.assertEqual(len(admin_mails), 1)
+        msg = admin_mails[0]
         self.assertIn("mailtest", msg.subject)
         self.assertTrue(msg.alternatives, "Expected an HTML alternative to be attached")
         html_body = msg.alternatives[0][0]
         self.assertEqual(msg.alternatives[0][1], "text/html")
         self.assertNotIn("(keine Angabe)", html_body)
 
-    def test_notification_shows_email_badge_for_real_registration_with_email(self):
-        """End-to-end: registering with an email produces the 'Vollstaendig' badge."""
+    def test_notification_names_username_and_email(self):
         self.client.post(
             reverse("core:register"),
             {
@@ -193,26 +191,9 @@ class RegistrationAdminNotificationTest(TestCase):
                 "password2": "SecurePass123!",
             },
         )
-        self.assertEqual(len(mail.outbox), 1)
-        html_body = mail.outbox[0].alternatives[0][0]
-        self.assertIn("Vollst\u00e4ndig (mit E-Mail)", html_body)
-        self.assertIn("mailtest3@example.com", html_body)
-
-    def test_notification_shows_email_badge_when_email_present(self):
-        """RegisterForm has no email field (registration never collects one
-        today), so this exercises the template directly for the has_email=True
-        branch rather than going through the registration flow."""
-        from django.template.loader import render_to_string
-
-        html_body = render_to_string(
-            "core/email/registration_notification.html",
-            {
-                "username": "mailtest2",
-                "email": "student@example.com",
-                "has_email": True,
-                "site_url": settings.SITE_URL if hasattr(settings, "SITE_URL") else "",
-            },
-        )
-        self.assertIn("Vollst\u00e4ndig (mit E-Mail)", html_body)
-        self.assertIn("student@example.com", html_body)
-        self.assertNotIn("Anonym / Basic", html_body)
+        msg = next(m for m in mail.outbox if m.to == ["admin@preceptly.de"])
+        html_body = msg.alternatives[0][0]
+        for body in (msg.body, html_body):
+            self.assertIn("mailtest3", body)
+            self.assertIn("mailtest3@example.com", body)
+            self.assertNotIn("Account-Typ", body)

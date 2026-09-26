@@ -7309,3 +7309,20 @@ msgstr "Das Passwort ist nicht richtig."
 
 msgid "This is already your email address."
 msgstr "Das ist bereits deine E-Mail-Adresse."
+
+msgid "Thank you — your email address is confirmed."
+msgstr "Danke – deine E-Mail-Adresse ist bestätigt."
+
+#, python-format
+msgid "We've sent a new confirmation link to %(email)s."
+msgstr "Wir haben einen neuen Bestätigungslink an %(email)s geschickt."
+
+#, python-format
+msgid "Please confirm your email address %(email)s."
+msgstr "Bitte bestätige deine E-Mail-Adresse %(email)s."
+
+msgid "Wrong address?"
+msgstr "Falsche Adresse?"
+
+msgid "When the account email was confirmed via link."
+msgstr "Wann die Konto-Adresse per Link bestätigt wurde."

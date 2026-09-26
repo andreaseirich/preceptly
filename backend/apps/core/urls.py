@@ -16,7 +16,12 @@ from apps.core.views import (
     TaxYearCsvView,
     TaxYearView,
 )
-from apps.core.views_account_email import EmailChangeConfirmView, EmailRequiredView
+from apps.core.views_account_email import (
+    EmailChangeConfirmView,
+    EmailRequiredView,
+    EmailVerifyView,
+    ResendVerificationView,
+)
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_csp import csp_report
 from apps.core.views_email_test import test_email
@@ -82,6 +87,12 @@ urlpatterns = [
         name="password_reset_confirm",
     ),
     path("account/email/", EmailRequiredView.as_view(), name="email_required"),
+    path("account/email/verify/<str:token>/", EmailVerifyView.as_view(), name="email_verify"),
+    path(
+        "account/email/verify-again/",
+        ResendVerificationView.as_view(),
+        name="email_verify_resend",
+    ),
     path(
         "account/email/confirm/<str:token>/",
         EmailChangeConfirmView.as_view(),

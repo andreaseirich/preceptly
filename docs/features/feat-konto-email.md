@@ -20,6 +20,7 @@ Bis 26.09.2026 war die E-Mail-Adresse bei der Registrierung freiwillig; 2 von
 | Registrierung | E-Mail ist Pflichtfeld | `RegisterForm` |
 | Konten ohne E-Mail | nach dem Login zuerst `/account/email/`; Hinweisleiste auf jeder Seite, bis die Adresse da ist | `views_account_email.py`, `TutorFlowLoginView.get_success_url`, Context-Processor `account_email_context` |
 | Passwort vergessen | `/password-reset/`: Link per Mail, 1 Stunde gültig, einmal nutzbar; die Mail nennt auch den Benutzernamen | `views_password.py`, `PASSWORD_RESET_TIMEOUT` |
+| Adresse bestätigen | jede neue Adresse bekommt einen Link (7 Tage gültig): bei der Registrierung, beim Nachtragen, beim Ändern über den Änderungslink. Bis dahin Hinweisleiste mit „Bestätigungslink senden“ (höchstens 3 pro Stunde) und „Falsche Adresse?“ | `send_verification`, `EmailVerifyView`, `UserProfile.email_verified_at` |
 | E-Mail ändern | Einstellungen → E-Mail: neue Adresse + aktuelles Passwort → Bestätigungslink an die neue Adresse (24 Stunden); danach Hinweis an die alte | `views_account_email.py`, `SettingsView._change_email` |
 | Stripe | die bei Stripe hinterlegte Adresse wird **nie** geändert, nur eine fehlende ergänzt | `_maybe_update_stripe_customer_email` |
 
@@ -40,6 +41,7 @@ Portal-Konten — Schüler und Eltern haben ihren eigenen Reset im Portal.
 
 ## Bewusst nicht gemacht
 
-- Keine Bestätigung der Adresse bei der Registrierung (Double-Opt-in). Ein
-  Tippfehler fällt erst beim ersten Reset auf.
+- Eine unbestätigte Adresse sperrt nichts: Das Konto bleibt nutzbar, und
+  „Passwort vergessen“ geht auch an sie. Die Bestätigung soll Tippfehler
+  sichtbar machen, nicht aussperren.
 - Die Adresse bei Stripe ändern (Entscheidung Andreas, 26.09.2026).

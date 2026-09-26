@@ -24,10 +24,16 @@ def demo_context(request):
 
 
 def account_email_context(request):
-    """needs_email: Tutor-Konto ohne E-Mail-Adresse - base.html zeigt dann einen Hinweis."""
-    from apps.core.views_account_email import needs_email
+    """Tutor-Konto ohne E-Mail-Adresse bzw. mit unbestätigter - base.html zeigt
+    dann einen Hinweis."""
+    from apps.core.views_account_email import needs_email, needs_email_verification
 
-    return {"needs_email": needs_email(getattr(request, "user", None))}
+    user = getattr(request, "user", None)
+    missing = needs_email(user)
+    return {
+        "needs_email": missing,
+        "needs_email_verification": not missing and needs_email_verification(user),
+    }
 
 
 def vapid_public_key(request):

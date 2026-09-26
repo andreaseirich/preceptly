@@ -95,6 +95,11 @@ class UserProfile(models.Model):
         blank=True,
         help_text=_("When the user explicitly accepted AGB, AVV, and Datenschutzerklärung."),
     )
+    email_verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("When the account email was confirmed via link."),
+    )
     timezone = models.CharField(
         max_length=64,
         default="Europe/Berlin",

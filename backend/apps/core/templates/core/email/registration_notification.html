@@ -42,20 +42,6 @@
                       </tr>
 
                       <tr>
-                        <td style="padding:14px 20px; {% if has_email %}border-bottom:1px solid #e5e7eb;{% endif %}">
-                          <span style="color:#6b7280; font-size:13px; font-weight:500;">Account-Typ</span>
-                        </td>
-                        <td style="padding:14px 20px; {% if has_email %}border-bottom:1px solid #e5e7eb;{% endif %}">
-                          {% if has_email %}
-                          <span style="color:#111827; font-size:14px;">Vollständig (mit E-Mail)</span>
-                          {% else %}
-                          <span style="display:inline-block; background:#fef3c7; color:#92400e; font-size:12px; font-weight:600; padding:3px 9px; border-radius:99px;">Anonym / Basic (ohne Mail)</span>
-                          {% endif %}
-                        </td>
-                      </tr>
-
-                      {% if has_email %}
-                      <tr>
                         <td style="padding:14px 20px;">
                           <span style="color:#6b7280; font-size:13px; font-weight:500;">E-Mail</span>
                         </td>
@@ -63,7 +49,6 @@
                           <span style="color:#111827; font-size:14px;">{{ email }}</span>
                         </td>
                       </tr>
-                      {% endif %}
 
                     </table>
                   </td>

@@ -28,7 +28,7 @@ from apps.core.background import run_in_background
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.referrals import ensure_referral_code, resolve_referrer_user
-from apps.core.views_account_email import needs_email
+from apps.core.views_account_email import needs_email, send_verification
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +125,7 @@ class RegisterView(CreateView):
         login(self.request, user)
         self.request.session.cycle_key()
         self._notify_admin(user)
+        send_verification(user)
         return redirect(self.success_url)
 
     def _notify_admin(self, user) -> None:
@@ -136,7 +137,6 @@ class RegisterView(CreateView):
         context = {
             "username": safe_username,
             "email": safe_email,
-            "has_email": bool(safe_email),
             "site_url": getattr(settings, "SITE_URL", ""),
         }
         html_message = render_to_string("core/email/registration_notification.html", context)
