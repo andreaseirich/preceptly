@@ -141,6 +141,10 @@ Optional: `STRIPE_PRICE_ID_YEARLY`, `STRIPE_PORTAL_RETURN_URL`, `STRIPE_CHECKOUT
 
 Webhook URL: `https://your-domain/webhooks/stripe/` (must match the path in `backend/tutorflow/urls.py`). Use Stripe CLI for local testing: `stripe listen --forward-to localhost:8000/webhooks/stripe/`.
 
+Production: `https://preceptly.de/webhooks/stripe/` (set in Stripe on 26.09.2026). Never use the
+`*.up.railway.app` address: `CanonicalDomainMiddleware` answers it with a 301 to preceptly.de, and
+Stripe counts a redirect as a failed delivery - payments would never reach the app.
+
 ## Monitoring and Logs
 
 - **Logs**: Click on "Deployments" → Select a deployment → "View Logs"
