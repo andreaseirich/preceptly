@@ -56,6 +56,14 @@ class ErrorStreamTest(SimpleTestCase):
         self.assertEqual(getattr(handlers["console_errors"]["stream"], "name", ""), "<stderr>")
         self.assertEqual(handlers["console_errors"]["level"], "ERROR")
 
+    def test_errors_reach_bark_from_every_logger(self):
+        """Auch Fehler aus dem App-Code sollen aufs Handy, nicht nur die von Django."""
+        loggers = {**settings.LOGGING["loggers"], "root": settings.LOGGING["root"]}
+        for name, cfg in loggers.items():
+            if name == "root" or cfg.get("propagate") is False:
+                with self.subTest(logger=name):
+                    self.assertIn("bark", cfg.get("handlers", []))
+
     def test_every_console_logger_also_reports_errors(self):
         loggers = {**settings.LOGGING["loggers"], "root": settings.LOGGING["root"]}
         for name, cfg in loggers.items():

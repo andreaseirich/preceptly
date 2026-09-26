@@ -1,6 +1,7 @@
 import logging
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.test import SimpleTestCase, override_settings
 
 from apps.core.bark_alert import BarkErrorHandler
@@ -26,17 +27,22 @@ class BarkErrorHandlerFormatSourceTest(SimpleTestCase):
         self.assertIn("ValueError", source)
         self.assertIn("test_bark_alert.py", source)
 
-    def test_format_source_without_exception_uses_message(self):
+    def test_format_source_without_exception_names_only_the_location(self):
+        """Der Meldungstext kann Adressen enthalten - er gehört nicht auf den Sperrbildschirm."""
         record = logging.LogRecord(
-            name="x",
+            name="apps.core.views_account_email",
             level=logging.ERROR,
-            pathname="x",
-            lineno=1,
-            msg="plain message",
+            pathname="/app/backend/apps/core/views_account_email.py",
+            lineno=42,
+            msg="Mail an lehrerin@example.com fehlgeschlagen",
             args=(),
             exc_info=None,
         )
-        self.assertEqual(BarkErrorHandler._format_source(record), "plain message")
+        source = BarkErrorHandler._format_source(record)
+        self.assertEqual(
+            source, "apps.core.views_account_email in apps/core/views_account_email.py:42"
+        )
+        self.assertNotIn("@", source)
 
 
 @override_settings(
@@ -46,6 +52,22 @@ class BarkErrorHandlerFormatSourceTest(SimpleTestCase):
     BARK_AUTH_PASSWORD="pass",
 )
 class BarkErrorHandlerEmitTest(SimpleTestCase):
+    def setUp(self):
+        cache.clear()  # die Bremse merkt sich Fundstellen im Cache
+
+    def test_same_source_is_reported_once_per_window(self):
+        handler = BarkErrorHandler()
+
+        def record(lineno):
+            return logging.LogRecord("apps.x", logging.ERROR, "x", lineno, "oops", (), None)
+
+        with patch("apps.core.bark_alert.requests.get") as mock_get:
+            handler.emit(record(1))
+            handler.emit(record(1))
+            handler.emit(record(2))
+
+        self.assertEqual(mock_get.call_count, 2)
+
     def test_emit_calls_bark_api_with_passive_level(self):
         handler = BarkErrorHandler()
         record = logging.LogRecord(

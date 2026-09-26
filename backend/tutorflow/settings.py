@@ -185,9 +185,11 @@ MIDDLEWARE = [
     "apps.core.middleware.RequestLogMiddleware",
 ]
 
-# Content-Security-Policy: solange True, meldet der Browser nur, statt zu
-# blockieren. Zum Scharfschalten CSP_REPORT_ONLY=0 setzen.
-CSP_REPORT_ONLY = env_bool("CSP_REPORT_ONLY", True)
+# Content-Security-Policy wird durchgesetzt (seit 26.09.2026). Nur zur
+# Fehlersuche CSP_REPORT_ONLY=1 setzen: Dann meldet der Browser nur, statt zu
+# blockieren. Der Standard ist bewusst „durchsetzen“ - fehlt die Variable in
+# einer Umgebung, bleibt die Richtlinie trotzdem scharf.
+CSP_REPORT_ONLY = env_bool("CSP_REPORT_ONLY", False)
 
 # Aufbewahrungsfrist der Zugriffsprotokolle (/dev/stats/). Ältere Einträge
 # werden automatisch gelöscht - die Frist steht so auch in der
@@ -424,7 +426,7 @@ LOGGING = {
     },
     "loggers": {
         "apps.ai": {
-            "handlers": ["console", "console_errors", "file"],
+            "handlers": ["console", "console_errors", "file", "bark"],
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
@@ -440,7 +442,8 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["console", "console_errors"],
+        # bark: auch Fehler aus dem App-Code aufs Handy, nicht nur die von Django
+        "handlers": ["console", "console_errors", "bark"],
         "level": "INFO",  # Always INFO to see email logs
     },
 }
