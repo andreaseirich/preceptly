@@ -25,6 +25,7 @@ class RegisterViewTest(TestCase):
             reverse("core:register"),
             {
                 "username": "newtutor",
+                "email": "newtutor@example.com",
                 "password1": "SecurePass123!",
                 "password2": "SecurePass123!",
             },
@@ -62,7 +63,7 @@ class RegisterViewTest(TestCase):
         self.assertEqual(User.objects.filter(username="taken").count(), 1)
 
     def test_register_with_email_saves_it(self):
-        """Email is optional at registration; if given, it's saved to the user."""
+        """The email given at registration is saved to the user."""
         self.client.post(
             reverse("core:register"),
             {
@@ -75,20 +76,25 @@ class RegisterViewTest(TestCase):
         user = User.objects.get(username="withemail")
         self.assertEqual(user.email, "withemail@example.com")
 
-    def test_register_without_email_leaves_it_blank(self):
-        """Email stays optional - omitting it does not block registration."""
+    def test_register_without_email_is_rejected(self):
+        """Ohne E-Mail keine Registrierung - sonst ist ein vergessenes Passwort
+        nicht zu retten und der Tutor nicht erreichbar."""
         response = self.client.post(
             reverse("core:register"),
             {
                 "username": "noemailreg",
                 "password1": "SecurePass123!",
                 "password2": "SecurePass123!",
+                "avv_consent": "on",
             },
-            follow=True,
         )
         self.assertEqual(response.status_code, 200)
-        user = User.objects.get(username="noemailreg")
-        self.assertEqual(user.email, "")
+        self.assertIn("email", response.context["form"].errors)
+        self.assertFalse(User.objects.filter(username="noemailreg").exists())
+
+    def test_email_field_is_marked_required(self):
+        response = self.client.get(reverse("core:register"))
+        self.assertContains(response, 'id="id_email" required aria-required="true"')
 
     def test_login_after_register(self):
         """After registration, user is logged in and can access dashboard."""
@@ -96,6 +102,7 @@ class RegisterViewTest(TestCase):
             reverse("core:register"),
             {
                 "username": "fresh",
+                "email": "fresh@example.com",
                 "password1": "SecurePass123!",
                 "password2": "SecurePass123!",
             },
@@ -161,6 +168,7 @@ class RegistrationAdminNotificationTest(TestCase):
             reverse("core:register"),
             {
                 "username": "mailtest",
+                "email": "mailtest@example.com",
                 "password1": "SecurePass123!",
                 "password2": "SecurePass123!",
             },
@@ -172,7 +180,6 @@ class RegistrationAdminNotificationTest(TestCase):
         self.assertTrue(msg.alternatives, "Expected an HTML alternative to be attached")
         html_body = msg.alternatives[0][0]
         self.assertEqual(msg.alternatives[0][1], "text/html")
-        self.assertIn("Anonym / Basic (ohne Mail)", html_body)
         self.assertNotIn("(keine Angabe)", html_body)
 
     def test_notification_shows_email_badge_for_real_registration_with_email(self):

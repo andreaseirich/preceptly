@@ -150,6 +150,7 @@ class ReferralRegistrationTest(TestCase):
             reverse("core:register"),
             data={
                 "username": "newtutor",
+                "email": "newtutor@example.com",
                 "password1": "SuperSecret123!",
                 "password2": "SuperSecret123!",
             },
@@ -166,6 +167,7 @@ class ReferralRegistrationTest(TestCase):
             reverse("core:register"),
             data={
                 "username": "newtutor2",
+                "email": "newtutor2@example.com",
                 "password1": "SuperSecret123!",
                 "password2": "SuperSecret123!",
             },
@@ -187,6 +189,7 @@ class ReferralRegistrationTest(TestCase):
             reverse("core:register"),
             data={
                 "username": "distinctuser",
+                "email": "distinctuser@example.com",
                 "password1": "SuperSecret123!",
                 "password2": "SuperSecret123!",
             },

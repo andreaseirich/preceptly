@@ -12,7 +12,7 @@ from apps.core.models import Expense, Review
 
 
 class UserEmailForm(forms.ModelForm):
-    """Form to edit user email (optional, for Stripe/invoices)."""
+    """Adds an email address to an account that has none yet."""
 
     class Meta:
         model = User
@@ -20,10 +20,10 @@ class UserEmailForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].required = False
+        self.fields["email"].required = True
         self.fields["email"].label = _("Email address")
         self.fields["email"].help_text = _(
-            "Optional. Used for invoices and Stripe billing. Recommended for Premium."
+            "Needed to restore access to your account, for invoices and important notices."
         )
 
 
@@ -37,11 +37,13 @@ class RegisterForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = _("Username")
-        self.fields["email"].required = False
+        # Pflicht seit 26.09.2026: ohne Adresse lässt sich ein vergessenes
+        # Passwort nicht zurücksetzen und der Tutor ist nicht erreichbar.
+        self.fields["email"].required = True
         self.fields["email"].label = _("Email address")
         self.fields["email"].help_text = _(
-            "Optional. Enables automatic PDF invoices and appointment reminders; "
-            "can only be changed later via support."
+            "Required. Lets you restore access to your account and receive invoices "
+            "and important notices."
         )
         self.fields["password1"].label = _("Password")
         self.fields["password2"].label = _("Password confirmation")

@@ -335,8 +335,13 @@ def _stripe_premium_checkout_enabled() -> bool:
 
 def _maybe_update_stripe_customer_email(profile: UserProfile, user) -> None:
     """
-    If user has valid email and Stripe customer exists but has no/different email, update via Customer.modify.
-    No-op if email invalid, no stripe_customer_id, or already in sync.
+    Give the Stripe customer the account email if Stripe has none yet.
+
+    An email Stripe already has is never overwritten: the account email can be
+    changed in the settings, the billing email at Stripe stays as it is.
+    stripe_email_last_synced remembers the address Stripe has, so this only
+    asks Stripe until one is known.
+    No-op if email invalid or no stripe_customer_id.
     Never raises; errors are logged (no PII) and flow continues.
     """
     try:
@@ -345,12 +350,12 @@ def _maybe_update_stripe_customer_email(profile: UserProfile, user) -> None:
         new_email = get_email_for_stripe(user)
         if not new_email:
             return
-        if profile.stripe_email_last_synced == new_email:
+        if profile.stripe_email_last_synced:
             return
         customer = stripe.Customer.retrieve(profile.stripe_customer_id)
         current = (customer.email or "").strip() or None
-        if current == new_email:
-            profile.stripe_email_last_synced = new_email
+        if current:
+            profile.stripe_email_last_synced = current
             profile.save(update_fields=["stripe_email_last_synced"])
             return
         stripe.Customer.modify(profile.stripe_customer_id, email=new_email)

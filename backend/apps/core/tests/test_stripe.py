@@ -523,7 +523,7 @@ class StripeCustomerEmailUpdateTest(TestCase):
     def test_customer_modify_called_when_email_changed(
         self, mock_portal_create, mock_retrieve, mock_modify
     ):
-        """D: Email changed and valid -> Customer.modify called."""
+        """D: Stripe has no email yet -> the account email is filled in."""
         self.user.email = "changed@valid-domain.org"
         self.user.save()
         mock_retrieve.return_value = MagicMock(email=None)
@@ -531,6 +531,44 @@ class StripeCustomerEmailUpdateTest(TestCase):
         self.client.login(username="tutor_email", password="test")
         self.client.post(reverse("stripe_portal"))
         mock_modify.assert_called_once_with("cus_update_test", email="changed@valid-domain.org")
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.Customer.retrieve")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_email_stripe_already_has_is_never_overwritten(
+        self, mock_portal_create, mock_retrieve, mock_modify
+    ):
+        """Die Konto-Adresse darf sich ändern, die Adresse bei Stripe nicht."""
+        self.user.email = "new-account@valid-domain.org"
+        self.user.save()
+        mock_retrieve.return_value = MagicMock(email="billing@valid-domain.org")
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+
+        self.client.post(reverse("stripe_portal"))
+        self.client.post(reverse("stripe_portal"))
+
+        mock_modify.assert_not_called()
+        mock_retrieve.assert_called_once()  # danach gemerkt, kein erneuter Abruf
+
+    @patch("apps.core.views_stripe.stripe.Customer.modify")
+    @patch("apps.core.views_stripe.stripe.Customer.retrieve")
+    @patch("apps.core.views_stripe.stripe.billing_portal.Session.create")
+    def test_changed_account_email_does_not_reach_stripe(
+        self, mock_portal_create, mock_retrieve, mock_modify
+    ):
+        UserProfile.objects.filter(user=self.user).update(
+            stripe_email_last_synced="old@valid-domain.org"
+        )
+        self.user.email = "changed@valid-domain.org"
+        self.user.save()
+        mock_portal_create.return_value = MagicMock(url="https://billing.stripe.com/ok")
+        self.client.login(username="tutor_email", password="test")
+
+        self.client.post(reverse("stripe_portal"))
+
+        mock_modify.assert_not_called()
+        mock_retrieve.assert_not_called()
 
     @patch("apps.core.views_stripe.logger")
     @patch("apps.core.views_stripe.stripe.Customer.modify")

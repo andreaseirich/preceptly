@@ -165,7 +165,7 @@
                 {% trans "For invoices and Stripe we recommend adding an email address." %}
             </div>
             {% endif %}
-            <p class="settings-desc">{% trans "Optional. Used for invoices and Stripe billing notifications." %}
+            <p class="settings-desc">{% trans "Needed to restore access to your account, for invoices and important notices." %}
             {% if user.email %} {% trans "To change an existing email address, please contact support." %}{% endif %}</p>
             <form method="post">
                 {% csrf_token %}

@@ -7192,3 +7192,23 @@ msgstr "Buchung im Portal"
 #: apps/core/templates/core/landing.html
 msgid "Students and parents book, reschedule and cancel lessons themselves in the portal — within your working hours."
 msgstr "Schüler und Eltern buchen, verschieben und sagen Stunden selbst im Portal ab – innerhalb deiner Arbeitszeiten."
+
+#: apps/core/forms.py
+msgid "Required. Lets you restore access to your account and receive invoices and important notices."
+msgstr "Pflichtfeld. Damit kannst du den Zugang zu deinem Konto wiederherstellen und bekommst Rechnungen und wichtige Hinweise."
+
+#: apps/core/forms.py
+msgid "Needed to restore access to your account, for invoices and important notices."
+msgstr "Wird gebraucht, um den Zugang zu deinem Konto wiederherzustellen, und für Rechnungen und wichtige Hinweise."
+
+#: apps/core/templates/core/landing.html
+msgid "Student or parent?"
+msgstr "Schüler oder Eltern?"
+
+#: apps/core/templates/core/landing.html
+msgid "Appointments, materials and messages from your tutor — all in one place."
+msgstr "Termine, Unterlagen und Nachrichten von deinem Nachhilfelehrer – alles an einem Ort."
+
+#: apps/core/templates/core/landing.html
+msgid "You get access through an email invitation from your tutor."
+msgstr "Den Zugang bekommst du per E-Mail-Einladung von deinem Nachhilfelehrer."
