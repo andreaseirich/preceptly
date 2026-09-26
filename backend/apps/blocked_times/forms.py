@@ -28,8 +28,10 @@ class BlockedTimeForm(forms.ModelForm):
         required=False,
         label=_("Blockzeit wiederholen"),
         help_text=_("Statt einer einzelnen Blockzeit eine wiederkehrende Serie anlegen"),
+        # data-change statt onchange: Die CSP lässt keine Inline-Handler zu,
+        # actions.js ruft die Funktion auf.
         widget=forms.CheckboxInput(
-            attrs={"class": "form-check-input", "onchange": "toggleRecurrenceFields()"}
+            attrs={"class": "form-check-input", "data-change": "toggleRecurrenceFields"}
         ),
     )
     recurrence_type = forms.ChoiceField(

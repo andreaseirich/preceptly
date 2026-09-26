@@ -30,8 +30,10 @@ class SessionForm(forms.ModelForm):
         required=False,
         label=_("Repeat this session"),
         help_text=_("Create a recurring series instead of a single session"),
+        # data-change statt onchange: Die CSP lässt keine Inline-Handler zu,
+        # actions.js ruft die Funktion auf.
         widget=forms.CheckboxInput(
-            attrs={"class": "form-check-input", "onchange": "toggleRecurrenceFields()"}
+            attrs={"class": "form-check-input", "data-change": "toggleRecurrenceFields"}
         ),
     )
     recurrence_type = forms.ChoiceField(

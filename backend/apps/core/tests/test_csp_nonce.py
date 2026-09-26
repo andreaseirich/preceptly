@@ -71,7 +71,8 @@ class NonceHeaderTest(TestCase):
 
 
 class TemplateGuardTest(TestCase):
-    """Wächter über alle Vorlagen."""
+    """Wächter über alle Vorlagen - und über Formular-Widgets, die Attribute
+    aus Python ins HTML schreiben."""
 
     def test_no_inline_event_handlers(self):
         found = []
@@ -121,6 +122,23 @@ class TemplateGuardTest(TestCase):
             if not is_partial and (not parent or parent.group(1) not in ENTRY_TEMPLATES):
                 uncovered.append(name)
         self.assertEqual(uncovered, [])
+
+    def test_no_inline_event_handlers_in_form_widgets(self):
+        """onchange=… in attrs={…} landet genauso als Inline-Handler im HTML,
+        nur sieht es der Vorlagen-Wächter nicht (so am 26.09.2026 gemeldet)."""
+        event_attr = re.compile(
+            r"""["']on(click|dblclick|change|input|submit|reset|select|load|focus|blur"""
+            r"""|key[a-z]+|mouse[a-z]+|touch[a-z]+|pointer[a-z]+)["']\s*:""",
+            re.IGNORECASE,
+        )
+        found = []
+        for path in (BACKEND / "apps").rglob("*.py"):
+            if "tests" in path.parts or path.name.startswith("test"):
+                continue
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if event_attr.search(line):
+                    found.append(f"{path.relative_to(BACKEND)}:{number}")
+        self.assertEqual(found, [], "Inline-Handler in Widgets - stattdessen data-change usw.")
 
     def test_actions_js_is_a_static_file(self):
         self.assertIsNotNone(finders.find("js/actions.js"))
