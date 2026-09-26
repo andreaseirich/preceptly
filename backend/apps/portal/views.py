@@ -574,7 +574,7 @@ class PortalPasswordResetRequestView(View):
                     run_in_background(
                         "Portal-Passwort-Reset",
                         send_mail,
-                        subject="Reset your Preceptly Portal password",
+                        subject="Neues Passwort für dein Preceptly-Portal",
                         message=plain,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[recipient],

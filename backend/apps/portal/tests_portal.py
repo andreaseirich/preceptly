@@ -463,6 +463,19 @@ class PortalPasswordResetM1Test(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ["m1student@example.com"])
 
+    def test_reset_mail_is_german(self):
+        self.client.post(reverse("portal:password_reset"), {"email": "m1student@example.com"})
+
+        message = mail.outbox[0]
+        self.assertEqual(message.subject, "Neues Passwort für dein Preceptly-Portal")
+        self.assertIn("Hier legst du dein neues Passwort fest", message.body)
+        html = message.alternatives[0][0]
+        self.assertIn('<html lang="de">', html)
+        self.assertIn("Neues Passwort festlegen", html)
+        for text in (message.body, html):
+            self.assertIn("/portal/password-reset/confirm/", text)
+            self.assertNotIn("password reset", text.lower())
+
     @override_settings(RUN_IN_BACKGROUND=True)
     def test_reset_mail_goes_out_after_the_response(self):
         """Die Antwort wartet nicht auf den Mailserver - sonst verrät die
