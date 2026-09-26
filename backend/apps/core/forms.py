@@ -27,6 +27,31 @@ class UserEmailForm(forms.ModelForm):
         )
 
 
+class AccountEmailChangeForm(forms.Form):
+    """Neue Konto-Adresse anfordern - nur mit dem aktuellen Passwort."""
+
+    new_email = forms.EmailField(label=_("New email address"), max_length=254)
+    current_password = forms.CharField(
+        label=_("Current password"), strip=False, widget=forms.PasswordInput
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        password = self.cleaned_data["current_password"]
+        if not self.user.check_password(password):
+            raise forms.ValidationError(_("The password is not correct."))
+        return password
+
+    def clean_new_email(self):
+        email = self.cleaned_data["new_email"].strip()
+        if email.casefold() == (self.user.email or "").casefold():
+            raise forms.ValidationError(_("This is already your email address."))
+        return email
+
+
 class RegisterForm(UserCreationForm):
     """Registration form for new tutor accounts. No premium by default."""
 

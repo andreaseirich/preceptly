@@ -209,6 +209,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "apps.core.context_processors.unread_portal_messages",
                 "apps.core.context_processors.demo_context",
+                "apps.core.context_processors.account_email_context",
                 "apps.core.context_processors.vapid_public_key",
                 "apps.core.context_processors.csp_nonce",
                 "apps.core.context_processors.plan_features",
@@ -297,6 +298,10 @@ TIME_ZONE = "Europe/Berlin"
 
 # Authentication
 LOGIN_URL = "/login/"
+# „Passwort vergessen" für Tutoren (apps/core/views_password.py): Link 1 Stunde
+# gültig. core/password_reset_*.html und core/email/password_reset.* nennen die
+# Dauer - bei Änderung mitziehen.
+PASSWORD_RESET_TIMEOUT = 60 * 60
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
 

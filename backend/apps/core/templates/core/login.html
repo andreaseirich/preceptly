@@ -36,6 +36,10 @@
         </button>
     </form>
 
+    <p style="margin: 12px 0 0; text-align: center;">
+        <a href="{% url 'core:password_reset' %}" style="display: inline-block; padding: 8px 4px; color: var(--accent); text-decoration: underline; font-size: 0.95em;">{% trans "Forgot your password?" %}</a>
+    </p>
+
     <a href="{% url 'core:register' %}" class="btn btn-secondary" style="display: block; width: 100%; padding: 12px; font-size: 16px; margin-top: 12px; text-align: center; box-sizing: border-box;">
         {% trans "Register" %}
     </a>

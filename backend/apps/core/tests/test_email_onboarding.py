@@ -1,7 +1,7 @@
 """
-Tests for first-time self-service email addition (change of an existing
-email stays support-only, see commit 077c4af) and the dashboard onboarding
-banner prompting users without an email to add one.
+Tests for adding an email to an account that has none (settings) and the
+banner shown on every page until an address exists. Changing an existing
+address: test_account_email.py.
 """
 
 from django.contrib.auth.models import User
@@ -25,7 +25,7 @@ class SettingsEmailFirstTimeAddTest(TestCase):
         user.refresh_from_db()
         self.assertEqual(user.email, "new@example.com")
 
-    def test_user_with_existing_email_cannot_change_it(self):
+    def test_save_email_does_not_change_an_existing_address(self):
         user = User.objects.create_user(
             username="hasemail", password="test", email="old@example.com"
         )
@@ -58,10 +58,10 @@ class DashboardOnboardingBannerTest(TestCase):
         User.objects.create_user(username="noemail2", password="test")
         self.client.login(username="noemail2", password="test")
         response = self.client.get(reverse("core:dashboard"))
-        self.assertContains(response, "PDF-Rechnungen")
+        self.assertContains(response, reverse("core:email_required"))
 
     def test_banner_hidden_when_email_present(self):
         User.objects.create_user(username="hasemail2", password="test", email="tutor@example.com")
         self.client.login(username="hasemail2", password="test")
         response = self.client.get(reverse("core:dashboard"))
-        self.assertNotContains(response, "PDF-Rechnungen")
+        self.assertNotContains(response, reverse("core:email_required"))

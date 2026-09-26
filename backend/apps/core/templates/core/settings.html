@@ -165,8 +165,33 @@
                 {% trans "For invoices and Stripe we recommend adding an email address." %}
             </div>
             {% endif %}
-            <p class="settings-desc">{% trans "Needed to restore access to your account, for invoices and important notices." %}
-            {% if user.email %} {% trans "To change an existing email address, please contact support." %}{% endif %}</p>
+            <p class="settings-desc">{% trans "Needed to restore access to your account, for invoices and important notices." %}</p>
+            {% if user.email %}
+            <p style="margin: 0 0 12px;">{% trans "Current address:" %} <strong>{{ user.email }}</strong></p>
+            {% if is_demo_user %}
+            <p class="settings-desc">{% trans "Demo accounts cannot change their email address." %}</p>
+            {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <p class="settings-desc">{% trans "To change it, we send a link to the new address. The change takes effect once you click it, and your old address is told about it." %}</p>
+                <div style="display: grid; gap: 8px; max-width: 420px;">
+                    <label for="id_new_email" class="settings-label">{% trans "New email address" %}</label>
+                    <input type="email" name="new_email" id="id_new_email" maxlength="254" required autocomplete="email"
+                           value="{{ email_change_form.new_email.value|default:'' }}"
+                           {% if email_change_form.new_email.errors %}aria-invalid="true" aria-describedby="id_new_email_errors"{% endif %}
+                           style="width: 100%; box-sizing: border-box;">
+                    {% if email_change_form.new_email.errors %}<p id="id_new_email_errors" style="color: #dc3545; margin: 0;" role="alert">{{ email_change_form.new_email.errors.0 }}</p>{% endif %}
+                    <label for="id_current_password" class="settings-label">{% trans "Current password" %}</label>
+                    <input type="password" name="current_password" id="id_current_password" required autocomplete="current-password"
+                           {% if email_change_form.current_password.errors %}aria-invalid="true" aria-describedby="id_current_password_errors"{% endif %}
+                           style="width: 100%; box-sizing: border-box;">
+                    {% if email_change_form.current_password.errors %}<p id="id_current_password_errors" style="color: #dc3545; margin: 0;" role="alert">{{ email_change_form.current_password.errors.0 }}</p>{% endif %}
+                    <div><button type="submit" name="change_email" value="1" class="btn btn-secondary">{% trans "Send confirmation link" %}</button></div>
+                </div>
+                <p class="settings-desc" style="margin-top: 10px;">{% trans "The email address stored for payments with Stripe stays unchanged." %}</p>
+            </form>
+            {% endif %}
+            {% else %}
             <form method="post">
                 {% csrf_token %}
                 <label for="id_email" class="sr-only">{% trans "Email address" %}</label>
@@ -176,6 +201,7 @@
                 </div>
                 {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
             </form>
+            {% endif %}
         </section>
 
         <section class="settings-card" id="timezone" aria-labelledby="timezone-title">

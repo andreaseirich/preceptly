@@ -7212,3 +7212,100 @@ msgstr "Termine, Unterlagen und Nachrichten von deinem Nachhilfelehrer – alles
 #: apps/core/templates/core/landing.html
 msgid "You get access through an email invitation from your tutor."
 msgstr "Den Zugang bekommst du per E-Mail-Einladung von deinem Nachhilfelehrer."
+
+msgid "Forgot your password?"
+msgstr "Passwort vergessen?"
+
+msgid "Enter the email address of your Preceptly account. We'll send you a link to set a new password, together with your username."
+msgstr "Gib die E-Mail-Adresse deines Preceptly-Kontos ein. Wir schicken dir einen Link für ein neues Passwort und nennen dir deinen Benutzernamen."
+
+msgid "Send link"
+msgstr "Link senden"
+
+msgid "Reset your portal password"
+msgstr "Portal-Passwort zurücksetzen"
+
+msgid "Back to login"
+msgstr "Zurück zur Anmeldung"
+
+msgid "Check your inbox"
+msgstr "Schau in dein Postfach"
+
+msgid "If a tutor account with this email address exists, we've sent you a link to set a new password. The link is valid for one hour."
+msgstr "Falls es ein Tutor-Konto mit dieser E-Mail-Adresse gibt, haben wir dir einen Link für ein neues Passwort geschickt. Der Link ist eine Stunde gültig."
+
+msgid "Nothing arrived? Check your spam folder. If your account has no email address, write to <a href=\"mailto:info@preceptly.de\">info@preceptly.de</a>."
+msgstr "Nichts angekommen? Schau im Spam-Ordner nach. Hat dein Konto keine E-Mail-Adresse, schreib an <a href=\"mailto:info@preceptly.de\">info@preceptly.de</a>."
+
+msgid "Set a new password"
+msgstr "Neues Passwort festlegen"
+
+msgid "Save password"
+msgstr "Passwort speichern"
+
+msgid "This link is no longer valid"
+msgstr "Dieser Link ist nicht mehr gültig"
+
+msgid "Links for a new password are valid for one hour and can only be used once."
+msgstr "Links für ein neues Passwort sind eine Stunde gültig und nur einmal nutzbar."
+
+msgid "Request a new link"
+msgstr "Neuen Link anfordern"
+
+msgid "Password changed"
+msgstr "Passwort geändert"
+
+msgid "You can now log in with your new password."
+msgstr "Du kannst dich jetzt mit deinem neuen Passwort anmelden."
+
+msgid "Add your email address"
+msgstr "E-Mail-Adresse hinterlegen"
+
+msgid "From now on every Preceptly account needs an email address. It lets you reset a forgotten password, and we can reach you about invoices and important notices — for example when the security of your data is concerned."
+msgstr "Ab sofort braucht jedes Preceptly-Konto eine E-Mail-Adresse. Damit kannst du ein vergessenes Passwort zurücksetzen, und wir erreichen dich bei Rechnungen und wichtigen Hinweisen – etwa wenn es um die Sicherheit deiner Daten geht."
+
+msgid "Save and continue"
+msgstr "Speichern und weiter"
+
+msgid "Your account has no email address yet — without it, a forgotten password cannot be reset."
+msgstr "Dein Konto hat noch keine E-Mail-Adresse – ohne sie lässt sich ein vergessenes Passwort nicht zurücksetzen."
+
+msgid "Add it now"
+msgstr "Jetzt hinterlegen"
+
+msgid "Current address:"
+msgstr "Aktuelle Adresse:"
+
+msgid "Demo accounts cannot change their email address."
+msgstr "Demo-Konten können ihre E-Mail-Adresse nicht ändern."
+
+msgid "To change it, we send a link to the new address. The change takes effect once you click it, and your old address is told about it."
+msgstr "Zum Ändern schicken wir einen Link an die neue Adresse. Geändert wird erst, wenn du ihn anklickst – deine alte Adresse bekommt dann einen Hinweis."
+
+msgid "New email address"
+msgstr "Neue E-Mail-Adresse"
+
+msgid "Current password"
+msgstr "Aktuelles Passwort"
+
+msgid "Send confirmation link"
+msgstr "Bestätigungslink senden"
+
+msgid "The email address stored for payments with Stripe stays unchanged."
+msgstr "Die Adresse, die Stripe für Zahlungen gespeichert hat, bleibt unverändert."
+
+#, python-format
+msgid "We've sent a confirmation link to %(email)s. Your address changes once you click it."
+msgstr "Wir haben einen Bestätigungslink an %(email)s geschickt. Deine Adresse ändert sich, sobald du ihn anklickst."
+
+msgid "Your email address has been changed."
+msgstr "Deine E-Mail-Adresse wurde geändert."
+
+msgid "This confirmation link is invalid or has expired."
+msgstr "Dieser Bestätigungslink ist ungültig oder abgelaufen."
+
+msgid "The password is not correct."
+msgstr "Das Passwort ist nicht richtig."
+
+msgid "This is already your email address."
+msgstr "Das ist bereits deine E-Mail-Adresse."

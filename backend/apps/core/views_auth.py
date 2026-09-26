@@ -5,6 +5,7 @@ Authentication views for login, logout, and registration.
 import logging
 import re
 import unicodedata
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import login
@@ -14,7 +15,7 @@ from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView
 
@@ -27,6 +28,7 @@ from apps.core.background import run_in_background
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.referrals import ensure_referral_code, resolve_referrer_user
+from apps.core.views_account_email import needs_email
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +45,13 @@ class TutorFlowLoginView(LoginView):
         if throttled:
             return throttled
         return super().post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        url = super().get_success_url()
+        if needs_email(self.request.user):
+            # Seit 26.09.2026 Pflicht: Konten ohne Adresse tragen sie zuerst nach.
+            return f"{reverse('core:email_required')}?{urlencode({'next': url})}"
+        return url
 
     def form_valid(self, form):
         result = super().form_valid(form)

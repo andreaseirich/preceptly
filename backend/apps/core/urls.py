@@ -16,6 +16,7 @@ from apps.core.views import (
     TaxYearCsvView,
     TaxYearView,
 )
+from apps.core.views_account_email import EmailChangeConfirmView, EmailRequiredView
 from apps.core.views_auth import RegisterView, TutorFlowLoginView, TutorFlowLogoutView
 from apps.core.views_csp import csp_report
 from apps.core.views_email_test import test_email
@@ -26,6 +27,12 @@ from apps.core.views_erecht24_revocation import (
 )
 from apps.core.views_health import health_status
 from apps.core.views_log_test import test_logs
+from apps.core.views_password import (
+    TutorPasswordResetCompleteView,
+    TutorPasswordResetConfirmView,
+    TutorPasswordResetDoneView,
+    TutorPasswordResetView,
+)
 from apps.core.views_portal import TutorMessagesOverviewView, TutorMessageView
 from apps.core.views_pwa import (
     manifest_view,
@@ -62,6 +69,24 @@ urlpatterns = [
     path("login/", TutorFlowLoginView.as_view(), name="login"),
     path("logout/", TutorFlowLogoutView.as_view(), name="logout"),
     path("register/", RegisterView.as_view(), name="register"),
+    path("password-reset/", TutorPasswordResetView.as_view(), name="password_reset"),
+    path("password-reset/sent/", TutorPasswordResetDoneView.as_view(), name="password_reset_done"),
+    path(
+        "password-reset/done/",
+        TutorPasswordResetCompleteView.as_view(),
+        name="password_reset_complete",
+    ),
+    path(
+        "password-reset/<uidb64>/<token>/",
+        TutorPasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
+    ),
+    path("account/email/", EmailRequiredView.as_view(), name="email_required"),
+    path(
+        "account/email/confirm/<str:token>/",
+        EmailChangeConfirmView.as_view(),
+        name="email_change_confirm",
+    ),
     path("", views.LandingPageView.as_view(), name="landing"),
     path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("income/", views.IncomeOverviewView.as_view(), name="income"),

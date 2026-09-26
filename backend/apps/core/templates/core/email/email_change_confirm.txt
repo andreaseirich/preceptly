@@ -1,0 +1,13 @@
+{% autoescape off %}Preceptly — Neue E-Mail-Adresse bestätigen
+==========================================
+
+Für dein Preceptly-Konto „{{ username }}“ soll diese Adresse die neue E-Mail-Adresse werden.
+
+Bestätige das hier. Der Link ist 24 Stunden gültig:
+{{ confirm_url }}
+
+Wenn du das nicht warst, kannst du diese E-Mail ignorieren – dann ändert sich nichts.
+
+---
+Preceptly — {{ site_url }}
+{% endautoescape %}

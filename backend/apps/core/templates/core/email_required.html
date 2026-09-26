@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Add your email address" %} – Preceptly{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 100px auto; padding: 40px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h1 style="text-align: center; margin-bottom: 20px; color: var(--text-primary);">{% trans "Add your email address" %}</h1>
+    <p id="email_required_intro" style="color: var(--text-primary); margin-bottom: 20px;">{% trans "From now on every Preceptly account needs an email address. It lets you reset a forgotten password, and we can reach you about invoices and important notices — for example when the security of your data is concerned." %}</p>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div style="margin-bottom: 20px;">
+            <label for="id_email" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Email address" %}:</label>
+            <input type="email" name="email" id="id_email" required autofocus aria-required="true" maxlength="254" autocomplete="email"
+                   aria-describedby="email_required_intro{% if form.email.errors %} id_email_errors{% endif %}"
+                   value="{{ form.email.value|default:'' }}"
+                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+            {% if form.email.errors %}
+            <div id="id_email_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.email.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">{% trans "Save and continue" %}</button>
+    </form>
+</div>
+{% endblock %}

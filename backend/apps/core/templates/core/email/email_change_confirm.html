@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="utf-8"><title>Neue E-Mail-Adresse bestätigen</title></head>
+<body style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+  <h1 style="color: #0d8069;">Preceptly</h1>
+  <h2>Neue E-Mail-Adresse bestätigen</h2>
+  <p>Für dein Preceptly-Konto „{{ username }}“ soll diese Adresse die neue E-Mail-Adresse werden.</p>
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="{{ confirm_url }}"
+       style="background: #0d8069; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block;">
+      Adresse bestätigen
+    </a>
+  </div>
+  <p style="color: #666; font-size: 14px;">Der Link ist 24 Stunden gültig. Oder kopiere ihn: <a href="{{ confirm_url }}">{{ confirm_url }}</a></p>
+  <p style="color: #666; font-size: 12px;">Wenn du das nicht warst, kannst du diese E-Mail ignorieren – dann ändert sich nichts.</p>
+  <hr style="border: none; border-top: 1px solid #eee;">
+  <p style="color: #666; font-size: 12px; text-align: center;">Preceptly — <a href="{{ site_url }}">{{ site_url }}</a></p>
+</body>
+</html>

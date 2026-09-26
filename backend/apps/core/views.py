@@ -26,6 +26,7 @@ from django.views.generic import (
 
 from apps.billing.models import Invoice
 from apps.core.forms import (
+    AccountEmailChangeForm,
     ExpenseForm,
     ReviewForm,
     UserEmailForm,
@@ -271,6 +272,40 @@ class SettingsView(LoginRequiredMixin, FormView):
         # fragment and hide the "saved" message rendered at the top of the page.
         return f"{reverse('core:settings')}?section={section}"
 
+    def _change_email(self, request):
+        """Neue Konto-Adresse anfordern: Passwort prüfen, Link an die neue Adresse.
+
+        Geändert wird erst beim Klick (EmailChangeConfirmView). Die Adresse bei
+        Stripe bleibt unberührt."""
+        from django_ratelimit.core import is_ratelimited
+
+        from apps.core.demo_guard import is_demo_user
+        from apps.core.views_account_email import request_email_change
+
+        if is_demo_user(request.user) or not request.user.email:
+            return redirect(self._section_url("email"))
+        if is_ratelimited(
+            request, group="account-email-change", key="user", rate="5/h", increment=True
+        ):
+            messages.error(request, _("Too many attempts. Please try again later."))
+            return redirect(self._section_url("email"))
+        form = AccountEmailChangeForm(request.user, request.POST)
+        if form.is_valid():
+            new_email = form.cleaned_data["new_email"]
+            request_email_change(request, new_email)
+            messages.success(
+                request,
+                _(
+                    "We've sent a confirmation link to %(email)s. "
+                    "Your address changes once you click it."
+                )
+                % {"email": new_email},
+            )
+            return redirect(self._section_url("email"))
+        context = self.get_context_data(settings_initial_section="email")
+        context["email_change_form"] = form
+        return self.render_to_response(context)
+
     def get_success_url(self):
         return self._section_url("working-hours")
 
@@ -289,15 +324,12 @@ class SettingsView(LoginRequiredMixin, FormView):
 
     def post(self, request, *args, **kwargs):
         """Handle WorkingHoursForm and UserEmailForm."""
+        if "change_email" in request.POST:
+            return self._change_email(request)
         if "save_email" in request.POST:
             if request.user.email:
-                # Changing an existing email is blocked in the UI (security
-                # hardening, see commit 077c4af): only first-time addition is
-                # self-service, to limit account-takeover / billing-hijack risk.
-                messages.info(
-                    request,
-                    _("To change your email address, please contact support."),
-                )
+                # Eine vorhandene Adresse ändert nur change_email: mit dem
+                # aktuellen Passwort und einem Bestätigungslink an die neue Adresse.
                 return redirect(self._section_url("email"))
             email_form = UserEmailForm(request.POST, instance=request.user)
             if email_form.is_valid():
@@ -438,6 +470,7 @@ class SettingsView(LoginRequiredMixin, FormView):
             self.request.user.email
         )
         context["email_form"] = UserEmailForm(instance=self.request.user)
+        context["email_change_form"] = AccountEmailChangeForm(self.request.user)
         context["profile"] = profile
         context["current_working_hours"] = profile.default_working_hours or {}
         import zoneinfo

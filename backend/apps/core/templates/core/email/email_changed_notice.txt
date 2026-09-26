@@ -1,0 +1,12 @@
+{% autoescape off %}Preceptly — E-Mail-Adresse geändert
+===================================
+
+Die E-Mail-Adresse deines Preceptly-Kontos „{{ username }}“ wurde gerade geändert. Neue Adresse: {{ new_email }}
+
+Das warst du? Dann ist alles in Ordnung. An diese Adresse schicken wir ab jetzt nichts mehr.
+
+Das warst du nicht? Dann schreib bitte sofort an info@preceptly.de, damit wir dein Konto sichern können.
+
+---
+Preceptly — {{ site_url }}
+{% endautoescape %}

@@ -112,6 +112,8 @@ müssen grün sein.
 - TURN-Zugangsdaten verfallen nach 8 Stunden: `docs/operations/turn-server.md`
 - Backups: Railway-Snapshots aller Volumes, täglich, 6 Tage — die CLI zeigt sie nicht:
   `docs/operations/backup.md`
+- E-Mail-Pflicht, „Passwort vergessen" und Ändern der Konto-E-Mail:
+  `docs/features/feat-konto-email.md`
 - Alle Umgebungsvariablen: `docs/operations/railway-env-vars.md`
 
 ## Barrierefreiheit

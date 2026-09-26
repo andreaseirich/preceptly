@@ -23,6 +23,13 @@ def demo_context(request):
     return {"is_demo_user": _is_demo_user(request.user) if request.user.is_authenticated else False}
 
 
+def account_email_context(request):
+    """needs_email: Tutor-Konto ohne E-Mail-Adresse - base.html zeigt dann einen Hinweis."""
+    from apps.core.views_account_email import needs_email
+
+    return {"needs_email": needs_email(getattr(request, "user", None))}
+
+
 def vapid_public_key(request):
     """Exposes the (non-secret) VAPID public key to every template, for the
     push-notification subscribe flow. Empty string if push is not configured."""
