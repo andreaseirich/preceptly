@@ -1,16 +1,15 @@
 """Content-Security-Policy: welche Quellen eine Seite laden darf.
 
-Die Richtlinie startet im Melde-Modus (``Content-Security-Policy-Report-Only``):
-Der Browser blockiert nichts, meldet Verstöße aber an ``/csp-report/``. So lässt
-sich vor dem Scharfschalten sehen, was eine echte Sperre kaputt machen würde —
-gerade im Videoraum, wo ein Fehlschlag ein laufendes Meeting beenden würde.
+Die Richtlinie wird durchgesetzt (``Content-Security-Policy``, seit
+26.09.2026, vorher zwei Tage im Melde-Modus). Verstöße meldet der Browser
+weiterhin an ``/csp-report/``.
 
 Skripte laufen nur mit Nonce: Jede Antwort bekommt eine neue Zufallszahl, die
 Vorlagen über ``{{ csp_nonce }}`` an jedes ``<script>`` setzen. Eingeschleuster
 Code kennt sie nicht. Inline-Handler (``onclick="…"``) können keine Nonce tragen;
 ihre Aufgabe übernimmt ``static/js/actions.js`` über Daten-Attribute.
 
-Umschalten auf Durchsetzung: Umgebungsvariable ``CSP_REPORT_ONLY=0``.
+Zur Fehlersuche zurück in den Melde-Modus: Umgebungsvariable ``CSP_REPORT_ONLY=1``.
 """
 
 import secrets
@@ -82,7 +81,7 @@ class ContentSecurityPolicyMiddleware:
         self.get_response = get_response
         self.header = (
             "Content-Security-Policy-Report-Only"
-            if getattr(settings, "CSP_REPORT_ONLY", True)
+            if getattr(settings, "CSP_REPORT_ONLY", False)
             else "Content-Security-Policy"
         )
 

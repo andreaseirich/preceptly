@@ -1,6 +1,6 @@
 # Content-Security-Policy
 
-**Stand:** 24.09.2026 — Melde-Modus aktiv, noch nicht scharf geschaltet.
+**Stand:** 26.09.2026 — durchgesetzt. Den Melde-Modus gibt es nur noch zur Fehlersuche.
 
 Die Content-Security-Policy sagt dem Browser, aus welchen Quellen eine Seite
 etwas laden darf. Sie ist die wirksamste Bremse gegen eingeschleusten
@@ -16,7 +16,7 @@ zu bekommen, lädt der Browser es nicht.
 | Ersatz für Inline-Handler | `backend/apps/core/static/js/actions.js` |
 | Meldestelle für Verstöße | `backend/apps/core/views_csp.py`, URL `/csp-report/` |
 | Wächter-Tests | `backend/apps/core/tests/test_csp_nonce.py` |
-| Schalter | Umgebungsvariable `CSP_REPORT_ONLY` (Standard: `1` = nur melden) |
+| Schalter | Umgebungsvariable `CSP_REPORT_ONLY` (Standard `0` = durchsetzen; `1` = nur melden, zur Fehlersuche) |
 
 ## Skripte: nur mit Nonce
 
@@ -135,15 +135,21 @@ curl -s https://widerrufsbutton-cdn.e-recht24.de/<shop-id>/revocation-modal.min.
 
 Jede neue Adresse dort muss in die Richtlinie.
 
-## Scharf schalten
+## Scharf geschaltet (26.09.2026)
 
-1. Ein paar Tage Melde-Modus laufen lassen und die Logs durchsehen.
-2. Fehlende Quellen in `POLICY_DIRECTIVES` ergänzen — oder besser: die Stelle
-   im Code so ändern, dass sie ohne die fremde Quelle auskommt.
-3. `railway variables --service preceptly --set "CSP_REPORT_ONLY=0"`.
-4. Direkt danach ein echtes Meeting öffnen und prüfen: Kamera, Mikrofon,
-   Bildschirmfreigabe, PDF-Anzeige, Chat.
-5. Das Widerrufsfenster öffnen und prüfen, dass das Captcha lädt und keine
-   CSP-Meldung in der Konsole erscheint.
+Nach zwei Tagen Melde-Modus: Es kamen nur zwei Meldungen, beide behoben — das
+Stylesheet des Widerrufsfensters (24.09.) und ein `onchange=` aus den
+Formular-Widgets für Serien (26.09., seitdem prüft ein Wächter-Test auch die
+Python-Formulare). Der Standard im Code ist seitdem „durchsetzen“: Fehlt die
+Variable, bleibt die Richtlinie scharf.
 
-Zurückschalten geht jederzeit mit `CSP_REPORT_ONLY=1`.
+**Unter der scharfen Richtlinie noch nicht praktisch geprüft:** ein echtes
+Meeting (Kamera, Mikrofon, Bildschirmfreigabe, PDF-Anzeige, Chat) und das
+Widerrufsfenster mit Captcha. Klemmt dort etwas:
+
+1. `railway variables --service preceptly --set "CSP_REPORT_ONLY=1"` — zurück
+   in den Melde-Modus, der Browser blockiert nichts mehr.
+2. Die Meldung im Log lesen (`CSP-Verstoß: …`), die Quelle in
+   `POLICY_DIRECTIVES` ergänzen oder besser den Code so ändern, dass er ohne
+   sie auskommt.
+3. Die Variable wieder entfernen.

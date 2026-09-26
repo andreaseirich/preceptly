@@ -15,13 +15,15 @@ ENFORCED = "Content-Security-Policy"
 
 
 class PolicyHeaderTest(TestCase):
-    def test_html_pages_carry_the_report_only_header(self):
+    def test_html_pages_carry_the_enforced_header_by_default(self):
+        """Scharf ohne eigene Einstellung - eine fehlende Variable darf nicht
+        still in den Melde-Modus zurückfallen."""
         response = self.client.get(reverse("core:login"))
 
-        self.assertIn(REPORT_ONLY, response)
-        self.assertNotIn(ENFORCED, response)
-        self.assertIn("report-uri /csp-report/", response[REPORT_ONLY])
-        self.assertIn("default-src 'self'", response[REPORT_ONLY])
+        self.assertIn(ENFORCED, response)
+        self.assertNotIn(REPORT_ONLY, response)
+        self.assertIn("report-uri /csp-report/", response[ENFORCED])
+        self.assertIn("default-src 'self'", response[ENFORCED])
 
     def test_revocation_form_can_load_and_submit(self):
         """Der gesetzlich nötige Widerruf muss sich öffnen UND absenden lassen.
@@ -57,15 +59,16 @@ class PolicyHeaderTest(TestCase):
     def test_non_html_responses_stay_untouched(self):
         response = self.client.get("/health/")
 
+        self.assertNotIn(ENFORCED, response)
         self.assertNotIn(REPORT_ONLY, response)
 
-    def test_enforcing_mode_uses_the_other_header(self):
-        with override_settings(CSP_REPORT_ONLY=False):
+    def test_report_only_mode_for_debugging(self):
+        with override_settings(CSP_REPORT_ONLY=True):
             middleware = ContentSecurityPolicyMiddleware(lambda request: _html_response())
             response = middleware(RequestFactory().get("/"))
 
-        self.assertIn(ENFORCED, response)
-        self.assertNotIn(REPORT_ONLY, response)
+        self.assertIn(REPORT_ONLY, response)
+        self.assertNotIn(ENFORCED, response)
 
 
 def _parse(policy):

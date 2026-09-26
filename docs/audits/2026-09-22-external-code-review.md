@@ -3,7 +3,8 @@
 **Quelle:** Code-Review von außen (Datei `preceptly-codereview-2026-09-22.md`)
 **Bearbeitet:** 22.–23.09.2026
 **Stand:** 10 von 10 Befunden und alle P3-Punkte erledigt.
-Offen bleibt nur das Scharfschalten der Content-Security-Policy.
+Seit 26.09.2026 ist auch die Content-Security-Policy scharf geschaltet — damit
+ist alles umgesetzt. Ergebnis der Nachprüfung vom 26.09.2026: siehe unten.
 
 ## P1 — zeitnah beheben
 
@@ -17,7 +18,7 @@ Offen bleibt nur das Scharfschalten der Content-Security-Policy.
 
 | # | Befund | Umsetzung |
 |---|--------|-----------|
-| 4 | Keine Content-Security-Policy | Richtlinie im Melde-Modus aktiv (`df696d7`), siehe `docs/operations/content-security-policy.md`. **Scharfschalten steht noch aus** — erst die Meldungen auswerten |
+| 4 | Keine Content-Security-Policy | Richtlinie im Melde-Modus aktiv (`df696d7`), siehe `docs/operations/content-security-policy.md`. am 26.09.2026 scharf geschaltet, der Standard im Code ist seitdem „durchsetzen“ |
 | 5 | Portal-Login ohne Drosselung pro Konto | Zusätzliche Drosselung pro E-Mail-Adresse, fünf Versuche in fünf Minuten (`6c9013c`) |
 | 6 | L4 aus dem Juli-Audit nur teilweise behoben | `apps/portal/identity.py` prüft beide Anmeldewege — Django-User **und** Vertrags-E-Mail eines `StudentPortalLink`; benutzt in Profiländerung und Einladung (`bd2b3b0`) |
 | 7 | TURN-Zugangsdaten statisch und für jeden Teilnehmer sichtbar | Kurzlebige Zugangsdaten nach dem TURN-REST-Verfahren, 8 Stunden gültig (`393a7c2`); coturn am 23.09. auf `use-auth-secret` umgestellt und geprüft, siehe `docs/operations/turn-server.md` |
@@ -41,3 +42,15 @@ Offen bleibt nur das Scharfschalten der Content-Security-Policy.
 | Rate-Limit antwortete mit 403 samt Traceback | Eigene Antwort mit Status 429 und `Retry-After` (`f6519c8`) |
 | Logs liefen über (jede Meldung doppelt, 404 als Warnung) | Doppelte Weitergabe abgeschaltet, 404 herausgefiltert (`1761ee9`) |
 | Portal-Login für Schüler und Eltern nicht auffindbar | Verweis auf der Start- und der Login-Seite (`764eff9`) |
+
+## Nachprüfung 26.09.2026
+
+Die Nachprüfung auf Stand `46d2b83` bestätigt alle Punkte oben. Ihre neuen
+Hinweise:
+
+| Hinweis | Umgang |
+|---|---|
+| N1 — Folge der umgeschriebenen Historie | bewusst nicht weiter verfolgt, Begründung in der privaten Betriebsdoku |
+| N2 — CSP nur im Melde-Modus | scharf geschaltet, Standard „durchsetzen“ (26.09.2026) |
+| N3 — Datensicherung nur bei Railway | Entscheidung dokumentiert in `docs/operations/backup.md`; einen Rückspieltest aus einem Railway-Snapshot machen wir in Produktion bewusst nicht, weil Railway dabei das laufende Volume ersetzt |
+| Randnotiz — gescheiterte Hintergrund-Mails fallen nur im Log auf | galt für alle Fehler aus dem App-Code; seit 26.09.2026 gehen sie per Bark aufs Handy (nur Fundstelle, dieselbe höchstens alle 10 Minuten) |

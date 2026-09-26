@@ -24,7 +24,7 @@ from apps.meeting.models import MeetingRoom
 
 BACKEND = Path(settings.BASE_DIR)
 TEMPLATE_ROOTS = [BACKEND / "apps", BACKEND / "templates"]
-HEADER = "Content-Security-Policy-Report-Only"
+HEADER = "Content-Security-Policy"
 
 # Seiten, die actions.js selbst einbinden; alle anderen erben es von hier.
 ENTRY_TEMPLATES = {
