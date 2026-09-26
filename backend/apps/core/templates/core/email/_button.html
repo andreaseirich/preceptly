@@ -1,0 +1,11 @@
+{% comment %}Knopf wie in der Buchungsbenachrichtigung, darunter der Link zum Kopieren.{% endcomment %}
+              <div style="margin-top:28px; text-align:center;">
+                <a href="{{ url }}"
+                   style="background:#1a56db; color:#ffffff; text-decoration:none; padding:13px 28px; border-radius:7px; font-size:15px; font-weight:600; display:inline-block;">
+                  {{ label }} →
+                </a>
+              </div>
+              <p style="margin:24px 0 0; color:#6b7280; font-size:13px;">
+                {{ validity }} Funktioniert der Knopf nicht, kopiere diesen Link in deinen Browser:<br>
+                <a href="{{ url }}" style="color:#1a56db; word-break:break-all;">{{ url }}</a>
+              </p>

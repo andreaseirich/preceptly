@@ -1,0 +1,48 @@
+{% comment %}
+Grundlayout der Mails an Tutoren - wie die Buchungsbenachrichtigung
+(portal/email/booking_notification.html). Blöcke: title, heading, body.
+Kontraste nach WCAG AA: „Preceptly“ im Kopf 4,9:1, Fußzeile 4,6:1.
+{% endcomment %}<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f6f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f4f6f9; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px; width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#1a56db; border-radius:10px 10px 0 0; padding: 24px 32px; text-align:center;">
+              <p style="margin:0; color:rgba(255,255,255,0.85); font-size:13px; letter-spacing:0.5px; text-transform:uppercase;">Preceptly</p>
+              <h1 style="margin:8px 0 0; color:#ffffff; font-size:22px; font-weight:600;">{% block heading %}{% endblock %}</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background:#ffffff; padding: 32px 32px 24px; color:#374151; font-size:16px; line-height:1.5;">
+{% block body %}{% endblock %}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f4f6f9; border-radius:0 0 10px 10px; padding:20px 32px; text-align:center; border-top:1px solid #e5e7eb;">
+              <p style="margin:0; color:#6b7280; font-size:12px;">
+                Preceptly — Nachhilfe-Management<br>
+                <a href="{{ site_url }}" style="color:#6b7280;">{{ site_url }}</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

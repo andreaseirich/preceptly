@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="de">
-<head><meta charset="utf-8"><title>E-Mail-Adresse geändert</title></head>
-<body style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-  <h1 style="color: #0d8069;">Preceptly</h1>
-  <h2>Deine E-Mail-Adresse wurde geändert</h2>
-  <p>Die E-Mail-Adresse deines Preceptly-Kontos „{{ username }}“ wurde gerade geändert. Neue Adresse: <strong>{{ new_email }}</strong></p>
-  <p>Das warst du? Dann ist alles in Ordnung. An diese Adresse schicken wir ab jetzt nichts mehr.</p>
-  <p><strong>Das warst du nicht?</strong> Dann schreib bitte sofort an <a href="mailto:info@preceptly.de">info@preceptly.de</a>, damit wir dein Konto sichern können.</p>
-  <hr style="border: none; border-top: 1px solid #eee;">
-  <p style="color: #666; font-size: 12px; text-align: center;">Preceptly — <a href="{{ site_url }}">{{ site_url }}</a></p>
-</body>
-</html>
+{% extends "core/email/_base.html" %}
+{% block title %}E-Mail-Adresse geändert{% endblock %}
+{% block heading %}🔔 E-Mail-Adresse geändert{% endblock %}
+{% block body %}
+              <p style="margin:0 0 24px;">Die E-Mail-Adresse deines Preceptly-Kontos wurde gerade geändert. An diese Adresse schicken wir ab jetzt nichts mehr.</p>
+{% include "core/email/_account_card.html" with second_label="Neue Adresse" second_value=new_email %}
+              <div style="margin-top:24px; padding:14px 18px; background:#fef3c7; border:1px solid #fcd34d; border-radius:8px; color:#92400e; font-size:14px;">
+                <strong>Das warst du nicht?</strong> Dann schreib bitte sofort an
+                <a href="mailto:info@preceptly.de" style="color:#92400e;">info@preceptly.de</a>, damit wir dein Konto sichern können.
+              </div>
+{% endblock %}

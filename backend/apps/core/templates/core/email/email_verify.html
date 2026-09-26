@@ -1,19 +1,9 @@
-<!DOCTYPE html>
-<html lang="de">
-<head><meta charset="utf-8"><title>E-Mail-Adresse bestätigen</title></head>
-<body style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-  <h1 style="color: #0d8069;">Preceptly</h1>
-  <h2>E-Mail-Adresse bestätigen</h2>
-  <p>Bitte bestätige, dass diese Adresse zu deinem Preceptly-Konto „{{ username }}“ gehört.</p>
-  <div style="text-align: center; margin: 30px 0;">
-    <a href="{{ verify_url }}"
-       style="background: #0d8069; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block;">
-      Adresse bestätigen
-    </a>
-  </div>
-  <p style="color: #666; font-size: 14px;">Der Link ist 7 Tage gültig. Oder kopiere ihn: <a href="{{ verify_url }}">{{ verify_url }}</a></p>
-  <p style="color: #666; font-size: 12px;">Wenn du kein Preceptly-Konto angelegt hast, kannst du diese E-Mail ignorieren.</p>
-  <hr style="border: none; border-top: 1px solid #eee;">
-  <p style="color: #666; font-size: 12px; text-align: center;">Preceptly — <a href="{{ site_url }}">{{ site_url }}</a></p>
-</body>
-</html>
+{% extends "core/email/_base.html" %}
+{% block title %}E-Mail-Adresse bestätigen{% endblock %}
+{% block heading %}✉️ E-Mail-Adresse bestätigen{% endblock %}
+{% block body %}
+              <p style="margin:0 0 24px;">Bitte bestätige, dass diese Adresse zu deinem Preceptly-Konto gehört.</p>
+{% include "core/email/_account_card.html" %}
+{% include "core/email/_button.html" with url=verify_url label="Adresse bestätigen" validity="Der Link ist 7 Tage gültig." %}
+              <p style="margin:16px 0 0; color:#6b7280; font-size:13px;">Wenn du kein Preceptly-Konto angelegt hast, kannst du diese E-Mail ignorieren.</p>
+{% endblock %}
