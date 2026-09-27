@@ -228,8 +228,12 @@ WSGI_APPLICATION = "tutorflow.wsgi.application"
 
 DATABASE_URL = env("DATABASE_URL")
 if DATABASE_URL:
+    # conn_max_age=0: Unter ASGI (daphne) laufen synchrone Views in wechselnden
+    # Threads, und jeder hielte seine eigene dauerhafte Verbindung - unter Last
+    # bis zum Verbindungslimit von Postgres. Die Django-Doku rät unter ASGI
+    # ausdrücklich davon ab. Nächster Schritt, falls nötig: Pool mit psycopg 3.
     DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG)
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=0, ssl_require=not DEBUG)
     }
 else:
     DATABASES = {
