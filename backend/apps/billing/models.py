@@ -102,6 +102,13 @@ class Invoice(models.Model):
             ),
         ]
 
+    @property
+    def is_locked(self) -> bool:
+        """Ausgestellt (versendet oder bezahlt): Empfänger, Inhalt und PDF bleiben so,
+        wie der Kunde sie bekommen hat - der Beleg muss nachvollziehbar bleiben
+        (GoBD). Änderbar ist dann nur noch der Zahlungsstatus."""
+        return self.status != "draft"
+
     def __str__(self):
         return f"Invoice {self.id} - {self.payer_name} ({self.period_start} - {self.period_end})"
 

@@ -37,6 +37,26 @@ from apps.lessons.models import Lesson
 _log = logging.getLogger(__name__)
 
 
+logger = logging.getLogger(__name__)
+
+
+def _refuse_locked(request, pk):
+    messages.error(request, _("Issued invoices can no longer be changed or deleted."))
+    return redirect("billing:invoice_detail", pk=pk)
+
+
+def _store_invoice_pdf(request, invoice):
+    """PDF aus den aktuellen Daten erzeugen und an der Rechnung speichern."""
+    lang = getattr(request, "LANGUAGE_CODE", "de")
+    pdf_bytes = generate_invoice_pdf(invoice, language=lang)
+    filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
+    if invoice.invoice_pdf:
+        invoice.invoice_pdf.delete(save=False)
+    invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
+    invoice.invoice_pdf_created_at = timezone.now()
+    invoice.save(update_fields=["invoice_pdf_created_at"])
+
+
 def _safe_date(val):
     """Parse ISO date or return None on invalid input."""
     if val is None:
@@ -122,6 +142,8 @@ class InvoicePayerUpdateView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+        if invoice.is_locked:
+            return _refuse_locked(request, pk)
         payer_name = request.POST.get("payer_name", "").strip()[:200]
         payer_address = request.POST.get("payer_address", "").strip()[:500]
         if not payer_name:
@@ -313,6 +335,16 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return _user_invoice_queryset(self.request.user)
 
+    def get(self, request, *args, **kwargs):
+        if self.get_object().is_locked:
+            return _refuse_locked(request, kwargs["pk"])
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if self.get_object().is_locked:
+            return _refuse_locked(request, kwargs["pk"])
+        return super().post(request, *args, **kwargs)
+
     def delete(self, request, *args, **kwargs):
         """Löscht die Rechnung und setzt Lessons zurück."""
         invoice = self.get_object()
@@ -338,6 +370,8 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
 def generate_invoice_document(request, pk):
     """Generiert das Rechnungsdokument für eine Invoice."""
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.is_locked and invoice.document:
+        return _refuse_locked(request, pk)
 
     try:
         InvoiceDocumentService.save_document(invoice)
@@ -383,6 +417,12 @@ def invoice_mark_sent(request, pk):
         messages.warning(request, _("Invoice is already marked as sent or paid."))
     else:
         InvoiceService.mark_invoice_as_sent(invoice)
+        if not invoice.invoice_pdf:
+            # Die verschickte Fassung festhalten - danach wird sie nie neu erzeugt.
+            try:
+                _store_invoice_pdf(request, invoice)
+            except Exception:
+                logger.exception("PDF beim Versand nicht erzeugt (Rechnung %s)", invoice.pk)
         messages.success(request, _("Invoice marked as sent."))
     return redirect("billing:invoice_detail", pk=pk)
 
@@ -470,15 +510,11 @@ def invoice_undo_paid(request, pk):
 def invoice_pdf_generate(request, pk):
     """Generate and store PDF for invoice. Returns redirect."""
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.is_locked and invoice.invoice_pdf:
+        messages.error(request, _("The PDF of an issued invoice stays as it was sent."))
+        return redirect("billing:invoice_detail", pk=pk)
     try:
-        lang = getattr(request, "LANGUAGE_CODE", "de")
-        pdf_bytes = generate_invoice_pdf(invoice, language=lang)
-        filename = f"invoice_{invoice.id}_{invoice.period_start}_{invoice.period_end}.pdf"
-        if invoice.invoice_pdf:
-            invoice.invoice_pdf.delete(save=False)
-        invoice.invoice_pdf.save(filename, ContentFile(pdf_bytes), save=True)
-        invoice.invoice_pdf_created_at = timezone.now()
-        invoice.save(update_fields=["invoice_pdf_created_at"])
+        _store_invoice_pdf(request, invoice)
         messages.success(request, _("PDF successfully generated."))
     except Exception:
         messages.error(request, _("Error generating PDF. Please try again."))

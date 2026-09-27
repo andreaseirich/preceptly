@@ -7326,3 +7326,12 @@ msgstr "Falsche Adresse?"
 
 msgid "When the account email was confirmed via link."
 msgstr "Wann die Konto-Adresse per Link bestätigt wurde."
+
+msgid "Issued invoices can no longer be changed or deleted."
+msgstr "Ausgestellte Rechnungen lassen sich nicht mehr ändern oder löschen."
+
+msgid "The PDF of an issued invoice stays as it was sent."
+msgstr "Die PDF einer ausgestellten Rechnung bleibt so, wie sie verschickt wurde."
+
+msgid "This invoice has been issued. Its content and PDF stay exactly as sent; only the payment status can still change."
+msgstr "Diese Rechnung ist ausgestellt. Inhalt und PDF bleiben genau so, wie sie verschickt wurden – ändern lässt sich nur noch der Zahlungsstatus."

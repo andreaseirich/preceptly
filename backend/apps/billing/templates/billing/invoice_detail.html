@@ -162,7 +162,9 @@
     <div class="inv-card">
         <div class="inv-card-header">
             {% trans "Recipient" %}
+            {% if not invoice.is_locked %}
             <button class="edit-toggle" type="button" data-click="togglePayerEdit" id="payer-toggle-btn" aria-expanded="false">✎ {% trans "Edit" %}</button>
+            {% endif %}
         </div>
         <div class="inv-card-body" id="payer-display">
             <strong>{{ invoice.payer_name }}</strong>
@@ -228,9 +230,13 @@
         <div class="inv-card-header">{% trans "Actions" %}</div>
         <div class="inv-card-body">
             <div class="action-section">
+                {% if invoice.is_locked %}
+                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🔒</span> {% trans "This invoice has been issued. Its content and PDF stay exactly as sent; only the payment status can still change." %}</p>
+                {% endif %}
 
                 <div class="action-label">PDF</div>
                 {% if billing_profile_complete %}
+                    {% if not invoice.is_locked or not invoice.invoice_pdf %}
                     <form method="post" action="{% url 'billing:invoice_pdf_generate' invoice.pk %}">
                         {% csrf_token %}
                         <button type="submit" class="action-btn primary">
@@ -238,6 +244,7 @@
                             <span>{% if invoice.invoice_pdf %}{% trans "Regenerate PDF" %}{% else %}{% trans "Generate PDF" %}{% endif %}</span>
                         </button>
                     </form>
+                    {% endif %}
                     {% if invoice.invoice_pdf %}
                     <a href="{% url 'billing:invoice_pdf_download' invoice.pk %}" class="action-btn secondary" download>
                         <span class="icon">📥</span>
@@ -284,10 +291,12 @@
                 </form>
                 {% endif %}
 
+                {% if not invoice.is_locked %}
                 <div class="action-divider"></div>
                 <a href="{% url 'billing:invoice_delete' invoice.pk %}" class="action-btn danger">
                     <span class="icon">🗑️</span><span>{% trans "Delete invoice" %}</span>
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
