@@ -19,13 +19,13 @@
         {% csrf_token %}
         <div style="margin-bottom: 20px;">
             <label for="id_username" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Username" %}:</label>
-            <input type="text" name="username" id="id_username" required autofocus aria-required="true"
+            <input type="text" name="username" id="id_username" required autofocus aria-required="true" autocomplete="username"
                    style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
         </div>
 
         <div style="margin-bottom: 25px;">
             <label for="id_password" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password" %}:</label>
-            <input type="password" name="password" id="id_password" required aria-required="true"
+            <input type="password" name="password" id="id_password" required aria-required="true" autocomplete="current-password"
                    style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
         </div>
 

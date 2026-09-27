@@ -22,7 +22,7 @@
             {% for weekday in weekdays %}
             <td style="border: 1px solid var(--border-color); padding: 2px; vertical-align: top; background: var(--bg-secondary); font-size:0.68em; line-height:1.3;">
                 {% for lesson in weekday.lessons %}{% if lesson.start_time.hour == hour %}
-                <div style="background: var(--accent); color:#fff; padding:1px 3px; border-radius:2px; margin-bottom:1px; white-space:nowrap; overflow:hidden;">{{ lesson.start_time|time:"H:i" }}</div>
+                <div style="background: var(--accent); color:var(--on-accent, #fff); padding:1px 3px; border-radius:2px; margin-bottom:1px; white-space:nowrap; overflow:hidden;">{{ lesson.start_time|time:"H:i" }}</div>
                 {% endif %}{% endfor %}
                 {% for slot in weekday.busy %}{% if not slot.is_own and hour in slot.hours_covered %}
                 <div style="background: rgba(239,68,68,0.18); border-left:2px solid #ef4444; padding:1px 3px; color: var(--text-secondary); white-space:nowrap; overflow:hidden;">Belegt</div>

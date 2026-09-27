@@ -112,7 +112,7 @@
     <form method="post" action="{% url 'ai:generate_lesson_plan' lesson.pk %}" style="margin-top: 15px;">
         {% csrf_token %}
         <input type="hidden" name="next" value="{% url 'lesson_plans:lesson_plan' lesson_id=lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}">
-        <button type="submit" class="btn" style="background: var(--accent); color: white;">
+        <button type="submit" class="btn" style="background: var(--accent); color: var(--on-accent, #fff);">
             {% if has_lesson_plan %}
                 🔄 {% trans "Regenerate AI Lesson Plan" %}
             {% else %}

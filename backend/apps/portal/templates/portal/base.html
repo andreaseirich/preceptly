@@ -21,12 +21,14 @@
 
             /* Interaction */
             --accent: #0d8069;
+            --on-accent: #ffffff;  /* Schrift auf var(--accent) */
             --accent-hover: #0b6f5c;
             --accent-tint: #e6f4f1;
             --focus-ring: rgba(13,128,105,.35);
 
             /* Status */
             --success: #2e7d32;
+            --on-success: #ffffff;  /* Schrift auf var(--success) */
             --warning: #b45309;
             --danger:  #b03a2e;
 
@@ -50,10 +52,12 @@
 
         [data-theme="dark"] {
             --accent: #4dd0b3;
+            --on-accent: #1a1a1a;  /* Schrift auf var(--accent) */
             --accent-hover: #6ee0c5;
             --accent-tint: rgba(77,208,179,0.14);
             --focus-ring: rgba(77,208,179,.45);
             --success: #66bb6a;
+            --on-success: #1a1a1a;  /* Schrift auf var(--success) */
             --warning: #f9a825;
             --danger:  #ef5350;
 
@@ -76,10 +80,12 @@
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme="light"]) {
                 --accent: #4dd0b3;
+                --on-accent: #1a1a1a;  /* Schrift auf var(--accent) */
                 --accent-hover: #6ee0c5;
                 --accent-tint: rgba(77,208,179,0.14);
                 --focus-ring: rgba(77,208,179,.45);
                 --success: #66bb6a;
+                --on-success: #1a1a1a;  /* Schrift auf var(--success) */
                 --warning: #f9a825;
                 --danger:  #ef5350;
 
@@ -265,7 +271,7 @@
         /* ── Buttons ── */
         .btn {
             display: inline-block; padding: 10px 22px;
-            background: var(--accent); color: #fff !important;
+            background: var(--accent); color: var(--on-accent, #fff) !important;
             text-decoration: none !important; border-radius: 4px; border: none;
             cursor: pointer; font-size: 0.95em;
             transition: background 0.2s, transform 0.1s;
@@ -287,7 +293,7 @@
         }
         .btn-sm:active { transform: scale(0.97); }
         .btn-sm-primary   { color: var(--accent); border-color: var(--accent); }
-        .btn-sm-primary:hover   { background: var(--accent); color: #fff; }
+        .btn-sm-primary:hover   { background: var(--accent); color: var(--on-accent, #fff); }
         .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
         .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
         .btn-sm-danger    { color: var(--danger); border-color: var(--danger); }
@@ -321,7 +327,7 @@
         .skip-link {
             position: absolute; left: -9999px; top: auto;
             width: 1px; height: 1px; overflow: hidden;
-            background: var(--accent); color: #fff; padding: 8px 16px;
+            background: var(--accent); color: var(--on-accent, #fff); padding: 8px 16px;
             border-radius: 0 0 4px 4px; font-weight: 600; z-index: 9999;
             text-decoration: none;
         }
@@ -377,7 +383,7 @@
         .pwa-steps{list-style:none;margin:0;padding:0;}
         .pwa-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
         .pwa-step:last-child{margin-bottom:0;}
-        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
+        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:var(--accent);color:var(--on-accent, #fff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
         .pwa-step-icon{flex-shrink:0;width:44px;height:44px;background:var(--accent-tint);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);}
         .pwa-step-icon svg{stroke:currentColor;}
         .pwa-step-text{font-size:.9em;color:var(--text-primary);line-height:1.45;padding-top:12px;}
