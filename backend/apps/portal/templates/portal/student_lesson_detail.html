@@ -7,7 +7,7 @@
     <h1 style="margin:0;">{{ lesson.date|date:"d.m.Y" }} – {{ student.full_name }}</h1>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
         {% if lesson.meeting_room and lesson.meeting_room.is_active %}
-        <a class="btn" href="{% url 'portal:meeting_wait' lesson.pk %}" style="background:#27ae60; font-weight:600;">📹 Meeting beitreten</a>
+        <a class="btn" href="{% url 'portal:meeting_wait' lesson.pk %}" style="font-weight:600;">📹 Meeting beitreten</a>
         {% else %}
         <span class="btn btn-secondary" style="opacity:0.5; cursor:default;" title="Der Tutor muss das Meeting zuerst starten">📹 Kein Meeting aktiv</span>
         {% endif %}
@@ -37,6 +37,30 @@
         </tbody>
     </table>
 </div>
+
+{% if lesson.status == "planned" %}
+<div class="card" style="margin-top:16px;">
+    <h2 style="margin-top:0; font-size:1.1em;">Termin ändern</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="{% url 'portal:session_reschedule' lesson.pk %}">Verschieben</a>
+        {% if lesson.recurring_session_id %}
+        <form method="post" action="{% url 'portal:session_cancel' lesson.pk %}" data-confirm="Nur diesen Termin absagen?">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Nur diesen Termin absagen</button>
+        </form>
+        <form method="post" action="{% url 'portal:recurring_cancel' lesson.recurring_session_id %}" data-confirm="Die gesamte Serie absagen? Alle kommenden Termine dieser Serie entfallen.">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Gesamte Serie absagen</button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'portal:session_cancel' lesson.pk %}" data-confirm="Termin wirklich absagen?">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Absagen</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
 
 {% if lesson.meeting_url %}
 <div class="alert-info" style="margin-top:16px;">

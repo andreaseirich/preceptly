@@ -13,6 +13,14 @@
 {% endblock %}
 
 {% block content %}
+<style nonce="{{ csp_nonce }}">
+/* Ganze Zeile antippbar (data-href, actions.js) - auf dem Handy liegen die
+   Knöpfe rechts außerhalb des Bildschirms. Zellen mit eigenen Knöpfen tragen
+   data-stop-propagation, damit dort nur der Knopf zählt. */
+.lesson-row { cursor: pointer; }
+.lesson-row:hover td, .lesson-row:focus-within td { background: var(--bg-primary); }
+.lesson-link { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+</style>
 <h1>Hallo, {{ student.full_name }}!</h1>
 
 <div class="btn-group" style="margin-bottom:28px;">
@@ -56,16 +64,17 @@
     </thead>
     <tbody>
     {% for entry in upcoming_with_meeting %}
-    <tr>
-        <td>{{ entry.lesson.date|date:"d.m.Y" }}</td>
+    {% url 'portal:student_lesson_detail' entry.lesson.pk as lesson_url %}
+    <tr class="lesson-row" data-href="{{ lesson_url }}">
+        <td><a class="lesson-link" href="{{ lesson_url }}">{{ entry.lesson.date|date:"d.m.Y" }}</a></td>
         <td>{{ entry.lesson.start_time|time:"H:i" }}</td>
         <td>{{ entry.lesson.duration_minutes }} min</td>
-        <td>
+        <td data-stop-propagation>
             {% if entry.meeting_room %}
             <a class="btn-sm btn-sm-primary" href="{% url 'portal:meeting_wait' entry.lesson.pk %}">📹 Meeting</a>
-            {% else %}
-            <span style="color:var(--text-secondary); font-size:0.85em;" aria-label="Keine Aktion">–</span>
             {% endif %}
+            <a class="btn-sm btn-sm-secondary" href="{% url 'portal:session_reschedule' entry.lesson.pk %}"
+               aria-label="Stunde am {{ entry.lesson.date|date:'d.m.Y' }} um {{ entry.lesson.start_time|time:'H:i' }} Uhr verschieben">Verschieben</a>
         </td>
     </tr>
     {% endfor %}

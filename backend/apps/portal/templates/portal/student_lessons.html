@@ -3,6 +3,14 @@
 {% block title %}Meine Stunden – Preceptly{% endblock %}
 
 {% block content %}
+<style nonce="{{ csp_nonce }}">
+/* Ganze Zeile antippbar (data-href, actions.js) - auf dem Handy liegen die
+   Knöpfe rechts außerhalb des Bildschirms. Zellen mit eigenen Knöpfen tragen
+   data-stop-propagation, damit dort nur der Knopf zählt. */
+.lesson-row { cursor: pointer; }
+.lesson-row:hover td, .lesson-row:focus-within td { background: var(--bg-primary); }
+.lesson-link { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+</style>
 <h1>Meine Stunden</h1>
 
 <div class="btn-group">
@@ -25,8 +33,9 @@
     </thead>
     <tbody>
     {% for lesson in lessons %}
-    <tr>
-        <td>{{ lesson.date|date:"d.m.Y" }}</td>
+    {% url 'portal:student_lesson_detail' lesson.pk as lesson_url %}
+    <tr class="lesson-row" data-href="{{ lesson_url }}">
+        <td><a class="lesson-link" href="{{ lesson_url }}">{{ lesson.date|date:"d.m.Y" }}</a></td>
         <td>{{ lesson.start_time|time:"H:i" }}</td>
         <td>{{ lesson.duration_minutes }} Min.</td>
         <td>
@@ -39,14 +48,14 @@
             <span style="color:var(--text-secondary);" aria-label="Keine Hausaufgaben">–</span>
             {% endif %}
         </td>
-        <td>
+        <td data-stop-propagation>
             {% if lesson.meeting_url %}
             <a class="btn-sm btn-sm-primary" href="{{ lesson.meeting_url }}" target="_blank" rel="noopener">▶ Beitreten</a>
             {% else %}
             <span style="color:var(--text-secondary);" aria-label="Kein Meeting">–</span>
             {% endif %}
         </td>
-        <td style="white-space:nowrap;">
+        <td data-stop-propagation style="white-space:nowrap;">
             <a href="{% url 'portal:student_lesson_detail' lesson.pk %}" class="btn-sm btn-sm-secondary">Details</a>
             {% if lesson.status == 'planned' %}
             <a href="{% url 'portal:session_reschedule' lesson.pk %}" class="btn-sm btn-sm-secondary">Verschieben</a>

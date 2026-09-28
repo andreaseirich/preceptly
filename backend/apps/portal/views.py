@@ -226,11 +226,15 @@ class StudentHomeView(View):
         from apps.lessons.models import Lesson
 
         today = _dt.date.today()
-        upcoming = Lesson.objects.filter(
-            contract=student,
-            date__gte=today,
-            status__in=["planned"],
-        ).order_by("date", "start_time")[:5]
+        upcoming = (
+            Lesson.objects.filter(
+                contract=student,
+                date__gte=today,
+                status__in=["planned"],
+            )
+            .select_related("meeting_room")
+            .order_by("date", "start_time")[:5]
+        )
         recent = Lesson.objects.filter(
             contract=student,
             date__lt=today,

@@ -71,7 +71,7 @@
       .then(function(data) {
         slotGrid.innerHTML = '';
         if (!data.slots || !data.slots.length) {
-          slotGrid.innerHTML = '<span class="slot-empty">Keine freien Slots.</span>';
+          slotGrid.innerHTML = '<span class="slot-empty">An diesem Tag ist nichts mehr frei. Wähle einen anderen Tag – mit „Nächste Woche“ in der Übersicht oben auch später.</span>';
           return;
         }
         data.slots.forEach(function(slot) {
