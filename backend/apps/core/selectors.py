@@ -52,7 +52,19 @@ class IncomeSelector:
         return calculate_lesson_amount(lesson, lesson.contract.user)
 
     @staticmethod
-    def _get_lesson_amount(lesson: Lesson) -> Decimal:
+    def _invoiced_totals(lessons_qs) -> dict:
+        """Summe der Rechnungsposten je Stunde - eine Abfrage für alle Stunden statt
+        einer pro Stunde (Prüfbericht 27.09.2026, L2). Stunden ohne Posten fehlen."""
+        return dict(
+            InvoiceItem.objects.filter(lesson__in=lessons_qs)
+            .order_by()
+            .values("lesson_id")
+            .annotate(s=Sum("amount"))
+            .values_list("lesson_id", "s")
+        )
+
+    @staticmethod
+    def _get_lesson_amount(lesson: Lesson, invoiced_totals: dict | None = None) -> Decimal:
         """
         Gibt den Betrag für eine Lesson zurück.
 
@@ -66,7 +78,12 @@ class IncomeSelector:
         Returns:
             Betrag als Decimal
         """
-        invoiced_total = InvoiceItem.objects.filter(lesson=lesson).aggregate(s=Sum("amount"))["s"]
+        if invoiced_totals is not None:
+            invoiced_total = invoiced_totals.get(lesson.pk)
+        else:
+            invoiced_total = InvoiceItem.objects.filter(lesson=lesson).aggregate(s=Sum("amount"))[
+                "s"
+            ]
         if invoiced_total is not None:
             return invoiced_total
         return IncomeSelector._calculate_lesson_amount(lesson)
@@ -245,10 +262,13 @@ class IncomeSelector:
         elif year:
             query &= Q(date__year=year)
 
-        lessons_qs = Lesson.objects.filter(query).select_related("contract")
+        lessons_qs = Lesson.objects.filter(query).select_related(
+            "contract", "contract__user", "contract__institute_fk"
+        )
         if user:
             lessons_qs = lessons_qs.filter(contract__user=user)
         lessons = lessons_qs
+        invoiced_totals = IncomeSelector._invoiced_totals(lessons_qs)
 
         status_breakdown = {}
         for status_code, status_name in Lesson.STATUS_CHOICES:
@@ -258,7 +278,7 @@ class IncomeSelector:
 
             for lesson in status_lessons:
                 # Use central calculation method (same logic as InvoiceService)
-                total_income += IncomeSelector._get_lesson_amount(lesson)
+                total_income += IncomeSelector._get_lesson_amount(lesson, invoiced_totals)
 
             status_breakdown[status_code] = {
                 "name": status_name,
@@ -301,16 +321,17 @@ class IncomeSelector:
         )
         invoiced_lessons_qs = Lesson.objects.filter(
             query & Q(id__in=invoiced_lesson_ids)
-        ).select_related("contract")
+        ).select_related("contract", "contract__user", "contract__institute_fk")
         if user:
             invoiced_lessons_qs = invoiced_lessons_qs.filter(contract__user=user)
         invoiced_lessons = invoiced_lessons_qs
+        invoiced_totals = IncomeSelector._invoiced_totals(invoiced_lessons_qs)
 
         # Lessons without InvoiceItem with status TAUGHT (not invoiced, but taught)
         not_invoiced_qs = (
             Lesson.objects.filter(query & Q(status="taught"))
             .exclude(id__in=invoiced_lesson_ids)
-            .select_related("contract")
+            .select_related("contract", "contract__user", "contract__institute_fk")
         )
         if user:
             not_invoiced_qs = not_invoiced_qs.filter(contract__user=user)
@@ -320,7 +341,7 @@ class IncomeSelector:
         # For invoiced lessons: amounts from InvoiceItems (Single Source of Truth)
         invoiced_income = Decimal("0.00")
         for lesson in invoiced_lessons:
-            invoiced_income += IncomeSelector._get_lesson_amount(lesson)
+            invoiced_income += IncomeSelector._get_lesson_amount(lesson, invoiced_totals)
 
         # For not invoiced lessons: calculate with same logic as InvoiceService
         not_invoiced_income = Decimal("0.00")
