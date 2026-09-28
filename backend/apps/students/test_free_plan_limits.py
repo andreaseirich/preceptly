@@ -117,6 +117,28 @@ class StudentLimitWarningTest(TestCase):
             f"Expected student limit warning, got messages: {[str(m) for m in msgs]}",
         )
 
+    def test_contract_create_path_warns_too(self):
+        """Ein Schüler ist ein Vertrag - auch „Vertrag anlegen“ zeigt den Hinweis (F3)."""
+        user = _make_new_free_user("new_free_contract_path")
+        for _i in range(FREE_STUDENT_LIMIT):
+            _make_student(user)
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("contracts:create"),
+            {
+                "first_name": "New",
+                "last_name": "Student",
+                "hourly_rate": "20.00",
+                "unit_duration_minutes": "60",
+                "start_date": date.today().isoformat(),
+            },
+        )
+
+        self.assertEqual(Contract.objects.filter(user=user).count(), FREE_STUDENT_LIMIT + 1)
+        warnings = [m for m in response.wsgi_request._messages if m.level_tag == "warning"]
+        self.assertTrue(any("5" in str(m) for m in warnings), [str(m) for m in warnings])
+
     def test_old_free_user_no_warning_beyond_limit(self):
         """Grandfathered free user (joined before cutoff) gets no warning even with 6+ students."""
         user = _make_old_free_user("old_free_limit")

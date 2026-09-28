@@ -14,9 +14,8 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DeleteView, ListView
@@ -64,23 +63,9 @@ class StudentCreateView(LoginRequiredMixin, View):
     def post(self, request):
         form = ContractForm(request.POST, user=request.user)
         if form.is_valid():
-            from apps.contracts.models import Contract as _Contract
-            from apps.core.feature_flags import FREE_STUDENT_LIMIT, is_new_free_user
+            from apps.core.free_limits import warn_if_student_limit_reached
 
-            if is_new_free_user(request.user):
-                student_count = _Contract.objects.filter(user=request.user).count()
-                if student_count >= FREE_STUDENT_LIMIT:
-                    messages.warning(
-                        request,
-                        format_html(
-                            _(
-                                "Free plan: the limit of 5 active students has been reached. "
-                                'Your student was saved — <a href="{}">upgrade to a paid plan</a> for unlimited students.'
-                            ),
-                            reverse("core:landing") + "#pricing",
-                        ),
-                    )
-
+            warn_if_student_limit_reached(request)
             contract = form.save(commit=False)
             contract.user = request.user
             contract.save()

@@ -178,6 +178,9 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
                         n=DEMO_CONTRACT_LIMIT
                     ),
                 )
+        from apps.core.free_limits import warn_if_student_limit_reached
+
+        warn_if_student_limit_reached(self.request)
         # Save contract first
         form.instance.user = self.request.user
         self.object = form.save()
