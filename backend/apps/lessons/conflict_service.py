@@ -4,11 +4,11 @@ Service for conflict detection and recalculation.
 
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from django.apps import apps
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -118,36 +118,16 @@ class SessionConflictService:
         return start_datetime, end_datetime
 
     @staticmethod
-    def check_conflicts(session: Session, exclude_self: bool = True) -> list[dict]:
-        """
-        Checks if a session has conflicts with other sessions or blocked times.
-
-        Args:
-            session: Session object
-            exclude_self: If True, the session itself is excluded from the check
-
-        Returns:
-            List of conflict dicts with 'type', 'object', 'message'
-        """
+    def _lesson_conflicts(session, start, end, candidates, exclude_self: bool) -> list[dict]:
+        """Überschneidungen mit anderen Stunden - reine Rechnung über fertige Kandidaten
+        (Stunden desselben Tutors am selben Tag)."""
         conflicts = []
-        start_datetime, end_datetime = SessionConflictService.calculate_time_block(session)
-
-        # Check conflicts with other sessions (same user only - multi-tenancy)
-        owner_user = session.contract.user
-        query = Q(date=session.date, start_time__isnull=False, contract__user=owner_user)
-
-        if exclude_self and session.pk:
-            query &= ~Q(pk=session.pk)
-
-        Session = apps.get_model("lessons", "Session")
-        other_sessions = Session.objects.filter(query).select_related("contract", "contract")
-
-        for other_session in other_sessions:
+        for other_session in candidates:
+            if exclude_self and session.pk and other_session.pk == session.pk:
+                continue
             other_start, other_end = SessionConflictService.calculate_time_block(other_session)
-
-            # Check overlap with explicit helper function
             if SessionConflictService.intervals_overlap(
-                start1=start_datetime, end1=end_datetime, start2=other_start, end2=other_end
+                start1=start, end1=end, start2=other_start, end2=other_end
             ):
                 conflicts.append(
                     {
@@ -161,20 +141,16 @@ class SessionConflictService:
                         "end": other_end,
                     }
                 )
+        return conflicts
 
-        # Check conflicts with blocked times (same user only - multi-tenancy)
-        # Find blocked times that could overlap: start before session ends, end after session starts
-        blocked_times = BlockedTime.objects.filter(
-            user=owner_user,
-            start_datetime__lt=end_datetime,
-            end_datetime__gt=start_datetime,
-        )
-
+    @staticmethod
+    def _blocked_time_conflicts(start, end, blocked_times) -> list[dict]:
+        """Überschneidungen mit Sperrzeiten - reine Rechnung."""
+        conflicts = []
         for blocked_time in blocked_times:
-            # Explicit overlap check with helper function
             if SessionConflictService.intervals_overlap(
-                start1=start_datetime,
-                end1=end_datetime,
+                start1=start,
+                end1=end,
                 start2=blocked_time.start_datetime,
                 end2=blocked_time.end_datetime,
             ):
@@ -189,23 +165,118 @@ class SessionConflictService:
                         "end": blocked_time.end_datetime,
                     }
                 )
-
-        # Check quota conflict
-        quota_conflict = ContractQuotaService.check_quota_conflict(session, exclude_self)
-        if quota_conflict:
-            conflicts.append(
-                {
-                    "type": "quota",
-                    "object": session.contract,
-                    "message": quota_conflict["message"],
-                    "planned_total": quota_conflict["planned_total"],
-                    "actual_total": quota_conflict["actual_total"],
-                    "month": quota_conflict["month"],
-                    "year": quota_conflict["year"],
-                }
-            )
-
         return conflicts
+
+    @staticmethod
+    def _quota_entry(session, quota_conflict) -> dict | None:
+        if not quota_conflict:
+            return None
+        return {
+            "type": "quota",
+            "object": session.contract,
+            "message": quota_conflict["message"],
+            "planned_total": quota_conflict["planned_total"],
+            "actual_total": quota_conflict["actual_total"],
+            "month": quota_conflict["month"],
+            "year": quota_conflict["year"],
+        }
+
+    @staticmethod
+    def check_conflicts(session: Session, exclude_self: bool = True) -> list[dict]:
+        """
+        Checks if a session has conflicts with other sessions or blocked times.
+
+        Für viele Stunden auf einmal: check_conflicts_bulk (gleiche Regeln, wenige
+        Abfragen statt vier pro Stunde).
+
+        Args:
+            session: Session object
+            exclude_self: If True, the session itself is excluded from the check
+
+        Returns:
+            List of conflict dicts with 'type', 'object', 'message'
+        """
+        start_datetime, end_datetime = SessionConflictService.calculate_time_block(session)
+        # Only sessions and blocked times of the same user (multi-tenancy)
+        owner_user = session.contract.user
+
+        Session = apps.get_model("lessons", "Session")
+        candidates = Session.objects.filter(
+            date=session.date, start_time__isnull=False, contract__user=owner_user
+        ).select_related("contract")
+        conflicts = SessionConflictService._lesson_conflicts(
+            session, start_datetime, end_datetime, candidates, exclude_self
+        )
+
+        blocked_times = BlockedTime.objects.filter(
+            user=owner_user,
+            start_datetime__lt=end_datetime,
+            end_datetime__gt=start_datetime,
+        )
+        conflicts += SessionConflictService._blocked_time_conflicts(
+            start_datetime, end_datetime, blocked_times
+        )
+
+        quota = SessionConflictService._quota_entry(
+            session, ContractQuotaService.check_quota_conflict(session, exclude_self)
+        )
+        if quota:
+            conflicts.append(quota)
+        return conflicts
+
+    @staticmethod
+    def check_conflicts_bulk(sessions, exclude_self: bool = True) -> dict[int, list[dict]]:
+        """check_conflicts für viele Stunden auf einmal: {session.pk: [Konflikte]}.
+
+        Dieselben Rechenfunktionen, aber die Daten kommen in fünf Abfragen statt
+        vier pro Stunde - für Wochenansicht, Dashboard und Monatsansicht, die sonst
+        mit jeder Stunde langsamer wurden (Prüfbericht 27.09.2026, L2).
+        """
+        sessions = [s for s in sessions if s.pk]
+        if not sessions:
+            return {}
+        Session = apps.get_model("lessons", "Session")
+        Contract = apps.get_model("contracts", "Contract")
+
+        contracts = Contract.objects.in_bulk({s.contract_id for s in sessions})
+        for s in sessions:
+            s.contract = contracts[s.contract_id]
+        owners = {c.user_id for c in contracts.values()}
+        blocks = {s.pk: SessionConflictService.calculate_time_block(s) for s in sessions}
+
+        candidates = defaultdict(list)
+        for other in Session.objects.filter(
+            date__in={s.date for s in sessions},
+            start_time__isnull=False,
+            contract__user_id__in=owners,
+        ).select_related("contract"):
+            candidates[(other.contract.user_id, other.date)].append(other)
+
+        blocked = defaultdict(list)
+        for blocked_time in BlockedTime.objects.filter(
+            user_id__in=owners,
+            start_datetime__lt=max(end for _start, end in blocks.values()),
+            end_datetime__gt=min(start for start, _end in blocks.values()),
+        ):
+            blocked[blocked_time.user_id].append(blocked_time)
+
+        quota_data = ContractQuotaService.preload(sessions)
+
+        result = {}
+        for s in sessions:
+            start, end = blocks[s.pk]
+            owner = s.contract.user_id
+            conflicts = SessionConflictService._lesson_conflicts(
+                s, start, end, candidates[(owner, s.date)], exclude_self
+            )
+            conflicts += SessionConflictService._blocked_time_conflicts(start, end, blocked[owner])
+            quota = SessionConflictService._quota_entry(
+                s, ContractQuotaService.quota_conflict_from_preloaded(s, quota_data, exclude_self)
+            )
+            if quota:
+                conflicts.append(quota)
+            result[s.pk] = conflicts
+        return result
 
     @staticmethod
     def has_conflicts(session: Session, exclude_self: bool = True) -> bool:

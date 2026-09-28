@@ -195,8 +195,9 @@ class LessonMonthView(LoginRequiredMixin, ListView):
             year = now.year
             month = now.month
 
+        conflicts = LessonConflictService.check_conflicts_bulk(context["lessons"])
         for lesson in context["lessons"]:
-            lesson.conflicts = LessonConflictService.check_conflicts(lesson)
+            lesson.conflicts = conflicts.get(lesson.pk, [])
 
         context["year"] = year
         context["month"] = month

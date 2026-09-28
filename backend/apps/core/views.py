@@ -106,15 +106,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         now = timezone.now()
         user = self.request.user
 
-        # Today's sessions
-        today_sessions = SessionQueryService.get_today_sessions(user=user)
-        for session in today_sessions:
-            session.conflicts = LessonConflictService.check_conflicts(session)
-
-        # Upcoming sessions
-        upcoming_sessions = SessionQueryService.get_upcoming_sessions(days=7, user=user)
-        for session in upcoming_sessions:
-            session.conflicts = LessonConflictService.check_conflicts(session)
+        # Today's and upcoming sessions, conflicts for all of them in one go
+        today_sessions = list(SessionQueryService.get_today_sessions(user=user))
+        upcoming_sessions = list(SessionQueryService.get_upcoming_sessions(days=7, user=user))
+        conflicts = LessonConflictService.check_conflicts_bulk(today_sessions + upcoming_sessions)
+        for session in today_sessions + upcoming_sessions:
+            session.conflicts = conflicts.get(session.pk, [])
 
         # Count conflicts (convert both QuerySets to lists for combination)
         all_sessions = list(today_sessions) + list(upcoming_sessions)

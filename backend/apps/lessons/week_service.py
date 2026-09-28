@@ -88,7 +88,8 @@ class WeekService:
         )
         if user:
             lessons_qs = lessons_qs.filter(contract__user=user)
-        lessons = lessons_qs
+        lessons = list(lessons_qs)
+        conflicts_map = LessonConflictService.check_conflicts_bulk(lessons)
 
         # Lade Blockzeiten für die Woche
         start_datetime = timezone.make_aware(datetime.combine(week_start, time.min))
@@ -106,8 +107,7 @@ class WeekService:
 
         for lesson in lessons:
             lessons_by_date[lesson.date].append(lesson)
-            # Prüfe Konflikte
-            conflicts = LessonConflictService.check_conflicts(lesson)
+            conflicts = conflicts_map.get(lesson.id)
             if conflicts:
                 conflicts_by_lesson[lesson.id] = conflicts
 

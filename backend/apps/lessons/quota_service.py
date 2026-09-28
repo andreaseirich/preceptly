@@ -2,6 +2,8 @@
 Service für Kontingent-Prüfung basierend auf ContractMonthlyPlan.
 """
 
+from calendar import monthrange
+from collections import defaultdict
 from datetime import date
 from typing import Optional
 
@@ -9,6 +11,18 @@ from django.utils.translation import gettext as _
 
 from apps.contracts.models import ContractMonthlyPlan
 from apps.lessons.models import Lesson
+
+COUNTED_STATUSES = ["planned", "taught", "paid"]
+
+
+def _month_end(day: date) -> date:
+    return date(day.year, day.month, monthrange(day.year, day.month)[1])
+
+
+def _plans_until(lesson: Lesson, plans) -> list:
+    """Monatspläne von Vertragsbeginn bis einschließlich zum Monat der Stunde."""
+    y, m = lesson.date.year, lesson.date.month
+    return [p for p in plans if p.year < y or (p.year == y and p.month <= m)]
 
 
 class ContractQuotaService:
@@ -40,49 +54,36 @@ class ContractQuotaService:
         if not contract.has_monthly_planning_limit:
             return None
 
-        # Determine the month of the lesson
-        lesson_year = lesson.date.year
-        lesson_month = lesson.date.month
-
-        # Get all ContractMonthlyPlan entries from contract start to including lesson month
-        # Sort by year and month
-        monthly_plans = ContractMonthlyPlan.objects.filter(
-            contract=contract, year__lte=lesson_year
-        ).order_by("year", "month")
-
-        # Filter: Only plans up to and including the lesson month
-        relevant_plans = []
-        for plan in monthly_plans:
-            if plan.year < lesson_year or (plan.year == lesson_year and plan.month <= lesson_month):
-                relevant_plans.append(plan)
-
+        plans = list(
+            ContractMonthlyPlan.objects.filter(contract=contract, year__lte=lesson.date.year)
+        )
         # If no monthly plans exist for this period, there is no quota restriction
-        if not relevant_plans:
+        if not _plans_until(lesson, plans):
             return None
 
-        # Calculate planned total units up to and including this month
-        planned_total = sum(plan.planned_units for plan in relevant_plans)
-
-        # Calculate actual lessons from contract start to end of this month
-        # Use the end of the lesson month
-        from calendar import monthrange
-
-        last_day_of_month = monthrange(lesson_year, lesson_month)[1]
-        month_end = date(lesson_year, lesson_month, last_day_of_month)
-
-        # Get all lessons of this contract with date <= month end
-        # Status: PLANNED, TAUGHT, PAID (no CANCELLED)
         lessons_query = Lesson.objects.filter(
-            contract=contract, date__lte=month_end, status__in=["planned", "taught", "paid"]
+            contract=contract, date__lte=_month_end(lesson.date), status__in=COUNTED_STATUSES
         )
-
         if exclude_self and lesson.pk:
             lessons_query = lessons_query.exclude(pk=lesson.pk)
+        return ContractQuotaService.quota_conflict_from(lesson, plans, lessons_query.count())
 
-        actual_lessons = lessons_query.count()
+    @staticmethod
+    def quota_conflict_from(lesson: Lesson, plans, other_lessons: int) -> Optional[dict]:
+        """Die Kontingentregel als reine Rechnung, ohne Datenbank.
 
-        # Check: actual_lessons + 1 (the new lesson) > planned_total
-        if actual_lessons + 1 > planned_total:
+        plans: Monatspläne des Vertrags (beliebige Reihenfolge, auch spätere Monate),
+        other_lessons: Stunden des Vertrags bis Monatsende, ohne diese Stunde
+        (bzw. mit ihr, wenn exclude_self=False - wie bisher).
+        """
+        relevant_plans = _plans_until(lesson, plans)
+        if not relevant_plans:
+            return None
+        planned_total = sum(plan.planned_units for plan in relevant_plans)
+        lesson_year, lesson_month = lesson.date.year, lesson.date.month
+
+        # Check: other lessons + 1 (this one) > planned_total
+        if other_lessons + 1 > planned_total:
             return {
                 "type": "quota",
                 "message": _(
@@ -93,15 +94,52 @@ class ContractQuotaService:
                     month=lesson_month,
                     year=lesson_year,
                     planned=planned_total,
-                    actual=actual_lessons + 1,
+                    actual=other_lessons + 1,
                 ),
                 "planned_total": planned_total,
-                "actual_total": actual_lessons + 1,
+                "actual_total": other_lessons + 1,
                 "month": lesson_month,
                 "year": lesson_year,
             }
 
         return None
+
+    @staticmethod
+    def preload(lessons) -> dict:
+        """Monatspläne und gezählte Stunden aller Verträge mit Kontingent - zwei
+        Abfragen für beliebig viele Stunden (für quota_conflict_from_preloaded)."""
+        limited = [lsn for lsn in lessons if lsn.contract.has_monthly_planning_limit]
+        if not limited:
+            return {"plans": {}, "lessons": {}}
+        contract_ids = {lsn.contract_id for lsn in limited}
+        plans = defaultdict(list)
+        for plan in ContractMonthlyPlan.objects.filter(contract_id__in=contract_ids):
+            plans[plan.contract_id].append(plan)
+        counted = defaultdict(list)
+        for contract_id, day, pk in Lesson.objects.filter(
+            contract_id__in=contract_ids,
+            date__lte=max(_month_end(lsn.date) for lsn in limited),
+            status__in=COUNTED_STATUSES,
+        ).values_list("contract_id", "date", "pk"):
+            counted[contract_id].append((day, pk))
+        return {"plans": plans, "lessons": counted}
+
+    @staticmethod
+    def quota_conflict_from_preloaded(
+        lesson: Lesson, preloaded: dict, exclude_self: bool = True
+    ) -> Optional[dict]:
+        """check_quota_conflict mit den Daten aus preload()."""
+        if not lesson.contract.has_monthly_planning_limit:
+            return None
+        month_end = _month_end(lesson.date)
+        others = sum(
+            1
+            for day, pk in preloaded["lessons"].get(lesson.contract_id, [])
+            if day <= month_end and not (exclude_self and lesson.pk and pk == lesson.pk)
+        )
+        return ContractQuotaService.quota_conflict_from(
+            lesson, preloaded["plans"].get(lesson.contract_id, []), others
+        )
 
     @staticmethod
     def has_quota_conflict(lesson: Lesson, exclude_self: bool = True) -> bool:
