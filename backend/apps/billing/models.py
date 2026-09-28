@@ -9,6 +9,7 @@ from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.contracts.models import Contract
 from apps.lessons.models import Lesson
@@ -26,6 +27,10 @@ class Invoice(models.Model):
         ("draft", _("Draft")),
         ("sent", _("Sent")),
         ("paid", _("Paid")),
+        # Original und Stornorechnung - beide zählen danach weder als Umsatz
+        # noch als offener Posten. Eigener Kontext: „Cancelled“ heißt bei
+        # Stunden „Ausgefallen“.
+        ("cancelled", pgettext_lazy("invoice status", "Cancelled")),
     ]
 
     owner = models.ForeignKey(
@@ -64,6 +69,14 @@ class Invoice(models.Model):
         decimal_places=2,
         default=Decimal("0.00"),
         help_text=_("Total invoice amount (may be negative if items include deductions)."),
+    )
+    cancels = models.OneToOneField(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="cancellation",
+        help_text=_("For a cancellation invoice: the invoice it cancels"),
     )
     document = models.FileField(
         upload_to="invoices/",
@@ -108,6 +121,16 @@ class Invoice(models.Model):
         wie der Kunde sie bekommen hat - der Beleg muss nachvollziehbar bleiben
         (GoBD). Änderbar ist dann nur noch der Zahlungsstatus."""
         return self.status != "draft"
+
+    @property
+    def is_cancellation(self) -> bool:
+        """Stornorechnung (hebt eine andere Rechnung auf)."""
+        return self.cancels_id is not None
+
+    @property
+    def display_number(self) -> str:
+        """Nummer wie auf der PDF - alte Free-Rechnungen ohne Nummer tragen ihre ID."""
+        return self.invoice_number or str(self.id)
 
     def __str__(self):
         return f"Invoice {self.id} - {self.payer_name} ({self.period_start} - {self.period_end})"

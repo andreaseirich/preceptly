@@ -41,6 +41,7 @@ class InvoiceStatus(StrEnum):
     DRAFT = "draft"
     SENT = "sent"
     PAID = "paid"
+    CANCELLED = "cancelled"
 
 
 def _month_range(year: int, month: int) -> tuple[date, date]:
@@ -231,8 +232,14 @@ def taught_not_invoiced(user: User, year: int, month: int) -> dict:
     ).select_related("contract")
     count = 0
     value = Decimal("0")
+    # Eine Abfrage für alle Stunden; Posten stornierter Rechnungen zählen nicht
+    billed = set(
+        InvoiceItem.objects.filter(lesson__in=taught)
+        .exclude(invoice__status=InvoiceStatus.CANCELLED)
+        .values_list("lesson_id", flat=True)
+    )
     for les in taught:
-        if not InvoiceItem.objects.filter(lesson=les).exists():
+        if les.pk not in billed:
             count += 1
             value += _calculate_lesson_amount(les)
     return {"count": count, "value": value}

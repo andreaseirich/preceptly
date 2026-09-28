@@ -111,7 +111,7 @@
         <h1 style="margin-top:4px;">{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</h1>
     </div>
     <span class="inv-status {{ invoice.status }}">
-        {% if invoice.status == "draft" %}⚪{% elif invoice.status == "sent" %}📤{% else %}✅{% endif %}
+        {% if invoice.status == "draft" %}⚪{% elif invoice.status == "sent" %}📤{% elif invoice.status == "cancelled" %}🚫{% else %}✅{% endif %}
         {{ invoice.get_status_display }}
     </span>
 </div>
@@ -230,7 +230,11 @@
         <div class="inv-card-header">{% trans "Actions" %}</div>
         <div class="inv-card-body">
             <div class="action-section">
-                {% if invoice.is_locked %}
+                {% if invoice.is_cancellation %}
+                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🔒</span> {% blocktrans with number=invoice.cancels.display_number %}Cancellation invoice for invoice {{ number }}.{% endblocktrans %} <a href="{% url 'billing:invoice_detail' invoice.cancels_id %}">{% trans "Show original" %}</a></p>
+                {% elif invoice.status == "cancelled" %}
+                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🚫</span> {% blocktrans with number=invoice.cancellation.display_number %}Cancelled by cancellation invoice {{ number }}. Its lessons can be billed again.{% endblocktrans %} <a href="{% url 'billing:invoice_detail' invoice.cancellation.pk %}">{% trans "Show cancellation invoice" %}</a></p>
+                {% elif invoice.is_locked %}
                 <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🔒</span> {% trans "This invoice has been issued. Its content and PDF stay exactly as sent; only the payment status can still change." %}</p>
                 {% endif %}
 
@@ -287,6 +291,15 @@
                     {% csrf_token %}
                     <button type="submit" class="action-btn secondary">
                         <span class="icon">↩</span><span>{% trans "Undo payment" %}</span>
+                    </button>
+                </form>
+                {% endif %}
+                {% if invoice.status == "sent" or invoice.status == "paid" %}
+                <form method="post" action="{% url 'billing:invoice_cancel' invoice.pk %}"
+                      data-confirm="{% if invoice.status == 'paid' %}{% trans 'Cancel this paid invoice? A cancellation invoice is created. Refund the payment you received outside Preceptly.' %}{% else %}{% trans 'Cancel this invoice? A cancellation invoice with its own number is created, and the lessons can be billed again.' %}{% endif %}">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn danger">
+                        <span class="icon" aria-hidden="true">🚫</span><span>{% trans "Cancel invoice" %}</span>
                     </button>
                 </form>
                 {% endif %}

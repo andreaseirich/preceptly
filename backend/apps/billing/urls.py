@@ -23,6 +23,7 @@ urlpatterns = [
     path("<int:pk>/mark-paid/", views.invoice_mark_paid, name="invoice_mark_paid"),
     path("<int:pk>/set-paid-date/", views.invoice_set_paid_date, name="invoice_set_paid_date"),
     path("<int:pk>/undo-paid/", views.invoice_undo_paid, name="invoice_undo_paid"),
+    path("<int:pk>/cancel/", views.invoice_cancel, name="invoice_cancel"),
     path("<int:pk>/pdf/generate/", views.invoice_pdf_generate, name="invoice_pdf_generate"),
     path("<int:pk>/pdf/", views.invoice_pdf_download, name="invoice_pdf_download"),
     path(

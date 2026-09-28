@@ -26,6 +26,8 @@ _pdf_logger = _logging.getLogger(__name__)
 _LABELS = {
     "de": {
         "title": "Rechnung",
+        "cancellation_title": "Stornorechnung",
+        "cancellation_note": "Diese Stornorechnung hebt die Rechnung {number} vom {date} vollständig auf.",
         "issuer": "Aussteller",
         "invoice_number": "Rechnungsnummer",
         "invoice_date": "Rechnungsdatum",
@@ -53,6 +55,8 @@ _LABELS = {
     },
     "en": {
         "title": "Invoice",
+        "cancellation_title": "Cancellation Invoice",
+        "cancellation_note": "This cancellation invoice fully cancels invoice {number} of {date}.",
         "issuer": "Issuer",
         "invoice_number": "Invoice Number",
         "invoice_date": "Invoice Date",
@@ -294,7 +298,9 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
         )
 
         meta_left = [
-            Paragraph(L["title"], styles["title"]),
+            Paragraph(
+                L["cancellation_title"] if invoice.cancels_id else L["title"], styles["title"]
+            ),
         ]
 
         meta_right = [
@@ -327,6 +333,18 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
         elements.append(
             HRFlowable(width=page_width, thickness=2, color=_COLOR_ACCENT, spaceAfter=0.6 * cm)
         )
+        if invoice.cancels_id:
+            original = invoice.cancels
+            elements.append(
+                Paragraph(
+                    L["cancellation_note"].format(
+                        number=html.escape(str(original.invoice_number or original.id)),
+                        date=original.created_at.strftime("%d.%m.%Y"),
+                    ),
+                    styles["subtitle"],
+                )
+            )
+            elements.append(Spacer(1, 0.4 * cm))
 
         # ── Issuer + Recipient two-column block ───────────────────────────
         issuer_block = [Paragraph(L["issuer"].upper(), styles["section_heading"])]
@@ -475,7 +493,8 @@ def generate_invoice_pdf(invoice: Invoice, language: str = "de") -> bytes:
             elements.append(Paragraph(L["kleinunternehmer_notice"], notice_style))
 
         # ── Payment block ─────────────────────────────────────────────────
-        if issuer_iban or issuer_bic:
+        # Eine Stornorechnung fordert nichts an - der Zahlungsblock entfällt
+        if (issuer_iban or issuer_bic) and not invoice.cancels_id:
             elements.append(Spacer(1, 0.6 * cm))
 
             # Header bar (dark background, white text)

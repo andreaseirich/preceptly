@@ -15,7 +15,6 @@ from apps.contracts.institute_billing import (
     calculate_lesson_amount,
     resolve_institute_billing_config,
 )
-from apps.core.feature_flags import Feature, user_has_feature
 from apps.lessons.models import Lesson
 
 logger = logging.getLogger(__name__)
@@ -86,7 +85,8 @@ class InvoiceService:
                 date__lte=period_end,
             )
             .exclude(
-                invoice_items__isnull=False  # Keine Lessons, die bereits in einer Rechnung sind (1:1-Beziehung)
+                # Keine Lessons, die schon in einer (nicht stornierten) Rechnung stehen
+                invoice_items__invoice__status__in=["draft", "sent", "paid"]
             )
             .select_related("contract")
         )
@@ -137,7 +137,6 @@ class InvoiceService:
             ValueError: Wenn keine abrechenbaren Lessons gefunden werden
         """
         from django.core.exceptions import ValidationError
-        from django.db.models import F
 
         if period_start > period_end:
             raise ValidationError("period_start muss vor period_end liegen.")
@@ -189,21 +188,9 @@ class InvoiceService:
                 "status": "draft",
             }
 
-            if user and user_has_feature(user, Feature.FEATURE_BILLING_PRO):
-                from apps.core.models import UserProfile
-
-                with transaction.atomic():
-                    profile, _created = UserProfile.objects.select_for_update().get_or_create(
-                        user=user,
-                        defaults={"next_invoice_number": 1},
-                    )
-                    invoice_number = profile.next_invoice_number
-                    UserProfile.objects.filter(pk=profile.pk).update(
-                        next_invoice_number=F("next_invoice_number") + 1
-                    )
-                invoice_kwargs["invoice_number"] = f"INV-{invoice_number:04d}"
-            else:
-                invoice_kwargs["invoice_number"] = None
+            # Eigene fortlaufende Nummer für alle Tarife (seit 28.09.2026, vorher nur
+            # ab Starter - Free-Rechnungen trugen die plattformweite Datenbank-ID).
+            invoice_kwargs["invoice_number"] = InvoiceService.next_invoice_number(owner)
 
             invoice = Invoice.objects.create(**invoice_kwargs)
 
@@ -285,6 +272,70 @@ class InvoiceService:
         return result if isinstance(result, int) else 0
 
     @staticmethod
+    def next_invoice_number(user) -> str:
+        """Nächste fortlaufende Rechnungsnummer des Tutors (INV-0001, INV-0002 …)."""
+        from django.db.models import F
+
+        from apps.core.models import UserProfile
+
+        with transaction.atomic():
+            profile, _created = UserProfile.objects.select_for_update().get_or_create(
+                user=user, defaults={"next_invoice_number": 1}
+            )
+            number = profile.next_invoice_number
+            UserProfile.objects.filter(pk=profile.pk).update(
+                next_invoice_number=F("next_invoice_number") + 1
+            )
+        return f"INV-{number:04d}"
+
+    @staticmethod
+    def cancel_invoice(invoice: Invoice) -> Invoice:
+        """Storno: Gegenrechnung mit eigener Nummer und negativen Beträgen.
+
+        Danach gelten Original und Stornorechnung als storniert und fallen aus
+        Umsatz und offenen Posten. Die Posten der Stornorechnung verweisen auf
+        keine Stunde (nur als Text), die Stunden des Originals gelten wieder als
+        unterrichtet und lassen sich neu abrechnen.
+        """
+        with transaction.atomic():
+            original = Invoice.objects.select_for_update().get(pk=invoice.pk)
+            if original.status not in ("sent", "paid") or original.cancels_id:
+                raise ValueError(_("Only issued invoices can be cancelled."))
+            storno = Invoice.objects.create(
+                owner=original.owner,
+                invoice_number=InvoiceService.next_invoice_number(original.owner),
+                payer_name=original.payer_name,
+                payer_address=original.payer_address,
+                contract=original.contract,
+                period_start=original.period_start,
+                period_end=original.period_end,
+                status="cancelled",
+                sent_at=timezone.now(),
+                total_amount=-original.total_amount,
+                cancels=original,
+            )
+            items = list(original.items.all())
+            InvoiceItem.objects.bulk_create(
+                [
+                    InvoiceItem(
+                        invoice=storno,
+                        lesson=None,
+                        description=f"Storno: {item.description}"[:500],
+                        date=item.date,
+                        duration_minutes=item.duration_minutes,
+                        amount=-item.amount,
+                    )
+                    for item in items
+                ]
+            )
+            original.status = "cancelled"
+            original.save(update_fields=["status", "updated_at"])
+            Lesson.objects.filter(
+                pk__in=[item.lesson_id for item in items if item.lesson_id], status="paid"
+            ).update(status="taught", updated_at=timezone.now())
+        return storno
+
+    @staticmethod
     def mark_invoice_as_sent(invoice: Invoice) -> None:
         """Mark invoice as sent. Sets status=sent, sent_at=now."""
         invoice.status = "sent"
@@ -337,7 +388,7 @@ class PaymentService:
 
         unpaid_lesson_ids = set(
             InvoiceItem.objects.filter(lesson_id__in=lesson_ids)
-            .exclude(invoice__status="paid")
+            .exclude(invoice__status__in=["paid", "cancelled"])
             .values_list("lesson_id", flat=True)
         )
         paid_ids = set(lesson_ids) - unpaid_lesson_ids

@@ -115,6 +115,8 @@ müssen grün sein.
   `docs/operations/backup.md`
 - E-Mail-Pflicht, „Passwort vergessen" und Ändern der Konto-E-Mail:
   `docs/features/feat-konto-email.md`
+- Rechnungen: Sperre ab „versendet“, Storno, Nummern für alle Tarife:
+  `docs/features/feat-rechnungen.md`
 - Alle Umgebungsvariablen: `docs/operations/railway-env-vars.md`
 
 ## Barrierefreiheit

@@ -49,8 +49,10 @@ class BillingProTest(TestCase):
         self.assertIsNotNone(invoice.invoice_number)
         self.assertTrue(invoice.invoice_number.startswith("INV-"))
 
-    def test_basic_invoice_no_number(self):
+    def test_basic_invoice_gets_own_number_too(self):
+        """Seit 28.09.2026 in allen Tarifen - vorher trug die Free-PDF die
+        plattformweite Datenbank-ID (Prüfbericht F2)."""
         invoice = InvoiceService.create_invoice_from_lessons(
             date(2025, 3, 1), date(2025, 3, 31), user=self.basic_user
         )
-        self.assertIsNone(invoice.invoice_number)
+        self.assertEqual(invoice.invoice_number, "INV-0001")

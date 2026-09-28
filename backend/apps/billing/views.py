@@ -431,6 +431,9 @@ def invoice_mark_sent(request, pk):
 def invoice_mark_paid(request, pk):
     """Mark invoice as paid. GET: show date form. POST: save."""
     invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    if invoice.status == "cancelled":
+        messages.error(request, _("Cancelled invoices cannot be marked as paid."))
+        return redirect("billing:invoice_detail", pk=pk)
     if request.method == "POST":
         if invoice.status == "paid":
             messages.warning(request, _("Invoice is already marked as paid."))
@@ -548,3 +551,28 @@ def invoice_pdf_download(request, pk):
     response = FileResponse(file_handle, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{fn}"'
     return response
+
+
+@login_required
+@require_POST
+def invoice_cancel(request, pk):
+    """Storno einer ausgestellten Rechnung - für alle Tarife, denn löschen lassen
+    sich ausgestellte Rechnungen nicht mehr (Prüfbericht 27.09.2026, F1)."""
+    invoice = get_object_or_404(_user_invoice_queryset(request.user), pk=pk)
+    try:
+        storno = InvoiceService.cancel_invoice(invoice)
+    except ValueError as err:
+        messages.error(request, str(err))
+        return redirect("billing:invoice_detail", pk=pk)
+    try:
+        _store_invoice_pdf(request, storno)  # festgeschrieben wie bei jeder ausgestellten Rechnung
+    except Exception:
+        logger.exception("PDF der Stornorechnung nicht erzeugt (Rechnung %s)", storno.pk)
+    messages.success(
+        request,
+        _(
+            "Invoice cancelled. Cancellation invoice {number} has been created; "
+            "the lessons can be billed again."
+        ).format(number=storno.display_number),
+    )
+    return redirect("billing:invoice_detail", pk=storno.pk)

@@ -7335,3 +7335,45 @@ msgstr "Die PDF einer ausgestellten Rechnung bleibt so, wie sie verschickt wurde
 
 msgid "This invoice has been issued. Its content and PDF stay exactly as sent; only the payment status can still change."
 msgstr "Diese Rechnung ist ausgestellt. Inhalt und PDF bleiben genau so, wie sie verschickt wurden – ändern lässt sich nur noch der Zahlungsstatus."
+
+msgid "Only issued invoices can be cancelled."
+msgstr "Nur ausgestellte Rechnungen lassen sich stornieren."
+
+msgid "Invoice cancelled. Cancellation invoice {number} has been created; the lessons can be billed again."
+msgstr "Rechnung storniert. Die Stornorechnung {number} ist erstellt, die Stunden lassen sich neu abrechnen."
+
+msgid "Cancelled invoices cannot be marked as paid."
+msgstr "Stornierte Rechnungen lassen sich nicht als bezahlt markieren."
+
+#, python-format
+msgid "Cancellation invoice for invoice %(number)s."
+msgstr "Stornorechnung zu Rechnung %(number)s."
+
+msgid "Show original"
+msgstr "Original anzeigen"
+
+#, python-format
+msgid "Cancelled by cancellation invoice %(number)s. Its lessons can be billed again."
+msgstr "Storniert durch die Stornorechnung %(number)s. Die Stunden lassen sich neu abrechnen."
+
+msgid "Show cancellation invoice"
+msgstr "Stornorechnung anzeigen"
+
+msgid "Cancel invoice"
+msgstr "Rechnung stornieren"
+
+msgid "Cancel this paid invoice? A cancellation invoice is created. Refund the payment you received outside Preceptly."
+msgstr "Bezahlte Rechnung stornieren? Es entsteht eine Stornorechnung. Die erhaltene Zahlung erstattest du außerhalb von Preceptly."
+
+msgid "Cancel this invoice? A cancellation invoice with its own number is created, and the lessons can be billed again."
+msgstr "Rechnung stornieren? Es entsteht eine Stornorechnung mit eigener Nummer, die Stunden lassen sich danach neu abrechnen."
+
+msgid "Invoice status filter"
+msgstr "Statusfilter für Rechnungen"
+
+msgid "For a cancellation invoice: the invoice it cancels"
+msgstr "Bei einer Stornorechnung: die Rechnung, die sie aufhebt"
+
+msgctxt "invoice status"
+msgid "Cancelled"
+msgstr "Storniert"

@@ -57,6 +57,7 @@ class IncomeSelector:
         einer pro Stunde (Prüfbericht 27.09.2026, L2). Stunden ohne Posten fehlen."""
         return dict(
             InvoiceItem.objects.filter(lesson__in=lessons_qs)
+            .exclude(invoice__status="cancelled")
             .order_by()
             .values("lesson_id")
             .annotate(s=Sum("amount"))
@@ -81,9 +82,9 @@ class IncomeSelector:
         if invoiced_totals is not None:
             invoiced_total = invoiced_totals.get(lesson.pk)
         else:
-            invoiced_total = InvoiceItem.objects.filter(lesson=lesson).aggregate(s=Sum("amount"))[
-                "s"
-            ]
+            invoiced_total = (
+                InvoiceItem.objects.filter(lesson=lesson).exclude(invoice__status="cancelled")
+            ).aggregate(s=Sum("amount"))["s"]
         if invoiced_total is not None:
             return invoiced_total
         return IncomeSelector._calculate_lesson_amount(lesson)
@@ -316,9 +317,9 @@ class IncomeSelector:
             query &= Q(date__year=year)
 
         # Lessons with InvoiceItem (invoiced) - regardless of status
-        invoiced_lesson_ids = InvoiceItem.objects.filter(lesson__isnull=False).values_list(
-            "lesson_id", flat=True
-        )
+        invoiced_lesson_ids = (
+            InvoiceItem.objects.filter(lesson__isnull=False).exclude(invoice__status="cancelled")
+        ).values_list("lesson_id", flat=True)
         invoiced_lessons_qs = Lesson.objects.filter(
             query & Q(id__in=invoiced_lesson_ids)
         ).select_related("contract", "contract__user", "contract__institute_fk")
