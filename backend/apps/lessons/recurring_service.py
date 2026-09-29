@@ -284,6 +284,8 @@ class RecurringSessionService:
             status="",  # Empty - will be set automatically
             notes=recurring_session.notes,
             recurring_session=recurring_session,
+            booked_by_id=recurring_session.booked_by_id,
+            created_via=recurring_session.created_via,
         )
 
         # Automatic status setting (before saving)

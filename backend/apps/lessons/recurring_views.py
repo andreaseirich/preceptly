@@ -122,6 +122,8 @@ class RecurringLessonCreateView(LoginRequiredMixin, FeatureRequiredMixin, Create
     def form_valid(self, form):
         from django.db import transaction
 
+        form.instance.booked_by = self.request.user
+        form.instance.created_via = "tutor"
         with transaction.atomic():
             response = super().form_valid(form)
             messages.success(self.request, _("Recurring lesson successfully created."))

@@ -2,6 +2,7 @@
 Models for recurring sessions (series appointments).
 """
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -54,6 +55,21 @@ class RecurringSession(models.Model):
     sunday = models.BooleanField(default=False, help_text=_("Sunday"))
     is_active = models.BooleanField(default=True, help_text=_("Is the series active?"))
     notes = models.TextField(blank=True, null=True, help_text=_("Notes for the series"))
+    # Die erzeugten Stunden übernehmen beides (RecurringSessionService).
+    booked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Account that created the series"),
+    )
+    created_via = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text=_("Source: portal_series or tutor"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

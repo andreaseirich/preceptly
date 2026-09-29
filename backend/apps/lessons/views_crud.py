@@ -21,6 +21,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from apps.core.feature_flags import is_premium_user
 from apps.lesson_plans.models import LessonPlan
+from apps.lessons.booking_origin import TUTOR, booking_origin
 from apps.lessons.forms import LessonForm
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
@@ -101,6 +102,7 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         # Contract and lesson meta
         context["contract"] = lesson.contract
         context["tutor_no_show"] = lesson.tutor_no_show
+        context["booking"] = booking_origin(lesson, viewer=TUTOR)
         # Lesson plan context
         lesson_plans = LessonPlan.objects.filter(lesson=lesson).order_by("-created_at")
         context["lesson_plans"] = lesson_plans
@@ -199,6 +201,10 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         return initial
 
     def form_valid(self, form):
+        # Wer gebucht hat - steht auf der Detailseite der Stunde
+        form.instance.booked_by = self.request.user
+        form.instance.created_via = "tutor"
+
         # Check if a recurring lesson should be created
         is_recurring = form.cleaned_data.get("is_recurring", False)
 
@@ -218,6 +224,8 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 recurrence_type=form.cleaned_data.get("recurrence_type", "weekly"),
                 notes=lesson.notes,
                 is_active=True,
+                booked_by=self.request.user,
+                created_via="tutor",
             )
 
             # Set weekdays based on recurrence_weekdays
@@ -280,6 +288,9 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                 lesson.save()
                 LessonStatusService.update_status_for_lesson(lesson)
                 self.object = lesson
+            # Nicht super().form_valid(): das speicherte das Formular ein zweites Mal
+            # und legte am ersten Serientag eine doppelte Einzelstunde an.
+            return HttpResponseRedirect(self.get_success_url())
         else:
             # Create normal single lesson
             lesson = form.save()

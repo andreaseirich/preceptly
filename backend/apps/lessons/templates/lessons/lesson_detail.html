@@ -130,6 +130,13 @@
             </td>
         </tr>
         {% endif %}
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <th scope="row" style="padding: 8px; color: var(--text-secondary);">{% trans "Booked:" %}</th>
+            <td style="padding: 8px; color: var(--text-primary);">
+                {{ booking.at|date:"d.m.Y, H:i" }}{% if booking.how %} · {{ booking.how }}{% endif %}
+                {% if booking.note %}<br><small style="color: var(--text-secondary);">{{ booking.note }}</small>{% endif %}
+            </td>
+        </tr>
     </table>
 </div>
 

@@ -7377,3 +7377,71 @@ msgstr "Bei einer Stornorechnung: die Rechnung, die sie aufhebt"
 msgctxt "invoice status"
 msgid "Cancelled"
 msgstr "Storniert"
+
+#: apps/lessons/booking_origin.py
+msgid "Booked:"
+msgstr "Gebucht:"
+
+#: apps/lessons/booking_origin.py
+msgid "via the portal"
+msgstr "über das Portal"
+
+#: apps/lessons/booking_origin.py
+msgid "as a series via the portal"
+msgstr "als Serie über das Portal"
+
+#: apps/lessons/booking_origin.py
+msgid "as part of a series"
+msgstr "als Teil einer Serie"
+
+#: apps/lessons/booking_origin.py
+msgid "by you"
+msgstr "von dir"
+
+#: apps/lessons/booking_origin.py
+msgid "by %(name)s"
+msgstr "von %(name)s"
+
+#: apps/lessons/booking_origin.py
+msgid "by the tutor"
+msgstr "vom Tutor"
+
+#: apps/lessons/booking_origin.py
+msgid "by another account"
+msgstr "von einem anderen Konto"
+
+#: apps/lessons/booking_origin.py
+msgid "student account"
+msgstr "Schülerkonto"
+
+#: apps/lessons/booking_origin.py
+msgid "parent account"
+msgstr "Elternkonto"
+
+#: apps/lessons/booking_origin.py
+msgid "by the %(role)s"
+msgstr "vom %(role)s"
+
+#: apps/lessons/booking_origin.py
+msgid "by the %(role)s (%(email)s)"
+msgstr "vom %(role)s (%(email)s)"
+
+#: apps/lessons/booking_origin.py
+msgid "The booking account is only recorded since 29 Sep 2026."
+msgstr "Das buchende Konto wird erst seit dem 29.09.2026 gespeichert."
+
+#: apps/lessons/booking_origin.py
+msgid "Source: portal_booking, portal_series or tutor"
+msgstr "Quelle: portal_booking, portal_series oder tutor"
+
+#: apps/lessons/booking_origin.py
+msgid "Account that booked the session (tutor or portal account)"
+msgstr "Konto, das die Stunde gebucht hat (Tutor oder Portal-Konto)"
+
+#: apps/lessons/booking_origin.py
+msgid "Account that created the series"
+msgstr "Konto, das die Serie angelegt hat"
+
+#: apps/lessons/booking_origin.py
+msgid "Source: portal_series or tutor"
+msgstr "Quelle: portal_series oder tutor"

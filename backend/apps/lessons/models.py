@@ -1,5 +1,6 @@
 from functools import cached_property
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q
@@ -74,7 +75,15 @@ class Session(models.Model):
         blank=True,
         null=True,
         db_index=True,
-        help_text=_("Source: public_booking, contract_booking, or tutor"),
+        help_text=_("Source: portal_booking, portal_series or tutor"),
+    )
+    booked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Account that booked the session (tutor or portal account)"),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

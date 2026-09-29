@@ -682,6 +682,14 @@ class StudentLessonDetailView(View):
         lesson = get_object_or_404(Lesson, pk=pk, contract_id__in=contract_ids)
         student = lesson.contract
 
+        from django.utils import translation
+
+        from apps.lessons.booking_origin import PORTAL, booking_origin
+
+        # Das Portal ist nur deutsch - auch bei englischem Browser.
+        with translation.override("de"):
+            booking = booking_origin(lesson, viewer=PORTAL, portal_user=portal_user)
+
         return render(
             request,
             self.template_name,
@@ -689,6 +697,7 @@ class StudentLessonDetailView(View):
                 "lesson": lesson,
                 "student": student,
                 "portal_user": portal_user,
+                "booking": booking,
             },
         )
 
@@ -1000,6 +1009,7 @@ class PortalBookingView(View):
             status="planned",
             notes=topic or None,
             created_via="portal_booking",
+            booked_by=portal_user.user,
         )
         from apps.core.background import run_in_background
         from apps.portal.email_service import send_booking_notification_portal
@@ -1300,6 +1310,8 @@ class PortalRecurringCreateView(View):
             recurrence_type=rec_type if rec_type in ("weekly", "biweekly", "monthly") else "weekly",
             notes=topic or None,
             is_active=True,
+            booked_by=portal_user.user,
+            created_via="portal_series",
             **weekdays,
         )
         result = RecurringSessionService.generate_sessions(rs, check_conflicts=False)

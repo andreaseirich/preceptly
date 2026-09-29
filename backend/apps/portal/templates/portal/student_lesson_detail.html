@@ -34,6 +34,13 @@
                 <th scope="row" style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Status</th>
                 <td>{{ lesson.get_status_display }}</td>
             </tr>
+            <tr>
+                <th scope="row" style="text-align:left; padding-right:24px; color:var(--text-secondary); font-weight:500;">Gebucht</th>
+                <td>
+                    {{ booking.at|date:"d.m.Y, H:i" }} Uhr{% if booking.how %} · {{ booking.how }}{% endif %}
+                    {% if booking.note %}<br><small style="color:var(--text-secondary);">{{ booking.note }}</small>{% endif %}
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
