@@ -1,0 +1,2 @@
+# pdf.js is shipped as third-party code; keep it out of GitHub's language statistics
+backend/apps/core/static/js/pdfjs/** linguist-vendored
