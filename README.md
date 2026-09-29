@@ -1,6 +1,6 @@
 # Preceptly
 
-[![CI Status](https://img.shields.io/badge/CI-Passing-brightgreen)](https://github.com/andreaseirich/tutorflow/actions)
+[![CI](https://github.com/andreaseirich/preceptly/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/andreaseirich/preceptly/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Django](https://img.shields.io/badge/django-6.1-green.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
@@ -9,7 +9,7 @@
 
 **The productivity bridge for educators** – A comprehensive tutoring management system that eliminates administrative overhead and enables tutors to focus on teaching.
 
-**Premium vs Basic:** Basic users get full scheduling, conflict detection, billing, and invoicing. Premium adds AI-assisted lesson plans (LLM-powered), public booking with reschedule, and Stripe subscription management.
+**Plans:** Free covers scheduling, conflict detection, billing, and invoicing. Starter adds recurring lessons, blocked times, and the student portal. Pro adds unlimited documents and portal bookings, family access, video meeting rooms, AI-assisted lesson plans (LLM-powered), and reports. Business adds priority support and early access to new features. Subscriptions run through Stripe; details in [PRD.md](PRD.md).
 
 ### 🎥 Demo Video
 
@@ -48,7 +48,7 @@ All integrated into a single, coherent workflow that saves tutors hours every we
 ## Live Links
 
 - 🚀 **[Live Application](https://preceptly.de)** – Deployed on Railway
-- 👨‍💻 **[Portfolio](https://andreaseirich.github.io/tutorflow.html)** – Project details and case study
+- 👨‍💻 **[Portfolio](https://andreaseirich.github.io/preceptly.html)** – Project details and case study
 
 **Demo Credentials:**
 - Premium User: `demo_premium` / `demo123`
@@ -69,7 +69,7 @@ Generate invoices directly from taught sessions with automatic calculations base
 - *Pending revenue (sent)* = Sum of `Invoice.total_amount` where status = sent
 - *Total billed* = recognized + pending (paid + sent invoices)
 
-### 🤖 **AI-Powered Lesson Planning** (Premium)
+### 🤖 **AI-Powered Lesson Planning** (Pro)
 Generate structured lesson plans using LLM APIs with privacy-first design—PII sanitization ensures student data never leaves the system. Human-in-the-loop editing ensures accountability and quality.
 
 ---
@@ -79,16 +79,22 @@ Generate structured lesson plans using LLM APIs with privacy-first design—PII 
 ### Tech Stack
 
 **Backend:**
-- **Framework**: Django 6.0 (Python 3.12+)
+- **Framework**: Django 6.1 (Python 3.12+)
+- **Server**: Daphne (ASGI)
+- **Real-time**: Django Channels with a Redis channel layer (WebSockets for video meeting rooms)
 - **Database**: PostgreSQL (production), SQLite (development)
+- **Cache**: Redis (rate limits, locks)
 - **Architecture**: Service layer pattern with clear separation of concerns
 - **API**: RESTful endpoints with JSON responses
+- **Payments**: Stripe Checkout and customer portal for tutor subscriptions
+- **Calendar sync**: iCloud calendars via CalDAV (`caldav`, `icalendar`)
 
 **Frontend:**
 - Django Templates with vanilla JavaScript
 - Responsive design with mobile support
 - Progressive Web App (PWA) capabilities
 - Dark mode support
+- Video meeting rooms in the browser (WebRTC)
 
 **AI Integration:**
 - OpenAI-compatible LLM API
@@ -134,8 +140,8 @@ Requires Python 3.12+ and `pip install -r requirements.txt` first. Creates `.env
 ### Manual Setup
 
 ```bash
-git clone https://github.com/andreaseirich/tutorflow.git
-cd tutorflow
+git clone https://github.com/andreaseirich/preceptly.git
+cd preceptly
 python3 -m venv .venv && source .venv/bin/activate  # or venv
 pip install -r requirements.txt
 cd backend && python manage.py migrate && python manage.py compilemessages
@@ -165,15 +171,20 @@ To install a pre-commit hook that blocks forbidden paths (e.g. `.gitignore`, `.c
 
 ## Project Status
 
-Preceptly is currently submitted to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge focused on creativity, real-world impact, and technology.
+Preceptly started as a submission to the **CodeCraze Hackathon** (November 15 – December 15, 2025), an open-innovation challenge focused on creativity, real-world impact, and technology. It is now live at [preceptly.de](https://preceptly.de) and under active development.
 
 **Current Status:**
 - ✅ Core scheduling with conflict detection
 - ✅ Contract-based quota management
 - ✅ Automated billing and invoice generation
-- ✅ AI-powered lesson planning (premium feature)
+- ✅ AI-powered lesson planning (Pro plan)
+- ✅ Student/parent portal: booking, rescheduling, messages, homework, calendar feed
+- ✅ Video meeting rooms per lesson (WebRTC via Django Channels)
+- ✅ iCloud calendar sync (CalDAV)
+- ✅ Stripe subscriptions (Free, Starter, Pro, Business)
+- ✅ Installable PWA with push notifications
 - ✅ Full internationalization (English, German)
-- ✅ Production deployment on Railway
+- ✅ Production deployment on Railway at [preceptly.de](https://preceptly.de)
 - ✅ Comprehensive test coverage
 - ✅ Security best practices (CodeQL, Dependabot)
 
