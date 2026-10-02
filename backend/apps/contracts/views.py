@@ -127,6 +127,9 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
             if not link.is_active:
                 link.activation_url = f"{site_url}/portal/activate/{link.invite_token}/"
         context["portal_links"] = portal_links
+        from apps.lessons.booking_origin import TUTOR, cancelled_overview
+
+        context["cancelled_overview"] = cancelled_overview(contract, viewer=TUTOR)
         context["progress_notes"] = ProgressNote.objects.filter(contract=contract).order_by(
             "-created_at"
         )[:10]

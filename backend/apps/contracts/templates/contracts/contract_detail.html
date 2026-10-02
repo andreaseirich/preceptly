@@ -156,6 +156,23 @@
   </div>
 </div>
 
+{% if cancelled_overview %}
+<div class="box-section" style="margin-top: 1.5em;">
+  <h3>Im Portal abgesagte Termine</h3>
+  <p style="color: var(--text-secondary); font-size: .9em; margin-top: 0;">Abgesagte Termine verschwinden aus dem Kalender. Hier steht, wer wann abgesagt hat. Angezeigt werden die letzten 20.</p>
+  <ul style="list-style: none; padding: 0; margin: 0;">
+    {% for record, info in cancelled_overview %}
+    <li style="padding: 8px 0;{% if not forloop.last %} border-bottom: 1px solid var(--border-color);{% endif %}">
+      <strong>{{ record.date|date:"D, d.m.Y" }}, {{ record.start_time|time:"H:i" }}</strong>
+      ({{ record.duration_minutes }} Min.{% if record.was_series %}, Serientermin{% endif %})<br>
+      Abgesagt: {{ info.cancelled_at|date:"d.m.Y, H:i" }} · {{ info.cancelled_how }}
+      {% if info.booked %}<br><small style="color: var(--text-secondary);">Gebucht: {{ info.booked.at|date:"d.m.Y, H:i" }}{% if info.booked.how %} · {{ info.booked.how }}{% endif %}</small>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
 <div class="box-section" style="margin-top: 1.5em;">
   <h3>Fortschrittsnotizen</h3>
   {% for note in progress_notes %}

@@ -82,6 +82,21 @@
 <div class="empty-state"><p>Keine Stunden gefunden.</p></div>
 {% endif %}
 
+{% if cancelled_overview %}
+<h2 style="margin-top:28px; font-size:1.15em;">Abgesagte Termine</h2>
+<div class="card">
+    <ul style="list-style:none; padding:0; margin:0;">
+        {% for record, info in cancelled_overview %}
+        <li style="padding:8px 0;{% if not forloop.last %} border-bottom:1px solid var(--border-color);{% endif %}">
+            <strong>{{ record.date|date:"D, d.m.Y" }}, {{ record.start_time|time:"H:i" }} Uhr</strong>
+            ({{ record.duration_minutes }} Min.{% if record.was_series %}, Serientermin{% endif %})<br>
+            <span style="color:var(--text-secondary);">Abgesagt am {{ info.cancelled_at|date:"d.m.Y, H:i" }} Uhr · {{ info.cancelled_how }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <dialog id="cancelModal" aria-modal="true" aria-labelledby="cancelModalTitle" style="border:1px solid var(--border-color); border-radius:8px; padding:24px; max-width:420px; width:90%; background:var(--card-bg); color:var(--text-primary);">
   <h3 id="cancelModalTitle" style="margin-top:0; margin-bottom:8px;">Termin absagen</h3>
   <p style="margin-bottom:20px; color:var(--text-secondary);">Möchtest du nur diesen Termin oder die gesamte Serie löschen?</p>

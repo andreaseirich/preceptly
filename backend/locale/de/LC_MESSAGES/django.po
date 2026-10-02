@@ -7483,3 +7483,11 @@ msgstr "\n            Vor diesem Abrechnungszeitraum hast du bereits <strong>%(u
 #, python-format
 msgid "incl. start value %(n)s"
 msgstr "inkl. Startwert %(n)s"
+
+#: apps/lessons/booking_origin.py
+msgid "with the whole series via the portal"
+msgstr "mit der ganzen Serie über das Portal"
+
+#: apps/lessons/booking_origin.py
+msgid "Cancellation or rescheduling via portal"
+msgstr "Absage oder Verschiebung im Portal"

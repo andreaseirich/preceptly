@@ -383,10 +383,18 @@ class SettingsView(LoginRequiredMixin, FormView):
             notif_pref.notify_portal_booking_push = bool(
                 request.POST.get("notify_portal_booking_push")
             )
+            notif_pref.notify_portal_change_email = bool(
+                request.POST.get("notify_portal_change_email")
+            )
+            notif_pref.notify_portal_change_push = bool(
+                request.POST.get("notify_portal_change_push")
+            )
             notif_pref.save(
                 update_fields=[
                     "notify_portal_booking_email",
                     "notify_portal_booking_push",
+                    "notify_portal_change_email",
+                    "notify_portal_change_push",
                     "updated_at",
                 ]
             )

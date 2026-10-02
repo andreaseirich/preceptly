@@ -202,3 +202,48 @@ def send_login_reminder(contract, recipient_email, tutor_name, role="student", r
         html_message=html_message,
         fail_silently=False,
     )
+
+
+def send_change_notification_portal(tutor, notice):
+    """Benachrichtigung an den Tutor nach Absage, Verschiebung oder Serienende im
+    Portal: E-Mail und/oder Push, je nach NotificationPreference (Typ "portal_change").
+
+    notice: ein dict aus apps.portal.change_notices."""
+    from apps.core.push_service import is_channel_enabled, send_push_notification
+
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+    dashboard_url = f"{site_url}/contracts/{notice['contract_pk']}/" if site_url else ""
+
+    recipient = (tutor.email or "").strip()
+    if recipient and is_channel_enabled(tutor, "portal_change", "email"):
+        context = {
+            "heading": notice["heading"],
+            "intro": notice["intro"],
+            "rows": notice["rows"],
+            "site_url": site_url,
+            "dashboard_url": dashboard_url,
+        }
+        try:
+            send_mail(
+                subject=notice["subject"].replace("\n", " ").replace("\r", " "),
+                message=render_to_string("portal/email/change_notification.txt", context),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient],
+                html_message=render_to_string("portal/email/change_notification.html", context),
+                fail_silently=False,
+            )
+        except Exception:
+            logger.exception("Portal-Benachrichtigung fehlgeschlagen: %s", notice["heading"])
+    elif not recipient:
+        logger.warning(
+            "Tutor %s hat keine E-Mail-Adresse; Portal-Benachrichtigung (E-Mail) übersprungen",
+            tutor.username,
+        )
+
+    send_push_notification(
+        tutor,
+        "portal_change",
+        title=notice["push_title"],
+        body=notice["push_body"],
+        url=dashboard_url or None,
+    )

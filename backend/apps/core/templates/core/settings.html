@@ -478,6 +478,19 @@
                         </label>
                     </span>
                 </div>
+                <div role="group" aria-labelledby="notif-portal-change" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; margin-top: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; max-width: 520px;">
+                    <span id="notif-portal-change">{% trans "Cancellation or rescheduling via portal" %}</span>
+                    <span style="display: flex; gap: 14px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9em;">
+                            <input type="checkbox" name="notify_portal_change_email" {% if notif_pref.notify_portal_change_email %}checked{% endif %}>
+                            {% trans "Email" %}
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9em;">
+                            <input type="checkbox" name="notify_portal_change_push" {% if notif_pref.notify_portal_change_push %}checked{% endif %}>
+                            {% trans "Push" %}
+                        </label>
+                    </span>
+                </div>
                 <div class="settings-actions">
                     <button type="submit" name="save_notifications" class="btn btn-secondary">{% trans "Save" %}</button>
                 </div>

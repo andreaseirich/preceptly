@@ -1,0 +1,13 @@
+{{ heading }} — Preceptly
+
+{{ intro }}
+
+{% for label, value in rows %}{{ label }}: {{ value }}
+{% endfor %}{% if dashboard_url %}
+Schüler ansehen: {{ dashboard_url }}
+{% endif %}
+Diese Nachrichten stellst du in den Einstellungen unter „Benachrichtigungen“ ein.
+
+---
+Preceptly — Nachhilfe-Management
+{{ site_url }}

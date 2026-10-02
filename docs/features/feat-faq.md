@@ -30,16 +30,9 @@ Beide Seiten sind fest auf Deutsch geschrieben, wie der Rest des Portals.
 
 ## Bewusst so beantwortet
 
-- **Absagen und Verschieben im Portal:** Der Tutor bekommt keine eigene
-  Nachricht, und ein abgesagter Termin wird gelöscht. Beide FAQ sagen das
-  offen. Ob das so bleiben soll, ist offen (siehe unten).
+- **Absagen und Verschieben im Portal:** Der Tutor wird benachrichtigt, und
+  abgesagte Termine stehen im Archiv (siehe `feat-portal-absagen.md`).
 - **Datenschutz:** keine Angaben zu Hosting oder Technik, nur der Verweis auf
   die Datenschutzerklärung. Die Rechtstexte kommen von eRecht24.
 - **Konto löschen:** Tutoren wenden sich an die Kontaktdaten im Impressum,
   Familien an ihren Tutor. Eine Löschfunktion zum Selbstbedienen gibt es nicht.
-
-## Offen
-
-- Benachrichtigung des Tutors bei Absage und Verschiebung im Portal.
-- Abgesagte Termine als „abgesagt“ aufbewahren statt löschen, damit
-  nachvollziehbar bleibt, wer wann abgesagt hat.

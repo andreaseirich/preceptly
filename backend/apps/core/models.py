@@ -366,6 +366,9 @@ class NotificationPreference(models.Model):
     notify_portal_booking_push = models.BooleanField(default=True)
     notify_login_reminder_email = models.BooleanField(default=True)
     notify_login_reminder_push = models.BooleanField(default=True)
+    # Absage, Verschiebung und Serienende im Portal (apps/portal/change_notices.py)
+    notify_portal_change_email = models.BooleanField(default=True)
+    notify_portal_change_push = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

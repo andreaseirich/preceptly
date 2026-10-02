@@ -92,6 +92,7 @@ class PortalFaqTest(TestCase):
     def test_template_comments_are_not_rendered(self):
         self.assertNotIn("{#", self.html)
 
-    def test_explains_automatic_status_and_missing_cancel_notice(self):
+    def test_explains_automatic_status_and_what_happens_on_cancelling(self):
         self.assertIn("wechselt automatisch auf „Unterrichtet“", self.html)
-        self.assertIn("bekommt aber keine eigene Nachricht", self.html)
+        self.assertIn("steht er danach bei „Abgesagte Termine“", self.html)
+        self.assertIn("Er bekommt eine Benachrichtigung", self.html)

@@ -282,6 +282,13 @@ class StudentLessonListView(View):
         lessons = Lesson.objects.filter(
             contract=student,
         ).order_by("-date", "-start_time")
+        from django.utils import translation
+
+        from apps.lessons.booking_origin import PORTAL, cancelled_overview
+
+        # Das Portal ist nur deutsch - auch bei englischem Browser.
+        with translation.override("de"):
+            cancelled = cancelled_overview(student, viewer=PORTAL, portal_user=portal_user)
         return render(
             request,
             self.template_name,
@@ -289,6 +296,7 @@ class StudentLessonListView(View):
                 "student": student,
                 "lessons": lessons,
                 "portal_user": portal_user,
+                "cancelled_overview": cancelled,
             },
         )
 
@@ -1059,8 +1067,23 @@ class PortalSessionCancelView(View):
         if session.status != "planned":
             messages.warning(request, "Nur geplante Termine können abgesagt werden.")
         else:
+            from django.db import transaction
+
+            from apps.core.background import run_in_background
+            from apps.lessons.cancellation_service import archive_cancelled
+            from apps.lessons.cancelled_models import CancelledSession
+            from apps.portal.change_notices import cancel_notice
+            from apps.portal.email_service import send_change_notification_portal
+
             date_str = session.date.strftime("%d.%m.%Y")
-            session.delete()
+            tutor = session.contract.user
+            notice = cancel_notice(session, portal_user)
+            # Die Stunde verschwindet aus dem Kalender, bleibt aber im Archiv
+            # nachvollziehbar: wer wann abgesagt hat (cancelled_models.py).
+            with transaction.atomic():
+                archive_cancelled([session], portal_user.user, CancelledSession.VIA_PORTAL)
+                session.delete()
+            run_in_background("Portal-Absage", send_change_notification_portal, tutor, notice)
             messages.success(request, f"Termin am {date_str} wurde abgesagt.")
 
         # Zurück zur richtigen Übersicht
@@ -1175,11 +1198,22 @@ class PortalSessionRescheduleView(View):
                 )
 
         old_date = session.date
+        old_time = session.start_time
         session.date = new_date
         session.start_time = new_time
         # Aus Serienbindung lösen wenn verschoben
         session.recurring_session = None
         session.save()
+        from apps.core.background import run_in_background
+        from apps.portal.change_notices import reschedule_notice
+        from apps.portal.email_service import send_change_notification_portal
+
+        run_in_background(
+            "Portal-Verschiebung",
+            send_change_notification_portal,
+            session.contract.user,
+            reschedule_notice(session, old_date, old_time, portal_user),
+        )
         messages.success(
             request,
             f"Termin vom {old_date.strftime('%d.%m.%Y')} auf {new_date.strftime('%d.%m.%Y')} um {new_time.strftime('%H:%M')} Uhr verschoben.",
@@ -1334,17 +1368,32 @@ class PortalRecurringCancelView(View):
         if not student:
             return HttpResponseForbidden()
 
+        from django.db import transaction
+
+        from apps.core.background import run_in_background
+        from apps.lessons.cancellation_service import archive_cancelled
+        from apps.lessons.cancelled_models import CancelledSession
+        from apps.portal.change_notices import series_cancel_notice
+        from apps.portal.email_service import send_change_notification_portal
+
         today = _dt.date.today()
-        deleted_count, _ = _Session.objects.filter(
+        upcoming = _Session.objects.filter(
             recurring_session=rs,
             date__gte=today,
             status="planned",
-        ).delete()
-
-        rs.is_active = False
-        rs.save()
+        )
+        dropped = list(upcoming)
+        notice = series_cancel_notice(rs, dropped, portal_user)
+        with transaction.atomic():
+            archive_cancelled(dropped, portal_user.user, CancelledSession.VIA_PORTAL_SERIES)
+            upcoming.delete()
+            rs.is_active = False
+            rs.save()
+        run_in_background(
+            "Portal-Serienende", send_change_notification_portal, rs.contract.user, notice
+        )
         messages.success(
-            request, f"Serientermin beendet. {deleted_count} zukünftige Termine gelöscht."
+            request, f"Serientermin beendet. {len(dropped)} zukünftige Termine abgesagt."
         )
         return redirect("portal:recurring_manage", student_pk=student.pk)
 
