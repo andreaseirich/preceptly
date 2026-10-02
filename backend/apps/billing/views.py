@@ -12,7 +12,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
-from django.db.models import Sum
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -31,6 +30,7 @@ from apps.billing.pdf_service import generate_invoice_pdf
 from apps.billing.services import InvoiceService
 from apps.contracts.institute_billing import resolve_institute_billing_config
 from apps.contracts.models import Contract
+from apps.contracts.tier_counting import COUNT_BY_STARTED_HOUR, counted_total
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 
@@ -262,7 +262,13 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                 )
                 if tier_from:
                     prior_qs = prior_qs.filter(date__gte=tier_from)
-                prior_minutes = int(prior_qs.aggregate(t=Sum("duration_minutes"))["t"] or 0)
+                prior_durations = list(prior_qs.values_list("duration_minutes", flat=True))
+                offset = tiered_config.count_offset
+                prior_minutes = sum(int(d or 0) for d in prior_durations) + offset * 60
+                if tiered_config.count_mode == COUNT_BY_STARTED_HOUR:
+                    context["tutorspace_preview_prior_units"] = int(
+                        counted_total(prior_durations, COUNT_BY_STARTED_HOUR, offset)
+                    )
                 context["tutorspace_show_tier_explainer"] = True
                 context["tutorspace_institute_name"] = tiered_institute.institute_name
                 context["tutorspace_preview_prior_minutes"] = prior_minutes

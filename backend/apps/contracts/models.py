@@ -171,6 +171,28 @@ class Institute(models.Model):
             "if the preview or amounts look wrong because many older lessons are included."
         ),
     )
+    tier_count_mode = models.CharField(
+        max_length=20,
+        choices=[
+            ("duration", _("By duration (60 minutes = 1)")),
+            ("started_hours", _("By unit (every started hour = 1)")),
+        ],
+        default="duration",
+        verbose_name=_("how lessons count toward the tiers"),
+        help_text=_(
+            "By unit: a lesson of 30 or 60 minutes counts as 1, one of 120 minutes as 2. "
+            "Pay always follows the duration (30 minutes earn half the hourly rate). "
+            "This only decides how fast you reach the next tier."
+        ),
+    )
+    tier_count_offset = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("start value for the tier counter"),
+        help_text=_(
+            "Hours or units the institute had already counted before the lessons "
+            "recorded here. They are added to the counter."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

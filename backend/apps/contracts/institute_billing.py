@@ -14,10 +14,16 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 
+from apps.contracts.tier_counting import (
+    COUNT_BY_DURATION,
+    COUNT_BY_STARTED_HOUR,
+    started_hours,
+)
 from apps.contracts.tutorspace_compensation import (
     TutorSpaceTier,
-    minutes_before_session_for_institute,
+    durations_before_session_for_institute,
     rate_for_cumulative_minute,
+    rate_for_hour_index,
     tier_boundaries_minutes,
 )
 
@@ -28,6 +34,8 @@ class InstituteBillingConfig:
     unpaid_on_tutor_no_show: bool
     tier_count_from: "date | None" = None  # noqa: F821 - forward ref, avoids top-level import
     tutor_no_show_pay_percent: int = 0
+    count_mode: str = COUNT_BY_DURATION
+    count_offset: int = 0
 
 
 def _tiers_from_json(raw_tiers: list[dict]) -> list[TutorSpaceTier]:
@@ -60,6 +68,8 @@ def resolve_institute_billing_config(institute) -> InstituteBillingConfig | None
         unpaid_on_tutor_no_show=institute.unpaid_on_tutor_no_show,
         tier_count_from=institute.tier_count_from if tiers else None,
         tutor_no_show_pay_percent=institute.tutor_no_show_pay_percent if tiers else 0,
+        count_mode=institute.tier_count_mode if tiers else COUNT_BY_DURATION,
+        count_offset=institute.tier_count_offset if tiers else 0,
     )
 
 
@@ -74,27 +84,39 @@ def calculate_tiered_amount(
     if duration <= 0:
         return Decimal("0.00")
 
-    minutes_before = minutes_before_session_for_institute(
+    durations_before = durations_before_session_for_institute(
         session, tutor, institute, config.tier_count_from
     )
-    boundaries = tier_boundaries_minutes(config.tiers)
     amount = Decimal("0.00")
     remaining = duration
-    cursor = minutes_before
 
-    def next_boundary_after(minute_index: int) -> int | None:
-        for b in boundaries:
-            if b > minute_index:
-                return b
-        return None
+    if config.count_mode == COUNT_BY_STARTED_HOUR:
+        # Jede angefangene Stunde des Termins ist eine Einheit mit eigenem Satz;
+        # bezahlt werden die tatsächlichen Minuten (30 Minuten = halber Satz).
+        unit_index = sum(started_hours(d) for d in durations_before) + config.count_offset
+        while remaining > 0:
+            unit_index += 1
+            chunk = min(60, remaining)
+            rate = rate_for_hour_index(config.tiers, unit_index)
+            amount += (Decimal(chunk) / Decimal("60")) * rate
+            remaining -= chunk
+    else:
+        boundaries = tier_boundaries_minutes(config.tiers)
+        cursor = sum(durations_before) + config.count_offset * 60
 
-    while remaining > 0:
-        rate = rate_for_cumulative_minute(config.tiers, cursor)
-        nb = next_boundary_after(cursor)
-        chunk = remaining if nb is None else min(remaining, nb - cursor)
-        amount += (Decimal(chunk) / Decimal("60")) * rate
-        cursor += chunk
-        remaining -= chunk
+        def next_boundary_after(minute_index: int) -> int | None:
+            for b in boundaries:
+                if b > minute_index:
+                    return b
+            return None
+
+        while remaining > 0:
+            rate = rate_for_cumulative_minute(config.tiers, cursor)
+            nb = next_boundary_after(cursor)
+            chunk = remaining if nb is None else min(remaining, nb - cursor)
+            amount += (Decimal(chunk) / Decimal("60")) * rate
+            cursor += chunk
+            remaining -= chunk
 
     if getattr(session, "tutor_no_show", False):
         pct = max(0, min(100, config.tutor_no_show_pay_percent))

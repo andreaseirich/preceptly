@@ -7445,3 +7445,41 @@ msgstr "Konto, das die Serie angelegt hat"
 #: apps/lessons/booking_origin.py
 msgid "Source: portal_series or tutor"
 msgstr "Quelle: portal_series oder tutor"
+
+#: apps/contracts/tier_counting.py
+msgid "By duration (60 minutes = 1)"
+msgstr "Nach Dauer (60 Minuten = 1)"
+
+#: apps/contracts/tier_counting.py
+msgid "By unit (every started hour = 1)"
+msgstr "Nach Einheit (angefangene Stunde = 1)"
+
+#: apps/contracts/tier_counting.py
+msgid "how lessons count toward the tiers"
+msgstr "Zählweise für die Stufen"
+
+#: apps/contracts/tier_counting.py
+msgid "By unit: a lesson of 30 or 60 minutes counts as 1, one of 120 minutes as 2. Pay always follows the duration (30 minutes earn half the hourly rate). This only decides how fast you reach the next tier."
+msgstr "Nach Einheit: Ein Termin mit 30 oder 60 Minuten zählt als 1, einer mit 120 Minuten als 2. Bezahlt wird immer nach Dauer (30 Minuten bringen den halben Stundensatz). Die Zählweise bestimmt nur, wie schnell du die nächste Stufe erreichst."
+
+#: apps/contracts/tier_counting.py
+msgid "start value for the tier counter"
+msgstr "Startwert für den Stufenzähler"
+
+#: apps/contracts/tier_counting.py
+msgid "Hours or units the institute had already counted before the lessons recorded here. They are added to the counter."
+msgstr "Stunden oder Einheiten, die das Institut schon gezählt hat, bevor die hier erfassten Stunden beginnen. Sie werden zum Zähler addiert."
+
+#: apps/contracts/tier_counting.py
+msgid "units"
+msgstr "Einheiten"
+
+#: apps/billing/templates/billing/invoice_create.html
+#, python-format
+msgid "\n            Before this billing period you already have <strong>%(units)s</strong> units of %(institute)s lessons that count toward the rate tier. Every started hour of a lesson counts as one unit; pay follows the duration. The tiered rate uses this history, not only the table below.\n            "
+msgstr "\n            Vor diesem Abrechnungszeitraum hast du bereits <strong>%(units)s</strong> Einheiten bei %(institute)s, die für die Stufe zählen. Jede angefangene Stunde eines Termins zählt als eine Einheit, bezahlt wird nach Dauer. Der Stufensatz richtet sich nach diesem Verlauf, nicht nur nach der Tabelle unten.\n            "
+
+#: apps/contracts/templates/contracts/institute_list.html
+#, python-format
+msgid "incl. start value %(n)s"
+msgstr "inkl. Startwert %(n)s"

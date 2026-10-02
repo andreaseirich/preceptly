@@ -39,10 +39,10 @@
             <td>
                 {% with p=institute.tier_progress %}
                 {% if p %}
-                    <p style="margin:0;">{% trans "Total taught" %}: {{ p.total_hours|floatformat:2 }} h</p>
-                    <p style="margin:0;">{% trans "Current tier" %}: {{ p.current_tier_label }} ({{ p.hours_in_current_tier|floatformat:2 }} h {% trans "in this tier" %})</p>
+                    <p style="margin:0;">{% trans "Total taught" %}: {{ p.total_hours|floatformat:-2 }} {{ p.unit_label }}{% if p.start_value %} ({% blocktrans with n=p.start_value %}incl. start value {{ n }}{% endblocktrans %}){% endif %}</p>
+                    <p style="margin:0;">{% trans "Current tier" %}: {{ p.current_tier_label }} ({{ p.hours_in_current_tier|floatformat:-2 }} {{ p.unit_label }} {% trans "in this tier" %})</p>
                     {% if p.next_tier_label %}
-                        <p style="margin:0;">{% trans "Next increase" %}: {{ p.next_tier_label }} {% trans "in" %} {{ p.hours_until_next_tier|floatformat:2 }} h</p>
+                        <p style="margin:0;">{% trans "Next increase" %}: {{ p.next_tier_label }} {% trans "in" %} {{ p.hours_until_next_tier|floatformat:-2 }} {{ p.unit_label }}</p>
                         {% if p.estimated_date %}
                             <p style="margin:0;">{% trans "Estimated date" %}: {{ p.estimated_date|date:"d.m.Y" }}</p>
                         {% endif %}

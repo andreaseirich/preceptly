@@ -5,11 +5,12 @@ Services for contract-related calculations (e.g. monthly planning summary).
 from datetime import date, timedelta
 from math import ceil
 
-from django.db.models import Sum
+from django.utils.translation import gettext
 
 from apps.contracts.formsets import iter_contract_months
 from apps.contracts.models import Contract, ContractMonthlyPlan, Institute
-from apps.lessons.models import Lesson, Session
+from apps.contracts.tier_counting import COUNT_BY_STARTED_HOUR, counted_total, tier_pool
+from apps.lessons.models import Lesson
 
 
 def _month_planning_for_contract(
@@ -130,16 +131,17 @@ def get_institute_tier_progress(institute: Institute) -> dict | None:
     if not sorted_tiers:
         return None
 
-    qs = Session.objects.filter(
-        contract__user=institute.user,
-        contract__institute_fk=institute,
-        status__in=["taught", "paid"],
+    # Derselbe Pool und dieselbe Zählweise wie in der Abrechnung (tier_counting.py).
+    mode = institute.tier_count_mode
+    pool = tier_pool(institute)
+    total_hours = round(
+        float(
+            counted_total(
+                pool.values_list("duration_minutes", flat=True), mode, institute.tier_count_offset
+            )
+        ),
+        2,
     )
-    if institute.tier_count_from is not None:
-        qs = qs.filter(date__gte=institute.tier_count_from)
-
-    total_minutes = qs.aggregate(total=Sum("duration_minutes"))["total"] or 0
-    total_hours = round(total_minutes / 60.0, 2)
 
     current_tier = sorted_tiers[0]
     for tier in sorted_tiers:
@@ -156,14 +158,10 @@ def get_institute_tier_progress(institute: Institute) -> dict | None:
     hours_until_next_tier = round(next_tier["hours_from"] - total_hours, 2) if next_tier else None
 
     today = date.today()
-    recent_qs = Session.objects.filter(
-        contract__user=institute.user,
-        contract__institute_fk=institute,
-        status__in=["taught", "paid"],
-        date__gte=today - timedelta(days=90),
+    recent = pool.filter(date__gte=today - timedelta(days=90))
+    daily_rate = (
+        float(counted_total(recent.values_list("duration_minutes", flat=True), mode)) / 90.0
     )
-    recent_minutes = recent_qs.aggregate(total=Sum("duration_minutes"))["total"] or 0
-    daily_rate = recent_minutes / 60.0 / 90.0
 
     estimated_date = None
     if daily_rate > 0 and hours_until_next_tier is not None:
@@ -177,4 +175,6 @@ def get_institute_tier_progress(institute: Institute) -> dict | None:
         "hours_until_next_tier": hours_until_next_tier,
         "estimated_date": estimated_date,
         "institute_name": institute.institute_name,
+        "unit_label": gettext("units") if mode == COUNT_BY_STARTED_HOUR else "h",
+        "start_value": institute.tier_count_offset,
     }

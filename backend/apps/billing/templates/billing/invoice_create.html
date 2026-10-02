@@ -52,11 +52,19 @@
     {% if tutorspace_show_tier_explainer %}
     <div class="tutorflow-help-box" style="border-left: 4px solid rgba(33, 150, 243, 0.6);">
         <p style="margin: 0 0 8px 0;"><strong>{% blocktrans with institute=tutorspace_institute_name %}{{ institute }} – tier calculation{% endblocktrans %}</strong></p>
+        {% if tutorspace_preview_prior_units is not None %}
+        <p style="margin: 0;">
+            {% blocktrans with institute=tutorspace_institute_name units=tutorspace_preview_prior_units %}
+            Before this billing period you already have <strong>{{ units }}</strong> units of {{ institute }} lessons that count toward the rate tier. Every started hour of a lesson counts as one unit; pay follows the duration. The tiered rate uses this history, not only the table below.
+            {% endblocktrans %}
+        </p>
+        {% else %}
         <p style="margin: 0;">
             {% blocktrans with institute=tutorspace_institute_name mins=tutorspace_preview_prior_minutes fh=tutorspace_preview_prior_full_hours rm=tutorspace_preview_prior_remainder_minutes %}
             Before this billing period you already have <strong>{{ mins }}</strong> minutes of {{ institute }} lessons that count toward the rate tier (that is <strong>{{ fh }}</strong> full hours plus <strong>{{ rm }}</strong> minutes). The tiered rate uses this history, not only the table below.
             {% endblocktrans %}
         </p>
+        {% endif %}
         {% if tutorspace_tier_count_from %}
         <p style="margin: 8px 0 0 0;">
             {% blocktrans with d=tutorspace_tier_count_from|date:"SHORT_DATE_FORMAT" %}

@@ -81,8 +81,13 @@ def _session_precedes_in_tier_order(a, b) -> bool:
 
 
 def minutes_before_session_for_institute(session, tutor: User, institute, tier_from) -> int:
+    """Sum of ``durations_before_session_for_institute``."""
+    return sum(durations_before_session_for_institute(session, tutor, institute, tier_from))
+
+
+def durations_before_session_for_institute(session, tutor: User, institute, tier_from) -> list[int]:
     """
-    Sum duration_minutes of sessions of ``institute`` (taught/paid, tutor_no_show=False)
+    duration_minutes of the sessions of ``institute`` (taught/paid, tutor_no_show=False)
     strictly before ``session`` in tier order.
 
     Note: a tutor_no_show session is not in this queryset but still gets a correct total from
@@ -104,8 +109,8 @@ def minutes_before_session_for_institute(session, tutor: User, institute, tier_f
         "id", "date", "start_time", "duration_minutes", "created_at"
     )
 
-    total = 0
-    for row in qs:
-        if _session_precedes_in_tier_order(row, session):
-            total += int(row.duration_minutes or 0)
-    return total
+    return [
+        int(row.duration_minutes or 0)
+        for row in qs
+        if _session_precedes_in_tier_order(row, session)
+    ]

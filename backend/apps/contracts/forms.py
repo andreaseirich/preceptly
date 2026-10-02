@@ -36,6 +36,8 @@ class InstituteForm(forms.ModelForm):
             "unpaid_on_tutor_no_show",
             "tutor_no_show_pay_percent",
             "tier_count_from",
+            "tier_count_mode",
+            "tier_count_offset",
         ]
         widgets = {
             "unpaid_on_tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
@@ -45,7 +47,15 @@ class InstituteForm(forms.ModelForm):
             "tier_count_from": forms.DateInput(
                 attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
             ),
+            "tier_count_mode": forms.Select(attrs={"class": "form-control"}),
+            "tier_count_offset": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Fehlen die Felder im POST, bleibt der gespeicherte Wert erhalten.
+        self.fields["tier_count_mode"].required = False
+        self.fields["tier_count_offset"].required = False
 
     def clean_tiers(self):
         tiers = self.cleaned_data.get("tiers")
@@ -53,6 +63,13 @@ class InstituteForm(forms.ModelForm):
         if error:
             raise forms.ValidationError(error)
         return tiers
+
+    def clean_tier_count_mode(self):
+        return self.cleaned_data.get("tier_count_mode") or self.instance.tier_count_mode
+
+    def clean_tier_count_offset(self):
+        value = self.cleaned_data.get("tier_count_offset")
+        return self.instance.tier_count_offset if value is None else value
 
 
 class ContractForm(forms.ModelForm):
