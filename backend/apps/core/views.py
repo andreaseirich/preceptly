@@ -590,8 +590,9 @@ class TaxYearView(LoginRequiredMixin, TemplateView):
 
         available_year_dates = (
             Invoice.objects.filter(owner=user, status="paid", paid_at__isnull=False)
-            .dates("paid_at", "year")
-            .order_by("-paid_at")
+            # order="DESC" statt .order_by("-paid_at"): Letzteres hebt DISTINCT je Jahr auf
+            # und liefert jedes Jahr so oft, wie es Zahlungstage gibt.
+            .dates("paid_at", "year", order="DESC")
         )
         available_years = [d.year for d in available_year_dates]
         if year not in available_years:
@@ -822,11 +823,9 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
 
 def _euer_data(user, year: int) -> dict:
     """Compute EÜR figures for *user* and *year*. Used by EuerView and EuerPdfView."""
-    available_year_dates = (
-        Invoice.objects.filter(owner=user, status="paid", paid_at__isnull=False)
-        .dates("paid_at", "year")
-        .order_by("-paid_at")
-    )
+    available_year_dates = Invoice.objects.filter(
+        owner=user, status="paid", paid_at__isnull=False
+    ).dates("paid_at", "year", order="DESC")
     available_years = [d.year for d in available_year_dates]
     if year not in available_years:
         available_years = sorted(set(available_years + [year]), reverse=True)
