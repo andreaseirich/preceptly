@@ -13,8 +13,7 @@ from django.urls import reverse
 
 from apps.contracts.models import Contract
 from apps.core.models import NotificationPreference, UserProfile
-from apps.lessons.cancelled_models import CancelledSession
-from apps.lessons.models import Session
+from apps.lessons.models import CancelledSession, Session
 from apps.lessons.recurring_models import RecurringSession
 from apps.portal.models import ParentStudentLink, PortalUser
 

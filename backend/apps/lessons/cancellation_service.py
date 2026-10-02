@@ -1,6 +1,6 @@
 """Abgesagte Stunden ins Archiv schreiben, bevor sie gelöscht werden."""
 
-from apps.lessons.cancelled_models import CancelledSession
+from apps.lessons.models import CancelledSession
 
 
 def archive_cancelled(sessions, cancelled_by, via) -> list[CancelledSession]:

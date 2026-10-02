@@ -1071,7 +1071,7 @@ class PortalSessionCancelView(View):
 
             from apps.core.background import run_in_background
             from apps.lessons.cancellation_service import archive_cancelled
-            from apps.lessons.cancelled_models import CancelledSession
+            from apps.lessons.models import CancelledSession
             from apps.portal.change_notices import cancel_notice
             from apps.portal.email_service import send_change_notification_portal
 
@@ -1372,7 +1372,7 @@ class PortalRecurringCancelView(View):
 
         from apps.core.background import run_in_background
         from apps.lessons.cancellation_service import archive_cancelled
-        from apps.lessons.cancelled_models import CancelledSession
+        from apps.lessons.models import CancelledSession
         from apps.portal.change_notices import series_cancel_notice
         from apps.portal.email_service import send_change_notification_portal
 

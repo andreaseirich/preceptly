@@ -121,7 +121,7 @@ def cancellation_info(record, viewer=TUTOR, portal_user=None) -> CancellationInf
 
 def cancelled_overview(contract, viewer=TUTOR, portal_user=None, limit=20) -> list[tuple]:
     """Die zuletzt abgesagten Termine eines Vertrags als (CancelledSession, CancellationInfo)."""
-    from apps.lessons.cancelled_models import CancelledSession
+    from apps.lessons.models import CancelledSession
 
     records = CancelledSession.objects.filter(contract=contract).select_related(
         "contract",

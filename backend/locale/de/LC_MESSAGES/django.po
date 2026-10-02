@@ -7491,3 +7491,48 @@ msgstr "mit der ganzen Serie über das Portal"
 #: apps/lessons/booking_origin.py
 msgid "Cancellation or rescheduling via portal"
 msgstr "Absage oder Verschiebung im Portal"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Getting started & account"
+msgstr "Erste Schritte & Konto"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Plans & subscription"
+msgstr "Tarife & Abo"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Students & contracts"
+msgstr "Schüler & Verträge"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Student & family portal"
+msgstr "Schüler- und Elternportal"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Online meetings"
+msgstr "Online-Meetings"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "AI lesson plans"
+msgstr "KI-Lektionspläne"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Calendar sync"
+msgstr "Kalender-Synchronisierung"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "App & notifications"
+msgstr "App & Benachrichtigungen"
+
+#: apps/core/templates/core/base.html
+msgctxt "FAQ nav dropdown"
+msgid "Privacy & security"
+msgstr "Datenschutz & Sicherheit"

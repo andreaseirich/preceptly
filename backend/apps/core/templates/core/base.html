@@ -167,7 +167,7 @@
         nav .nav-dropdown-toggle { background: transparent; color: white; border: none; font: inherit; padding: 8px 15px; border-radius: 3px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
         nav .nav-dropdown-toggle:hover, nav .nav-dropdown.open .nav-dropdown-toggle { background: var(--hover-bg); }
         nav .nav-dropdown-caret { font-size: 0.75em; }
-        nav .nav-dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: var(--bg-nav); border-radius: 4px; box-shadow: 0 4px 10px var(--shadow); padding: 6px; z-index: 1001; }
+        nav .nav-dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: var(--bg-nav); border-radius: 4px; box-shadow: 0 4px 10px var(--shadow); padding: 6px; z-index: 1001; max-height: 75vh; overflow-y: auto; }
         nav .nav-dropdown-menu a { display: block; padding: 8px 12px; }
         nav .nav-dropdown.open .nav-dropdown-menu,
         nav .nav-dropdown:hover .nav-dropdown-menu,
@@ -362,6 +362,9 @@
                 background: var(--hover-bg);
                 border-radius: 0;
                 padding: 0;
+                /* Das ganze Menü scrollt schon (nav-links.active) - kein zweites Scroll-Feld darin. */
+                max-height: none;
+                overflow: visible;
             }
             nav .nav-dropdown.open .nav-dropdown-menu { display: block; }
             nav .nav-dropdown-menu a { padding: 15px 20px 15px 40px; border-bottom: 1px solid var(--border-color); }
@@ -555,12 +558,21 @@
                     </button>
                     <div class="nav-dropdown-menu" id="navDropdownFaq" role="menu">
                         <a href="{% url 'core:faq' %}" role="menuitem">{% trans "Overview" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#einnahmen" role="menuitem">{% trans "Income & billing" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#rechnungen" role="menuitem">{% trans "Invoices" %}</a>
+                        <a href="{% url 'core:faq' %}#erste-schritte" role="menuitem">{% trans "Getting started & account" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#tarife" role="menuitem">{% trans "Plans & subscription" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#schueler" role="menuitem">{% trans "Students & contracts" context "FAQ nav dropdown" %}</a>
                         <a href="{% url 'core:faq' %}#stunden" role="menuitem">{% trans "Lessons" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#rechnungen" role="menuitem">{% trans "Invoices" %}</a>
+                        <a href="{% url 'core:faq' %}#einnahmen" role="menuitem">{% trans "Income & billing" context "FAQ nav dropdown" %}</a>
                         <a href="{% url 'core:faq' %}#steuern" role="menuitem">{% trans "Taxes & EÜR" context "FAQ nav dropdown" %}</a>
                         <a href="{% url 'core:faq' %}#berichte" role="menuitem">{% trans "Reports" context "FAQ nav dropdown" %}</a>
                         <a href="{% url 'core:faq' %}#gestaffelte-verguetung" role="menuitem">{% trans "Tiered pay" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#portal" role="menuitem">{% trans "Student & family portal" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#meetings" role="menuitem">{% trans "Online meetings" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#ki" role="menuitem">{% trans "AI lesson plans" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#kalender-sync" role="menuitem">{% trans "Calendar sync" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#app" role="menuitem">{% trans "App & notifications" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#datenschutz" role="menuitem">{% trans "Privacy & security" context "FAQ nav dropdown" %}</a>
                     </div>
                 </div>
                 {% if user.is_authenticated %}
