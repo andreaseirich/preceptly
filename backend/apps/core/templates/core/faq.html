@@ -5,43 +5,120 @@
 
 {% block content %}
 <h1>Häufige Fragen (FAQ)</h1>
-{# Section jump links now live in the "FAQ" nav dropdown in base.html. #}
+<p style="color: var(--text-secondary);">Antworten für Nachhilfelehrer. Schüler und Eltern finden ihre eigene Hilfe im Portal unter „Hilfe &amp; FAQ“.</p>
 
-{# ======= EINNAHMEN ======= #}
-<section id="einnahmen">
-  <h2>Einnahmen &amp; Abrechnung</h2>
-
-  <h3>Wie werden die Beträge in der Einnahmenübersicht ermittelt?</h3>
-  <ul>
-    <li><strong>Stunde bereits auf einer Rechnung:</strong> Summe aller Rechnungspositionen zu dieser Stunde – identisch mit der Abrechnung.</li>
-    <li><strong>Stunde noch nicht verrechnet:</strong> Dieselben Regeln wie beim Erstellen einer Rechnung (bei Instituten mit gestaffelter Vergütung: Stufenvergütung aus kumulierten Stunden; sonst: Dauer ÷ Einheitslänge × Vertragssatz).</li>
-    <li><strong>Realisierte Einnahmen:</strong> Nur einzelne Stunden, die auf einer als „bezahlt" markierten Rechnung stehen – zugeordnet zu dem Monat, in dem die Stunde stattfand, unabhängig vom Abrechnungszeitraum der Rechnung.</li>
+{# Die Sprunglinks im FAQ-Menü (base.html) decken nur einen Teil ab - diese Liste ist vollständig. #}
+{# Bewusst kein nav-Element: base.html gestaltet jedes nav als Hauptnavigation. #}
+<div role="navigation" aria-label="Inhalt der FAQ" style="margin: 20px 0 8px;">
+  <h2 style="font-size: 1.1em; margin-bottom: 8px;">Themen</h2>
+  <ul style="columns: 2 240px; column-gap: 32px; padding-left: 1.2em; margin: 0;">
+    <li><a href="#erste-schritte">Erste Schritte &amp; Konto</a></li>
+    <li><a href="#tarife">Tarife &amp; Abo</a></li>
+    <li><a href="#schueler">Schüler &amp; Verträge</a></li>
+    <li><a href="#stunden">Stunden &amp; Kalender</a></li>
+    <li><a href="#rechnungen">Rechnungen</a></li>
+    <li><a href="#einnahmen">Einnahmen &amp; Abrechnung</a></li>
+    <li><a href="#steuern">Steuern &amp; EÜR</a></li>
+    <li><a href="#berichte">Berichte</a></li>
+    <li><a href="#gestaffelte-verguetung">Gestaffelte Vergütung</a></li>
+    <li><a href="#portal">Schüler- und Elternportal</a></li>
+    <li><a href="#meetings">Online-Meetings</a></li>
+    <li><a href="#ki">KI-Lektionspläne</a></li>
+    <li><a href="#kalender-sync">Kalender-Synchronisierung</a></li>
+    <li><a href="#app">App &amp; Benachrichtigungen</a></li>
+    <li><a href="#datenschutz">Datenschutz &amp; Sicherheit</a></li>
   </ul>
+</div>
 
-  <h3>Warum weicht die Monatssumme von meinen tatsächlichen Einnahmen ab?</h3>
-  <p>Die realisierten Einnahmen zählen nur einzelne Stunden auf <strong>bezahlten Rechnungen</strong> und ordnen sie nach dem Datum der jeweiligen Stunde ein – nicht nach dem Abrechnungszeitraum der Rechnung. Eine Rechnung, die Stunden aus mehreren Monaten enthält, wird also auf diese Monate aufgeteilt.</p>
+{# ======= ERSTE SCHRITTE ======= #}
+<section id="erste-schritte" style="margin-top: 40px;">
+  <h2>Erste Schritte &amp; Konto</h2>
 
-  <h3>Was bedeuten die Spalten in der Jahresübersicht?</h3>
-  <p>Jede Zeile zeigt den Kalendermonat. Die realisierte Einnahme ist die Summe aller einzelnen Stunden, die in diesem Monat stattfanden und auf einer bezahlten Rechnung stehen – unabhängig davon, wann die zugehörige Rechnung beginnt oder bezahlt wurde.</p>
+  <h3>Was ist Preceptly?</h3>
+  <p>Preceptly ist eine Verwaltung für Nachhilfelehrer. Du pflegst Schüler und Verträge, planst Stunden mit Konflikterkennung, erstellst Rechnungen als PDF und siehst deine Einnahmen. In den bezahlten Tarifen kommen ein Portal für Schüler und Eltern, Online-Meetings und weitere Funktionen dazu.</p>
+
+  <h3>Wie fange ich an?</h3>
+  <ol>
+    <li><a href="{% url 'core:register' %}">Registriere dich</a> kostenlos. Eine Kreditkarte brauchst du nicht.</li>
+    <li>Lege einen Schüler an. Dabei entsteht sein Vertrag mit Stundensatz und Länge einer Einheit.</li>
+    <li>Trage die Stunden im Kalender ein.</li>
+    <li>Hinterlege in den <a href="{% url 'core:settings' %}">Einstellungen</a> deine Rechnungsdaten und erstelle am Ende des Zeitraums eine Rechnung.</li>
+  </ol>
+
+  <h3>Kann ich Preceptly ausprobieren, ohne mich zu registrieren?</h3>
+  <p>Ja. Auf der <a href="{% url 'core:landing' %}">Startseite</a> stehen Demo-Zugänge mit Beispieldaten.</p>
+
+  <h3>Wozu brauche ich eine E-Mail-Adresse?</h3>
+  <p>Über sie stellst du den Zugang wieder her, wenn du dein Passwort vergessen hast, und du bekommst wichtige Hinweise zu deinem Konto. Nach der Registrierung schicken wir dir einen Link, mit dem du die Adresse bestätigst.</p>
+
+  <h3>Ich habe mein Passwort vergessen. Was jetzt?</h3>
+  <p>Wähle auf der Anmeldeseite <a href="{% url 'core:password_reset' %}">„Passwort vergessen“</a> und gib deine E-Mail-Adresse ein. Der Link in der E-Mail gilt eine Stunde. Danach forderst du einfach einen neuen an.</p>
+
+  <h3>Wie ändere ich meine E-Mail-Adresse?</h3>
+  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „E-Mail-Adresse“. Wir schicken einen Link an die neue Adresse. Erst wenn du ihn anklickst, gilt die Änderung, und deine alte Adresse wird darüber informiert. Die Adresse, die für Zahlungen bei Stripe hinterlegt ist, bleibt davon unberührt.</p>
+
+  <h3>Kann ich die Sprache und das Design umstellen?</h3>
+  <p>Ja. Oben in der Leiste wechselst du zwischen Deutsch und Englisch und schaltest mit dem Mond-Symbol das dunkle Design ein.</p>
+
+  <h3>Wofür ist die Zeitzone in den Einstellungen?</h3>
+  <p>Sie bestimmt, wie Uhrzeiten für dich und für deine Schüler im Portal angezeigt werden. Wähle die Zeitzone, in der du unterrichtest.</p>
 </section>
 
-{# ======= RECHNUNGEN ======= #}
-<section id="rechnungen" style="margin-top: 40px;">
-  <h2>Rechnungen</h2>
+{# ======= TARIFE ======= #}
+<section id="tarife" style="margin-top: 40px;">
+  <h2>Tarife &amp; Abo</h2>
 
-  <h3>Welche Stunden kommen auf eine neue Rechnung?</h3>
-  <p>Alle Stunden mit Status <strong>Unterrichtet</strong> im gewählten Zeitraum werden automatisch einbezogen. Stunden mit Status <em>Geplant</em> oder <em>Bezahlt</em> werden nicht berücksichtigt. Eine Stunde kann nur auf einer Rechnung erscheinen – bereits abgerechnete Stunden werden automatisch ausgeschlossen.</p>
+  <h3>Welche Tarife gibt es?</h3>
+  <ul>
+    <li><strong>Basic (kostenlos):</strong> Terminplanung mit Konflikterkennung, Schüler und Verträge, Rechnungen als PDF, Einnahmenübersicht, Stundennotizen und Hausaufgaben.</li>
+    <li><strong>Starter (4,99 € im Monat):</strong> zusätzlich wiederkehrende Stunden und Blockzeiten, Dokumente (3 je Schüler), Statusfilter für Rechnungen, das Schülerportal und bis zu 3 Portal-Buchungen im Monat.</li>
+    <li><strong>Pro (9,99 € im Monat):</strong> alles aus Starter, dazu unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und Serien, EÜR-Export, Familien-Zugang, Meetingräume, KI-Lektionspläne und erweiterte Berichte.</li>
+    <li><strong>Business (19,99 € im Monat):</strong> alles aus Pro, dazu bevorzugter Support und früher Zugang zu neuen Funktionen.</li>
+  </ul>
+  <p>Die aktuelle Übersicht steht auf der <a href="{% url 'core:landing' %}#pricing">Preisseite</a>.</p>
 
-  <h3>Kann ich eine Rechnung nach bestimmten Verträgen oder Instituten filtern?</h3>
-  <p>Ja. Beim Erstellen einer Rechnung kannst du optional ein Institut oder einen einzelnen Vertrag auswählen. Dann werden nur Stunden des entsprechenden Vertrags abgerechnet.</p>
+  <h3>Gibt es eine Testphase?</h3>
+  <p>Ja. Bei deinem ersten Abo ist der erste Monat kostenlos. In dieser Zeit kannst du jederzeit kündigen.</p>
 
-  <h3>Was passiert, wenn ich eine Rechnung lösche?</h3>
-  <p>Die Stunden werden wieder auf „Unterrichtet" zurückgesetzt und können erneut abgerechnet werden.</p>
+  <h3>Wie buche, ändere oder kündige ich mein Abo?</h3>
+  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „Abonnement“. Die Zahlung läuft über Stripe. Dort verwaltest du auch deine Zahlungsart, siehst deine Abo-Rechnungen und kündigst.</p>
+
+  <h3>Was passiert mit meinen Daten, wenn ich kündige oder in einen kleineren Tarif wechsle?</h3>
+  <p>Deine Schüler, Stunden und Rechnungen bleiben erhalten. Die Funktionen des höheren Tarifs stehen nicht mehr zur Verfügung, bis du ihn wieder buchst. Schüler und Eltern sehen im Portal dann einen Hinweis, den Termin direkt mit dir abzusprechen.</p>
+
+  <h3>Was zählt als Portal-Buchung?</h3>
+  <p>Jeder einzelne Termin, den ein Schüler oder Elternteil im laufenden Kalendermonat selbst im Portal bucht. Stunden, die du einträgst, zählen nicht. Im Starter-Tarif sind 3 solche Buchungen im Monat enthalten, ab Pro beliebig viele.</p>
+
+  <h3>Gibt es im kostenlosen Tarif Grenzen?</h3>
+  <p>Ab 5 Schülern und ab 8 Rechnungen im Monat zeigt Preceptly einen Hinweis auf die bezahlten Tarife. Gespeichert wird trotzdem.</p>
+
+  <h3>Bekomme ich etwas, wenn ich Preceptly empfehle?</h3>
+  <p>Ja. In den <a href="{% url 'core:settings' %}">Einstellungen</a> findest du deinen Einladungslink. Für jeden Freund, dessen Abo aktiv wird, bekommst du einen Monat kostenlos.</p>
+</section>
+
+{# ======= SCHÜLER & VERTRÄGE ======= #}
+<section id="schueler" style="margin-top: 40px;">
+  <h2>Schüler &amp; Verträge</h2>
+
+  <h3>Was ist der Unterschied zwischen Schüler und Vertrag?</h3>
+  <p>In Preceptly gehört zu jedem Schüler ein Vertrag. Er enthält den Satz, die Länge einer Einheit (zum Beispiel 45 oder 60 Minuten), das Startdatum und auf Wunsch ein Enddatum. Aus diesen Angaben berechnet Preceptly den Betrag jeder Stunde.</p>
+
+  <h3>Wie unterscheide ich Privatunterricht und Unterricht für ein Institut?</h3>
+  <p>Beim Anlegen des Vertrags wählst du eines deiner <a href="{% url 'contracts:institute_list' %}">Institute</a> oder „Kein Institut“ für Privatunterricht. Für ein Institut gelten dessen eigene Regeln, etwa eine <a href="#gestaffelte-verguetung">gestaffelte Vergütung</a>.</p>
+
+  <h3>Was bedeutet die monatliche Planung mit geplanten Einheiten?</h3>
+  <p>Du kannst für jeden Monat festlegen, wie viele Einheiten mit dem Schüler vereinbart sind. Planst du mehr Stunden ein, zeigt Preceptly das als Konflikt „Vertragsquote überschritten“. Nicht genutzte Einheiten werden in den nächsten Monat übernommen.</p>
+
+  <h3>Ein Schüler pausiert oder hört auf. Was mache ich?</h3>
+  <p>Setze ihn auf inaktiv oder trage ein Enddatum im Vertrag ein. Seine bisherigen Stunden und Rechnungen bleiben erhalten.</p>
+
+  <h3>Kann ich Unterrichtsmaterial hinterlegen?</h3>
+  <p>Ja, ab dem Starter-Tarif. Dokumente, die du bei einem Schüler hochlädst, sieht die Familie im Portal. Im Starter-Tarif sind es bis zu 3 Dokumente je Schüler, ab Pro beliebig viele.</p>
 </section>
 
 {# ======= STUNDEN ======= #}
 <section id="stunden" style="margin-top: 40px;">
-  <h2>Stunden</h2>
+  <h2>Stunden &amp; Kalender</h2>
 
   <h3>Was sind die Stundenstatus?</h3>
   <ul>
@@ -51,11 +128,79 @@
     <li><strong>Bezahlt:</strong> Die Stunde ist auf einer bezahlten Rechnung.</li>
   </ul>
 
+  <h3>Warum steht eine Stunde auf „Unterrichtet“, obwohl ich nichts geändert habe?</h3>
+  <p>Preceptly setzt eine geplante Stunde automatisch auf „Unterrichtet“, sobald ihre Endzeit vorbei ist. Hat die Stunde nicht stattgefunden, stelle sie auf „Ausgefallen“ oder lösche sie, bevor du abrechnest. „Ausgefallen“ und „Bezahlt“ überschreibt die Automatik nie.</p>
+
+  <h3>Wo sehe ich, wer eine Stunde gebucht hat?</h3>
+  <p>Auf der Detailseite der Stunde in der Zeile „Gebucht“: mit Zeitpunkt, Weg (zum Beispiel über das Portal) und Konto. Das Konto wird seit dem 29.09.2026 gespeichert. Ältere Stunden zeigen nur den Zeitpunkt.</p>
+
+  <h3>Was ist ein Konflikt?</h3>
+  <p>Preceptly warnt, wenn sich eine Stunde mit einer anderen Stunde oder einer Blockzeit überschneidet oder wenn die Vertragsquote des Monats überschritten ist. Fahrzeiten vor und nach der Stunde zählen dabei mit. Die Stunde wird trotzdem gespeichert. Du entscheidest, ob du etwas änderst.</p>
+
+  <h3>Wofür sind die Fahrzeiten?</h3>
+  <p>Wenn du zu Schülern fährst, trägst du die Zeit vor und nach der Stunde ein. Sie wird im Kalender mit eingeplant und nicht abgerechnet.</p>
+
+  <h3>Was bedeutet „Tutor-Ausfall“?</h3>
+  <p>Damit markierst du eine Stunde, die du selbst versäumt hast. Für Institute legst du fest, ob solche Stunden mit 0 € abgerechnet werden oder welchen Anteil der Vergütung du behältst.</p>
+
   <h3>Was sind wiederkehrende Stunden?</h3>
-  <p>Mit wiederkehrenden Stunden legst du eine Serienstunde an (z. B. „jeden Montag um 14 Uhr"). Nach dem Speichern werden alle Einzelstunden für den angegebenen Zeitraum automatisch generiert. Du kannst einzelne Stunden der Serie später noch bearbeiten oder löschen.</p>
+  <p>Mit wiederkehrenden Stunden legst du eine Serie an, zum Beispiel „jeden Montag um 14 Uhr“. Nach dem Speichern erzeugt Preceptly alle Einzelstunden für den angegebenen Zeitraum. Einzelne Stunden der Serie kannst du später noch bearbeiten oder löschen. Serien gibt es ab dem Starter-Tarif.</p>
 
   <h3>Kann ich eine einzelne Stunde aus einer Wiederholungsserie ändern?</h3>
-  <p>Ja. Beim Bearbeiten einer Stunde kannst du wählen, ob du nur diese eine Stunde oder alle zukünftigen Stunden der Serie ändern möchtest.</p>
+  <p>Ja. Beim Bearbeiten einer Stunde wählst du, ob du nur diese eine Stunde oder alle zukünftigen Stunden der Serie ändern möchtest.</p>
+
+  <h3>Was sind Blockzeiten?</h3>
+  <p>Zeiten, in denen du nicht unterrichten kannst, etwa Urlaub oder ein Arzttermin. Im Portal erscheinen sie als belegt, ohne Details. Blockzeiten gibt es ab dem Starter-Tarif. Über die <a href="#kalender-sync">Kalender-Synchronisierung</a> kannst du sie auch aus deinem privaten Kalender übernehmen.</p>
+</section>
+
+{# ======= RECHNUNGEN ======= #}
+<section id="rechnungen" style="margin-top: 40px;">
+  <h2>Rechnungen</h2>
+
+  <h3>Welche Stunden kommen auf eine neue Rechnung?</h3>
+  <p>Alle Stunden mit Status <strong>Unterrichtet</strong> im gewählten Zeitraum werden automatisch einbezogen. Stunden mit Status <em>Geplant</em> oder <em>Bezahlt</em> werden nicht berücksichtigt. Eine Stunde kann nur auf einer Rechnung erscheinen. Bereits abgerechnete Stunden werden automatisch ausgeschlossen.</p>
+
+  <h3>Kann ich eine Rechnung nach bestimmten Verträgen oder Instituten filtern?</h3>
+  <p>Ja. Beim Erstellen einer Rechnung kannst du ein Institut oder einen einzelnen Vertrag auswählen. Dann werden nur dessen Stunden abgerechnet. Stunden für ein Institut mit eigenen Abrechnungsregeln kommen nur auf eine Rechnung, wenn du dieses Institut oder einen seiner Verträge auswählst.</p>
+
+  <h3>Wie werden Rechnungen nummeriert?</h3>
+  <p>Fortlaufend ab <code>INV-0001</code>, für jeden Tutor getrennt und in allen Tarifen. Stornorechnungen laufen in derselben Folge mit.</p>
+
+  <h3>Woher kommen Name, Adresse und Steuernummer auf der PDF?</h3>
+  <p>Aus den Rechnungsdaten in den <a href="{% url 'core:settings' %}">Einstellungen</a>. Dort trägst du auch deine Steuernummer oder USt-IdNr. ein und schaltest den Hinweis auf die Kleinunternehmerregelung (§ 19 UStG) ein.</p>
+
+  <h3>Verschickt Preceptly die Rechnung an meinen Kunden?</h3>
+  <p>Nein. Du lädst die PDF herunter und verschickst sie selbst. Danach markierst du die Rechnung als versendet.</p>
+
+  <h3>Kann ich eine versendete Rechnung noch ändern oder löschen?</h3>
+  <p>Nein. Ändern und löschen kannst du nur Entwürfe. Sobald eine Rechnung als versendet markiert ist, wird ihre PDF festgeschrieben, damit die Fassung erhalten bleibt, die dein Kunde bekommen hat.</p>
+
+  <h3>Wie korrigiere ich eine versendete oder bezahlte Rechnung?</h3>
+  <p>Du stornierst sie. Preceptly erzeugt eine Stornorechnung mit eigener Nummer und negativen Beträgen, die auf das Original verweist. Beide Rechnungen stehen danach auf „storniert“ und zählen nicht mehr als Umsatz. Die Stunden gelten wieder als unterrichtet, und du kannst sie neu abrechnen.</p>
+
+  <h3>Was passiert, wenn ich einen Entwurf lösche?</h3>
+  <p>Die Stunden stehen wieder als „Unterrichtet“ bereit und können erneut abgerechnet werden.</p>
+
+  <h3>Wie markiere ich eine Rechnung als bezahlt?</h3>
+  <p>Auf der Rechnung trägst du das Zahlungsdatum ein. Die Stunden der Rechnung bekommen den Status „Bezahlt“ und zählen ab dann zu den realisierten Einnahmen.</p>
+</section>
+
+{# ======= EINNAHMEN ======= #}
+<section id="einnahmen" style="margin-top: 40px;">
+  <h2>Einnahmen &amp; Abrechnung</h2>
+
+  <h3>Wie werden die Beträge in der Einnahmenübersicht ermittelt?</h3>
+  <ul>
+    <li><strong>Stunde bereits auf einer Rechnung:</strong> Summe aller Rechnungspositionen zu dieser Stunde, identisch mit der Abrechnung.</li>
+    <li><strong>Stunde noch nicht verrechnet:</strong> Dieselben Regeln wie beim Erstellen einer Rechnung. Bei Instituten mit gestaffelter Vergütung gilt der Stufensatz, sonst Dauer ÷ Einheitslänge × Vertragssatz.</li>
+    <li><strong>Realisierte Einnahmen:</strong> Nur Stunden, die auf einer als „bezahlt“ markierten Rechnung stehen. Sie werden dem Monat zugeordnet, in dem die Stunde stattfand, unabhängig vom Abrechnungszeitraum der Rechnung.</li>
+  </ul>
+
+  <h3>Warum weicht die Monatssumme von meinen tatsächlichen Einnahmen ab?</h3>
+  <p>Die realisierten Einnahmen zählen nur Stunden auf <strong>bezahlten Rechnungen</strong> und ordnen sie nach dem Datum der Stunde ein, nicht nach dem Abrechnungszeitraum der Rechnung. Eine Rechnung mit Stunden aus mehreren Monaten wird also auf diese Monate aufgeteilt. Stornierte Rechnungen zählen nicht mit.</p>
+
+  <h3>Was bedeuten die Spalten in der Jahresübersicht?</h3>
+  <p>Jede Zeile zeigt einen Kalendermonat. Die realisierte Einnahme ist die Summe aller Stunden, die in diesem Monat stattfanden und auf einer bezahlten Rechnung stehen, unabhängig davon, wann die Rechnung beginnt oder bezahlt wurde.</p>
 </section>
 
 {# ======= STEUERN ======= #}
@@ -63,24 +208,33 @@
   <h2>Steuern &amp; EÜR</h2>
 
   <h3>Was zeigt die EÜR-Ansicht?</h3>
-  <p>Die EÜR (Einnahmen-Überschuss-Rechnung) folgt dem <strong>Zufluss-Prinzip</strong> (§ 4 Abs. 3 EStG): Nur Rechnungen, deren Zahlungsdatum im gewählten Jahr liegt, werden einbezogen. Das entspricht der deutschen Steuererklärung für Freiberufler.</p>
+  <p>Die EÜR (Einnahmen-Überschuss-Rechnung) folgt dem <strong>Zufluss-Prinzip</strong> (§ 4 Abs. 3 EStG): Nur Rechnungen, deren Zahlungsdatum im gewählten Jahr liegt, werden einbezogen. Das entspricht der deutschen Steuererklärung für Freiberufler. Den EÜR-Export gibt es ab dem Pro-Tarif.</p>
 
-  <h3>Wann gilt eine Rechnung als „zugeflossen"?</h3>
-  <p>Wenn du in Preceptly ein Zahlungsdatum einträgst (Rechnung als bezahlt markieren). Das Datum der Rechnungsstellung oder des Abrechnungszeitraums ist für die EÜR nicht maßgeblich.</p>
+  <h3>Wann gilt eine Rechnung als „zugeflossen“?</h3>
+  <p>Wenn du in Preceptly ein Zahlungsdatum einträgst, also die Rechnung als bezahlt markierst. Das Datum der Rechnungsstellung oder des Abrechnungszeitraums ist für die EÜR nicht maßgeblich.</p>
+
+  <h3>Kann ich auch Ausgaben erfassen?</h3>
+  <p>Ja. Ausgaben wie Material oder Fahrtkosten trägst du unter „Ausgaben“ ein. Sie fließen in die EÜR ein.</p>
+
+  <h3>Ersetzt Preceptly meinen Steuerberater?</h3>
+  <p>Nein. Preceptly stellt deine Zahlen zusammen, berät aber nicht steuerlich. Kläre Fragen zu deiner Steuererklärung mit einem Steuerberater oder dem Finanzamt.</p>
 </section>
 
 {# ======= BERICHTE ======= #}
 <section id="berichte" style="margin-top: 40px;">
   <h2>Berichte</h2>
 
-  <h3>Was bedeutet „Realisierte Einnahmen" im Bericht?</h3>
+  <h3>Was bedeutet „Realisierte Einnahmen“ im Bericht?</h3>
   <p>Summe aller bezahlten Rechnungen für den gewählten Monat, geordnet nach dem Startdatum des Abrechnungszeitraums.</p>
 
-  <h3>Was bedeutet „Unterrichtet, nicht verrechnet"?</h3>
-  <p>Stunden mit Status „Unterrichtet", die noch auf keiner Rechnung stehen. Der angezeigte Betrag wird nach denselben Regeln berechnet wie beim Erstellen einer neuen Rechnung (inklusive gestaffelter Vergütung, falls für das Institut konfiguriert).</p>
+  <h3>Was bedeutet „Unterrichtet, nicht verrechnet“?</h3>
+  <p>Stunden mit Status „Unterrichtet“, die noch auf keiner Rechnung stehen. Der angezeigte Betrag wird nach denselben Regeln berechnet wie beim Erstellen einer neuen Rechnung, einschließlich gestaffelter Vergütung, falls sie für das Institut eingerichtet ist.</p>
 
   <h3>Wie werden die Top-Stunden pro Schüler berechnet?</h3>
-  <p>Zählt alle Stunden mit Status „Unterrichtet" oder „Bezahlt" im gewählten Kalendermonat nach Stundendatum.</p>
+  <p>Gezählt werden alle Stunden mit Status „Unterrichtet“ oder „Bezahlt“ im gewählten Kalendermonat, nach dem Datum der Stunde.</p>
+
+  <h3>In welchem Tarif gibt es die Berichte?</h3>
+  <p>Die erweiterten Berichte gehören zum Pro-Tarif. Die Einnahmenübersicht gibt es in jedem Tarif.</p>
 </section>
 
 {# ======= GESTAFFELTE VERGÜTUNG ======= #}
@@ -88,36 +242,139 @@
   <h2>Gestaffelte Vergütung pro Institut</h2>
 
   <h3>Wie funktioniert die gestaffelte Vergütung?</h3>
-  <p>Für ein Institut mit gestaffelter Vergütung steigt der Stundensatz mit der kumulierten Gesamtstundenzahl. Preceptly zählt alle vorherigen Stunden dieses Instituts (ab dem konfigurierten Startdatum in den Einstellungen) und wendet den entsprechenden Stufensatz automatisch bei der Abrechnung an.</p>
+  <p>Bei einem Institut mit gestaffelter Vergütung steigt dein Satz mit der Zahl der Stunden, die du insgesamt für dieses Institut unterrichtet hast. Preceptly zählt die bisherigen Stunden des Instituts ab dem eingestellten Zählbeginn und wendet bei der Abrechnung automatisch den passenden Stufensatz an.</p>
 
   <h3>Wie richte ich das für ein Institut ein?</h3>
-  <p>Unter <a href="{% url 'contracts:institute_list' %}">Institute</a> kannst du jedes Institut anlegen und dort eigene Stufen (ab wie vielen Stunden welcher Satz gilt), die Regel „bei Tutor-Ausfall nicht abrechnen" sowie den Stufenfortschritt einsehen. Beim Anlegen eines Vertrags wählst du dann eines deiner Institute aus, oder „Kein Institut" für Privatunterricht. Ohne eigene Konfiguration hat ein Institut keine Stufenvergütung und rechnet Tutor-Ausfälle normal ab — auch für Institute wie „TutorSpace" oder „Abacus" musst du die Regeln selbst eintragen.</p>
+  <p>Unter <a href="{% url 'contracts:institute_list' %}">Institute</a> legst du jedes Institut an und trägst seine Stufen ein: ab wie vielen Stunden welcher Satz gilt. Dort stehen auch die Regel „bei Tutor-Ausfall nicht abrechnen“ und der Stufenfortschritt. Beim Anlegen eines Vertrags wählst du dann eines deiner Institute aus. Ohne eigene Einstellung hat ein Institut keine Stufenvergütung. Auch für Institute wie „TutorSpace“ oder „Abacus“ trägst du die Regeln selbst ein.</p>
+
+  <h3>Zählt Preceptly nach Stunden oder nach Einheiten?</h3>
+  <p>Das stellst du je Institut ein. „Nach Dauer“ zählt 60 Minuten als 1 Stunde, ein Termin mit 30 Minuten also als halbe. „Nach Einheit“ zählt jede angefangene Stunde eines Termins als 1: 30 und 60 Minuten zählen als 1, 120 Minuten als 2. Frage dein Institut, wie es zählt. Bezahlt wird in beiden Fällen nach Dauer, 30 Minuten bringen also den halben Stundensatz.</p>
+
+  <h3>Wofür ist der Startwert?</h3>
+  <p>Hat dein Institut schon Stunden gezählt, die in Preceptly nicht erfasst sind, trägst du deren Zahl als Startwert ein. Er wird zum Zähler addiert. So stimmt dein Stufenfortschritt mit dem Zähler des Instituts überein.</p>
 
   <h3>Ab welchem Datum werden Stunden für die Stufenberechnung gezählt?</h3>
-  <p>Das Startdatum für die Stufenberechnung kannst du in den <a href="{% url 'core:settings' %}">Einstellungen</a> festlegen. Stunden vor diesem Datum fließen nicht in die Stufenberechnung ein.</p>
+  <p>Den Zählbeginn legst du beim Institut fest. Stunden vor diesem Datum fließen nicht in die Stufenberechnung ein. Lässt du das Feld leer, zählt jede bisherige Stunde des Instituts.</p>
 
   <h3>Warum stimmt der berechnete Betrag nicht mit meiner Institut-Abrechnung überein?</h3>
-  <p>Mögliche Ursachen: Das Startdatum für die Stufenberechnung ist nicht korrekt gesetzt, die Stufenkonfiguration für das Institut weicht ab, oder es wurden Stunden manuell ohne passenden Vertrag erfasst. Prüfe in den Einstellungen das konfigurierte Startdatum sowie unter Institut-Tarife die hinterlegten Stufen.</p>
+  <p>Mögliche Ursachen: Die Zählweise passt nicht zu der des Instituts, der Zählbeginn oder der Startwert ist nicht richtig gesetzt, die Stufen weichen ab, oder Stunden wurden ohne passenden Vertrag erfasst. Prüfe diese Angaben unter <a href="{% url 'contracts:institute_list' %}">Institute</a>. Rechnungen, die es schon gibt, ändern sich durch eine neue Einstellung nicht.</p>
 </section>
+
+{# ======= PORTAL ======= #}
+<section id="portal" style="margin-top: 40px;">
+  <h2>Schüler- und Elternportal</h2>
+
+  <h3>Was ist das Portal?</h3>
+  <p>Ein eigener Bereich für deine Schüler und ihre Eltern. Dort sehen sie ihre Termine und Hausaufgaben, buchen, verschieben und sagen Termine ab, schreiben dir Nachrichten, laden Dokumente und treten Online-Meetings bei. Das Portal gibt es ab dem Starter-Tarif.</p>
+
+  <h3>Wie lade ich eine Familie ein?</h3>
+  <p>Öffne den Vertrag des Schülers, trage unter „Portal-Zugang“ die E-Mail-Adresse ein und sende die Einladung. Die Familie bekommt einen Link, über den sie ihr Passwort setzt. Der Link gilt 7 Tage. Ist er abgelaufen, schickst du an derselben Stelle eine neue Einladung.</p>
+
+  <h3>Brauchen Schüler und Eltern getrennte Konten?</h3>
+  <p>Nein. Schüler und Eltern teilen sich ein Portal-Konto je Kind.</p>
+
+  <h3>Eine Familie hat mehrere Kinder bei mir. Geht das mit einem Konto?</h3>
+  <p>Ja, ab dem Pro-Tarif (Familien-Zugang). Lade für jedes Kind dieselbe E-Mail-Adresse ein. Das bestehende Konto wird dann automatisch mit dem weiteren Kind verknüpft. In kleineren Tarifen braucht jedes Kind eine eigene E-Mail-Adresse.</p>
+
+  <h3>Wann können Familien Termine buchen?</h3>
+  <p>Nur innerhalb deiner Standard-Arbeitszeiten aus den <a href="{% url 'core:settings' %}">Einstellungen</a> und nur in freien Zeiten. Deine anderen Stunden und Blockzeiten erscheinen im Portal als belegt, ohne Namen und ohne Thema. Ein gebuchter Termin dauert so lange wie eine Einheit im Vertrag.</p>
+
+  <h3>Erfahre ich, wenn jemand im Portal bucht?</h3>
+  <p>Ja, per E-Mail und per Push-Nachricht. Beides stellst du in den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „Benachrichtigungen“ ein. Bei Absagen und Verschiebungen im Portal bekommst du keine eigene Nachricht. Die Änderung siehst du in deinem Kalender.</p>
+
+  <h3>Was passiert, wenn eine Familie einen Termin absagt oder verschiebt?</h3>
+  <p>Ein abgesagter Termin verschwindet aus deinem Kalender. Ein verschobener Termin steht am neuen Datum. Gehörte er zu einer Serie, wird er aus ihr gelöst. Absagen und verschieben lassen sich nur geplante Termine.</p>
+
+  <h3>Können Familien selbst Serientermine anlegen?</h3>
+  <p>Ab dem Pro-Tarif. Im Starter-Tarif buchen sie nur einzelne Termine und sprechen Serien direkt mit dir ab.</p>
+
+  <h3>Was ist der Puffer-Hinweis?</h3>
+  <p>Ein Hinweis beim Buchen, der Familien bittet, etwa eine halbe Stunde Abstand zu deinen anderen Terminen und Blockzeiten zu lassen. Du schaltest ihn in den Einstellungen unter „Schüler- und Elternportal“ ein oder aus.</p>
+
+  <h3>Eine Familie hat sich noch nie angemeldet. Was kann ich tun?</h3>
+  <p>Im Vertrag des Schülers schickst du unter „Portal-Zugang“ eine Login-Erinnerung oder, solange die Einladung noch aussteht, eine neue Einladung.</p>
+</section>
+
+{# ======= MEETINGS ======= #}
+<section id="meetings" style="margin-top: 40px;">
+  <h2>Online-Meetings</h2>
+
+  <h3>Wie starte ich ein Online-Meeting?</h3>
+  <p>Auf der Detailseite der Stunde mit „Meeting starten“. Meetingräume gehören zum Pro-Tarif.</p>
+
+  <h3>Wie kommen Schüler in das Meeting?</h3>
+  <p>Über das Portal. Bis du das Meeting startest, warten sie im Warteraum und werden danach automatisch verbunden.</p>
+
+  <h3>Brauche ich ein Zusatzprogramm?</h3>
+  <p>Nein. Das Meeting läuft im Browser. Beim ersten Mal fragt der Browser, ob er Kamera und Mikrofon nutzen darf.</p>
+</section>
+
+{# ======= KI ======= #}
+<section id="ki" style="margin-top: 40px;">
+  <h2>KI-Lektionspläne</h2>
+
+  <h3>Was macht der KI-Lektionsplan?</h3>
+  <p>Auf der Detailseite einer Stunde erzeugst du einen Vorschlag für den Ablauf der Stunde. Du kannst Hinweise mitgeben, etwa Schwerpunkte oder Schwächen des Schülers, und Material als PDF hochladen (bis 5 MB). Die Funktion gehört zum Pro-Tarif.</p>
+
+  <h3>Was passiert mit den Daten meiner Schüler?</h3>
+  <p>Namen und Kontaktdaten werden entfernt, bevor der Text an das Sprachmodell geht. Einzelheiten stehen in der <a href="{% url 'core:legal_privacy' %}">Datenschutzerklärung</a>.</p>
+
+  <h3>Kann ich mich auf den Plan verlassen?</h3>
+  <p>Er ist ein Vorschlag. Lies ihn durch und passe ihn an, bevor du ihn nutzt. Die Verantwortung für den Unterricht bleibt bei dir.</p>
+</section>
+
 {# ======= KALENDER-SYNC ======= #}
-<section id="kalender-sync">
+<section id="kalender-sync" style="margin-top: 40px;">
   <h2>Kalender-Synchronisierung</h2>
 
   <h3>Was macht die Kalender-Synchronisierung?</h3>
-  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> kannst du deinen iCloud-Kalender per CalDAV verbinden. Danach läuft automatisch alle paar Minuten Folgendes: Deine Preceptly-Stunden werden in einen Kalender deiner Wahl übertragen (z. B. „Nachhilfe"), und Termine aus einem oder mehreren anderen Kalendern deiner Wahl (z. B. „Privat") werden als Blockzeiten nach Preceptly übernommen. Diese Funktion ist aktuell nur auf Apple-Geräten sichtbar, da sie iCloud-Kalender verbindet.</p>
+  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> kannst du deinen iCloud-Kalender per CalDAV verbinden. Danach läuft automatisch alle paar Minuten Folgendes: Deine Preceptly-Stunden werden in einen Kalender deiner Wahl übertragen (zum Beispiel „Nachhilfe“), und Termine aus einem oder mehreren anderen Kalendern deiner Wahl (zum Beispiel „Privat“) werden als Blockzeiten nach Preceptly übernommen. Diese Funktion ist aktuell nur auf Apple-Geräten sichtbar, da sie iCloud-Kalender verbindet.</p>
 
   <h3>Läuft das in beide Richtungen?</h3>
-  <p>Nein, bewusst nicht. Stunden laufen nur von Preceptly zu iCloud: Änderst oder löschst du die übertragene Kopie direkt in iCloud, hat das keine Auswirkung auf die Stunde in Preceptly – Preceptly bleibt hier die Quelle der Wahrheit, damit eine abgerechnete Unterrichtsstunde nie unbemerkt verändert wird. Blockzeiten laufen nur von iCloud zu Preceptly: Legst du eine Blockzeit direkt in Preceptly an, wird sie nicht nach iCloud übertragen.</p>
+  <p>Nein, bewusst nicht. Stunden laufen nur von Preceptly zu iCloud: Änderst oder löschst du die übertragene Kopie direkt in iCloud, hat das keine Auswirkung auf die Stunde in Preceptly. Preceptly bleibt hier die Quelle der Wahrheit, damit eine abgerechnete Unterrichtsstunde nie unbemerkt verändert wird. Blockzeiten laufen nur von iCloud zu Preceptly: Legst du eine Blockzeit direkt in Preceptly an, wird sie nicht nach iCloud übertragen.</p>
 
-  <h3>Warum brauche ich ein „App-spezifisches Passwort"?</h3>
+  <h3>Warum brauche ich ein „App-spezifisches Passwort“?</h3>
   <p>Apple erlaubt aus Sicherheitsgründen keinen Zugriff auf CalDAV mit deinem normalen Apple-ID-Passwort. Erstelle stattdessen unter <a href="https://appleid.apple.com" rel="noopener">appleid.apple.com</a> → Anmeldung und Sicherheit → App-spezifische Passwörter ein eigenes Passwort nur für Preceptly. Es lässt sich jederzeit unabhängig von deinem Apple-ID-Passwort widerrufen.</p>
 
   <h3>Welche Kalender soll ich auswählen?</h3>
-  <p>Das entscheidest du selbst – Preceptly gibt nichts vor. Sinnvoll ist z. B. ein eigener iCloud-Kalender nur für Nachhilfestunden als Ziel, und dein privater (und ggf. weitere) Kalender als Quelle für Blockzeiten. Du kannst die Auswahl jederzeit unter „Kalender auswählen" in den Einstellungen ändern.</p>
+  <p>Das entscheidest du selbst. Sinnvoll ist zum Beispiel ein eigener iCloud-Kalender nur für Nachhilfestunden als Ziel und dein privater Kalender als Quelle für Blockzeiten. Du kannst die Auswahl jederzeit unter „Kalender auswählen“ in den Einstellungen ändern.</p>
 
   <h3>Was passiert mit bereits manuell eingetragenen Terminen?</h3>
-  <p>Blockzeiten, die du bereits manuell in Preceptly angelegt hast, werden nicht verändert oder gelöscht – der Import ergänzt nur neue, noch nicht vorhandene externe Termine.</p>
+  <p>Blockzeiten, die du schon in Preceptly angelegt hast, werden nicht verändert oder gelöscht. Der Import ergänzt nur neue externe Termine.</p>
+
+  <h3>Können Schüler ihre Termine auch im eigenen Kalender sehen?</h3>
+  <p>Ja. Im Portal gibt es unter „Profil“ einen persönlichen Link für ein Kalender-Abo, der in Google Kalender, iCloud und Outlook funktioniert. Er ist nur lesend.</p>
 </section>
 
+{# ======= APP ======= #}
+<section id="app" style="margin-top: 40px;">
+  <h2>App &amp; Benachrichtigungen</h2>
+
+  <h3>Gibt es eine App?</h3>
+  <p>Preceptly läuft im Browser und lässt sich wie eine App auf dem Startbildschirm ablegen. Die Schaltfläche dafür steht in den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „App auf dem Startbildschirm“. Einen Eintrag im App Store oder bei Google Play gibt es nicht.</p>
+
+  <h3>Wie schalte ich Push-Nachrichten ein?</h3>
+  <p>In den Einstellungen unter „Benachrichtigungen“. Push-Nachrichten aktivierst du für jedes Gerät einzeln. Unterstützt der Browser sie nicht, steht das dort.</p>
+
+  <h3>Worüber werde ich benachrichtigt?</h3>
+  <p>Über neue Buchungen aus dem Portal. Für jede Art von Ereignis wählst du, ob du eine E-Mail, eine Push-Nachricht oder beides bekommst. Neue Nachrichten von Familien zeigt die Zahl neben „Nachrichten“ im Menü.</p>
+</section>
+
+{# ======= DATENSCHUTZ ======= #}
+<section id="datenschutz" style="margin-top: 40px;">
+  <h2>Datenschutz &amp; Sicherheit</h2>
+
+  <h3>Wer sieht die Daten meiner Schüler?</h3>
+  <p>Nur du. Jeder Tutor sieht ausschließlich seine eigenen Schüler, Stunden und Rechnungen. Familien sehen im Portal nur die Daten ihres eigenen Kindes.</p>
+
+  <h3>Was ist der Auftragsverarbeitungsvertrag (AVV)?</h3>
+  <p>Du verarbeitest mit Preceptly Daten deiner Schüler. Dafür verlangt die DSGVO (Art. 28) einen Vertrag zwischen dir und Preceptly. Du akzeptierst ihn in den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „Rechtliche Vereinbarungen“.</p>
+
+  <h3>Wo liegen meine Zahlungsdaten?</h3>
+  <p>Bei Stripe. Preceptly speichert keine Karten- oder Kontodaten.</p>
+
+  <h3>Wo finde ich die Einzelheiten und einen Ansprechpartner?</h3>
+  <p>In der <a href="{% url 'core:legal_privacy' %}">Datenschutzerklärung</a>. Die Kontaktdaten stehen im <a href="{% url 'core:legal_imprint' %}">Impressum</a>. Dorthin wendest du dich auch, wenn du dein Konto löschen lassen möchtest.</p>
+</section>
 
 {% endblock %}

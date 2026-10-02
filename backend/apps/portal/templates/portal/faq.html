@@ -1,72 +1,238 @@
 {% extends "portal/base.html" %}
 
-{% block title %}Hilfe & FAQ – Preceptly Portal{% endblock %}
+{% block title %}Hilfe &amp; FAQ – Preceptly Portal{% endblock %}
 
 {% block content %}
-<h1>Hilfe & FAQ</h1>
-<p style="color:var(--text-secondary); margin-top:-8px; margin-bottom:24px;">
-    Hier findest du Antworten auf häufige Fragen zum Preceptly-Portal.
+<h1>Hilfe &amp; FAQ</h1>
+<p style="color:var(--text-secondary); margin-top:-8px; margin-bottom:16px;">
+    Antworten auf häufige Fragen von Schülern und Eltern zum Preceptly-Portal.
 </p>
 
-<div class="card">
-    <h2 style="margin-top:0;">Zeitzone & Uhrzeiten</h2>
-
-    <h3>Werden Zeiten in meiner Ortszeit angezeigt?</h3>
-    <p>Ja. Das Portal erkennt automatisch deine lokale Zeitzone über deinen Browser und rechnet alle Uhrzeiten entsprechend um. Ein Termin, den dein Tutor um 09:00 Uhr in Berlin eingetragen hat, erscheint für dich automatisch in deiner Ortszeit – zum Beispiel als 10:00 Uhr, wenn du dich in einem Gebiet mit UTC+1 befindest.</p>
-
-    <h3>Was passiert, wenn mein Tutor in einer anderen Zeitzone ist?</h3>
-    <p>Alle Buchungen, Kalendereinträge und freien Slots werden in deiner Ortszeit angezeigt. Beim Buchen wird die Uhrzeit automatisch in die Zeitzone deines Tutors umgerechnet und korrekt gespeichert. Du musst nichts manuell berechnen.</p>
-
-    <h3>Warum sehe ich manchmal eine Uhrzeit mit „(Tutor)" in Klammern?</h3>
-    <p>Bei der Terminbuchung wird dir sowohl deine Ortszeit als auch die entsprechende Tutor-Zeit angezeigt, falls sie abweichen. So vermeidest du Verwechslungen.</p>
+{# Bewusst kein nav-Element: portal/base.html gestaltet jedes nav als Hauptnavigation. #}
+<div class="card" role="navigation" aria-label="Inhalt der Hilfe">
+    <h2 style="margin-top:0; font-size:1.1em;">Themen</h2>
+    <ul style="columns: 2 200px; column-gap: 28px; padding-left: 1.2em; margin: 0;">
+        <li><a href="#erste-schritte">Erste Schritte</a></li>
+        <li><a href="#buchen">Termine buchen</a></li>
+        <li><a href="#aendern">Verschieben &amp; absagen</a></li>
+        <li><a href="#serien">Serientermine</a></li>
+        <li><a href="#stunden">Stunden &amp; Hausaufgaben</a></li>
+        <li><a href="#kalender">Kalender</a></li>
+        <li><a href="#meeting">Online-Meeting</a></li>
+        <li><a href="#nachrichten">Nachrichten &amp; Dokumente</a></li>
+        <li><a href="#familie">Eltern &amp; mehrere Kinder</a></li>
+        <li><a href="#konto">Konto &amp; Passwort</a></li>
+        <li><a href="#zeitzone">Zeitzone &amp; Uhrzeiten</a></li>
+        <li><a href="#hilfe">Datenschutz &amp; Hilfe</a></li>
+    </ul>
 </div>
 
-<div class="card">
-    <h2 style="margin-top:0;">Terminbuchung</h2>
+<div class="card" id="erste-schritte">
+    <h2 style="margin-top:0;">Erste Schritte</h2>
 
-    <h3>Wie buche ich einen Termin?</h3>
-    <p>Gehe zu <strong>Termin buchen</strong> (über das Dashboard oder den Kalender). Wähle ein Datum – es werden automatisch die freien Zeitslots deines Tutors in deiner Ortszeit angezeigt. Klicke auf einen Slot und bestätige die Buchung.</p>
-
-    <h3>Was bedeuten die grauen „Belegt"-Felder?</h3>
-    <p>Graue Felder zeigen Zeiträume, die bereits durch andere Termine oder Blockzeiten deines Tutors belegt sind. Diese können nicht gebucht werden.</p>
-
-    <h3>Kann ich einen Termin absagen?</h3>
-    <p>Ja. Gehe zu deiner Terminübersicht oder zum Kalender, öffne den Termin und klicke auf <strong>Absagen</strong>. Bitte achte darauf, Absagen rechtzeitig vorzunehmen – kontaktiere deinen Tutor bei kurzfristigen Änderungen direkt.</p>
-
-    <h3>Was sind Serientermine?</h3>
-    <p>Serientermine sind regelmäßig wiederkehrende Stunden, z. B. jeden Montag um 16:00 Uhr. Deine Serien findest du unter <strong>Serientermine</strong>. Ob du dort selbst eine neue Serie anlegen kannst, hängt davon ab, was dein Nachhilfelehrer freigeschaltet hat – wenn nicht, sprich die Serie direkt mit ihm ab.</p>
-</div>
-
-<div class="card">
-    <h2 style="margin-top:0;">Kalender</h2>
-
-    <h3>Was bedeuten die roten „Belegt"-Blöcke im Kalender?</h3>
-    <p>Diese Blöcke zeigen anonym an, dass dein Tutor zu dieser Zeit einen anderen Termin oder eine Blockzeit hat. Du siehst keine Details (kein Name, kein Thema) – nur dass diese Zeit nicht verfügbar ist.</p>
-
-    <h3>Was bedeuten die blauen Blöcke?</h3>
-    <p>Blaue Blöcke sind deine eigenen gebuchten Stunden. Klicke darauf, um Details zu sehen.</p>
-</div>
-
-<div class="card">
-    <h2 style="margin-top:0;">Portal-Zugang & Konto</h2>
+    <h3>Was ist das Portal?</h3>
+    <p>Hier siehst du deine Nachhilfestunden und Hausaufgaben. Du kannst Termine buchen, verschieben und absagen, deinem Nachhilfelehrer schreiben, Dokumente austauschen und an Online-Meetings teilnehmen. Welche dieser Funktionen freigeschaltet sind, legt dein Nachhilfelehrer fest.</p>
 
     <h3>Wie aktiviere ich meinen Portal-Zugang?</h3>
-    <p>Du erhältst per E-Mail einen persönlichen Aktivierungslink. Klicke darauf, setze dein Passwort und du bist sofort im Portal angemeldet. Der Link ist 7 Tage gültig – bitte deinen Tutor um einen neuen Link, falls er abgelaufen ist.</p>
+    <p>Du erhältst per E-Mail einen persönlichen Aktivierungslink. Klicke darauf und setze dein Passwort. Danach bist du sofort angemeldet. Der Link ist 7 Tage gültig. Ist er abgelaufen, bitte deinen Nachhilfelehrer um eine neue Einladung.</p>
 
-    <h3>Ich habe mein Passwort vergessen. Was jetzt?</h3>
-    <p>Gehe zur <a href="{% url 'portal:password_reset' %}">Passwort-zurücksetzen</a>-Seite und gib deine E-Mail-Adresse ein. Du erhältst einen Link zum Zurücksetzen.</p>
+    <h3>Wie melde ich mich später an?</h3>
+    <p>Mit deiner E-Mail-Adresse und deinem Passwort auf der Anmeldeseite des Portals.</p>
 
-    <h3>Ich habe keine E-Mail erhalten.</h3>
-    <p>Prüfe deinen Spam-Ordner. Wenn die E-Mail dort nicht ist, kontaktiere deinen Tutor – er kann dir einen neuen Einladungslink schicken.</p>
+    <h3>Ich habe keine Einladung erhalten.</h3>
+    <p>Prüfe deinen Spam-Ordner. Ist die E-Mail dort nicht, schickt dir dein Nachhilfelehrer eine neue Einladung.</p>
+
+    <h3>Kann ich das Portal wie eine App nutzen?</h3>
+    <p>Ja. Unter <a href="{% url 'portal:profile' %}">Profil</a> findest du „Zum Home-Bildschirm hinzufügen“. Danach öffnest du das Portal über ein eigenes Symbol auf deinem Handy.</p>
 </div>
 
-<div class="card">
-    <h2 style="margin-top:0;">Sonstiges</h2>
+<div class="card" id="buchen">
+    <h2 style="margin-top:0;">Termine buchen</h2>
 
-    <h3>An wen wende ich mich bei technischen Problemen?</h3>
-    <p>Bitte kontaktiere deinen Tutor direkt. Er oder sie kann das Problem an den Support weiterleiten.</p>
+    <h3>Wie buche ich einen Termin?</h3>
+    <p>Gehe zu <strong>Termin buchen</strong> (über das Dashboard oder den Kalender). Wähle ein Datum. Du siehst dann die freien Zeiten deines Nachhilfelehrers. Tippe auf eine Zeit und bestätige die Buchung. Im Feld „Thema / Nachricht“ kannst du angeben, was du in der Stunde besprechen möchtest.</p>
+
+    <h3>Welche Zeiten kann ich buchen?</h3>
+    <p>Zeiten innerhalb der Arbeitszeiten deines Nachhilfelehrers, die noch frei sind. Termine in der Vergangenheit lassen sich nicht buchen.</p>
+
+    <h3>Was bedeuten die grauen „Belegt“-Felder?</h3>
+    <p>Sie zeigen Zeiten, in denen dein Nachhilfelehrer schon einen anderen Termin oder eine Blockzeit hat. Diese Zeiten kannst du nicht buchen.</p>
+
+    <h3>Wie lange dauert ein gebuchter Termin?</h3>
+    <p>So lange, wie es in eurem Vertrag als Einheit vereinbart ist. Brauchst du eine längere Stunde, sprich das mit deinem Nachhilfelehrer ab.</p>
+
+    <h3>Warum soll ich Abstand zu anderen Terminen lassen?</h3>
+    <p>Manche Nachhilfelehrer bitten beim Buchen darum, etwa eine halbe Stunde Puffer zu ihren anderen Terminen zu lassen. So bleibt Zeit für die Vorbereitung. Das ist eine Bitte. Buchen kannst du trotzdem.</p>
+
+    <h3>Warum steht dort „Online-Buchungen sind im Moment nicht möglich“?</h3>
+    <p>Dann nimmt dein Nachhilfelehrer gerade keine Buchungen über das Portal an. Sprich den Termin direkt mit ihm ab.</p>
+
+    <h3>Erfährt mein Nachhilfelehrer von meiner Buchung?</h3>
+    <p>Ja. Der Termin steht sofort in seinem Kalender. Außerdem bekommt er eine Benachrichtigung, sofern er sie nicht abgeschaltet hat.</p>
+</div>
+
+<div class="card" id="aendern">
+    <h2 style="margin-top:0;">Verschieben &amp; absagen</h2>
+
+    <h3>Wie verschiebe ich einen Termin?</h3>
+    <p>Tippe unter <a href="{% url 'portal:student_lessons' %}">Stunden</a> oder im Dashboard auf den Termin und wähle <strong>Verschieben</strong>. Suche einen neuen Tag und eine freie Zeit aus. Ist an einem Tag nichts mehr frei, wähle einen anderen Tag oder die nächste Woche.</p>
+
+    <h3>Wie sage ich einen Termin ab?</h3>
+    <p>Öffne den Termin und wähle <strong>Absagen</strong>. Der Termin wird dann aus deinem Kalender und aus dem deines Nachhilfelehrers entfernt.</p>
+
+    <h3>Welche Termine kann ich ändern?</h3>
+    <p>Nur geplante Termine. Eine Stunde, die schon stattgefunden hat, lässt sich im Portal nicht mehr verschieben oder absagen.</p>
+
+    <h3>Erfährt mein Nachhilfelehrer von einer Absage oder Verschiebung?</h3>
+    <p>Er sieht die Änderung in seinem Kalender, bekommt aber keine eigene Nachricht. Gib ihm deshalb bei kurzfristigen Änderungen bitte direkt Bescheid, zum Beispiel über <strong>Nachrichten</strong>.</p>
+
+    <h3>Bis wann muss ich absagen?</h3>
+    <p>Das Portal setzt keine Frist. Es gilt, was du mit deinem Nachhilfelehrer vereinbart hast. Frag ihn, wenn du unsicher bist, ob eine späte Absage berechnet wird.</p>
+
+    <h3>Der Termin gehört zu einer Serie. Was passiert beim Verschieben?</h3>
+    <p>Nur dieser eine Termin wird verschoben. Er gehört danach nicht mehr zur Serie. Die anderen Termine der Serie bleiben, wie sie sind.</p>
+</div>
+
+<div class="card" id="serien">
+    <h2 style="margin-top:0;">Serientermine</h2>
+
+    <h3>Was sind Serientermine?</h3>
+    <p>Regelmäßig wiederkehrende Stunden, zum Beispiel jeden Montag um 16:00 Uhr. Deine Serien findest du unter <strong>Serientermine</strong>.</p>
+
+    <h3>Kann ich selbst eine Serie anlegen?</h3>
+    <p>Das hängt davon ab, was dein Nachhilfelehrer freigeschaltet hat. Siehst du unter „Serientermine“ die Schaltfläche „Neue Serie“, wählst du Wochentage, Uhrzeit, Start und auf Wunsch ein Ende. Sonst sprichst du die Serie direkt mit ihm ab.</p>
+
+    <h3>Wie sage ich nur einen Termin einer Serie ab?</h3>
+    <p>Öffne den Termin und wähle „Nur diesen Termin absagen“. Die übrigen Termine bleiben bestehen.</p>
+
+    <h3>Wie beende ich eine ganze Serie?</h3>
+    <p>Unter „Serientermine“ mit „Serie beenden“ oder im Termin mit „Gesamte Serie absagen“. Alle kommenden Termine der Serie entfallen dann. Stunden, die schon stattgefunden haben, bleiben erhalten.</p>
+</div>
+
+<div class="card" id="stunden">
+    <h2 style="margin-top:0;">Stunden &amp; Hausaufgaben</h2>
+
+    <h3>Was bedeutet der Status einer Stunde?</h3>
+    <ul>
+        <li><strong>Geplant:</strong> Der Termin steht an.</li>
+        <li><strong>Unterrichtet:</strong> Die Stunde hat stattgefunden.</li>
+        <li><strong>Ausgefallen:</strong> Die Stunde ist ausgefallen.</li>
+        <li><strong>Bezahlt:</strong> Die Stunde ist abgerechnet und bezahlt.</li>
+    </ul>
+
+    <h3>Eine Stunde steht auf „Unterrichtet“, hat aber nicht stattgefunden. Warum?</h3>
+    <p>Ein geplanter Termin wechselt automatisch auf „Unterrichtet“, sobald seine Endzeit vorbei ist. Wurde er vorher nicht abgesagt, gilt er deshalb als gehalten. Melde dich bei deinem Nachhilfelehrer. Er kann den Status berichtigen.</p>
+
+    <h3>Wo sehe ich, wann und von wem ein Termin gebucht wurde?</h3>
+    <p>Öffne den Termin. In der Zeile „Gebucht“ stehen der Zeitpunkt und das Konto, zum Beispiel „über das Portal von dir“ oder der Name deines Nachhilfelehrers. Das Konto wird seit dem 29.09.2026 gespeichert. Ältere Termine zeigen nur den Zeitpunkt.</p>
+
+    <h3>Wo finde ich meine Hausaufgaben?</h3>
+    <p>Im Dashboard unter „Letzte Stunden“ und auf der Detailseite der Stunde. Dort stehen auch Notizen, die dein Nachhilfelehrer zur Stunde geschrieben hat.</p>
+</div>
+
+<div class="card" id="kalender">
+    <h2 style="margin-top:0;">Kalender</h2>
+
+    <h3>Was bedeuten die roten „Belegt“-Blöcke im Kalender?</h3>
+    <p>Sie zeigen, dass dein Nachhilfelehrer zu dieser Zeit einen anderen Termin oder eine Blockzeit hat. Du siehst keine Details, also keinen Namen und kein Thema.</p>
+
+    <h3>Was bedeuten die blauen Blöcke?</h3>
+    <p>Das sind deine eigenen Stunden. Tippe darauf, um die Details zu sehen.</p>
+
+    <h3>Kann ich meine Termine im eigenen Kalender sehen?</h3>
+    <p>Ja. Unter <a href="{% url 'portal:profile' %}">Profil</a> findest du bei „Kalender abonnieren“ einen persönlichen Link. Trage ihn einmal als Kalender-Abo in Google Kalender, iCloud oder Outlook ein. Neue Termine erscheinen dann von selbst. Der Kalender aktualisiert sich alle paar Stunden und ist nur lesend: Änderungen dort wirken sich nicht auf das Portal aus.</p>
+
+    <h3>Ich habe den Kalender-Link versehentlich weitergegeben. Was nun?</h3>
+    <p>Wähle im Profil „Link erneuern“. Der alte Link funktioniert dann nicht mehr, und du trägst den neuen in deinem Kalender ein.</p>
+</div>
+
+<div class="card" id="meeting">
+    <h2 style="margin-top:0;">Online-Meeting</h2>
+
+    <h3>Wie nehme ich an einem Online-Meeting teil?</h3>
+    <p>Läuft ein Meeting, zeigt das Dashboard „Meeting läuft – Jetzt beitreten“. Du kannst auch den Termin öffnen und „Meeting beitreten“ wählen.</p>
+
+    <h3>Dort steht „Kein Meeting aktiv“. Was heißt das?</h3>
+    <p>Dein Nachhilfelehrer hat das Meeting noch nicht gestartet. Sobald er es startet, kannst du beitreten. Wartest du schon im Warteraum, wirst du automatisch verbunden.</p>
+
+    <h3>Was brauche ich dafür?</h3>
+    <p>Einen aktuellen Browser, eine Kamera und ein Mikrofon. Ein Programm musst du nicht installieren. Beim ersten Mal fragt der Browser, ob er Kamera und Mikrofon nutzen darf. Erlaube das, sonst hört und sieht dich dein Nachhilfelehrer nicht.</p>
+
+    <h3>Bild oder Ton funktionieren nicht.</h3>
+    <p>Prüfe in den Einstellungen des Browsers, ob Kamera und Mikrofon für das Portal erlaubt sind, und lade die Seite neu. Hilft das nicht, probiere einen anderen Browser oder ein anderes Gerät.</p>
+</div>
+
+<div class="card" id="nachrichten">
+    <h2 style="margin-top:0;">Nachrichten &amp; Dokumente</h2>
+
+    <h3>Wie schreibe ich meinem Nachhilfelehrer?</h3>
+    <p>Über <strong>Nachrichten</strong> im Dashboard. Dort siehst du auch seine Antworten.</p>
+
+    <h3>Wo finde ich Unterrichtsmaterial?</h3>
+    <p>Unter <strong>Dokumente</strong>. Dort lädst du Dateien herunter, die dein Nachhilfelehrer bereitgestellt hat.</p>
+
+    <h3>Kann ich selbst Dateien hochladen?</h3>
+    <p>Ja, zum Beispiel ein Foto deiner Hausaufgabe. Erlaubt sind PDF, Bilder (PNG, JPG), Word, Excel und Textdateien bis 50 MB.</p>
+
+    <h3>Warum kann ich keine weitere Datei hochladen?</h3>
+    <p>Dann ist die Zahl der Dateien für dich ausgeschöpft. Wende dich an deinen Nachhilfelehrer.</p>
+</div>
+
+<div class="card" id="familie">
+    <h2 style="margin-top:0;">Eltern &amp; mehrere Kinder</h2>
+
+    <h3>Brauchen Eltern und Kind getrennte Konten?</h3>
+    <p>Nein. Eltern und Kind nutzen gemeinsam ein Konto.</p>
+
+    <h3>Ich habe mehrere Kinder bei demselben Nachhilfelehrer. Brauche ich mehrere Konten?</h3>
+    <p>Das hängt davon ab, was dein Nachhilfelehrer freigeschaltet hat. Mit dem Familien-Zugang siehst du nach der Anmeldung alle Kinder auf einer Seite und wählst für jedes Kind Termine, Kalender, Dokumente und Nachrichten. Sonst hat jedes Kind ein eigenes Konto mit eigener E-Mail-Adresse.</p>
+
+    <h3>Sehen andere Familien unsere Daten?</h3>
+    <p>Nein. Du siehst nur die Daten deiner eigenen Kinder. Termine anderer Schüler erscheinen höchstens als „Belegt“, ohne Namen.</p>
+</div>
+
+<div class="card" id="konto">
+    <h2 style="margin-top:0;">Konto &amp; Passwort</h2>
+
+    <h3>Ich habe mein Passwort vergessen. Was jetzt?</h3>
+    <p>Gehe zur Seite <a href="{% url 'portal:password_reset' %}">Passwort zurücksetzen</a> und gib deine E-Mail-Adresse ein. Du erhältst einen Link. Er gilt eine Stunde. Danach forderst du einfach einen neuen an.</p>
+
+    <h3>Wie ändere ich mein Passwort?</h3>
+    <p>Unter <a href="{% url 'portal:profile' %}">Profil</a> bei „Passwort ändern“. Du brauchst dafür dein aktuelles Passwort.</p>
+
+    <h3>Wie ändere ich meine E-Mail-Adresse oder Telefonnummer?</h3>
+    <p>Unter <a href="{% url 'portal:profile' %}">Profil</a> bei „Kontaktdaten“. Mit der E-Mail-Adresse meldest du dich an, und an sie gehen Benachrichtigungen.</p>
+
+    <h3>Wie schalte ich Push-Nachrichten ein?</h3>
+    <p>Im Profil unter „Benachrichtigungen“. Push-Nachrichten aktivierst du für jedes Gerät einzeln. Unterstützt dein Browser sie nicht, steht das dort.</p>
+
+    <h3>Wie lösche ich mein Konto?</h3>
+    <p>Wende dich an deinen Nachhilfelehrer. Er verwaltet die Portal-Zugänge seiner Schüler.</p>
+</div>
+
+<div class="card" id="zeitzone">
+    <h2 style="margin-top:0;">Zeitzone &amp; Uhrzeiten</h2>
+
+    <h3>In welcher Zeitzone werden die freien Zeiten beim Buchen angezeigt?</h3>
+    <p>In deiner Ortszeit. Das Portal erkennt die Zeitzone über deinen Browser und rechnet die freien Zeiten deines Nachhilfelehrers um.</p>
+
+    <h3>Was passiert, wenn mein Nachhilfelehrer in einer anderen Zeitzone ist?</h3>
+    <p>Beim Buchen wird die gewählte Uhrzeit in seine Zeitzone umgerechnet und richtig gespeichert. Du musst nichts selbst ausrechnen. Ein Hinweis nennt dir beide Zeitzonen.</p>
+
+    <h3>Warum sehe ich manchmal eine Uhrzeit mit „(Tutor)“ in Klammern?</h3>
+    <p>Weichen eure Zeitzonen ab, zeigt die Buchung neben deiner Ortszeit auch die Zeit deines Nachhilfelehrers. So vermeidest du Verwechslungen.</p>
+</div>
+
+<div class="card" id="hilfe">
+    <h2 style="margin-top:0;">Datenschutz &amp; Hilfe</h2>
 
     <h3>Sind meine Daten sicher?</h3>
-    <p>Ja. Alle Daten werden verschlüsselt übertragen (HTTPS). Du siehst ausschließlich Informationen, die deinen eigenen Unterricht betreffen. Andere Schüler oder deren Daten sind für dich nicht einsehbar.</p>
+    <p>Alle Daten werden verschlüsselt übertragen (HTTPS). Du siehst ausschließlich Informationen zu deinem eigenen Unterricht. Daten anderer Schüler kannst du nicht einsehen. Einzelheiten stehen in der Datenschutzerklärung, die unten auf jeder Seite verlinkt ist.</p>
+
+    <h3>Wer sieht meine Nachrichten und Dokumente?</h3>
+    <p>Du und dein Nachhilfelehrer.</p>
+
+    <h3>An wen wende ich mich bei Fragen oder technischen Problemen?</h3>
+    <p>An deinen Nachhilfelehrer. Er kann das Problem an den Support von Preceptly weitergeben.</p>
 </div>
 {% endblock %}
