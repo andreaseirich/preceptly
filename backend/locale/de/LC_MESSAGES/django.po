@@ -7599,3 +7599,14 @@ msgstr "Mindestabstand (Minuten)"
 #: apps/core/views.py
 msgid "Students and parents can only book times that keep this gap, in the portal also when rescheduling and for series (days that are too close are left out). For lessons you enter yourself, you get a warning. 0 means no minimum."
 msgstr "Schüler und Eltern können nur Zeiten buchen, die diesen Abstand einhalten, im Portal auch beim Verschieben und bei Serien (zu dichte Tage werden ausgelassen). Bei Stunden, die du selbst einträgst, bekommst du eine Warnung. 0 bedeutet kein Mindestabstand."
+
+msgid "Days on which you already have another lesson or a blocked time at that time are left out."
+msgstr "Tage, an denen du zu dieser Zeit schon eine andere Stunde oder eine Blockzeit hast, werden ausgelassen."
+
+msgid " and {more} more"
+msgstr " und {more} weitere"
+
+msgid "{count} day was already busy and was left out: {days}."
+msgid_plural "{count} days were already busy and were left out: {days}."
+msgstr[0] "{count} Tag war schon belegt und wurde ausgelassen: {days}."
+msgstr[1] "{count} Tage waren schon belegt und wurden ausgelassen: {days}."

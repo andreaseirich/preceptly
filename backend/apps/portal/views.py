@@ -782,22 +782,14 @@ def _get_available_slots(
 
     Frei heißt: innerhalb der Arbeitszeiten und nach der Regel in apps/lessons/availability.py, also mit
     Fahrzeit der neuen Stunde (travel_before/travel_after) und dem Mindestabstand des Tutors."""
-    from apps.lessons.availability import BusyCalendar
+    from apps.lessons.availability import BusyCalendar, working_windows
 
     profile = getattr(tutor, "profile", None)
     wh = (profile.default_working_hours if profile else {}) or {}
-    day_name = date.strftime("%A").lower()
-    day_slots = wh.get(day_name, [])
-
     calendar = BusyCalendar(tutor, date, date)
 
     available = []
-    for slot in day_slots:
-        try:
-            slot_start = _dt.datetime.strptime(slot["start"], "%H:%M").time()
-            slot_end = _dt.datetime.strptime(slot["end"], "%H:%M").time()
-        except (KeyError, ValueError):
-            continue
+    for slot_start, slot_end in working_windows(wh, date):
         cur = _dt.datetime.combine(date, slot_start)
         slot_end_dt = _dt.datetime.combine(date, slot_end)
         dur = _dt.timedelta(minutes=duration_minutes)
@@ -928,7 +920,9 @@ class PortalBookingView(View):
         from apps.lessons.availability import BusyCalendar
 
         duration = contract.unit_duration_minutes
-        reason = BusyCalendar(student.user, session_date, session_date).reason(
+        reason = BusyCalendar(
+            student.user, session_date, session_date, enforce_working_hours=True
+        ).reason(
             session_date,
             session_time,
             duration,
@@ -1111,7 +1105,9 @@ class PortalSessionRescheduleView(View):
         from apps.lessons.availability import BusyCalendar
 
         duration = session.duration_minutes
-        reason = BusyCalendar(student.user, new_date, new_date, exclude_pk=session.pk).reason(
+        reason = BusyCalendar(
+            student.user, new_date, new_date, exclude_pk=session.pk, enforce_working_hours=True
+        ).reason(
             new_date,
             new_time,
             duration,
@@ -1182,8 +1178,10 @@ class PortalRecurringManageView(View):
 def _busy_error(reason) -> str:
     """Fehlertext, wenn eine gewünschte Zeit nicht frei ist. Ohne Angabe, was dort steht: Familien sehen im
     Portal sonst auch nur "belegt"."""
-    from apps.lessons.availability import BLOCKED
+    from apps.lessons.availability import BLOCKED, OFF_HOURS
 
+    if reason == OFF_HOURS:
+        return "Diese Zeit liegt außerhalb der Arbeitszeiten deines Tutors."
     if reason == BLOCKED:
         return "Diese Zeit ist durch eine Blockzeit belegt oder liegt zu dicht davor oder danach."
     return (
@@ -1192,17 +1190,31 @@ def _busy_error(reason) -> str:
     )
 
 
-def _busy_days_message(busy) -> str:
+def _left_out_message(entries, singular, plural) -> str:
     """Meldung nach dem Anlegen einer Serie: Welche Tage wurden ausgelassen? Ohne Angabe, was dort
     steht - Familien sehen im Portal nur "belegt"."""
-    days = [entry["date"].strftime("%d.%m.%Y") for entry in busy]
+    days = [entry["date"].strftime("%d.%m.%Y") for entry in entries]
     shown, more = ", ".join(days[:10]), len(days) - 10
-    one = len(days) == 1
-    text = (
-        f"{len(days)} {'Tag war' if one else 'Tage waren'} schon belegt und "
-        f"{'wurde' if one else 'wurden'} ausgelassen: {shown}"
-    )
+    text = f"{len(days)} {singular if len(days) == 1 else plural}: {shown}"
     return text + (f" und {more} weitere." if more > 0 else ".")
+
+
+def _busy_days_message(busy) -> str:
+    """Tage, an denen der Tutor zu dieser Zeit schon eine Stunde oder Blockzeit hat."""
+    return _left_out_message(
+        busy,
+        "Tag war schon belegt und wurde ausgelassen",
+        "Tage waren schon belegt und wurden ausgelassen",
+    )
+
+
+def _off_hours_message(off_hours) -> str:
+    """Tage, an denen die gewünschte Uhrzeit außerhalb der Arbeitszeiten des Tutors liegt."""
+    return _left_out_message(
+        off_hours,
+        "Tag liegt außerhalb der Arbeitszeiten deines Tutors und wurde ausgelassen",
+        "Tage liegen außerhalb der Arbeitszeiten deines Tutors und wurden ausgelassen",
+    )
 
 
 def _portal_series_allowed(student):
@@ -1301,17 +1313,30 @@ class PortalRecurringCreateView(View):
             **weekdays,
         )
         # Nur freie Tage buchen: Tage, an denen der Tutor zu dieser Zeit schon eine Stunde oder eine
-        # Blockzeit hat, werden ausgelassen (apps/lessons/availability.py), alle anderen gebucht.
+        # Blockzeit hat oder die Uhrzeit außerhalb seiner Arbeitszeiten liegt, werden ausgelassen
+        # (apps/lessons/availability.py), alle anderen gebucht.
+        from apps.lessons.availability import OFF_HOURS
+
         result = RecurringSessionService.generate_sessions(
-            rs, check_conflicts=False, skip_busy=True
+            rs, check_conflicts=False, skip_busy=True, within_hours=True
         )
-        busy = result["busy"]
-        if busy and not result["created"] and not result["skipped"]:
+        busy = [entry for entry in result["busy"] if entry["reason"] != OFF_HOURS]
+        off_hours = [entry for entry in result["busy"] if entry["reason"] == OFF_HOURS]
+        if result["busy"] and not result["created"] and not result["skipped"]:
             rs.delete()
+            if not off_hours:
+                reason = "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit schon belegt."
+            elif not busy:
+                reason = "An allen gewünschten Tagen liegt diese Uhrzeit außerhalb der Arbeitszeiten deines Tutors."
+            else:
+                reason = (
+                    "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit nicht frei "
+                    "(schon belegt oder außerhalb seiner Arbeitszeiten)."
+                )
             messages.warning(
                 request,
-                "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit schon belegt. "
-                "Es wurde keine Serie angelegt. Wähle eine andere Uhrzeit oder andere Wochentage.",
+                f"{reason} Es wurde keine Serie angelegt. "
+                "Wähle eine andere Uhrzeit oder andere Wochentage.",
             )
             return redirect("portal:recurring_create", student_pk=student_pk)
         booked = result["created"]
@@ -1321,6 +1346,8 @@ class PortalRecurringCreateView(View):
         )
         if busy:
             messages.info(request, _busy_days_message(busy))
+        if off_hours:
+            messages.info(request, _off_hours_message(off_hours))
         return redirect("portal:recurring_manage", student_pk=student_pk)
 
 

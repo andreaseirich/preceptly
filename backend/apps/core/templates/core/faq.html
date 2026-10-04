@@ -147,7 +147,7 @@
   <p>Damit markierst du eine Stunde, die du selbst versäumt hast. Für Institute legst du fest, ob solche Stunden mit 0 € abgerechnet werden oder welchen Anteil der Vergütung du behältst.</p>
 
   <h3>Was sind wiederkehrende Stunden?</h3>
-  <p>Mit wiederkehrenden Stunden legst du eine Serie an, zum Beispiel „jeden Montag um 14 Uhr“. Nach dem Speichern erzeugt Preceptly alle Einzelstunden für den angegebenen Zeitraum. Einzelne Stunden der Serie kannst du später noch bearbeiten oder löschen. Serien gibt es ab dem Starter-Tarif.</p>
+  <p>Mit wiederkehrenden Stunden legst du eine Serie an, zum Beispiel „jeden Montag um 14 Uhr“. Nach dem Speichern erzeugt Preceptly alle Einzelstunden für den angegebenen Zeitraum. Einzelne Stunden der Serie kannst du später noch bearbeiten oder löschen. Tage, an denen du zu dieser Zeit schon eine andere Stunde oder eine Blockzeit hast, lässt Preceptly aus, alle anderen werden gebucht. Nach dem Anlegen siehst du, welche Tage das waren. Serien gibt es ab dem Starter-Tarif.</p>
 
   <h3>Kann ich eine einzelne Stunde aus einer Wiederholungsserie ändern?</h3>
   <p>Ja. Beim Bearbeiten einer Stunde wählst du, ob du nur diese eine Stunde oder alle zukünftigen Stunden der Serie ändern möchtest.</p>
@@ -280,7 +280,7 @@
   <p>Ja, ab dem Pro-Tarif (Familien-Zugang). Lade für jedes Kind dieselbe E-Mail-Adresse ein. Das bestehende Konto wird dann automatisch mit dem weiteren Kind verknüpft. In kleineren Tarifen braucht jedes Kind eine eigene E-Mail-Adresse.</p>
 
   <h3>Wann können Familien Termine buchen?</h3>
-  <p>Nur innerhalb deiner Standard-Arbeitszeiten aus den <a href="{% url 'core:settings' %}">Einstellungen</a> und nur in freien Zeiten. Deine anderen Stunden und Blockzeiten erscheinen im Portal als belegt, ohne Namen und ohne Thema. Ein gebuchter Termin dauert so lange wie eine Einheit im Vertrag. Als frei gelten nur Zeiten, die Fahrzeiten und deinen Mindestabstand einhalten.</p>
+  <p>Nur innerhalb deiner Standard-Arbeitszeiten aus den <a href="{% url 'core:settings' %}">Einstellungen</a> und nur in freien Zeiten. Das gilt beim Buchen, beim Verschieben und bei Serien. Hast du keine Arbeitszeiten eingetragen, sehen Familien keine freien Zeiten und können dort nichts buchen. Deine anderen Stunden und Blockzeiten erscheinen im Portal als belegt, ohne Namen und ohne Thema. Ein gebuchter Termin dauert so lange wie eine Einheit im Vertrag. Als frei gelten nur Zeiten, die Fahrzeiten und deinen Mindestabstand einhalten.</p>
 
   <h3>Erfahre ich, wenn jemand im Portal bucht?</h3>
   <p>Ja, per E-Mail und per Push-Nachricht. Das gilt auch, wenn eine Familie einen Termin absagt, verschiebt oder eine Serie beendet. In den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „Benachrichtigungen“ stellst du für Buchungen und für Absagen und Verschiebungen getrennt ein, was du bekommst.</p>
@@ -289,7 +289,7 @@
   <p>Ein abgesagter Termin verschwindet aus deinem Kalender, damit die Zeit wieder frei ist. Er bleibt aber nachvollziehbar: Beim Schüler steht unter „Im Portal abgesagte Termine“, wer wann abgesagt hat und wer den Termin gebucht hatte. Ein verschobener Termin steht am neuen Datum. Gehörte er zu einer Serie, wird er aus ihr gelöst. Absagen und verschieben lassen sich nur geplante Termine.</p>
 
   <h3>Können Familien selbst Serientermine anlegen?</h3>
-  <p>Ab dem Pro-Tarif. Im Starter-Tarif buchen sie nur einzelne Termine und sprechen Serien direkt mit dir ab. Tage, an denen du zu dieser Zeit schon eine Stunde oder eine Blockzeit hast, lässt das Portal aus, alle anderen werden gebucht.</p>
+  <p>Ab dem Pro-Tarif. Im Starter-Tarif buchen sie nur einzelne Termine und sprechen Serien direkt mit dir ab. Tage, an denen du zu dieser Zeit schon eine Stunde oder eine Blockzeit hast oder an denen die Uhrzeit außerhalb deiner Arbeitszeiten liegt, lässt das Portal aus, alle anderen werden gebucht.</p>
 
   <h3>Was ist der Puffer-Hinweis?</h3>
   <p>Ein Hinweis beim Buchen, der Familien bittet, etwa eine halbe Stunde Abstand zu deinen anderen Terminen und Blockzeiten zu lassen. Du schaltest ihn in den Einstellungen unter „Schüler- und Elternportal“ ein oder aus.</p>

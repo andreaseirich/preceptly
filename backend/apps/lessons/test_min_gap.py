@@ -341,6 +341,8 @@ class PortalGapTest(GapFixture):
         self.assertEqual(lesson.start_time, dt.time(10, 30))
 
     def test_series_leave_out_days_that_are_too_close(self):
+        self.profile.default_working_hours = {"monday": [{"start": "08:00", "end": "20:00"}]}
+        self.profile.save()
         monday = self.day + dt.timedelta(days=(7 - self.day.weekday()) % 7 or 7)
         mondays = [monday + dt.timedelta(weeks=n) for n in range(3)]
         self.lesson(15, 0, day=mondays[1])  # 15:00-16:00; die Serie liegt 16:20-17:10 mit Fahrzeit

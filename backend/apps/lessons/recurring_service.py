@@ -23,6 +23,7 @@ class RecurringSessionService:
         check_conflicts: bool = True,
         dry_run: bool = False,
         skip_busy: bool = False,
+        within_hours: bool = False,
     ) -> dict:
         """
         Generates sessions for a RecurringSession over the period [start_date, end_date].
@@ -34,6 +35,9 @@ class RecurringSessionService:
             skip_busy: If True, days on which the tutor is already busy (another lesson or a
                 blocked time at that time, see apps.lessons.availability) are left out. All
                 other days are booked.
+            within_hours: Together with skip_busy: days or times outside the tutor's working hours
+                are left out as well (reason apps.lessons.availability.OFF_HOURS). Used for series
+                created by families in the portal.
 
         Returns:
             Dict with:
@@ -79,7 +83,10 @@ class RecurringSessionService:
             from apps.lessons.availability import BusyCalendar
 
             busy_calendar = BusyCalendar(
-                recurring_session.contract.user, recurring_session.start_date, end_date
+                recurring_session.contract.user,
+                recurring_session.start_date,
+                end_date,
+                enforce_working_hours=within_hours,
             )
 
         # Generate sessions based on recurrence_type

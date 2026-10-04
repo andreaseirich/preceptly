@@ -45,3 +45,5 @@ nicht mehr in die Fahrzeit einer anderen Stunde buchen.
 | Vorbelegung der Fahrzeiten | `apps/lessons/travel_defaults.py`, `apps/core/static/js/travel-defaults.js` |
 | Portal | `_get_available_slots`, `_busy_error`, Buchung, Verschieben, Serie in `apps/portal/views.py` |
 | Tests | `apps/lessons/test_travel_defaults.py`, `apps/lessons/test_min_gap.py` |
+
+Die Arbeitszeiten im Portal und die Serien des Tutors stehen in `docs/features/feat-serien-freie-tage.md`.

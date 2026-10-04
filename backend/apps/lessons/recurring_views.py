@@ -25,6 +25,7 @@ from apps.lessons.recurring_forms import RecurringLessonForm
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
 from apps.lessons.recurring_utils import get_all_sessions_for_recurring
+from apps.lessons.series_messages import report_busy_days
 from apps.lessons.views_calendar import get_last_calendar_url
 
 
@@ -94,7 +95,9 @@ class RecurringLessonCreateView(LoginRequiredMixin, FeatureRequiredMixin, Create
         recurring_lesson = self.object
 
         with transaction.atomic():
-            result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
+            result = RecurringLessonService.generate_lessons(
+                recurring_lesson, check_conflicts=True, skip_busy=True
+            )
 
         if result["created"] > 0:
             messages.success(
@@ -117,6 +120,7 @@ class RecurringLessonCreateView(LoginRequiredMixin, FeatureRequiredMixin, Create
                 ).format(count=conflict_count),
             )
 
+        report_busy_days(self.request, result["busy"])
         return get_last_calendar_url(self.request)
 
     def form_valid(self, form):
@@ -172,7 +176,9 @@ class RecurringLessonUpdateView(LoginRequiredMixin, FeatureRequiredMixin, Update
 
             response = super().form_valid(form)
 
-            result = RecurringLessonService.generate_lessons(recurring, check_conflicts=True)
+            result = RecurringLessonService.generate_lessons(
+                recurring, check_conflicts=True, skip_busy=True
+            )
 
         if result["created"] > 0:
             messages.success(
@@ -197,6 +203,7 @@ class RecurringLessonUpdateView(LoginRequiredMixin, FeatureRequiredMixin, Update
                 ).format(count=conflict_count),
             )
 
+        report_busy_days(self.request, result["busy"])
         return response
 
     def get_success_url(self):
@@ -249,7 +256,9 @@ def generate_lessons_from_recurring(request, pk):
     if not user_has_feature(request.user, Feature.FEATURE_RECURRING_LESSONS):
         return deny(request, Feature.FEATURE_RECURRING_LESSONS, "lessons:recurring_detail", pk=pk)
 
-    result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
+    result = RecurringLessonService.generate_lessons(
+        recurring_lesson, check_conflicts=True, skip_busy=True
+    )
 
     if result["created"] > 0:
         messages.success(
@@ -281,6 +290,8 @@ def generate_lessons_from_recurring(request, pk):
                 conflict_count,
             ).format(count=conflict_count),
         )
+
+    report_busy_days(request, result["busy"])
 
     # Weiterleitung zum Kalender, falls Lessons erstellt wurden
     if result["created"] > 0:

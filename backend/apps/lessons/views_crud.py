@@ -30,6 +30,7 @@ from apps.lessons.recurring_utils import (
     find_matching_recurring_lesson,
     get_all_lessons_for_recurring,
 )
+from apps.lessons.series_messages import report_busy_days
 from apps.lessons.services import LessonConflictService, recalculate_conflicts_for_affected_lessons
 from apps.lessons.status_service import LessonStatusService
 from apps.lessons.views_calendar import get_last_calendar_url
@@ -241,7 +242,9 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
             recurring_lesson.save()
 
             # Generate lessons from RecurringLesson
-            result = RecurringLessonService.generate_lessons(recurring_lesson, check_conflicts=True)
+            result = RecurringLessonService.generate_lessons(
+                recurring_lesson, check_conflicts=True, skip_busy=True
+            )
 
             if result["created"] > 0:
                 messages.success(
@@ -270,6 +273,8 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
                         conflict_count,
                     ).format(count=conflict_count),
                 )
+
+            report_busy_days(self.request, result["busy"])
 
             # Set self.object for redirection
             if result.get("created", 0) > 0:
