@@ -24,9 +24,8 @@ class TravelDefaultsMixin:
             str(pk): {"before": before, "after": after} for pk, before, after in rows
         }
 
-        creating = not (self.instance and self.instance.pk)
-        if not creating:
-            return
+        if self.instance.pk:
+            return  # bestehende Stunde oder Serie: ihre eigenen Werte bleiben
         help_text = _("Pre-filled from the student's contract; you can change it for this lesson.")
         self.fields["travel_time_before_minutes"].help_text = help_text
         self.fields["travel_time_after_minutes"].help_text = help_text
