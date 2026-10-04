@@ -135,10 +135,13 @@
   <p>Auf der Detailseite der Stunde in der Zeile „Gebucht“: mit Zeitpunkt, Weg (zum Beispiel über das Portal) und Konto. Das Konto wird seit dem 29.09.2026 gespeichert. Ältere Stunden zeigen nur den Zeitpunkt.</p>
 
   <h3>Was ist ein Konflikt?</h3>
-  <p>Preceptly warnt, wenn sich eine Stunde mit einer anderen Stunde oder einer Blockzeit überschneidet oder wenn die Vertragsquote des Monats überschritten ist. Fahrzeiten vor und nach der Stunde zählen dabei mit. Die Stunde wird trotzdem gespeichert. Du entscheidest, ob du etwas änderst.</p>
+  <p>Preceptly warnt, wenn sich eine Stunde mit einer anderen Stunde oder einer Blockzeit überschneidet, den eingestellten Mindestabstand unterschreitet oder wenn die Vertragsquote des Monats überschritten ist. Fahrzeiten vor und nach der Stunde zählen dabei mit. Die Stunde wird trotzdem gespeichert. Du entscheidest, ob du etwas änderst.</p>
 
   <h3>Wofür sind die Fahrzeiten?</h3>
   <p>Wenn du zu Schülern fährst, trägst du die Zeit vor und nach der Stunde ein. Sie wird im Kalender mit eingeplant und nicht abgerechnet. Für jeden Schüler kannst du im Vertrag Standard-Fahrzeiten eintragen. Sie werden bei neuen Stunden vorbelegt und lassen sich für jede Stunde ändern. Stunden, die Familien im Portal buchen, übernehmen die Standardwerte.</p>
+
+  <h3>Kann ich einen Mindestabstand zwischen Terminen festlegen?</h3>
+  <p>Ja, in den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „Mindestabstand zwischen Terminen“. Du gibst an, wie viele Minuten mindestens zwischen zwei Terminen und zwischen einem Termin und einer Blockzeit liegen sollen, damit es nicht zu stressig wird. Fahrzeiten zählen zum Termin. Trägst du selbst eine Stunde ein, die den Abstand unterschreitet, bekommst du einen Konflikt mit dem Hinweis „Zu wenig Abstand“. Familien können im Portal nur Zeiten buchen, die den Abstand einhalten, auch beim Verschieben, und bei Serien lässt das Portal zu dichte Tage aus. 0 bedeutet kein Mindestabstand.</p>
 
   <h3>Was bedeutet „Tutor-Ausfall“?</h3>
   <p>Damit markierst du eine Stunde, die du selbst versäumt hast. Für Institute legst du fest, ob solche Stunden mit 0 € abgerechnet werden oder welchen Anteil der Vergütung du behältst.</p>
@@ -277,7 +280,7 @@
   <p>Ja, ab dem Pro-Tarif (Familien-Zugang). Lade für jedes Kind dieselbe E-Mail-Adresse ein. Das bestehende Konto wird dann automatisch mit dem weiteren Kind verknüpft. In kleineren Tarifen braucht jedes Kind eine eigene E-Mail-Adresse.</p>
 
   <h3>Wann können Familien Termine buchen?</h3>
-  <p>Nur innerhalb deiner Standard-Arbeitszeiten aus den <a href="{% url 'core:settings' %}">Einstellungen</a> und nur in freien Zeiten. Deine anderen Stunden und Blockzeiten erscheinen im Portal als belegt, ohne Namen und ohne Thema. Ein gebuchter Termin dauert so lange wie eine Einheit im Vertrag.</p>
+  <p>Nur innerhalb deiner Standard-Arbeitszeiten aus den <a href="{% url 'core:settings' %}">Einstellungen</a> und nur in freien Zeiten. Deine anderen Stunden und Blockzeiten erscheinen im Portal als belegt, ohne Namen und ohne Thema. Ein gebuchter Termin dauert so lange wie eine Einheit im Vertrag. Als frei gelten nur Zeiten, die Fahrzeiten und deinen Mindestabstand einhalten.</p>
 
   <h3>Erfahre ich, wenn jemand im Portal bucht?</h3>
   <p>Ja, per E-Mail und per Push-Nachricht. Das gilt auch, wenn eine Familie einen Termin absagt, verschiebt oder eine Serie beendet. In den <a href="{% url 'core:settings' %}">Einstellungen</a> unter „Benachrichtigungen“ stellst du für Buchungen und für Absagen und Verschiebungen getrennt ein, was du bekommst.</p>

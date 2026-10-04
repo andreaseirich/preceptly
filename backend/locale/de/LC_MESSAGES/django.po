@@ -7561,3 +7561,41 @@ msgstr "Standard-Fahrzeit"
 #, python-format
 msgid "%(before)s min before, %(after)s min after"
 msgstr "%(before)s Min. vorher, %(after)s Min. nachher"
+
+#: apps/core/views.py
+msgid "Minimum minutes between two appointments and between an appointment and a blocked time. 0 = none."
+msgstr "Mindestabstand in Minuten zwischen zwei Terminen und zwischen Termin und Blockzeit. 0 = keiner."
+
+#: apps/core/views.py
+#, python-brace-format
+msgid "Only {minutes} min to the lesson for {student} ({time}); at least {needed} min are set as the minimum gap"
+msgstr "Nur {minutes} Min. bis zur Stunde von {student} ({time}); als Mindestabstand sind {needed} Min. eingestellt"
+
+#: apps/core/views.py
+#, python-brace-format
+msgid "Only {minutes} min to the blocked time {title}; at least {needed} min are set as the minimum gap"
+msgstr "Nur {minutes} Min. bis zur Blockzeit {title}; als Mindestabstand sind {needed} Min. eingestellt"
+
+#: apps/core/views.py
+msgid "Please enter a whole number of minutes between 0 and 240."
+msgstr "Bitte gib eine ganze Zahl von 0 bis 240 Minuten ein."
+
+#: apps/core/views.py
+msgid "Minimum gap saved."
+msgstr "Mindestabstand gespeichert."
+
+#: apps/core/views.py
+msgid "Minimum gap between appointments"
+msgstr "Mindestabstand zwischen Terminen"
+
+#: apps/core/views.py
+msgid "So that your days do not get too stressful: at least this many minutes should lie between two appointments and between an appointment and a blocked time. Travel times count as part of the appointment."
+msgstr "Damit deine Tage nicht zu stressig werden: Zwischen zwei Terminen und zwischen einem Termin und einer Blockzeit sollen mindestens so viele Minuten liegen. Fahrzeiten zählen zum Termin."
+
+#: apps/core/views.py
+msgid "Minimum gap (minutes)"
+msgstr "Mindestabstand (Minuten)"
+
+#: apps/core/views.py
+msgid "Students and parents can only book times that keep this gap, in the portal also when rescheduling and for series (days that are too close are left out). For lessons you enter yourself, you get a warning. 0 means no minimum."
+msgstr "Schüler und Eltern können nur Zeiten buchen, die diesen Abstand einhalten, im Portal auch beim Verschieben und bei Serien (zu dichte Tage werden ausgelassen). Bei Stunden, die du selbst einträgst, bekommst du eine Warnung. 0 bedeutet kein Mindestabstand."

@@ -156,9 +156,9 @@
             <li style="margin-bottom: 8px;">
                 <strong>
                     {% if conflict.type == 'lesson' or conflict.type == 'session' %}
-                        ⚠️ Zeitüberschneidung mit anderer Stunde
+                        {% if conflict.too_close %}⏱ Zu wenig Abstand zu anderer Stunde{% else %}⚠️ Zeitüberschneidung mit anderer Stunde{% endif %}
                     {% elif conflict.type == 'blocked_time' %}
-                        🚫 Zeitüberschneidung mit Blockierung
+                        {% if conflict.too_close %}⏱ Zu wenig Abstand zu Blockierung{% else %}🚫 Zeitüberschneidung mit Blockierung{% endif %}
                     {% elif conflict.type == 'quota' %}
                         📊 Vertragsquote überschritten
                     {% endif %}

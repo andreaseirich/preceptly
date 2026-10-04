@@ -400,6 +400,21 @@ class SettingsView(LoginRequiredMixin, FormView):
             )
             messages.success(request, _("Notification settings saved."))
             return redirect(self._section_url("notifications"))
+        if "save_min_gap" in request.POST:
+            try:
+                minutes = int((request.POST.get("min_gap_minutes") or "0").strip())
+            except ValueError:
+                minutes = -1
+            if not 0 <= minutes <= 240:
+                messages.error(
+                    request, _("Please enter a whole number of minutes between 0 and 240.")
+                )
+                return redirect(self._section_url("portal"))
+            profile, _created = UserProfile.objects.get_or_create(user=request.user)
+            profile.min_gap_minutes = minutes
+            profile.save(update_fields=["min_gap_minutes", "updated_at"])
+            messages.success(request, _("Minimum gap saved."))
+            return redirect(self._section_url("portal"))
         if "save_portal" in request.POST:
             profile, _created = UserProfile.objects.get_or_create(user=request.user)
             profile.portal_buffer_hint_enabled = "portal_buffer_hint_enabled" in request.POST

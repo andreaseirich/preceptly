@@ -775,14 +775,21 @@ def _get_busy_slots(tutor, date):
     return [(start.time(), end.time()) for start, end, _kind in busy_intervals(tutor, date)]
 
 
-def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
-    """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück."""
+def _get_available_slots(
+    tutor, date, duration_minutes=60, slot_interval=30, travel_before=0, travel_after=0
+):
+    """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück.
+
+    Frei heißt: innerhalb der Arbeitszeiten und nach der Regel in apps/lessons/availability.py, also mit
+    Fahrzeit der neuen Stunde (travel_before/travel_after) und dem Mindestabstand des Tutors."""
+    from apps.lessons.availability import BusyCalendar
+
     profile = getattr(tutor, "profile", None)
     wh = (profile.default_working_hours if profile else {}) or {}
     day_name = date.strftime("%A").lower()
     day_slots = wh.get(day_name, [])
 
-    busy = _get_busy_slots(tutor, date)
+    calendar = BusyCalendar(tutor, date, date)
 
     available = []
     for slot in day_slots:
@@ -796,10 +803,11 @@ def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
         dur = _dt.timedelta(minutes=duration_minutes)
         step = _dt.timedelta(minutes=slot_interval)
         while cur + dur <= slot_end_dt:
-            cs = cur.time()
-            ce = (cur + dur).time()
-            if not any(cs < be and ce > bs for bs, be in busy):
-                available.append(cs.strftime("%H:%M"))
+            if (
+                calendar.reason(date, cur.time(), duration_minutes, travel_before, travel_after)
+                is None
+            ):
+                available.append(cur.strftime("%H:%M"))
             cur += step
     return sorted(set(available))
 
@@ -823,7 +831,13 @@ class PortalAvailabilityView(View):
         except ValueError:
             return JsonResponse({"error": "Ungültiges Datum"}, status=400)
 
-        slots = _get_available_slots(student.user, date, duration_minutes=duration)
+        slots = _get_available_slots(
+            student.user,
+            date,
+            duration_minutes=duration,
+            travel_before=contract.default_travel_time_before_minutes if contract else 0,
+            travel_after=contract.default_travel_time_after_minutes if contract else 0,
+        )
         busy = _get_busy_slots(student.user, date)
         busy_data = [{"start": s.strftime("%H:%M"), "end": e.strftime("%H:%M")} for s, e in busy]
         tutor_tz = (
@@ -909,48 +923,20 @@ class PortalBookingView(View):
                 request, student, contract, error="Das Datum liegt in der Vergangenheit."
             )
 
-        # Konflikt-Prüfung
+        # Konflikt-Prüfung: dieselbe Regel wie bei den freien Zeiten (apps/lessons/availability.py) -
+        # andere Stunden und Blockzeiten samt Fahrzeit und Mindestabstand des Tutors.
+        from apps.lessons.availability import BusyCalendar
+
         duration = contract.unit_duration_minutes
-        start_dt = _dt.datetime.combine(session_date, session_time)
-        end_dt = start_dt + _dt.timedelta(minutes=duration)
-        existing = _Session.objects.filter(
-            contract__user=student.user,
-            date=session_date,
-            status__in=["planned", "taught", "paid"],
+        reason = BusyCalendar(student.user, session_date, session_date).reason(
+            session_date,
+            session_time,
+            duration,
+            contract.default_travel_time_before_minutes,
+            contract.default_travel_time_after_minutes,
         )
-        for ex in existing:
-            ex_start = _dt.datetime.combine(session_date, ex.start_time)
-            ex_end = ex_start + _dt.timedelta(minutes=ex.duration_minutes)
-            if start_dt < ex_end and end_dt > ex_start:
-                return self._render(
-                    request,
-                    student,
-                    contract,
-                    error=f"Zeitkonflikt mit bestehendem Termin um {ex.start_time.strftime('%H:%M')} Uhr.",
-                )
-
-        # BlockedTime-Konflikt-Prüfung
-        from apps.blocked_times.models import BlockedTime
-
-        day_start_dt = _dt.datetime.combine(session_date, _dt.time(0, 0))
-        day_end_dt = _dt.datetime.combine(session_date, _dt.time(23, 59, 59))
-        day_start_aware = timezone.make_aware(day_start_dt)
-        day_end_aware = timezone.make_aware(day_end_dt)
-        blocked_times = BlockedTime.objects.filter(
-            user=student.user,
-            start_datetime__lt=day_end_aware,
-            end_datetime__gt=day_start_aware,
-        )
-        for bt in blocked_times:
-            bt_start = max(_localtime(bt.start_datetime).replace(tzinfo=None), day_start_dt)
-            bt_end = min(_localtime(bt.end_datetime).replace(tzinfo=None), day_end_dt)
-            if start_dt < bt_end and end_dt > bt_start:
-                return self._render(
-                    request,
-                    student,
-                    contract,
-                    error="Diese Zeit ist durch eine Blockzeit belegt.",
-                )
+        if reason:
+            return self._render(request, student, contract, error=_busy_error(reason))
 
         session = _Session.objects.create(
             contract=contract,
@@ -1091,7 +1077,6 @@ class PortalSessionRescheduleView(View):
         return self._render(request, session, student, portal_user)
 
     def post(self, request, session_pk):
-        from apps.lessons.models import Session as _Session
 
         portal_user, session, student = self._get_session_and_student(request, session_pk)
         if not portal_user:
@@ -1121,26 +1106,20 @@ class PortalSessionRescheduleView(View):
                 error="Das Datum liegt in der Vergangenheit.",
             )
 
-        # Konflikt-Prüfung (außer sich selbst)
+        # Konflikt-Prüfung (außer sich selbst): wie bei Buchung und freien Zeiten, mit der eigenen Fahrzeit
+        # der Stunde. Bis 04.10.2026 prüfte das Verschieben Blockzeiten gar nicht.
+        from apps.lessons.availability import BusyCalendar
+
         duration = session.duration_minutes
-        start_dt = _dt.datetime.combine(new_date, new_time)
-        end_dt = start_dt + _dt.timedelta(minutes=duration)
-        conflicts = _Session.objects.filter(
-            contract__user=student.user,
-            date=new_date,
-            status__in=["planned", "taught", "paid"],
-        ).exclude(pk=session.pk)
-        for ex in conflicts:
-            ex_start = _dt.datetime.combine(new_date, ex.start_time)
-            ex_end = ex_start + _dt.timedelta(minutes=ex.duration_minutes)
-            if start_dt < ex_end and end_dt > ex_start:
-                return self._render(
-                    request,
-                    session,
-                    student,
-                    portal_user,
-                    error=f"Zeitkonflikt mit Termin um {ex.start_time.strftime('%H:%M')} Uhr.",
-                )
+        reason = BusyCalendar(student.user, new_date, new_date, exclude_pk=session.pk).reason(
+            new_date,
+            new_time,
+            duration,
+            session.travel_time_before_minutes,
+            session.travel_time_after_minutes,
+        )
+        if reason:
+            return self._render(request, session, student, portal_user, error=_busy_error(reason))
 
         old_date = session.date
         old_time = session.start_time
@@ -1198,6 +1177,19 @@ class PortalRecurringManageView(View):
                 "can_create_series": _portal_series_allowed(student),
             },
         )
+
+
+def _busy_error(reason) -> str:
+    """Fehlertext, wenn eine gewünschte Zeit nicht frei ist. Ohne Angabe, was dort steht: Familien sehen im
+    Portal sonst auch nur "belegt"."""
+    from apps.lessons.availability import BLOCKED
+
+    if reason == BLOCKED:
+        return "Diese Zeit ist durch eine Blockzeit belegt oder liegt zu dicht davor oder danach."
+    return (
+        "Zeitkonflikt: Zu dieser Zeit ist dein Tutor nicht frei "
+        "(anderer Termin, Fahrzeit oder Pause dazwischen)."
+    )
 
 
 def _busy_days_message(busy) -> str:

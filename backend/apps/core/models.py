@@ -193,6 +193,15 @@ class UserProfile(models.Model):
         ),
     )
     portal_buffer_hint_enabled = models.BooleanField(default=True)
+    # Mindestabstand zwischen zwei Terminen und zwischen Termin und Blockzeit (Fahrzeiten zählen zum
+    # Termin). 0 = kein Mindestabstand. Regel: apps/lessons/availability.py und conflict_service.py.
+    min_gap_minutes = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[MaxValueValidator(240)],
+        help_text=_(
+            "Minimum minutes between two appointments and between an appointment and a blocked time. 0 = none."
+        ),
+    )
     withdrawal_waiver_accepted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

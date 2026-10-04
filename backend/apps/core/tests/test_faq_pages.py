@@ -74,6 +74,9 @@ class TutorFaqTest(TestCase):
     def test_explains_that_portal_series_leave_out_busy_days(self):
         self.assertIn("lässt das Portal aus", self.html)
 
+    def test_explains_the_minimum_gap(self):
+        self.assertIn("Mindestabstand zwischen Terminen", self.html)
+
     def test_explains_default_travel_times(self):
         self.assertIn("Standard-Fahrzeiten", self.html)
 
@@ -107,6 +110,9 @@ class PortalFaqTest(TestCase):
 
     def test_template_comments_are_not_rendered(self):
         self.assertNotIn("{#", self.html)
+
+    def test_explains_why_a_free_looking_time_cannot_be_booked(self):
+        self.assertIn("nicht als „Belegt“ markiert", self.html)
 
     def test_explains_that_series_leave_out_busy_days(self):
         self.assertIn("wird dieser Tag ausgelassen", self.html)

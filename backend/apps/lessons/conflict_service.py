@@ -14,6 +14,7 @@ from django.utils.translation import gettext as _
 
 from apps.blocked_times.models import BlockedTime
 from apps.lessons.quota_service import ContractQuotaService
+from apps.lessons.spacing import min_gap_minutes
 
 if TYPE_CHECKING:
     from apps.lessons.models import Session
@@ -118,9 +119,19 @@ class SessionConflictService:
         return start_datetime, end_datetime
 
     @staticmethod
-    def _lesson_conflicts(session, start, end, candidates, exclude_self: bool) -> list[dict]:
+    def _gap_minutes_between(start, end, other_start, other_end) -> int:
+        """Minuten zwischen zwei Zeitblöcken, die sich nicht überschneiden."""
+        if other_end <= start:
+            return int((start - other_end).total_seconds() // 60)
+        return int((other_start - end).total_seconds() // 60)
+
+    @staticmethod
+    def _lesson_conflicts(
+        session, start, end, candidates, exclude_self: bool, gap=timedelta(0)
+    ) -> list[dict]:
         """Überschneidungen mit anderen Stunden - reine Rechnung über fertige Kandidaten
-        (Stunden desselben Tutors am selben Tag)."""
+        (Stunden desselben Tutors am selben Tag). gap: Mindestabstand des Tutors; ein kleinerer
+        Abstand ist ein Konflikt mit too_close=True."""
         conflicts = []
         for other_session in candidates:
             if exclude_self and session.pk and other_session.pk == session.pk:
@@ -141,18 +152,41 @@ class SessionConflictService:
                         "end": other_end,
                     }
                 )
+            elif gap and SessionConflictService.intervals_overlap(
+                start1=start - gap, end1=end + gap, start2=other_start, end2=other_end
+            ):
+                minutes = SessionConflictService._gap_minutes_between(
+                    start, end, other_start, other_end
+                )
+                conflicts.append(
+                    {
+                        "type": "lesson",
+                        "object": other_session,
+                        "too_close": True,
+                        "gap_minutes": minutes,
+                        "message": _(
+                            "Only {minutes} min to the lesson for {student} ({time}); "
+                            "at least {needed} min are set as the minimum gap"
+                        ).format(
+                            minutes=minutes,
+                            student=other_session.contract,
+                            time=other_session.start_time.strftime("%H:%M"),
+                            needed=int(gap.total_seconds() // 60),
+                        ),
+                        "start": other_start,
+                        "end": other_end,
+                    }
+                )
         return conflicts
 
     @staticmethod
-    def _blocked_time_conflicts(start, end, blocked_times) -> list[dict]:
-        """Überschneidungen mit Sperrzeiten - reine Rechnung."""
+    def _blocked_time_conflicts(start, end, blocked_times, gap=timedelta(0)) -> list[dict]:
+        """Überschneidungen mit Sperrzeiten - reine Rechnung. gap: Mindestabstand des Tutors."""
         conflicts = []
         for blocked_time in blocked_times:
+            blocked_start, blocked_end = blocked_time.start_datetime, blocked_time.end_datetime
             if SessionConflictService.intervals_overlap(
-                start1=start,
-                end1=end,
-                start2=blocked_time.start_datetime,
-                end2=blocked_time.end_datetime,
+                start1=start, end1=end, start2=blocked_start, end2=blocked_end
             ):
                 conflicts.append(
                     {
@@ -161,8 +195,32 @@ class SessionConflictService:
                         "message": _("Overlap with blocked time: {title}").format(
                             title=blocked_time.title
                         ),
-                        "start": blocked_time.start_datetime,
-                        "end": blocked_time.end_datetime,
+                        "start": blocked_start,
+                        "end": blocked_end,
+                    }
+                )
+            elif gap and SessionConflictService.intervals_overlap(
+                start1=start - gap, end1=end + gap, start2=blocked_start, end2=blocked_end
+            ):
+                minutes = SessionConflictService._gap_minutes_between(
+                    start, end, blocked_start, blocked_end
+                )
+                conflicts.append(
+                    {
+                        "type": "blocked_time",
+                        "object": blocked_time,
+                        "too_close": True,
+                        "gap_minutes": minutes,
+                        "message": _(
+                            "Only {minutes} min to the blocked time {title}; "
+                            "at least {needed} min are set as the minimum gap"
+                        ).format(
+                            minutes=minutes,
+                            title=blocked_time.title,
+                            needed=int(gap.total_seconds() // 60),
+                        ),
+                        "start": blocked_start,
+                        "end": blocked_end,
                     }
                 )
         return conflicts
@@ -204,17 +262,18 @@ class SessionConflictService:
         candidates = Session.objects.filter(
             date=session.date, start_time__isnull=False, contract__user=owner_user
         ).select_related("contract")
+        gap = timedelta(minutes=min_gap_minutes(owner_user))
         conflicts = SessionConflictService._lesson_conflicts(
-            session, start_datetime, end_datetime, candidates, exclude_self
+            session, start_datetime, end_datetime, candidates, exclude_self, gap
         )
 
         blocked_times = BlockedTime.objects.filter(
             user=owner_user,
-            start_datetime__lt=end_datetime,
-            end_datetime__gt=start_datetime,
+            start_datetime__lt=end_datetime + gap,
+            end_datetime__gt=start_datetime - gap,
         )
         conflicts += SessionConflictService._blocked_time_conflicts(
-            start_datetime, end_datetime, blocked_times
+            start_datetime, end_datetime, blocked_times, gap
         )
 
         quota = SessionConflictService._quota_entry(
@@ -238,10 +297,15 @@ class SessionConflictService:
         Session = apps.get_model("lessons", "Session")
         Contract = apps.get_model("contracts", "Contract")
 
-        contracts = Contract.objects.in_bulk({s.contract_id for s in sessions})
+        # user__profile mitladen: Der Mindestabstand kommt ohne zusätzliche Abfrage mit.
+        contracts = Contract.objects.select_related("user__profile").in_bulk(
+            {s.contract_id for s in sessions}
+        )
         for s in sessions:
             s.contract = contracts[s.contract_id]
         owners = {c.user_id for c in contracts.values()}
+        gaps = {c.user_id: timedelta(minutes=min_gap_minutes(c.user)) for c in contracts.values()}
+        widest_gap = max(gaps.values(), default=timedelta(0))
         blocks = {s.pk: SessionConflictService.calculate_time_block(s) for s in sessions}
 
         candidates = defaultdict(list)
@@ -255,8 +319,8 @@ class SessionConflictService:
         blocked = defaultdict(list)
         for blocked_time in BlockedTime.objects.filter(
             user_id__in=owners,
-            start_datetime__lt=max(end for _start, end in blocks.values()),
-            end_datetime__gt=min(start for start, _end in blocks.values()),
+            start_datetime__lt=max(end for _start, end in blocks.values()) + widest_gap,
+            end_datetime__gt=min(start for start, _end in blocks.values()) - widest_gap,
         ):
             blocked[blocked_time.user_id].append(blocked_time)
 
@@ -266,10 +330,13 @@ class SessionConflictService:
         for s in sessions:
             start, end = blocks[s.pk]
             owner = s.contract.user_id
+            gap = gaps[owner]
             conflicts = SessionConflictService._lesson_conflicts(
-                s, start, end, candidates[(owner, s.date)], exclude_self
+                s, start, end, candidates[(owner, s.date)], exclude_self, gap
             )
-            conflicts += SessionConflictService._blocked_time_conflicts(start, end, blocked[owner])
+            conflicts += SessionConflictService._blocked_time_conflicts(
+                start, end, blocked[owner], gap
+            )
             quota = SessionConflictService._quota_entry(
                 s, ContractQuotaService.quota_conflict_from_preloaded(s, quota_data, exclude_self)
             )

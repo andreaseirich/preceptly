@@ -304,6 +304,20 @@
             </form>
         </section>
 
+        <section class="settings-card" id="min-gap" aria-labelledby="min-gap-title">
+            <h3 id="min-gap-title">{% trans "Minimum gap between appointments" %}</h3>
+            <p class="settings-desc">{% trans "So that your days do not get too stressful: at least this many minutes should lie between two appointments and between an appointment and a blocked time. Travel times count as part of the appointment." %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <label for="id_min_gap_minutes">{% trans "Minimum gap (minutes)" %}</label>
+                <input type="number" name="min_gap_minutes" id="id_min_gap_minutes" class="form-control" style="max-width: 140px;" min="0" max="240" step="5" value="{{ profile.min_gap_minutes }}" aria-describedby="min-gap-help">
+                <p id="min-gap-help" class="settings-desc" style="margin-top: 8px;">{% trans "Students and parents can only book times that keep this gap, in the portal also when rescheduling and for series (days that are too close are left out). For lessons you enter yourself, you get a warning. 0 means no minimum." %}</p>
+                <div class="settings-actions">
+                    <button type="submit" name="save_min_gap" class="btn btn-success">{% trans "Save" %}</button>
+                </div>
+            </form>
+        </section>
+
         <section class="settings-card" id="portal" aria-labelledby="portal-title">
             <h3 id="portal-title">{% trans "Student & Parent Portal" %}</h3>
             <p class="settings-desc">{% trans "When students or parents book, reschedule or set up recurring lessons in the portal, they can see a hint asking them to leave buffer time around your appointments and blocked times." %}</p>

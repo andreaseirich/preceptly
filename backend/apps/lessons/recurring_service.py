@@ -355,7 +355,11 @@ class RecurringSessionService:
 
         if busy_calendar is not None:
             reason = busy_calendar.reason(
-                session_date, recurring_session.start_time, recurring_session.duration_minutes
+                session_date,
+                recurring_session.start_time,
+                recurring_session.duration_minutes,
+                recurring_session.travel_time_before_minutes,
+                recurring_session.travel_time_after_minutes,
             )
             if reason:
                 return {"created": False, "skipped": False, "busy": reason}
