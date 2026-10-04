@@ -7536,3 +7536,28 @@ msgstr "App & Benachrichtigungen"
 msgctxt "FAQ nav dropdown"
 msgid "Privacy & security"
 msgstr "Datenschutz & Sicherheit"
+
+#: apps/contracts/models.py
+msgid "default travel time before (minutes)"
+msgstr "Standard-Fahrzeit vorher (Minuten)"
+
+#: apps/contracts/models.py
+msgid "default travel time after (minutes)"
+msgstr "Standard-Fahrzeit nachher (Minuten)"
+
+#: apps/contracts/models.py
+msgid "Pre-filled for new lessons of this student. You can change it for each lesson."
+msgstr "Wird bei neuen Stunden dieses Schülers vorbelegt. Du kannst sie für jede Stunde ändern."
+
+#: apps/contracts/models.py
+msgid "Pre-filled from the student's contract; you can change it for this lesson."
+msgstr "Aus dem Vertrag des Schülers vorbelegt, für diese Stunde änderbar."
+
+#: apps/contracts/models.py
+msgid "Standard travel time"
+msgstr "Standard-Fahrzeit"
+
+#: apps/contracts/models.py
+#, python-format
+msgid "%(before)s min before, %(after)s min after"
+msgstr "%(before)s Min. vorher, %(after)s Min. nachher"

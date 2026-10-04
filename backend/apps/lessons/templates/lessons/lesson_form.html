@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}Stunde bearbeiten – Preceptly{% endblock %}
 
@@ -66,6 +66,7 @@
             {{ form.travel_time_after_minutes }}
             {% if form.travel_time_after_minutes.errors %}<div id="{{ form.travel_time_after_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.travel_time_after_minutes.errors }}</div>{% endif %}
         </p>
+        {% if form.travel_time_after_minutes.help_text %}<p class="form-help" style="font-size:0.85em; color: var(--text-secondary); margin-top:-6px;">{{ form.travel_time_after_minutes.help_text }}</p>{% endif %}
         <p>
             <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
             {{ form.notes }}
@@ -203,6 +204,8 @@
     </div>
 </form>
 
+{{ form.contract_travel_defaults|json_script:"contract-travel-defaults" }}
+<script src="{% static 'js/travel-defaults.js' %}" nonce="{{ csp_nonce }}" defer></script>
 <script nonce="{{ csp_nonce }}">
 function toggleRecurrenceFields() {
     const isRecurring = document.getElementById('{{ form.is_recurring.id_for_label }}');

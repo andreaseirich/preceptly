@@ -96,6 +96,8 @@ class ContractForm(forms.ModelForm):
             "institute_fk",
             "hourly_rate",
             "unit_duration_minutes",
+            "default_travel_time_before_minutes",
+            "default_travel_time_after_minutes",
             "start_date",
             "end_date",
             "is_active",
@@ -115,6 +117,12 @@ class ContractForm(forms.ModelForm):
             "institute_fk": forms.Select(attrs={"class": "form-control"}),
             "hourly_rate": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "unit_duration_minutes": forms.NumberInput(attrs={"class": "form-control"}),
+            "default_travel_time_before_minutes": forms.NumberInput(
+                attrs={"class": "form-control", "min": 0, "max": 480}
+            ),
+            "default_travel_time_after_minutes": forms.NumberInput(
+                attrs={"class": "form-control", "min": 0, "max": 480}
+            ),
             "start_date": forms.DateInput(
                 attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
             ),
@@ -126,8 +134,17 @@ class ContractForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
+    def clean_default_travel_time_before_minutes(self):
+        return self.cleaned_data.get("default_travel_time_before_minutes") or 0
+
+    def clean_default_travel_time_after_minutes(self):
+        return self.cleaned_data.get("default_travel_time_after_minutes") or 0
+
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        # Leer heißt 0: Bestehende Wege, die Verträge ohne diese Felder anlegen, bleiben gültig.
+        for name in ("default_travel_time_before_minutes", "default_travel_time_after_minutes"):
+            self.fields[name].required = False
         self.fields["email"].label = _("Schüler-E-Mail")
         self.fields["email"].help_text = _(
             "E-Mail-Adresse des Schülers — wird für das Schüler-Portal verwendet."

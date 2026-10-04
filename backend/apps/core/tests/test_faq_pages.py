@@ -74,6 +74,9 @@ class TutorFaqTest(TestCase):
     def test_explains_that_portal_series_leave_out_busy_days(self):
         self.assertIn("lässt das Portal aus", self.html)
 
+    def test_explains_default_travel_times(self):
+        self.assertIn("Standard-Fahrzeiten", self.html)
+
     def test_no_outdated_claim_about_deleting_sent_invoices(self):
         self.assertIn("Ändern und löschen kannst du nur Entwürfe", self.html)
 

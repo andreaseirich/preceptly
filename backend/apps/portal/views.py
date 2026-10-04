@@ -961,6 +961,8 @@ class PortalBookingView(View):
             notes=topic or None,
             created_via="portal_booking",
             booked_by=portal_user.user,
+            travel_time_before_minutes=contract.default_travel_time_before_minutes,
+            travel_time_after_minutes=contract.default_travel_time_after_minutes,
         )
         from apps.core.background import run_in_background
         from apps.portal.email_service import send_booking_notification_portal
@@ -1297,6 +1299,8 @@ class PortalRecurringCreateView(View):
             end_date=end_date,
             start_time=start_time,
             duration_minutes=contract.unit_duration_minutes,
+            travel_time_before_minutes=contract.default_travel_time_before_minutes,
+            travel_time_after_minutes=contract.default_travel_time_after_minutes,
             recurrence_type=rec_type if rec_type in ("weekly", "biweekly", "monthly") else "weekly",
             notes=topic or None,
             is_active=True,

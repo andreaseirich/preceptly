@@ -8,9 +8,10 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.feature_flags import Feature, user_has_feature
 from apps.core.upload_validation import validate_file_magic
 from apps.lessons.models import Session, SessionDocument
+from apps.lessons.travel_defaults import TravelDefaultsMixin
 
 
-class SessionForm(forms.ModelForm):
+class SessionForm(TravelDefaultsMixin, forms.ModelForm):
     """Form for session creation and editing."""
 
     # Option for editing: only this session or entire series
@@ -124,6 +125,7 @@ class SessionForm(forms.ModelForm):
                 self.fields["contract"].queryset = contract_qs
             else:
                 self.fields["contract"].queryset = contract_qs.filter(is_active=True)
+        self.setup_travel_defaults()
         # Hide recurrence fields when editing (only show when creating)
         if self.instance and self.instance.pk:
             self.fields["is_recurring"].widget = forms.HiddenInput()

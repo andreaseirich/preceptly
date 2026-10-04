@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}Wiederkehrende Lektion – Preceptly{% endblock %}
 
@@ -22,6 +22,9 @@
             {% if field.errors %}
                 <div id="{{ field.html_name }}_errors" role="alert" class="error">{{ field.errors }}</div>
             {% endif %}
+            {% if field.name == 'travel_time_after_minutes' and field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
             {% if field.name == 'recurrence_type' %}
                 <small class="form-text text-muted">
                     <strong>{% trans "Weekly:" %}</strong> {% trans "Every week on the selected weekdays." %}<br>
@@ -42,4 +45,6 @@
         <a href="{% url 'lessons:week' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
+{{ form.contract_travel_defaults|json_script:"contract-travel-defaults" }}
+<script src="{% static 'js/travel-defaults.js' %}" nonce="{{ csp_nonce }}" defer></script>
 {% endblock %}

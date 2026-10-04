@@ -6,15 +6,17 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.lessons.recurring_models import RecurringLesson
+from apps.lessons.travel_defaults import TravelDefaultsMixin
 
 
-class RecurringLessonForm(forms.ModelForm):
+class RecurringLessonForm(TravelDefaultsMixin, forms.ModelForm):
     """Form für RecurringLesson-Erstellung und -Bearbeitung."""
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
             self.fields["contract"].queryset = self.fields["contract"].queryset.filter(user=user)
+        self.setup_travel_defaults()
 
     class Meta:
         model = RecurringLesson

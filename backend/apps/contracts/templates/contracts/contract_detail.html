@@ -31,6 +31,7 @@
     {% if contract.institute %}<tr><th scope="row">{% trans "Institute" %}</th><td>{{ contract.institute }}</td></tr>{% endif %}
     <tr><th scope="row">{% trans "Rate" %}</th><td>{% blocktrans with rate=contract.hourly_rate %}{{ rate }}€ per unit{% endblocktrans %}</td></tr>
     <tr><th scope="row">{% trans "Duration per unit" %}</th><td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} minutes{% endblocktrans %}</td></tr>
+    {% if contract.default_travel_time_before_minutes or contract.default_travel_time_after_minutes %}<tr><th scope="row">{% trans "Standard travel time" %}</th><td>{% blocktrans with before=contract.default_travel_time_before_minutes after=contract.default_travel_time_after_minutes %}{{ before }} min before, {{ after }} min after{% endblocktrans %}</td></tr>{% endif %}
     <tr><th scope="row">{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
     <tr><th scope="row">{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
     <tr><th scope="row">Status</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>

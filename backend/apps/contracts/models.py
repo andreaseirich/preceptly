@@ -58,6 +58,24 @@ class Contract(models.Model):
         validators=[MinValueValidator(1)],
         verbose_name=_("unit duration (minutes)"),
     )
+    # Standard-Fahrzeiten: werden bei neuen Stunden dieses Schülers vorbelegt (lessons/travel_defaults.py).
+    # Bestehende Stunden ändern sich nicht, jede Stunde behält ihre eigenen Werte.
+    default_travel_time_before_minutes = models.PositiveIntegerField(
+        default=0,
+        validators=[MaxValueValidator(480)],
+        verbose_name=_("default travel time before (minutes)"),
+        help_text=_(
+            "Pre-filled for new lessons of this student. You can change it for each lesson."
+        ),
+    )
+    default_travel_time_after_minutes = models.PositiveIntegerField(
+        default=0,
+        validators=[MaxValueValidator(480)],
+        verbose_name=_("default travel time after (minutes)"),
+        help_text=_(
+            "Pre-filled for new lessons of this student. You can change it for each lesson."
+        ),
+    )
     start_date = models.DateField(verbose_name=_("start date"))
     end_date = models.DateField(null=True, blank=True, verbose_name=_("end date"))
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("active"))
