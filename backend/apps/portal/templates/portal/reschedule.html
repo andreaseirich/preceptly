@@ -1,12 +1,14 @@
 {% extends "portal/base.html" %}
+{% load static %}
 
 {% block title %}Termin verschieben – Preceptly{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/week-picker.css' %}">
 <style>
 .slot-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
-.slot-btn { padding:7px 16px; border:1px solid var(--border-color); border-radius:4px;
-    background:var(--bg-secondary); color:var(--text-primary); cursor:pointer; font-size:0.9em; }
+.slot-btn { padding:10px 18px; min-height:44px; border:1px solid var(--text-secondary); border-radius:6px;
+    background:var(--bg-secondary); color:var(--text-primary); cursor:pointer; font-size:0.95em; }
 .slot-btn:hover, .slot-btn.selected { background:var(--accent); color:var(--on-accent, #fff); border-color:var(--accent); }
 .slot-empty { color:var(--text-secondary); font-size:0.9em; }
 </style>
@@ -21,8 +23,8 @@
 
 {% if error %}<div class="alert-danger" role="alert">{{ error }}</div>{% endif %}
 
-<h2 style="margin-top:0;">Wochenübersicht</h2>
-<p style="color:var(--text-secondary); font-size:0.88em; margin-top:-8px;">Klicke auf einen Tag, um die freien Zeiten darunter zu laden.</p>
+<h2 style="margin-top:0;">Tag wählen</h2>
+<p style="color:var(--text-secondary); font-size:0.9em; margin-top:-8px;">Tippe auf einen Tag. Darunter erscheinen die freien Uhrzeiten zum Anklicken.</p>
 {% include "portal/_buffer_hint.html" %}
 {% include "portal/_week_calendar_widget.html" with nav_url_name="portal:session_reschedule" nav_pk=session.pk %}
 
@@ -37,18 +39,19 @@
     <div style="margin-bottom:20px;">
       <label for="id_start_time" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Neue Uhrzeit</label>
       {% include "portal/_buffer_hint.html" with compact=True %}
-      <div class="slot-grid" id="slot-grid" role="group" aria-label="Verfügbare Uhrzeiten">
-        <span class="slot-empty">Bitte zuerst ein Datum auswählen.</span>
+      <div class="slot-grid" id="slot-grid" role="group" aria-live="polite" aria-label="Verfügbare Uhrzeiten">
+        <span class="slot-empty">Bitte zuerst einen Tag auswählen.</span>
       </div>
       <input type="hidden" id="id_start_time" name="start_time" required aria-required="true">
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <button type="submit" id="submit-btn" disabled
+      <button type="submit" id="submit-btn" aria-describedby="submit-hint" disabled
         style="padding:9px 24px; background:var(--accent); color:var(--on-accent, #fff); border:none; border-radius:4px; font-size:0.95em; font-weight:600; cursor:pointer;">
         Termin verschieben
       </button>
       <a href="{% url 'portal:home' %}" data-history-back class="btn-sm btn-sm-secondary" style="padding:9px 16px;">Abbrechen</a>
     </div>
+    <p id="submit-hint" class="slot-empty" style="margin:8px 0 0;">Wähle zuerst einen Tag und eine Uhrzeit, dann kannst du verschieben.</p>
   </form>
 </div>
 {% endblock %}
@@ -60,12 +63,14 @@
   var slotGrid  = document.getElementById('slot-grid');
   var timeInput = document.getElementById('id_start_time');
   var submitBtn = document.getElementById('submit-btn');
+  var submitHint = document.getElementById('submit-hint');
   if (!dateInput) return;
   dateInput.addEventListener('change', function() {
     var date = dateInput.value;
     if (!date) return;
     slotGrid.innerHTML = '<span class="slot-empty">Lade …</span>';
     timeInput.value = ''; submitBtn.disabled = true;
+    if (submitHint) submitHint.hidden = false;
     fetch('/portal/availability/{{ student.pk }}/?date=' + date)
       .then(function(r){ return r.json(); })
       .then(function(data) {
@@ -82,6 +87,7 @@
             document.querySelectorAll('.slot-btn').forEach(function(b){ b.classList.remove('selected'); });
             btn.classList.add('selected');
             timeInput.value = slot; submitBtn.disabled = false;
+            if (submitHint) submitHint.hidden = true;
           });
           slotGrid.appendChild(btn);
         });

@@ -87,8 +87,14 @@ class WeekCalendarMultiHourBlockedTimeTest(TestCase):
 
         self.assertEqual(hours_seen, {18, 19})
 
-    def test_booking_page_html_shows_belegt_for_middle_hour(self):
+    def test_booking_page_does_not_offer_the_hours_inside_a_multi_hour_block(self):
+        # Bis 04.10.2026 zeichnete das stündliche Raster "Belegt" ein; seither zeigt die Tag-Auswahl nur
+        # freie Zeiten. Der Fehler von damals (19:00 sah frei aus, ließ sich aber nicht buchen) darf trotzdem
+        # nicht wiederkommen: Eine Zeit, die den Block berührt, zählt nie als frei.
         monday = self._next_monday()
+        UserProfile.objects.filter(user=self.tutor).update(
+            default_working_hours={"monday": [{"start": "14:00", "end": "21:00"}]}
+        )
         start = timezone.make_aware(datetime.combine(monday, time(18, 45)))
         end = timezone.make_aware(datetime.combine(monday, time(20, 0)))
         BlockedTime.objects.create(
@@ -104,10 +110,15 @@ class WeekCalendarMultiHourBlockedTimeTest(TestCase):
             reverse("portal:book", args=[self.contract.pk]),
             {"year": monday.year, "month": monday.month, "day": monday.day},
         )
+
         self.assertEqual(response.status_code, 200)
-        body = response.content.decode()
-        # Rough check: the "19:00" row's <tr> block must contain "Belegt".
-        idx = body.find(">19:00<")
-        self.assertNotEqual(idx, -1)
-        next_tr = body.find("</tr>", idx)
-        self.assertIn("Belegt", body[idx:next_tr])
+        weekday = next(w for w in response.context["weekdays"] if w["date"] == monday)
+        for touched in (
+            "18:00",
+            "18:30",
+            "19:00",
+            "19:30",
+        ):  # eine Stunde ab dann reicht in den Block
+            self.assertNotIn(touched, weekday["free"])
+        self.assertIn("17:30", weekday["free"])  # endet 18:30, vor dem Block
+        self.assertIn("20:00", weekday["free"])  # der Block endet genau um 20:00

@@ -1,0 +1,89 @@
+/* Tag-Auswahl im Portal (Termin buchen und verschieben): Wochentage als große Schaltflächen mit der Zahl der
+ * freien Zeiten. Am Handy untereinander (ohne seitliches Scrollen), ab 760 px sieben Spalten.
+ * Farben aus den Variablen des Portals, damit Hell- und Dunkelmodus stimmen. */
+
+.week-picker { margin-bottom: 20px; }
+
+/* Am Handy: Zeitraum oben mittig, darunter "Vorige" und "Nächste" nebeneinander. */
+.week-picker-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.week-picker-range { grid-column: 1 / -1; order: -1; text-align: center; font-weight: 600; color: var(--text-primary); }
+.week-picker-nav .week-nav { justify-content: center; }
+.week-picker-nav .week-nav { min-height: 44px; display: inline-flex; align-items: center; }
+
+.week-picker-empty {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--text-secondary);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.92em;
+}
+
+.week-picker-days {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.week-day-pick {
+    width: 100%;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    text-align: left;
+    font: inherit;
+    font-size: 0.95em;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--text-secondary);
+    border-left-width: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.week-day-pick .wd-day { flex: 1 1 auto; font-weight: 600; overflow-wrap: anywhere; }
+.week-day-pick .wd-date { color: var(--text-secondary); }
+.week-day-pick .wd-state { min-width: 7.5em; text-align: right; font-size: 0.9em; color: var(--text-secondary); }
+
+.week-day-pick.has-free { background: var(--accent-tint); border-color: var(--accent); }
+.week-day-pick.has-free .wd-state { color: var(--text-primary); font-weight: 600; }
+
+.week-day-pick:hover:not(:disabled) { border-color: var(--accent); }
+
+.week-day-pick[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent, #fff);
+}
+.week-day-pick[aria-pressed="true"] .wd-date,
+.week-day-pick[aria-pressed="true"] .wd-state { color: inherit; }
+
+.week-day-pick:disabled { opacity: 0.5; cursor: default; }
+
+.week-day-pick:focus-visible { outline: 3px solid var(--text-primary); outline-offset: 2px; }
+
+@media (min-width: 760px) {
+    .week-picker-nav { display: flex; justify-content: space-between; }
+    .week-picker-range { order: 0; }
+    .week-picker-days { grid-template-columns: repeat(7, 1fr); }
+    .week-day-pick {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        border-left-width: 1px;
+        border-top-width: 6px;
+    }
+    .week-day-pick .wd-day { flex: none; font-size: 0.92em; }
+    .week-day-pick .wd-state { min-width: 0; text-align: left; font-size: 0.85em; }
+}

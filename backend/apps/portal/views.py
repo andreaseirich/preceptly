@@ -776,17 +776,26 @@ def _get_busy_slots(tutor, date):
 
 
 def _get_available_slots(
-    tutor, date, duration_minutes=60, slot_interval=30, travel_before=0, travel_after=0
+    tutor,
+    date,
+    duration_minutes=60,
+    slot_interval=30,
+    travel_before=0,
+    travel_after=0,
+    calendar=None,
 ):
     """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück.
 
     Frei heißt: innerhalb der Arbeitszeiten und nach der Regel in apps/lessons/availability.py, also mit
-    Fahrzeit der neuen Stunde (travel_before/travel_after) und dem Mindestabstand des Tutors."""
+    Fahrzeit der neuen Stunde (travel_before/travel_after) und dem Mindestabstand des Tutors.
+
+    calendar: ein schon geladener BusyCalendar, der den Tag abdeckt (für mehrere Tage in drei Abfragen)."""
     from apps.lessons.availability import BusyCalendar, working_windows
 
     profile = getattr(tutor, "profile", None)
     wh = (profile.default_working_hours if profile else {}) or {}
-    calendar = BusyCalendar(tutor, date, date)
+    if calendar is None:
+        calendar = BusyCalendar(tutor, date, date)
 
     available = []
     for slot_start, slot_end in working_windows(wh, date):
@@ -802,6 +811,35 @@ def _get_available_slots(
                 available.append(cur.strftime("%H:%M"))
             cur += step
     return sorted(set(available))
+
+
+def _free_slots_for_week(student, week_start, week_end):
+    """Freie Startzeiten je Tag der Woche für den Vertrag des Schülers.
+
+    Dieselbe Regel und dieselben Werte (Dauer, Fahrzeit des Vertrags) wie die Liste unter dem Raster
+    (PortalAvailabilityView), damit die Zahl am Tag und die Liste nie auseinanderlaufen. Eine gemeinsame
+    BusyCalendar für die ganze Woche; vergangene Tage haben nichts frei."""
+    from apps.lessons.availability import BusyCalendar
+
+    contract = _get_active_contract(student)
+    days = [week_start + _dt.timedelta(days=offset) for offset in range(7)]
+    if contract is None:
+        return {day: [] for day in days}
+    today = timezone.localdate()
+    calendar = BusyCalendar(student.user, max(week_start, today), week_end)
+    return {
+        day: []
+        if day < today
+        else _get_available_slots(
+            student.user,
+            day,
+            duration_minutes=contract.unit_duration_minutes,
+            travel_before=contract.default_travel_time_before_minutes,
+            travel_after=contract.default_travel_time_after_minutes,
+            calendar=calendar,
+        )
+        for day in days
+    }
 
 
 class PortalAvailabilityView(View):
@@ -871,7 +909,7 @@ class PortalBookingView(View):
             "booking_blocked": portal_booking_limit_reached(student.user),
             "booking_blocked_message": BOOKING_BLOCKED_MESSAGE,
         }
-        context.update(_build_week_calendar(student, year, month, day))
+        context.update(_build_week_calendar(student, year, month, day, with_free_slots=True))
         context["today"] = today.isoformat()
         return render(request, self.template_name, context)
 
@@ -1058,7 +1096,7 @@ class PortalSessionRescheduleView(View):
             "error": error,
             "show_buffer_hint": _buffer_hint_enabled(student),
         }
-        context.update(_build_week_calendar(student, year, month, day))
+        context.update(_build_week_calendar(student, year, month, day, with_free_slots=True))
         context["today"] = today.isoformat()
         return render(request, self.template_name, context)
 
@@ -1765,12 +1803,15 @@ class PortalCalendarView(View):
         return render(request, self.template_name, context)
 
 
-def _build_week_calendar(student, year, month, day):
+def _build_week_calendar(student, year, month, day, with_free_slots=False):
     """Berechnet Wochenkalender-Daten (Stunden, Belegtzeiten) für einen Vertrag.
 
     Wird sowohl von der Kalender-Wochenansicht als auch von der
     Buchungs-/Verschiebungs-Ansicht verwendet, damit Schüler beim Buchen
     dieselbe Frei/Belegt-Übersicht sehen wie im reinen Kalender.
+
+    with_free_slots: Je Tag zusätzlich die freien Startzeiten ("free", "free_count") und die Summe der Woche
+    ("week_free_total") - für die Tag-Auswahl beim Buchen und Verschieben.
     """
     current_date = _dt.date(year, month, day)
     # Montag der aktuellen Woche
@@ -1886,7 +1927,7 @@ def _build_week_calendar(student, year, month, day):
     prev_week = week_start - _dt.timedelta(days=7)
     next_week = week_start + _dt.timedelta(days=7)
 
-    return {
+    context = {
         "weekdays": weekdays,
         "week_start": week_start,
         "week_end": week_end,
@@ -1899,6 +1940,13 @@ def _build_week_calendar(student, year, month, day):
         )
         or "Europe/Berlin",
     }
+    if with_free_slots:
+        free_by_day = _free_slots_for_week(student, week_start, week_end)
+        for entry in weekdays:
+            entry["free"] = free_by_day[entry["date"]]
+            entry["free_count"] = len(entry["free"])
+        context["week_free_total"] = sum(entry["free_count"] for entry in weekdays)
+    return context
 
 
 class PortalWeekView(View):
