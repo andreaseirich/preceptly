@@ -769,77 +769,20 @@ def _get_active_contract(student):
 
 
 def _get_busy_slots(tutor, date):
-    from apps.blocked_times.models import BlockedTime
-    from apps.lessons.models import Session as _Session
+    """Belegte Zeiten (Beginn, Ende) an einem Tag. Die Regel steht in apps/lessons/availability.py."""
+    from apps.lessons.availability import busy_intervals
 
-    busy = []
-    sessions = _Session.objects.filter(
-        contract__user=tutor,
-        date=date,
-        status__in=["planned", "taught", "paid"],
-    )
-    for s in sessions:
-        s_start = _dt.datetime.combine(date, s.start_time)
-        s_end = s_start + _dt.timedelta(minutes=s.duration_minutes)
-        busy.append((s.start_time, s_end.time()))
-    _day_start_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(0, 0)))
-    _day_end_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(23, 59, 59)))
-    blocked_times = BlockedTime.objects.filter(
-        user=tutor,
-        start_datetime__lt=_day_end_aware,
-        end_datetime__gt=_day_start_aware,
-    )
-    for bt in blocked_times:
-        clamped_start = max(
-            _localtime(bt.start_datetime).replace(tzinfo=None),
-            _dt.datetime.combine(date, _dt.time(0, 0)),
-        )
-        clamped_end = min(
-            _localtime(bt.end_datetime).replace(tzinfo=None),
-            _dt.datetime.combine(date, _dt.time(23, 59)),
-        )
-        if clamped_start < clamped_end:
-            busy.append((clamped_start.time(), clamped_end.time()))
-    return busy
+    return [(start.time(), end.time()) for start, end, _kind in busy_intervals(tutor, date)]
 
 
 def _get_available_slots(tutor, date, duration_minutes=60, slot_interval=30):
     """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück."""
-    from apps.blocked_times.models import BlockedTime
-    from apps.lessons.models import Session as _Session
-
     profile = getattr(tutor, "profile", None)
     wh = (profile.default_working_hours if profile else {}) or {}
     day_name = date.strftime("%A").lower()
     day_slots = wh.get(day_name, [])
 
-    sessions = _Session.objects.filter(
-        contract__user=tutor,
-        date=date,
-        status__in=["planned", "taught", "paid"],
-    )
-    busy = []
-    for s in sessions:
-        s_start = _dt.datetime.combine(date, s.start_time)
-        s_end = s_start + _dt.timedelta(minutes=s.duration_minutes)
-        busy.append((s.start_time, s_end.time()))
-
-    _day_start_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(0, 0)))
-    _day_end_aware = timezone.make_aware(_dt.datetime.combine(date, _dt.time(23, 59, 59)))
-    blocked_times = BlockedTime.objects.filter(
-        user=tutor,
-        start_datetime__lt=_day_end_aware,
-        end_datetime__gt=_day_start_aware,
-    )
-    day_start_dt = _dt.datetime.combine(date, _dt.time(0, 0))
-    day_end_dt = _dt.datetime.combine(date, _dt.time(23, 59))
-    for bt in blocked_times:
-        bt_start = _localtime(bt.start_datetime).replace(tzinfo=None)
-        bt_end = _localtime(bt.end_datetime).replace(tzinfo=None)
-        clamped_start = max(bt_start, day_start_dt)
-        clamped_end = min(bt_end, day_end_dt)
-        if clamped_start < clamped_end:
-            busy.append((clamped_start.time(), clamped_end.time()))
+    busy = _get_busy_slots(tutor, date)
 
     available = []
     for slot in day_slots:
@@ -1255,6 +1198,19 @@ class PortalRecurringManageView(View):
         )
 
 
+def _busy_days_message(busy) -> str:
+    """Meldung nach dem Anlegen einer Serie: Welche Tage wurden ausgelassen? Ohne Angabe, was dort
+    steht - Familien sehen im Portal nur "belegt"."""
+    days = [entry["date"].strftime("%d.%m.%Y") for entry in busy]
+    shown, more = ", ".join(days[:10]), len(days) - 10
+    one = len(days) == 1
+    text = (
+        f"{len(days)} {'Tag war' if one else 'Tage waren'} schon belegt und "
+        f"{'wurde' if one else 'wurden'} ausgelassen: {shown}"
+    )
+    return text + (f" und {more} weitere." if more > 0 else ".")
+
+
 def _portal_series_allowed(student):
     """Serien im Portal selbst anlegen: erst ab Pro (siehe FEATURE_PORTAL_RECURRING)."""
     return user_has_feature(student.user, Feature.FEATURE_PORTAL_RECURRING)
@@ -1348,8 +1304,27 @@ class PortalRecurringCreateView(View):
             created_via="portal_series",
             **weekdays,
         )
-        result = RecurringSessionService.generate_sessions(rs, check_conflicts=False)
-        messages.success(request, f"Serientermin erstellt. {result['created']} Termine generiert.")
+        # Nur freie Tage buchen: Tage, an denen der Tutor zu dieser Zeit schon eine Stunde oder eine
+        # Blockzeit hat, werden ausgelassen (apps/lessons/availability.py), alle anderen gebucht.
+        result = RecurringSessionService.generate_sessions(
+            rs, check_conflicts=False, skip_busy=True
+        )
+        busy = result["busy"]
+        if busy and not result["created"] and not result["skipped"]:
+            rs.delete()
+            messages.warning(
+                request,
+                "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit schon belegt. "
+                "Es wurde keine Serie angelegt. Wähle eine andere Uhrzeit oder andere Wochentage.",
+            )
+            return redirect("portal:recurring_create", student_pk=student_pk)
+        booked = result["created"]
+        messages.success(
+            request,
+            f"Serientermin erstellt. {booked} {'Termin' if booked == 1 else 'Termine'} gebucht.",
+        )
+        if busy:
+            messages.info(request, _busy_days_message(busy))
         return redirect("portal:recurring_manage", student_pk=student_pk)
 
 

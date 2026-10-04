@@ -19,7 +19,10 @@ class RecurringSessionService:
 
     @staticmethod
     def generate_sessions(
-        recurring_session: RecurringSession, check_conflicts: bool = True, dry_run: bool = False
+        recurring_session: RecurringSession,
+        check_conflicts: bool = True,
+        dry_run: bool = False,
+        skip_busy: bool = False,
     ) -> dict:
         """
         Generates sessions for a RecurringSession over the period [start_date, end_date].
@@ -28,16 +31,27 @@ class RecurringSessionService:
             recurring_session: The RecurringSession template
             check_conflicts: Whether to check for conflicts
             dry_run: If True, no sessions are saved, only preview
+            skip_busy: If True, days on which the tutor is already busy (another lesson or a
+                blocked time at that time, see apps.lessons.availability) are left out. All
+                other days are booked.
 
         Returns:
             Dict with:
             - 'created': Number of created sessions
             - 'skipped': Number of skipped (already existing)
+            - 'busy': List of {'date', 'reason'} for days left out because the tutor is busy
             - 'conflicts': List of conflicts (if check_conflicts=True)
             - 'preview': List of Session instances (if dry_run=True)
         """
         if not recurring_session.is_active:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
+            return {
+                "created": 0,
+                "skipped": 0,
+                "busy": [],
+                "conflicts": [],
+                "preview": [],
+                "sessions": [],
+            }
 
         # Determine end date
         end_date = recurring_session.end_date
@@ -60,52 +74,75 @@ class RecurringSessionService:
         if end_date > max_end:
             end_date = max_end
 
+        busy_calendar = None
+        if skip_busy:
+            from apps.lessons.availability import BusyCalendar
+
+            busy_calendar = BusyCalendar(
+                recurring_session.contract.user, recurring_session.start_date, end_date
+            )
+
         # Generate sessions based on recurrence_type
         recurrence_type = recurring_session.recurrence_type
 
         if recurrence_type == "weekly":
             return RecurringSessionService._generate_weekly_sessions(
-                recurring_session, end_date, check_conflicts, dry_run
+                recurring_session, end_date, check_conflicts, dry_run, busy_calendar
             )
         elif recurrence_type == "biweekly":
             return RecurringSessionService._generate_biweekly_sessions(
-                recurring_session, end_date, check_conflicts, dry_run
+                recurring_session, end_date, check_conflicts, dry_run, busy_calendar
             )
         elif recurrence_type == "monthly":
             return RecurringSessionService._generate_monthly_sessions(
-                recurring_session, end_date, check_conflicts, dry_run
+                recurring_session, end_date, check_conflicts, dry_run, busy_calendar
             )
         else:
             # Fallback to weekly for unknown types
             return RecurringSessionService._generate_weekly_sessions(
-                recurring_session, end_date, check_conflicts, dry_run
+                recurring_session, end_date, check_conflicts, dry_run, busy_calendar
             )
 
     @staticmethod
     def _generate_weekly_sessions(
-        recurring_session: RecurringSession, end_date: date, check_conflicts: bool, dry_run: bool
+        recurring_session: RecurringSession,
+        end_date: date,
+        check_conflicts: bool,
+        dry_run: bool,
+        busy_calendar=None,
     ) -> dict:
         """Generates weekly sessions."""
         active_weekdays = recurring_session.get_active_weekdays()
 
         if not active_weekdays:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
+            return {
+                "created": 0,
+                "skipped": 0,
+                "busy": [],
+                "conflicts": [],
+                "preview": [],
+                "sessions": [],
+            }
 
         current_date = recurring_session.start_date
         created = 0
         skipped = 0
+        busy = []  # Tage, die ausgelassen wurden, weil der Tutor dort belegt ist
         conflicts = []
         preview = []
         sessions = []  # Collect created sessions for email notifications
         dates_checked = []
 
-        while current_date <= end_date and created + skipped < _MAX_SESSIONS_PER_GENERATION:
+        while (
+            current_date <= end_date
+            and created + skipped + len(busy) < _MAX_SESSIONS_PER_GENERATION
+        ):
             weekday = current_date.weekday()  # 0=Monday, 6=Sunday
 
             if weekday in active_weekdays:
                 dates_checked.append(str(current_date))
                 result = RecurringSessionService._create_session_if_not_exists(
-                    recurring_session, current_date, check_conflicts, dry_run
+                    recurring_session, current_date, check_conflicts, dry_run, busy_calendar
                 )
                 if result["created"]:
                     created += 1
@@ -119,12 +156,15 @@ class RecurringSessionService:
                             conflicts.extend(result["conflicts"])
                 elif result["skipped"]:
                     skipped += 1
+                elif result.get("busy"):
+                    busy.append({"date": current_date, "reason": result["busy"]})
 
             current_date += timedelta(days=1)
 
         return {
             "created": created,
             "skipped": skipped,
+            "busy": busy,
             "conflicts": conflicts,
             "preview": preview if dry_run else [],
             "sessions": sessions if not dry_run else [],
@@ -132,22 +172,37 @@ class RecurringSessionService:
 
     @staticmethod
     def _generate_biweekly_sessions(
-        recurring_session: RecurringSession, end_date: date, check_conflicts: bool, dry_run: bool
+        recurring_session: RecurringSession,
+        end_date: date,
+        check_conflicts: bool,
+        dry_run: bool,
+        busy_calendar=None,
     ) -> dict:
         """Generates bi-weekly sessions (every 2 weeks)."""
         active_weekdays = recurring_session.get_active_weekdays()
         if not active_weekdays:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
+            return {
+                "created": 0,
+                "skipped": 0,
+                "busy": [],
+                "conflicts": [],
+                "preview": [],
+                "sessions": [],
+            }
 
         start_date = recurring_session.start_date
         current_date = start_date
         created = 0
         skipped = 0
+        busy = []  # Tage, die ausgelassen wurden, weil der Tutor dort belegt ist
         conflicts = []
         preview = []
         sessions = []  # Collect created sessions for email notifications
 
-        while current_date <= end_date and created + skipped < _MAX_SESSIONS_PER_GENERATION:
+        while (
+            current_date <= end_date
+            and created + skipped + len(busy) < _MAX_SESSIONS_PER_GENERATION
+        ):
             weekday = current_date.weekday()
 
             if weekday in active_weekdays:
@@ -155,7 +210,7 @@ class RecurringSessionService:
                 weeks_since_start = (current_date - start_date).days // 7
                 if weeks_since_start % 2 == 0:
                     result = RecurringSessionService._create_session_if_not_exists(
-                        recurring_session, current_date, check_conflicts, dry_run
+                        recurring_session, current_date, check_conflicts, dry_run, busy_calendar
                     )
                     if result["created"]:
                         created += 1
@@ -169,12 +224,15 @@ class RecurringSessionService:
                                 conflicts.extend(result["conflicts"])
                     elif result["skipped"]:
                         skipped += 1
+                    elif result.get("busy"):
+                        busy.append({"date": current_date, "reason": result["busy"]})
 
             current_date += timedelta(days=1)
 
         return {
             "created": created,
             "skipped": skipped,
+            "busy": busy,
             "conflicts": conflicts,
             "preview": preview if dry_run else [],
             "sessions": sessions if not dry_run else [],
@@ -182,15 +240,27 @@ class RecurringSessionService:
 
     @staticmethod
     def _generate_monthly_sessions(
-        recurring_session: RecurringSession, end_date: date, check_conflicts: bool, dry_run: bool
+        recurring_session: RecurringSession,
+        end_date: date,
+        check_conflicts: bool,
+        dry_run: bool,
+        busy_calendar=None,
     ) -> dict:
         """Generates monthly sessions (same calendar day every month)."""
         active_weekdays = recurring_session.get_active_weekdays()
         if not active_weekdays:
-            return {"created": 0, "skipped": 0, "conflicts": [], "preview": [], "sessions": []}
+            return {
+                "created": 0,
+                "skipped": 0,
+                "busy": [],
+                "conflicts": [],
+                "preview": [],
+                "sessions": [],
+            }
 
         created = 0
         skipped = 0
+        busy = []  # Tage, die ausgelassen wurden, weil der Tutor dort belegt ist
         conflicts = []
         preview = []
         sessions = []  # Collect created sessions for email notifications
@@ -201,7 +271,10 @@ class RecurringSessionService:
 
         from calendar import monthrange
 
-        while current_date <= end_date and created + skipped < _MAX_SESSIONS_PER_GENERATION:
+        while (
+            current_date <= end_date
+            and created + skipped + len(busy) < _MAX_SESSIONS_PER_GENERATION
+        ):
             # Check if current date is the correct day of month
             # AND if it is an active weekday
             target_day = start_day
@@ -213,7 +286,7 @@ class RecurringSessionService:
 
             if current_date.day == target_day and current_date.weekday() in active_weekdays:
                 result = RecurringSessionService._create_session_if_not_exists(
-                    recurring_session, current_date, check_conflicts, dry_run
+                    recurring_session, current_date, check_conflicts, dry_run, busy_calendar
                 )
                 if result["created"]:
                     created += 1
@@ -227,6 +300,8 @@ class RecurringSessionService:
                             conflicts.extend(result["conflicts"])
                 elif result["skipped"]:
                     skipped += 1
+                elif result.get("busy"):
+                    busy.append({"date": current_date, "reason": result["busy"]})
 
             # Jump to next month
             # Calculate the next month
@@ -250,6 +325,7 @@ class RecurringSessionService:
         return {
             "created": created,
             "skipped": skipped,
+            "busy": busy,
             "conflicts": conflicts,
             "preview": preview if dry_run else [],
             "sessions": sessions if not dry_run else [],
@@ -261,8 +337,12 @@ class RecurringSessionService:
         session_date: date,
         check_conflicts: bool,
         dry_run: bool,
+        busy_calendar=None,
     ) -> dict:
-        """Helper method: Creates a session if it doesn't exist yet."""
+        """Helper method: Creates a session if it doesn't exist yet.
+
+        With a busy_calendar, a day on which the tutor is already busy at that time is left out
+        (result["busy"] holds the reason) instead of being booked."""
         # Check if a session already exists for this day
         existing = Session.objects.filter(
             contract=recurring_session.contract,
@@ -272,6 +352,13 @@ class RecurringSessionService:
 
         if existing:
             return {"created": False, "skipped": True}
+
+        if busy_calendar is not None:
+            reason = busy_calendar.reason(
+                session_date, recurring_session.start_time, recurring_session.duration_minutes
+            )
+            if reason:
+                return {"created": False, "skipped": False, "busy": reason}
 
         # Create new session (without status - will be set automatically)
         session = Session(
