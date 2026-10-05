@@ -53,9 +53,31 @@ Uhrzeiten hat `aria-live="polite"`, auch beim Verschieben.
 | Stylesheet | `apps/core/static/css/week-picker.css` |
 | Freie Zeiten je Tag | `_free_slots_for_week`, `_build_week_calendar(with_free_slots=True)` in `apps/portal/views.py` |
 | Seiten | `portal/book.html`, `portal/reschedule.html` |
-| Tests | `apps/portal/test_week_picker.py`, `apps/portal/test_week_calendar_multihour.py` |
+| Tests | `apps/portal/test_week_picker.py`, `apps/portal/test_week_jump_and_past.py`, `apps/portal/test_week_calendar_multihour.py` |
 
-## Bekannt, nicht geändert
+## Erste Woche mit freien Zeiten (05.10.2026)
 
-Die Liste der freien Zeiten blendet für **heute** bereits vergangene Uhrzeiten nicht aus, und die Buchung lehnt nur
-vergangene *Tage* ab, nicht vergangene Zeiten am heutigen Tag. Das war schon vorher so.
+Auftrag von Andreas („Ja, mach beides“). Anlass: Am Sonntag war die aktuelle Woche leer, die nächste hatte
+37 freie Zeiten. Wer die Seite öffnete, sah scheinbar nichts und musste von selbst auf „Nächste Woche“ tippen.
+
+- Öffnet die Seite **ohne Wochenangabe** und ist in der aktuellen Woche nichts mehr frei, zeigt sie die erste Woche
+  mit freien Zeiten (bis zwölf Wochen voraus) und sagt das: „Diese Woche ist nichts mehr frei. Wir zeigen dir deshalb
+  die erste Woche mit freien Zeiten.“
+- Mit Wochenangabe in der Adresse (Vorige/Nächste Woche) gilt immer genau diese Woche, auch wenn sie leer ist.
+- Ist in den nächsten zwölf Wochen nichts frei, bleibt die Seite auf der aktuellen Woche.
+- Gilt für „Termin buchen“ und „Termin verschieben“. Die Suche läuft über einen gemeinsamen `BusyCalendar`, also nicht
+  je Tag eigene Abfragen (`_first_free_day`, `_week_anchor` in `apps/portal/views.py`).
+- Ungültige Wochenangaben (z. B. Monat 13) ergeben die aktuelle Woche statt eines Fehlers.
+
+## Vergangene Uhrzeiten von heute (05.10.2026)
+
+Bisher lehnte die Buchung nur vergangene *Tage* ab. Jetzt:
+
+- Die Liste der freien Zeiten und die Zahl am Tag lassen Uhrzeiten von heute aus, die schon begonnen haben.
+- Buchen und Verschieben lehnen sie ab: „Diese Uhrzeit ist heute schon vorbei.“ Ein Termin, der genau jetzt beginnt,
+  zählt als vorbei.
+- Regel: `is_past` in `apps/lessons/availability.py`. „Jetzt“ kommt aus `local_now()` (naive Ortszeit), damit Tests die
+  Uhrzeit festlegen können (`apps/portal/test_week_jump_and_past.py`).
+
+**Nicht geändert:** Serien, die Familien im Portal anlegen, prüfen nicht, ob die erste Stunde schon vorbei ist. Legt
+jemand heute eine Serie an, deren Uhrzeit heute schon vorbei ist, entsteht die erste Stunde in der Vergangenheit.

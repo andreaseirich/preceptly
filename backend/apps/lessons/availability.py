@@ -28,6 +28,19 @@ BUSY_STATUSES = ("planned", "taught", "paid")
 _WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
 
+def local_now():
+    """Jetzt als naive Ortszeit (wie alle Zeiten hier). Eigene Funktion, damit Tests die Uhrzeit festlegen können."""
+    return timezone.localtime().replace(tzinfo=None)
+
+
+def is_past(day, start_time, now=None):
+    """Hat ein Termin am Tag day um start_time schon begonnen? Nur für heute kann das bei einer Zeit von heute
+    wahr sein, vergangene Tage sind es ohnehin. Ein Termin, der genau jetzt beginnt, zählt als vorbei.
+
+    now: ein fester Zeitpunkt (naive Ortszeit), sonst local_now()."""
+    return datetime.combine(day, start_time) <= (now or local_now())
+
+
 def working_windows(hours, day):
     """Arbeitszeitfenster eines Tages als Liste von (Beginn, Ende). Kaputte Einträge werden übersprungen.
 

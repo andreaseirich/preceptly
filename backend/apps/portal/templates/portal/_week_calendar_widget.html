@@ -7,6 +7,10 @@
         <a href="{% url nav_url_name nav_pk %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn-sm btn-sm-secondary week-nav">Nächste Woche →</a>
     </div>
 
+    {% if week_jumped %}
+    <p class="week-picker-empty" role="status">Diese Woche ist nichts mehr frei. Wir zeigen dir deshalb die erste Woche mit freien Zeiten.</p>
+    {% endif %}
+
     {% if week_free_total == 0 %}
     <p class="week-picker-empty" role="status">In dieser Woche ist nichts mehr frei. Wechsle mit „Nächste Woche“ zur folgenden Woche.</p>
     {% endif %}

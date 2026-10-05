@@ -787,11 +787,14 @@ def _get_available_slots(
     """Gibt sortierte Liste freier Startzeiten (HH:MM) zurück.
 
     Frei heißt: innerhalb der Arbeitszeiten und nach der Regel in apps/lessons/availability.py, also mit
-    Fahrzeit der neuen Stunde (travel_before/travel_after) und dem Mindestabstand des Tutors.
+    Fahrzeit der neuen Stunde (travel_before/travel_after) und dem Mindestabstand des Tutors. Uhrzeiten von
+    heute, die schon vorbei sind, werden nicht angeboten.
 
     calendar: ein schon geladener BusyCalendar, der den Tag abdeckt (für mehrere Tage in drei Abfragen)."""
+    from apps.lessons import availability
     from apps.lessons.availability import BusyCalendar, working_windows
 
+    now = availability.local_now()
     profile = getattr(tutor, "profile", None)
     wh = (profile.default_working_hours if profile else {}) or {}
     if calendar is None:
@@ -805,12 +808,71 @@ def _get_available_slots(
         step = _dt.timedelta(minutes=slot_interval)
         while cur + dur <= slot_end_dt:
             if (
-                calendar.reason(date, cur.time(), duration_minutes, travel_before, travel_after)
+                not availability.is_past(date, cur.time(), now)
+                and calendar.reason(date, cur.time(), duration_minutes, travel_before, travel_after)
                 is None
             ):
                 available.append(cur.strftime("%H:%M"))
             cur += step
     return sorted(set(available))
+
+
+def _contract_slots(contract, tutor, day, calendar):
+    """Freie Startzeiten eines Tages mit Dauer und Fahrzeit des Vertrags (wie PortalAvailabilityView)."""
+    return _get_available_slots(
+        tutor,
+        day,
+        duration_minutes=contract.unit_duration_minutes,
+        travel_before=contract.default_travel_time_before_minutes,
+        travel_after=contract.default_travel_time_after_minutes,
+        calendar=calendar,
+    )
+
+
+def _first_free_day(student, start_day, weeks=12):
+    """Erster Tag ab start_day (höchstens `weeks` Wochen voraus) mit freien Zeiten, sonst None.
+
+    Ein gemeinsamer BusyCalendar für den ganzen Zeitraum."""
+    from apps.lessons.availability import BusyCalendar
+
+    contract = _get_active_contract(student)
+    if contract is None:
+        return None
+    last_day = start_day + _dt.timedelta(weeks=weeks)
+    calendar = BusyCalendar(student.user, start_day, last_day)
+    day = start_day
+    while day <= last_day:
+        if _contract_slots(contract, student.user, day, calendar):
+            return day
+        day += _dt.timedelta(days=1)
+    return None
+
+
+def _week_anchor(request, student):
+    """Tag, dessen Woche die Auswahl zeigt: (Jahr, Monat, Tag, gesprungen).
+
+    Mit year/month/day in der Adresse (Vorige/Nächste Woche) genau diese Woche. Sonst die aktuelle Woche; ist
+    dort nichts mehr frei, die erste Woche mit freien Zeiten in den nächsten zwölf Wochen (gesprungen=True).
+    Ungültige Angaben ergeben die aktuelle Woche."""
+    from apps.lessons import availability
+
+    today = availability.local_now().date()
+    if any(key in request.GET for key in ("year", "month", "day")):
+        try:
+            year = int(request.GET.get("year", today.year))
+            month = int(request.GET.get("month", today.month))
+            day = int(request.GET.get("day", today.day))
+            year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
+            _dt.date(year, month, day)
+        except (ValueError, TypeError, OverflowError):
+            year, month, day = today.year, today.month, today.day
+        return year, month, day, False
+
+    first_free = _first_free_day(student, today)
+    this_week_end = today + _dt.timedelta(days=6 - today.weekday())
+    if first_free is not None and first_free > this_week_end:
+        return first_free.year, first_free.month, first_free.day, True
+    return today.year, today.month, today.day, False
 
 
 def _free_slots_for_week(student, week_start, week_end):
@@ -825,19 +887,12 @@ def _free_slots_for_week(student, week_start, week_end):
     days = [week_start + _dt.timedelta(days=offset) for offset in range(7)]
     if contract is None:
         return {day: [] for day in days}
-    today = timezone.localdate()
+    from apps.lessons import availability
+
+    today = availability.local_now().date()
     calendar = BusyCalendar(student.user, max(week_start, today), week_end)
     return {
-        day: []
-        if day < today
-        else _get_available_slots(
-            student.user,
-            day,
-            duration_minutes=contract.unit_duration_minutes,
-            travel_before=contract.default_travel_time_before_minutes,
-            travel_after=contract.default_travel_time_after_minutes,
-            calendar=calendar,
-        )
+        day: [] if day < today else _contract_slots(contract, student.user, day, calendar)
         for day in days
     }
 
@@ -891,14 +946,7 @@ class PortalBookingView(View):
 
     def _render(self, request, student, contract, error=None, success=None):
         today = _dt.date.today()
-        now = timezone.now()
-        try:
-            year = int(request.GET.get("year", now.year))
-            month = int(request.GET.get("month", now.month))
-            day = int(request.GET.get("day", now.day))
-        except (ValueError, TypeError):
-            year, month, day = now.year, now.month, now.day
-        year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
+        year, month, day, week_jumped = _week_anchor(request, student)
         context = {
             "student": student,
             "contract": contract,
@@ -910,6 +958,7 @@ class PortalBookingView(View):
             "booking_blocked_message": BOOKING_BLOCKED_MESSAGE,
         }
         context.update(_build_week_calendar(student, year, month, day, with_free_slots=True))
+        context["week_jumped"] = week_jumped
         context["today"] = today.isoformat()
         return render(request, self.template_name, context)
 
@@ -951,6 +1000,13 @@ class PortalBookingView(View):
         if session_date < _dt.date.today():
             return self._render(
                 request, student, contract, error="Das Datum liegt in der Vergangenheit."
+            )
+
+        from apps.lessons.availability import is_past
+
+        if is_past(session_date, session_time):
+            return self._render(
+                request, student, contract, error="Diese Uhrzeit ist heute schon vorbei."
             )
 
         # Konflikt-Prüfung: dieselbe Regel wie bei den freien Zeiten (apps/lessons/availability.py) -
@@ -1081,14 +1137,7 @@ class PortalSessionRescheduleView(View):
 
     def _render(self, request, session, student, portal_user, error=None):
         today = _dt.date.today()
-        now = timezone.now()
-        try:
-            year = int(request.GET.get("year", now.year))
-            month = int(request.GET.get("month", now.month))
-            day = int(request.GET.get("day", now.day))
-        except (ValueError, TypeError):
-            year, month, day = now.year, now.month, now.day
-        year = max(BOOKING_MIN_YEAR, min(BOOKING_MAX_YEAR, year))
+        year, month, day, week_jumped = _week_anchor(request, student)
         context = {
             "session": session,
             "student": student,
@@ -1097,6 +1146,7 @@ class PortalSessionRescheduleView(View):
             "show_buffer_hint": _buffer_hint_enabled(student),
         }
         context.update(_build_week_calendar(student, year, month, day, with_free_slots=True))
+        context["week_jumped"] = week_jumped
         context["today"] = today.isoformat()
         return render(request, self.template_name, context)
 
@@ -1136,6 +1186,17 @@ class PortalSessionRescheduleView(View):
                 student,
                 portal_user,
                 error="Das Datum liegt in der Vergangenheit.",
+            )
+
+        from apps.lessons.availability import is_past
+
+        if is_past(new_date, new_time):
+            return self._render(
+                request,
+                session,
+                student,
+                portal_user,
+                error="Diese Uhrzeit ist heute schon vorbei.",
             )
 
         # Konflikt-Prüfung (außer sich selbst): wie bei Buchung und freien Zeiten, mit der eigenen Fahrzeit
