@@ -1316,6 +1316,15 @@ def _off_hours_message(off_hours) -> str:
     )
 
 
+def _past_message(past) -> str:
+    """Termine der Serie, die beim Anlegen schon vorbei waren (heute früher, oder Startdatum zurück)."""
+    return _left_out_message(
+        past,
+        "Termin war schon vorbei und wurde ausgelassen",
+        "Termine waren schon vorbei und wurden ausgelassen",
+    )
+
+
 def _portal_series_allowed(student):
     """Serien im Portal selbst anlegen: erst ab Pro (siehe FEATURE_PORTAL_RECURRING)."""
     return user_has_feature(student.user, Feature.FEATURE_PORTAL_RECURRING)
@@ -1412,18 +1421,30 @@ class PortalRecurringCreateView(View):
             **weekdays,
         )
         # Nur freie Tage buchen: Tage, an denen der Tutor zu dieser Zeit schon eine Stunde oder eine
-        # Blockzeit hat oder die Uhrzeit außerhalb seiner Arbeitszeiten liegt, werden ausgelassen
-        # (apps/lessons/availability.py), alle anderen gebucht.
-        from apps.lessons.availability import OFF_HOURS
+        # Blockzeit hat, die Uhrzeit außerhalb seiner Arbeitszeiten liegt oder der Termin schon vorbei ist,
+        # werden ausgelassen (apps/lessons/availability.py), alle anderen gebucht.
+        from apps.lessons.availability import OFF_HOURS, PAST
 
         result = RecurringSessionService.generate_sessions(
-            rs, check_conflicts=False, skip_busy=True, within_hours=True
+            rs, check_conflicts=False, skip_busy=True, within_hours=True, only_future=True
         )
-        busy = [entry for entry in result["busy"] if entry["reason"] != OFF_HOURS]
-        off_hours = [entry for entry in result["busy"] if entry["reason"] == OFF_HOURS]
-        if result["busy"] and not result["created"] and not result["skipped"]:
+        left_out = result["busy"]
+        reasons = {entry["reason"] for entry in left_out}
+        busy = [entry for entry in left_out if entry["reason"] not in (OFF_HOURS, PAST)]
+        off_hours = [entry for entry in left_out if entry["reason"] == OFF_HOURS]
+        past = [entry for entry in left_out if entry["reason"] == PAST]
+        if left_out and not result["created"] and not result["skipped"]:
             rs.delete()
-            if not off_hours:
+            advice = "Wähle eine andere Uhrzeit oder andere Wochentage."
+            if reasons == {PAST}:
+                reason = "Alle gewünschten Termine liegen schon in der Vergangenheit."
+                advice = "Wähle ein späteres Startdatum oder eine spätere Uhrzeit."
+            elif PAST in reasons:
+                reason = (
+                    "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit nicht frei "
+                    "oder der Termin liegt schon in der Vergangenheit."
+                )
+            elif not off_hours:
                 reason = "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit schon belegt."
             elif not busy:
                 reason = "An allen gewünschten Tagen liegt diese Uhrzeit außerhalb der Arbeitszeiten deines Tutors."
@@ -1432,11 +1453,7 @@ class PortalRecurringCreateView(View):
                     "An allen gewünschten Tagen ist dein Tutor zu dieser Zeit nicht frei "
                     "(schon belegt oder außerhalb seiner Arbeitszeiten)."
                 )
-            messages.warning(
-                request,
-                f"{reason} Es wurde keine Serie angelegt. "
-                "Wähle eine andere Uhrzeit oder andere Wochentage.",
-            )
+            messages.warning(request, f"{reason} Es wurde keine Serie angelegt. {advice}")
             return redirect("portal:recurring_create", student_pk=student_pk)
         booked = result["created"]
         messages.success(
@@ -1447,6 +1464,8 @@ class PortalRecurringCreateView(View):
             messages.info(request, _busy_days_message(busy))
         if off_hours:
             messages.info(request, _off_hours_message(off_hours))
+        if past:
+            messages.info(request, _past_message(past))
         return redirect("portal:recurring_manage", student_pk=student_pk)
 
 

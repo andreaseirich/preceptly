@@ -79,5 +79,9 @@ Bisher lehnte die Buchung nur vergangene *Tage* ab. Jetzt:
 - Regel: `is_past` in `apps/lessons/availability.py`. „Jetzt“ kommt aus `local_now()` (naive Ortszeit), damit Tests die
   Uhrzeit festlegen können (`apps/portal/test_week_jump_and_past.py`).
 
-**Nicht geändert:** Serien, die Familien im Portal anlegen, prüfen nicht, ob die erste Stunde schon vorbei ist. Legt
-jemand heute eine Serie an, deren Uhrzeit heute schon vorbei ist, entsteht die erste Stunde in der Vergangenheit.
+**Serien (05.10.2026, „Ja, gleiche die Serien an“):** Auch Serien, die Familien im Portal anlegen, lassen Termine aus,
+die schon vorbei sind: die Uhrzeit von heute, die schon begonnen hat, und alle Tage vor heute, falls das Startdatum
+zurückliegt. Sie stehen in einer eigenen Meldung („1 Termin war schon vorbei und wurde ausgelassen: 05.10.2026.“).
+Sind alle Termine vorbei, wird keine Serie angelegt („Alle gewünschten Termine liegen schon in der Vergangenheit.“).
+Technisch: `enforce_future` im `BusyCalendar`, Grund `PAST`, Schalter `only_future` der Serienerzeugung. Serien des
+Tutors sind nicht betroffen, er darf auch rückwirkend anlegen.

@@ -24,6 +24,7 @@ class RecurringSessionService:
         dry_run: bool = False,
         skip_busy: bool = False,
         within_hours: bool = False,
+        only_future: bool = False,
     ) -> dict:
         """
         Generates sessions for a RecurringSession over the period [start_date, end_date].
@@ -38,6 +39,9 @@ class RecurringSessionService:
             within_hours: Together with skip_busy: days or times outside the tutor's working hours
                 are left out as well (reason apps.lessons.availability.OFF_HOURS). Used for series
                 created by families in the portal.
+            only_future: Together with skip_busy: sessions that have already begun are left out
+                as well (reason apps.lessons.availability.PAST). Used for series created by
+                families in the portal.
 
         Returns:
             Dict with:
@@ -87,6 +91,7 @@ class RecurringSessionService:
                 recurring_session.start_date,
                 end_date,
                 enforce_working_hours=within_hours,
+                enforce_future=only_future,
             )
 
         # Generate sessions based on recurrence_type

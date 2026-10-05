@@ -12,6 +12,9 @@ die Familien im Portal anlegen: Belegte Tage werden dort ausgelassen, alle ander
 Die Arbeitszeiten des Tutors (UserProfile.default_working_hours) prüft nur, wer enforce_working_hours=True
 übergibt - das Portal tut das, der Tutor selbst darf auch außerhalb seiner Zeiten planen. Sind gar keine
 Arbeitszeiten eingetragen, gibt es keine Einschränkung. Der Vertragsumfang wird nicht geprüft.
+
+Mit enforce_future=True zählen auch Zeiten, die schon begonnen haben, als nicht frei (PAST). So legt das Portal
+bei Serien keine Stunden in der Vergangenheit an.
 """
 
 from collections import defaultdict
@@ -24,6 +27,7 @@ from apps.lessons.spacing import min_gap_minutes
 LESSON = "lesson"
 BLOCKED = "blocked_time"
 OFF_HOURS = "off_hours"
+PAST = "past"
 BUSY_STATUSES = ("planned", "taught", "paid")
 _WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
@@ -66,7 +70,8 @@ class BusyCalendar:
     exclude_pk: eine Stunde, die nicht mitzählt (die Stunde, die gerade verschoben wird).
     gap_minutes: Mindestabstand; ohne Angabe aus dem Profil des Tutors.
     enforce_working_hours: Zeiten außerhalb der Arbeitszeiten des Tutors gelten als nicht frei (OFF_HOURS).
-        Ohne eingetragene Arbeitszeiten gibt es keine Einschränkung."""
+        Ohne eingetragene Arbeitszeiten gibt es keine Einschränkung.
+    enforce_future: Zeiten, die schon begonnen haben, gelten als nicht frei (PAST)."""
 
     def __init__(
         self,
@@ -76,12 +81,14 @@ class BusyCalendar:
         exclude_pk=None,
         gap_minutes=None,
         enforce_working_hours=False,
+        enforce_future=False,
     ):
         from apps.blocked_times.models import BlockedTime
         from apps.lessons.models import Session
 
         self.gap = timedelta(minutes=min_gap_minutes(tutor) if gap_minutes is None else gap_minutes)
         self._by_day = defaultdict(list)
+        self._now = local_now() if enforce_future else None
         self._hours = None
         if enforce_working_hours:
             hours = getattr(getattr(tutor, "profile", None), "default_working_hours", None)
@@ -140,12 +147,15 @@ class BusyCalendar:
 
     def reason(self, day, start_time, duration_minutes, travel_before=0, travel_after=0):
         """LESSON oder BLOCKED, wenn die Zeit belegt ist, OFF_HOURS (nur mit enforce_working_hours), wenn sie
-        außerhalb der Arbeitszeiten liegt, sonst None.
+        außerhalb der Arbeitszeiten liegt, PAST (nur mit enforce_future), wenn sie schon begonnen
+        hat, sonst None.
 
         Gemeint ist ein neuer Termin mit dieser Dauer und Fahrzeit. Er muss zu jedem belegten Zeitraum
         mindestens den Mindestabstand halten. Aneinandergrenzende Zeiten (eine Stunde endet genau, wenn die
         nächste beginnt) überschneiden sich nicht, solange der Mindestabstand 0 ist."""
         start = datetime.combine(day, start_time)
+        if self._now is not None and start <= self._now:
+            return PAST
         if self._hours is not None and not self._within_working_hours(day, start, duration_minutes):
             return OFF_HOURS
         block_start = start - timedelta(minutes=travel_before) - self.gap

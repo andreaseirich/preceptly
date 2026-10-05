@@ -38,6 +38,9 @@ buchen. Das galt bisher nur für die Liste der freien Zeiten, jetzt auch beim Sp
 | Verschieben | Wie die Buchung |
 | Serie | Der Tag wird ausgelassen und in einer eigenen Meldung genannt („3 Tage liegen außerhalb der Arbeitszeiten …“). Liegt jeder Tag außerhalb oder ist belegt, wird keine Serie angelegt |
 
+**Schon vorbei (nur Portal):** Termine einer Portal-Serie, die schon begonnen haben (heute früher, oder Startdatum in
+der Vergangenheit), werden ausgelassen und genannt. Siehe `docs/features/feat-portal-tag-auswahl.md`.
+
 Die ganze Stunde muss in einem Zeitfenster liegen (ohne Fahrzeit); sie kann nicht über zwei Fenster reichen. Ein Tag
 ohne Fenster (etwa Sonntag) zählt als außerhalb. **Sind gar keine Arbeitszeiten eingetragen,** gibt es keine
 Einschränkung beim Speichern (Serien und direkte Buchungen laufen wie bisher), die Liste der freien Zeiten bleibt
