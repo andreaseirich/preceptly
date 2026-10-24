@@ -35,7 +35,7 @@ def tier_pool(institute):
     from apps.lessons.models import Session  # lokaler Import gegen Zirkelbezug
 
     qs = Session.objects.filter(
-        contract__user=institute.user,
+        contract__user_id=institute.user_id,
         contract__institute_fk=institute,
         status__in=["taught", "paid"],
         tutor_no_show=False,

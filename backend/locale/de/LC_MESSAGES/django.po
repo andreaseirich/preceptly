@@ -7614,8 +7614,8 @@ msgstr[1] "{count} Tage waren schon belegt und wurden ausgelassen: {days}."
 msgid "default hourly rate"
 msgstr "Standard-Stundensatz"
 
-msgid "Pre-filled as the hourly rate when you add a student to this institute. Empty: the rate of the first pay tier is used, if there is one."
-msgstr "Wird als Stundensatz vorbelegt, wenn du diesem Institut einen Schüler hinzufügst. Leer: Es gilt der Satz der ersten Stufe, falls es eine gibt."
+msgid "Pre-filled as the hourly rate when you add a student to this institute. Empty: the rate of your current pay tier is used, if there is one."
+msgstr "Wird als Stundensatz vorbelegt, wenn du diesem Institut einen Schüler hinzufügst. Leer: Es gilt der Satz deiner aktuellen Stufe, falls es eine gibt."
 
 msgid "default unit duration (minutes)"
 msgstr "Standard-Einheitsdauer (Minuten)"

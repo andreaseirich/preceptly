@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.contracts.models import Contract, Institute
+from apps.contracts.services import new_student_defaults
 
 
 def _validate_tiers(tiers):
@@ -181,7 +182,7 @@ class ContractForm(forms.ModelForm):
         if self.instance.pk or self.is_bound:
             return
         for institute in self.fields["institute_fk"].queryset:
-            defaults = institute.student_defaults()
+            defaults = new_student_defaults(institute)
             if defaults["rate"] or defaults["duration"]:
                 self.institute_defaults[str(institute.pk)] = defaults
         if not self.institute_defaults:

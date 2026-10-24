@@ -25,19 +25,20 @@ Ein Institut hatte bisher weder Stundensatz noch Einheitsdauer, nur Staffeln. Ne
 
 | Feld | Grenzen | Leer |
 |---|---|---|
-| `default_hourly_rate` (Standard-Stundensatz) | ab 0,01 € | Es gilt der Satz der **ersten Staffel** (niedrigste „ab Stunden“), unabhängig von der Reihenfolge der Einträge. Ein Satz von 0 oder eine kaputte Staffel ergibt: nichts vorbelegen |
+| `default_hourly_rate` (Standard-Stundensatz) | ab 0,01 € | Es gilt der Satz der **aktuellen Staffel**: die Stufe, in der der Tutor bei diesem Institut gerade steht (gleiche Zählweise wie die Abrechnung und die Fortschrittsanzeige; bei null Stunden die erste). Unabhängig von der Reihenfolge der Einträge. Ein Satz von 0 oder eine kaputte Staffel ergibt: nichts vorbelegen |
 | `default_unit_duration_minutes` (Standard-Einheitsdauer) | 1 bis 480 Minuten | Nichts vorbelegen, es bleiben die üblichen 60 |
 
 Die Institut-Liste zeigt den Standard unter den Staffeln („Standard für neue Schüler: 14,00 €/h, 45 min“).
 
 **Bei Instituten mit Staffeln** rechnet Preceptly nach den Staffeln ab; der Stundensatz des Schülers ist dort nur ein
-Vorschlag (Pflichtfeld). Die Einheitsdauer des Schülers zählt dagegen bei der Abrechnung ohne Staffeln und für Privatschüler.
+Richtwert (Pflichtfeld), den aber die Prognose der geplanten Einnahmen (`apps/core/selectors.py`) verwendet. Die Einheitsdauer des Schülers zählt dagegen bei der Abrechnung ohne Staffeln und für Privatschüler.
 
 ## Code
 
 | Teil | Ort |
 |---|---|
-| Felder und `Institute.student_defaults()` | `apps/contracts/models.py`, Migration `0023_institute_student_defaults` (nullbar, keine Datenänderung) |
+| Felder | `apps/contracts/models.py`, Migrationen `0023_institute_student_defaults` (nullbar, keine Datenänderung) und `0024` (nur Hilfetext) |
+| Was vorbelegt wird: `new_student_defaults()` und die Stufen-Hilfsfunktionen | `apps/contracts/services.py` (dieselben Funktionen wie `get_institute_tier_progress`) |
 | Formulare (`InstituteForm`, `ContractForm._setup_institute_defaults`) | `apps/contracts/forms.py` |
 | Skript | `apps/core/static/js/institute-defaults.js` |
 | Einbau in beide Schüler-Formulare | `apps/contracts/templates/contracts/_institute_defaults.html` |
@@ -47,3 +48,10 @@ Vorschlag (Pflichtfeld). Die Einheitsdauer des Schülers zählt dagegen bei der 
 ## Nicht geändert
 
 Kein Wechsel des Satzes für bestehende Schüler, keine Vorbelegung beim Bearbeiten, keine Auswirkung auf Rechnungen.
+
+## Änderung vom 24.10.2026: aktuelle statt erster Stufe
+
+Der erste Entwurf nahm ohne Standard-Stundensatz die **erste** Staffel (bei TutorSpace 13 €). Der Test mit den echten Daten
+zeigte, dass der Tutor dort in der Stufe 15 €/h steht (164 Stunden). Weil die Prognose der geplanten Einnahmen mit dem Satz
+im Schüler rechnet, schlägt Preceptly jetzt den **aktuell geltenden** Satz vor. Der Zählerstand kostet eine Abfrage je
+Institut ohne Standard-Stundensatz, mit eingetragenem Standard keine.

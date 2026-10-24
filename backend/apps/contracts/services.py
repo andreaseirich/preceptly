@@ -3,6 +3,7 @@ Services for contract-related calculations (e.g. monthly planning summary).
 """
 
 from datetime import date, timedelta
+from decimal import Decimal
 from math import ceil
 
 from django.utils.translation import gettext
@@ -105,9 +106,8 @@ def _compute_carried_over_before(contract: Contract, before_year: int, before_mo
     return carried
 
 
-def get_institute_tier_progress(institute: Institute) -> dict | None:
-    """Cumulative-hours tier progress for one Institute, or None if it has no tiers
-    or its tier data is malformed."""
+def _sorted_valid_tiers(institute: Institute) -> list[dict] | None:
+    """Stufen des Instituts nach "ab Stunden" sortiert, oder None bei keinen oder kaputten Stufen."""
     tiers = institute.tiers
 
     # Defensive type-check vor dem Sortieren (verhindert TypeError bei unvalidiertem JSONField)
@@ -128,25 +128,74 @@ def get_institute_tier_progress(institute: Institute) -> dict | None:
         return None
 
     # Leere Tier-Liste nach Sortierung → sicher abbrechen (verhindert IndexError)
+    return sorted_tiers or None
+
+
+def _tier_total_hours(institute: Institute, pool) -> float:
+    """Zählerstand des Instituts in Stunden bzw. Einheiten, einschließlich Startwert."""
+    return round(
+        float(
+            counted_total(
+                pool.values_list("duration_minutes", flat=True),
+                institute.tier_count_mode,
+                institute.tier_count_offset,
+            )
+        ),
+        2,
+    )
+
+
+def _tier_at(sorted_tiers: list[dict], total_hours: float) -> dict:
+    """Die Stufe, die beim Zählerstand total_hours gilt (bei null Stunden die erste)."""
+    current_tier = sorted_tiers[0]
+    for tier in sorted_tiers:
+        if tier["hours_from"] <= total_hours:
+            current_tier = tier
+    return current_tier
+
+
+def _money(value) -> Decimal | None:
+    """Ein Betrag als Decimal, oder None, wenn er fehlt, kaputt oder kleiner als 0,01 ist."""
+    try:
+        amount = Decimal(str(value))
+        if not amount.is_finite() or amount < Decimal("0.01"):
+            return None
+    except (TypeError, ValueError, ArithmeticError):
+        return None
+    return amount
+
+
+def new_student_defaults(institute: Institute) -> dict:
+    """Was beim Anlegen eines Schülers dieses Instituts vorbelegt wird: {"rate", "duration"}.
+
+    rate ist der Standard-Stundensatz des Instituts. Fehlt er, gilt der Satz der Stufe, in der der Tutor bei
+    diesem Institut gerade steht (gleiche Zählweise wie die Abrechnung, bei null Stunden die erste Stufe).
+    Er kommt als Text mit zwei Nachkommastellen; ohne Stufen, bei kaputten Stufen oder bei einem Satz unter
+    0,01 ist er None. duration sind die Minuten oder None. None heißt: nichts vorbelegen."""
+    rate = _money(institute.default_hourly_rate)
+    if rate is None and institute.default_hourly_rate is None:
+        sorted_tiers = _sorted_valid_tiers(institute)
+        if sorted_tiers:
+            total_hours = _tier_total_hours(institute, tier_pool(institute))
+            rate = _money(_tier_at(sorted_tiers, total_hours).get("rate"))
+    return {
+        "rate": f"{rate:.2f}" if rate is not None else None,
+        "duration": institute.default_unit_duration_minutes or None,
+    }
+
+
+def get_institute_tier_progress(institute: Institute) -> dict | None:
+    """Cumulative-hours tier progress for one Institute, or None if it has no tiers
+    or its tier data is malformed."""
+    sorted_tiers = _sorted_valid_tiers(institute)
     if not sorted_tiers:
         return None
 
     # Derselbe Pool und dieselbe Zählweise wie in der Abrechnung (tier_counting.py).
     mode = institute.tier_count_mode
     pool = tier_pool(institute)
-    total_hours = round(
-        float(
-            counted_total(
-                pool.values_list("duration_minutes", flat=True), mode, institute.tier_count_offset
-            )
-        ),
-        2,
-    )
-
-    current_tier = sorted_tiers[0]
-    for tier in sorted_tiers:
-        if tier["hours_from"] <= total_hours:
-            current_tier = tier
+    total_hours = _tier_total_hours(institute, pool)
+    current_tier = _tier_at(sorted_tiers, total_hours)
 
     next_tier = None
     for tier in sorted_tiers:

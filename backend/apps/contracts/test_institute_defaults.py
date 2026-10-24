@@ -9,12 +9,16 @@ from decimal import Decimal
 from pathlib import Path
 
 from django.contrib.auth import get_user_model
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.contracts.forms import ContractForm, InstituteForm
 from apps.contracts.models import Contract, Institute
+from apps.contracts.services import new_student_defaults
 from apps.core.models import UserProfile
+from apps.lessons.models import Session
 
 User = get_user_model()
 
@@ -51,37 +55,150 @@ class InstituteFixture(TestCase):
 
 class StudentDefaultsTest(InstituteFixture):
     def test_explicit_values_win_over_the_tiers(self):
-        self.assertEqual(self.explicit.student_defaults(), {"rate": "27.50", "duration": 45})
+        self.assertEqual(new_student_defaults(self.explicit), {"rate": "27.50", "duration": 45})
 
-    def test_without_an_explicit_rate_the_first_tier_counts_whatever_the_order(self):
-        self.assertEqual(self.tiered.student_defaults(), {"rate": "14.00", "duration": None})
+    def test_without_an_explicit_rate_the_current_tier_counts_whatever_the_order(self):
+        # Null Stunden: die erste Stufe (14 €), obwohl sie in der Liste hinten steht
+        self.assertEqual(new_student_defaults(self.tiered), {"rate": "14.00", "duration": None})
+
+    def test_the_rate_follows_the_hours_the_tutor_has_reached(self):
+        self.tiered.tier_count_offset = 60  # Startwert: schon in der Stufe ab 50 Stunden
+        self.tiered.save()
+
+        self.assertEqual(new_student_defaults(self.tiered)["rate"], "18.00")
+
+    def test_the_next_tier_starts_exactly_at_its_threshold(self):
+        for offset, expected in [(49, "14.00"), (50, "18.00")]:
+            with self.subTest(offset=offset):
+                self.tiered.tier_count_offset = offset
+
+                self.assertEqual(new_student_defaults(self.tiered)["rate"], expected)
+
+    def test_lessons_taught_move_the_tutor_up_a_tier(self):
+        contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="Lea",
+            last_name="Schmidt",
+            hourly_rate=Decimal("14.00"),
+            start_date=dt.date(2025, 1, 1),
+            institute_fk=self.tiered,
+            unit_duration_minutes=60,
+        )
+        Session.objects.create(
+            contract=contract,
+            date=dt.date(2026, 1, 5),
+            start_time=dt.time(15, 0),
+            duration_minutes=51 * 60,
+            status="taught",
+        )
+        # nicht gezählt: nur geplant
+        Session.objects.create(
+            contract=contract,
+            date=dt.date(2026, 1, 6),
+            start_time=dt.time(15, 0),
+            duration_minutes=100 * 60,
+            status="planned",
+        )
+
+        self.assertEqual(new_student_defaults(self.tiered)["rate"], "18.00")
+
+    def test_planned_lessons_do_not_move_the_tutor_up(self):
+        contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="Lea",
+            last_name="Schmidt",
+            hourly_rate=Decimal("14.00"),
+            start_date=dt.date(2025, 1, 1),
+            institute_fk=self.tiered,
+            unit_duration_minutes=60,
+        )
+        Session.objects.create(
+            contract=contract,
+            date=dt.date(2026, 1, 6),
+            start_time=dt.time(15, 0),
+            duration_minutes=100 * 60,
+            status="planned",
+        )
+
+        self.assertEqual(new_student_defaults(self.tiered)["rate"], "14.00")
+
+    def test_an_explicit_rate_beats_the_current_tier_even_when_higher_tiers_apply(self):
+        self.explicit.tier_count_offset = 60
+
+        self.assertEqual(new_student_defaults(self.explicit)["rate"], "27.50")
 
     def test_nothing_set_means_nothing_to_fill(self):
-        self.assertEqual(self.bare.student_defaults(), {"rate": None, "duration": None})
+        self.assertEqual(new_student_defaults(self.bare), {"rate": None, "duration": None})
 
     def test_a_tier_rate_of_zero_is_not_offered(self):
         self.tiered.tiers = [{"hours_from": 0, "rate": 0, "label": "gratis"}]
 
-        self.assertIsNone(self.tiered.student_defaults()["rate"])
+        self.assertIsNone(new_student_defaults(self.tiered)["rate"])
 
     def test_broken_tiers_do_not_raise(self):
         for broken in (
             [{"rate": 14}],
             [{"hours_from": "x", "rate": 14}],
             [{"hours_from": 0, "rate": "viel"}],
+            [{"hours_from": 0}],
+            [{"hours_from": 0, "rate": float("nan")}],
             ["kaputt"],
             "kaputt",
             None,
+            [],
         ):
             with self.subTest(tiers=broken):
                 self.tiered.tiers = broken
 
-                self.assertIsNone(self.tiered.student_defaults()["rate"])
+                self.assertIsNone(new_student_defaults(self.tiered)["rate"])
 
     def test_rates_with_many_decimals_are_rounded_for_the_input(self):
         self.tiered.tiers = [{"hours_from": 0, "rate": 14.5, "label": "x"}]
 
-        self.assertEqual(self.tiered.student_defaults()["rate"], "14.50")
+        self.assertEqual(new_student_defaults(self.tiered)["rate"], "14.50")
+
+    def test_the_counting_mode_decides_how_a_short_lesson_counts(self):
+        # Startwert 49 plus eine unterrichtete Stunde von 30 Minuten: nach Dauer 49,5 (Stufe 14 €),
+        # nach angefangener Stunde 50 (Stufe 18 €) - wie in der Abrechnung.
+        contract = Contract.objects.create(
+            user=self.tutor,
+            first_name="Lea",
+            last_name="Schmidt",
+            hourly_rate=Decimal("14.00"),
+            start_date=dt.date(2025, 1, 1),
+            institute_fk=self.tiered,
+            unit_duration_minutes=30,
+        )
+        Session.objects.create(
+            contract=contract,
+            date=dt.date(2026, 1, 5),
+            start_time=dt.time(15, 0),
+            duration_minutes=30,
+            status="taught",
+        )
+        self.tiered.tier_count_offset = 49
+
+        self.tiered.tier_count_mode = "duration"
+        by_duration = new_student_defaults(self.tiered)["rate"]
+        self.tiered.tier_count_mode = "started_hours"
+        by_unit = new_student_defaults(self.tiered)["rate"]
+
+        self.assertEqual((by_duration, by_unit), ("14.00", "18.00"))
+
+    def test_costs_one_query_for_tiers_and_none_for_an_explicit_rate(self):
+        fresh = Institute.objects.get(
+            pk=self.tiered.pk
+        )  # Besitzer nicht vorgeladen, wie im Formular
+        with CaptureQueriesContext(connection) as tiered:
+            new_student_defaults(fresh)
+        with CaptureQueriesContext(connection) as explicit:
+            new_student_defaults(self.explicit)
+        with CaptureQueriesContext(connection) as bare:
+            new_student_defaults(self.bare)
+
+        self.assertEqual(len(tiered), 1)
+        self.assertEqual(len(explicit), 0)
+        self.assertEqual(len(bare), 0)
 
 
 class InstituteFormTest(InstituteFixture):
@@ -159,6 +276,15 @@ class ContractFormPrefillTest(InstituteFixture):
                 str(self.tiered.pk): {"rate": "14.00", "duration": None},
             },
         )
+
+    def test_the_form_offers_the_rate_of_the_tier_the_tutor_has_reached(self):
+        self.tiered.tier_count_offset = 60
+        self.tiered.save()
+
+        form = ContractForm(user=self.tutor)
+
+        self.assertEqual(form.institute_defaults[str(self.tiered.pk)]["rate"], "18.00")
+        self.assertEqual(form.institute_defaults[str(self.explicit.pk)]["rate"], "27.50")
 
     def test_the_institute_field_is_marked_for_the_script(self):
         form = ContractForm(user=self.tutor)
