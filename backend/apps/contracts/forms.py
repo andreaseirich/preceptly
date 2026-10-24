@@ -32,6 +32,8 @@ class InstituteForm(forms.ModelForm):
         model = Institute
         fields = [
             "institute_name",
+            "default_hourly_rate",
+            "default_unit_duration_minutes",
             "tiers",
             "unpaid_on_tutor_no_show",
             "tutor_no_show_pay_percent",
@@ -40,6 +42,12 @@ class InstituteForm(forms.ModelForm):
             "tier_count_offset",
         ]
         widgets = {
+            "default_hourly_rate": forms.NumberInput(
+                attrs={"class": "form-control", "step": "0.01", "min": "0.01"}
+            ),
+            "default_unit_duration_minutes": forms.NumberInput(
+                attrs={"class": "form-control", "min": 1, "max": 480}
+            ),
             "unpaid_on_tutor_no_show": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "tutor_no_show_pay_percent": forms.NumberInput(
                 attrs={"class": "form-control", "min": 0, "max": 100}
@@ -160,6 +168,31 @@ class ContractForm(forms.ModelForm):
         self.fields["institute_fk"].queryset = Institute.objects.filter(
             user=user if user else (self.instance.user if self.instance.pk else None)
         ).order_by("institute_name")
+        self._setup_institute_defaults()
+
+    def _setup_institute_defaults(self):
+        """Stundensatz und Einheitsdauer beim Anlegen aus dem gewählten Institut vorbelegen.
+
+        Gilt nur für neue, noch nicht abgeschickte Formulare: Beim Bearbeiten bleiben die Werte des Schülers
+        stehen, und nach einem Fehler zählen die Eingaben des Tutors. Ein kleines Skript
+        (static/js/institute-defaults.js) füllt die Felder beim Wechsel des Instituts. Es überschreibt nichts,
+        was der Tutor selbst eingetragen hat."""
+        self.institute_defaults = {}
+        if self.instance.pk or self.is_bound:
+            return
+        for institute in self.fields["institute_fk"].queryset:
+            defaults = institute.student_defaults()
+            if defaults["rate"] or defaults["duration"]:
+                self.institute_defaults[str(institute.pk)] = defaults
+        if not self.institute_defaults:
+            return
+        self.fields["institute_fk"].widget.attrs["data-institute-prefill"] = "true"
+        self.fields["institute_fk"].widget.attrs["data-prefill-message"] = _(
+            "Stundensatz und Einheitsdauer wurden aus dem Institut übernommen. Du kannst sie ändern."
+        )
+        hint = _("Wird vorbelegt, wenn du ein Institut wählst. Du kannst den Wert ändern.")
+        self.fields["hourly_rate"].help_text = hint
+        self.fields["unit_duration_minutes"].help_text = hint
 
     def save(self, commit=True):
         instance = super().save(commit=False)

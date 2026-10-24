@@ -35,6 +35,11 @@
                 {% if institute.unpaid_on_tutor_no_show %}
                     {% if institute.tiers %}, {% endif %}{% trans "no billing on tutor no-show" %}
                 {% endif %}
+                {% if institute.default_hourly_rate or institute.default_unit_duration_minutes %}
+                <div style="color:var(--text-secondary); font-size:.9em;">{% trans "Default for new students" %}:
+                    {% if institute.default_hourly_rate %}{{ institute.default_hourly_rate|floatformat:2 }} €/h{% endif %}{% if institute.default_hourly_rate and institute.default_unit_duration_minutes %}, {% endif %}{% if institute.default_unit_duration_minutes %}{{ institute.default_unit_duration_minutes }} {% trans "min" %}{% endif %}
+                </div>
+                {% endif %}
             </td>
             <td>
                 {% with p=institute.tier_progress %}

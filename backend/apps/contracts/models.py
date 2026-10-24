@@ -211,6 +211,30 @@ class Institute(models.Model):
             "recorded here. They are added to the counter."
         ),
     )
+    # Standardwerte für neue Schüler dieses Instituts (siehe student_defaults). Leer: nichts vorbelegen,
+    # beim Stundensatz gilt dann die erste Staffel.
+    default_hourly_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        verbose_name=_("default hourly rate"),
+        help_text=_(
+            "Pre-filled as the hourly rate when you add a student to this institute. "
+            "Empty: the rate of the first pay tier is used, if there is one."
+        ),
+    )
+    default_unit_duration_minutes = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(480)],
+        verbose_name=_("default unit duration (minutes)"),
+        help_text=_(
+            "Pre-filled as the unit duration when you add a student to this institute. "
+            "Empty: the usual 60 minutes stay."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -222,3 +246,23 @@ class Institute(models.Model):
 
     def __str__(self):
         return self.institute_name
+
+    def student_defaults(self) -> dict:
+        """Was beim Anlegen eines Schülers dieses Instituts vorbelegt wird: {"rate", "duration"}.
+
+        rate ist der Standard-Stundensatz, sonst der Satz der ersten Staffel (niedrigste "ab Stunden"), als
+        Text mit zwei Nachkommastellen; ein Satz von 0 oder eine kaputte Staffel ergibt None. duration sind
+        die Minuten oder None. None heißt: nichts vorbelegen."""
+        rate = self.default_hourly_rate
+        if rate is None and isinstance(self.tiers, list) and self.tiers:
+            try:
+                first = min(self.tiers, key=lambda tier: float(tier["hours_from"]))
+                rate = Decimal(str(first["rate"]))
+            except (KeyError, TypeError, ValueError, ArithmeticError):
+                rate = None
+        if rate is not None and rate < Decimal("0.01"):
+            rate = None
+        return {
+            "rate": f"{rate:.2f}" if rate is not None else None,
+            "duration": self.default_unit_duration_minutes or None,
+        }

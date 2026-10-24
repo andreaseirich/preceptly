@@ -1,0 +1,5 @@
+{% load static %}{# Standardwerte der Institute für das Schüler-Formular, nur bei neuen Schülern (siehe ContractForm). #}
+{% if form.institute_defaults %}
+{{ form.institute_defaults|json_script:"institute-defaults" }}
+<script src="{% static 'js/institute-defaults.js' %}" nonce="{{ csp_nonce }}" defer></script>
+{% endif %}

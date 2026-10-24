@@ -7610,3 +7610,30 @@ msgid "{count} day was already busy and was left out: {days}."
 msgid_plural "{count} days were already busy and were left out: {days}."
 msgstr[0] "{count} Tag war schon belegt und wurde ausgelassen: {days}."
 msgstr[1] "{count} Tage waren schon belegt und wurden ausgelassen: {days}."
+
+msgid "default hourly rate"
+msgstr "Standard-Stundensatz"
+
+msgid "Pre-filled as the hourly rate when you add a student to this institute. Empty: the rate of the first pay tier is used, if there is one."
+msgstr "Wird als Stundensatz vorbelegt, wenn du diesem Institut einen Schüler hinzufügst. Leer: Es gilt der Satz der ersten Stufe, falls es eine gibt."
+
+msgid "default unit duration (minutes)"
+msgstr "Standard-Einheitsdauer (Minuten)"
+
+msgid "Pre-filled as the unit duration when you add a student to this institute. Empty: the usual 60 minutes stay."
+msgstr "Wird als Einheitsdauer vorbelegt, wenn du diesem Institut einen Schüler hinzufügst. Leer: Es bleiben die üblichen 60 Minuten."
+
+msgid "Defaults for new students"
+msgstr "Standard für neue Schüler"
+
+msgid "When you add a student to this institute, the hourly rate and the unit duration are filled in from here. You can still change them for each student."
+msgstr "Wenn du diesem Institut einen Schüler hinzufügst, werden Stundensatz und Einheitsdauer von hier übernommen. Du kannst sie für jeden Schüler ändern."
+
+msgid "Default for new students"
+msgstr "Standard für neue Schüler"
+
+msgid "Stundensatz und Einheitsdauer wurden aus dem Institut übernommen. Du kannst sie ändern."
+msgstr "Stundensatz und Einheitsdauer wurden aus dem Institut übernommen. Du kannst sie ändern."
+
+msgid "Wird vorbelegt, wenn du ein Institut wählst. Du kannst den Wert ändern."
+msgstr "Wird vorbelegt, wenn du ein Institut wählst. Du kannst den Wert ändern."
