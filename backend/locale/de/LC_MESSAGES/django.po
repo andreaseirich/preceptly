@@ -7637,3 +7637,6 @@ msgstr "Stundensatz und Einheitsdauer wurden aus dem Institut übernommen. Du ka
 
 msgid "Wird vorbelegt, wenn du ein Institut wählst. Du kannst den Wert ändern."
 msgstr "Wird vorbelegt, wenn du ein Institut wählst. Du kannst den Wert ändern."
+
+msgid "Please leave this field empty"
+msgstr "Bitte lass dieses Feld leer."

@@ -67,6 +67,12 @@
             {% endif %}
         </div>
 
+        {# Honeypot gegen Automaten: unsichtbar, per Tastatur nicht erreichbar und für Screenreader versteckt. Ein Mensch lässt es leer. #}
+        <div aria-hidden="true" style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap;">
+            <label for="id_homepage">{% trans "Please leave this field empty" %}</label>
+            <input type="text" name="homepage" id="id_homepage" value="" tabindex="-1" autocomplete="off">
+        </div>
+
         {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
         <fieldset style="border: none; padding: 0; margin: 0 0 20px 0;">
             <legend style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600; font-size: 1em;">{% trans "Consent" %}</legend>

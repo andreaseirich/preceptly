@@ -2,6 +2,8 @@
 Forms for core app.
 """
 
+import logging
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -9,6 +11,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import Expense, Review
+
+logger = logging.getLogger(__name__)
+
+# Honeypot der Registrierung (siehe RegisterForm). Der Name ist absichtlich unauffällig und kein Feld, das Browser
+# oder Passwortmanager von selbst ausfüllen (kein name, email, phone, address, organization).
+HONEYPOT_FIELD = "homepage"
 
 
 class UserEmailForm(forms.ModelForm):
@@ -53,7 +61,18 @@ class AccountEmailChangeForm(forms.Form):
 
 
 class RegisterForm(UserCreationForm):
-    """Registration form for new tutor accounts. No premium by default."""
+    """Registration form for new tutor accounts. No premium by default.
+
+    Honeypot gegen Automaten: Das Feld HONEYPOT_FIELD ist für Menschen unsichtbar und nicht erreichbar
+    (register.html), Automaten füllen aber jedes Textfeld aus. Ist es nicht leer, wird nichts angelegt.
+    strip=False, damit auch ein Leerzeichen als gefüllt zählt."""
+
+    homepage = forms.CharField(
+        required=False,
+        strip=False,
+        label=_("Please leave this field empty"),
+        widget=forms.TextInput(attrs={"tabindex": "-1", "autocomplete": "off"}),
+    )
 
     class Meta:
         model = User
@@ -85,6 +104,16 @@ class RegisterForm(UserCreationForm):
                 code="duplicate_username",
             )
         return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get(HONEYPOT_FIELD):
+            # Weder Benutzername noch Adresse ins Log: Es genügt zu sehen, dass es passiert.
+            logger.warning("Registration rejected: honeypot field was filled")
+            raise forms.ValidationError(
+                _("Registration failed. Please try again."), code="honeypot"
+            )
+        return cleaned_data
 
 
 class WorkingHoursForm(forms.Form):
