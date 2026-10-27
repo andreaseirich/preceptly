@@ -1,11 +1,11 @@
 # CVE-2026-4539 (ReDoS in AdlLexer): fixed upstream pygments#3064; PyPI still 2.19.2.
 # Pin git until Pygments > 2.19.2 is released; then replace with a version pin and drop pip-audit ignore.
 Pygments @ git+https://github.com/pygments/pygments.git@24b8aa76c6cd6d70f39c6dd605cce319c98e2ccc
-asgiref==3.12.1
+asgiref==3.13.0
 channels==4.3.2
 channels-redis==4.3.0
 daphne==4.2.3
-certifi==2026.10.19
+certifi==2026.10.23
 charset-normalizer==3.5.2
 Django==6.1.2
 dj-database-url==3.1.2
