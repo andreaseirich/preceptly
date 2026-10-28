@@ -100,12 +100,13 @@ am 24.10.2026: ignorieren mit Begründung, nicht auf eine Vorabversion des produ
 | CVE-2026-115778 | `twisted.conch` Telnet (Speicher) | Nein | ignoriert |
 | CVE-2026-115775 | XML-Element-Stream (Speicher) | Nein | ignoriert |
 | CVE-2026-115776 | `twisted.words` IRC-Server (Speicher) | Nein | ignoriert |
+| CVE-2026-83813 | `twisted.names` DNS-Client (gefälschte DNS-Antworten, Cache-Poisoning); am 28.10.2026 gemeldet | Nein: weder Daphne noch Autobahn, Channels oder der Anwendungscode nutzen `twisted.names`, Twisted löst Namen über seinen Thread-Resolver auf | ignoriert |
 | CVE-2026-115877 | `twisted.web.http.HTTPChannel`: bloßes CR oder LF im Header-Wert wird nicht abgelehnt (Request-Smuggling) | **Ja**, Daphne nutzt `twisted.web.http` | **befristet** ignoriert |
 
 - **Zu CVE-2026-115877:** Ein Angriff braucht einen vorgeschalteten Proxy, der denselben Zeilenumbruch anders deutet.
   Preceptly läuft hinter einem solchen Proxy; die Einschätzung des Restrisikos steht im nicht öffentlichen Sicherheitsplan.
 - **Nächster Schritt:** Sobald **Twisted 26.10.0 (stabil)** auf PyPI steht: Daphne mit der neuen Version testen, die
-  Ignores für 115774, 115775, 115776, 115778 und 115877 aus `.github/workflows/ci.yml` entfernen und prüfen, ob 106454
+  Ignores für 115774, 115775, 115776, 115778, 83813 und 115877 aus `.github/workflows/ci.yml` entfernen und prüfen, ob 106454
   inzwischen einen Fix hat. Bis dahin bei jedem Dependabot-Hinweis zu Twisted/Daphne nachsehen.
 - **Zusätzlich am 24.10.2026 behoben (kein Ignore nötig):** `pillow` 12.3.0 → 13.0.0 (37 Meldungen), `pypdf` 6.20.0 → 6.21.2
   (9 Meldungen), `certifi` 2026.7.22 → 2026.10.19 (CA-Bundle mit kompromittiertem emSign-Root).

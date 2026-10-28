@@ -51,6 +51,7 @@ jobs:
           pip-audit \
             --ignore-vuln CVE-2026-4539 \
             --ignore-vuln CVE-2026-106454 \
+            --ignore-vuln CVE-2026-83813 \
             --ignore-vuln CVE-2026-115774 \
             --ignore-vuln CVE-2026-115775 \
             --ignore-vuln CVE-2026-115776 \
@@ -58,7 +59,7 @@ jobs:
             --ignore-vuln CVE-2026-115877
         # CVE-2026-4539: Pygments ReDoS; fix merged upstream but no PyPI release >2.19.2 yet.
         # Twisted 26.4.0 (via Daphne), no stable fix yet - see SECURITY.md "CVE-2026-106454 ... (Twisted)":
-        #   CVE-2026-106454, -115774, -115775, -115776, -115778: modules Preceptly does not use (IMAP, conch, words/IRC, XML stream).
+        #   CVE-2026-106454, -115774, -115775, -115776, -115778, -83813: modules Preceptly does not use (IMAP, conch, words/IRC, XML stream, DNS client).
         #   CVE-2026-115877: twisted.web.http header validation, time-limited ignore until Twisted 26.10.0 final.
         # CVE-2026-3219 (pip polyglot): fixed in pip>=26.1; resolved by the pip>=26.1.2 pin above.
         # See SECURITY.md for details.
