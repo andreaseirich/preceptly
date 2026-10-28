@@ -356,6 +356,25 @@ class RequestLog(models.Model):
         indexes = [models.Index(fields=["timestamp", "path"])]
 
 
+class DailyCounter(models.Model):
+    """Ein Zähler je Name und Tag, ohne personenbezogene Daten (nur Name, Tag, Anzahl).
+
+    Gedacht für Ereignisse, die kein Konto und keine andere Spur hinterlassen, etwa abgewiesene Registrierungen
+    (apps/core/counters.py). Anders als das Zugriffsprotokoll wird er nicht nach 30 Tagen gelöscht: Eine Zeile
+    je Tag und Name ist winzig."""
+
+    name = models.CharField(max_length=50)
+    day = models.DateField()
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-day", "name"]
+        constraints = [models.UniqueConstraint(fields=["name", "day"], name="uniq_daily_counter")]
+
+    def __str__(self):
+        return f"{self.name} {self.day}: {self.count}"
+
+
 class NotificationPreference(models.Model):
     """Per-user opt-in/opt-out for email vs. push delivery of specific notification types.
 

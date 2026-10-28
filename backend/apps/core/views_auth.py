@@ -25,6 +25,7 @@ from apps.core.auth_throttle import (
     throttle_register,
 )
 from apps.core.background import run_in_background
+from apps.core.counters import REGISTRATION_HONEYPOT, count_event
 from apps.core.forms import RegisterForm
 from apps.core.models import UserProfile
 from apps.core.referrals import ensure_referral_code, resolve_referrer_user
@@ -96,6 +97,16 @@ class RegisterView(CreateView):
         if throttled:
             return throttled
         return super().post(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        # Eine Abweisung durch den Honeypot (RegisterForm.clean) hinterlässt kein Konto; der Zähler macht sie sichtbar
+        # (/dev/stats/). Fehler beim Zählen dürfen die Antwort nicht verhindern.
+        if any(error.code == "honeypot" for error in form.non_field_errors().as_data()):
+            try:
+                count_event(REGISTRATION_HONEYPOT)
+            except Exception:
+                logger.warning("Honeypot counter could not be written", exc_info=True)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         user = None

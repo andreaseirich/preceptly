@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.views import View
 
 from apps.core.auth_throttle import _get_client_ip, _throttle_check
+from apps.core.counters import REGISTRATION_HONEYPOT, counts_by_day, total_count
 from apps.core.models import RequestLog
 
 User = get_user_model()
@@ -118,6 +119,8 @@ class DevStatsView(View):
         except Exception:
             new_portal_users_30d = None
 
+        honeypot_days = counts_by_day(REGISTRATION_HONEYPOT, 7)
+
         recent_errors = list(
             qs_base.filter(status_code__gte=400).values("path", "status_code", "timestamp", "ip")[
                 :50
@@ -154,6 +157,9 @@ class DevStatsView(View):
             "status_5xx": status_5xx,
             "new_users_30d": new_users_30d,
             "new_portal_users_30d": new_portal_users_30d,
+            "honeypot_today": honeypot_days[-1]["count"],
+            "honeypot_7d": sum(day["count"] for day in honeypot_days),
+            "honeypot_total": total_count(REGISTRATION_HONEYPOT),
             "recent_errors": recent_errors,
             "top_agents": top_agents,
             "avg_response": avg_response,

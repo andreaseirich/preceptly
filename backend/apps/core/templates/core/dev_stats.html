@@ -154,6 +154,9 @@
         <tbody>
           <tr><td>Neue Django-User</td><td><strong>{{ new_users_30d }}</strong></td></tr>
           <tr><td>Neue Portal-User</td><td><strong>{% if new_portal_users_30d is not None %}{{ new_portal_users_30d }}{% else %}–{% endif %}</strong></td></tr>
+          <tr><td>Vom Honeypot abgewiesen, heute</td><td><strong>{{ honeypot_today }}</strong></td></tr>
+          <tr><td>Vom Honeypot abgewiesen, letzte 7 Tage</td><td><strong>{{ honeypot_7d }}</strong></td></tr>
+          <tr><td>Vom Honeypot abgewiesen, gesamt (seit Zählbeginn)</td><td><strong>{{ honeypot_total }}</strong></td></tr>
         </tbody>
       </table>
     </div>

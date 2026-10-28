@@ -26,6 +26,20 @@ Das Registrierformular hat ein zusätzliches Textfeld `homepage`:
 Der Feldname ist absichtlich keiner, den Browser oder Passwortmanager von selbst ausfüllen (kein `name`, `email`, `phone`,
 `address`, `organization`).
 
+## Zählung der Abweisungen (28.10.2026)
+
+Auftrag von Andreas („Ja, mach die Abweisungen zählbar“). Eine Abweisung hinterlässt kein Konto, nur eine Log-Zeile; die
+Railway-Logs reichen wenige Stunden zurück, und das Zugriffsprotokoll (`RequestLog`, 30 Tage) kann sie nicht von anderen
+Formularfehlern unterscheiden. Deshalb gibt es einen **dauerhaften Tageszähler** (`DailyCounter`: Name, Tag, Anzahl; eine
+Zeile je Tag und Name):
+
+- Gezählt wird in `RegisterView.form_invalid`, wenn der Fehler den Code `honeypot` trägt. Andere Formularfehler (falsches
+  Passwort, Benutzername vergeben) und gedrosselte Versuche (429) zählen nicht. Ein Fehler beim Zählen verhindert die Antwort nicht.
+- **Keine personenbezogenen Daten:** weder IP noch Benutzername noch Adresse, nur Zahlen. Deshalb keine Löschfrist und keine
+  Änderung an der Datenschutzerklärung nötig.
+- Angezeigt auf `/dev/stats/` im Block „Registrierungen“: heute, letzte 7 Tage, gesamt seit Zählbeginn.
+- Der Zähler ist allgemein gehalten (`apps/core/counters.py`, `count_event(name)`) und lässt sich für andere Ereignisse nutzen.
+
 ## Grenzen
 
 Ein Honeypot hält einfache Automaten ab, die jedes Textfeld ausfüllen. Gezielte Angreifer, die nur die sichtbaren Felder
@@ -39,4 +53,5 @@ das Formular in unter einer Sekunde ausfüllen und echte Nutzer treffen würden.
 |---|---|
 | Feld und Prüfung (`RegisterForm.clean`, `HONEYPOT_FIELD`) | `apps/core/forms.py` |
 | Unsichtbares Feld | `apps/core/templates/core/register.html` |
-| Tests | `apps/core/tests/test_register_honeypot.py` |
+| Zähler | `apps/core/counters.py`, Modell `DailyCounter` (Migration `0036`), Anzeige in `apps/core/views_stats.py` und `dev_stats.html` |
+| Tests | `apps/core/tests/test_register_honeypot.py`, `apps/core/tests/test_daily_counter.py` |
