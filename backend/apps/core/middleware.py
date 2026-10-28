@@ -9,6 +9,8 @@ from django.http import HttpResponsePermanentRedirect
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 
+from apps.core.session_cleanup import purge_expired_sessions
+
 logger = logging.getLogger(__name__)
 
 _LOCAL_HOSTS = {"localhost", "127.0.0.1", "testserver"}
@@ -127,12 +129,22 @@ class RequestLogMiddleware(MiddlewareMixin):
         """Einmal am Tag aufräumen - ohne Zeitplaner, also aus dem Betrieb heraus.
 
         ``cache.add`` setzt die Sperre nur, wenn sie noch nicht existiert;
-        so löscht bei mehreren Prozessen trotzdem nur einer."""
+        so löscht bei mehreren Prozessen trotzdem nur einer. Zugriffsprotokoll und abgelaufene
+        Login-Sitzungen (apps/core/session_cleanup.py) werden unabhängig voneinander aufgeräumt:
+        Ein Fehler bei dem einen verhindert das andere nicht."""
         try:
             if not cache.add(_PURGE_CACHE_KEY, "1", _PURGE_INTERVAL_SECONDS):
                 return
-            deleted = purge_old_request_logs()
-            if deleted:
-                logger.info("RequestLog: %s alte Einträge gelöscht", deleted)
         except Exception:
-            logger.debug("RequestLog purge failed", exc_info=True)
+            logger.debug("RequestLog purge lock failed", exc_info=True)
+            return
+        for label, purge in (
+            ("RequestLog", purge_old_request_logs),
+            ("Login-Sitzungen", purge_expired_sessions),
+        ):
+            try:
+                deleted = purge()
+                if deleted:
+                    logger.info("%s: %s alte Einträge gelöscht", label, deleted)
+            except Exception:
+                logger.debug("%s purge failed", label, exc_info=True)
