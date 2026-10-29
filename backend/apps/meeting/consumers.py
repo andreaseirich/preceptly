@@ -6,6 +6,7 @@ import html
 import json
 import logging
 import os
+import re
 import time
 import uuid
 from collections import deque
@@ -14,6 +15,36 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 logger = logging.getLogger(__name__)
+
+
+_DIAG_FIELDS = (
+    "event",
+    "state",
+    "ice",
+    "signaling",
+    "route",
+    "local_audio",
+    "local_video",
+    "remote_tracks",
+)
+_DIAG_UNSAFE = re.compile(r"[^A-Za-z0-9_./-]")
+
+
+def format_diag(data: dict) -> str:
+    """Eine Diagnosemeldung eines Browsers als Logzeile.
+
+    Nur bekannte Felder, Zahlen auf 0 bis 99 begrenzt, Text auf wenige harmlose Zeichen und 30 Zeichen gekürzt: Der Browser
+    ist nicht vertrauenswürdig, und ins Log darf weder ein Zeilenumbruch noch Beliebiges."""
+    parts = []
+    for key in _DIAG_FIELDS:
+        value = data.get(key)
+        if isinstance(value, bool):
+            continue
+        if isinstance(value, int):
+            parts.append(f"{key}={min(max(value, 0), 99)}")
+        elif isinstance(value, str):
+            parts.append(f"{key}={_DIAG_UNSAFE.sub('', value)[:30]}")
+    return " ".join(parts)
 
 
 class MeetingConsumer(AsyncWebsocketConsumer):
@@ -30,6 +61,7 @@ class MeetingConsumer(AsyncWebsocketConsumer):
       kick        – Teilnehmer entfernen (target_peer_id) – nur Tutor
       doc_notify  – Neues Dokument  (name, url, date, doc_id)
       leave       – Raum verlassen
+      diag        – Diagnose der Medienverbindung (nur Logzeile)
 
     Nachrichten vom Server:
       joined        – { peer_id, peers: [...] }
@@ -457,6 +489,16 @@ class MeetingConsumer(AsyncWebsocketConsumer):
                     },
                     "sender_channel": self.channel_name,
                 },
+            )
+
+        elif msg_type == "diag":
+            # Technischer Zustand der Medienverbindung dieses Browsers, nur fürs Log (siehe room.html, sendDiag).
+            logger.info(
+                "Meeting diag token=%s rolle=%s peer=%s %s",
+                self.token[:8],
+                "tutor" if self.is_tutor else "teilnehmer",
+                self.peer_id[:8],
+                format_diag(data),
             )
 
         elif msg_type == "ping":

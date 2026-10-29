@@ -65,6 +65,11 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 }
 .video-tile:hover .kick-btn { opacity: 1; }
 .video-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.video-tile .tile-status {
+    position: absolute; top: 6px; left: 8px; background: rgba(0,0,0,0.7);
+    color: #fff; font-size: 0.72em; padding: 2px 6px; border-radius: 4px; pointer-events: none;
+}
+.video-tile .tile-status:empty { display: none; }
 .video-tile .tile-label {
     position: absolute; bottom: 6px; left: 8px; background: rgba(0,0,0,0.7);
     color: #fff; font-size: 0.72em; padding: 2px 6px; border-radius: 4px; pointer-events: none;
@@ -709,7 +714,7 @@ async function initMedia() {
 }
 
 function toggleMic() {
-    if (!localStream) return;
+    if (!localStream || !localStream.getAudioTracks().length) return;
     micActive = !micActive;
     localStream.getAudioTracks().forEach(t => t.enabled = micActive);
     const btn = document.getElementById("btn-mic");
@@ -717,7 +722,7 @@ function toggleMic() {
     btn.classList.toggle("active", micActive);
 }
 function toggleCam() {
-    if (!localStream) return;
+    if (!localStream || !localStream.getVideoTracks().length) return;
     camActive = !camActive;
     localStream.getVideoTracks().forEach(t => t.enabled = camActive);
     const btn = document.getElementById("btn-cam");
@@ -762,20 +767,97 @@ function stopScreenShare() {
     document.getElementById("btn-screen").textContent = "🖥 Teilen";
 }
 
+let _leaving = false;
+
 async function hangUp() {
+    // Mehrfaches Klicken (etwa weil die Seite bei schwacher Verbindung langsam reagiert) darf nicht mehrfach beenden.
+    if (_leaving) return;
+    _leaving = true;
     _intentionalClose = true;
-    Object.keys(peers).forEach(removePeer);
-    if (ws) { try { ws.send(JSON.stringify({ type: "leave" })); } catch(e) {} ws.close(); }
+    commitTextOverlay();
+    const buttons = document.querySelectorAll('[data-click="hangUp"]');
+    buttons.forEach(b => { b.disabled = true; });
+    const sub = document.getElementById("header-sub");
+    if (sub) sub.textContent = "Verlasse das Meeting …";
+
+    // Alles lokal aufräumen, ohne auf das Netz zu warten. Jeder Schritt einzeln abgesichert: Ein Fehler darf das
+    // Verlassen nie verhindern.
+    try { Object.keys(peers).forEach(id => removePeer(id)); } catch (e) { /* weiter */ }
+    try { if (screenStream) screenStream.getTracks().forEach(t => t.stop()); } catch (e) { /* weiter */ }
+    try { if (localStream) localStream.getTracks().forEach(t => t.stop()); } catch (e) { /* weiter */ }  // Kamera-Anzeige aus
+    setStatus("Verlasse das Meeting …");
+    if (ws) {
+        try { ws.send(JSON.stringify({ type: "leave" })); } catch (e) { /* weiter */ }
+        try { ws.close(); } catch (e) { /* weiter */ }
+    }
+
     if (IS_TUTOR) {
-        // Meeting als beendet markieren (is_active=False)
+        // Meeting als beendet markieren (is_active=False). Die Anfrage darf das Verlassen nicht aufhalten: keepalive
+        // lässt sie die Seite überleben, und nach spätestens 2 Sekunden geht es weiter, auch bei schlechter Verbindung.
+        let end = Promise.resolve();
         try {
-            await fetch(END_URL, {
+            end = fetch(END_URL, {
                 method: "POST",
+                keepalive: true,
                 headers: { "X-CSRFToken": getCookie("csrftoken"), "Content-Type": "application/json" },
-            });
-        } catch(e) { /* ignore, redirect anyway */ }
+            }).catch(() => { /* trotzdem weiter */ });
+        } catch (e) { /* weiter */ }
+        await Promise.race([end, new Promise(resolve => setTimeout(resolve, 2000))]);
     }
     window.location.href = BACK_URL;
+    // Falls der Wechsel der Seite blockiert wird, lässt sich nach einigen Sekunden erneut versuchen.
+    setTimeout(() => {
+        _leaving = false;
+        buttons.forEach(b => { b.disabled = false; });
+    }, 6000);
+}
+
+// Kurze Diagnosemeldungen an den Server (Logzeile je Meldung, nur technische Zustände): Wenn Bild oder Ton fehlen,
+// lässt sich im Log erkennen, ob die Verbindung stand, welchen Weg sie nahm und ob eigene oder fremde Spuren fehlten.
+let _diagSent = 0;
+function sendDiag(info) {
+    if (_diagSent >= 12 || !ws || ws.readyState !== 1) return;
+    _diagSent++;
+    try { ws.send(JSON.stringify(Object.assign({ type: "diag" }, info))); } catch (e) { /* nur Diagnose */ }
+}
+
+function sendLocalMediaDiag() {
+    sendDiag({
+        event: "join",
+        local_audio: localStream ? localStream.getAudioTracks().length : 0,
+        local_video: localStream ? localStream.getVideoTracks().length : 0,
+    });
+}
+
+async function sendConnectionDiag(peerId, pc, event) {
+    let route = "";
+    try {
+        const stats = await pc.getStats();
+        let pair = null;
+        stats.forEach(report => {
+            if (report.type === "transport" && report.selectedCandidatePairId) pair = stats.get(report.selectedCandidatePairId);
+        });
+        if (!pair) {
+            stats.forEach(report => {
+                if (report.type === "candidate-pair" && report.state === "succeeded" && (report.nominated || report.selected)) pair = report;
+            });
+        }
+        if (pair) {
+            const local = stats.get(pair.localCandidateId), remote = stats.get(pair.remoteCandidateId);
+            route = `${(local && local.candidateType) || "?"}/${(remote && remote.candidateType) || "?"}/${(local && local.protocol) || "?"}`;
+        }
+    } catch (e) { /* nur Diagnose */ }
+    const peer = peers[peerId];
+    sendDiag({
+        event,
+        state: peerState(pc),
+        ice: pc.iceConnectionState,
+        signaling: pc.signalingState,
+        route,
+        local_audio: localStream ? localStream.getAudioTracks().length : 0,
+        local_video: localStream ? localStream.getVideoTracks().length : 0,
+        remote_tracks: peer && peer.stream ? peer.stream.getTracks().length : 0,
+    });
 }
 
 function getCookie(name) {
@@ -794,6 +876,8 @@ function connectWS() {
     ws.onopen = () => {
         _reconnectDelay = 1000;  // Backoff zurücksetzen nach erfolgreicher Verbindung
         ws.send(JSON.stringify({ type: "join", name: DISPLAY_NAME, is_tutor: IS_TUTOR, user_token: USER_TOKEN }));
+        _diagSent = 0;
+        sendLocalMediaDiag();
         setStatus("Verbunden – warte auf Teilnehmer …");
         document.getElementById("header-sub").textContent = "Verbunden";
         _wsHeartbeat = setInterval(() => {
@@ -886,49 +970,70 @@ function connectWS() {
     };
 }
 
+function peerState(pc) {
+    return pc.connectionState || pc.iceConnectionState;
+}
+
+function restartIce(peerId, pc) {
+    pc.createOffer({ iceRestart: true })
+        .then(offer => pc.setLocalDescription(offer))
+        .then(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "offer", sdp: pc.localDescription, target_peer_id: peerId }));
+            }
+        })
+        .catch(() => { removePeer(peerId); });
+}
+
 async function createPeerConnection(peerId, name, initiator) {
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
     peers[peerId] = { pc, name, stream: null };
+    ensurePeerTile(peerId, name);
+    setPeerStatus(peerId, "Verbinde …");
 
     // Add local tracks
-    if (localStream) {
-        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-    }
+    const localTracks = localStream ? localStream.getTracks() : [];
+    localTracks.forEach(track => pc.addTrack(track, localStream));
+    // Ohne eigene Kamera- oder Mikrofon-Spur enthielte das Angebot keinen Medienabschnitt dafür, und man könnte die
+    // Spur der anderen auch nicht empfangen: Beide sähen und hörten sich nicht, obwohl die Verbindung steht.
+    if (!localTracks.some(t => t.kind === "audio")) pc.addTransceiver("audio", { direction: "recvonly" });
+    if (!localTracks.some(t => t.kind === "video")) pc.addTransceiver("video", { direction: "recvonly" });
 
     // ICE candidates
     pc.onicecandidate = ({ candidate }) => {
-        if (candidate) {
+        if (candidate && ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ type: "ice", candidate, target_peer_id: peerId }));
         }
     };
 
-    // Remote stream
-    pc.ontrack = ({ streams }) => {
-        if (streams && streams[0]) {
-            peers[peerId].stream = streams[0];
-            addVideoTile(peerId, name, streams[0]);
-        }
+    // Remote stream. Kommen Spuren ohne Strom an, wird einer gebaut.
+    pc.ontrack = ({ track, streams }) => {
+        const peer = peers[peerId];
+        if (!peer) return;
+        if (!peer.stream) peer.stream = (streams && streams[0]) || new MediaStream();
+        if (!peer.stream.getTracks().includes(track)) peer.stream.addTrack(track);
+        addVideoTile(peerId, name, peer.stream);
     };
 
     pc.onconnectionstatechange = () => {
-        const state = pc.connectionState;
-        if (["failed", "closed"].includes(state)) {
+        const state = peerState(pc);
+        if (state === "closed") {
             removePeer(peerId);
+        } else if (state === "failed") {
+            setPeerStatus(peerId, "Verbindung fehlgeschlagen – neuer Versuch …");
+            sendConnectionDiag(peerId, pc, "failed");
+            if (initiator) restartIce(peerId, pc);
         } else if (state === "disconnected") {
+            setPeerStatus(peerId, "Verbindung unterbrochen …");
             // Warte 6 s — erholt sich die Verbindung nicht, ICE-Restart versuchen
             setTimeout(() => {
                 if (!peers[peerId] || peers[peerId].pc !== pc) return;
-                if (pc.connectionState !== "disconnected") return;
-                if (initiator) {
-                    pc.createOffer({ iceRestart: true }).then(offer => {
-                        pc.setLocalDescription(offer);
-                        if (ws && ws.readyState === WebSocket.OPEN) {
-                            ws.send(JSON.stringify({ type: "offer", sdp: offer, target_peer_id: peerId }));
-                        }
-                    }).catch(() => { removePeer(peerId); });
-                }
+                if (peerState(pc) !== "disconnected") return;
+                if (initiator) restartIce(peerId, pc);
             }, 6000);
-        } else if (state === "connected") {
+        } else if (state === "connected" || state === "completed") {
+            setPeerStatus(peerId, "");
+            sendConnectionDiag(peerId, pc, "connected");
             // Limit video bitrate to 600 kbps for stability on poor connections
             const videoSender = pc.getSenders().find(s => s.track?.kind === "video");
             if (videoSender) {
@@ -941,9 +1046,19 @@ async function createPeerConnection(peerId, name, initiator) {
                     videoSender.setParameters(params).catch(() => {});
                 }
             }
+        } else {
+            setPeerStatus(peerId, "Verbinde …");
         }
         updatePeerStatus();
     };
+
+    // Kommt nach 10 Sekunden noch nichts von der Gegenseite an, steht das im Log.
+    setTimeout(() => {
+        const peer = peers[peerId];
+        if (peer && peer.pc === pc && !(peer.stream && peer.stream.getTracks().length)) {
+            sendConnectionDiag(peerId, pc, "no_media_10s");
+        }
+    }, 10000);
 
     if (initiator) {
         const offer = await pc.createOffer();
@@ -1002,15 +1117,17 @@ async function handleIce(msg) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Video tiles
 // ─────────────────────────────────────────────────────────────────────────────
-function addVideoTile(peerId, name, stream) {
-    const existing = document.getElementById(`tile-${peerId}`);
-    if (existing) { existing.querySelector("video").srcObject = stream; return; }
-    const tile = document.createElement("div");
+function ensurePeerTile(peerId, name) {
+    let tile = document.getElementById(`tile-${peerId}`);
+    if (tile) return tile;
+    tile = document.createElement("div");
     tile.className = "video-tile"; tile.id = `tile-${peerId}`;
     const vid = document.createElement("video");
-    vid.autoplay = true; vid.playsInline = true; vid.srcObject = stream;
+    vid.autoplay = true; vid.playsInline = true;
     const label = document.createElement("div"); label.className = "tile-label"; label.textContent = name;
     const noVid = document.createElement("div"); noVid.className = "no-video"; noVid.textContent = "👤";
+    const status = document.createElement("div"); status.className = "tile-status";
+    status.setAttribute("role", "status");
     if (IS_TUTOR) {
         const kickBtn = document.createElement("button");
         kickBtn.className = "kick-btn";
@@ -1019,9 +1136,28 @@ function addVideoTile(peerId, name, stream) {
         kickBtn.onclick = () => kickPeer(peerId);
         tile.appendChild(kickBtn);
     }
-    tile.appendChild(vid); tile.appendChild(noVid); tile.appendChild(label);
+    tile.appendChild(vid); tile.appendChild(noVid); tile.appendChild(label); tile.appendChild(status);
+    // Der Platzhalter bleibt, bis wirklich Bild ankommt (auch ein reiner Ton-Strom hat Metadaten, aber keine Breite).
+    const showPlaceholder = () => { noVid.style.display = vid.videoWidth > 0 ? "none" : "flex"; };
+    vid.addEventListener("loadedmetadata", showPlaceholder);
+    vid.addEventListener("resize", showPlaceholder);
     document.getElementById("videos").appendChild(tile);
-    vid.onloadedmetadata = () => { noVid.style.display = "none"; };
+    return tile;
+}
+
+function setPeerStatus(peerId, text) {
+    const tile = document.getElementById(`tile-${peerId}`);
+    const status = tile && tile.querySelector(".tile-status");
+    if (status) status.textContent = text;
+}
+
+function addVideoTile(peerId, name, stream) {
+    const tile = ensurePeerTile(peerId, name);
+    const vid = tile.querySelector("video");
+    if (vid.srcObject !== stream) vid.srcObject = stream;
+    // Manche Browser starten die Wiedergabe trotz autoplay nicht von selbst (Ton einer Gegenstelle ohne Bild).
+    const playing = vid.play();
+    if (playing && typeof playing.catch === "function") playing.catch(() => {});
 }
 
 function removePeer(peerId) {
@@ -1035,11 +1171,17 @@ function removePeer(peerId) {
 }
 
 function updatePeerStatus() {
-    const n = Object.keys(peers).length;
+    const list = Object.values(peers);
     const ps = document.getElementById("peer-status");
-    ps.textContent = n === 0
-        ? "Warte auf Teilnehmer …"
-        : `${n} Teilnehmer verbunden`;
+    if (list.length === 0) {
+        ps.textContent = "Warte auf Teilnehmer …";
+        return;
+    }
+    const connected = list.filter(p => ["connected", "completed"].includes(peerState(p.pc))).length;
+    // Nicht jeder Eintrag ist verbunden: Bei einem Eintrag ohne Verbindung stand früher trotzdem "verbunden".
+    ps.textContent = connected === list.length
+        ? `${connected} Teilnehmer verbunden`
+        : `${list.length} Teilnehmer, ${connected} verbunden – Verbindung wird aufgebaut …`;
 }
 
 function kickPeer(peerId) {
@@ -1407,10 +1549,35 @@ function setDash(d) {
 })();
 
 // ── Text tool overlay ─────────────────────────────────────────────────────────
+// Das offene Textfeld wird bestätigt bei Enter, beim Verlassen des Feldes, bei jedem Klick oder Tipp ausserhalb, beim
+// Wechsel des Tabs, beim Ändern der Fenstergröße und beim Verlassen des Meetings. Ein Bestätigen nur beim Verlassen des
+// Feldes (blur) reichte nicht: Firefox und Safari geben Buttons auf dem Mac beim Klicken keinen Fokus, das Feld blieb offen
+// und schwebte über allen Tabs, ohne je auf dem Whiteboard zu landen. Escape verwirft den Text.
+let wbTextOpen = null;   // { worldPos, color } solange ein Feld offen ist
+let _textOverlayBound = false;
+
+function bindTextOverlay() {
+    if (_textOverlayBound) return;
+    const input = document.getElementById('wb-text-input');
+    if (!input) return;
+    _textOverlayBound = true;
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commitTextOverlay(); }
+        else if (e.key === 'Escape') { cancelTextOverlay(); }
+        e.stopPropagation();  // prevent whiteboard keyboard shortcuts while typing
+    });
+    // Nur mit Text bestätigen: Öffnet ein Klick aufs Whiteboard ein neues, noch leeres Feld, löst der Browser danach noch
+    // ein verspätetes blur aus, das das neue Feld sofort wieder schliessen würde. Leere Felder schliessen Escape,
+    // ein Klick ausserhalb (pointerdown unten) oder der Wechsel des Tabs.
+    input.addEventListener('blur', () => { if (wbTextOpen && input.value.trim()) commitTextOverlay(); });
+}
+
 function showTextOverlay(worldPos) {
     const overlay = document.getElementById('wb-text-overlay');
     const input   = document.getElementById('wb-text-input');
     if (!overlay || !input) return;
+    bindTextOverlay();
+    commitTextOverlay();   // was im vorigen Feld steht, geht nicht verloren
     const rect = wbCanvas.getBoundingClientRect();
     const sx = worldPos.x * viewScale + viewOX + rect.left;
     const sy = worldPos.y * viewScale + viewOY + rect.top;
@@ -1422,26 +1589,53 @@ function showTextOverlay(worldPos) {
     overlay.style.top  = sy + 'px';
     overlay.style.display = 'block';
     input.value = '';
+    wbTextOpen = { worldPos, color: wbColor };
     setTimeout(() => input.focus(), 0);
+}
 
-    function commit() {
-        const text = input.value.trim();
-        overlay.style.display = 'none';
-        input.onkeydown = null; input.onblur = null;
-        if (!text) return;
-        const fs = Math.round(18 / Math.max(viewScale, 0.1));
-        const stroke = { type: 'text', text, x: worldPos.x, y: worldPos.y, color: wbColor, fontSize: fs };
-        wbStrokes.push(stroke);
-        redrawAll();
-        if (ws && ws.readyState === 1)
-            ws.send(JSON.stringify({ type: 'wb_event', action: 'stroke', stroke }));
-    }
-    input.onkeydown = e => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
-        if (e.key === 'Escape') { overlay.style.display = 'none'; input.onblur = null; }
-        e.stopPropagation();  // prevent whiteboard keyboard shortcuts while typing
-    };
-    input.onblur = commit;
+function commitTextOverlay() {
+    const open = wbTextOpen;
+    if (!open) return;
+    wbTextOpen = null;
+    const overlay = document.getElementById('wb-text-overlay');
+    const input   = document.getElementById('wb-text-input');
+    const text = input ? input.value.trim() : '';
+    if (overlay) overlay.style.display = 'none';
+    if (input) input.value = '';
+    if (!text) return;
+    const fs = Math.round(18 / Math.max(viewScale, 0.1));
+    const stroke = { type: 'text', text, x: open.worldPos.x, y: open.worldPos.y, color: open.color, fontSize: fs };
+    wbStrokes.push(stroke);
+    redrawAll();
+    if (ws && ws.readyState === 1)
+        ws.send(JSON.stringify({ type: 'wb_event', action: 'stroke', stroke }));
+}
+
+function cancelTextOverlay() {
+    wbTextOpen = null;
+    const overlay = document.getElementById('wb-text-overlay');
+    const input   = document.getElementById('wb-text-input');
+    if (overlay) overlay.style.display = 'none';
+    if (input) input.value = '';
+}
+
+// Capture-Phase: läuft vor allen anderen Handlern, auch vor dem Klick aufs Whiteboard, der ein neues Feld öffnet.
+document.addEventListener('pointerdown', e => {
+    if (!wbTextOpen) return;
+    const overlay = document.getElementById('wb-text-overlay');
+    if (overlay && overlay.contains(e.target)) return;
+    commitTextOverlay();
+}, true);
+window.addEventListener('resize', () => commitTextOverlay());
+
+function mergeStrokes(incoming) {
+    const known = new Set(wbStrokes.map(s => JSON.stringify(s)));
+    let added = false;
+    incoming.forEach(stroke => {
+        const key = JSON.stringify(stroke);
+        if (!known.has(key)) { known.add(key); wbStrokes.push(stroke); added = true; }
+    });
+    if (added) redrawAll();
 }
 
 function handleWbEvent(msg) {
@@ -1459,11 +1653,11 @@ function handleWbEvent(msg) {
     } else if (msg.action === "bg_clear") {
         clearWbBackground(false);
     } else if (msg.action === "state_sync") {
-        wbStrokes = msg.strokes || [];
-        if (msg.background_url) {
+        // Der Abgleich beim Beitritt ergänzt nur. Früher ersetzte er die eigene Zeichnung: Ein Teilnehmer mit leerem oder
+        // älterem Stand (etwa nach einer kurzen Verbindungsunterbrechung) löschte so die Zeichnung und den Text der anderen.
+        mergeStrokes(msg.strokes || []);
+        if (msg.background_url && (!wbBackground || wbBackground.url !== msg.background_url)) {
             loadBackground(msg.background_url, msg.background_name || "", false, null, msg.background_filename);
-        } else {
-            clearWbBackground(false);
         }
     }
 }
@@ -1591,6 +1785,7 @@ function addChatLine(name, text, mine, system) {
 // Tabs
 // ─────────────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
+    commitTextOverlay();   // ein offenes Textfeld gehört zum Whiteboard und darf nicht über anderen Tabs schweben
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
     btn.classList.add("active");
@@ -1701,46 +1896,63 @@ async function initLobby() {
     const lobbyVideo = document.getElementById("lobby-video");
     const noVideo    = document.getElementById("lobby-no-video");
     const errEl      = document.getElementById("lobby-err");
+    const AUDIO = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    const VIDEO = { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } };
+    const getMedia = constraints => navigator.mediaDevices.getUserMedia(constraints);
 
+    localStream = null;
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } },
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-        });
+        localStream = await getMedia({ video: VIDEO, audio: AUDIO });
     } catch (e) {
-        // Kamera nicht verfügbar — Audio-only versuchen
-        try { localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
-        catch (e2) { localStream = new MediaStream(); }
-        _lobbyCamOn = false;
-        const camBtnFallback = document.getElementById("lobby-btn-cam");
-        camBtnFallback.classList.remove("active");
-        camBtnFallback.classList.add("muted");
-        camBtnFallback.textContent = "📷 Kamera aus";
-        camBtnFallback.setAttribute("aria-pressed", "false");
-        errEl.textContent = "Kamera nicht verfügbar – nur Audio.";
+        // Kamera oder Mikrofon nicht verfügbar - nacheinander Ton allein, Bild allein, dann ohne beides weitermachen
+        try { localStream = await getMedia({ audio: AUDIO }); }
+        catch (e2) {
+            try { localStream = await getMedia({ video: VIDEO }); }
+            catch (e3) { localStream = new MediaStream(); }
+        }
     }
 
-    if (localStream.getVideoTracks().length > 0) {
+    const hasVideo = localStream.getVideoTracks().length > 0;
+    const hasAudio = localStream.getAudioTracks().length > 0;
+    _lobbyCamOn = hasVideo;
+    _lobbyMicOn = hasAudio;
+
+    if (hasVideo) {
         lobbyVideo.srcObject = localStream;
+        lobbyVideo.style.display = "";
         noVideo.style.display = "none";
     } else {
         lobbyVideo.style.display = "none";
         noVideo.style.display = "flex";
     }
 
-    // Wenn Audio fehlt
-    if (localStream.getAudioTracks().length === 0 && !errEl.textContent) {
-        errEl.textContent = "Mikrofon nicht verfügbar.";
-        _lobbyMicOn = false;
-        const micBtnFallback = document.getElementById("lobby-btn-mic");
-        micBtnFallback.classList.remove("active");
-        micBtnFallback.classList.add("muted");
-        micBtnFallback.textContent = "🎤 Mikrofon aus";
-        micBtnFallback.setAttribute("aria-pressed", "false");
+    const setToggle = (id, available, on, textOn, textOff, textMissing) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.disabled = !available;
+        btn.classList.toggle("active", available && on);
+        btn.classList.toggle("muted", !(available && on));
+        btn.textContent = !available ? textMissing : (on ? textOn : textOff);
+        btn.setAttribute("aria-pressed", available && on ? "true" : "false");
+    };
+    setToggle("lobby-btn-mic", hasAudio, _lobbyMicOn, "🎤 Mikrofon an", "🔇 Mikrofon aus", "🎤 nicht verfügbar");
+    setToggle("lobby-btn-cam", hasVideo, _lobbyCamOn, "📷 Kamera an", "📷 Kamera aus", "📷 nicht verfügbar");
+
+    // Ehrliche Meldung: Auch ohne beides darf man beitreten, die anderen sieht und hört man trotzdem.
+    if (!hasVideo && !hasAudio) {
+        errEl.textContent = "Kein Zugriff auf Kamera und Mikrofon. Du kannst trotzdem beitreten und die anderen sehen und hören. "
+            + "Damit dich die anderen auch sehen und hören, erlaube den Zugriff in der Adressleiste deines Browsers und lade die Seite neu.";
+    } else if (!hasVideo) {
+        errEl.textContent = "Kamera nicht verfügbar – nur Mikrofon.";
+    } else if (!hasAudio) {
+        errEl.textContent = "Mikrofon nicht verfügbar – nur Kamera.";
+    } else {
+        errEl.textContent = "";
     }
 }
 
 function lobbyToggleMic() {
+    if (!localStream || !localStream.getAudioTracks().length) return;  // kein Mikrofon: nichts umzuschalten
     _lobbyMicOn = !_lobbyMicOn;
     const btn = document.getElementById("lobby-btn-mic");
     if (_lobbyMicOn) {
@@ -1755,6 +1967,7 @@ function lobbyToggleMic() {
 }
 
 function lobbyToggleCam() {
+    if (!localStream || !localStream.getVideoTracks().length) return;  // keine Kamera: nichts umzuschalten
     _lobbyCamOn = !_lobbyCamOn;
     const btn    = document.getElementById("lobby-btn-cam");
     const vid    = document.getElementById("lobby-video");
@@ -1782,8 +1995,18 @@ function lobbyJoin() {
     // Meeting-Buttons synchronisieren
     const micBtn = document.getElementById("btn-mic");
     const camBtn = document.getElementById("btn-cam");
-    if (micBtn) { micBtn.textContent = micActive ? "🎤 Mikrofon" : "🔇 Stumm"; micBtn.classList.toggle("active", micActive); }
-    if (camBtn) { camBtn.textContent = camActive ? "📷 Kamera"   : "📷 Aus";   camBtn.classList.toggle("active", camActive); }
+    const hasAudio = !!localStream && localStream.getAudioTracks().length > 0;
+    const hasVideo = !!localStream && localStream.getVideoTracks().length > 0;
+    if (micBtn) {
+        micBtn.textContent = !hasAudio ? "🎤 nicht verfügbar" : (micActive ? "🎤 Mikrofon" : "🔇 Stumm");
+        micBtn.classList.toggle("active", hasAudio && micActive);
+        micBtn.disabled = !hasAudio;
+    }
+    if (camBtn) {
+        camBtn.textContent = !hasVideo ? "📷 nicht verfügbar" : (camActive ? "📷 Kamera" : "📷 Aus");
+        camBtn.classList.toggle("active", hasVideo && camActive);
+        camBtn.disabled = !hasVideo;
+    }
 
     // Lobby-Video auf Meeting-Tile umhängen
     const meetingVid = document.getElementById("video-local");
@@ -1853,7 +2076,7 @@ document.addEventListener("keydown", function (e) {
 })();
 </script>
 <div id="wb-text-overlay">
-    <input id="wb-text-input" type="text" placeholder="Text …" autocomplete="off">
+    <input id="wb-text-input" type="text" placeholder="Text … (Enter = einfügen)" aria-label="Text für das Whiteboard" autocomplete="off">
 </div>
 </body>
 </html>
