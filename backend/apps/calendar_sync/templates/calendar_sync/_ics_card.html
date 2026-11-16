@@ -1,0 +1,66 @@
+{% load i18n %}
+<section class="settings-card" id="calendar-import" aria-labelledby="calendar-import-title">
+    <h3 id="calendar-import-title">{% trans "Calendar by address (Google)" %}</h3>
+    <p class="settings-desc">{% blocktrans %}Block the times of a Google Calendar in Preceptly. You paste the secret iCal address of the calendar; Preceptly reads its appointments (title and time only) and turns them into blocked times. This only reads: nothing is ever written to your calendar. Runs automatically every few minutes.{% endblocktrans %}</p>
+
+    {% if ics_sources %}
+    <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
+        {% for source in ics_sources %}
+        <li style="margin: 10px 0; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+            <strong>{{ source.name }}</strong>
+            <span style="color: var(--text-secondary); font-size: 0.85em;">({{ source.host }})</span>
+            <p role="status" style="margin: 6px 0 0 0; font-size: 0.9em;">
+                {% if not source.sync_enabled %}
+                    {% trans "Paused" %}
+                {% elif source.error_text %}
+                    ⚠️ {{ source.error_text }}
+                {% elif source.last_synced_at %}
+                    ✓ {% blocktrans with when=source.last_synced_at|date:"d.m.Y H:i" %}Last synced {{ when }}{% endblocktrans %}
+                {% else %}
+                    {% trans "Waiting for first sync…" %}
+                {% endif %}
+            </p>
+            {% with s=source.last_sync_summary %}
+            {% if s and source.sync_enabled and not source.error_text %}
+            <p style="color: var(--text-secondary); font-size: 0.85em; margin: 4px 0 0 0;">
+                {% blocktrans with created=s.created updated=s.updated deleted=s.deleted %}Last run: {{ created }} new, {{ updated }} changed, {{ deleted }} removed{% endblocktrans %}
+            </p>
+            {% endif %}
+            {% endwith %}
+            <div class="settings-actions">
+                <form method="post" action="{% url 'calendar_sync:ics_sync_now' source.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">{% trans "Sync now" %}</button>
+                </form>
+                <form method="post" action="{% url 'calendar_sync:ics_toggle' source.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">{% if source.sync_enabled %}{% trans "Pause sync" %}{% else %}{% trans "Resume sync" %}{% endif %}</button>
+                </form>
+                <form method="post" action="{% url 'calendar_sync:ics_remove' source.pk %}" data-confirm="{% trans "Remove this calendar? The blocked times imported from it are deleted too." %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">{% trans "Remove" %}</button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if ics_sources_full %}
+        <p style="font-size: 0.9em; color: var(--text-secondary);">{% blocktrans with count=ics_source_limit %}You can connect up to {{ count }} calendars. Remove one to add another.{% endblocktrans %}</p>
+    {% else %}
+    <form method="post" action="{% url 'calendar_sync:ics_add' %}" style="max-width: 480px;">
+        {% csrf_token %}
+        <label for="id_ics_name" class="settings-label">{% trans "Name (optional)" %}</label>
+        <input type="text" name="name" id="id_ics_name" maxlength="100" style="width: 100%;" autocomplete="off">
+        <label for="id_ics_url" class="settings-label" style="margin-top: 12px;">{% trans "Secret address in iCal format" %}</label>
+        <input type="password" name="ics_url" id="id_ics_url" required aria-required="true" aria-describedby="ics-url-help" style="width: 100%;" autocomplete="off" spellcheck="false">
+        <p id="ics-url-help" style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">
+            {% blocktrans %}In Google Calendar on a computer: Settings → click the calendar under "Settings for my calendars" → Integrate calendar → copy "Secret address in iCal format". Anyone who has this address can read the calendar, so do not share it. If it ever gets out, reset it in Google Calendar.{% endblocktrans %}
+        </p>
+        <div class="settings-actions">
+            <button type="submit" class="btn">{% trans "Connect calendar" %}</button>
+        </div>
+    </form>
+    {% endif %}
+</section>

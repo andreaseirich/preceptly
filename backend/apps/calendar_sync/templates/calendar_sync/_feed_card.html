@@ -1,0 +1,62 @@
+{% load i18n %}
+<section class="settings-card" id="calendar-feed" aria-labelledby="calendar-feed-title">
+    <h3 id="calendar-feed-title">{% trans "Calendar subscription" %}</h3>
+    <p class="settings-desc">{% blocktrans %}Show your Preceptly lessons in Google Calendar, Apple Calendar or Outlook. You subscribe once with a link; the calendar app then retrieves your lessons by itself. This only reads: changes in the calendar app do not change anything in Preceptly.{% endblocktrans %}</p>
+
+    {% if tutor_feed %}
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <label for="tutor-feed-url-input" class="sr-only">{% trans "Subscription link" %}</label>
+            <input type="text" readonly value="{{ tutor_feed_url }}" id="tutor-feed-url-input" data-select-on-click style="flex: 1; min-width: 220px;">
+            <button type="button" class="btn btn-secondary" data-copy-from="tutor-feed-url-input">{% trans "Copy" %}</button>
+            <a href="{{ tutor_feed_webcal_url }}" class="btn btn-secondary">{% trans "Open in calendar app" %}</a>
+        </div>
+        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 8px;">
+            {% trans "Anyone who has this link can see your appointments. Do not share it. If it gets out, create a new link: the old one stops working immediately." %}
+            {% if tutor_feed.last_fetched_at %}
+                {% blocktrans with when=tutor_feed.last_fetched_at|date:"d.m.Y H:i" %}Last retrieved {{ when }}.{% endblocktrans %}
+            {% else %}
+                {% trans "Not retrieved yet." %}
+            {% endif %}
+        </p>
+
+        <form method="post" action="{% url 'calendar_sync:feed_names' %}" style="margin-top: 12px;">
+            {% csrf_token %}
+            <label style="display: flex; gap: 8px; align-items: flex-start;">
+                <input type="checkbox" name="include_student_names" {% if tutor_feed.include_student_names %}checked{% endif %}>
+                <span>{% trans "Show the student's name in the title of each appointment" %}</span>
+            </label>
+            <p style="font-size: 0.85em; color: var(--text-secondary); margin: 4px 0 0 0;">{% trans "Off: appointments are titled just “Nachhilfe”. The calendar service you subscribe with stores the titles in your account." %}</p>
+            <div class="settings-actions">
+                <button type="submit" class="btn btn-secondary">{% trans "Save" %}</button>
+            </div>
+        </form>
+
+        <details style="margin-top: 12px;">
+            <summary>{% trans "How to subscribe" %}</summary>
+            <ul style="margin-top: 8px;">
+                <li>{% trans "Google Calendar (computer): Other calendars → plus → From URL → paste the link." %}</li>
+                <li>{% trans "Apple Calendar on a Mac: File → New Calendar Subscription. On iPhone: Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar." %}</li>
+                <li>{% trans "Outlook: Add calendar → Subscribe from web." %}</li>
+            </ul>
+            <p style="font-size: 0.85em; color: var(--text-secondary);">{% trans "Calendar apps refresh subscribed calendars on their own schedule, so a change can take a while to show up. If you already sync with iCloud above, do not subscribe in iCloud as well: you would see every lesson twice." %}</p>
+        </details>
+
+        <div class="settings-actions">
+            <form method="post" action="{% url 'calendar_sync:feed_renew' %}" data-confirm="{% trans "Create a new link? The old link stops working immediately, so subscriptions made with it will stop updating." %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">{% trans "Create new link" %}</button>
+            </form>
+            <form method="post" action="{% url 'calendar_sync:feed_disable' %}" data-confirm="{% trans "Switch off the subscription? The link stops working." %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">{% trans "Switch off" %}</button>
+            </form>
+        </div>
+    {% else %}
+        <div class="settings-actions">
+            <form method="post" action="{% url 'calendar_sync:feed_enable' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">{% trans "Switch on calendar subscription" %}</button>
+            </form>
+        </div>
+    {% endif %}
+</section>

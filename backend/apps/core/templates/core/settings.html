@@ -335,7 +335,7 @@
             </form>
         </section>
 
-        <section class="settings-card" id="calendar-sync" aria-labelledby="calendar-sync-title" style="display:none;">
+        <section class="settings-card" id="calendar-sync" aria-labelledby="calendar-sync-title">
             <h3 id="calendar-sync-title">{% trans "Calendar Sync" %} <span style="font-size:0.75em; font-weight: normal; color:var(--text-secondary);">(Beta)</span></h3>
             <p class="settings-desc">{% blocktrans %}Your Preceptly sessions are copied to an iCloud calendar of your choice, and events from your other calendars are imported as blocked times. Runs automatically every few minutes.{% endblocktrans %}</p>
 
@@ -400,6 +400,9 @@
                 </form>
             {% endif %}
         </section>
+
+        {% include "calendar_sync/_ics_card.html" %}
+        {% include "calendar_sync/_feed_card.html" %}
     </section>
 
     {# ──────────────────────────── Rechnungen ─────────────────────────── #}
@@ -554,17 +557,6 @@
 {% endif %}
 
 <script nonce="{{ csp_nonce }}">
-(function() {
-    // CalDAV against iCloud is only relevant on Apple devices. Detected
-    // client-side so the card reacts correctly even behind caching layers.
-    var ua = navigator.userAgent || '';
-    var platform = navigator.platform || '';
-    if (/Mac|iPhone|iPad|iPod/.test(platform) || /Macintosh|iPhone|iPad|iPod/.test(ua)) {
-        var section = document.getElementById('calendar-sync');
-        if (section) section.style.display = '';
-    }
-})();
-
 (function() {
     var layout = document.getElementById('settings-layout');
     if (!layout) return;

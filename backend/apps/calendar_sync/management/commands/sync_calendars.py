@@ -11,6 +11,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
+from apps.calendar_sync.ics_sync import sync_all_ics_sources
 from apps.calendar_sync.sync_service import sync_all_active_connections
 
 logger = logging.getLogger(__name__)
@@ -26,4 +27,10 @@ class Command(BaseCommand):
                 "Calendar sync done: pushed=%(pushed)s pulled=%(pulled)s imported=%(imported)s "
                 "deleted=%(deleted)s conflicts=%(conflicts)s errors=%(errors)s" % totals
             )
+        )
+        # Kalenderadressen (Google): getrennt vom CalDAV-Abgleich, die erste Zeile oben bleibt unverändert.
+        ics_totals = sync_all_ics_sources()
+        self.stdout.write(
+            "Calendar address sync done: sources=%(sources)s created=%(created)s updated=%(updated)s "
+            "deleted=%(deleted)s errors=%(errors)s" % ics_totals
         )

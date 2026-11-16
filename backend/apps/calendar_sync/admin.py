@@ -3,8 +3,10 @@ from django.contrib import admin
 from apps.calendar_sync.models import (
     CalendarConnection,
     ExternalCalendarEventMapping,
+    IcsCalendarSource,
     SyncConflict,
     SyncedCalendar,
+    TutorCalendarFeed,
 )
 
 
@@ -35,3 +37,30 @@ class SyncConflictAdmin(admin.ModelAdmin):
     list_display = ("connection", "mapping", "created_at", "resolved_at", "resolution")
     list_filter = ("resolution",)
     readonly_fields = ("local_snapshot", "external_snapshot", "created_at")
+
+
+@admin.register(IcsCalendarSource)
+class IcsCalendarSourceAdmin(admin.ModelAdmin):
+    """Die Adresse selbst ist wie ein Passwort und wird hier nie angezeigt."""
+
+    list_display = ("user", "name", "host", "sync_enabled", "last_synced_at", "last_sync_error")
+    list_filter = ("sync_enabled", "host")
+    search_fields = ("user__username", "user__email", "name")
+    exclude = ("encrypted_url",)
+    readonly_fields = (
+        "url_hash",
+        "last_attempt_at",
+        "last_synced_at",
+        "last_sync_summary",
+        "created_at",
+    )
+
+
+@admin.register(TutorCalendarFeed)
+class TutorCalendarFeedAdmin(admin.ModelAdmin):
+    """Der Token ist die Berechtigung zum Abruf und wird hier nie angezeigt."""
+
+    list_display = ("user", "include_student_names", "created_at", "last_fetched_at")
+    search_fields = ("user__username", "user__email")
+    exclude = ("token",)
+    readonly_fields = ("created_at", "last_fetched_at")

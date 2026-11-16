@@ -198,3 +198,8 @@ class SyncConflict(models.Model):
     @property
     def is_resolved(self) -> bool:
         return self.resolved_at is not None
+
+
+# Weitere Modelle liegen in eigenen Dateien (Übersicht); Django findet sie über diese Importe.
+from apps.calendar_sync.models_feed import TutorCalendarFeed  # noqa: E402,F401
+from apps.calendar_sync.models_ics import IcsCalendarSource, IcsEventMapping  # noqa: E402,F401

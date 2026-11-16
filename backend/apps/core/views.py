@@ -484,6 +484,10 @@ class SettingsView(LoginRequiredMixin, FormView):
                 )
             )
 
+        from apps.calendar_sync.ui import settings_context as calendar_settings_context
+
+        context.update(calendar_settings_context(self.request))
+
         q = self.request.GET
         context["show_stripe_success_banner"] = (
             q.get("stripe_success") == "1" or q.get("checkout") == "success"
