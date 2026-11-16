@@ -7867,3 +7867,6 @@ msgstr "Jeder, der den Link kennt, kann diese Termine lesen. Der Link ist deshal
 
 msgid "The calendar service the tutor chooses receives the data in the tutor's own account and handles it under its own terms; Preceptly has no influence on that and does not know which service retrieves the link."
 msgstr "Der vom Tutor gewählte Kalenderdienst erhält die Daten im eigenen Konto des Tutors und verarbeitet sie nach seinen eigenen Bedingungen; darauf hat Preceptly keinen Einfluss und weiß auch nicht, welcher Dienst den Link abruft."
+
+msgid "Generate structured lesson plans with AI — names and contact details are removed first, and the model runs on our own hardware in Germany, not at an external AI provider."
+msgstr "Strukturierte Stundenpläne mit KI erstellen — Namen und Kontaktdaten werden vorher entfernt, und das Sprachmodell läuft auf unserer eigenen Hardware in Deutschland, nicht bei einem externen KI-Anbieter."
