@@ -7640,3 +7640,230 @@ msgstr "Wird vorbelegt, wenn du ein Institut wählst. Du kannst den Wert ändern
 
 msgid "Please leave this field empty"
 msgstr "Bitte lass dieses Feld leer."
+
+# Kalender per Adresse (Google) und Kalender-Abo, 16.11.2026
+
+msgid "Calendar address"
+msgstr "Kalenderadresse"
+
+msgid "Calendar addresses"
+msgstr "Kalenderadressen"
+
+msgid "Calendar address appointment"
+msgstr "Termin einer Kalenderadresse"
+
+msgid "Calendar address appointments"
+msgstr "Termine einer Kalenderadresse"
+
+msgid "Calendar subscription"
+msgstr "Kalender-Abo"
+
+msgid "Calendar subscriptions"
+msgstr "Kalender-Abos"
+
+msgid "Name shown in the settings."
+msgstr "Name, der in den Einstellungen angezeigt wird."
+
+msgid "The secret address, encrypted. Never shown again."
+msgstr "Die geheime Adresse, verschlüsselt. Wird nie wieder angezeigt."
+
+msgid "SHA-256 of the address: detects duplicates without decrypting."
+msgstr "SHA-256 der Adresse: erkennt Doppelte, ohne zu entschlüsseln."
+
+msgid "Host of the address, for display only."
+msgstr "Rechner der Adresse, nur zur Anzeige."
+
+msgid "Error code of the last attempt (never the address)."
+msgstr "Fehlercode des letzten Versuchs (nie die Adresse)."
+
+msgid "Put the student's name in the title of each appointment. Off by default: the link is not a login."
+msgstr "Den Namen des Schülers in den Titel jedes Termins schreiben. Standardmäßig aus: Der Link ist kein Login."
+
+msgid "Calendar by address (Google)"
+msgstr "Kalender per Adresse (Google)"
+
+msgid "Block the times of a Google Calendar in Preceptly. You paste the secret iCal address of the calendar; Preceptly reads its appointments (title and time only) and turns them into blocked times. This only reads: nothing is ever written to your calendar. Runs automatically every few minutes."
+msgstr "Blockiere die Zeiten eines Google Kalenders in Preceptly. Du fügst die geheime iCal-Adresse des Kalenders ein; Preceptly liest seine Termine (nur Titel und Zeit) und macht daraus Blockzeiten. Das geschieht nur lesend: In deinen Kalender wird nie etwas geschrieben. Läuft automatisch alle paar Minuten."
+
+msgid "Paused"
+msgstr "Pausiert"
+
+#, python-format
+msgid "Last run: %(created)s new, %(updated)s changed, %(deleted)s removed"
+msgstr "Letzter Lauf: %(created)s neu, %(updated)s geändert, %(deleted)s entfernt"
+
+msgid "Sync now"
+msgstr "Jetzt abgleichen"
+
+msgid "Remove this calendar? The blocked times imported from it are deleted too."
+msgstr "Diesen Kalender entfernen? Die daraus importierten Blockzeiten werden ebenfalls gelöscht."
+
+msgid "Remove"
+msgstr "Entfernen"
+
+#, python-format
+msgid "You can connect up to %(count)s calendars. Remove one to add another."
+msgstr "Du kannst bis zu %(count)s Kalender verbinden. Entferne einen, um einen weiteren hinzuzufügen."
+
+msgid "Name (optional)"
+msgstr "Name (optional)"
+
+msgid "Secret address in iCal format"
+msgstr "Geheime Adresse im iCal-Format"
+
+msgid "In Google Calendar on a computer: Settings → click the calendar under \"Settings for my calendars\" → Integrate calendar → copy \"Secret address in iCal format\". Anyone who has this address can read the calendar, so do not share it. If it ever gets out, reset it in Google Calendar."
+msgstr "In Google Kalender am Computer: Einstellungen → unter „Einstellungen für meine Kalender“ den Kalender anklicken → „Kalender integrieren“ → „Geheime Adresse im iCal-Format“ kopieren. Jeder, der diese Adresse hat, kann den Kalender lesen. Gib sie deshalb nicht weiter. Falls sie jemals bekannt wird, setze sie in Google Kalender zurück."
+
+msgid "Connect calendar"
+msgstr "Kalender verbinden"
+
+msgid "Show your Preceptly lessons in Google Calendar, Apple Calendar or Outlook. You subscribe once with a link; the calendar app then retrieves your lessons by itself. This only reads: changes in the calendar app do not change anything in Preceptly."
+msgstr "Zeige deine Preceptly-Stunden in Google Kalender, Apple Kalender oder Outlook. Du abonnierst einmal mit einem Link; die Kalender-App ruft deine Stunden dann selbst ab. Das geschieht nur lesend: Änderungen in der Kalender-App ändern nichts in Preceptly."
+
+msgid "Subscription link"
+msgstr "Abo-Link"
+
+msgid "Open in calendar app"
+msgstr "In Kalender-App öffnen"
+
+msgid "Anyone who has this link can see your appointments. Do not share it. If it gets out, create a new link: the old one stops working immediately."
+msgstr "Jeder, der diesen Link hat, kann deine Termine sehen. Gib ihn nicht weiter. Falls er bekannt wird, erstelle einen neuen Link: Der alte funktioniert sofort nicht mehr."
+
+#, python-format
+msgid "Last retrieved %(when)s."
+msgstr "Zuletzt abgerufen: %(when)s."
+
+msgid "Not retrieved yet."
+msgstr "Noch nicht abgerufen."
+
+msgid "Show the student's name in the title of each appointment"
+msgstr "Den Namen des Schülers im Titel jedes Termins anzeigen"
+
+msgid "Off: appointments are titled just “Nachhilfe”. The calendar service you subscribe with stores the titles in your account."
+msgstr "Aus: Die Termine heißen nur „Nachhilfe“. Der Kalenderdienst, mit dem du abonnierst, speichert die Titel in deinem Konto."
+
+msgid "How to subscribe"
+msgstr "So abonnierst du"
+
+msgid "Google Calendar (computer): Other calendars → plus → From URL → paste the link."
+msgstr "Google Kalender (Computer): Weitere Kalender → Plus → Per URL → Link einfügen."
+
+msgid "Apple Calendar on a Mac: File → New Calendar Subscription. On iPhone: Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar."
+msgstr "Apple Kalender am Mac: Ablage → Neues Kalenderabonnement. Am iPhone: Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → Kalenderabo hinzufügen."
+
+msgid "Outlook: Add calendar → Subscribe from web."
+msgstr "Outlook: Kalender hinzufügen → Aus dem Internet abonnieren."
+
+msgid "Calendar apps refresh subscribed calendars on their own schedule, so a change can take a while to show up. If you already sync with iCloud above, do not subscribe in iCloud as well: you would see every lesson twice."
+msgstr "Kalender-Apps aktualisieren abonnierte Kalender nach eigenem Takt, eine Änderung kann also etwas dauern. Wenn du oben schon mit iCloud abgleichst, abonniere nicht zusätzlich in iCloud: Du würdest jede Stunde doppelt sehen."
+
+msgid "Create a new link? The old link stops working immediately, so subscriptions made with it will stop updating."
+msgstr "Neuen Link erstellen? Der alte Link funktioniert sofort nicht mehr, Abos damit werden nicht mehr aktualisiert."
+
+msgid "Create new link"
+msgstr "Neuen Link erstellen"
+
+msgid "Switch off the subscription? The link stops working."
+msgstr "Abo ausschalten? Der Link funktioniert dann nicht mehr."
+
+msgid "Switch off"
+msgstr "Ausschalten"
+
+msgid "Switch on calendar subscription"
+msgstr "Kalender-Abo einschalten"
+
+msgid "Please paste the address of your calendar."
+msgstr "Bitte füge die Adresse deines Kalenders ein."
+
+msgid "This does not look like a valid calendar address."
+msgstr "Das sieht nicht nach einer gültigen Kalenderadresse aus."
+
+msgid "Only the secret iCal address of a Google Calendar can be used here."
+msgstr "Hier kann nur die geheime iCal-Adresse eines Google Kalenders verwendet werden."
+
+msgid "The calendar could not be retrieved. Please check the address and try again."
+msgstr "Der Kalender konnte nicht abgerufen werden. Bitte prüfe die Adresse und versuche es erneut."
+
+msgid "The calendar is too large to import."
+msgstr "Der Kalender ist zu groß zum Importieren."
+
+msgid "The address does not lead to a calendar."
+msgstr "Die Adresse führt nicht zu einem Kalender."
+
+msgid "The calendar contains too many appointments to import."
+msgstr "Der Kalender enthält zu viele Termine zum Importieren."
+
+msgid "Calendar import is not available right now. Please try again later."
+msgstr "Der Kalenderimport ist gerade nicht verfügbar. Bitte versuche es später erneut."
+
+msgid "The calendar could not be imported."
+msgstr "Der Kalender konnte nicht importiert werden."
+
+msgid "Your calendar subscription link is ready."
+msgstr "Dein Kalender-Abo-Link ist bereit."
+
+msgid "New link created. The old link no longer works."
+msgstr "Neuer Link erstellt. Der alte Link funktioniert nicht mehr."
+
+msgid "Calendar subscription switched off. The link no longer works."
+msgstr "Kalender-Abo ausgeschaltet. Der Link funktioniert nicht mehr."
+
+msgid "Saved."
+msgstr "Gespeichert."
+
+#, python-brace-format
+msgid "You can connect up to {count} calendar addresses. Remove one first."
+msgstr "Du kannst bis zu {count} Kalenderadressen verbinden. Entferne zuerst eine."
+
+msgid "This calendar is already connected."
+msgstr "Dieser Kalender ist bereits verbunden."
+
+#, python-brace-format
+msgid "Calendar connected. {count} appointments were imported as blocked times."
+msgstr "Kalender verbunden. {count} Termine wurden als Blockzeiten übernommen."
+
+msgid "Please wait a minute before syncing again."
+msgstr "Bitte warte eine Minute, bevor du erneut abgleichst."
+
+#, python-brace-format
+msgid "Synced: {created} new, {updated} changed, {deleted} removed."
+msgstr "Abgeglichen: {created} neu, {updated} geändert, {deleted} entfernt."
+
+msgid "Calendar removed, along with the blocked times imported from it."
+msgstr "Kalender entfernt, samt der daraus importierten Blockzeiten."
+
+msgid "Included from the Starter plan"
+msgstr "Ab dem Starter-Tarif enthalten"
+
+msgid "Monthly and yearly income overview and expense tracking. EÜR export for your tax return comes with Pro."
+msgstr "Monats- und Jahresübersicht und Ausgabenverfolgung. Den EÜR-Export für die Steuererklärung gibt es ab Pro."
+
+msgid "Preceptly is built on Django and Python, backed by a PostgreSQL database and hosted on Railway."
+msgstr "Preceptly basiert auf Django und Python, nutzt eine PostgreSQL-Datenbank und wird auf Railway gehostet."
+
+msgid "Calendar import via secret address (Google Calendar)"
+msgstr "Kalenderimport über geheime Adresse (Google Kalender)"
+
+msgid "Tutors can optionally enter the secret iCal address of their Google Calendar. Preceptly then retrieves that calendar from Google at regular intervals and takes over its appointments as blocked times, so that no lessons can be booked at those times. Only the title and the time of each appointment are read; descriptions, participants and locations are not."
+msgstr "Tutoren können optional die geheime iCal-Adresse ihres Google Kalenders eintragen. Preceptly ruft diesen Kalender dann regelmäßig bei Google ab und übernimmt dessen Termine als Blockzeiten, damit zu diesen Zeiten keine Stunden gebucht werden können. Gelesen werden nur Titel und Zeit der Termine, nicht Beschreibungen, Teilnehmer oder Orte."
+
+msgid "The address works like a password: we store it in encrypted form, never display it again and never write it to logs. The import can be paused at any time; removing the calendar also deletes the blocked times that were imported from it."
+msgstr "Die Adresse wirkt wie ein Passwort: Wir speichern sie verschlüsselt, zeigen sie nie wieder an und schreiben sie nie in Protokolle. Der Import lässt sich jederzeit pausieren; wird der Kalender entfernt, werden auch die daraus importierten Blockzeiten gelöscht."
+
+msgid "Recipient of the retrieval request is Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland, within the tutor's own Google account. Google only receives the request itself (including the IP address of our server); no data about students is sent to Google. Where data is transferred to the USA, this is based on the EU-US Data Privacy Framework or the standard contractual clauses of the EU Commission."
+msgstr "Empfänger der Abrufanfrage ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland, im eigenen Google-Konto des Tutors. Google erhält nur die Anfrage selbst (einschließlich der IP-Adresse unseres Servers); Daten über Schüler werden nicht an Google übermittelt. Soweit Daten in die USA übermittelt werden, beruht das auf dem EU-US Data Privacy Framework oder den Standardvertragsklauseln der EU-Kommission."
+
+msgid "Appointment titles can contain names of third parties (for example a doctor's appointment). Please keep the titles in the calendar you connect neutral."
+msgstr "Titel von Terminen können Namen Dritter enthalten (z. B. ein Arzttermin). Bitte halte die Titel in dem verbundenen Kalender neutral."
+
+msgid "Calendar subscription link"
+msgstr "Kalender-Abo-Link"
+
+msgid "Tutors can optionally switch on a calendar subscription link. Calendar apps such as Google Calendar, Apple Calendar or Outlook then retrieve the tutor's lessons from Preceptly at regular intervals (read-only). For each lesson the calendar contains the time and a title; by default the title is just “Nachhilfe”, and the tutor can choose to include the student's name."
+msgstr "Tutoren können optional einen Kalender-Abo-Link einschalten. Kalender-Apps wie Google Kalender, Apple Kalender oder Outlook rufen die Stunden des Tutors dann regelmäßig bei Preceptly ab (nur lesend). Der Kalender enthält je Stunde die Zeit und einen Titel; standardmäßig heißt der Titel nur „Nachhilfe“, und der Tutor kann den Namen des Schülers einschalten."
+
+msgid "Everyone who knows the link can read these appointments. The link is therefore secret, is not listed anywhere and can be renewed at any time; the old link then stops working immediately. Our server logs may contain the link as part of the requested address."
+msgstr "Jeder, der den Link kennt, kann diese Termine lesen. Der Link ist deshalb geheim, wird nirgends aufgelistet und lässt sich jederzeit erneuern; der alte Link funktioniert danach sofort nicht mehr. Unsere Server-Protokolle können den Link als Teil der abgerufenen Adresse enthalten."
+
+msgid "The calendar service the tutor chooses receives the data in the tutor's own account and handles it under its own terms; Preceptly has no influence on that and does not know which service retrieves the link."
+msgstr "Der vom Tutor gewählte Kalenderdienst erhält die Daten im eigenen Konto des Tutors und verarbeitet sie nach seinen eigenen Bedingungen; darauf hat Preceptly keinen Einfluss und weiß auch nicht, welcher Dienst den Link abruft."

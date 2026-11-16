@@ -1,6 +1,6 @@
 # Product Requirements Document — Preceptly
 
-**Stand:** 24.09.2026 — beschreibt, was live ist. Geplantes steht ausdrücklich als „geplant".
+**Stand:** 16.11.2026 — beschreibt, was live ist. Geplantes steht ausdrücklich als „geplant".
 
 ## Produktvision
 
@@ -34,6 +34,9 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 - **Sperrzeiten** (Urlaub, private Termine)
 - Buchung durch Schüler läuft über das **Portal** (siehe unten). Die frühere öffentliche Buchungsseite ist seit 24.09.2026 entfernt.
 - **iCloud-Kalender-Sync** (CalDAV): zukünftige Stunden werden übertragen, vergangene entfernt; Konflikte sichtbar
+- **Kalender per Adresse** (Google): die „geheime Adresse im iCal-Format“ als Quelle für Blockzeiten, nur lesend, nur Titel und Zeit
+- **Kalender-Abo** für Tutoren: geheimer Link (iCal-Feed), den Google Kalender, iCloud oder Outlook abonnieren; Titel standardmäßig „Nachhilfe“ ohne Schülername
+- Beides: `docs/features/feat-kalender-adresse-und-abo.md`; die Kalender-Karte ist auf allen Geräten sichtbar
 
 ### Abrechnung und Einnahmen
 - Rechnungen aus gehaltenen Stunden, als PDF; Status offen/versendet/bezahlt
@@ -71,7 +74,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 
 | Tarif | Umfang |
 |---|---|
-| **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 höchstens 5 Schüler und 8 Rechnungen pro Monat. Keine Dokumente, keine Portal-Buchung |
+| **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 ein Hinweis auf die bezahlten Tarife ab 5 Schülern und ab 8 Rechnungen pro Monat (gespeichert wird trotzdem). Keine Dokumente, keine Portal-Buchung |
 | **Starter** | + Serientermine, Sperrzeiten, Statusfilter der Rechnungsliste, Schüler-Portal; **höchstens 3 Dokumente je Schüler**, **höchstens 3 Portal-Buchungen je Monat** (nur Einzeltermine) |
 | **Pro** | + unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und **Serien im Portal**, Familien-Zugang (mehrere Kinder an einem Konto), Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
 | **Business** | alles aus Pro, dazu bevorzugter Support und früher Zugang zu neuen Funktionen |
@@ -83,7 +86,7 @@ Maßgeblich ist `backend/apps/core/feature_flags.py`.
 
 | Grenze | Wo |
 |---|---|
-| Free: 5 Schüler, 8 Rechnungen/Monat (Konten ab 02.07.2026) | `students/views.py`, `billing/views.py` |
+| Free: Hinweis ab 5 Schülern / 8 Rechnungen pro Monat (Konten ab 02.07.2026), kein Sperren | `students/views.py`, `billing/views.py` |
 | Dokumente: Free keine, Starter 3 je Schüler — beim Tutor und im Portal | `document_limit_reached()` |
 | Portal-Buchungen: Free keine, Starter 3 je Tutor und Kalendermonat, gezählt nach Anlagedatum | `portal_booking_limit_reached()` |
 | Serien im Portal selbst anlegen: erst ab Pro | `Feature.FEATURE_PORTAL_RECURRING` |
@@ -113,7 +116,7 @@ Kind eine eigene E-Mail-Adresse. Auf der Preisseite hieß das bis 25.09.2026
 
 **Ausnahme:** Der iCloud-Kalender-Sync legt weiterhin Sperrzeiten an, auch im
 Free-Tarif — er spiegelt Termine aus dem Kalender, damit nichts doppelt gebucht
-wird. Gesperrt ist nur das eigene Anlegen über die Oberfläche.
+wird. Gesperrt ist nur das eigene Anlegen über die Oberfläche. Dasselbe gilt für den Import per Kalenderadresse (Google).
 
 **Wichtig:** Stripe rechnet nur die Abos der Tutoren ab. Zahlungen der Schüler
 an den Tutor laufen außerhalb von Preceptly; Preceptly erstellt die Rechnung

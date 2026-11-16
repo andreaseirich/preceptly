@@ -67,7 +67,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
     <li>Zugangsbeschränkung auf authentifizierte Nutzer</li>
     <li>Regelmäßige Datensicherungen</li>
     <li>Protokollierung sicherheitsrelevanter Ereignisse</li>
-    <li>Verschlüsselte Speicherung der Zugangsdaten für die Kalender-Synchronisierung</li>
+    <li>Verschlüsselte Speicherung der Zugangsdaten und Kalenderadressen für die Kalender-Synchronisierung</li>
     <li>KI-Unterrichtsplanung ausschließlich auf eigener Hardware des Auftragsverarbeiters in Deutschland; Zugriff nur über ein Ende-zu-Ende-verschlüsseltes privates Netzwerk (WireGuard), nicht aus dem öffentlichen Internet erreichbar</li>
     <li>Automatische Entfernung von Namen, Kontaktdaten und Notizen vor der KI-Verarbeitung; in Zusatzhinweisen und PDF-Material werden Schülername, E-Mail-Adressen und Telefonnummern maskiert</li>
 </ul>
@@ -107,6 +107,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (nachfolgend �
 <p><small>Stripe, Inc. verarbeitet ausschließlich Zahlungsdaten des Verantwortlichen (Abo-Gebühren) und ist damit kein Unterauftragsverarbeiter für Schülerdaten im Sinne dieses AVV. Stripe ist in der allgemeinen Datenschutzerklärung separat ausgewiesen.</small></p>
 <p>6.2 Die KI-Unterrichtsplanung wird nicht von einem externen KI-Anbieter erbracht, sondern auf eigener Hardware des Auftragsverarbeiters in Deutschland (Sprachmodell Qwen 2.5, ausgeführt über Ollama).</p>
 <p>6.3 Nutzt der Verantwortliche die Kalender-Synchronisierung, überträgt der Auftragsverarbeiter auf dessen Weisung Termindaten (einschließlich des Schülernamens im Termintitel, sofern die Titelvorlage ihn enthält) in das vom Verantwortlichen selbst verbundene iCloud-Konto und liest dort Termine als Blockzeiten ein. Apple ist insoweit Dienstleister des Verantwortlichen und kein Unterauftragsverarbeiter des Auftragsverarbeiters.</p>
+<p>6.3a Nutzt der Verantwortliche den Kalenderimport per geheimer Adresse (z. B. Google Kalender), ruft der Auftragsverarbeiter auf dessen Weisung diese Adresse ab und übernimmt Titel und Zeit der Termine als Blockzeiten. Nutzt der Verantwortliche das Kalender-Abo, stellt der Auftragsverarbeiter die Termine (einschließlich des Schülernamens im Titel, sofern der Verantwortliche das eingeschaltet hat) als Kalenderdatei bereit, die nur über einen geheimen Link abrufbar ist; abgerufen wird sie durch den vom Verantwortlichen selbst gewählten Kalenderdienst. Der jeweilige Kalenderanbieter ist insoweit Dienstleister des Verantwortlichen und kein Unterauftragsverarbeiter des Auftragsverarbeiters.</p>
 <p>6.4 Push-Benachrichtigungen werden Ende-zu-Ende-verschlüsselt über den Push-Dienst des jeweiligen Browser- bzw. Betriebssystemanbieters zugestellt; dieser erhält keinen Zugriff auf die Inhalte.</p>
 <p>6.5 Änderungen hinsichtlich der eingesetzten Unterauftragsverarbeiter werden dem Verantwortlichen durch eine Aktualisierung dieser Seite mitgeteilt. Der Verantwortliche kann innerhalb von 14 Tagen nach Bekanntgabe Einspruch erheben.</p>
 </div>
@@ -193,7 +194,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
     <li>Access restricted to authenticated users</li>
     <li>Regular data backups</li>
     <li>Logging of security-relevant events</li>
-    <li>Encrypted storage of the credentials used for calendar sync</li>
+    <li>Encrypted storage of the credentials and calendar addresses used for calendar sync</li>
     <li>AI lesson planning exclusively on the Processor's own hardware in Germany; accessible only through an end-to-end encrypted private network (WireGuard), not reachable from the public internet</li>
     <li>Automatic removal of names, contact details and notes before AI processing; in additional notes and PDF material, the student's name, email addresses and phone numbers are masked</li>
 </ul>
@@ -233,6 +234,7 @@ E-Mail: <a href="mailto:info@preceptly.de">info@preceptly.de</a> (hereinafter "P
 <p><small>Stripe, Inc. processes payment data of the Controller (subscription fees) only and is therefore not a sub-processor for student data within the scope of this DPA. Stripe is listed separately in the general privacy policy.</small></p>
 <p>6.2 AI lesson planning is not provided by an external AI provider but runs on the Processor's own hardware in Germany (language model Qwen 2.5, run via Ollama).</p>
 <p>6.3 If the Controller uses calendar sync, the Processor transfers scheduling data on the Controller's instruction (including the student's name in the event title, if the title template contains it) into the iCloud account the Controller has connected, and imports events from it as blocked times. Apple acts as the Controller's own service provider in this respect and is not a sub-processor of the Processor.</p>
+<p>6.3a If the Controller uses the calendar import via secret address (e.g. Google Calendar), the Processor retrieves that address on the Controller's instruction and takes over the title and time of the appointments as blocked times. If the Controller uses the calendar subscription, the Processor provides the appointments (including the student's name in the title, if the Controller has switched that on) as a calendar file that can only be retrieved via a secret link; it is retrieved by the calendar service the Controller has chosen. The respective calendar provider acts as the Controller's own service provider in this respect and is not a sub-processor of the Processor.</p>
 <p>6.4 Push notifications are delivered end-to-end encrypted via the push service of the respective browser or operating system provider, which has no access to their content.</p>
 <p>6.5 Changes to sub-processors will be communicated to the Controller by updating this page. The Controller may object within 14 days of notification.</p>
 </div>

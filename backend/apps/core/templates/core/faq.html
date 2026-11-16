@@ -156,7 +156,7 @@
   <p>Ja. Beim Bearbeiten einer Stunde wählst du, ob du nur diese eine Stunde oder alle zukünftigen Stunden der Serie ändern möchtest.</p>
 
   <h3>Was sind Blockzeiten?</h3>
-  <p>Zeiten, in denen du nicht unterrichten kannst, etwa Urlaub oder ein Arzttermin. Im Portal erscheinen sie als belegt, ohne Details. Blockzeiten gibt es ab dem Starter-Tarif. Über die <a href="#kalender-sync">Kalender-Synchronisierung</a> kannst du sie auch aus deinem privaten Kalender übernehmen.</p>
+  <p>Zeiten, in denen du nicht unterrichten kannst, etwa Urlaub oder ein Arzttermin. Im Portal erscheinen sie als belegt, ohne Details. Blockzeiten gibt es ab dem Starter-Tarif. Über die <a href="#kalender-sync">Kalender-Synchronisierung</a> kannst du sie auch aus deinem privaten Kalender (iCloud oder Google) übernehmen.</p>
 </section>
 
 {# ======= RECHNUNGEN ======= #}
@@ -334,7 +334,7 @@
   <h2>Kalender-Synchronisierung</h2>
 
   <h3>Was macht die Kalender-Synchronisierung?</h3>
-  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> kannst du deinen iCloud-Kalender per CalDAV verbinden. Danach läuft automatisch alle paar Minuten Folgendes: Deine Preceptly-Stunden werden in einen Kalender deiner Wahl übertragen (zum Beispiel „Nachhilfe“), und Termine aus einem oder mehreren anderen Kalendern deiner Wahl (zum Beispiel „Privat“) werden als Blockzeiten nach Preceptly übernommen. Diese Funktion ist aktuell nur auf Apple-Geräten sichtbar, da sie iCloud-Kalender verbindet.</p>
+  <p>In den <a href="{% url 'core:settings' %}">Einstellungen</a> kannst du deinen iCloud-Kalender per CalDAV verbinden. Danach läuft automatisch alle paar Minuten Folgendes: Deine Preceptly-Stunden werden in einen Kalender deiner Wahl übertragen (zum Beispiel „Nachhilfe“), und Termine aus einem oder mehreren anderen Kalendern deiner Wahl (zum Beispiel „Privat“) werden als Blockzeiten nach Preceptly übernommen. Für Google Kalender gibt es einen lesenden Weg über die geheime Adresse (siehe unten).</p>
 
   <h3>Läuft das in beide Richtungen?</h3>
   <p>Nein, bewusst nicht. Stunden laufen nur von Preceptly zu iCloud: Änderst oder löschst du die übertragene Kopie direkt in iCloud, hat das keine Auswirkung auf die Stunde in Preceptly. Preceptly bleibt hier die Quelle der Wahrheit, damit eine abgerechnete Unterrichtsstunde nie unbemerkt verändert wird. Blockzeiten laufen nur von iCloud zu Preceptly: Legst du eine Blockzeit direkt in Preceptly an, wird sie nicht nach iCloud übertragen.</p>
@@ -350,6 +350,21 @@
 
   <h3>Können Schüler ihre Termine auch im eigenen Kalender sehen?</h3>
   <p>Ja. Im Portal gibt es unter „Profil“ einen persönlichen Link für ein Kalender-Abo, der in Google Kalender, iCloud und Outlook funktioniert. Er ist nur lesend.</p>
+
+  <h3>Kann ich auch einen Google Kalender verbinden?</h3>
+  <p>Ja, lesend. Google erlaubt Programmen den Zugriff nur über eine aufwendige Freigabe (OAuth). Preceptly nutzt deshalb die „geheime Adresse im iCal-Format“ deines Kalenders. Du findest sie in Google Kalender am Computer unter Einstellungen → unter „Einstellungen für meine Kalender“ den Kalender anklicken → „Kalender integrieren“. Füge sie in den <a href="{% url 'core:settings' %}?section=calendar-sync">Einstellungen</a> unter „Kalender per Adresse (Google)“ ein. Preceptly übernimmt die Termine dann als Blockzeiten und gleicht sie alle paar Minuten ab. Gelesen werden nur Titel und Zeit, und es wird nie etwas in deinen Kalender geschrieben.</p>
+
+  <h3>Ist die geheime Adresse sicher?</h3>
+  <p>Sie ist wie ein Passwort: Wer sie kennt, kann den Kalender lesen. Preceptly speichert sie verschlüsselt, zeigt sie nie wieder an und schreibt sie in keine Protokolle. Gib sie niemandem weiter. Wird sie jemals bekannt, setze sie in Google Kalender zurück und füge die neue Adresse ein. Entfernst du den Kalender in den Einstellungen, werden auch die daraus importierten Blockzeiten gelöscht.</p>
+
+  <h3>Was passiert, wenn ich eine importierte Blockzeit lösche?</h3>
+  <p>Sie kommt nicht wieder, solange der Termin in deinem Kalender steht. Verschwindet der Termin aus dem Kalender, verschwindet auch die Blockzeit. Stunden aus Preceptly werden nie als Blockzeit übernommen.</p>
+
+  <h3>Wie sehe ich meine Preceptly-Stunden in Google Kalender, iCloud oder Outlook?</h3>
+  <p>Mit dem Kalender-Abo: Schalte es in den <a href="{% url 'core:settings' %}?section=calendar-sync">Einstellungen</a> unter „Kalender-Abo“ ein und abonniere den Link in deiner Kalender-App (die Anleitung steht dort). Das Abo ist nur lesend: Änderungen in der Kalender-App ändern keine Stunde in Preceptly. Wer schon per iCloud-Abgleich überträgt, sollte nicht zusätzlich abonnieren, sonst erscheint jede Stunde doppelt. Kalender-Apps aktualisieren Abos nach eigenem Takt, Änderungen können also etwas dauern.</p>
+
+  <h3>Wer kann den Abo-Link sehen? Warum steht dort nur „Nachhilfe“?</h3>
+  <p>Jeder, der den Link kennt, kann deine Termine lesen. Deshalb ist er geheim, und du kannst ihn jederzeit erneuern; der alte funktioniert dann sofort nicht mehr. Standardmäßig heißen die Termine nur „Nachhilfe“, ohne den Namen des Schülers, denn der Kalenderdienst speichert die Titel in deinem Konto. Den Namen kannst du in den Einstellungen einschalten. Notizen, Hausaufgaben und Meeting-Links stehen nie im Abo.</p>
 </section>
 
 {# ======= APP ======= #}

@@ -71,6 +71,23 @@
         <p>{% trans "Recipient is Apple Distribution International Ltd., Hollyhill Industrial Estate, Hollyhill, Cork, Ireland, within the tutor's own iCloud account. Data transfers to the USA are based on the standard contractual clauses of the EU Commission." %}</p>
         <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract, at the tutor's request)." %}</p>
     </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Calendar import via secret address (Google Calendar)" %}</h2>
+        <p>{% trans "Tutors can optionally enter the secret iCal address of their Google Calendar. Preceptly then retrieves that calendar from Google at regular intervals and takes over its appointments as blocked times, so that no lessons can be booked at those times. Only the title and the time of each appointment are read; descriptions, participants and locations are not." %}</p>
+        <p>{% trans "The address works like a password: we store it in encrypted form, never display it again and never write it to logs. The import can be paused at any time; removing the calendar also deletes the blocked times that were imported from it." %}</p>
+        <p>{% trans "Recipient of the retrieval request is Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland, within the tutor's own Google account. Google only receives the request itself (including the IP address of our server); no data about students is sent to Google. Where data is transferred to the USA, this is based on the EU-US Data Privacy Framework or the standard contractual clauses of the EU Commission." %}</p>
+        <p>{% trans "Appointment titles can contain names of third parties (for example a doctor's appointment). Please keep the titles in the calendar you connect neutral." %}</p>
+        <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract, at the tutor's request)." %}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>{% trans "Calendar subscription link" %}</h2>
+        <p>{% trans "Tutors can optionally switch on a calendar subscription link. Calendar apps such as Google Calendar, Apple Calendar or Outlook then retrieve the tutor's lessons from Preceptly at regular intervals (read-only). For each lesson the calendar contains the time and a title; by default the title is just “Nachhilfe”, and the tutor can choose to include the student's name." %}</p>
+        <p>{% trans "Everyone who knows the link can read these appointments. The link is therefore secret, is not listed anywhere and can be renewed at any time; the old link then stops working immediately. Our server logs may contain the link as part of the requested address." %}</p>
+        <p>{% trans "The calendar service the tutor chooses receives the data in the tutor's own account and handles it under its own terms; Preceptly has no influence on that and does not know which service retrieves the link." %}</p>
+        <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract, at the tutor's request)." %}</p>
+    </div>
     <div class="legal-section">
         <h2>{% trans "Push notifications" %}</h2>
         <p>{% trans "If you enable push notifications on a device, notifications (e.g. about a new booking, including the student's name and the time) are delivered via the push service of your browser or operating system provider (e.g. Google, Apple or Mozilla). The content is end-to-end encrypted in accordance with the Web Push standard; the push service only processes the technical data required for delivery." %}</p>
