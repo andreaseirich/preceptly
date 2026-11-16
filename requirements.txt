@@ -25,6 +25,6 @@ caldav==3.7.0
 icalendar==7.3.0
 recurring-ical-events==3.8.2
 cryptography==50.0.2
-pypdf==6.21.4
+pypdf==7.1.0
 
 # cache-bust: 2026-06-25
