@@ -38,7 +38,7 @@ Existing tools are either too simple (generic calendars that ignore contract quo
 Preceptly is a domain-specific operating system for tutors that uniquely combines:
 - **Intelligent conflict detection** (time overlaps, travel constraints, contract quotas)
 - **Automated billing** with invoice generation from taught sessions
-- **AI-assisted lesson planning** with privacy-first design
+- **AI-assisted lesson planning** that removes names and contact details first and runs on a self-hosted model
 - **Contract-based quota management** ensuring compliance with student agreements
 
 All integrated into a single, coherent workflow that saves tutors hours every week and prevents costly scheduling mistakes.
@@ -70,7 +70,7 @@ Generate invoices directly from taught sessions with automatic calculations base
 - *Total billed* = recognized + pending (paid + sent invoices)
 
 ### 🤖 **AI-Powered Lesson Planning** (Pro)
-Generate structured lesson plans using LLM APIs with privacy-first design—PII sanitization ensures student data never leaves the system. Human-in-the-loop editing ensures accountability and quality.
+Generate structured lesson plans with a language model. Names, email addresses and phone numbers are removed before the text is sent to the model. The model is configurable (any OpenAI-compatible API); the instance at preceptly.de runs Qwen 2.5 via Ollama on its own hardware in Germany, not at an external AI provider. Human-in-the-loop editing ensures accountability and quality.
 
 ---
 
@@ -97,8 +97,8 @@ Generate structured lesson plans using LLM APIs with privacy-first design—PII 
 - Video meeting rooms in the browser (WebRTC)
 
 **AI Integration:**
-- OpenAI-compatible LLM API
-- Privacy-first design with PII sanitization
+- OpenAI-compatible LLM API (preceptly.de uses a self-hosted Ollama model)
+- PII sanitization: names, email addresses and phone numbers are removed before the text is sent to the model
 - Mock mode for deterministic demos (`MOCK_LLM=1`)
 
 **DevOps & Quality:**
