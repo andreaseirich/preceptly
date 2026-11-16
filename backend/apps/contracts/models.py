@@ -101,8 +101,10 @@ class Contract(models.Model):
                 if old and old.is_active and not self.is_active:
                     from apps.lessons.models import Lesson
 
+                    # Nur Geplantes räumen wir weg. Gehaltene, bezahlte und abgesagte Stunden bleiben:
+                    # An ihnen hängen Rechnungen, Einnahmen und Steuern (auch bei Stunden von heute).
                     today = timezone.localdate()
-                    Lesson.objects.filter(contract=self, date__gte=today).delete()
+                    Lesson.objects.filter(contract=self, date__gte=today, status="planned").delete()
         if not self.booking_token:
             self.booking_token = secrets.token_urlsafe(32)
         super().save(*args, **kwargs)
