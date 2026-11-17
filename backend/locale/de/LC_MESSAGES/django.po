@@ -7917,3 +7917,16 @@ msgstr "{count} gibt es in Preceptly nicht mehr"
 #, python-brace-format
 msgid "{count} lessons are missing in this calendar"
 msgstr "{count} Stunden fehlen in diesem Kalender"
+
+msgid "Block all-day events even if they are marked “Free”"
+msgstr "Ganztägige Termine auch blockieren, wenn sie als „Verfügbar“ markiert sind"
+
+msgid "Google marks new all-day events as “Free” by default, so they would not block anything. Switch this on for calendars where all-day events (vacation, training) should block the whole day."
+msgstr "Google markiert neue ganztägige Termine standardmäßig als „Verfügbar“, sie würden deshalb nichts blockieren. Schalte das für Kalender ein, in denen ganztägige Termine (Urlaub, Fortbildung) den ganzen Tag blockieren sollen."
+
+#, python-format
+msgid "Skipped because marked “Free”: %(count)s"
+msgstr "Übersprungen, weil als „Verfügbar“ markiert: %(count)s"
+
+msgid "Also block all-day events that are marked \"Free\" in the calendar (Google marks new all-day events that way)."
+msgstr "Auch ganztägige Termine blockieren, die im Kalender als „Verfügbar“ markiert sind (Google markiert neue ganztägige Termine so)."

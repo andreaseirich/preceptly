@@ -9,6 +9,9 @@ Regeln:
   Tutors bleiben bis dahin stehen. Aus der Quelle verschwunden (im Zeitraum) -> Blockzeit wird gelöscht.
 - Hat der Tutor eine importierte Blockzeit selbst gelöscht, wird sie nicht neu angelegt, solange der Termin in der
   Quelle steht (siehe IcsEventMapping).
+- Als "verfügbar" markierte Termine blockieren nichts. Ausnahme: Hat die Quelle block_free_all_day eingeschaltet,
+  zählen ganztägige trotzdem (Google markiert sie standardmäßig als "verfügbar"). Wie viele übersprungen wurden,
+  steht in last_sync_summary["free"].
 - Eigene Stunden (UID endet auf @preceptly.de) werden nie importiert; sonst würden sie sich selbst blockieren.
   Stattdessen werden sie mit den echten Stunden verglichen (own_check.py); Abweichungen und fehlende Stunden stehen
   in last_sync_summary["own"]. Es wird nichts geändert: Der Kalender ist nur lesbar.
@@ -61,16 +64,24 @@ def sync_source(source: IcsCalendarSource, *, data=None, now=None, fetch=None) -
     now = now or timezone.now()
     fetch = fetch or fetch_ics  # erst hier auflösen, damit sich fetch_ics in Tests ersetzen lässt
     window_start, window_end = default_window(now)
+    stats = {}
     try:
         if data is None:
             data = fetch(decrypt_password(bytes(source.encrypted_url)))
-        occurrences = parse_occurrences(data, window_start, window_end)
+        occurrences = parse_occurrences(
+            data,
+            window_start,
+            window_end,
+            block_free_all_day=source.block_free_all_day,
+            stats=stats,
+        )
     except CalendarCredentialError:
         return _record_error(source, "credential", now)
     except IcsError as error:
         return _record_error(source, error.code, now)
 
     summary = _apply(source, occurrences, window_start, window_end, now)
+    summary["free"] = stats.get("free", 0)
     source.last_attempt_at = now
     source.last_synced_at = now
     source.last_sync_error = ""

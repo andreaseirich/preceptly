@@ -18,6 +18,7 @@ urlpatterns = [
     # Kalender per Adresse (Google): nur lesend
     path("address/add/", views_ics.ics_add, name="ics_add"),
     path("address/<int:pk>/sync/", views_ics.ics_sync_now, name="ics_sync_now"),
+    path("address/<int:pk>/all-day/", views_ics.ics_all_day, name="ics_all_day"),
     path("address/<int:pk>/toggle/", views_ics.ics_toggle, name="ics_toggle"),
     path("address/<int:pk>/remove/", views_ics.ics_remove, name="ics_remove"),
     # Kalender-Abo für Tutoren: der Abruf ist öffentlich (Token), die Verwaltung braucht Login

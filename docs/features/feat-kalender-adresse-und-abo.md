@@ -32,7 +32,7 @@ alle 15 Minuten** ab (nach einem Fehler höchstens stündlich). „Jetzt abgleic
   und verschobene Einzeltermine.
 - Übernommen wird **nur der Titel** (keine Beschreibung, Teilnehmer, Orte). Ganztägige Termine blockieren von 0 bis 24 Uhr
   Ortszeit (Europe/Berlin, wenn der Kalender keine Zeitzone nennt).
-- **Nicht übernommen:** abgesagte Termine, als „verfügbar“ markierte (Geburtstage, Erinnerungen), Termine ohne Dauer und
+- **Nicht übernommen:** abgesagte Termine, als „verfügbar“ markierte (Geburtstage, Erinnerungen; ganztägige nur, wenn bei der Quelle „Ganztägige Termine auch blockieren“ eingeschaltet ist, denn Google markiert sie standardmäßig als „verfügbar“; die Zahl der übersprungenen steht bei der Quelle), Termine ohne Dauer und
   **eigene Stunden** (Kennung endet auf `@preceptly.de`), damit sich Preceptly nicht selbst blockiert.
 - Neu → Blockzeit. Titel geändert → Blockzeit wird angepasst. Aus dem Kalender verschwunden (im Zeitraum) → Blockzeit wird gelöscht.
   Verschiebt sich ein Termin, gilt das als neuer Termin (der Beginn gehört zur Kennung).

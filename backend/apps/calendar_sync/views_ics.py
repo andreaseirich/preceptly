@@ -29,6 +29,22 @@ def _back():
     return redirect(reverse("core:settings") + "?section=calendar-sync")
 
 
+def _report_sync(request, result):
+    """Meldet das Ergebnis eines Abgleichs: die Zahlen oder den Fehler, dazu den Hinweis zu den eigenen Terminen."""
+    if result.get("error"):
+        messages.error(request, ics_error_message(result["error"]))
+        return
+    messages.success(
+        request,
+        _("Synced: {created} new, {updated} changed, {deleted} removed.").format(
+            created=result["created"], updated=result["updated"], deleted=result["deleted"]
+        ),
+    )
+    note = own_note(result.get("own"))
+    if note:
+        messages.info(request, note)
+
+
 @login_required
 @require_POST
 @ratelimit(key="user", rate="10/h", method="POST", block=True)
@@ -96,20 +112,20 @@ def ics_sync_now(request, pk):
     if source.last_attempt_at and now - source.last_attempt_at < MANUAL_COOLDOWN:
         messages.info(request, _("Please wait a minute before syncing again."))
         return _back()
-    result = sync_source(source, now=now)
-    if result.get("error"):
-        messages.error(request, ics_error_message(result["error"]))
-    else:
-        messages.success(
-            request,
-            _("Synced: {created} new, {updated} changed, {deleted} removed.").format(
-                created=result["created"], updated=result["updated"], deleted=result["deleted"]
-            ),
-        )
-    if not result.get("error"):
-        note = own_note(result.get("own"))
-        if note:
-            messages.info(request, note)
+    _report_sync(request, sync_source(source, now=now))
+    return _back()
+
+
+@login_required
+@require_POST
+@ratelimit(key="user", rate="30/h", method="POST", block=True)
+def ics_all_day(request, pk):
+    """Einstellung je Quelle: ganztägige Termine auch blockieren, wenn sie als "Verfügbar" markiert sind. Gilt sofort."""
+    source = get_object_or_404(IcsCalendarSource, pk=pk, user=request.user)
+    source.block_free_all_day = request.POST.get("block_free_all_day") == "on"
+    source.save(update_fields=["block_free_all_day"])
+    messages.success(request, _("Saved."))
+    _report_sync(request, sync_source(source))
     return _back()
 
 

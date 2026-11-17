@@ -184,12 +184,21 @@ def _as_aware(value, local_tz):
 
 
 def parse_occurrences(
-    data, window_start, window_end, *, local_tz=DEFAULT_TIMEZONE, max_occurrences=MAX_OCCURRENCES
+    data,
+    window_start,
+    window_end,
+    *,
+    local_tz=DEFAULT_TIMEZONE,
+    max_occurrences=MAX_OCCURRENCES,
+    block_free_all_day=False,
+    stats=None,
 ):
     """Alle Termine im Zeitraum [window_start, window_end), Wiederholungen aufgelöst.
 
     Übersprungen werden abgesagte Termine und solche, die als "verfügbar" markiert sind (TRANSP:TRANSPARENT, etwa
-    Geburtstage und Erinnerungen), sowie Termine ohne Dauer. Löst IcsError aus, wenn die Datei kein Kalender ist
+    Geburtstage und Erinnerungen), sowie Termine ohne Dauer. Google markiert neue ganztägige Termine standardmäßig
+    als "verfügbar"; mit block_free_all_day=True zählen ganztägige Termine trotzdem. In stats["free"] steht, wie
+    viele Termine wegen "verfügbar" übersprungen wurden. Löst IcsError aus, wenn die Datei kein Kalender ist
     oder zu viele Termine enthält."""
     try:
         calendar = icalendar.Calendar.from_ical(data)
@@ -217,8 +226,6 @@ def parse_occurrences(
     for component in components:
         if str(component.get("STATUS", "")).upper() == "CANCELLED":
             continue
-        if str(component.get("TRANSP", "")).upper() == "TRANSPARENT":
-            continue
         try:
             raw_start, raw_end = component.start, component.end
             start, end = _as_aware(raw_start, local_tz), _as_aware(raw_end, local_tz)
@@ -229,6 +236,13 @@ def parse_occurrences(
         if end <= start:
             continue
         all_day = isinstance(raw_start, date) and not isinstance(raw_start, datetime)
+        if str(component.get("TRANSP", "")).upper() == "TRANSPARENT" and not (
+            all_day and block_free_all_day
+        ):
+            # Verfügbar: blockiert nichts (Geburtstage, Erinnerungen). Ganztägige zählen nur, wenn die Quelle es erlaubt.
+            if stats is not None:
+                stats["free"] = stats.get("free", 0) + 1
+            continue
         uid = str(component.get("UID", "")).strip()[:250] or f"no-uid-{start.isoformat()}"
         key = f"{uid}|{start.astimezone(dt_timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         summary = " ".join(str(component.get("SUMMARY", "")).split())[:200] or "Termin"

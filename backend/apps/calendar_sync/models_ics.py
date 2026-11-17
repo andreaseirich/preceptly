@@ -30,6 +30,13 @@ class IcsCalendarSource(models.Model):
     )
     host = models.CharField(max_length=100, help_text=_("Host of the address, for display only."))
     sync_enabled = models.BooleanField(default=True)
+    block_free_all_day = models.BooleanField(
+        default=False,
+        help_text=_(
+            'Also block all-day events that are marked "Free" in the calendar '
+            "(Google marks new all-day events that way)."
+        ),
+    )
     last_attempt_at = models.DateTimeField(null=True, blank=True)
     last_synced_at = models.DateTimeField(null=True, blank=True)
     last_sync_error = models.CharField(

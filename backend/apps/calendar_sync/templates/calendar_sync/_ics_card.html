@@ -25,6 +25,9 @@
             <p style="color: var(--text-secondary); font-size: 0.85em; margin: 4px 0 0 0;">
                 {% blocktrans with created=s.created updated=s.updated deleted=s.deleted %}Last run: {{ created }} new, {{ updated }} changed, {{ deleted }} removed{% endblocktrans %}
             </p>
+            {% if s.free %}
+            <p style="color: var(--text-secondary); font-size: 0.85em; margin: 4px 0 0 0;">{% blocktrans with count=s.free %}Skipped because marked “Free”: {{ count }}{% endblocktrans %}</p>
+            {% endif %}
             {% if s.own %}
             <div style="font-size: 0.85em; margin: 6px 0 0 0;">
                 <p style="margin: 0; color: var(--text-secondary);">{% blocktrans with found=s.own.found ok=s.own.ok %}Own Preceptly lessons in this calendar: {{ found }} (not imported as blocked times), {{ ok }} match.{% endblocktrans %}</p>
@@ -40,6 +43,17 @@
             {% endif %}
             {% endif %}
             {% endwith %}
+            <form method="post" action="{% url 'calendar_sync:ics_all_day' source.pk %}" style="margin-top: 8px;">
+                {% csrf_token %}
+                <label style="display: flex; gap: 8px; align-items: flex-start; font-size: 0.9em;">
+                    <input type="checkbox" name="block_free_all_day" {% if source.block_free_all_day %}checked{% endif %} aria-describedby="all-day-help-{{ source.pk }}">
+                    <span>{% trans "Block all-day events even if they are marked “Free”" %}</span>
+                </label>
+                <p id="all-day-help-{{ source.pk }}" style="color: var(--text-secondary); font-size: 0.85em; margin: 4px 0 0 26px;">{% trans "Google marks new all-day events as “Free” by default, so they would not block anything. Switch this on for calendars where all-day events (vacation, training) should block the whole day." %}</p>
+                <div class="settings-actions">
+                    <button type="submit" class="btn btn-secondary">{% trans "Save" %}</button>
+                </div>
+            </form>
             <div class="settings-actions">
                 <form method="post" action="{% url 'calendar_sync:ics_sync_now' source.pk %}">
                     {% csrf_token %}
