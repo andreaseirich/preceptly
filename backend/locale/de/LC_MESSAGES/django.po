@@ -7870,3 +7870,12 @@ msgstr "Der vom Tutor gewählte Kalenderdienst erhält die Daten im eigenen Kont
 
 msgid "Generate structured lesson plans with AI — names and contact details are removed first, and the model runs on our own hardware in Germany, not at an external AI provider."
 msgstr "Strukturierte Stundenpläne mit KI erstellen — Namen und Kontaktdaten werden vorher entfernt, und das Sprachmodell läuft auf unserer eigenen Hardware in Deutschland, nicht bei einem externen KI-Anbieter."
+
+msgid "No VAT is charged pursuant to § 19 UStG (German small business regulation). The prices are final prices."
+msgstr "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung). Die Preise sind Endpreise."
+
+msgid "Preceptly is open to other tutors, with a free plan and paid plans. Under andicode he runs a web development business; further projects are listed at andicode.de."
+msgstr "Preceptly steht auch anderen Nachhilfelehrern offen, mit einem kostenlosen Tarif und bezahlten Tarifen. Unter andicode betreibt er ein Gewerbe für Webentwicklung; weitere Projekte sind auf andicode.de aufgelistet."
+
+msgid "The first other tutors have already tried it — feedback and questions are welcome at info@preceptly.de."
+msgstr "Die ersten anderen Nachhilfelehrer haben es bereits ausprobiert – Feedback und Fragen sind willkommen unter info@preceptly.de."
