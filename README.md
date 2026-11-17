@@ -87,7 +87,7 @@ Generate structured lesson plans with a language model. Names, email addresses a
 - **Architecture**: Service layer pattern with clear separation of concerns
 - **API**: RESTful endpoints with JSON responses
 - **Payments**: Stripe Checkout and customer portal for tutor subscriptions
-- **Calendar sync**: iCloud calendars via CalDAV (`caldav`, `icalendar`)
+- **Calendars**: iCloud sync via CalDAV (`caldav`, `icalendar`); read-only import of a Google Calendar through its secret iCal address, and a read-only subscription feed of a tutor's lessons for Google Calendar, iCloud and Outlook (`recurring-ical-events`)
 
 **Frontend:**
 - Django Templates with vanilla JavaScript
@@ -181,6 +181,8 @@ Preceptly started as a submission to the **CodeCraze Hackathon** (November 15 �
 - ✅ Student/parent portal: booking, rescheduling, messages, homework, calendar feed
 - ✅ Video meeting rooms per lesson (WebRTC via Django Channels)
 - ✅ iCloud calendar sync (CalDAV)
+- ✅ Google Calendar import: the secret iCal address becomes blocked times (read-only, title and time only)
+- ✅ Calendar subscription feed for tutors (Google Calendar, iCloud, Outlook); student names are off by default
 - ✅ Stripe subscriptions (Free, Starter, Pro, Business)
 - ✅ Installable PWA with push notifications
 - ✅ Full internationalization (English, German)
@@ -196,6 +198,7 @@ Preceptly started as a submission to the **CodeCraze Hackathon** (November 15 �
 - **[API](docs/API.md)** – Endpoints and usage
 - **[Railway Deployment](docs/RAILWAY_DEPLOYMENT.md)** – Deploy, env vars, Stripe
 - **[Ethics & Privacy](docs/ETHICS.md)** – Data protection principles
+- **[Calendar address and subscription](docs/features/feat-kalender-adresse-und-abo.md)** – Google import and subscription feed: behaviour, security, privacy (German)
 - **[Judging Guide](docs/JUDGING_GUIDE.md)** – Reviewer shortcuts and demo flows
 
 ---
