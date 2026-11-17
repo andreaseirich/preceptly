@@ -361,6 +361,9 @@
   <h3>Was passiert, wenn ich eine importierte Blockzeit lösche?</h3>
   <p>Sie kommt nicht wieder, solange der Termin in deinem Kalender steht. Verschwindet der Termin aus dem Kalender, verschwindet auch die Blockzeit. Stunden aus Preceptly werden nie als Blockzeit übernommen.</p>
 
+  <h3>Was bedeutet „Eigene Preceptly-Stunden in diesem Kalender“?</h3>
+  <p>Enthält ein verbundener Kalender Termine, die von Preceptly stammen (zum Beispiel eine Kopie deiner Stunden aus dem iCloud-Abgleich oder dem Abo), übernimmt Preceptly sie nicht als Blockzeit, sonst würden sich deine Stunden selbst blockieren. Stattdessen vergleicht Preceptly sie mit deinen echten Stunden und zeigt bei der Quelle, wie viele übereinstimmen, wie viele eine andere Uhrzeit haben, welche es in Preceptly nicht mehr gibt (gelöscht oder abgesagt) und welche künftigen Stunden im Kalender fehlen. Preceptly ändert dabei nichts: Der Kalender ist nur lesbar, und deine Stunden in Preceptly sind maßgeblich. Kalender-Apps aktualisieren Kopien nach eigenem Takt, kurze Abweichungen sind deshalb normal.</p>
+
   <h3>Wie sehe ich meine Preceptly-Stunden in Google Kalender, iCloud oder Outlook?</h3>
   <p>Mit dem Kalender-Abo: Schalte es in den <a href="{% url 'core:settings' %}?section=calendar-sync">Einstellungen</a> unter „Kalender-Abo“ ein und abonniere den Link in deiner Kalender-App (die Anleitung steht dort). Das Abo ist nur lesend: Änderungen in der Kalender-App ändern keine Stunde in Preceptly. Wer schon per iCloud-Abgleich überträgt, sollte nicht zusätzlich abonnieren, sonst erscheint jede Stunde doppelt. Kalender-Apps aktualisieren Abos nach eigenem Takt, Änderungen können also etwas dauern.</p>
 

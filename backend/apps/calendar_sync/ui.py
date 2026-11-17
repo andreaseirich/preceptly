@@ -1,6 +1,7 @@
 """Was die Einstellungsseite für Kalenderadresse und Kalender-Abo braucht (Meldungen und Daten für die Vorlagen)."""
 
 from django.urls import reverse
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from apps.calendar_sync.models import IcsCalendarSource, TutorCalendarFeed
@@ -43,3 +44,26 @@ def settings_context(request):
         context["tutor_feed_url"] = url
         context["tutor_feed_webcal_url"] = "webcal://" + url.split("://", 1)[1]
     return context
+
+
+def own_note(own):
+    """Ein Hinweis für die Meldung nach dem Abgleich. Leer, wenn der Kalender keine eigenen Preceptly-Termine enthält."""
+    if not own or not own.get("found"):
+        return ""
+    text = gettext(
+        "{count} appointments come from Preceptly itself and are not imported as blocked times."
+    ).format(count=own["found"])
+    problems = []
+    if own.get("changed"):
+        problems.append(
+            gettext("{count} have a different time than in Preceptly").format(count=own["changed"])
+        )
+    if own.get("gone"):
+        problems.append(gettext("{count} no longer exist in Preceptly").format(count=own["gone"]))
+    if own.get("missing"):
+        problems.append(
+            gettext("{count} lessons are missing in this calendar").format(count=own["missing"])
+        )
+    if problems:
+        text += " " + gettext("Differences:") + " " + "; ".join(problems) + "."
+    return text

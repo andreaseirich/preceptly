@@ -25,6 +25,19 @@
             <p style="color: var(--text-secondary); font-size: 0.85em; margin: 4px 0 0 0;">
                 {% blocktrans with created=s.created updated=s.updated deleted=s.deleted %}Last run: {{ created }} new, {{ updated }} changed, {{ deleted }} removed{% endblocktrans %}
             </p>
+            {% if s.own %}
+            <div style="font-size: 0.85em; margin: 6px 0 0 0;">
+                <p style="margin: 0; color: var(--text-secondary);">{% blocktrans with found=s.own.found ok=s.own.ok %}Own Preceptly lessons in this calendar: {{ found }} (not imported as blocked times), {{ ok }} match.{% endblocktrans %}</p>
+                {% if s.own.changed or s.own.gone or s.own.missing %}
+                <ul style="margin: 4px 0 0 18px; padding: 0;">
+                    {% if s.own.changed %}<li>⚠️ {% blocktrans with count=s.own.changed %}Different time than in Preceptly: {{ count }}{% endblocktrans %} ({% for d in s.own.details.changed %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.changed > s.own.details.changed|length %}, …{% endif %})</li>{% endif %}
+                    {% if s.own.gone %}<li>⚠️ {% blocktrans with count=s.own.gone %}No longer in Preceptly (deleted or cancelled): {{ count }}{% endblocktrans %} ({% for d in s.own.details.gone %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.gone > s.own.details.gone|length %}, …{% endif %})</li>{% endif %}
+                    {% if s.own.missing %}<li>⚠️ {% blocktrans with count=s.own.missing %}Missing in this calendar: {{ count }}{% endblocktrans %} ({% for d in s.own.details.missing %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.missing > s.own.details.missing|length %}, …{% endif %})</li>{% endif %}
+                </ul>
+                <p style="margin: 4px 0 0 0; color: var(--text-secondary);">{% trans "Calendar apps update copies on their own schedule, so short differences are normal." %}</p>
+                {% endif %}
+            </div>
+            {% endif %}
             {% endif %}
             {% endwith %}
             <div class="settings-actions">

@@ -34,7 +34,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 - **Sperrzeiten** (Urlaub, private Termine)
 - Buchung durch Schüler läuft über das **Portal** (siehe unten). Die frühere öffentliche Buchungsseite ist seit 24.09.2026 entfernt.
 - **iCloud-Kalender-Sync** (CalDAV): zukünftige Stunden werden übertragen, vergangene entfernt; Konflikte sichtbar
-- **Kalender per Adresse** (Google): die „geheime Adresse im iCal-Format“ als Quelle für Blockzeiten, nur lesend, nur Titel und Zeit
+- **Kalender per Adresse** (Google): die „geheime Adresse im iCal-Format“ als Quelle für Blockzeiten, nur lesend, nur Titel und Zeit; eigene Preceptly-Termine im Kalender werden mit den echten Stunden verglichen (Abweichungen und fehlende Stunden werden gemeldet, nichts wird geändert)
 - **Kalender-Abo** für Tutoren: geheimer Link (iCal-Feed), den Google Kalender, iCloud oder Outlook abonnieren; Titel standardmäßig „Nachhilfe“ ohne Schülername
 - Beides: `docs/features/feat-kalender-adresse-und-abo.md`; die Kalender-Karte ist auf allen Geräten sichtbar
 

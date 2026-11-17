@@ -20,7 +20,7 @@ from apps.calendar_sync.crypto import CalendarCredentialError, encrypt_password
 from apps.calendar_sync.ics_import import IcsError, fetch_ics, normalize_ics_url
 from apps.calendar_sync.ics_sync import MANUAL_COOLDOWN, sync_source
 from apps.calendar_sync.models import IcsCalendarSource
-from apps.calendar_sync.ui import ics_error_message
+from apps.calendar_sync.ui import ics_error_message, own_note
 
 DEFAULT_NAME = "Google Calendar"
 
@@ -81,6 +81,9 @@ def ics_add(request):
             count=result["created"]
         ),
     )
+    note = own_note(result.get("own"))
+    if note:
+        messages.info(request, note)
     return _back()
 
 
@@ -103,6 +106,10 @@ def ics_sync_now(request, pk):
                 created=result["created"], updated=result["updated"], deleted=result["deleted"]
             ),
         )
+    if not result.get("error"):
+        note = own_note(result.get("own"))
+        if note:
+            messages.info(request, note)
     return _back()
 
 

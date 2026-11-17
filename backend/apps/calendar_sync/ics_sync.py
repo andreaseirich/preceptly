@@ -10,6 +10,8 @@ Regeln:
 - Hat der Tutor eine importierte Blockzeit selbst gelöscht, wird sie nicht neu angelegt, solange der Termin in der
   Quelle steht (siehe IcsEventMapping).
 - Eigene Stunden (UID endet auf @preceptly.de) werden nie importiert; sonst würden sie sich selbst blockieren.
+  Stattdessen werden sie mit den echten Stunden verglichen (own_check.py); Abweichungen und fehlende Stunden stehen
+  in last_sync_summary["own"]. Es wird nichts geändert: Der Kalender ist nur lesbar.
 - Wie beim iCloud-Import gilt keine Tarifgrenze: Der Import spiegelt nur, was im Kalender steht.
 """
 
@@ -24,6 +26,7 @@ from apps.blocked_times.models import BlockedTime
 from apps.calendar_sync.crypto import CalendarCredentialError, decrypt_password
 from apps.calendar_sync.ics_import import IcsError, default_window, fetch_ics, parse_occurrences
 from apps.calendar_sync.models import IcsCalendarSource, IcsEventMapping
+from apps.calendar_sync.own_check import check_own_lessons
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +70,7 @@ def sync_source(source: IcsCalendarSource, *, data=None, now=None, fetch=None) -
     except IcsError as error:
         return _record_error(source, error.code, now)
 
-    summary = _apply(source, occurrences, window_start, window_end)
+    summary = _apply(source, occurrences, window_start, window_end, now)
     source.last_attempt_at = now
     source.last_synced_at = now
     source.last_sync_error = ""
@@ -79,14 +82,16 @@ def sync_source(source: IcsCalendarSource, *, data=None, now=None, fetch=None) -
 
 
 @transaction.atomic
-def _apply(source, occurrences, window_start, window_end) -> dict:
+def _apply(source, occurrences, window_start, window_end, now) -> dict:
     existing = {m.key: m for m in source.event_mappings.select_related("blocked_time")}
     summary = dict(EMPTY_SUMMARY)
     seen = set()
+    own = []  # Termine, die von Preceptly selbst stammen
 
     for occurrence in occurrences:
         if occurrence.uid.endswith(OWN_UID_SUFFIX):
             summary["skipped"] += 1
+            own.append(occurrence)
             continue
         seen.add(occurrence.key)
         digest = _content_hash(occurrence)
@@ -129,6 +134,17 @@ def _apply(source, occurrences, window_start, window_end) -> dict:
             blocked.delete()
             summary["deleted"] += 1
 
+    if own:
+        try:
+            with transaction.atomic():  # ein Fehler hier darf den Import nicht mitreißen
+                summary["own"] = check_own_lessons(source.user, own, now, window_end)
+        except Exception as error:
+            # Nur die Art loggen: Fehlertexte dürfen nie die Adresse enthalten.
+            logger.error(
+                "Checking own lessons failed for calendar address %s (%s)",
+                source.pk,
+                type(error).__name__,
+            )
     return summary
 
 

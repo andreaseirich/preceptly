@@ -7879,3 +7879,41 @@ msgstr "Preceptly steht auch anderen Nachhilfelehrern offen, mit einem kostenlos
 
 msgid "The first other tutors have already tried it — feedback and questions are welcome at info@preceptly.de."
 msgstr "Die ersten anderen Nachhilfelehrer haben es bereits ausprobiert – Feedback und Fragen sind willkommen unter info@preceptly.de."
+
+#, python-format
+msgid "Own Preceptly lessons in this calendar: %(found)s (not imported as blocked times), %(ok)s match."
+msgstr "Eigene Preceptly-Stunden in diesem Kalender: %(found)s (werden nicht als Blockzeit übernommen), %(ok)s stimmen überein."
+
+#, python-format
+msgid "Different time than in Preceptly: %(count)s"
+msgstr "Andere Uhrzeit als in Preceptly: %(count)s"
+
+#, python-format
+msgid "No longer in Preceptly (deleted or cancelled): %(count)s"
+msgstr "In Preceptly nicht mehr vorhanden (gelöscht oder abgesagt): %(count)s"
+
+#, python-format
+msgid "Missing in this calendar: %(count)s"
+msgstr "In diesem Kalender fehlen: %(count)s"
+
+msgid "Calendar apps update copies on their own schedule, so short differences are normal."
+msgstr "Kalender-Apps aktualisieren Kopien nach eigenem Takt, kurze Abweichungen sind deshalb normal."
+
+#, python-brace-format
+msgid "{count} appointments come from Preceptly itself and are not imported as blocked times."
+msgstr "{count} Termine stammen von Preceptly selbst und werden nicht als Blockzeit übernommen."
+
+msgid "Differences:"
+msgstr "Abweichungen:"
+
+#, python-brace-format
+msgid "{count} have a different time than in Preceptly"
+msgstr "{count} haben eine andere Uhrzeit als in Preceptly"
+
+#, python-brace-format
+msgid "{count} no longer exist in Preceptly"
+msgstr "{count} gibt es in Preceptly nicht mehr"
+
+#, python-brace-format
+msgid "{count} lessons are missing in this calendar"
+msgstr "{count} Stunden fehlen in diesem Kalender"

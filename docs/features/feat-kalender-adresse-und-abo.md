@@ -45,6 +45,24 @@ alle 15 Minuten** ab (nach einem Fehler höchstens stündlich). „Jetzt abgleic
 - **Tarif:** Wie beim iCloud-Import gilt keine Tarifgrenze: Der Import spiegelt nur, was im Kalender steht (siehe PRD, Ausnahme
   iCloud-Sync).
 
+### Kontrolle der eigenen Termine
+
+Enthält der verbundene Kalender Termine, die von Preceptly selbst stammen (Kennung `preceptly-session-<Nr>@preceptly.de`, beim
+Abo auch `-tutor-`, beim Portal `-portal-`), werden sie **nie** als Blockzeit übernommen. Stattdessen vergleicht
+`apps/calendar_sync/own_check.py` sie mit den echten Stunden und legt das Ergebnis in `IcsCalendarSource.last_sync_summary["own"]`
+ab. Die Einstellungen zeigen es bei der Quelle, und beim Verbinden und bei „Jetzt abgleichen“ steht es in der Meldung.
+
+- **Stimmt:** Der Termin hat die Zeit der Stunde, entweder die reine Unterrichtszeit (Abo-Link) oder den Zeitblock mit Fahrzeiten
+  (iCloud-Abgleich).
+- **Andere Uhrzeit:** Die Stunde gibt es, aber Beginn oder Ende im Kalender weichen ab.
+- **In Preceptly nicht mehr vorhanden:** gelöscht, abgesagt oder eine fremde/unbekannte Kennung. Bei fremden Stunden steht nur die
+  Zeit des Kalendertermins, nie etwas aus der fremden Stunde.
+- **Fehlt im Kalender:** eine künftige Stunde (geplant, gehalten oder bezahlt, noch nicht vorbei, bis einen Tag vor Ende des Zeitraums)
+  hat keinen Termin. Das wird nur gemeldet, wenn der Kalender überhaupt eigene Termine enthält; ein privater Kalender ist keine Kopie.
+- **Es wird nichts geändert.** Der Kalender ist nur lesbar, und Preceptly bleibt die Quelle der Wahrheit (an den Stunden hängen
+  Rechnungen und Steuern). Ein Fehler bei der Kontrolle bricht den Import nicht ab.
+- Die Zahlen sind vollständig, gespeichert werden je Gruppe höchstens 10 Zeiten.
+
 ### Sicherheit
 
 Die Adresse ist wie ein Passwort: Wer sie kennt, kann den ganzen Kalender lesen.
