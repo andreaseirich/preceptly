@@ -49,7 +49,9 @@ Meeting diag token=e8e108ff rolle=tutor peer=3f2a91c0 event=connected state=conn
 
 - Verlässt der **Tutor** das Meeting, wird es für alle beendet und der Raum-Token erneuert (`EndMeetingView`). Das ist Absicht.
 - Bricht die Verbindung des Browsers zum Server ab, baut er sie neu auf (neue Peer-ID, die Medienverbindungen werden neu
-  ausgehandelt). Bei einer instabilen Internetverbindung kommt es dadurch zu Unterbrechungen.
+  ausgehandelt). Bei einer instabilen Internetverbindung kommt es dadurch zu Unterbrechungen. Seit 17.11.2026 geschieht das nach
+  der Rückkehr aus dem Hintergrund (Handy) sofort und nicht erst nach der Wartezeit, siehe
+  `docs/features/feat-meeting-radierer-und-hintergrund.md`.
 - **coturn schreibt kein Log:** `log-file=/var/log/coturn.log` ist konfiguriert, die Datei existiert nicht und journald ist
   leer, vermutlich darf der Dienst die Datei nicht anlegen. Für künftige Fehlersuche am TURN-Server sollte das behoben werden
   (Änderung auf dem ai-server, nicht im Repository).

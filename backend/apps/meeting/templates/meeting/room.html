@@ -259,6 +259,7 @@ a.doc-item { text-decoration: none; }
 #lobby-join:active { transform: scale(0.98); }
 #lobby-join:focus-visible { outline: 3px solid #6ee0c5; outline-offset: 2px; }
 #lobby-err { font-size: 0.82em; color: #e74c3c; text-align: center; min-height: 1.2em; }
+#lobby-phone-hint { font-size: 0.8em; color: var(--text2); text-align: center; line-height: 1.4; }
 </style>
 <script nonce="{{ csp_nonce }}">
 // pdf.js ships as an ES module since v4, and module scripts run deferred -
@@ -297,6 +298,7 @@ document.dispatchEvent(new Event("pdfjs:ready"));
 
         <div id="lobby-name-row">Du beitrittst als <strong>{{ display_name }}</strong></div>
 
+        <div id="lobby-phone-hint" hidden>📱 Auf dem Handy: Bleib in dieser Seite, solange das Meeting läuft. Wechselst du in eine andere App, hält das Handy die Seite an, und Mikrofon und Verbindung pausieren, bis du zurück bist.</div>
         <div id="lobby-err" role="alert"></div>
 
         <button id="lobby-join" type="button" data-click="lobbyJoin">Beitreten →</button>
@@ -508,6 +510,9 @@ let screenStream = null;
 let peers = {};       // peerId → { pc: RTCPeerConnection, name, stream }
 let _iceCandidateQueues = {}; // peerId → [ICECandidate] buffered before setRemoteDescription
 let micActive = true;
+// Einstellungen für Mikrofon und Kamera, auch für das erneute Holen nach einer Pause (Handy im Hintergrund).
+const MEDIA_AUDIO = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+const MEDIA_VIDEO = { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } };
 let camActive = true;
 let screenActive = false;
 
@@ -535,6 +540,11 @@ let touchPinchLast = null;  // { midX, midY, dist }
 
 const wbCanvas = document.getElementById("wb-canvas");
 const wbCtx    = wbCanvas.getContext("2d");
+// Die Striche entstehen auf einer eigenen Ebene und werden erst danach auf das Blatt gelegt. Der Radierer löscht mit
+// "destination-out" und darf nur Striche entfernen. Direkt auf der Fläche, die auch das weiße Blatt oder das PDF trägt,
+// stanzte er Löcher hinein, und der graue Rahmen (#wb-canvas-wrap) schien als "hellgrauer Strich" durch.
+const wbLayer    = document.createElement("canvas");
+const wbLayerCtx = wbLayer.getContext("2d");
 
 // Resize canvas to exactly fill the wrap (pixel-perfect, no CSS scaling)
 function resizeCanvas() {
@@ -565,8 +575,29 @@ function redrawAll() {
         const h = wbCanvas.height / viewScale;
         wbCtx.fillRect(0, 0, w, h);
     }
-    wbStrokes.forEach(drawStroke);
     wbCtx.restore();
+    // Striche auf der eigenen Ebene aufbauen, danach auf das Blatt legen (siehe wbLayer).
+    if (wbLayer.width !== wbCanvas.width || wbLayer.height !== wbCanvas.height) {
+        wbLayer.width = wbCanvas.width;
+        wbLayer.height = wbCanvas.height;
+    }
+    wbLayerCtx.clearRect(0, 0, wbLayer.width, wbLayer.height);
+    wbLayerCtx.save();
+    wbLayerCtx.translate(viewOX, viewOY);
+    wbLayerCtx.scale(viewScale, viewScale);
+    wbStrokes.forEach(s => drawStroke(s, wbLayerCtx));
+    // Der Strich, den der Radierer gerade zieht, steht noch nicht in der Liste, muss aber schon wirken.
+    if (wbCurrentStroke && wbCurrentStroke.erase) drawStroke(wbCurrentStroke, wbLayerCtx);
+    wbLayerCtx.restore();
+    if (wbLayer.width > 0 && wbLayer.height > 0) wbCtx.drawImage(wbLayer, 0, 0);
+}
+
+// Ein Neuaufbau je Bildschirmbild genügt, auch wenn der Radierer schneller Punkte liefert.
+let _wbRedrawQueued = false;
+function requestWbRedraw() {
+    if (_wbRedrawQueued) return;
+    _wbRedrawQueued = true;
+    requestAnimationFrame(() => { _wbRedrawQueued = false; redrawAll(); });
 }
 
 let _loadBgInProgress = false;
@@ -868,10 +899,14 @@ function getCookie(name) {
 // ─────────────────────────────────────────────────────────────────────────────
 // WebSocket + Signaling
 // ─────────────────────────────────────────────────────────────────────────────
-function connectWS() {
-    ws = new WebSocket(WS_URL);
+let _wsHeartbeat = null;     // Takt-Timer (Ping an den Server)
+let _reconnectTimer = null;  // geplanter Neuaufbau nach einem Abbruch
+let _lastPong = Date.now();  // Zeitpunkt der letzten Antwort des Servers
+let _pongCount = 0;          // Zahl der Antworten, für den Vergleich vorher/nachher (ein Zeitstempel kann gleich sein)
 
-    let _wsHeartbeat = null;
+function connectWS() {
+    clearTimeout(_reconnectTimer);
+    ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
         _reconnectDelay = 1000;  // Backoff zurücksetzen nach erfolgreicher Verbindung
@@ -880,8 +915,15 @@ function connectWS() {
         sendLocalMediaDiag();
         setStatus("Verbunden – warte auf Teilnehmer …");
         document.getElementById("header-sub").textContent = "Verbunden";
+        _lastPong = Date.now();
+        clearInterval(_wsHeartbeat);
         _wsHeartbeat = setInterval(() => {
-            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "ping" }));
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            // Der Server antwortet auf jeden Ping. Bleibt das lange aus, ist die Verbindung tot, auch wenn der Browser den
+            // Socket noch für offen hält (typisch nach einem Netzwechsel oder einer Pause auf dem Handy). Im Hintergrund
+            // laufen Timer gedrosselt, dort wird nichts ausgewertet.
+            if (!document.hidden && Date.now() - _lastPong > 15000) { reconnectNow(); return; }
+            ws.send(JSON.stringify({ type: "ping" }));
         }, 3000);
     };
 
@@ -900,7 +942,7 @@ function connectWS() {
         const codeInfo = evt.code !== 1006 ? ` [Code ${evt.code}]` : ' [Netzwerkabbruch]';
         setStatus(`Verbindung unterbrochen${codeInfo} – verbinde neu in ${secs} s …`);
         document.getElementById("header-sub").textContent = "Verbinde neu …";
-        setTimeout(() => { if (!_intentionalClose) connectWS(); }, _reconnectDelay);
+        _reconnectTimer = setTimeout(() => { if (!_intentionalClose) connectWS(); }, _reconnectDelay);
         _reconnectDelay = Math.min(_reconnectDelay * 2, 30000);
     };
 
@@ -909,6 +951,10 @@ function connectWS() {
     ws.onmessage = async (evt) => {
         const msg = JSON.parse(evt.data);
         switch (msg.type) {
+            case "pong":
+                _lastPong = Date.now();
+                _pongCount++;
+                break;
             case "joined":
                 myPeerId = msg.peer_id;
                 // Connect to all existing peers (we are the "polite" peer)
@@ -969,6 +1015,104 @@ function connectWS() {
         }
     };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rückkehr aus dem Hintergrund (Handy: App-Wechsel, Bildschirmsperre)
+// ─────────────────────────────────────────────────────────────────────────────
+// Im Hintergrund darf eine Webseite nicht weiterlaufen: iOS hält sie an und schaltet das Mikrofon stumm, andere Browser
+// drosseln oder trennen sie zeitweise. Das lässt sich aus der Seite nicht abschalten. Verbessern lässt sich die Rückkehr:
+// sofort prüfen, ob die Verbindung noch lebt, Mikrofon und Kamera bei Bedarf neu holen und die Wiedergabe fortsetzen.
+// Der Wachhalter verhindert außerdem die automatische Bildschirmsperre, solange man im Meeting ist.
+let _hiddenSince = null;
+let _wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        if (!("wakeLock" in navigator) || _wakeLock || document.hidden) return;
+        const lock = await navigator.wakeLock.request("screen");
+        _wakeLock = lock;
+        lock.addEventListener("release", () => { if (_wakeLock === lock) _wakeLock = null; });
+    } catch (e) { /* nicht überall verfügbar, nur eine Hilfe */ }
+}
+
+// Sofort neu verbinden, ohne die Wartezeit nach einem Abbruch (bis zu 30 Sekunden) abzuwarten.
+function reconnectNow() {
+    if (_intentionalClose || _leaving) return;
+    clearTimeout(_reconnectTimer);
+    clearInterval(_wsHeartbeat);
+    _wsHeartbeat = null;
+    const old = ws;
+    if (old) {
+        // Vom alten Socket nichts mehr annehmen: Sonst liefe sein Abbruch-Handler später noch einmal und baute ein zweites
+        // Mal auf.
+        old.onopen = old.onmessage = old.onclose = old.onerror = null;
+        try { old.close(); } catch (e) { /* schon zu */ }
+    }
+    Object.keys(peers).forEach(id => removePeer(id));
+    myPeerId = null;
+    _reconnectDelay = 1000;
+    setStatus("Verbinde neu …");
+    document.getElementById("header-sub").textContent = "Verbinde neu …";
+    connectWS();
+}
+
+// Nach einer Pause sind Mikrofon- und Kamera-Spuren oft beendet oder vom System stumm geschaltet. Dann neu holen und in
+// alle bestehenden Verbindungen einsetzen; Verbindungen, die danach entstehen, nehmen die neue Spur ohnehin mit.
+async function refreshLocalTrack(kind) {
+    if (!localStream || !navigator.mediaDevices) return;
+    const old = localStream.getTracks().find(t => t.kind === kind);
+    if (!old) return;  // nie erlaubt oder nie vorhanden: nichts Neues anfordern
+    if (old.readyState === "live" && !old.muted) return;
+    if (old.readyState === "live") {
+        // Vom System stumm geschaltet (Unterbrechung): meist kommt die Spur von selbst zurück, kurz abwarten.
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        if (old.readyState === "live" && !old.muted) return;
+    }
+    let fresh = null;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(kind === "audio" ? { audio: MEDIA_AUDIO } : { video: MEDIA_VIDEO });
+        fresh = stream.getTracks().find(t => t.kind === kind) || null;
+    } catch (e) { return; }  // verweigert oder belegt: mit der alten Spur weitermachen
+    if (!fresh) return;
+    fresh.enabled = kind === "audio" ? micActive : camActive;
+    localStream.removeTrack(old);
+    try { old.stop(); } catch (e) { /* schon beendet */ }
+    localStream.addTrack(fresh);
+    // Eine geteilte Bildschirm-Spur bleibt, wo sie ist.
+    if (kind === "video" && screenActive) return;
+    Object.values(peers).forEach(({ pc }) => {
+        const sender = pc.getSenders().find(s => s.track === old);
+        if (sender) sender.replaceTrack(fresh).catch(() => { /* die nächste Verbindung nimmt sie mit */ });
+    });
+}
+
+async function resumeAfterBackground() {
+    const away = _hiddenSince === null ? 0 : Date.now() - _hiddenSince;
+    _hiddenSince = null;
+    if (!ws || _intentionalClose || _leaving) return;  // vor dem Beitritt oder beim Verlassen nichts tun
+    requestWakeLock();
+    document.querySelectorAll("video").forEach(v => {
+        const playing = v.play();
+        if (playing && typeof playing.catch === "function") playing.catch(() => {});
+    });
+    refreshLocalTrack("audio").catch(() => {});
+    refreshLocalTrack("video").catch(() => {});
+    if (ws.readyState !== WebSocket.OPEN) { reconnectNow(); return; }
+    if (away < 2000) return;  // kurzer Wechsel: die Verbindung hat ihn überstanden
+    // Nach einer längeren Pause antwortet ein toter Socket nicht mehr. iOS merkt das sonst erst spät.
+    const before = _pongCount;
+    try { ws.send(JSON.stringify({ type: "ping" })); } catch (e) { reconnectNow(); return; }
+    setTimeout(() => {
+        if (!_intentionalClose && !_leaving && _pongCount === before) reconnectNow();
+    }, 2000);
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { if (_hiddenSince === null) _hiddenSince = Date.now(); }
+    else resumeAfterBackground();
+});
+// Kommt das Netz zurück (etwa nach einem Wechsel zwischen WLAN und Mobilfunk), nicht erst auf den nächsten Versuch warten.
+window.addEventListener("online", () => { if (ws && ws.readyState !== WebSocket.OPEN) reconnectNow(); });
 
 function peerState(pc) {
     return pc.connectionState || pc.iceConnectionState;
@@ -1351,10 +1495,11 @@ function wbContinueStroke(e) {
         const pts = s.points;
         const prev = pts.length >= 1 ? pts[pts.length - 1] : pos;
         s.points.push(pos);
+        // Der Radierer wirkt nur auf der Strich-Ebene: Ebene neu aufbauen, nicht auf dem Blatt malen.
+        if (s.erase) { requestWbRedraw(); return; }
         wbCtx.save();
         wbCtx.translate(viewOX, viewOY); wbCtx.scale(viewScale, viewScale);
-        if (s.erase) { wbCtx.globalCompositeOperation = 'destination-out'; wbCtx.strokeStyle = 'rgba(0,0,0,1)'; }
-        else { wbCtx.globalCompositeOperation = 'source-over'; wbCtx.strokeStyle = s.color; }
+        wbCtx.globalCompositeOperation = 'source-over'; wbCtx.strokeStyle = s.color;
         wbCtx.lineWidth = s.width;
         wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
         wbCtx.beginPath(); wbCtx.moveTo(prev.x, prev.y); wbCtx.lineTo(pos.x, pos.y);
@@ -1374,92 +1519,95 @@ function wbContinueStroke(e) {
 function wbEndStroke() {
     if (!wbDrawing || !wbCurrentStroke) return;
     wbDrawing = false;
+    const wasErase = !!wbCurrentStroke.erase;
     wbStrokes.push(wbCurrentStroke);
     // Broadcast
     if (ws && ws.readyState === 1) {
         ws.send(JSON.stringify({ type: "wb_event", action: "stroke", stroke: wbCurrentStroke }));
     }
     wbCurrentStroke = null;
+    if (wasErase) redrawAll();
 }
 
-function drawStroke(stroke) {
+function drawStroke(stroke, ctx) {
+    ctx = ctx || wbCtx;
     // Called inside a save/restore block with view transform applied (from redrawAll)
     const t = stroke.type || 'pen';
-    wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
-    wbCtx.setLineDash(stroke.dash || []);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.setLineDash(stroke.dash || []);
     if (stroke.erase) {
-        wbCtx.globalCompositeOperation = 'destination-out';
-        wbCtx.strokeStyle = 'rgba(0,0,0,1)';
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';
     } else {
-        wbCtx.globalCompositeOperation = 'source-over';
-        wbCtx.strokeStyle = stroke.color || '#1a1a1a';
-        wbCtx.fillStyle  = stroke.color || '#1a1a1a';
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = stroke.color || '#1a1a1a';
+        ctx.fillStyle  = stroke.color || '#1a1a1a';
     }
-    wbCtx.lineWidth = stroke.width || 3;
+    ctx.lineWidth = stroke.width || 3;
 
     if (t === 'pen' || stroke.erase) {
-        if (!stroke.points || stroke.points.length < 1) { wbCtx.setLineDash([]); return; }
-        wbCtx.beginPath();
-        wbCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-        stroke.points.slice(1).forEach(p => wbCtx.lineTo(p.x, p.y));
-        wbCtx.stroke();
+        if (!stroke.points || stroke.points.length < 1) { ctx.setLineDash([]); return; }
+        ctx.beginPath();
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        stroke.points.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.stroke();
 
     } else if (t === 'line') {
-        wbCtx.beginPath();
-        wbCtx.moveTo(stroke.x1, stroke.y1);
-        wbCtx.lineTo(stroke.x2, stroke.y2);
-        wbCtx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(stroke.x1, stroke.y1);
+        ctx.lineTo(stroke.x2, stroke.y2);
+        ctx.stroke();
 
     } else if (t === 'arrow') {
         const dx = stroke.x2 - stroke.x1, dy = stroke.y2 - stroke.y1;
         const len = Math.hypot(dx, dy);
-        if (len < 2) { wbCtx.setLineDash([]); return; }
+        if (len < 2) { ctx.setLineDash([]); return; }
         const ux = dx / len, uy = dy / len;
         const hLen = Math.max(stroke.width * 5, 18);
         const hAngle = 0.42;
         // shaft
-        wbCtx.beginPath();
-        wbCtx.moveTo(stroke.x1, stroke.y1);
-        wbCtx.lineTo(stroke.x2 - ux * hLen * 0.65, stroke.y2 - uy * hLen * 0.65);
-        wbCtx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(stroke.x1, stroke.y1);
+        ctx.lineTo(stroke.x2 - ux * hLen * 0.65, stroke.y2 - uy * hLen * 0.65);
+        ctx.stroke();
         // head (filled, no dash)
-        wbCtx.setLineDash([]);
-        wbCtx.beginPath();
-        wbCtx.moveTo(stroke.x2, stroke.y2);
-        wbCtx.lineTo(stroke.x2 - ux*hLen + uy*hLen*Math.tan(hAngle),
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(stroke.x2, stroke.y2);
+        ctx.lineTo(stroke.x2 - ux*hLen + uy*hLen*Math.tan(hAngle),
                      stroke.y2 - uy*hLen - ux*hLen*Math.tan(hAngle));
-        wbCtx.lineTo(stroke.x2 - ux*hLen - uy*hLen*Math.tan(hAngle),
+        ctx.lineTo(stroke.x2 - ux*hLen - uy*hLen*Math.tan(hAngle),
                      stroke.y2 - uy*hLen + ux*hLen*Math.tan(hAngle));
-        wbCtx.closePath();
-        wbCtx.fill();
+        ctx.closePath();
+        ctx.fill();
 
     } else if (t === 'rect') {
         const x = Math.min(stroke.x1, stroke.x2), y = Math.min(stroke.y1, stroke.y2);
         const w = Math.abs(stroke.x2 - stroke.x1), h = Math.abs(stroke.y2 - stroke.y1);
-        wbCtx.beginPath();
-        wbCtx.rect(x, y, w, h);
-        wbCtx.stroke();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.stroke();
 
     } else if (t === 'circle') {
         const cx = (stroke.x1 + stroke.x2) / 2, cy = (stroke.y1 + stroke.y2) / 2;
         const rx = Math.abs(stroke.x2 - stroke.x1) / 2, ry = Math.abs(stroke.y2 - stroke.y1) / 2;
-        if (rx < 1 || ry < 1) { wbCtx.setLineDash([]); return; }
-        wbCtx.beginPath();
-        wbCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-        wbCtx.stroke();
+        if (rx < 1 || ry < 1) { ctx.setLineDash([]); return; }
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
 
     } else if (t === 'text') {
-        wbCtx.setLineDash([]);
+        ctx.setLineDash([]);
         const fs = stroke.fontSize || 18;
-        wbCtx.font = `${fs}px sans-serif`;
-        wbCtx.globalCompositeOperation = 'source-over';
-        wbCtx.fillStyle = stroke.color || '#1a1a1a';
+        ctx.font = `${fs}px sans-serif`;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = stroke.color || '#1a1a1a';
         (stroke.text || '').split('\n').forEach((line, i) => {
-            wbCtx.fillText(line, stroke.x, stroke.y + i * fs * 1.3);
+            ctx.fillText(line, stroke.x, stroke.y + i * fs * 1.3);
         });
     }
-    wbCtx.setLineDash([]);
-    wbCtx.globalCompositeOperation = 'source-over';
+    ctx.setLineDash([]);
+    ctx.globalCompositeOperation = 'source-over';
 }
 
 function clearWhiteboard(broadcast) {
@@ -1641,7 +1789,7 @@ function mergeStrokes(incoming) {
 function handleWbEvent(msg) {
     if (msg.action === "stroke") {
         wbStrokes.push(msg.stroke);
-        drawStroke(msg.stroke);
+        redrawAll();
     } else if (msg.action === "clear") {
         clearWhiteboard(false);
     } else if (msg.action === "undo") {
@@ -1896,8 +2044,11 @@ async function initLobby() {
     const lobbyVideo = document.getElementById("lobby-video");
     const noVideo    = document.getElementById("lobby-no-video");
     const errEl      = document.getElementById("lobby-err");
-    const AUDIO = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
-    const VIDEO = { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 24, max: 30 } };
+    const AUDIO = MEDIA_AUDIO;
+    const VIDEO = MEDIA_VIDEO;
+    // Auf dem Handy ehrlich sagen, was ein App-Wechsel bewirkt: Eine Webseite läuft im Hintergrund nicht weiter.
+    try { if (window.matchMedia("(pointer: coarse)").matches) document.getElementById("lobby-phone-hint").hidden = false; }
+    catch (e) { /* nur ein Hinweis */ }
     const getMedia = constraints => navigator.mediaDevices.getUserMedia(constraints);
 
     localStream = null;
@@ -2026,6 +2177,7 @@ function lobbyJoin() {
     lobby.style.transition = "opacity 0.25s";
     setTimeout(() => { lobby.style.display = "none"; }, 250);
 
+    requestWakeLock();
     connectWS();
 }
 

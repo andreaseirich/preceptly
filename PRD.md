@@ -57,6 +57,8 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 - Eigener TURN-Server für Verbindungen hinter NAT, Zugangsdaten nur 8 Stunden gültig
 - Dokumente im Raum teilen, PDF-Anzeige mit selbst ausgeliefertem pdf.js
 - Es wird nichts aufgezeichnet
+- Auf dem Handy pausiert ein Browser die Seite, sobald man in eine andere App wechselt (Mikrofon und Verbindung ruhen). Bei der Rückkehr verbindet sich der Raum sofort neu, holt das Mikrofon bei Bedarf neu und hält den Bildschirm wach; die Lobby weist darauf hin
+- Details: `docs/features/feat-meeting-reparatur.md`, `docs/features/feat-meeting-radierer-und-hintergrund.md`
 
 ### KI-Unterrichtsplanung
 - Unterrichtsplan für eine Stunde erzeugen, neu erzeugen, speichern
