@@ -76,39 +76,41 @@ CI runs `pip-audit` to check for known vulnerabilities. If a vulnerability is fo
 - **Fix version:** pip 26.1 (released 2026-07-02).
 - **Resolution:** CI now pins `pip>=26.1.2` in the install step, which also fixes PYSEC-2026-196 (pip < 26.1.2) and CVE-2026-6357 (pip < 26.1). The `--ignore-vuln CVE-2026-3219` flag has been removed from the audit command.
 
-### pip-audit: CVE-2026-4539 (Pygments)
+### pip-audit: CVE-2026-4539 (Pygments) — RESOLVED 17.11.2026
 
-- **What it is:** **Regular Expression Denial of Service (ReDoS)** in Pygments’ **AdlLexer** (GUID/ID regex in `archetype.py`). An attacker who can force parsing of malicious input through that lexer could cause high CPU use. Advisories often rate this **Low** because exploitation typically requires **local** or **controlled** input paths, not generic internet-facing RCE.
-- **Issue:** Affected versions include PyPI’s latest **2.19.2** (metadata version string unchanged until the next release).
-- **Upstream fix:** [pygments/pygments#3064](https://github.com/pygments/pygments/pull/3064) (commit `24b8aa76…`).
-- **Our mitigation:**
-  1. **`requirements.txt` pins Pygments from that git revision** so installs get the **patched source**, even though the package still self-reports version **2.19.2**.
-  2. **CI** keeps `pip-audit --ignore-vuln CVE-2026-4539` until **Pygments > 2.19.2** exists on PyPI (otherwise the audit tool flags the metadata version only).
-- **Preceptly:** The app does not use that lexer on untrusted user content; residual risk is mostly transitive/tooling (e.g. highlighting in dev dependencies).
-- **Follow-up:** When PyPI publishes a release **> 2.19.2**, switch to `Pygments==<version>`, remove the git pin, and **remove** the `pip-audit` ignore for this CVE.
+- **What it is:** **Regular Expression Denial of Service (ReDoS)** in Pygments' **AdlLexer** (GUID/ID regex in `archetype.py`). An attacker who can force parsing of malicious input through that lexer could cause high CPU use; advisories rate it **Low**.
+- **Affected:** Pygments up to 2.19.2. **Fixed in 2.20.0** (on PyPI since 2026-03-29); the current release is 2.21.0.
+- **Resolution:** `requirements.txt` pins `Pygments==2.21.0`. This replaces the git-revision pin we used while PyPI had no fixed release, and the `pip-audit --ignore-vuln CVE-2026-4539` flag is gone from CI. `backend/apps/core/tests/test_dependency_assumptions.py` fails if a git pin comes back.
+- **Preceptly:** The app does not use that lexer on untrusted user content; the exposure was mostly tooling.
 
-### pip-audit: Twisted 26.4.0 (via Daphne) — OPEN, stand 24.10.2026
+### pip-audit: Twisted (via Daphne) — BEHOBEN am 17.11.2026
 
-Twisted ist keine direkte Abhängigkeit, sondern kommt über **Daphne** (der Webserver). Es gibt kein stabiles Release mit
-den Korrekturen: Sie stehen erst in `26.10.0rc1` (Vorabversion), eine Lücke hat gar keinen Fix. Entscheidung von Andreas
-am 24.10.2026: ignorieren mit Begründung, nicht auf eine Vorabversion des produktiven Webservers wechseln.
+Twisted ist keine direkte Abhängigkeit, sondern kommt über **Daphne** (der Webserver). Am 24.10.2026 gab es mit Twisted 26.4.0
+acht Meldungen und noch kein stabiles Release mit den Korrekturen; Andreas entschied damals, mit Begründung zu ignorieren und
+nicht auf eine Vorabversion des produktiven Webservers zu wechseln. **Twisted 26.10.0 (stabil, veröffentlicht am 30.10.2026)**
+löst das ab:
 
-| Lücke | Betrifft | Nutzt Preceptly das? | Umgang |
-|---|---|---|---|
-| CVE-2026-106454 | `twisted.mail.imap4` (ReDoS bei IMAP-LIST) | Nein, kein IMAP-Server | dauerhaft ignoriert (kein Fix verfügbar) |
-| CVE-2026-115774 | IMAP4-Server (Endlosschleife) | Nein | ignoriert |
-| CVE-2026-115778 | `twisted.conch` Telnet (Speicher) | Nein | ignoriert |
-| CVE-2026-115775 | XML-Element-Stream (Speicher) | Nein | ignoriert |
-| CVE-2026-115776 | `twisted.words` IRC-Server (Speicher) | Nein | ignoriert |
-| CVE-2026-83813 | `twisted.names` DNS-Client (gefälschte DNS-Antworten, Cache-Poisoning); am 28.10.2026 gemeldet | Nein: weder Daphne noch Autobahn, Channels oder der Anwendungscode nutzen `twisted.names`, Twisted löst Namen über seinen Thread-Resolver auf | ignoriert |
-| GHSA-vpp8-g58w-m8mp | HTTP/2-Server von `twisted.web` („Rapid Reset“, CPU-Erschöpfung); am 29.10.2026 gemeldet | Nein: Das Paket `h2` ist nicht installiert (Twisters HTTP/2-Code lässt sich ohne nicht laden), Daphne schaltet HTTP/2 nur mit `twisted[http2]` und TLS ein, und der Server startet ohne TLS-Endpunkt (TLS endet am Railway-Proxy). Ein Test (`test_dependency_assumptions.py`) schlägt fehl, sobald sich das ändert | ignoriert, solange diese Voraussetzung gilt |
-| CVE-2026-115877 | `twisted.web.http.HTTPChannel`: bloßes CR oder LF im Header-Wert wird nicht abgelehnt (Request-Smuggling) | **Ja**, Daphne nutzt `twisted.web.http` | **befristet** ignoriert |
+- Die Produktion läuft auf 26.10.0 (geprüft am 17.11.2026 mit `pip list` im Container).
+- `pip-audit` ohne jede Ausnahme meldet für Twisted 26.10.0 **nichts mehr**. Alle Ignores sind aus `.github/workflows/ci.yml` entfernt.
+- `requirements.txt` verlangt `Twisted>=26.10.0`, damit ein Build nie eine ältere Version auflöst.
+- Der Wächtertest `test_dependency_assumptions.py` verlangt außerdem, dass jedes künftige `--ignore-vuln` hier begründet steht.
 
-- **Zu CVE-2026-115877:** Ein Angriff braucht einen vorgeschalteten Proxy, der denselben Zeilenumbruch anders deutet.
-  Preceptly läuft hinter einem solchen Proxy; die Einschätzung des Restrisikos steht im nicht öffentlichen Sicherheitsplan.
-- **Nächster Schritt:** Sobald **Twisted 26.10.0 (stabil)** auf PyPI steht: Daphne mit der neuen Version testen, die
-  Ignores für 115774, 115775, 115776, 115778, 83813, GHSA-vpp8-g58w-m8mp und 115877 aus `.github/workflows/ci.yml` entfernen und prüfen, ob 106454
-  inzwischen einen Fix hat. Bis dahin bei jedem Dependabot-Hinweis zu Twisted/Daphne nachsehen.
+Meldungen, die bis dahin ignoriert waren (zur Nachvollziehbarkeit, Stand 24.10.2026):
+
+| Lücke | Betrifft | Nutzte Preceptly das? |
+|---|---|---|
+| CVE-2026-106454, CVE-2026-115774 | IMAP4-Server (`twisted.mail.imap4`) | Nein, kein IMAP-Server |
+| CVE-2026-115778 | `twisted.conch` Telnet | Nein |
+| CVE-2026-115775 | XML-Element-Stream | Nein |
+| CVE-2026-115776 | `twisted.words` IRC-Server | Nein |
+| CVE-2026-83813 | `twisted.names` DNS-Client | Nein: Twisted löst Namen über seinen Thread-Resolver auf |
+| GHSA-vpp8-g58w-m8mp | HTTP/2-Server von `twisted.web` („Rapid Reset“) | Nein: `h2` nicht installiert, Server startet ohne TLS-Endpunkt |
+| CVE-2026-115877 | `twisted.web.http.HTTPChannel`: bloßes CR oder LF im Header-Wert (Request-Smuggling) | **Ja**, Daphne nutzt `twisted.web.http`; war befristet bis zur stabilen 26.10.0 ignoriert |
+
+- **HTTP/2 bleibt aus:** Die Tests in `test_dependency_assumptions.py` halten `h2` und den HTTP/2-Extra aus den Abhängigkeiten und den
+  Server ohne TLS-Endpunkt (weniger Angriffsfläche), auch wenn die Meldung selbst behoben ist.
+- **Weiter beachten:** Bei jedem Dependabot-Hinweis zu Twisted oder Daphne nachsehen.
+
 - **Zusätzlich am 24.10.2026 behoben (kein Ignore nötig):** `pillow` 12.3.0 → 13.0.0 (37 Meldungen), `pypdf` 6.20.0 → 6.21.2
   (9 Meldungen), `certifi` 2026.7.22 → 2026.10.19 (CA-Bundle mit kompromittiertem emSign-Root).
 
