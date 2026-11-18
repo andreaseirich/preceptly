@@ -52,6 +52,12 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 - Push-Benachrichtigungen, als App installierbar (PWA)
 - Details: `docs/features/feat-portal.md`
 
+### Listen (Schüler, Rechnungen, Stunden, Serien, Ausgaben)
+- Jede Liste erreicht alle Einträge über Seiten (20 bzw. 50 je Seite), mit "Einträge 21–40 von 45"
+- Sortieren nach Spalten, Suchen und Filtern; Filter und Sortierung bleiben beim Blättern erhalten
+- Der Statusfilter bei Rechnungen bleibt ein Pro-Merkmal
+- Details: `docs/features/feat-listen-seiten-sortieren-filtern.md`
+
 ### Video-Meetings
 - Meeting-Raum je Stunde, direkt im Browser (WebRTC)
 - Eigener TURN-Server für Verbindungen hinter NAT, Zugangsdaten nur 8 Stunden gültig

@@ -8,8 +8,8 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models.functions import Lower
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -19,7 +19,10 @@ from django.utils.translation import ngettext
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from apps.contracts.list_helpers import student_choices
 from apps.core.feature_flags import is_premium_user
+from apps.core.list_filters import ChoiceFilter, DateFilter, SearchFilter
+from apps.core.list_mixin import SortFilterListMixin
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.booking_origin import TUTOR, booking_origin
 from apps.lessons.forms import LessonForm
@@ -38,13 +41,39 @@ from apps.lessons.views_calendar import get_last_calendar_url
 logger = logging.getLogger(__name__)
 
 
-class LessonListView(LoginRequiredMixin, ListView):
+class LessonListView(SortFilterListMixin, LoginRequiredMixin, ListView):
     """List of all lessons."""
 
     model = Lesson
     template_name = "lessons/lesson_list.html"
     context_object_name = "lessons"
     paginate_by = 50
+    sort_options = {
+        "date": ("date", "start_time"),
+        "time": ("start_time",),
+        "duration": ("duration_minutes",),
+        "student": (Lower("contract__last_name"), Lower("contract__first_name")),
+        "status": ("status",),
+    }
+    default_sort = "date"
+    default_dir = "desc"
+    list_filters = (
+        SearchFilter("q", _("Search"), ("contract__first_name", "contract__last_name")),
+        ChoiceFilter(
+            "student",
+            _("Student"),
+            student_choices,
+            lambda queryset, value: queryset.filter(contract_id=int(value)),
+        ),
+        ChoiceFilter(
+            "status",
+            _("Status"),
+            Lesson.STATUS_CHOICES,
+            lambda queryset, value: queryset.filter(status=value),
+        ),
+        DateFilter("start_date", _("From"), "date__gte"),
+        DateFilter("end_date", _("To"), "date__lte"),
+    )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -54,24 +83,13 @@ class LessonListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        """Filter lessons by user and optionally by date range."""
-        queryset = super().get_queryset().filter(contract__user=self.request.user)
-
-        # Filter by date range if provided
-        start_date = self.request.GET.get("start_date")
-        end_date = self.request.GET.get("end_date")
-
-        try:
-            if start_date:
-                datetime.strptime(start_date, "%Y-%m-%d")  # validate format first
-                queryset = queryset.filter(date__gte=start_date)
-            if end_date:
-                datetime.strptime(end_date, "%Y-%m-%d")  # validate format first
-                queryset = queryset.filter(date__lte=end_date)
-        except (ValueError, ValidationError):
-            pass  # ungültige Datumsformat-Parameter ignorieren
-
-        return queryset.order_by("-date", "-start_time")
+        """Nur die eigenen Stunden. Filter und Sortierung kommen von SortFilterListMixin."""
+        return (
+            super()
+            .get_queryset()
+            .filter(contract__user=self.request.user)
+            .select_related("contract")
+        )
 
 
 class LessonDetailView(LoginRequiredMixin, DetailView):

@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load list_tools %}
 {% load currency %}
 
 {% block title %}Rechnungen – Preceptly{% endblock %}
@@ -11,29 +12,18 @@
     <a href="{% url 'billing:invoice_create' %}" class="btn btn-success">➕ {% trans "Create New Invoice" %}</a>
 </div>
 
-{% if is_billing_pro %}
-<form method="get" style="margin-bottom: 20px;">
-    <label for="status">{% trans "Filter by status" %}:</label>
-    <select name="status" id="status">
-        <option value="">{% trans "All" %}</option>
-        <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>{% trans "Draft" %}</option>
-        <option value="sent" {% if status_filter == "sent" %}selected{% endif %}>{% trans "Sent" %}</option>
-        <option value="paid" {% if status_filter == "paid" %}selected{% endif %}>{% trans "Paid" %}</option>
-    </select>
-    <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
-</form>
-{% endif %}
+{% filter_bar %}
 
 {% if invoices %}
 <table aria-label="Rechnungsliste">
     <thead>
         <tr>
-            <th scope="col">{% trans "ID" %}</th>
-            <th scope="col">{% trans "Payer" %}</th>
-            <th scope="col">{% trans "Period" %}</th>
-            <th scope="col">{% trans "Amount" %}</th>
-            <th scope="col">{% trans "Status" %}</th>
-            <th scope="col">{% trans "Created" %}</th>
+            {% sort_header "number" _("ID") %}
+            {% sort_header "payer" _("Payer") %}
+            {% sort_header "period" _("Period") %}
+            {% sort_header "amount" _("Amount") %}
+            {% sort_header "status" _("Status") %}
+            {% sort_header "created" _("Created") %}
             <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
@@ -53,9 +43,10 @@
         {% endfor %}
     </tbody>
 </table>
+{% pagination %}
 {% else %}
 <div class="empty-state">
-    <p>{% trans "No invoices available." %}</p>
+    <p>{% if list_filters_active %}{% trans "No entries match these filters." %}{% else %}{% trans "No invoices available." %}{% endif %}</p>
 </div>
 {% endif %}
 {% endblock %}

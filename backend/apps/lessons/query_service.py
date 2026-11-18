@@ -82,7 +82,7 @@ class SessionQueryService:
         )
         if user:
             qs = qs.filter(contract__user=user)
-        return qs[:10]
+        return qs
 
 
 # Alias for backwards compatibility

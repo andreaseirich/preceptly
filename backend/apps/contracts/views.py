@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +21,7 @@ from apps.contracts.formsets import (
     generate_monthly_plans_for_contract,
     iter_contract_months,
 )
+from apps.contracts.list_helpers import filter_by_institute, institute_choices
 from apps.contracts.models import Contract, ContractMonthlyPlan, Institute
 from apps.contracts.services import (
     get_contract_current_month_summary,
@@ -27,18 +29,42 @@ from apps.contracts.services import (
     get_institute_tier_progress,
 )
 from apps.core.demo_guard import DEMO_CONTRACT_LIMIT, demo_block, is_demo_user
+from apps.core.list_filters import ChoiceFilter, SearchFilter
+from apps.core.list_mixin import SortFilterListMixin
 
 
-class ContractListView(LoginRequiredMixin, ListView):
+class ContractListView(SortFilterListMixin, LoginRequiredMixin, ListView):
     """List of all contracts for the current user."""
 
     model = Contract
     template_name = "contracts/contract_list.html"
     context_object_name = "contracts"
     paginate_by = 20
+    sort_options = {
+        "student": (Lower("last_name"), Lower("first_name")),
+        "institute": (Lower("institute_fk__institute_name"),),
+        "rate": ("hourly_rate",),
+        "duration": ("unit_duration_minutes",),
+        "from": ("start_date",),
+        "to": ("end_date",),
+        "status": ("is_active",),
+    }
+    default_sort = "student"
+    list_filters = (
+        SearchFilter(
+            "q", _("Search"), ("first_name", "last_name", "school", "institute_fk__institute_name")
+        ),
+        ChoiceFilter(
+            "status",
+            _("Status"),
+            [("active", _("Active")), ("inactive", _("Inactive"))],
+            lambda queryset, value: queryset.filter(is_active=value == "active"),
+        ),
+        ChoiceFilter("institute", _("Institute"), institute_choices, filter_by_institute),
+    )
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user).select_related("institute_fk")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -132,7 +158,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
         context["cancelled_overview"] = cancelled_overview(contract, viewer=TUTOR)
         context["progress_notes"] = ProgressNote.objects.filter(contract=contract).order_by(
             "-created_at"
-        )[:10]
+        )
         context["unread_messages"] = PortalMessage.objects.filter(
             contract=contract, read_by_tutor=False
         ).count()

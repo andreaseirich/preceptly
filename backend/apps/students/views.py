@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
+from django.db.models.functions import Lower
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -28,6 +29,8 @@ from apps.core.feature_flags import (
     document_limit_reached,
     user_has_feature,
 )
+from apps.core.list_filters import SearchFilter
+from apps.core.list_mixin import SortFilterListMixin
 from apps.core.tier_gate import deny
 from apps.core.upload_validation import validate_file_magic
 from apps.portal.identity import portal_login_conflict
@@ -43,11 +46,18 @@ _MAX_DOC_NAME_LEN = 200
 _SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._\-\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df ]")
 
 
-class StudentListView(LoginRequiredMixin, ListView):
+class StudentListView(SortFilterListMixin, LoginRequiredMixin, ListView):
     model = Contract
     template_name = "students/student_list.html"
     context_object_name = "students"
     paginate_by = 20
+    sort_options = {
+        "name": (Lower("last_name"), Lower("first_name")),
+        "school": (Lower("school"),),
+        "grade": (Lower("grade"),),
+    }
+    default_sort = "name"
+    list_filters = (SearchFilter("q", _("Search"), ("first_name", "last_name", "school", "grade")),)
 
     def get_queryset(self):
         return Contract.objects.filter(user=self.request.user)

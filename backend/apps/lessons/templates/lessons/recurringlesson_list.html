@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load list_tools %}
 
 {% block title %}Wiederkehrende Lektionen – Preceptly{% endblock %}
 
@@ -14,14 +15,16 @@
 {% endif %}
 </div>
 
+{% filter_bar %}
+
 <table aria-label="Wiederkehrende Lektionen">
     <thead>
         <tr>
-            <th scope="col">{% trans "Student" %}</th>
+            {% sort_header "student" _("Student") %}
             <th scope="col">{% trans "Weekdays" %}</th>
-            <th scope="col">{% trans "Time" %}</th>
-            <th scope="col">{% trans "Start Date" %}</th>
-            <th scope="col">{% trans "Status" %}</th>
+            {% sort_header "time" _("Time") %}
+            {% sort_header "start" _("Start Date") %}
+            {% sort_header "status" _("Status") %}
             <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
@@ -39,8 +42,9 @@
             </div></td>
         </tr>
         {% empty %}
-        <tr><td colspan="6">{% trans "No recurring lessons available." %}</td></tr>
+        <tr><td colspan="6">{% if list_filters_active %}{% trans "No entries match these filters." %}{% else %}{% trans "No recurring lessons available." %}{% endif %}</td></tr>
         {% endfor %}
     </tbody>
 </table>
+{% pagination %}
 {% endblock %}

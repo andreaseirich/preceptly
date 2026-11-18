@@ -1,0 +1,24 @@
+{% load i18n %}{% if filters %}
+<form method="get" class="list-filters" role="search" aria-label="{% trans 'Filter the list' %}">
+    {% for f in filters %}
+    <div class="list-filter">
+        <label for="filter-{{ f.name }}">{{ f.label }}</label>
+        {% if f.kind == "select" %}
+        <select id="filter-{{ f.name }}" name="{{ f.name }}">
+            {% if not f.has_default %}<option value="">{% trans "All" %}</option>{% endif %}
+            {% for choice in f.choices %}<option value="{{ choice.value }}"{% if choice.selected %} selected{% endif %}>{{ choice.label }}</option>{% endfor %}
+        </select>
+        {% elif f.kind == "date" %}
+        <input type="date" id="filter-{{ f.name }}" name="{{ f.name }}" value="{{ f.value }}">
+        {% else %}
+        <input type="search" id="filter-{{ f.name }}" name="{{ f.name }}" value="{{ f.value }}" maxlength="100" autocomplete="off">
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% if sort %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ direction }}">{% endif %}
+    <div class="list-filter-actions">
+        <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
+        {% if active %}<a href="{{ reset_url }}" class="list-filter-reset">{% trans "Reset filters" %}</a>{% endif %}
+    </div>
+</form>
+{% endif %}

@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% load i18n %}
+{% load list_tools %}
 {% load currency %}
 
 {% block title %}{% trans "Expenses" %} - Preceptly{% endblock %}
@@ -7,28 +8,21 @@
 {% block content %}
 <h1>{% trans "Expenses" %}</h1>
 
-<div style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
-    <form method="get" action="" style="display: flex; gap: 10px; align-items: center;">
-        <label for="year">{% trans "Year" %}:</label>
-        <select id="year" name="year">
-            {% for y in available_years %}
-            <option value="{{ y }}" {% if y == year_filter %}selected{% endif %}>{{ y }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-secondary">{% trans "Apply" %}</button>
-    </form>
+<div style="margin-bottom: 8px; display: flex; justify-content: flex-end;">
     <a href="{% url 'core:expense_create' %}" class="btn">+ {% trans "New expense" %}</a>
 </div>
+
+{% filter_bar %}
 
 {% if expenses %}
 <table class="table">
     <thead>
         <tr>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Category" %}</th>
-            <th>{% trans "Description" %}</th>
-            <th style="text-align:right;">{% trans "Amount" %}</th>
-            <th></th>
+            {% sort_header "date" _("Date") %}
+            {% sort_header "category" _("Category") %}
+            {% sort_header "description" _("Description") %}
+            {% sort_header "amount" _("Amount") "th-right" %}
+            <th scope="col"><span class="sr-only">{% trans "Actions" %}</span></th>
         </tr>
     </thead>
     <tbody>
@@ -54,14 +48,15 @@
     </tbody>
     <tfoot>
         <tr style="font-weight:bold; border-top:2px solid var(--border-color);">
-            <td colspan="3">{% trans "Total expenses" %}</td>
+            <td colspan="3">{% if expense_extra_filters %}{% trans "Total expenses (filtered)" %}{% else %}{% trans "Total expenses" %}{% endif %}</td>
             <td style="text-align:right;">{{ total_expense|euro }}</td>
             <td></td>
         </tr>
     </tfoot>
 </table>
+{% pagination %}
 {% else %}
-<p>{% trans "No expenses for this year." %}</p>
+<p>{% if list_filters_active %}{% trans "No entries match these filters." %}{% else %}{% trans "No expenses for this year." %}{% endif %}</p>
 {% endif %}
 
 <div style="margin-top:20px;">

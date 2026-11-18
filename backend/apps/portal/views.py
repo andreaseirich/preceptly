@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -382,10 +383,11 @@ class ParentStudentDetailView(View):
         student = link.contract
         from apps.lessons.models import Lesson
 
-        lessons = Lesson.objects.filter(
-            contract=student,
-        ).order_by("-date", "-start_time")[:20]
-        progress_notes = student.progress_notes.all()[:10]
+        # Alle Stunden, 20 je Seite. Früher stand hier [:20], und ältere Stunden waren nicht erreichbar.
+        lessons = Paginator(
+            Lesson.objects.filter(contract=student).order_by("-date", "-start_time"), 20
+        ).get_page(request.GET.get("page"))
+        progress_notes = student.progress_notes.all()
         chat_messages = PortalMessage.objects.filter(contract=student).order_by("created_at")
         PortalMessage.objects.filter(contract=student, read_by_portal=False).update(
             read_by_portal=True
@@ -396,6 +398,7 @@ class ParentStudentDetailView(View):
             {
                 "student": student,
                 "lessons": lessons,
+                "page_obj": lessons,
                 "progress_notes": progress_notes,
                 "chat_messages": chat_messages,
                 "portal_user": portal_user,

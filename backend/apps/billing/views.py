@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
+from django.db.models.functions import Lower
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -31,6 +32,8 @@ from apps.billing.services import InvoiceService
 from apps.contracts.institute_billing import resolve_institute_billing_config
 from apps.contracts.models import Contract
 from apps.contracts.tier_counting import COUNT_BY_STARTED_HOUR, counted_total
+from apps.core.list_filters import ChoiceFilter, SearchFilter
+from apps.core.list_mixin import SortFilterListMixin
 from apps.core.selectors import IncomeSelector
 from apps.lessons.models import Lesson
 
@@ -86,26 +89,46 @@ def _user_invoice_queryset(user):
     return Invoice.objects.filter(owner=user)
 
 
-class InvoiceListView(LoginRequiredMixin, ListView):
+class InvoiceListView(SortFilterListMixin, LoginRequiredMixin, ListView):
     """Liste aller Rechnungen."""
 
     model = Invoice
     template_name = "billing/invoice_list.html"
     context_object_name = "invoices"
     paginate_by = 20
+    sort_options = {
+        "number": ("invoice_number", "id"),
+        "payer": (Lower("payer_name"),),
+        "period": ("period_start", "period_end"),
+        "amount": ("total_amount",),
+        "status": ("status",),
+        "created": ("created_at",),
+    }
+    default_sort = "created"
+    default_dir = "desc"
 
     def get_queryset(self):
-        qs = _user_invoice_queryset(self.request.user).prefetch_related(
+        return _user_invoice_queryset(self.request.user).prefetch_related(
             "items",
             "items__lesson",
         )
+
+    def get_list_filters(self):
+        # Hier steht `_` für gettext (nicht lazy): Die Beschriftungen entstehen deshalb erst je Anfrage.
         from apps.core.feature_flags import Feature, user_has_feature
 
+        filters = [SearchFilter("q", _("Search"), ("payer_name", "invoice_number"))]
+        # Der Statusfilter gehört zum Pro-Tarif, wie bisher.
         if user_has_feature(self.request.user, Feature.FEATURE_BILLING_PRO):
-            status = self.request.GET.get("status", "").strip()
-            if status in ("draft", "sent", "paid"):
-                qs = qs.filter(status=status)
-        return qs
+            filters.append(
+                ChoiceFilter(
+                    "status",
+                    _("Status"),
+                    Invoice.STATUS_CHOICES,
+                    lambda queryset, value: queryset.filter(status=value),
+                )
+            )
+        return filters
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

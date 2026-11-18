@@ -5,8 +5,10 @@ Views für RecurringLesson-CRUD-Operationen.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.generic import (
@@ -18,7 +20,10 @@ from django.views.generic import (
     UpdateView,
 )
 
+from apps.contracts.list_helpers import student_choices
 from apps.core.feature_flags import Feature, user_has_feature
+from apps.core.list_filters import ChoiceFilter, SearchFilter
+from apps.core.list_mixin import SortFilterListMixin
 from apps.core.tier_gate import FeatureRequiredMixin, deny
 from apps.lessons.models import Session
 from apps.lessons.recurring_forms import RecurringLessonForm
@@ -29,16 +34,57 @@ from apps.lessons.series_messages import report_busy_days
 from apps.lessons.views_calendar import get_last_calendar_url
 
 
-class RecurringLessonListView(LoginRequiredMixin, ListView):
+def _series_status_filter(queryset, value):
+    """Beendet heißt: Das Enddatum liegt vor heute (`is_active` bleibt bei einer abgelaufenen Serie an)."""
+    today = timezone.localdate()
+    if value == "inactive":
+        return queryset.filter(is_active=False)
+    if value == "ended":
+        return queryset.filter(is_active=True, end_date__lt=today)
+    return queryset.filter(is_active=True).exclude(end_date__lt=today)
+
+
+class RecurringLessonListView(SortFilterListMixin, LoginRequiredMixin, ListView):
     """Liste aller wiederholenden Unterrichtsstunden."""
 
     model = RecurringLesson
     template_name = "lessons/recurringlesson_list.html"
     context_object_name = "recurring_lessons"
     paginate_by = 20
+    sort_options = {
+        "student": (Lower("contract__last_name"), Lower("contract__first_name")),
+        "time": ("start_time",),
+        "start": ("start_date",),
+        "status": ("is_active", "end_date"),
+    }
+    default_sort = "start"
+    default_dir = "desc"
 
     def get_queryset(self):
-        return super().get_queryset().filter(contract__user=self.request.user)
+        return (
+            super()
+            .get_queryset()
+            .filter(contract__user=self.request.user)
+            .select_related("contract")
+        )
+
+    def get_list_filters(self):
+        # Hier steht `_` für gettext (nicht lazy): Die Beschriftungen entstehen deshalb erst je Anfrage.
+        return [
+            SearchFilter("q", _("Search"), ("contract__first_name", "contract__last_name")),
+            ChoiceFilter(
+                "student",
+                _("Student"),
+                student_choices,
+                lambda queryset, value: queryset.filter(contract_id=int(value)),
+            ),
+            ChoiceFilter(
+                "status",
+                _("Status"),
+                [("active", _("Active")), ("ended", _("Ended")), ("inactive", _("Inactive"))],
+                _series_status_filter,
+            ),
+        ]
 
 
 class RecurringLessonDetailView(LoginRequiredMixin, DetailView):

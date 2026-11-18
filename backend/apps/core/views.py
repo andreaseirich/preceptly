@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
+from django.db.models.functions import Lower
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -32,6 +33,8 @@ from apps.core.forms import (
     UserEmailForm,
     WorkingHoursForm,
 )
+from apps.core.list_filters import ChoiceFilter, SearchFilter
+from apps.core.list_mixin import SortFilterListMixin
 from apps.core.models import Expense, Review, UserProfile
 from apps.core.selectors import IncomeSelector
 from apps.lessons.services import LessonConflictService, SessionQueryService
@@ -758,46 +761,69 @@ class TaxYearCsvView(LoginRequiredMixin, View):
         return response
 
 
-class ExpenseListView(LoginRequiredMixin, ListView):
+class ExpenseListView(SortFilterListMixin, LoginRequiredMixin, ListView):
     model = Expense
     template_name = "core/expense_list.html"
     context_object_name = "expenses"
+    paginate_by = 20
+    sort_options = {
+        "date": ("date",),
+        "category": ("category",),
+        "description": (Lower("description"),),
+        "amount": ("amount",),
+    }
+    default_sort = "date"
+    default_dir = "desc"
 
     def get_queryset(self):
-        qs = Expense.objects.filter(user=self.request.user)
-        year = self.request.GET.get("year")
-        if year:
-            try:
-                qs = qs.filter(date__year=int(year))
-            except (ValueError, TypeError) as exc:
-                logger.debug("Invalid year filter ignored: %s", exc)
-        return qs
+        return Expense.objects.filter(user=self.request.user)
+
+    def _available_years(self):
+        if not hasattr(self, "_years"):
+            now = timezone.now()
+            years = list(
+                Expense.objects.filter(user=self.request.user)
+                .dates("date", "year")
+                .values_list("date__year", flat=True)
+                .order_by("-date__year")
+            )
+            if now.year not in years:
+                years = sorted(set(years + [now.year]), reverse=True)
+            self._years = years
+        return self._years
+
+    def get_list_filters(self):
+        # Ohne Angabe gilt das laufende Jahr. Früher zeigte die Liste dann alle Jahre, die Summe darunter aber nur
+        # das laufende Jahr.
+        return [
+            ChoiceFilter(
+                "year",
+                _("Year"),
+                lambda request: [(year, year) for year in self._available_years()],
+                lambda queryset, value: queryset.filter(date__year=int(value)),
+                default=lambda request: str(timezone.now().year),
+            ),
+            ChoiceFilter(
+                "category",
+                _("Category"),
+                Expense.CATEGORY_CHOICES,
+                lambda queryset, value: queryset.filter(category=value),
+            ),
+            SearchFilter("q", _("Search"), ("description", "notes")),
+        ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        now = timezone.now()
-        year_param = self.request.GET.get("year")
-        try:
-            year_filter = int(year_param) if year_param else now.year
-        except (ValueError, TypeError):
-            year_filter = now.year
-
-        total_expense = Expense.objects.filter(
-            user=self.request.user, date__year=year_filter
-        ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-
-        existing_years = list(
-            Expense.objects.filter(user=self.request.user)
-            .dates("date", "year")
-            .values_list("date__year", flat=True)
-            .order_by("-date__year")
+        values = {f["name"]: f["value"] for f in context["list_filters"]}
+        context["year_filter"] = int(values["year"])
+        # Summe über alle Seiten der gefilterten Liste, nicht nur der angezeigten Seite.
+        # Mit dem wirksamen Betrag (Betriebsanteil), wie die Zeilen und die Steuerseiten. Früher stand hier die Summe der
+        # Rohbeträge: Bei einer nur zu 50 % betrieblichen Ausgabe zeigte die Zeile 5 €, die Summe zählte 10 €.
+        context["total_expense"] = sum(
+            (expense.effective_amount for expense in self.controlled_queryset), Decimal("0.00")
         )
-        if now.year not in existing_years:
-            existing_years = sorted(set(existing_years + [now.year]), reverse=True)
-
-        context["year_filter"] = year_filter
-        context["total_expense"] = total_expense
-        context["available_years"] = existing_years
+        context["available_years"] = self._available_years()
+        context["expense_extra_filters"] = bool(values["category"] or values["q"])
         return context
 
 

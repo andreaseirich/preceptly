@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load list_tools %}
 
 {% block title %}Verträge – Preceptly{% endblock %}
 
@@ -25,16 +26,18 @@
 </div>
 {% endif %}
 
+{% filter_bar %}
+
 <table aria-label="Schülerliste">
     <thead>
         <tr>
-            <th scope="col">{% trans "Student" %}</th>
-            <th scope="col">{% trans "Institute" %}</th>
-            <th scope="col">{% trans "Rate" %}</th>
-            <th scope="col">{% trans "Duration" %}</th>
-            <th scope="col">{% trans "From" %}</th>
-            <th scope="col">{% trans "To" %}</th>
-            <th scope="col">{% trans "Status" %}</th>
+            {% sort_header "student" _("Student") %}
+            {% sort_header "institute" _("Institute") %}
+            {% sort_header "rate" _("Rate") %}
+            {% sort_header "duration" _("Duration") %}
+            {% sort_header "from" _("From") %}
+            {% sort_header "to" _("To") %}
+            {% sort_header "status" _("Status") %}
             <th scope="col">{% trans "This month (planned / taught / remaining)" %}</th>
             <th scope="col">{% trans "Actions" %}</th>
         </tr>
@@ -77,8 +80,9 @@
         </tr>
         {% endwith %}
         {% empty %}
-        <tr><td colspan="9">Keine Schüler vorhanden.</td></tr>
+        <tr><td colspan="9">{% if list_filters_active %}{% trans "No entries match these filters." %}{% else %}Keine Schüler vorhanden.{% endif %}</td></tr>
         {% endfor %}
     </tbody>
 </table>
+{% pagination %}
 {% endblock %}

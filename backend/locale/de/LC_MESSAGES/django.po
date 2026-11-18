@@ -7930,3 +7930,32 @@ msgstr "Übersprungen, weil als „Verfügbar“ markiert: %(count)s"
 
 msgid "Also block all-day events that are marked \"Free\" in the calendar (Google marks new all-day events that way)."
 msgstr "Auch ganztägige Termine blockieren, die im Kalender als „Verfügbar“ markiert sind (Google markiert neue ganztägige Termine so)."
+
+msgid "Filter the list"
+msgstr "Liste filtern"
+
+msgid "Reset filters"
+msgstr "Filter zurücksetzen"
+
+msgid "Pagination"
+msgstr "Seitennavigation"
+
+msgid "Previous"
+msgstr "Zurück"
+
+#, python-format
+msgid "Page %(number)s"
+msgstr "Seite %(number)s"
+
+#, python-format
+msgid "Entries %(first)s–%(last)s of %(total)s"
+msgstr "Einträge %(first)s–%(last)s von %(total)s"
+
+msgid "No entries match these filters."
+msgstr "Keine Einträge zu diesen Filtern."
+
+msgid "Private lessons"
+msgstr "Privatunterricht"
+
+msgid "Total expenses (filtered)"
+msgstr "Gesamtausgaben (gefiltert)"

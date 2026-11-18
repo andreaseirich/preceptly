@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load list_tools %}
 
 {% block title %}Schüler – Preceptly{% endblock %}
 
@@ -7,12 +8,14 @@
 <h1>{% trans "Students" %}</h1>
 <a href="{% url 'students:create' %}" class="btn">{% trans "New Student" %}</a>
 
+{% filter_bar %}
+
 <table aria-label="Schülerliste">
     <thead>
         <tr>
-            <th scope="col">{% trans "Name" %}</th>
-            <th scope="col">{% trans "School" %}</th>
-            <th scope="col">{% trans "Grade" %}</th>
+            {% sort_header "name" _("Name") %}
+            {% sort_header "school" _("School") %}
+            {% sort_header "grade" _("Grade") %}
             <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
@@ -27,8 +30,9 @@
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">{% trans "No students available." %}</td></tr>
+        <tr><td colspan="4">{% if list_filters_active %}{% trans "No entries match these filters." %}{% else %}{% trans "No students available." %}{% endif %}</td></tr>
         {% endfor %}
     </tbody>
 </table>
+{% pagination %}
 {% endblock %}
