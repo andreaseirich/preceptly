@@ -162,10 +162,10 @@ if not TURN_CREDENTIAL and not TURN_STATIC_AUTH_SECRET:
             "TURN_CREDENTIAL or TURN_STATIC_AUTH_SECRET must be set in production (DEBUG=False)."
         )
 
-MEETING_STUN_URLS = [
-    "stun:stun.l.google.com:19302",
-    "stun:stun1.l.google.com:19302",
-]
+# STUN über denselben coturn-Server wie TURN: Zum Verbindungsaufbau geht keine IP-Adresse an Google (bis 19.11.2026 standen
+# hier die STUN-Server von Google). Ein anderer Server lässt sich mit der Umgebungsvariable STUN_URL angeben.
+STUN_URL = env("STUN_URL", default="") or "stun:" + _TURN_URL.partition(":")[2]
+MEETING_STUN_URLS = [STUN_URL]
 MEETING_TURN_URLS = [_TURN_URL, f"{_TURN_URL}?transport=tcp"]
 
 MIDDLEWARE = [

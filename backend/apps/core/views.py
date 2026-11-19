@@ -42,7 +42,7 @@ from apps.lessons.status_service import SessionStatusUpdater
 
 logger = logging.getLogger(__name__)
 
-LEGAL_LAST_UPDATED = "17.11.2026"
+LEGAL_LAST_UPDATED = "19.11.2026"
 
 
 class LandingPageView(TemplateView):
@@ -557,13 +557,15 @@ class LegalPrivacyView(LegalPageView):
 
     def get_context_data(self, **kwargs):
         from apps.core.erecht24_service import get_privacy_policy
+        from apps.core.legal_overrides import apply_privacy_overrides
 
         ALLOWED_LANGS = {"de", "en"}
         context = super().get_context_data(**kwargs)
         lang = getattr(self.request, "LANGUAGE_CODE", "de")[:2]
         if lang not in ALLOWED_LANGS:
             lang = "de"
-        context["erecht24_html"] = get_privacy_policy(lang)
+        # Bausteine, die für Preceptly nicht stimmen (zum Beispiel Cloudflare), ersetzt legal_overrides beim Ausliefern.
+        context["erecht24_html"] = apply_privacy_overrides(get_privacy_policy(lang), lang)
         return context
 
 

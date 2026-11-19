@@ -60,7 +60,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 
 ### Video-Meetings
 - Meeting-Raum je Stunde, direkt im Browser (WebRTC)
-- Eigener TURN-Server für Verbindungen hinter NAT, Zugangsdaten nur 8 Stunden gültig
+- Eigener TURN- und STUN-Server (coturn bei Hetzner) für Verbindungen hinter NAT, Zugangsdaten nur 8 Stunden gültig; keine IP-Adresse geht an Google
 - Dokumente im Raum teilen, PDF-Anzeige mit selbst ausgeliefertem pdf.js
 - Es wird nichts aufgezeichnet
 - Auf dem Handy pausiert ein Browser die Seite, sobald man in eine andere App wechselt (Mikrofon und Verbindung ruhen). Bei der Rückkehr verbindet sich der Raum sofort neu, holt das Mikrofon bei Bedarf neu und hält den Bildschirm wach; die Lobby weist darauf hin

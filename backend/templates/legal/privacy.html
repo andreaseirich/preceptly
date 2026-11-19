@@ -30,7 +30,7 @@
     {% endif %}
     <div class="legal-section" style="margin-top:2rem; border-top: 2px solid var(--border-color); padding-top:1.5rem;">
         <h2>{% trans "Preceptly-specific data processing" %}</h2>
-        <p class="legal-meta">{% blocktrans with date="19.09.2026" %}Last updated: {{ date }}{% endblocktrans %}</p>
+        <p class="legal-meta">{% blocktrans with date="19.11.2026" %}Last updated: {{ date }}{% endblocktrans %}</p>
         <p><em>{% trans "The following sections supplement the general privacy policy above with information specific to the Preceptly platform." %}</em></p>
     </div>
     <div class="legal-section">
@@ -49,7 +49,9 @@
         <h2>{% trans "Video meetings (Meeting Rooms)" %}</h2>
         <p>{% trans "The Pro plan includes an integrated video meeting function. Camera and microphone access is optional and only activated by the user's explicit action in the browser." %}</p>
         <p>{% trans "Video and audio data is transmitted directly between participants (peer-to-peer via WebRTC). No audio or video is stored on Preceptly servers." %}</p>
-        <p>{% blocktrans %}To establish the connection, IP addresses are transmitted to STUN servers (Google: stun.l.google.com). Google's privacy policy applies: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.{% endblocktrans %}</p>
+        <p>{% trans "If a direct connection is not possible (for example behind a firewall or on a mobile network), the encrypted media streams are relayed through a relay server (TURN) that we operate ourselves. It is hosted in Germany by Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen). The relay server sees the participants' IP addresses and forwards the encrypted data without being able to decrypt it; it stores no content. The access data for the relay server is generated anew for every meeting page and is valid for eight hours at most." %}</p>
+        <p>{% trans "The same server also acts as STUN server to establish the connection, so no IP addresses are sent to external STUN providers for this. Apart from technical system messages the server keeps no records; these messages can contain IP addresses of connection attempts, for example from port scans." %}</p>
+        <p>{% trans "Chat messages and whiteboard drawings are passed on through our application server (Railway) and are not stored; they only exist while the room is open. During a meeting the browser also sends a few short technical messages (part of the room identifier, role, type of connection, number of audio and video tracks). They contain no names, IP addresses or content and appear in the application logs at Railway." %}</p>
         <p>{% trans "Legal basis: Art. 6 para. 1 lit. b GDPR (performance of contract)." %}</p>
     </div>
     <div class="legal-section">
@@ -100,8 +102,9 @@
         <ul>
             <li><code>sessionid</code>: {% trans "Session cookie for managing the logged-in state. Deleted when you log out or close the browser." %}</li>
             <li><code>csrftoken</code>: {% trans "Security cookie to protect against cross-site request forgery (CSRF) attacks." %}</li>
+            <li><code>django_language</code>: {% trans "Stores the language you chose. It is only set when you switch the language and is deleted when you close the browser." %}</li>
         </ul>
-        <p>{% trans "In addition, Preceptly stores the selected display theme (light/dark) in the browser's localStorage. This is not a cookie and the data does not leave your device." %} {% trans "Preceptly also stores in localStorage whether you have dismissed the hint about installing the app to your home screen, so it is not shown again. This data does not leave your device either." %}</p>
+        <p>{% trans "In addition, Preceptly stores the selected display theme (light/dark) in the browser's localStorage. This is not a cookie and the data does not leave your device." %} {% trans "Preceptly also stores in localStorage whether you have dismissed the hint about installing the app to your home screen, so it is not shown again. This data does not leave your device either." %} {% trans "Preceptly also stores in localStorage whether you have dismissed the notice about the development status of the service, and in sessionStorage whether it has already been shown in the current browser session. This data does not leave your device either." %}</p>
         <p>{% trans "No tracking, analytics, or advertising cookies are used. A cookie consent banner is therefore not required." %}</p>
         <p>{% trans "Legal basis: Art. 6 para. 1 lit. b and f GDPR." %}</p>
     </div>
@@ -115,6 +118,7 @@
     <div class="legal-section">
         <h2>{% trans "Revocation button (e-Recht24)" %}</h2>
         <p>{% trans "Our website includes a revocation button provided by e-Recht24 (eRecht24 GmbH &amp; Co. KG, Lietzenburger Str. 94, 10719 Berlin, Germany). Its purpose is to enable consumers to exercise their statutory right of withdrawal conveniently and in a documented manner." %}</p>
+        <p>{% trans "The revocation button is loaded from a server of eRecht24 (widerrufsbutton-cdn.e-recht24.de) on the pages of our website, but not in the student and parent portal. Your IP address is transmitted to eRecht24 for this, whether or not you use the button. Legal basis: legitimate interest in providing the revocation button as required by law (Art. 6 para. 1 lit. f GDPR)." %}</p>
         <p>{% trans "When the revocation button is used, the following data processors and services are involved:" %}</p>
         <ul>
             <li><strong>Friendly Captcha</strong> &ndash; {% trans "bot detection and abuse prevention (Friendly Captcha GmbH, Am Anger 3-5, 82237 Wörthsee, Germany)." %}</li>

@@ -97,6 +97,7 @@ Achtung: Eine Preis-ID, die hier **nicht** hinterlegt ist, ordnet der Webhook ke
 | Variable | Beschreibung | Fehlt sie? |
 |----------|--------------|------------|
 | `TURN_URL` | TURN-Server | Default `turn:46.224.151.16:3478` |
+| `STUN_URL` | STUN-Server für den Verbindungsaufbau | Default: derselbe Server wie `TURN_URL` (`stun:46.224.151.16:3478`). Bis 19.11.2026 waren es die STUN-Server von Google |
 | `TURN_USER` | Benutzername für den statischen Zugang | Default `preceptly` |
 | `TURN_CREDENTIAL` | Festes Passwort (nur ohne `TURN_STATIC_AUTH_SECRET` nötig) | **Meetings hinter NAT/Firewall kommen nicht zustande** — im Heimnetz oft unauffällig, im Mobilfunk nicht |
 | `TURN_STATIC_AUTH_SECRET` | Gemeinsames Geheimnis mit coturn (`use-auth-secret`) für kurzlebige Zugangsdaten | Fällt auf das feste Passwort zurück, das dann im Quelltext jeder Meeting-Seite steht |

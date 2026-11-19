@@ -87,3 +87,16 @@ Sicherung der alten Konfiguration: `/etc/turnserver.conf.bak-2026-09-23`.
 Wiederherstellen, `sudo systemctl restart coturn`, und in Railway
 `TURN_STATIC_AUTH_SECRET` löschen — danach liefert die Anwendung wieder das
 feste Passwort aus.
+
+## STUN und Datenschutz (Stand 19.11.2026)
+
+- **STUN:** Der Verbindungsaufbau nutzt denselben Server (`stun:46.224.151.16:3478`, Einstellung `STUN_URL`). Bis 19.11.2026 standen
+  die STUN-Server von Google in der ICE-Liste; dorthin gingen die IP-Adressen aller Teilnehmer.
+- **Hoster:** Der Server gehört zur Hetzner Online GmbH. Sie ist in Datenschutzerklärung und AVV als Unterauftragsverarbeiter genannt
+  (Relay-Betrieb). Der Auftragsverarbeitungsvertrag mit Hetzner muss im Hetzner-Konto abgeschlossen sein.
+- **Protokolle:** coturn schreibt Betriebsmeldungen ins Systemjournal (`journalctl -u coturn`), nicht in `/var/log/coturn.log`. Das
+  Journal enthält die IP-Adressen von Verbindungsversuchen (viele davon Scans) und reicht bis Juni 2026 zurück, **eine Löschfrist ist
+  nicht eingerichtet**. Die Erklärung sagt deshalb nur, dass das Systemprotokoll IP-Adressen enthalten kann, ohne Frist. Wird eine
+  Aufbewahrungsdauer festgelegt (zum Beispiel `MaxRetentionSec=30day` für journald), gehört sie in die Erklärung.
+- **Wer die Protokollierung ändert** (zum Beispiel `log-file` repariert, siehe oben), muss die Erklärung prüfen: Dann stehen IP-Adressen
+  in einer Datei.

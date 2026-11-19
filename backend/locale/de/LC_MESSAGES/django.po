@@ -7959,3 +7959,21 @@ msgstr "Privatunterricht"
 
 msgid "Total expenses (filtered)"
 msgstr "Gesamtausgaben (gefiltert)"
+
+msgid "If a direct connection is not possible (for example behind a firewall or on a mobile network), the encrypted media streams are relayed through a relay server (TURN) that we operate ourselves. It is hosted in Germany by Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen). The relay server sees the participants' IP addresses and forwards the encrypted data without being able to decrypt it; it stores no content. The access data for the relay server is generated anew for every meeting page and is valid for eight hours at most."
+msgstr "Ist keine Direktverbindung möglich (zum Beispiel hinter einer Firewall oder im Mobilfunk), werden die verschlüsselten Medienströme über einen Relay-Server (TURN) weitergeleitet, den wir selbst betreiben. Er steht bei der Hetzner Online GmbH (Industriestr. 25, 91710 Gunzenhausen) in Deutschland. Der Relay-Server sieht die IP-Adressen der Teilnehmer und leitet die verschlüsselten Daten weiter, ohne sie entschlüsseln zu können; Inhalte speichert er nicht. Die Zugangsdaten zum Relay-Server werden für jede Meeting-Seite neu erzeugt und gelten höchstens acht Stunden."
+
+msgid "The same server also acts as STUN server to establish the connection, so no IP addresses are sent to external STUN providers for this. Apart from technical system messages the server keeps no records; these messages can contain IP addresses of connection attempts, for example from port scans."
+msgstr "Derselbe Server dient auch als STUN-Server für den Verbindungsaufbau, deshalb werden dafür keine IP-Adressen an externe STUN-Anbieter übermittelt. Außer technischen Systemmeldungen führt der Server keine Aufzeichnungen; diese Meldungen können IP-Adressen von Verbindungsversuchen enthalten, zum Beispiel von Port-Scans."
+
+msgid "Chat messages and whiteboard drawings are passed on through our application server (Railway) and are not stored; they only exist while the room is open. During a meeting the browser also sends a few short technical messages (part of the room identifier, role, type of connection, number of audio and video tracks). They contain no names, IP addresses or content and appear in the application logs at Railway."
+msgstr "Chat-Nachrichten und Whiteboard-Zeichnungen werden über unseren Anwendungsserver (Railway) weitergeleitet und nicht gespeichert; sie bestehen nur, solange der Raum geöffnet ist. Während eines Meetings schickt der Browser außerdem einige kurze technische Meldungen (Teil der Raumkennung, Rolle, Art der Verbindung, Anzahl der Ton- und Videospuren). Sie enthalten weder Namen noch IP-Adressen oder Inhalte und erscheinen in den Anwendungsprotokollen bei Railway."
+
+msgid "The revocation button is loaded from a server of eRecht24 (widerrufsbutton-cdn.e-recht24.de) on the pages of our website, but not in the student and parent portal. Your IP address is transmitted to eRecht24 for this, whether or not you use the button. Legal basis: legitimate interest in providing the revocation button as required by law (Art. 6 para. 1 lit. f GDPR)."
+msgstr "Der Widerrufsbutton wird auf den Seiten unserer Website, nicht aber im Schüler- und Elternportal, von einem Server von eRecht24 (widerrufsbutton-cdn.e-recht24.de) geladen. Dabei wird Ihre IP-Adresse an eRecht24 übermittelt, unabhängig davon, ob Sie den Button benutzen. Rechtsgrundlage: berechtigtes Interesse an der gesetzlich vorgeschriebenen Bereitstellung des Widerrufsbuttons (Art. 6 Abs. 1 lit. f DSGVO)."
+
+msgid "Stores the language you chose. It is only set when you switch the language and is deleted when you close the browser."
+msgstr "Speichert die gewählte Sprache. Es wird nur gesetzt, wenn Sie die Sprache umstellen, und beim Schließen des Browsers gelöscht."
+
+msgid "Preceptly also stores in localStorage whether you have dismissed the notice about the development status of the service, and in sessionStorage whether it has already been shown in the current browser session. This data does not leave your device either."
+msgstr "Preceptly speichert außerdem im localStorage, ob Sie den Hinweis zum Entwicklungsstand des Dienstes ausgeblendet haben, und im sessionStorage, ob er in der aktuellen Browsersitzung schon angezeigt wurde. Auch diese Daten verlassen Ihr Gerät nicht."
