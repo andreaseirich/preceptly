@@ -49,7 +49,8 @@ class SessionQueryService:
     @staticmethod
     def get_today_sessions(user: User = None) -> list[Session]:
         """Returns all sessions for today."""
-        today = timezone.now().date()
+        # Das deutsche Datum, nicht das UTC-Datum: Zwischen 00:00 und 01:00 Uhr (im Sommer 02:00) liegt UTC einen Tag zurück.
+        today = timezone.localdate()
         Session = apps.get_model("lessons", "Session")
         qs = Session.objects.filter(date=today).select_related("contract").order_by("start_time")
         if user:
@@ -70,7 +71,8 @@ class SessionQueryService:
         Returns:
             List of Session objects (from tomorrow up to today + days)
         """
-        today = timezone.now().date()
+        # Das deutsche Datum, nicht das UTC-Datum: Zwischen 00:00 und 01:00 Uhr (im Sommer 02:00) liegt UTC einen Tag zurück.
+        today = timezone.localdate()
         end_date = today + timedelta(days=days)
 
         # Only sessions from tomorrow (date > today), not today

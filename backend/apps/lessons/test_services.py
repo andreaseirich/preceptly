@@ -184,7 +184,7 @@ class LessonQueryServiceTest(TestCase):
 
     def test_get_today_lessons(self):
         """Test: Heutige Lessons abrufen."""
-        today = timezone.now().date()
+        today = timezone.localdate()  # das deutsche Datum, wie der Dienst (nicht das UTC-Datum)
         lesson = Lesson.objects.create(
             contract=self.contract, date=today, start_time=time(14, 0), duration_minutes=60
         )

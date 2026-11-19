@@ -36,7 +36,7 @@ class DashboardRangesTest(TestCase):
 
     def test_today_lesson_in_today_section_only(self):
         """Test: Lesson mit Datum = heute erscheint nur im Today-Bereich, nicht in Next 7 days."""
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         # Erstelle eine Lesson für heute
         today_lesson = Lesson.objects.create(
@@ -57,7 +57,7 @@ class DashboardRangesTest(TestCase):
 
     def test_tomorrow_lesson_in_next_7_days(self):
         """Test: Lesson mit Datum = morgen erscheint in Next 7 days."""
-        tomorrow = timezone.now().date() + timedelta(days=1)
+        tomorrow = timezone.localdate() + timedelta(days=1)
 
         # Erstelle eine Lesson für morgen
         tomorrow_lesson = Lesson.objects.create(
@@ -78,7 +78,7 @@ class DashboardRangesTest(TestCase):
 
     def test_lesson_beyond_7_days_not_in_next_7_days(self):
         """Test: Lesson mit Datum > heute + 7 Tage erscheint nicht in Next 7 days."""
-        future_date = timezone.now().date() + timedelta(days=8)
+        future_date = timezone.localdate() + timedelta(days=8)
 
         # Erstelle eine Lesson für in 8 Tagen
         future_lesson = Lesson.objects.create(
@@ -99,7 +99,7 @@ class DashboardRangesTest(TestCase):
 
     def test_lesson_exactly_7_days_in_next_7_days(self):
         """Test: Lesson mit Datum = heute + 7 Tage erscheint in Next 7 days."""
-        seven_days_later = timezone.now().date() + timedelta(days=7)
+        seven_days_later = timezone.localdate() + timedelta(days=7)
 
         # Erstelle eine Lesson für in genau 7 Tagen
         lesson_7_days = Lesson.objects.create(
@@ -116,7 +116,7 @@ class DashboardRangesTest(TestCase):
 
     def test_dashboard_view_separation(self):
         """Test: Dashboard-View trennt korrekt zwischen Today und Next 7 days."""
-        today = timezone.now().date()
+        today = timezone.localdate()
         tomorrow = today + timedelta(days=1)
 
         # Erstelle Lessons
