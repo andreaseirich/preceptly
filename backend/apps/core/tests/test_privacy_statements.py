@@ -56,6 +56,12 @@ class PrivacyPolicyTest(TestCase):
             with self.subTest(lang=lang):
                 self.assertNotIn("stun.l.google.com", self.page(lang))
 
+    def test_it_names_the_retention_of_the_relay_servers_system_log(self):
+        # Das Journal des Servers (coturn schreibt dort IP-Adressen von Verbindungsversuchen hin) ist seit 19.11.2026 auf 30 Tage
+        # begrenzt: /etc/systemd/journald.conf.d/30-retention.conf. Ändert sich die Frist dort, muss der Text mit.
+        self.assertIn("nach 30 Tagen automatisch gelöscht", self.page("de"))
+        self.assertIn("deleted automatically after 30 days", self.page("en"))
+
     def test_it_says_that_chat_and_whiteboard_are_not_stored(self):
         self.assertIn("Chat-Nachrichten und Whiteboard-Zeichnungen", self.page("de"))
         self.assertIn("Chat messages and whiteboard drawings", self.page("en"))

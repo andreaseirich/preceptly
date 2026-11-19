@@ -42,7 +42,7 @@ from apps.lessons.status_service import SessionStatusUpdater
 
 logger = logging.getLogger(__name__)
 
-LEGAL_LAST_UPDATED = "19.11.2026"
+LEGAL_LAST_UPDATED = "20.11.2026"
 
 
 class LandingPageView(TemplateView):

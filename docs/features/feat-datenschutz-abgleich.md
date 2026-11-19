@@ -10,7 +10,7 @@ Rechtsberatung.
 |---|---|---|
 | 1 | Das Meeting nutzte neben dem eigenen TURN-Server (Hetzner) **auch die STUN-Server von Google**. Die Erklärung nannte nur Google, nicht den eigenen Relay-Server. Der AVV nannte Hetzner nicht (am 17.11. mit dem Backup entfernt, der TURN-Server blieb bei Hetzner) | Google-STUN abgeschaltet: Der Verbindungsaufbau nutzt den eigenen coturn-Server (`STUN_URL`, Standard `stun:46.224.151.16:3478`). Erklärung: neuer Absatz zum Relay (Hetzner, Zugangsdaten höchstens 8 Stunden, kein Zugriff auf Inhalte). AVV: Hetzner in der Tabelle, neuer Absatz 6.2a |
 | 2 | Browser-Speicher unvollständig: Das Sprach-Cookie `django_language` (Sitzungs-Cookie, nur nach Umstellen der Sprache) und die Merkzettel für den Entwicklungshinweis (localStorage/sessionStorage) fehlten | in der Erklärung ergänzt |
-| 3 | „Letzte Aktualisierung“ stand auf 19.09.2026, obwohl am 17.11. Abschnitte dazukamen | Datum in Erklärung, AVV und `LEGAL_LAST_UPDATED` auf 19.11.2026 |
+| 3 | „Letzte Aktualisierung“ stand auf 19.09.2026, obwohl am 17.11. Abschnitte dazukamen | Datum in Erklärung, AVV und `LEGAL_LAST_UPDATED` auf 19.11.2026, mit dem Nachtrag (30-Tage-Frist) auf 20.11.2026 fortgeschrieben |
 | 4 | Chat und Whiteboard laufen durch den Anwendungsserver, die Diagnosemeldungen stehen in den Railway-Logs; beides fehlte | ergänzt (Chat und Whiteboard werden nicht gespeichert) |
 | 5 | Der von eRecht24 erzeugte Cloudflare-Abschnitt beschrieb ein CDN, das den Datenverkehr durchleitet. Tatsächlich ist Cloudflare nur DNS (Nameserver); die Antworten kommen direkt von Railway (`server: railway-hikari`, kein `cf-ray`, A-Eintrag bei Railway) | Abschnitt und Gruppenüberschrift beim Ausliefern ersetzt, siehe unten |
 | 6 | Das eRecht24-Skript wird auf jeder Seite des Kerns geladen (Footer), im Portal nicht. Beim Seitenaufruf geht die IP an eRecht24, unabhängig vom Gebrauch des Buttons | Absatz im Preceptly-Teil |
@@ -46,11 +46,16 @@ in der Erklärung). Dann gehört der Abschnitt in den Preceptly-Teil (`privacy.h
   Sitzung, Datum der Seiten stimmt mit `LEGAL_LAST_UPDATED` überein.
 - **Mutationstest:** Acht Fehler gezielt eingebaut (Google-STUN wieder in der Liste, Abschnitt bis zum Ende ersetzt, doppelte Überschrift ungeschützt, Sprach-Cookie fehlt im Text, Hetzner fehlt im AVV, Ansicht wendet die Anpassung nicht an, Datum im Preceptly-Teil veraltet, Gruppenüberschrift bleibt CDN). Alle acht werden bemerkt. Im ersten Durchlauf überlebte das veraltete Datum: Der Test fand das Datum auch im Seitenkopf. Er prüft jetzt gezielt den Preceptly-Teil.
 
-## Offen (Entscheidung oder Handlung von Andreas)
+## Erledigt nach Rückfrage (19.11.2026)
 
-1. **AVV mit Hetzner:** Der Vertrag über Auftragsverarbeitung muss im Hetzner-Konto abgeschlossen sein. Das lässt sich von hier nicht sehen.
-2. **Aufbewahrung des coturn-Journals:** `journalctl -u coturn` enthält IP-Adressen von Verbindungsversuchen (viele sind Scans) und reicht
-   bis zum 27.06.2026 zurück; eine Löschfrist gibt es nicht (`journald` hat keine `MaxRetentionSec`). Die Erklärung sagt darum nur, dass das
-   Systemprotokoll IP-Adressen enthalten kann, ohne Frist. Vorschlag: `MaxRetentionSec=30day`, dann die Frist in die Erklärung schreiben.
-   Das betrifft das ganze Journal des ai-server und löscht ältere Einträge, deshalb nicht ohne Freigabe geändert.
-3. **eRecht24-Generator:** Cloudflare dort als „nur DNS“ führen, falls das möglich ist, dann entfällt unsere Anpassung.
+1. **AVV mit Hetzner:** Andreas hat bestätigt, dass der Vertrag über Auftragsverarbeitung im Hetzner-Konto abgeschlossen ist.
+2. **Aufbewahrung des coturn-Journals:** `journald` auf dem ai-server ist auf 30 Tage begrenzt (`MaxRetentionSec=30day`,
+   `MaxFileSec=1day` in `/etc/systemd/journald.conf.d/30-retention.conf`). Beim Neustart von journald fielen alle Dateien über 30 Tage
+   weg (Einträge ab April 2026, vorher keine Grenze), dazu eine Altdatei von 25.01.2026 in einem Verzeichnis einer früheren
+   Maschinenkennung. Das Journal hat jetzt Einträge ab 22.10.2026 (473 MB). Die Erklärung nennt die 30 Tage; ein Test bindet den Text.
+
+## Offen
+
+- **eRecht24-Generator:** Cloudflare dort als „nur DNS“ führen, falls das möglich ist, dann entfällt unsere Anpassung.
+- Die 30 Tage gelten für das **ganze** Journal des ai-server, nicht nur für coturn. Wer dort ältere Protokolle für eine Fehlersuche
+  braucht, muss sie vorher sichern.
