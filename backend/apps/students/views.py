@@ -23,6 +23,7 @@ from django.views.generic import DeleteView, ListView
 
 from apps.contracts.forms import ContractForm
 from apps.contracts.models import Contract
+from apps.core.demo_guard import demo_block, is_demo_user
 from apps.core.feature_flags import (
     Feature,
     document_limit,
@@ -206,6 +207,10 @@ class PortalInviteView(LoginRequiredMixin, View):
     """
 
     def post(self, request, pk):
+        if is_demo_user(request.user):
+            # Die Demo-Zugangsdaten sind öffentlich: Sonst könnte jeder Besucher E-Mails an beliebige Adressen auslösen.
+            return demo_block(request, _("Sending portal e-mails is not available in demo mode."))
+
         from django.db import transaction
 
         from apps.portal.email_service import send_portal_invite
@@ -320,6 +325,10 @@ class PortalInviteView(LoginRequiredMixin, View):
 
 class PortalInviteResendView(LoginRequiredMixin, View):
     def post(self, request, pk):
+        if is_demo_user(request.user):
+            # Die Demo-Zugangsdaten sind öffentlich: Sonst könnte jeder Besucher E-Mails an beliebige Adressen auslösen.
+            return demo_block(request, _("Sending portal e-mails is not available in demo mode."))
+
         from apps.portal.email_service import send_portal_invite
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)
@@ -382,6 +391,10 @@ class PortalLoginReminderView(LoginRequiredMixin, View):
     """Login-Erinnerung an bereits aktive Portal-Nutzer senden."""
 
     def post(self, request, pk):
+        if is_demo_user(request.user):
+            # Die Demo-Zugangsdaten sind öffentlich: Sonst könnte jeder Besucher E-Mails an beliebige Adressen auslösen.
+            return demo_block(request, _("Sending portal e-mails is not available in demo mode."))
+
         from apps.portal.email_service import send_login_reminder
 
         contract = get_object_or_404(Contract, pk=pk, user=request.user)

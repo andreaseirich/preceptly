@@ -7977,3 +7977,9 @@ msgstr "Speichert die gewählte Sprache. Es wird nur gesetzt, wenn Sie die Sprac
 
 msgid "Preceptly also stores in localStorage whether you have dismissed the notice about the development status of the service, and in sessionStorage whether it has already been shown in the current browser session. This data does not leave your device either."
 msgstr "Preceptly speichert außerdem im localStorage, ob Sie den Hinweis zum Entwicklungsstand des Dienstes ausgeblendet haben, und im sessionStorage, ob er in der aktuellen Browsersitzung schon angezeigt wurde. Auch diese Daten verlassen Ihr Gerät nicht."
+
+msgid "Sending portal e-mails is not available in demo mode."
+msgstr "Der Versand von Portal-E-Mails ist im Demo-Modus nicht verfügbar."
+
+msgid "Connecting a calendar is not available in demo mode."
+msgstr "Das Verbinden eines Kalenders ist im Demo-Modus nicht verfügbar."

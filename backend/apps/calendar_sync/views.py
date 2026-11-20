@@ -15,6 +15,7 @@ from apps.blocked_times.models import BlockedTime
 from apps.calendar_sync.caldav_client import CalDavClient, CalDavConnectionError
 from apps.calendar_sync.crypto import CalendarCredentialError, decrypt_password, encrypt_password
 from apps.calendar_sync.models import CalendarConnection, SyncConflict, SyncedCalendar
+from apps.core.demo_guard import demo_block, is_demo_user
 
 # Well-known CalDAV discovery URLs - fixed per provider, so the tutor only
 # ever enters their account credentials, never a URL they'd have to look up.
@@ -26,6 +27,10 @@ PROVIDER_CALDAV_URLS = {
 @login_required
 @require_POST
 def connect_calendar(request):
+    if is_demo_user(request.user):
+        # Öffentliche Demo: Zugangsdaten oder die geheime Adresse eines Besuchers dürfen nicht in einem Konto landen, das alle
+        # benutzen (die Termine sähen alle, die sich mit den öffentlichen Zugangsdaten anmelden).
+        return demo_block(request, _("Connecting a calendar is not available in demo mode."))
     provider = request.POST.get("provider", "icloud").strip()
     caldav_username = request.POST.get("caldav_username", "").strip()
     caldav_password = request.POST.get("caldav_password", "").strip()

@@ -56,17 +56,26 @@ Beim Deploy wird nichts automatisch geändert: Der erste Zugriff eines Demo-Kont
   nichts und erlauben einen neuen Versuch, es entsteht nie eine Demo, wo keine ist, und die Middleware frischt beim ersten Zugriff auf.
 - **Mutationstest:** 15 Fehler gezielt eingebaut (feste Daten zurück im Vertragsbeginn, bei den Quotenstunden und bei den Serien; Auffrischen löscht die Konten; Kalenderadresse, Abo-Adresse, Push-Abos und Portal-Konten bleiben liegen; Tarifstufe und Passwort werden nicht zurückgesetzt; Tagessperre fehlt; jeder Nutzer löst es aus; keine Transaktion; ein Fehler sperrt bis morgen; Middleware nicht verdrahtet). Alle 15 werden von den Tests bemerkt. Davor fielen zwei Lücken auf und wurden geschlossen: Die Besucher-Reste (Kalender, Push, Portal) und die Tarifstufe waren nicht abgesichert.
 
-## Beobachtungen (nicht geändert, Entscheidung offen)
+## Nachtrag 20.11.2026: Funde bei dieser Arbeit, behoben
 
-- **Portal-Einladungen aus der Demo.** `PortalInviteView` (und Erneut-Senden und Login-Erinnerung) hat weder eine Sperre für Demo-Konten
-  noch ein Ratelimit. Mit den öffentlichen Zugangsdaten kann jeder Besucher Einladungs-E-Mails an beliebige Adressen von der Preceptly-Domain
-  verschicken lassen. Vorschlag: `demo_block` für diese drei Aktionen, wie bei Passwort, E-Mail und Stripe.
-- **Kalenderadressen aus der Demo.** Das Eintragen einer Google-Adresse ist auf 10 je Stunde begrenzt, aber nicht für die Demo gesperrt. Ein
-  Besucher könnte seinen echten Kalender eintragen; dessen Titel sähen dann alle, die sich mit den öffentlichen Zugangsdaten anmelden, bis
-  zur nächsten Auffrischung. Mit der täglichen Auffrischung ist das auf einen Tag begrenzt. Vorschlag: auch hier `demo_block`.
-- Die Demo-Konten haben `is_staff=True` (ohne Superuser und ohne Berechtigungen). Das öffnet nur ein leeres Admin-Fenster; die
-  Statistikseite hat einen eigenen Passwortschutz.
-- `seed_demo_data` und `load_demo_data`/`clear_demo_data` bleiben als Handbefehle erhalten. `--clear` löscht weiterhin die Konten selbst.
+- **Portal-Einladungen aus der Demo.** `PortalInviteView`, Erneut-Senden und Login-Erinnerung hatten weder eine Sperre für Demo-Konten noch
+  ein Ratelimit: Mit den öffentlichen Zugangsdaten konnte jeder Besucher Einladungs-E-Mails an beliebige Adressen von der Preceptly-Domain
+  auslösen. Jetzt sperrt `demo_block` alle drei.
+- **Kalender aus der Demo.** Die iCloud-Anbindung und das Eintragen einer geheimen Google-Adresse sind für Demo-Konten gesperrt: Ein
+  Besucher konnte seinen echten Kalender in einem Konto ablegen, dessen Termine alle sehen, die sich mit den öffentlichen Zugangsdaten
+  anmelden (die tägliche Auffrischung begrenzte das nur auf einen Tag). Abo-Link und Abgleich bleiben möglich, sie enthalten keine Geheimnisse
+  eines Besuchers.
+- **Totes Modell `RecurringBlockedTime`.** Die Tabelle ist seit Migration 0008 weg, die Klasse blieb als Modell mit Fremdschlüssel auf den
+  Nutzer und wird in `BlockedTimeCreateView.form_valid` bei jedem Anlegen einer Blockzeit importiert. Danach scheiterte im selben Prozess jedes
+  `User.delete()` ("no such table"), in der Produktion zum Beispiel beim Löschen eines Schülers mit Portal-Konto, bis zum nächsten Neustart. Jetzt
+  ist die Klasse ein reiner Datenhalter (`dataclass`) ohne Tabelle und ohne Beziehung zum Nutzer; die tote Funktion
+  `find_matching_recurring_blocked_time` (fragte die gelöschte Tabelle ab, ohne Aufrufer) ist entfernt. `makemigrations --check` meldet keine
+  Änderung.
+- Geprüft mit neun eingebauten Fehlern (Sperre je Ansicht entfernt, Sperre trifft jeden, Datenhalter wieder ein Modell, Wochentage und
+  inaktive Serie falsch): alle neun werden bemerkt. Tests: `apps/core/tests/test_demo_outbound_guard.py` (mit Gegenprobe für normale Tutoren),
+  `apps/blocked_times/test_recurring_holder.py`.
+- Unverändert: Die Demo-Konten haben `is_staff=True` (ohne Superuser und Berechtigungen, öffnet nur ein leeres Admin-Fenster; die
+  Statistikseite hat einen eigenen Passwortschutz). `--clear` löscht weiterhin die Konten selbst.
 
 ## Code
 

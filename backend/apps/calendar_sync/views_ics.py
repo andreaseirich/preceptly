@@ -21,6 +21,7 @@ from apps.calendar_sync.ics_import import IcsError, fetch_ics, normalize_ics_url
 from apps.calendar_sync.ics_sync import MANUAL_COOLDOWN, sync_source
 from apps.calendar_sync.models import IcsCalendarSource
 from apps.calendar_sync.ui import ics_error_message, own_note
+from apps.core.demo_guard import demo_block, is_demo_user
 
 DEFAULT_NAME = "Google Calendar"
 
@@ -49,6 +50,10 @@ def _report_sync(request, result):
 @require_POST
 @ratelimit(key="user", rate="10/h", method="POST", block=True)
 def ics_add(request):
+    if is_demo_user(request.user):
+        # Öffentliche Demo: Zugangsdaten oder die geheime Adresse eines Besuchers dürfen nicht in einem Konto landen, das alle
+        # benutzen (die Termine sähen alle, die sich mit den öffentlichen Zugangsdaten anmelden).
+        return demo_block(request, _("Connecting a calendar is not available in demo mode."))
     if (
         IcsCalendarSource.objects.filter(user=request.user).count()
         >= IcsCalendarSource.MAX_PER_USER

@@ -9,6 +9,9 @@ Demo-Accounts dürfen NICHT:
 - Stripe Checkout starten
 - KI unbegrenzt nutzen (Tageslimit)
 - Passwort oder E-Mail-Adresse ändern
+- E-Mails aus dem Portal auslösen (Einladung, Erneut-Senden, Login-Erinnerung) und Kalender anbinden (iCloud, geheime Google-Adresse):
+  Die Zugangsdaten sind öffentlich, sonst könnte jeder Besucher Mails an beliebige Adressen auslösen oder seine Kalenderdaten in einem
+  Konto ablegen, das alle benutzen
 
 Die Daten werden einmal je Kalendertag neu erzeugt, beim ersten Zugriff eines Demo-Kontos (apps/core/demo_refresh.py). So
 verschieben sich alle Termine mit der Zeit, und Änderungen von Besuchern sind spätestens am nächsten Tag weg. Früher stand hier

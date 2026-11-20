@@ -8,32 +8,6 @@ from apps.blocked_times.models import BlockedTime
 from apps.blocked_times.recurring_models import RecurringBlockedTime
 
 
-def find_matching_recurring_blocked_time(blocked_time: BlockedTime) -> RecurringBlockedTime | None:
-    """
-    Finds the RecurringBlockedTime that a BlockedTime belongs to.
-
-    A BlockedTime belongs to a RecurringBlockedTime if:
-    - Same title
-    - Same start and end time
-    - The BlockedTime's date matches the RecurringBlockedTime's recurrence pattern
-    """
-    # Search for RecurringBlockedTimes with the same title and times
-    recurring_blocked_times = RecurringBlockedTime.objects.filter(
-        title=blocked_time.title,
-        start_time=blocked_time.start_datetime.time(),
-        end_time=blocked_time.end_datetime.time(),
-        is_active=True,
-    )
-
-    for recurring in recurring_blocked_times:
-        # Check if the BlockedTime's date matches the pattern
-        matches = _date_matches_recurring_pattern(blocked_time.start_datetime.date(), recurring)
-        if matches:
-            return recurring
-
-    return None
-
-
 def get_all_blocked_times_for_recurring(
     recurring: RecurringBlockedTime, original_start_time=None
 ) -> list[BlockedTime]:
