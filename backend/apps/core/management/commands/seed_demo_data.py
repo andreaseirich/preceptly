@@ -3,9 +3,13 @@ Management command for creating demo data for Preceptly.
 
 Usage:
     python manage.py seed_demo_data           # Add demo data (idempotent for users)
-    python manage.py seed_demo_data --clear   # Delete demo_premium/demo_user data only, then seed
+    python manage.py seed_demo_data --clear   # Delete demo_premium/demo_user and their data, then seed
+    python manage.py seed_demo_data --refresh # Delete their data but keep the accounts, then seed (daily refresh)
 
 Only demo_premium and demo_user are created or modified. Other users' data is never touched.
+
+All dates are relative to today, so the demo always looks current. Run again (or let apps/core/demo_refresh.py do it
+once per day) to move everything forward.
 
 Creates:
     - 4 students with different profiles
@@ -26,12 +30,20 @@ from django.utils import timezone
 from apps.billing.models import Invoice
 from apps.billing.services import InvoiceService
 from apps.blocked_times.models import BlockedTime
+from apps.calendar_sync.models import CalendarConnection, IcsCalendarSource, TutorCalendarFeed
 from apps.contracts.models import Contract, ContractMonthlyPlan, Institute
-from apps.core.models import UserProfile
+from apps.core.models import Expense, PushSubscription, UserProfile
 from apps.lesson_plans.models import LessonPlan
 from apps.lessons.models import Lesson
 from apps.lessons.recurring_models import RecurringLesson
 from apps.lessons.recurring_service import RecurringLessonService
+from apps.portal.models import PortalUser
+
+
+def _add_months(first_of_month: date, months: int) -> date:
+    """First day of the month `months` before (negative) or after (positive) the month of `first_of_month`."""
+    index = first_of_month.year * 12 + (first_of_month.month - 1) + months
+    return date(index // 12, index % 12 + 1, 1)
 
 
 class Command(BaseCommand):
@@ -41,11 +53,19 @@ class Command(BaseCommand):
         parser.add_argument(
             "--clear",
             action="store_true",
-            help="Delete demo user data only before seeding",
+            help="Delete demo users and their data before seeding",
+        )
+        parser.add_argument(
+            "--refresh",
+            action="store_true",
+            help="Delete the data of the demo users but keep the accounts, then seed again",
         )
 
-    def _clear_demo_user_data(self):
-        """Delete only data belonging to demo_premium and demo_user."""
+    def _clear_demo_user_data(self, keep_users=False):
+        """Delete only data belonging to demo_premium and demo_user.
+
+        With keep_users the accounts and their profiles stay (a login in progress must survive the daily refresh).
+        """
         demo_users = User.objects.filter(username__in=["demo_premium", "demo_user"])
         if not demo_users.exists():
             return
@@ -55,6 +75,15 @@ class Command(BaseCommand):
             Contract.objects.filter(user_id__in=demo_user_ids).values_list("id", flat=True)
         )
 
+        # The demo logins are public, so visitors can leave more behind than contracts: calendar addresses, push
+        # subscriptions, expenses and portal accounts. All of it goes with the daily refresh.
+        CalendarConnection.objects.filter(user_id__in=demo_user_ids).delete()
+        IcsCalendarSource.objects.filter(user_id__in=demo_user_ids).delete()
+        TutorCalendarFeed.objects.filter(user_id__in=demo_user_ids).delete()
+        Expense.objects.filter(user_id__in=demo_user_ids).delete()
+        PushSubscription.objects.filter(user_id__in=demo_user_ids).delete()
+        PortalUser.objects.filter(tutor_id__in=demo_user_ids).delete()
+
         LessonPlan.objects.filter(contract_id__in=contract_ids).delete()
         Invoice.objects.filter(owner_id__in=demo_user_ids).delete()
         Lesson.objects.filter(contract_id__in=contract_ids).delete()
@@ -63,6 +92,8 @@ class Command(BaseCommand):
         ContractMonthlyPlan.objects.filter(contract_id__in=contract_ids).delete()
         Contract.objects.filter(user_id__in=demo_user_ids).delete()
         Institute.objects.filter(user_id__in=demo_user_ids).delete()
+        if keep_users:
+            return
         UserProfile.objects.filter(user_id__in=demo_user_ids).delete()
         User.objects.filter(id__in=demo_user_ids).delete()
 
@@ -70,8 +101,17 @@ class Command(BaseCommand):
         if options["clear"]:
             self.stdout.write(self.style.WARNING("Deleting demo user data only..."))
             self._clear_demo_user_data()
+        elif options["refresh"]:
+            self.stdout.write(self.style.WARNING("Refreshing demo data (accounts stay)..."))
+            self._clear_demo_user_data(keep_users=True)
 
         self.stdout.write(self.style.SUCCESS("Creating demo data..."))
+
+        # All dates below are relative to the German calendar day, not to a fixed year (the old fixed dates in 2025
+        # ran out of the demo after a few months).
+        today = timezone.localdate()
+        this_month = today.replace(day=1)
+        next_month = _add_months(this_month, 1)
 
         # Create users first (required for multi-tenancy)
         premium_user, _ = User.objects.get_or_create(
@@ -101,6 +141,8 @@ class Command(BaseCommand):
         non_premium_user.save()
 
         UserProfile.objects.get_or_create(user=non_premium_user, defaults={})
+        UserProfile.objects.filter(user=premium_user).update(subscription_tier="business")
+        UserProfile.objects.filter(user=non_premium_user).update(subscription_tier="free")
 
         # Contracts (contain all student info)
         # Contract 1: With monthly quotas (for quota conflicts)
@@ -116,13 +158,18 @@ class Command(BaseCommand):
             notes="Weekly 2x Math - with monthly quotas",
             hourly_rate=Decimal("25.00"),
             unit_duration_minutes=60,
-            start_date=date(2025, 11, 1),
+            start_date=_add_months(this_month, -2),
             is_active=True,
         )
 
         # ContractMonthlyPlan for quota conflicts
-        ContractMonthlyPlan.objects.create(contract=contract1, year=2025, month=11, planned_units=3)
-        ContractMonthlyPlan.objects.create(contract=contract1, year=2025, month=12, planned_units=5)
+        # This month 5 units, next month 3 (the four lessons below in the next month show the quota conflict)
+        ContractMonthlyPlan.objects.create(
+            contract=contract1, year=this_month.year, month=this_month.month, planned_units=5
+        )
+        ContractMonthlyPlan.objects.create(
+            contract=contract1, year=next_month.year, month=next_month.month, planned_units=3
+        )
 
         # Contract 2: With recurring lessons
         demo_institute, _ = Institute.objects.get_or_create(
@@ -141,7 +188,7 @@ class Command(BaseCommand):
             institute_fk=demo_institute,
             hourly_rate=Decimal("30.00"),
             unit_duration_minutes=90,
-            start_date=date(2025, 10, 15),
+            start_date=_add_months(this_month, -3).replace(day=15),
             is_active=True,
         )
 
@@ -157,7 +204,7 @@ class Command(BaseCommand):
             notes="Single lessons only",
             hourly_rate=Decimal("28.00"),
             unit_duration_minutes=60,
-            start_date=date(2025, 12, 1),
+            start_date=_add_months(this_month, -1),
             is_active=True,
         )
 
@@ -173,13 +220,11 @@ class Command(BaseCommand):
             notes="Recurring lessons Monday and Wednesday",
             hourly_rate=Decimal("22.00"),
             unit_duration_minutes=60,
-            start_date=date(2025, 11, 1),
+            start_date=_add_months(this_month, -2),
             is_active=True,
         )
 
         # Lessons (with conflicts)
-        today = timezone.now().date()
-
         lesson1 = Lesson.objects.create(
             contract=contract1,
             date=today + timedelta(days=1),
@@ -222,39 +267,39 @@ class Command(BaseCommand):
         )
 
         # Quota conflict: Try to create more lessons than planned
-        # November: 3 planned, but create 4 lessons (4th should have conflict)
+        # Next month: 3 planned, but create 4 lessons (4th should have conflict). All four are in the future.
         Lesson.objects.create(
             contract=contract1,
-            date=date(2025, 11, 5),
+            date=next_month.replace(day=3),
             start_time=time(10, 0),
             duration_minutes=60,
             status="planned",
-            notes="Math: Algebra - 1st lesson in November",
+            notes="Math: Algebra - 1st lesson in the next month",
         )
         Lesson.objects.create(
             contract=contract1,
-            date=date(2025, 11, 12),
+            date=next_month.replace(day=10),
             start_time=time(10, 0),
             duration_minutes=60,
             status="planned",
-            notes="Math: Algebra - 2nd lesson in November",
+            notes="Math: Algebra - 2nd lesson in the next month",
         )
         Lesson.objects.create(
             contract=contract1,
-            date=date(2025, 11, 19),
+            date=next_month.replace(day=17),
             start_time=time(10, 0),
             duration_minutes=60,
             status="planned",
-            notes="Math: Algebra - 3rd lesson in November",
+            notes="Math: Algebra - 3rd lesson in the next month",
         )
         # This lesson should have a quota conflict (4th lesson, but only 3 planned)
         Lesson.objects.create(
             contract=contract1,
-            date=date(2025, 11, 26),
+            date=next_month.replace(day=24),
             start_time=time(10, 0),
             duration_minutes=60,
             status="planned",
-            notes="Math: Algebra - 4th lesson in November (QUOTA CONFLICT)",
+            notes="Math: Algebra - 4th lesson in the next month (QUOTA CONFLICT)",
         )
 
         # Recurring Lessons
@@ -266,7 +311,7 @@ class Command(BaseCommand):
         recurring1 = RecurringLesson.objects.create(
             contract=contract4,
             start_date=recurring1_start,
-            end_date=recurring1_start + timedelta(days=30),  # 4 weeks
+            end_date=recurring1_start + timedelta(days=55),  # 8 weeks
             start_time=time(16, 0),
             duration_minutes=60,
             travel_time_before_minutes=15,
@@ -294,7 +339,7 @@ class Command(BaseCommand):
         recurring2 = RecurringLesson.objects.create(
             contract=contract2,
             start_date=recurring2_start,
-            end_date=recurring2_start + timedelta(days=21),  # 3 weeks
+            end_date=recurring2_start + timedelta(days=48),  # 7 weeks
             start_time=time(15, 0),
             duration_minutes=90,
             travel_time_before_minutes=20,
@@ -438,7 +483,7 @@ class Command(BaseCommand):
             notes="Weekly Math lessons",
             hourly_rate=Decimal("24.00"),
             unit_duration_minutes=60,
-            start_date=date(2025, 11, 1),
+            start_date=_add_months(this_month, -2),
             is_active=True,
         )
 
@@ -453,12 +498,12 @@ class Command(BaseCommand):
             notes="German support",
             hourly_rate=Decimal("20.00"),
             unit_duration_minutes=60,
-            start_date=date(2025, 10, 20),
+            start_date=_add_months(this_month, -3).replace(day=20),
             is_active=True,
         )
 
         ContractMonthlyPlan.objects.create(
-            contract=std_contract1, year=2025, month=11, planned_units=4
+            contract=std_contract1, year=this_month.year, month=this_month.month, planned_units=4
         )
 
         Lesson.objects.create(

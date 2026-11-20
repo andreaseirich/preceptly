@@ -10,7 +10,9 @@ Demo-Accounts dürfen NICHT:
 - KI unbegrenzt nutzen (Tageslimit)
 - Passwort oder E-Mail-Adresse ändern
 
-Alle Daten werden stündlich automatisch zurückgesetzt (Railway Cron).
+Die Daten werden einmal je Kalendertag neu erzeugt, beim ersten Zugriff eines Demo-Kontos (apps/core/demo_refresh.py). So
+verschieben sich alle Termine mit der Zeit, und Änderungen von Besuchern sind spätestens am nächsten Tag weg. Früher stand hier
+"stündlich per Railway-Cron"; einen solchen Cron gab es nie.
 """
 
 from django.core.cache import cache

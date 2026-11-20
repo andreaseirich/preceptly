@@ -178,6 +178,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    # Erzeugt die Demo-Daten einmal je Tag neu, beim ersten Zugriff eines Demo-Kontos (nach der Anmeldung, vor der Ansicht).
+    "apps.core.demo_refresh.DemoFreshnessMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_ratelimit.middleware.RatelimitMiddleware",
     "apps.core.csp.ContentSecurityPolicyMiddleware",
