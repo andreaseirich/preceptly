@@ -61,8 +61,9 @@ class WeekViewClickBehaviorTest(TestCase):
         # Check that edit URL is present (should be in the edit icon)
         edit_url = reverse("lessons:update", kwargs={"pk": self.lesson.pk})
         self.assertContains(response, edit_url)
-        # Check for edit icon (✏️)
-        self.assertContains(response, "✏️")
+        # Das Bearbeiten-Symbol ist ein SVG-Icon im Link „lesson-edit“ (früher das Emoji ✏️)
+        self.assertContains(response, 'class="lesson-edit"')
+        self.assertContains(response, '<use href="#i-pencil">')
 
     def test_lesson_plan_view_loads_correctly(self):
         """Test: Lesson plan view redirects to lesson detail page (lesson plan integrated there)."""

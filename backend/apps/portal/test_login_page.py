@@ -1,5 +1,8 @@
 """Portal-Anmeldeseite: Rückweg zum Tutor-Login und Layout auf dem Handy."""
 
+from pathlib import Path
+
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
@@ -18,4 +21,10 @@ class PortalLoginPageTest(TestCase):
         for name in ("portal:login", "portal:password_reset"):
             with self.subTest(seite=name):
                 body = self.client.get(reverse(name)).content.decode()
-                self.assertIn("flex-direction: column", body)
+                self.assertIn('class="portal auth-page"', body)
+                self.assertIn("core/css/auth.css", body)
+        # Die Regel selbst steht in auth.css (früher im Inline-CSS jeder Seite)
+        css = (Path(settings.BASE_DIR) / "apps/core/static/core/css/auth.css").read_text(
+            encoding="utf-8"
+        )
+        self.assertRegex(css, r"\.auth-page\s*\{[^}]*flex-direction:\s*column")

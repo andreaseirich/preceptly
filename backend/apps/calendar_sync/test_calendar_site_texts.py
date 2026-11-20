@@ -61,11 +61,12 @@ class SiteTextsTest(TestCase):
 
         free_start = html.index("Im kostenlosen Tarif enthalten")
         starter_start = html.index("Ab dem Starter-Tarif enthalten")
-        premium_start = html.index("Premium-Funktionen")
+        pro_start = html.index("Ab dem Pro-Tarif enthalten")
         free_group = html[free_start:starter_start]
-        starter_group = html[starter_start:premium_start]
+        starter_group = html[starter_start:pro_start]
+        pro_group = html[pro_start:]
         self.assertLess(free_start, starter_start)
-        self.assertLess(starter_start, premium_start)
+        self.assertLess(starter_start, pro_start)
         for starter_only in (
             "Wiederkehrende Unterrichtsstunden",
             "Blockzeiten",
@@ -74,6 +75,10 @@ class SiteTextsTest(TestCase):
             self.assertNotIn(starter_only, free_group)
             self.assertIn(starter_only, starter_group)
         self.assertIn("EÜR-Export für die Steuererklärung gibt es ab Pro", free_group)
+        # Meetingräume und KI-Pläne brauchen Pro (feature_flags): Sie stehen in der Pro-Gruppe, nicht bei Starter
+        for pro_only in ("Integrierte Meeting-Räume", "KI-gestützte Stundenplanung"):
+            self.assertNotIn(pro_only, starter_group)
+            self.assertIn(pro_only, pro_group)
 
     def test_the_about_page_no_longer_names_framework_versions(self):
         html = self.page("/legal/about/", "de")

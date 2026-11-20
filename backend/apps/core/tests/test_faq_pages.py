@@ -44,7 +44,7 @@ class TutorFaqTest(TestCase):
     def test_menu_lists_every_topic_and_every_menu_link_has_a_section(self):
         page = re.escape(reverse("core:faq"))
         # ohne den Skip-Link „Zum Inhalt springen“ aus base.html
-        topics = set(re.findall(r'href="#([a-z0-9-]+)"', self.html)) - {"main-content"}
+        topics = set(re.findall(r'<a\b[^>]*\bhref="#([a-z0-9-]+)"', self.html)) - {"main-content"}
         menu = set(re.findall(rf'href="{page}#([a-z0-9-]+)"', self.html))
         sections = set(re.findall(r'\bid="([a-z0-9-]+)"', self.html))
 

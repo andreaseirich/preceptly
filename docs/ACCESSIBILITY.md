@@ -36,6 +36,14 @@ Bei **jeder** Änderung an `.html`-Dateien — auch kleinen — immer sicherstel
 - Großer Text (≥ 18pt / ≥ 14pt fett): ≥ 3:1
 - UI-Komponenten & grafische Objekte: ≥ 3:1
 - Neue Farbwerte mit Python-Skript prüfen (Formel: WCAG-Luminanz-Methode)
+- Alle Farbwerte stehen in `backend/apps/core/static/core/css/tokens.css` (hell „Papier“, dunkel „Tafel“). Der Test
+  `apps/core/tests/test_design_tokens.py` rechnet die Kontraste daraus nach (Text 4,5:1, Eingabe-Rand 3:1) und schlägt an,
+  sobald ein Paar nicht mehr trägt. Der Textmarker-Ton (`--highlight`) ist nur Fläche hinter Tinte, nie Schriftfarbe
+- Symbole sind Dekor (`{% icon %}` setzt `aria-hidden`): Wo ein Symbol allein steht, braucht der Knopf `aria-label` oder verborgenen Text
+
+### Aufklappmenüs
+- Muster „aufklappbarer Bereich“: Knopf mit `aria-expanded` und `aria-controls`, **kein** `role="menu"` ohne Pfeiltasten-Steuerung
+- Aktuelle Seite im Menü mit `aria-current="page"`; Umschalter (Thema) mit `aria-pressed`
 
 ### Seitentitel
 - `{% block title %}Seitenname – Preceptly{% endblock %}` — eindeutig und auf Deutsch
@@ -49,6 +57,14 @@ Bei **jeder** Änderung an `.html`-Dateien — auch kleinen — immer sicherstel
 - `role="alert"` auf Flash-Messages
 - Vollständiger Sweep aller 42 Templates (Labels, scope, aria-*, fieldset)
 - Farbkontrast-Audit: 54 Kombinationen geprüft, `#2980b9` → `#1a6fa8` korrigiert
+
+## Überarbeitung vom 20.11.2026 (Designsystem „Kladde“)
+
+- Eine `<h1>` je Seite (auch im Rückfalltext der Rechtsseiten und auf den Portal-Anmeldeseiten); Test `test_page_structure.py`
+- Alle Felder beschriftet (`for`/`id` oder `aria-label`), auch KI-Hinweise, PDF-Upload und Kalender-Abo-Adresse
+- Menü ohne `role="menu"`, Theme-Knopf mit `aria-pressed`, zweite Logo-Fassung mit `alt=""`, Sprache und Fußzeilen-Beschriftungen folgen der Anfrage
+- Kalenderblöcke und Statusfarben aus Tokens (vorher weiß auf Orange 2,2:1, Gelb auf Türkis)
+- Dunkles Thema und „Gerät dunkel“ liefern dieselben Werte (Test)
 
 ---
 

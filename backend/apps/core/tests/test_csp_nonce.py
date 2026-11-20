@@ -85,13 +85,13 @@ class TemplateGuardTest(TestCase):
         )
 
     def test_no_javascript_urls(self):
-        found = [
-            str(p.relative_to(BACKEND))
-            for p in _templates()
-            if re.search(
-                r"""href\s*=\s*["']\s*javascript:""", p.read_text(encoding="utf-8"), re.IGNORECASE
-            )
-        ]
+        """Auch nicht als Rückfallwert in einem Vorlagenausdruck: href="{{ x|default:'javascript:…' }}" wurde von der CSP blockiert."""
+        attribute = re.compile(r"""href\s*=\s*"([^"]*)"|href\s*=\s*'([^']*)'""", re.IGNORECASE)
+        found = []
+        for p in _templates():
+            for m in attribute.finditer(p.read_text(encoding="utf-8")):
+                if re.search(r"javascript:", m.group(1) or m.group(2), re.IGNORECASE):
+                    found.append(str(p.relative_to(BACKEND)))
         self.assertEqual(found, [])
 
     def test_every_script_tag_has_the_nonce(self):

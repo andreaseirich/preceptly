@@ -279,8 +279,8 @@ class GermanLandingPageTestCase(TestCase):
         self.assertNotIn(b"Willkommen bei Preceptly", response.content)
 
     def test_marketing_text_mentions_free_plan(self):
-        """Landing page pricing intro must mention 'kostenlos startbar'."""
+        """Die Preisüberschrift der Startseite nennt den kostenlosen Einstieg."""
         response = self._get_landing_de()
         self.assertEqual(response.status_code, 200)
-        self.assertIn("kostenlos startbar".encode(), response.content)
+        self.assertIn("Kostenlos starten".encode(), response.content)
         self.assertNotIn("Preceptly kostet ab 4,99".encode(), response.content)

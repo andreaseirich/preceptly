@@ -759,16 +759,18 @@ class PortalPasswordValidatorL1Test(TestCase):
         url = reverse("portal:activate", kwargs={"token": self.link.invite_token})
         resp = self.client.post(url, {"password": "12345678", "password_confirm": "12345678"})
         self.assertEqual(resp.status_code, 200)
-        content = resp.content.decode()
-        self.assertIn("error", content.lower())
+        self.assertContains(resp, 'role="alert"')
+        self.link.refresh_from_db()
+        self.assertFalse(self.link.is_active)
 
     def test_activation_rejects_common_password(self):
         """Activation must reject passwords that fail CommonPasswordValidator."""
         url = reverse("portal:activate", kwargs={"token": self.link.invite_token})
         resp = self.client.post(url, {"password": "password1", "password_confirm": "password1"})
         self.assertEqual(resp.status_code, 200)
-        content = resp.content.decode()
-        self.assertIn("error", content.lower())
+        self.assertContains(resp, 'role="alert"')
+        self.link.refresh_from_db()
+        self.assertFalse(self.link.is_active)
 
     def test_activation_accepts_strong_password(self):
         """Activation must accept a password that passes all validators."""

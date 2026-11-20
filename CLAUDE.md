@@ -104,6 +104,13 @@ müssen grün sein.
   (`onclick=…`, `onsubmit=…`, `href="javascript:…"`) — stattdessen `data-click` &
   Co. aus `apps/core/static/js/actions.js`. Ein Wächter-Test erzwingt beides.
   Details: `docs/operations/content-security-policy.md`
+- **Gestaltung (Designsystem „Kladde“):** Farben, Schrift und Abstände nur über Tokens aus
+  `backend/apps/core/static/core/css/tokens.css` (`var(--ink)`, `var(--accent)`, …), keine festen
+  Hex-Werte in Vorlagen. Neue Stile gehören in die passende Datei unter `core/css/` (Aufgaben der
+  Dateien: `docs/features/feat-designsystem-kladde.md`), nicht in einen Inline-`<style>`-Block.
+  Symbole sind `{% icon "name" %}` (Zeichnungen in `apps/core/icon_paths.py`), **keine Emojis**;
+  `{% icon %}` nie in einem Attribut. Anmelde- und Fehlerseiten nutzen `auth-card` aus `auth.css`.
+  Anrede in der Tutor-Oberfläche: „du“. Wächter-Tests: `test_design_tokens.py`, `test_icons.py`
 
 ## Sicherheit
 

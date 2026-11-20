@@ -36,6 +36,12 @@ def _templates():
     return (p for p in APPS.rglob("*.html") if "email" not in p.parts)
 
 
+def _sources():
+    """Vorlagen und Stylesheets: Seit der Umstellung auf das Designsystem stehen die Farbwerte in core/css/*.css."""
+    yield from _templates()
+    yield from (APPS / "core/static/core/css").glob("*.css")
+
+
 class AccentTextTokenTest(SimpleTestCase):
     def test_no_hard_white_on_accent_or_success(self):
         found = []
@@ -50,7 +56,7 @@ class AccentTextTokenTest(SimpleTestCase):
     def test_every_colour_definition_brings_readable_text(self):
         """Zu jedem --accent/--success gehört ein --on-… mit mindestens 4,5:1."""
         checked = 0
-        for path in _templates():
+        for path in _sources():
             lines = path.read_text(encoding="utf-8").splitlines()
             for i, line in enumerate(lines):
                 m = re.match(r"\s*--(accent|success):\s*(#[0-9a-fA-F]{3,6})\s*;", line)
@@ -62,12 +68,15 @@ class AccentTextTokenTest(SimpleTestCase):
                     self.assertIsNotNone(nxt, f"--on-{kind} fehlt nach --{kind}")
                     self.assertGreaterEqual(_contrast(surface, nxt.group(1)), 4.5)
                 checked += 1
-        self.assertGreaterEqual(checked, 12)
+        self.assertGreaterEqual(
+            checked, 6
+        )  # tokens.css: hell, dunkel und „Gerät dunkel“ je für Akzent und Erfolg
 
     def test_rating_stars_are_readable_in_both_themes(self):
-        text = (APPS / "core/templates/core/base.html").read_text(encoding="utf-8")
+        text = (APPS / "core/static/core/css/tokens.css").read_text(encoding="utf-8")
         markers = re.findall(r"--marker:\s*(#[0-9a-fA-F]{6})", text)
-        backgrounds = re.findall(r"--bg-secondary:\s*(#[0-9a-fA-F]{6})", text)
+        backgrounds = re.findall(r"--paper-card:\s*(#[0-9a-fA-F]{6})", text)
+        self.assertGreaterEqual(len(markers), 3)
         self.assertEqual(len(markers), len(backgrounds))
         for marker, background in zip(markers, backgrounds, strict=True):
             with self.subTest(stern=marker, grund=background):

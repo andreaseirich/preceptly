@@ -166,7 +166,12 @@ class MarkupTest(PickerFixture):
 
         html = response.content.decode()
         self.assertIn('type="button" class="week-day-pick', html)
-        self.assertEqual(html.count('aria-pressed="false"'), 7)
+        import re
+
+        day_buttons = re.findall(
+            r'<button\b[^>]*week-day-pick[^>]*aria-pressed="false"[^>]*>', html
+        )
+        self.assertEqual(len(day_buttons), 7)
         self.assertIn('role="list"', html)
         self.assertIn('aria-label="Tage der Woche"', html)
         self.assertNotIn("onclick=", html)  # CSP: keine Inline-Handler
