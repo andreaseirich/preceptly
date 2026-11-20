@@ -410,7 +410,8 @@ msgstr "Warnung"
 
 #: apps/billing/templates/billing/invoice_confirm_delete.html:11
 msgid "Do you really want to delete this invoice?"
-msgstr "Möchten Sie diese Rechnung wirklich löschen?"
+msgstr "Möchtest du diese Rechnung wirklich löschen?"
+
 
 #: apps/billing/templates/billing/invoice_confirm_delete.html:12
 msgid "Invoice:"
@@ -552,11 +553,8 @@ msgid ""
 "            Your settings only count lessons from <strong>%(d)s</strong> "
 "onward toward the tier.\n"
 "            "
-msgstr ""
-"\n"
-"            Ihre Einstellungen zählen nur Stunden ab <strong>%(d)s</strong> "
-"zur Stufenberechnung.\n"
-"            "
+msgstr "\n            Deine Einstellungen zählen nur Stunden ab <strong>%(d)s</strong> zur Stufenberechnung.\n            "
+
 
 #: apps/billing/templates/billing/invoice_create.html:67
 msgid ""
@@ -639,7 +637,8 @@ msgstr "Gesamt (Vorschau)"
 
 #: apps/billing/templates/billing/invoice_create.html:104
 msgid "Make sure that:"
-msgstr "Stellen Sie sicher, dass:"
+msgstr "Stelle sicher, dass:"
+
 
 #: apps/billing/templates/billing/invoice_create.html:106
 msgid "There are lessons with status 'taught' in the period"
@@ -657,7 +656,8 @@ msgstr "Rechnung erstellen"
 
 #: apps/billing/templates/billing/invoice_create.html:129
 msgid "Please enter a period."
-msgstr "Bitte geben Sie einen Zeitraum ein."
+msgstr "Bitte gib einen Zeitraum ein."
+
 
 #: apps/billing/templates/billing/invoice_detail.html:5
 #: apps/billing/templates/billing/invoice_detail.html:111
@@ -677,10 +677,8 @@ msgstr "Rechnungsdaten fehlen"
 msgid ""
 "To generate a PDF, please fill in your <a href=\"%(url)s\">invoice details</"
 "a> first (name, address, optional tax number)."
-msgstr ""
-"Um ein PDF zu erstellen, tragen Sie bitte zuerst Ihre <a "
-"href=\"%(url)s\">Rechnungsdaten</a> ein (Name, Adresse, optional "
-"Steuernummer)."
+msgstr "Um ein PDF zu erstellen, trage bitte zuerst deine <a href=\"%(url)s\">Rechnungsdaten</a> ein (Name, Adresse, optional Steuernummer)."
+
 
 #: apps/billing/templates/billing/invoice_detail.html:138
 #: apps/billing/templates/billing/invoice_list.html:50
@@ -741,9 +739,8 @@ msgstr "Bearbeiten"
 msgid ""
 "You can change the recipient here, e.g. if the parents should receive the "
 "invoice instead of the student."
-msgstr ""
-"Sie können den Empfänger hier ändern, z. B. wenn die Eltern die Rechnung "
-"erhalten sollen statt des Schülers."
+msgstr "Du kannst den Empfänger hier ändern, z. B. wenn die Eltern die Rechnung erhalten sollen statt des Schülers."
+
 
 #: apps/billing/templates/billing/invoice_detail.html:180
 #: apps/students/templates/students/student_list.html:13
@@ -1219,7 +1216,8 @@ msgstr "Bitte ein Wiederholungsmuster für die Sperrzeitserie auswählen."
 #: apps/blocked_times/forms.py:124
 msgid ""
 "Please select at least one weekday when creating a recurring blocked time."
-msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
+msgstr "Bitte wähle mindestens einen Wochentag aus."
+
 
 #: apps/blocked_times/models.py:13
 msgid "User who owns this blocked time"
@@ -1438,8 +1436,8 @@ msgstr "Sperrzeit löschen"
 msgid ""
 "Are you sure you want to delete the blocked time "
 "\"%(title)s\" (%(datetime)s)?"
-msgstr ""
-"Möchten Sie die Blockzeit \"%(title)s\" (%(datetime)s) wirklich löschen?"
+msgstr "Möchtest du die Blockzeit \"%(title)s\" (%(datetime)s) wirklich löschen?"
+
 
 #: apps/blocked_times/templates/blocked_times/blockedtime_confirm_delete.html:12
 msgid "This blocked time is part of a series"
@@ -1563,9 +1561,8 @@ msgstr "Sperrzeitserie löschen"
 msgid ""
 "Are you sure you want to delete the recurring blocked time "
 "\"%(title)s\" (%(weekdays)s, %(time)s)?"
-msgstr ""
-"Möchten Sie die wiederkehrende Blockzeit \"%(title)s\" (%(weekdays)s, "
-"%(time)s) wirklich löschen?"
+msgstr "Möchtest du die wiederkehrende Blockzeit \"%(title)s\" (%(weekdays)s, %(time)s) wirklich löschen?"
+
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_confirm_delete.html:9
 msgid "Already generated blocked times will not be deleted."
@@ -1644,10 +1641,8 @@ msgid ""
 "Recurring blocked times allow you to create repeating blocked times (e.g., "
 "'every Tuesday 6-8 PM'). After saving, you can generate the blocked times "
 "for the specified period."
-msgstr ""
-"Wiederkehrende Blockzeiten ermöglichen es Ihnen, sich wiederholende "
-"Blockzeiten zu erstellen (z.B. 'jeden Dienstag 18-20 Uhr'). Nach dem "
-"Speichern können Sie die Blockzeiten für den angegebenen Zeitraum generieren."
+msgstr "Wiederkehrende Blockzeiten ermöglichen es dir, sich wiederholende Blockzeiten zu erstellen (z.B. 'jeden Dienstag 18-20 Uhr'). Nach dem Speichern kannst du die Blockzeiten für den angegebenen Zeitraum generieren."
+
 
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_form.html:27
 #: apps/lessons/templates/lessons/recurringlesson_form.html:27
@@ -1695,7 +1690,8 @@ msgstr "Blockzeiten aus Serie generieren"
 #: apps/blocked_times/templates/blocked_times/recurring_blockedtime_generate.html:9
 #, python-format
 msgid "Do you want to generate blocked times from the series \"%(title)s\"?"
-msgstr "Möchten Sie Blockzeiten aus der Serie \"%(title)s\" generieren?"
+msgstr "Möchtest du Blockzeiten aus der Serie \"%(title)s\" generieren?"
+
 
 #: apps/blocked_times/views.py:139
 msgid "Blocked times in the past are not allowed."
@@ -2521,7 +2517,8 @@ msgstr "Vertrag erfolgreich aktualisiert."
 
 #: apps/contracts/views.py:290
 msgid "Please correct the errors in the monthly planning."
-msgstr "Bitte korrigieren Sie die Fehler in der monatlichen Planung."
+msgstr "Bitte korrigiere die Fehler in der monatlichen Planung."
+
 
 #: apps/contracts/views.py:314
 msgid "Contract successfully deleted."
@@ -3085,9 +3082,9 @@ msgid "Change language"
 msgstr "Sprache ändern"
 
 #: apps/core/templates/core/base.html:593
-msgid "Demo account — data resets hourly. Do not enter real personal data."
+msgid "Demo account — data resets daily. Do not enter real personal data."
 msgstr ""
-"Demo-Konto — Daten werden stündlich zurückgesetzt. Gib keine echten "
+"Demo-Konto — Daten werden täglich zurückgesetzt. Gib keine echten "
 "personenbezogenen Daten ein."
 
 #: apps/core/templates/core/base.html:615
@@ -3177,7 +3174,8 @@ msgstr "Fehler"
 
 #: apps/core/templates/core/base.html:700
 msgid "Network error: Please check your internet connection."
-msgstr "Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung."
+msgstr "Netzwerkfehler: Bitte überprüfe deine Internetverbindung."
+
 
 #: apps/core/templates/core/base.html:703
 #: apps/lessons/templates/lessons/week.html:72
@@ -4076,7 +4074,8 @@ msgstr "Bei Preceptly anmelden"
 
 #: apps/core/templates/core/login.html:14
 msgid "Invalid username or password. Please try again."
-msgstr "Ungültiger Benutzername oder Passwort. Bitte versuchen Sie es erneut."
+msgstr "Ungültiger Benutzername oder Passwort. Bitte versuche es erneut."
+
 
 #: apps/core/templates/core/login.html:40
 #: apps/core/templates/core/register.html:8
@@ -4099,7 +4098,8 @@ msgstr "Zurück zur Startseite"
 
 #: apps/core/templates/core/register.html:16
 msgid "Please correct the errors below."
-msgstr "Bitte korrigieren Sie die Fehler unten."
+msgstr "Bitte korrigiere die Fehler unten."
+
 
 #: apps/core/templates/core/register.html:74
 msgid "Consent"
@@ -4305,9 +4305,8 @@ msgstr "Benachrichtigungen & App"
 msgid ""
 "Manage your Premium subscription. Premium unlocks unlimited public booking, "
 "reschedule, reports, Billing Pro, and AI lesson plans."
-msgstr ""
-"Verwalten Sie Ihr Premium-Abo. Premium ermöglicht unbegrenztes Public "
-"Booking, Umbuchung, Berichte, Billing Pro und KI-Stundenpläne."
+msgstr "Verwalte dein Premium-Abo. Premium ermöglicht unbegrenztes Public Booking, Umbuchung, Berichte, Billing Pro und KI-Stundenpläne."
+
 
 #: apps/core/templates/core/settings.html:74
 msgid "Current plan"
@@ -4388,9 +4387,8 @@ msgstr "Optional. Wird für Rechnungen und Stripe-Benachrichtigungen verwendet."
 
 #: apps/core/templates/core/settings.html:169
 msgid "To change an existing email address, please contact support."
-msgstr ""
-"Um eine bestehende E-Mail-Adresse zu ändern, kontaktieren Sie bitte den "
-"Support."
+msgstr "Um eine bestehende E-Mail-Adresse zu ändern, kontaktiere bitte den Support."
+
 
 #: apps/core/templates/core/settings.html:200
 #: apps/core/templates/core/settings.html:203
@@ -4436,22 +4434,15 @@ msgid ""
 "        <a href=\"%(url_avv)s\">Data Processing Agreement (AVV)</a>,\n"
 "        and <a href=\"%(url_privacy)s\">Privacy Policy</a> on %(date)s.\n"
 "        "
-msgstr ""
-"\n"
-"        Sie haben die <a href=\"%(url_terms)s\">AGB</a>,\n"
-"        den <a href=\"%(url_avv)s\">Auftragsverarbeitungsvertrag (AVV)</a>\n"
-"        und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a> am "
-"%(date)s akzeptiert.\n"
-"        "
+msgstr "\n        Du hast die <a href=\"%(url_terms)s\">AGB</a>,\n        den <a href=\"%(url_avv)s\">Auftragsverarbeitungsvertrag (AVV)</a>\n        und die <a href=\"%(url_privacy)s\">Datenschutzerklärung</a> am %(date)s akzeptiert.\n        "
+
 
 #: apps/core/templates/core/settings.html:226
 msgid ""
 "You have not yet explicitly accepted the Data Processing Agreement (AVV). "
 "This is required for GDPR-compliant use of Preceptly."
-msgstr ""
-"Sie haben den Auftragsverarbeitungsvertrag (AVV) noch nicht ausdrücklich "
-"akzeptiert. Dies ist für die DSGVO-konforme Nutzung von Preceptly "
-"erforderlich."
+msgstr "Du hast den Auftragsverarbeitungsvertrag (AVV) noch nicht ausdrücklich akzeptiert. Dies ist für die DSGVO-konforme Nutzung von Preceptly erforderlich."
+
 
 #: apps/core/templates/core/settings.html:232
 msgid "Legal consent"
@@ -4498,10 +4489,8 @@ msgid ""
 "Choose how you usually get to on-site appointments. This affects which time "
 "slots are offered in the public booking calendar (e.g. more slots with "
 "bicycle, fewer with public transport)."
-msgstr ""
-"Wählen Sie, wie Sie üblicherweise zu Vor-Ort-Terminen anreisen. Das "
-"beeinflusst, welche Zeitslots im Buchungskalender angeboten werden (z. B. "
-"mehr Slots mit Fahrrad, weniger mit ÖPNV)."
+msgstr "Wähle, wie du üblicherweise zu Vor-Ort-Terminen anreist. Das beeinflusst, welche Zeitslots im Buchungskalender angeboten werden (z. B. mehr Slots mit Fahrrad, weniger mit ÖPNV)."
+
 
 #: apps/core/templates/core/settings.html:299
 msgid "Save travel mode"
@@ -4877,7 +4866,8 @@ msgstr "Standard-Arbeitszeiten erfolgreich aktualisiert."
 
 #: apps/core/views.py:302
 msgid "To change your email address, please contact support."
-msgstr "Um Ihre E-Mail-Adresse zu ändern, kontaktieren Sie bitte den Support."
+msgstr "Um deine E-Mail-Adresse zu ändern, kontaktiere bitte den Support."
+
 
 #: apps/core/views.py:308
 msgid "Email address saved."
@@ -4929,7 +4919,8 @@ msgstr "Ausgabe gelöscht."
 
 #: apps/core/views.py:913
 msgid "Please confirm the legal agreements to proceed."
-msgstr "Bitte bestätigen Sie die rechtlichen Vereinbarungen, um fortzufahren."
+msgstr "Bitte bestätige die rechtlichen Vereinbarungen, um fortzufahren."
+
 
 #: apps/core/views.py:921
 msgid "Legal agreements accepted."
@@ -4988,7 +4979,8 @@ msgstr "Stripe-Checkout ist im Demo-Modus nicht verfügbar."
 #: apps/core/views_stripe.py:294 apps/core/views_stripe.py:381
 #: apps/core/views_stripe.py:400 apps/core/views_stripe.py:486
 msgid "Payment is not configured. Please contact support."
-msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktieren Sie den Support."
+msgstr "Zahlung ist nicht konfiguriert. Bitte kontaktiere den Support."
+
 
 #: apps/core/views_stripe.py:322 apps/core/views_stripe.py:518
 msgid "Could not open billing portal. Please try again."
@@ -5135,9 +5127,8 @@ msgstr "KI-Lektionsplan"
 msgid ""
 "A lesson plan has already been generated for this lesson. You can regenerate "
 "it below."
-msgstr ""
-"Für diese Unterrichtsstunde wurde bereits ein Lektionsplan generiert. Sie "
-"können ihn unten neu generieren."
+msgstr "Für diese Unterrichtsstunde wurde bereits ein Lektionsplan generiert. Du kannst ihn unten neu generieren."
+
 
 #: apps/lesson_plans/templates/lesson_plans/lesson_plan.html:110
 msgid "Generate an AI-powered lesson plan for this lesson."
@@ -5236,7 +5227,8 @@ msgstr "Bitte ein Wiederholungsmuster für den Serientermin auswählen."
 
 #: apps/lessons/forms.py:187
 msgid "Please select at least one weekday when creating a recurring session."
-msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
+msgstr "Bitte wähle mindestens einen Wochentag aus."
+
 
 #: apps/lessons/forms.py:207
 msgid "Optional: Document name"
@@ -5562,9 +5554,8 @@ msgstr "Wochenansicht"
 msgid ""
 "Click on a day to create a new lesson. Click on an existing lesson to edit "
 "it."
-msgstr ""
-"Klicken Sie auf einen Tag, um eine neue Unterrichtsstunde zu erstellen. "
-"Klicken Sie auf eine vorhandene Unterrichtsstunde, um sie zu bearbeiten."
+msgstr "Klicke auf einen Tag, um eine neue Unterrichtsstunde zu erstellen. Klicke auf eine vorhandene Unterrichtsstunde, um sie zu bearbeiten."
+
 
 #: apps/lessons/templates/lessons/calendar.html:38
 msgid "Create new lesson"
@@ -5721,9 +5712,8 @@ msgstr "Stunde löschen"
 msgid ""
 "Are you sure you want to delete the lesson for \"%(student)s\" on %(date)s "
 "at %(time)s?"
-msgstr ""
-"Möchten Sie die Unterrichtsstunde für \"%(student)s\" am %(date)s um "
-"%(time)s wirklich löschen?"
+msgstr "Möchtest du die Unterrichtsstunde für \"%(student)s\" am %(date)s um %(time)s wirklich löschen?"
+
 
 #: apps/lessons/templates/lessons/lesson_confirm_delete.html:14
 #: apps/lessons/templates/lessons/lesson_form.html:13
@@ -5913,9 +5903,8 @@ msgstr "Serientermin löschen"
 msgid ""
 "Are you sure you want to delete the recurring lesson for "
 "\"%(student)s\" (%(weekdays)s, %(time)s)?"
-msgstr ""
-"Möchten Sie die wiederkehrende Unterrichtsstunde für "
-"\"%(student)s\" (%(weekdays)s, %(time)s) wirklich löschen?"
+msgstr "Möchtest du die wiederkehrende Unterrichtsstunde für \"%(student)s\" (%(weekdays)s, %(time)s) wirklich löschen?"
+
 
 #: apps/lessons/templates/lessons/recurringlesson_confirm_delete.html:10
 #, python-format
@@ -5972,11 +5961,8 @@ msgid ""
 "Recurring lessons allow you to create repeating lessons (e.g., 'every Monday "
 "at 2 PM'). After saving, all lessons for the specified period will be "
 "automatically generated."
-msgstr ""
-"Wiederkehrende Unterrichtsstunden ermöglichen es Ihnen, sich wiederholende "
-"Unterrichtsstunden zu erstellen (z.B. 'jeden Montag um 14 Uhr'). Nach dem "
-"Speichern werden alle Unterrichtsstunden für den angegebenen Zeitraum "
-"automatisch generiert."
+msgstr "Wiederkehrende Unterrichtsstunden ermöglichen es dir, sich wiederholende Unterrichtsstunden zu erstellen (z.B. 'jeden Montag um 14 Uhr'). Nach dem Speichern werden alle Unterrichtsstunden für den angegebenen Zeitraum automatisch generiert."
+
 
 #: apps/lessons/templates/lessons/recurringlesson_form.html:41
 msgid "Save and Generate Lessons"
@@ -6093,7 +6079,8 @@ msgstr "Keine Arbeitszeiten für diesen Tag konfiguriert."
 
 #: apps/lessons/templates/lessons/student_booking.html:396
 msgid "Please select at least one time slot."
-msgstr "Bitte wählen Sie mindestens einen Zeitslot aus."
+msgstr "Bitte wähle mindestens einen Zeitslot aus."
+
 
 #: apps/lessons/templates/lessons/student_booking.html:411
 msgid "All selected slots must be on the same day."
@@ -6139,11 +6126,13 @@ msgstr "Änderungen speichern"
 
 #: apps/lessons/templates/lessons/student_booking.html:669
 msgid "Please fill in all required fields."
-msgstr "Bitte füllen Sie alle erforderlichen Felder aus."
+msgstr "Bitte fülle alle erforderlichen Felder aus."
+
 
 #: apps/lessons/templates/lessons/student_booking.html:673
 msgid "Please select at least one weekday."
-msgstr "Bitte wählen Sie mindestens einen Wochentag aus."
+msgstr "Bitte wähle mindestens einen Wochentag aus."
+
 
 #: apps/lessons/templates/lessons/week.html:66
 msgid ""
@@ -6485,7 +6474,8 @@ msgstr "Schüler löschen"
 #: apps/students/templates/students/student_confirm_delete.html:9
 #, python-format
 msgid "Are you sure you want to delete <strong>%(name)s</strong>?"
-msgstr "Möchten Sie <strong>%(name)s</strong> wirklich löschen?"
+msgstr "Möchtest du <strong>%(name)s</strong> wirklich löschen?"
+
 
 #: apps/students/templates/students/student_form.html:7
 msgid "Edit Student"
@@ -7983,3 +7973,113 @@ msgstr "Der Versand von Portal-E-Mails ist im Demo-Modus nicht verfügbar."
 
 msgid "Connecting a calendar is not available in demo mode."
 msgstr "Das Verbinden eines Kalenders ist im Demo-Modus nicht verfügbar."
+
+msgid "Site footer"
+msgstr "Seitenende"
+
+msgid "Legal information"
+msgstr "Rechtliche Hinweise"
+
+msgid "15 min travel"
+msgstr "15 Min. Fahrzeit"
+
+msgid "3 lessons"
+msgstr "3 Stunden"
+
+msgid "AI without personal data"
+msgstr "KI ohne personenbezogene Daten"
+
+msgid "Accept the data processing agreement (Art. 28 GDPR) directly in your settings."
+msgstr "Schließe den Auftragsverarbeitungsvertrag (Art. 28 DSGVO) direkt in den Einstellungen ab."
+
+msgid "Add your students"
+msgstr "Schüler anlegen"
+
+msgid "All features"
+msgstr "Alle Funktionen"
+
+msgid "Also in Pro: EÜR tax export, family access with several children on one account, unlimited portal bookings and series, and advanced reports."
+msgstr "Ebenfalls im Pro-Tarif: EÜR-Steuerexport, Familien-Zugang mit mehreren Kindern an einem Konto, unbegrenzte Portal-Buchungen und Serien sowie erweiterte Berichte."
+
+msgid "Create PDF invoices from your taught lessons and keep track of what has been paid."
+msgstr "Erstelle PDF-Rechnungen aus deinen gehaltenen Stunden und behalte im Blick, was bezahlt ist."
+
+msgid "Data processing agreement in your account"
+msgstr "Auftragsverarbeitungsvertrag im Konto"
+
+msgid "Demo data is reset daily. Please do not enter real personal data."
+msgstr "Die Demo-Daten werden täglich zurückgesetzt. Bitte gib keine echten personenbezogenen Daten ein."
+
+msgid "English"
+msgstr "Englisch"
+
+msgid "For AI lesson plans, names and contact details are removed first. The language model runs on our own hardware in Germany, not at an external AI provider."
+msgstr "Für KI-Stundenpläne werden Namen und Kontaktdaten vorher entfernt. Das Sprachmodell läuft auf unserer eigenen Hardware in Deutschland, nicht bei einem externen KI-Anbieter."
+
+msgid "For self-employed tutors"
+msgstr "Für selbstständige Nachhilfelehrer"
+
+msgid "Free plan"
+msgstr "Kostenloser Tarif"
+
+msgid "From first student to first invoice"
+msgstr "Vom ersten Schüler bis zur ersten Rechnung"
+
+msgid "Illustration: a day plan in which Preceptly flags two overlapping lessons"
+msgstr "Illustration: ein Tagesplan, in dem Preceptly zwei sich überschneidende Stunden markiert"
+
+msgid "Included from the Pro plan"
+msgstr "Ab dem Pro-Tarif enthalten"
+
+msgid "Invoice what you taught"
+msgstr "Abrechnen, was du unterrichtet hast"
+
+msgid "Maths"
+msgstr "Mathe"
+
+msgid "One profile and one contract per student: hourly rate, unit length, institute and monthly quota."
+msgstr "Ein Profil und ein Vertrag je Schüler: Stundensatz, Einheitenlänge, Institut und Monatskontingent."
+
+msgid "Overlap"
+msgstr "Überschneidung"
+
+msgid "Paid plans start at 4.99 € per month. Prices are final prices."
+msgstr "Bezahlte Tarife beginnen bei 4,99 € pro Monat. Alle Preise sind Endpreise."
+
+msgid "Plan your lessons"
+msgstr "Stunden planen"
+
+msgid "Preceptly warns you about overlaps, travel times and exceeded contract quotas before they become a problem."
+msgstr "Preceptly warnt dich vor Überschneidungen, Fahrzeiten und überschrittenen Vertragskontingenten, bevor daraus ein Problem wird."
+
+msgid "Privacy built into the product"
+msgstr "Datenschutz ist Teil des Produkts"
+
+msgid "Questions or feedback? Write to <a href=\"mailto:andreas@preceptly.de\">andreas@preceptly.de</a>."
+msgstr "Fragen oder Rückmeldungen? Schreib an <a href=\"mailto:andreas@preceptly.de\">andreas@preceptly.de</a>."
+
+msgid "Start free, upgrade when you need more"
+msgstr "Kostenlos starten, upgraden, wenn du mehr brauchst"
+
+msgid "The complete workspace for <span class=\"hl\">private tutors</span>"
+msgstr "Der komplette Arbeitsplatz für <span class=\"hl\">Nachhilfelehrer</span>"
+
+msgid "Up to 5 students"
+msgstr "Bis zu 5 Schüler"
+
+msgid "Up to 8 invoices per month"
+msgstr "Bis zu 8 Rechnungen pro Monat"
+
+msgid "based on %(counter)s rating from tutors"
+msgid_plural "based on %(counter)s ratings from tutors"
+msgstr[0] "aus %(counter)s Bewertung von Nachhilfelehrern"
+msgstr[1] "aus %(counter)s Bewertungen von Nachhilfelehrern"
+
+msgid "Delete student %(name)s"
+msgstr "Schüler %(name)s löschen"
+
+msgid "unit"
+msgstr "Einheit"
+
+msgid "Page not found"
+msgstr "Seite nicht gefunden"

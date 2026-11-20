@@ -110,10 +110,13 @@ class Contract(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
+        from django.utils.formats import number_format
         from django.utils.translation import gettext as _
 
         institute_str = f" ({self.institute_fk.institute_name})" if self.institute_fk_id else ""
-        return f"{self.full_name} - {self.hourly_rate}€/{_('unit')}{institute_str}"
+        # Zahl in der Sprache des Besuchers (28,00 statt 28.00), mit geschütztem Leerzeichen vor dem Euro-Zeichen
+        rate = number_format(self.hourly_rate, 2)
+        return f"{self.full_name} - {rate}\u00a0€/{_('unit')}{institute_str}"
 
     @property
     def full_name(self):
