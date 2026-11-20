@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load icons %}
 
 {% block title %}Warteraum – {{ lesson.date|date:"d.m.Y" }} – Preceptly Portal{% endblock %}
 
@@ -46,7 +47,7 @@
 
 {% block content %}
 <div class="wait-card card">
-    <span class="wait-icon">📹</span>
+    <span class="wait-icon">{% icon "video" %}</span>
     <h2 style="margin-top:0;">Warteraum</h2>
     <p style="color:var(--text-secondary); margin-bottom:0;">
         Warte darauf, dass dein Tutor das Meeting startet …

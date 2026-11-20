@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}Vertragsdetails – Preceptly{% endblock %}
 
@@ -113,13 +114,13 @@
     <div style="margin-bottom: 0.75em; padding-bottom: 0.75em; {% if not forloop.last %}border-bottom: 1px solid var(--border-color);{% endif %}">
       <strong>{{ pl.parent.user.email|default:pl.parent.user.username }}</strong>
       {% if pl.is_active %}
-        <span style="color: #28a745;">— ✓ aktiv</span>
+        <span style="color: #28a745;">— {% icon "check" %} aktiv</span>
         <form method="post" action="{% url 'students:portal_login_reminder' contract.pk %}" style="margin-top: 0.5em; display:inline-block;">
           {% csrf_token %}
-          <button type="submit" class="btn-sm btn-sm-secondary">✉ Login-Erinnerung senden</button>
+          <button type="submit" class="btn-sm btn-sm-secondary">{% icon "mail" %} Login-Erinnerung senden</button>
         </form>
       {% else %}
-        <span style="color: var(--text-secondary);">— ⏳ Einladung ausstehend</span>
+        <span style="color: var(--text-secondary);">— {% icon "hourglass" %} Einladung ausstehend</span>
         {% if pl.activation_url %}
         <div style="margin: 0.5em 0;">
           <small style="color: var(--text-secondary);">Aktivierungslink:</small><br>

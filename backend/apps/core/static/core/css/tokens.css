@@ -1,0 +1,189 @@
+/* Preceptly – Designsystem „Kladde“: Tokens
+ *
+ * Hell = „Papier“ (warmes Blatt auf dem Schreibtisch), dunkel = „Tafel“ (Kreide auf Schiefergrün).
+ * Markenfarben bleiben (Marine #2c3e50 aus dem Logo, Türkis als Akzent); neu ist der Textmarker-Gelbton für Hervorhebungen.
+ * Alle Text- und Bedienelementpaare erreichen WCAG 2.1 AA (Text 4,5:1, Eingabe-Rahmen 3:1); geprüft in
+ * apps/core/tests/test_design_tokens.py – dort steht auch, welche Paare gelten. Werte hier ändern heißt: dieser Test muss grün bleiben.
+ *
+ * Die alten Namen (--bg-primary, --accent, …) bleiben als Aliase erhalten, damit die Vorlagen mit eigenem CSS weiter funktionieren.
+ */
+
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../../fonts/source-sans-3-latin-wght-normal.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("../../fonts/source-serif-4-latin-wght-normal.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Schrift */
+  --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Form */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 72px;
+  --measure: 68ch;
+
+  /* Marke */
+  --brand-navy: #2c3e50;
+  --brand-navy-light: #3d5266;
+  --brand-navy-dark: #22303f;
+  --brand-teal: #1abc9c; /* nur dekorativ, nie für Text oder Schaltflächen auf hellem Grund */
+
+  /* Papier */
+  --paper-page: #f3efe6;
+  --paper-card: #fffdf8;
+  --paper-sunk: #f7f3ea;
+  --line: #ddd6c6;
+  --line-strong: #8c8a80; /* Rand von Eingabefeldern: 3,4:1 auf --paper-card */
+  --rule: rgba(44, 62, 80, 0.07); /* Linien des Schreibhefts (nur Dekor) */
+
+  /* Text */
+  --ink: #1c2833;
+  --ink-soft: #4d5963;
+
+  /* Interaktion */
+  --accent: #0b6e5c;
+  --on-accent: #ffffff;
+  --accent-hover: #085746;
+  --accent-tint: #e3f1ec;
+  --focus-ring: rgba(11, 110, 92, 0.38);
+  --highlight: #f4d03f; /* Textmarker: Hintergrund hinter Schrift in Tinte, nie als Textfarbe */
+  --on-highlight: #1c2833;
+  --marker: #b45309; /* Sterne der Bewertungen, AA */
+
+  /* Status */
+  --success: #2b7a33;
+  --on-success: #ffffff;
+  --warning: #92450a;
+  --danger: #a8321f;
+  --info: #1b5fa8;
+  --success-tint: #e4f1e3;
+  --warning-tint: #fbefd5;
+  --danger-tint: #f9e4df;
+  --info-tint: #e1ecf8;
+
+  /* Schatten */
+  --shadow: rgba(28, 40, 51, 0.1);
+  --shadow-sm: 0 1px 2px rgba(28, 40, 51, 0.06), 0 1px 1px rgba(28, 40, 51, 0.04);
+  --shadow-md: 0 6px 20px rgba(28, 40, 51, 0.09), 0 2px 4px rgba(28, 40, 51, 0.05);
+
+  /* Aliase für ältere Vorlagen */
+  --bg-primary: var(--paper-page);
+  --bg-secondary: var(--paper-card);
+  --bg-nav: var(--paper-card);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-nav: var(--ink);
+  --border-color: var(--line);
+  --hover-bg: rgba(28, 40, 51, 0.06);
+  --active-bg: var(--accent);
+  --table-header-bg: var(--paper-sunk);
+  --table-hover-bg: var(--paper-sunk);
+  --input-border: var(--line-strong);
+  --input-focus: var(--focus-ring);
+}
+
+/* Tafel */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper-page: #0f1a1c;
+  --paper-card: #162326;
+  --paper-sunk: #1b2c30;
+  --line: #2a3d41;
+  --line-strong: #6f8587;
+  --rule: rgba(233, 240, 234, 0.05);
+
+  --ink: #e9f0ea;
+  --ink-soft: #a9b9b6;
+
+  --accent: #66d6bb;
+  --on-accent: #08241d;
+  --accent-hover: #8be6cf;
+  --accent-tint: rgba(102, 214, 187, 0.13);
+  --focus-ring: rgba(102, 214, 187, 0.5);
+  --highlight: #f2cf55;
+  --on-highlight: #1c2833;
+  --marker: #fbbf24;
+
+  --success: #7bd88a;
+  --on-success: #0c2410;
+  --warning: #f2b24a;
+  --danger: #ff8a7a;
+  --info: #7fb8f5;
+  --success-tint: rgba(123, 216, 138, 0.14);
+  --warning-tint: rgba(242, 178, 74, 0.14);
+  --danger-tint: rgba(255, 138, 122, 0.14);
+  --info-tint: rgba(127, 184, 245, 0.14);
+
+  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  --hover-bg: rgba(233, 240, 234, 0.08);
+}
+
+/* Ohne gespeicherte Wahl folgt die Seite dem Gerät */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --paper-page: #0f1a1c;
+    --paper-card: #162326;
+    --paper-sunk: #1b2c30;
+    --line: #2a3d41;
+    --line-strong: #6f8587;
+    --rule: rgba(233, 240, 234, 0.05);
+
+    --ink: #e9f0ea;
+    --ink-soft: #a9b9b6;
+
+    --accent: #66d6bb;
+    --on-accent: #08241d;
+    --accent-hover: #8be6cf;
+    --accent-tint: rgba(102, 214, 187, 0.13);
+    --focus-ring: rgba(102, 214, 187, 0.5);
+    --highlight: #f2cf55;
+    --on-highlight: #1c2833;
+    --marker: #fbbf24;
+
+    --success: #7bd88a;
+    --on-success: #0c2410;
+    --warning: #f2b24a;
+    --danger: #ff8a7a;
+    --info: #7fb8f5;
+    --success-tint: rgba(123, 216, 138, 0.14);
+    --warning-tint: rgba(242, 178, 74, 0.14);
+    --danger-tint: rgba(255, 138, 122, 0.14);
+    --info-tint: rgba(127, 184, 245, 0.14);
+
+    --shadow: rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+    --hover-bg: rgba(233, 240, 234, 0.08);
+  }
+}

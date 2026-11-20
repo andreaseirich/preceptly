@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 {% load lesson_filters %}
+{% load icons %}
 
 {% block title %}{% trans "Week View" %} - Preceptly{% endblock %}
 
@@ -9,7 +10,7 @@
 
 <div class="btn-group">
     <a href="{% url 'lessons:week' %}?year={{ prev_week.year }}&month={{ prev_week.month }}&day={{ prev_week.day }}" class="btn">← {% trans "Previous Week" %}</a>
-    <a href="{% url 'lessons:calendar' %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">📅 {% trans "Month View" %}</a>
+    <a href="{% url 'lessons:calendar' %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">{% icon "calendar-days" %} {% trans "Month View" %}</a>
     <a href="{% url 'lessons:week' %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn">{% trans "Next Week" %} →</a>
 </div>
 
@@ -79,7 +80,7 @@ window.I18N = Object.assign(window.I18N || {}, {
             <tr>
                 <th class="time-label" style="width: 80px; border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; color: var(--text-primary);">{% trans "Time" %}</th>
                 {% for weekday in weekdays %}
-                <th class="{% if weekday.date == today %}today-header{% endif %}" style="border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; {% if weekday.date == today %}background: rgba(33, 150, 243, 0.15);{% endif %} color: var(--text-primary);">
+                <th class="{% if weekday.date == today %}today-header{% endif %}" style="border: 1px solid var(--border-color); padding: 8px; background: var(--table-header-bg); text-align: center; {% if weekday.date == today %}background: var(--accent-tint);{% endif %} color: var(--text-primary);">
                     {{ weekday.name_short }}<br>
                     <small style="font-weight: normal;">{{ weekday.date.day }}.{{ weekday.date.month }}.</small>
                 </th>
@@ -89,7 +90,7 @@ window.I18N = Object.assign(window.I18N || {}, {
         <tbody>
             {% for hour in hours %}
             <tr data-hour="{{ hour }}" style="height: 60px; position: relative;">
-                <td class="time-label" style="border: 1px solid var(--border-color); padding: 4px; text-align: center; background: rgba(255,255,255,0.03); font-size: 0.85em; color: var(--text-primary);">
+                <td class="time-label" style="border: 1px solid var(--border-color); padding: 4px; text-align: center; background: var(--paper-sunk); font-size: 0.85em; color: var(--text-primary);">
                     {{ hour }}:00
                 </td>
                 {% for weekday in weekdays %}
@@ -102,7 +103,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                         {% for lesson in weekday.lessons %}
                             {% comment %}Render block in the hour row where lesson starts{% endcomment %}
                             {% if lesson.start_time.hour|add:0 == hour|add:0 %}
-                            <div class="lesson-block {% if lesson.id in conflicts_by_lesson %}has-conflict{% endif %}" 
+                            <div class="lesson-block lesson-block--{% if lesson.status == 'paid' %}paid{% elif lesson.status == 'taught' %}taught{% else %}planned{% endif %}{% if lesson.id in conflicts_by_lesson %} has-conflict{% endif %}" 
                                  data-lesson-id="{{ lesson.id }}"
                                  data-conflict-reasons="{% if lesson.id in conflicts_by_lesson %}{{ conflicts_by_lesson|dict_get:lesson.id|conflict_reasons }}{% endif %}"
                                  data-start-hour="{{ lesson.start_time.hour }}"
@@ -116,8 +117,6 @@ window.I18N = Object.assign(window.I18N || {}, {
                                  style="position: absolute; 
                                         left: 0; 
                                         right: 0; 
-                                        background: {% if lesson.status == 'paid' %}#2e7d32{% elif lesson.status == 'taught' %}#607d8b{% else %}var(--accent){% endif %};
-                                        color: white; 
                                         padding: 2px 4px; 
                                         font-size: 0.75em; 
                                         border-radius: 3px;
@@ -126,37 +125,37 @@ window.I18N = Object.assign(window.I18N || {}, {
                                         overflow: hidden;
                                         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
                                         transition: all 0.2s;
-                                        {% if lesson.id in conflicts_by_lesson %}border: 2px solid #dc3545;{% endif %}"
+                                        {% if lesson.id in conflicts_by_lesson %}border: 2px solid var(--danger);{% endif %}"
                                  data-mouseover="showLessonPreview" data-mouseover-args='["$el", "$event"]'
                                  data-mouseout="hideLessonPreview"
                                  data-href="{% url 'lessons:detail' lesson.pk %}?year={{ weekday.date.year }}&amp;month={{ weekday.date.month }}&amp;day={{ weekday.date.day }}"
-                                 title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %} - {% trans 'Click to view lesson plan' %}">
+                                 title="{% if lesson.travel_time_before_minutes > 0 %}{{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %} - {% trans 'Click to view lesson plan' %}">
                                 {% if lesson.travel_time_before_minutes > 0 %}
                                 <div style="background: rgba(255,255,255,0.15); padding: 1px 4px; margin: -2px -4px 2px -4px; font-size: 0.7em; border-radius: 3px 3px 0 0;">
-                                    🚗 {{ lesson.travel_time_before_minutes }} {% trans "Min." %}
+                                    {% icon "car" %} {{ lesson.travel_time_before_minutes }} {% trans "Min." %}
                                 </div>
                                 {% endif %}
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                     <div style="flex: 1;">
-                                        <span style="font-size: 1.1em; margin-right: 4px;">📚</span> <strong>{{ lesson.contract.student.first_name }}</strong>
+                                        <span style="font-size: 1.1em; margin-right: 4px;">{% icon "book-open" %}</span> <strong>{{ lesson.contract.student.first_name }}</strong>
                                         {% if lesson.id in conflicts_by_lesson %}
                                         {% with conflict_reasons_text=conflicts_by_lesson|dict_get:lesson.id|conflict_reasons %}
-                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" style="color: #ffeb3b; font-size: 1.1em; margin-left: 4px; text-decoration: none;" title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Conflict - Click for details' %}{% endif %}" aria-label="{% trans 'View Conflicts' %}" data-stop-propagation>⚠️</a>
+                                        <a href="{% url 'lessons:conflicts' lesson.pk %}" class="lesson-conflict-flag" title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Conflict - Click for details' %}{% endif %}" aria-label="{% trans 'View Conflicts' %}" data-stop-propagation>{% icon "triangle-alert" %}</a>
                                         {% endwith %}
                                         {% endif %}<br>
                                         <small style="opacity: 0.9;">{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans "Min." %}</small>
-                                        {% if lesson.status == 'paid' %}<small style="display: block; opacity: 0.8;">✓ {% trans "Paid" %}</small>{% endif %}
+                                        {% if lesson.status == 'paid' %}<small style="display: block; opacity: 0.8;">{% icon "check" %} {% trans "Paid" %}</small>{% endif %}
                                     </div>
                                     <a href="{% url 'lessons:update' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}" 
-                                       style="color: white; text-decoration: none; font-size: 1.1em; padding: 2px 4px; background: rgba(255,255,255,0.2); border-radius: 3px; margin-left: 4px; flex-shrink: 0;"
+                                       class="lesson-edit"
                                        title="{% trans 'Edit lesson' %}" aria-label="{% trans 'Edit Lesson' %}"
                                        data-stop-propagation>
-                                        ✏️
+                                        {% icon "pencil" %}
                                     </a>
                                 </div>
                                 {% if lesson.travel_time_after_minutes > 0 %}
                                 <div style="background: rgba(255,255,255,0.15); padding: 1px 4px; margin: 2px -4px -2px -4px; font-size: 0.7em; border-radius: 0 0 3px 3px;">
-                                    🚗 {{ lesson.travel_time_after_minutes }} {% trans "Min." %}
+                                    {% icon "car" %} {{ lesson.travel_time_after_minutes }} {% trans "Min." %}
                                 </div>
                                 {% endif %}
                             </div>
@@ -179,8 +178,6 @@ window.I18N = Object.assign(window.I18N || {}, {
                                         height: {% if start_hour == end_hour %}{{ end_minute|add:"-"|add:start_minute }}{% else %}60{% endif %}px; 
                                         left: 0; 
                                         right: 0; 
-                                        background: #ff9800; 
-                                        color: white; 
                                         padding: 2px 4px; 
                                         font-size: 0.75em; 
                                         border-radius: 3px;
@@ -193,7 +190,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                                  data-mouseout="hideBlockedTimePreview"
                                  {% if blocked_time.pk %}data-href="{% url 'blocked_times:detail' blocked_time.pk %}?year={{ weekday.date.year }}&amp;month={{ weekday.date.month }}&amp;day={{ weekday.date.day }}"{% endif %}
                                  title="{{ blocked_time.title }} - {{ blocked_time.start_datetime|time:'H:i' }} {% trans 'to' %} {{ blocked_time.end_datetime|time:'H:i' }}{% if not blocked_time.pk %} ({% trans 'Preview - not yet created' %}){% endif %}">
-                                <span style="font-size: 1.1em;">🚫</span> <strong>{{ blocked_time.title }}</strong><br>
+                                <span style="font-size: 1.1em;">{% icon "ban" %}</span> <strong>{{ blocked_time.title }}</strong><br>
                                 {% if blocked_time.is_start_day and blocked_time.is_end_day %}<small>{{ blocked_time.start_datetime|time:'H:i' }} – {{ blocked_time.end_datetime|time:'H:i' }}</small>{% elif not blocked_time.is_start_day and not blocked_time.is_end_day %}<small>↑ Forts. ↓</small>{% elif not blocked_time.is_start_day %}<small>↑ Forts. bis {{ blocked_time.end_datetime|time:'H:i' }}</small>{% else %}<small>{{ blocked_time.start_datetime|time:'H:i' }} – {{ blocked_time.end_datetime|date:'d.m.' }} {{ blocked_time.end_datetime|time:'H:i' }} ↓</small>{% endif %}
                             </div>
                             {% endif %}
@@ -229,31 +226,20 @@ window.I18N = Object.assign(window.I18N || {}, {
 <div id="dialog-overlay" class="create-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
 
 <style>
-/* Hover-Hervorhebung der Blöcke (früher per onmouseover im Inline-Stil gesetzt;
-   !important, weil der Grundwert im style-Attribut steht) */
-.lesson-block:hover {
-    transform: scale(1.02) !important;
-    z-index: 20 !important;
-}
-.blocked-time-block:hover {
-    background: #e68900 !important;
-}
-.time-slot:hover {
-    background: rgba(255,255,255,0.05);
-}
-[data-theme="dark"] .time-slot:hover {
-    background: rgba(255,255,255,0.08);
-}
-.time-slot.dragging {
-    background: rgba(33, 150, 243, 0.2);
-}
-.lesson-block.has-conflict {
-    border: 2px solid #dc3545 !important;
-    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
-}
-[data-theme="dark"] .create-dialog-overlay {
-    background: rgba(0,0,0,0.7);
-}
+/* Farben der Blöcke kommen aus den Design-Tokens (core/css/tokens.css): geplant = Akzent, gehalten = Grau, bezahlt = Grün, Sperrzeit = Bernstein */
+.lesson-block { background: var(--accent); color: var(--on-accent); }
+.lesson-block--paid { background: var(--success); color: var(--on-success); }
+.lesson-block--taught { background: var(--ink-soft); color: var(--paper-card); }
+/* !important, weil der Grundwert (transition, Position) im style-Attribut steht */
+.lesson-block:hover { transform: scale(1.02) !important; z-index: 20 !important; }
+.lesson-block.has-conflict { border: 2px solid var(--danger) !important; box-shadow: 0 0 5px color-mix(in srgb, var(--danger) 50%, transparent); }
+.lesson-conflict-flag { background: var(--danger); color: var(--paper-card); font-size: 1.05em; margin-left: 4px; padding: 0 4px; border-radius: 3px; text-decoration: none; }
+.lesson-edit { color: inherit; text-decoration: none; font-size: 1.1em; padding: 2px 4px; background: rgba(255, 255, 255, 0.2); border-radius: 3px; margin-left: 4px; flex-shrink: 0; }
+.blocked-time-block { background: color-mix(in srgb, var(--warning) 22%, var(--paper-card)); color: var(--ink); border-left: 4px solid var(--warning); }
+.blocked-time-block:hover { background: color-mix(in srgb, var(--warning) 34%, var(--paper-card)); }
+.time-slot:hover { background: var(--paper-sunk) !important; }
+.time-slot.dragging { background: var(--accent-tint) !important; }
+[data-theme="dark"] .create-dialog-overlay { background: rgba(0, 0, 0, 0.7); }
 </style>
 
 <script nonce="{{ csp_nonce }}">

@@ -1,83 +1,7 @@
 {% load i18n %}
-<style>
-.site-footer {
-    margin-top: 40px;
-    background: #1f2933;
-    color: #f5f7fa;
-    padding: 25px 20px;
-}
-.site-footer a {
-    color: #d9e2ec;
-    text-decoration: none;
-    margin-right: 15px;
-}
-.site-footer a:hover {
-    text-decoration: underline;
-}
-.site-footer .footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    text-align: center;
-}
-.site-footer .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
-.site-footer .footer-meta {
-    font-size: 0.85em;
-    color: #bcccdc;
-}
-.site-footer nav {
-    position: static;
-    z-index: auto;
-    background: none;
-    box-shadow: none;
-    padding: 0;
-    margin: 0;
-    border-radius: 0;
-}
-.site-footer #eRecht24RevocationButton {
-    background: transparent;
-    color: #d9e2ec;
-    border: 1px solid #d9e2ec;
-    padding: 3px 10px;
-    font-size: 0.95em;
-    font-weight: normal;
-    min-height: 0;
-    min-width: 0;
-    line-height: 1.4;
-    border-radius: 4px;
-    text-decoration: none;
-    margin-right: 0;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.site-footer #eRecht24RevocationButton:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    border-color: #ffffff;
-    text-decoration: none;
-}
-@media (max-width: 768px) {
-    .site-footer .footer-container {
-        flex-direction: column;
-        align-items: center;
-    }
-    .site-footer a {
-        margin-right: 10px;
-    }
-}
-</style>
-<footer class="site-footer" aria-label="Seitenende">
+<footer class="site-footer" aria-label="{% trans 'Site footer' %}">
     <div class="footer-container">
-        <nav aria-label="Footer-Navigation">
+        <nav aria-label="{% trans 'Legal information' %}">
             <div class="footer-links">
                 <a href="{% url 'core:legal_imprint' %}">{% trans "Imprint" %}</a>
                 <a href="{% url 'core:legal_privacy' %}">{% trans "Privacy Policy" %}</a>
@@ -95,7 +19,7 @@
         <script nonce="{{ csp_nonce }}" async src="https://widerrufsbutton-cdn.e-recht24.de/widgets/revocation-button.js"></script>
         <div class="footer-meta">
             <span>© {% now "Y" %} andicode</span>
-            <span>· Preceptly by <a href="https://andicode.de" target="_blank" rel="noopener noreferrer" style="color: inherit;">andicode</a></span>
+            <span>· Preceptly by <a href="https://andicode.de" target="_blank" rel="noopener noreferrer">andicode</a></span>
         </div>
     </div>
 </footer>

@@ -1,19 +1,20 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 
-{% block title %}Schüler löschen – Preceptly{% endblock %}
+{% block title %}{% trans "Delete Student" %} – Preceptly{% endblock %}
 
 {% block content %}
 <h1>{% trans "Delete Student" %}</h1>
 
-<p>{% blocktrans with name=student.full_name %}Are you sure you want to delete <strong>{{ name }}</strong>?{% endblocktrans %}</p>
+<p>{% blocktrans with name=object.full_name %}Are you sure you want to delete <strong>{{ name }}</strong>?{% endblocktrans %}</p>
 <p>{% trans "This action cannot be undone." %}</p>
 
 <form method="post">
     {% csrf_token %}
+    {% blocktrans with name=object.full_name asvar delete_label %}Delete student {{ name }}{% endblocktrans %}
     <div class="btn-group">
-        <button type="submit" class="btn btn-danger" aria-label="Schüler {{ student.full_name }} löschen">{% trans "Delete" %}</button>
-        <a href="{% url 'contracts:detail' student.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+        <button type="submit" class="btn btn-danger" aria-label="{{ delete_label }}">{% trans "Delete" %}</button>
+        <a href="{% url 'contracts:detail' object.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>
 {% endblock %}

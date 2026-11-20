@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}{% trans "Review Moderation" %} – Preceptly{% endblock %}
 
@@ -18,7 +19,7 @@
             <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
             — {{ review.rating }}/5
             {% if review.is_approved %}
-                <span style="color: var(--accent, #0d8069);">✓ {% trans "Approved" %}</span>
+                <span style="color: var(--accent, #0d8069);">{% icon "check" %} {% trans "Approved" %}</span>
             {% else %}
                 <span style="color: var(--text-secondary);">{% trans "Pending" %}</span>
             {% endif %}

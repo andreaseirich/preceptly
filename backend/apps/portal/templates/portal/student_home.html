@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load icons %}
 
 {% block title %}Mein Portal – Preceptly{% endblock %}
 
@@ -24,13 +25,13 @@
 <h1>Hallo, {{ student.full_name }}!</h1>
 
 <div class="btn-group" style="margin-bottom:28px;">
-    <a class="btn" href="{% url 'portal:calendar_week' %}">📅 Kalender</a>
+    <a class="btn" href="{% url 'portal:calendar_week' %}">{% icon "calendar-days" %} Kalender</a>
     <a class="btn" href="{% url 'portal:book' student.pk %}">+ Termin buchen</a>
     <a class="btn btn-secondary" href="{% url 'portal:student_lessons' %}">Alle Stunden</a>
     <a class="btn btn-secondary" href="{% url 'portal:recurring_manage' student.pk %}">Serientermine</a>
     <a class="btn btn-secondary" href="{% url 'portal:documents' student.pk %}">Dokumente</a>
     <a class="btn btn-secondary" href="{% url 'portal:messages' student.pk %}">Nachrichten</a>
-    <a class="btn btn-secondary" href="{% url 'portal:profile' %}">⚙ Profil</a>
+    <a class="btn btn-secondary" href="{% url 'portal:profile' %}">{% icon "settings" %} Profil</a>
 </div>
 
 <div class="card">
@@ -45,7 +46,7 @@
           padding:12px 16px; margin-bottom:12px; text-decoration:none; color:inherit;
           animation:pulse 2s infinite;">
     <span style="font-weight:600; color:#1e8449;">
-        📹 Meeting läuft – {{ entry.lesson.date|date:"d.m.Y" }}, {{ entry.lesson.start_time|time:"H:i" }} Uhr
+        {% icon "video" %} Meeting läuft – {{ entry.lesson.date|date:"d.m.Y" }}, {{ entry.lesson.start_time|time:"H:i" }} Uhr
     </span>
     <span class="btn" style="background:#27ae60; font-weight:700; padding:6px 18px; font-size:0.95em;">
         Jetzt beitreten →
@@ -71,7 +72,7 @@
         <td>{{ entry.lesson.duration_minutes }} min</td>
         <td data-stop-propagation>
             {% if entry.meeting_room %}
-            <a class="btn-sm btn-sm-primary" href="{% url 'portal:meeting_wait' entry.lesson.pk %}">📹 Meeting</a>
+            <a class="btn-sm btn-sm-primary" href="{% url 'portal:meeting_wait' entry.lesson.pk %}">{% icon "video" %} Meeting</a>
             {% endif %}
             <a class="btn-sm btn-sm-secondary" href="{% url 'portal:session_reschedule' entry.lesson.pk %}"
                aria-label="Stunde am {{ entry.lesson.date|date:'d.m.Y' }} um {{ entry.lesson.start_time|time:'H:i' }} Uhr verschieben">Verschieben</a>

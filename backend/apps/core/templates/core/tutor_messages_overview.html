@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}Nachrichten – Preceptly{% endblock %}
 
@@ -68,7 +69,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>💬 Nachrichten</h1>
+<h1>{% icon "message-circle" %} Nachrichten</h1>
 
 {% if threads %}
 <p style="color:var(--text-secondary); font-size:0.88em; margin-bottom:18px;">
@@ -106,10 +107,10 @@
 
 {% else %}
 <div class="empty-box">
-    <div class="empty-icon">💬</div>
+    <div class="empty-icon">{% icon "message-circle" %}</div>
     <h2>Noch keine Portal-Registrierungen</h2>
     <p>Sobald sich Schüler oder Eltern über einen Einladungslink im Portal anmelden, erscheinen ihre Chats hier.</p>
-    <a class="btn" href="{% url 'contracts:list' %}">👤 Zu den Schülern</a>
+    <a class="btn" href="{% url 'contracts:list' %}">{% icon "user" %} Zu den Schülern</a>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load icons %}
 
 {% block title %}Dokumente – Preceptly{% endblock %}
 
@@ -44,7 +45,7 @@
       &middot; {% if doc.uploaded_by_tutor %}Nachhilfelehrer{% else %}{{ doc.uploaded_by_portal_user.user.username }}{% endif %}
     </small>
   </div>
-  <a href="{% url 'portal:document_download' student.pk doc.pk %}" class="btn-sm btn-sm-secondary">⬇ Herunterladen</a>
+  <a href="{% url 'portal:document_download' student.pk doc.pk %}" class="btn-sm btn-sm-secondary">{% icon "download" %} Herunterladen</a>
 </div>
 {% endfor %}
 </div>

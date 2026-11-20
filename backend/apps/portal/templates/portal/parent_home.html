@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load icons %}
 
 {% block title %}Elternportal – Preceptly{% endblock %}
 
@@ -202,7 +203,7 @@
 
 {% block content %}
 <h1 style="margin-bottom: 16px;">Ihre Kinder</h1>
-<div style="margin-bottom:20px;"><a class="btn btn-secondary" href="{% url 'portal:profile' %}">⚙ Profil bearbeiten</a></div>
+<div style="margin-bottom:20px;"><a class="btn btn-secondary" href="{% url 'portal:profile' %}">{% icon "settings" %} Profil bearbeiten</a></div>
 
 {% if students_data %}
 <div class="student-grid">
@@ -226,7 +227,7 @@
 
         {% if sd.next_lesson %}
         <div class="lesson-row" aria-label="Nächste Stunde">
-            <div class="lesson-icon" aria-hidden="true">📅</div>
+            <div class="lesson-icon" aria-hidden="true">{% icon "calendar-days" %}</div>
             <div>
                 <p class="lesson-meta">Nächste Stunde</p>
                 <p class="lesson-time">{{ sd.next_lesson.date|date:"d.m.Y" }}, {{ sd.next_lesson.start_time|time:"H:i" }} Uhr</p>
@@ -243,7 +244,7 @@
 
         {% else %}
         <div class="lesson-row" style="opacity:0.55;">
-            <div class="lesson-icon" aria-hidden="true">📅</div>
+            <div class="lesson-icon" aria-hidden="true">{% icon "calendar-days" %}</div>
             <div>
                 <p class="lesson-meta">Nächste Stunde</p>
                 <p class="lesson-time" style="font-weight:400; color:var(--text-secondary);">Keine geplant</p>
@@ -259,15 +260,15 @@
                 ⓘ Details
             </a>
             <a class="action-btn" href="{% url 'portal:parent_calendar_week' sd.student.pk %}">
-                📅 Kalender
+                {% icon "calendar-days" %} Kalender
             </a>
             <a class="action-btn" href="{% url 'portal:documents' sd.student.pk %}">
-                📄 Dokumente
+                {% icon "file-text" %} Dokumente
             </a>
             <a class="action-btn {% if sd.unread_messages > 0 %}unread-hint{% endif %}"
                href="{% url 'portal:messages' sd.student.pk %}"
                style="grid-column: 1 / -1;">
-                💬 Nachrichten
+                {% icon "message-circle" %} Nachrichten
                 {% if sd.unread_messages > 0 %}
                 <span class="btn-badge" aria-label="{{ sd.unread_messages }} ungelesene Nachrichten">{{ sd.unread_messages }}</span>
                 {% endif %}

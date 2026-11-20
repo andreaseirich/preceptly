@@ -1,438 +1,70 @@
-{% load static i18n %}<!DOCTYPE html>
+{% load static i18n icons %}<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2c3e50">
+    <meta name="theme-color" content="#fffdf8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#162326" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
     <link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
+    <link rel="preload" href="{% static 'fonts/source-sans-3-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/portal-shell.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/calendar-theme.css' %}">
     <link rel="stylesheet" href="{% static 'core/list-tools.css' %}">
     <link rel="manifest" href="{% url 'core:manifest' %}">
     <title>{% block title %}Preceptly Portal{% endblock %}</title>
-    <style>
-        * { box-sizing: border-box; }
-
-        :root {
-            /* Brand */
-            --brand-navy: #2c3e50;
-            --brand-navy-light: #3d5266;
-            --brand-navy-dark: #22303f;
-            --brand-teal: #1abc9c;
-
-            /* Interaction */
-            --accent: #0d8069;
-            --on-accent: #ffffff;  /* Schrift auf var(--accent) */
-            --accent-hover: #0b6f5c;
-            --accent-tint: #e6f4f1;
-            --focus-ring: rgba(13,128,105,.35);
-
-            /* Status */
-            --success: #2e7d32;
-            --on-success: #ffffff;  /* Schrift auf var(--success) */
-            --warning: #b45309;
-            --danger:  #b03a2e;
-
-            /* Neutral */
-            --bg-primary: #f5f7f9;
-            --bg-secondary: #ffffff;
-            --bg-nav: var(--brand-navy);
-            --text-primary: var(--brand-navy-dark);
-            --text-secondary: #5a6b7b;
-            --text-nav: #ffffff;
-            --border-color: #d7dee5;
-            --shadow: rgba(0,0,0,0.10);
-            --shadow-card: rgba(0,0,0,0.12);
-            --hover-bg: var(--brand-navy-light);
-            --active-bg: var(--accent);
-            --table-header-bg: #f8f9fa;
-            --table-hover-bg: var(--accent-tint);
-            --input-border: #d7dee5;
-            --input-focus: var(--focus-ring);
-        }
-
-        [data-theme="dark"] {
-            --accent: #4dd0b3;
-            --on-accent: #1a1a1a;  /* Schrift auf var(--accent) */
-            --accent-hover: #6ee0c5;
-            --accent-tint: rgba(77,208,179,0.14);
-            --focus-ring: rgba(77,208,179,.45);
-            --success: #66bb6a;
-            --on-success: #1a1a1a;  /* Schrift auf var(--success) */
-            --warning: #f9a825;
-            --danger:  #ef5350;
-
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-nav: #1e1e1e;
-            --text-primary: #e0e0e0;
-            --text-secondary: #9aabb8;
-            --text-nav: #ecf0f1;
-            --border-color: #3a3a3a;
-            --shadow: rgba(0,0,0,0.4);
-            --shadow-card: rgba(0,0,0,0.5);
-            --hover-bg: #2a2a2a;
-            --active-bg: var(--accent);
-            --table-header-bg: #252525;
-            --table-hover-bg: #333;
-            --input-border: #444;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) {
-                --accent: #4dd0b3;
-                --on-accent: #1a1a1a;  /* Schrift auf var(--accent) */
-                --accent-hover: #6ee0c5;
-                --accent-tint: rgba(77,208,179,0.14);
-                --focus-ring: rgba(77,208,179,.45);
-                --success: #66bb6a;
-                --on-success: #1a1a1a;  /* Schrift auf var(--success) */
-                --warning: #f9a825;
-                --danger:  #ef5350;
-
-                --bg-primary: #1a1a1a;
-                --bg-secondary: #2d2d2d;
-                --bg-nav: #1e1e1e;
-                --text-primary: #e0e0e0;
-                --text-secondary: #9aabb8;
-                --text-nav: #ecf0f1;
-                --border-color: #3a3a3a;
-                --shadow: rgba(0,0,0,0.4);
-                --shadow-card: rgba(0,0,0,0.5);
-                --hover-bg: #2a2a2a;
-                --active-bg: var(--accent);
-                --table-header-bg: #252525;
-                --table-hover-bg: #333;
-                --input-border: #444;
-            }
-        }
-
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            transition: background-color 0.25s, color 0.25s;
-        }
-
-        /* ── Navigation ── */
-        nav {
-            background: var(--bg-nav);
-            padding: 0 24px;
-            box-shadow: 0 2px 6px var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: stretch;
-            justify-content: space-between;
-            min-height: 56px;
-        }
-        .nav-brand {
-            color: var(--text-nav);
-            font-weight: 700;
-            font-size: 1.05em;
-            text-decoration: none;
-            letter-spacing: 0.03em;
-            display: flex;
-            align-items: center;
-            padding: 0 8px 0 0;
-            white-space: nowrap;
-        }
-        .nav-brand img { height: 26px; width: auto; display: block; }
-        .nav-links {
-            display: flex;
-            align-items: stretch;
-            gap: 2px;
-            flex: 1;
-            padding-left: 16px;
-        }
-        .nav-links a {
-            color: rgba(255,255,255,0.82);
-            text-decoration: none;
-            padding: 0 14px;
-            font-size: 0.88em;
-            display: flex;
-            align-items: center;
-            transition: background 0.15s, color 0.15s;
-            border-radius: 0;
-            white-space: nowrap;
-        }
-        .nav-links a:hover { background: rgba(255,255,255,0.10); color: #fff; }
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .nav-username {
-            color: rgba(255,255,255,0.70);
-            font-size: 0.82em;
-            white-space: nowrap;
-        }
-        .btn-logout {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.30);
-            color: var(--text-nav);
-            padding: 5px 12px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.80em;
-            transition: background 0.15s;
-        }
-        .btn-logout:hover { background: rgba(255,255,255,0.12); }
-        .theme-toggle {
-            background: transparent;
-            border: none;
-            color: var(--text-nav);
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 4px;
-            font-size: 1.1em;
-            transition: background 0.15s;
-            line-height: 1;
-        }
-        .theme-toggle:hover { background: rgba(255,255,255,0.10); }
-        .menu-toggle {
-            display: none;
-            background: transparent;
-            border: none;
-            color: var(--text-nav);
-            font-size: 22px;
-            cursor: pointer;
-            padding: 0 10px;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* ── Layout ── */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 30px 24px 50px;
-        }
-
-        /* ── Typography ── */
-        h1 { color: var(--text-primary); margin-top: 0; font-size: 1.55em; }
-        h2 { color: var(--text-primary); margin-top: 28px; margin-bottom: 14px;
-             border-bottom: 2px solid var(--border-color); padding-bottom: 8px; font-size: 1.18em; }
-        h3 { color: var(--text-secondary); font-size: 1.0em; margin-top: 0; }
-        p  { color: var(--text-primary); }
-        a  { color: var(--accent); }
-        a:hover { text-decoration: underline; color: var(--accent-hover); }
-
-        /* ── Cards / Boxes ── */
-        .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px 24px;
-            box-shadow: 0 2px 6px var(--shadow-card);
-            margin-bottom: 20px;
-            transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
-        }
-        .box-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 16px 20px;
-            box-shadow: 0 1px 3px var(--shadow);
-            margin-bottom: 16px;
-        }
-
-        /* ── Tables ── */
-        table { width: 100%; border-collapse: collapse; margin-top: 12px;
-                box-shadow: 0 1px 4px var(--shadow); border-radius: 6px; overflow: hidden; }
-        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border-color);
-                 color: var(--text-primary); }
-        th { background: var(--table-header-bg); font-weight: 600; font-size: 0.88em;
-             text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: var(--table-hover-bg); }
-
-        /* ── Forms ── */
-        input, textarea, select {
-            width: 100%; padding: 9px 12px;
-            border: 1px solid var(--input-border); border-radius: 4px;
-            background: var(--bg-secondary); color: var(--text-primary);
-            font-size: 0.95em; margin-bottom: 12px;
-            transition: border-color 0.15s, box-shadow 0.15s;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none; box-shadow: 0 0 0 3px var(--input-focus); border-color: var(--accent);
-        }
-        /* Die Regel oben gilt sonst auch für Kontrollkästchen: Sie werden dann
-           über die volle Breite gezogen und ihre Beschriftung rutscht weg. */
-        input[type="checkbox"], input[type="radio"] {
-            width: auto; padding: 0; margin-bottom: 0;
-            accent-color: var(--accent);
-        }
-        label { display: block; font-size: 0.87em; color: var(--text-secondary);
-                margin-bottom: 4px; font-weight: 500; }
-
-        /* ── Buttons ── */
-        .btn {
-            display: inline-block; padding: 10px 22px;
-            background: var(--accent); color: var(--on-accent, #fff) !important;
-            text-decoration: none !important; border-radius: 4px; border: none;
-            cursor: pointer; font-size: 0.95em;
-            transition: background 0.2s, transform 0.1s;
-            white-space: nowrap; line-height: 1.4;
-        }
-        .btn:hover { background: var(--accent-hover); }
-        .btn:active { transform: scale(0.98); }
-        .btn-secondary { background: #6c757d; }
-        .btn-secondary:hover { background: #5a6268; }
-        .btn-danger { background: var(--danger); }
-        .btn-danger:hover { background: #922f26; }
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-
-        .btn-sm {
-            display: inline-block; padding: 4px 10px; border-radius: 4px; border: 1px solid;
-            font-size: 0.82em; cursor: pointer; text-decoration: none !important;
-            background: transparent; transition: background 0.15s, color 0.15s;
-            white-space: nowrap; line-height: 1.5;
-        }
-        .btn-sm:active { transform: scale(0.97); }
-        .btn-sm-primary   { color: var(--accent); border-color: var(--accent); }
-        .btn-sm-primary:hover   { background: var(--accent); color: var(--on-accent, #fff); }
-        .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
-        .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
-        .btn-sm-danger    { color: var(--danger); border-color: var(--danger); }
-        .btn-sm-danger:hover    { background: var(--danger); color: #fff; }
-
-        /* ── Alerts ── */
-        .alert-info    { padding: 14px 16px; background: var(--accent-tint);
-                         border: 1px solid rgba(13,128,105,0.3); border-radius: 6px;
-                         margin-bottom: 16px; color: var(--text-primary); }
-        [data-theme="dark"] .alert-info { border-color: rgba(77,208,179,0.35); }
-        .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-        .alert-success { padding: 14px 16px; background: rgba(39,174,96,0.10);
-                         border: 1px solid rgba(39,174,96,0.40); border-radius: 6px;
-                         margin-bottom: 16px; color: var(--text-primary); }
-        .alert-warning { padding: 14px 16px; background: rgba(230,126,34,0.10);
-                         border: 1px solid rgba(230,126,34,0.40); border-radius: 6px;
-                         margin-bottom: 16px; color: var(--text-primary); }
-        .alert-danger  { padding: 14px 16px; background: rgba(192,57,43,0.10);
-                         border: 1px solid rgba(192,57,43,0.40); border-radius: 6px;
-                         margin-bottom: 16px; color: var(--text-primary); }
-
-        /* ── Misc ── */
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
-        .badge {
-            display: inline-block; background: var(--danger); color: #fff;
-            font-size: 0.72em; font-weight: 700; padding: 1px 6px;
-            border-radius: 10px; line-height: 1.6; margin-left: 4px; vertical-align: middle;
-        }
-
-
-        .skip-link {
-            position: absolute; left: -9999px; top: auto;
-            width: 1px; height: 1px; overflow: hidden;
-            background: var(--accent); color: var(--on-accent, #fff); padding: 8px 16px;
-            border-radius: 0 0 4px 4px; font-weight: 600; z-index: 9999;
-            text-decoration: none;
-        }
-        .skip-link:focus {
-            position: fixed; left: 50%; top: 0;
-            transform: translateX(-50%); width: auto; height: auto; overflow: visible;
-        }
-        /* ── Responsive ── */
-        @media (max-width: 640px) {
-            .container { padding: 16px 14px 40px; }
-            nav { padding: 0 14px; }
-            .menu-toggle { display: block; }
-            .nav-links {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0;
-                padding: 0;
-                max-height: 0;
-                overflow: hidden;
-                background: var(--bg-nav);
-                box-shadow: 0 4px 10px var(--shadow);
-                transition: max-height 0.25s ease;
-                z-index: 999;
-            }
-            .nav-links.active { max-height: 60vh; overflow-y: auto; }
-            .nav-links a {
-                padding: 14px 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.08);
-            }
-            .nav-username { display: none; }
-            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 0.85em; }
-            th, td { padding: 9px 8px; }
-        }
-
-        /* PWA install modal + banner (mirrors the tutor-facing app) */
-        .pwa-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:16px;}
-        .pwa-modal-overlay.open{display:flex;}
-        .pwa-modal{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;width:100%;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,.35);padding:24px;position:relative;max-height:90vh;overflow-y:auto;}
-        .pwa-modal h2{margin:0 0 6px;font-size:1.15em;border:none;padding:0;color:var(--text-primary);}
-        .pwa-modal-close{position:absolute;top:12px;right:12px;background:transparent;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);line-height:1;padding:4px 8px;border-radius:4px;min-width:auto;min-height:auto;}
-        .pwa-modal-close:hover{background:var(--hover-bg);color:var(--text-primary);}
-        .pwa-modal-subtitle{font-size:.88em;color:var(--text-secondary);margin-bottom:16px;}
-        .pwa-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border-color);margin-bottom:16px;}
-        .pwa-tab{background:transparent;border:none;padding:8px 12px;cursor:pointer;font-size:.85em;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:3px 3px 0 0;transition:color .15s,border-color .15s;white-space:nowrap;}
-        .pwa-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
-        .pwa-tab:hover:not(.active){color:var(--text-primary);}
-        .pwa-panel{display:none;}
-        .pwa-panel.active{display:block;}
-        .pwa-steps{list-style:none;margin:0;padding:0;}
-        .pwa-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
-        .pwa-step:last-child{margin-bottom:0;}
-        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:var(--accent);color:var(--on-accent, #fff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
-        .pwa-step-icon{flex-shrink:0;width:44px;height:44px;background:var(--accent-tint);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);}
-        .pwa-step-icon svg{stroke:currentColor;}
-        .pwa-step-text{font-size:.9em;color:var(--text-primary);line-height:1.45;padding-top:12px;}
-        .pwa-banner{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:460px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:14px 16px;z-index:1500;gap:12px;align-items:center;}
-        .pwa-banner.visible{display:flex;}
-        .pwa-banner p{margin:0;font-size:.88em;color:var(--text-primary);flex:1;line-height:1.4;}
-        .pwa-banner-btns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
-        .pwa-banner-btns .btn{width:auto;min-width:auto;font-size:.85em;padding:8px 12px;}
-    </style>
     {% block extra_css %}{% endblock %}
     <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
-<body>
+<body class="portal">
+{% icon_sprite %}
 <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
-<nav aria-label="Portalnavigation">
+<nav class="portal-nav" aria-label="Portalnavigation">
+  <div class="nav-container">
     {% if portal_user %}
-    <a class="nav-brand" href="{% if portal_user.role == 'parent' %}{% url 'portal:parent_home' %}{% else %}{% url 'portal:student_home' %}{% endif %}">
-        <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
+    {% with url_name=request.resolver_match.url_name %}
+    <a class="nav-brand" href="{% if portal_user.role == 'parent' %}{% url 'portal:parent_home' %}{% else %}{% url 'portal:student_home' %}{% endif %}" aria-label="Preceptly Portal">
+        <img class="logo logo--on-light" src="{% static 'brand/preceptly-logo.svg' %}" alt="Preceptly" width="116" height="30">
+        <img class="logo logo--on-dark" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="" width="116" height="30">
     </a>
-    <button class="menu-toggle" id="portalMenuToggle" aria-label="Menü ein-/ausblenden" aria-expanded="false" aria-controls="portalNavLinks">☰</button>
+    <button type="button" class="menu-toggle nav-btn" id="portalMenuToggle" aria-label="Menü ein-/ausblenden" aria-expanded="false" aria-controls="portalNavLinks">{% icon "menu" %}</button>
     <div class="nav-links" id="portalNavLinks">
         {% if portal_user.role == 'parent' %}
-        <a href="{% url 'portal:parent_home' %}">Dashboard</a>
+        <a href="{% url 'portal:parent_home' %}"{% if url_name == 'parent_home' or url_name == 'parent_student_detail' %} aria-current="page"{% endif %}>{% icon "layout-dashboard" "nav-icon" %} Dashboard</a>
         {% else %}
-        <a href="{% url 'portal:student_home' %}">Dashboard</a>
-        <a href="{% url 'portal:calendar_week' %}">📅 Kalender</a>
-        <a href="{% url 'portal:student_lessons' %}">Stunden</a>
+        <a href="{% url 'portal:student_home' %}"{% if url_name == 'student_home' %} aria-current="page"{% endif %}>{% icon "layout-dashboard" "nav-icon" %} Dashboard</a>
+        <a href="{% url 'portal:calendar_week' %}"{% if url_name == 'calendar_week' or url_name == 'calendar' %} aria-current="page"{% endif %}>{% icon "calendar-days" "nav-icon" %} Kalender</a>
+        <a href="{% url 'portal:student_lessons' %}"{% if url_name == 'student_lessons' or url_name == 'student_lesson_detail' %} aria-current="page"{% endif %}>{% icon "book-open" "nav-icon" %} Stunden</a>
         {% endif %}
-        <a href="{% url 'portal:faq' %}" style="opacity:0.75;">Hilfe & FAQ</a>
+        <a href="{% url 'portal:faq' %}"{% if url_name == 'faq' %} aria-current="page"{% endif %}>{% icon "circle-help" "nav-icon" %} Hilfe &amp; FAQ</a>
     </div>
     <div class="nav-right">
         <span class="nav-username">{{ portal_user.user.username }}</span>
-        <button class="theme-toggle" id="themeToggle" title="Design wechseln" aria-label="Design wechseln">
-            <span id="themeIcon">🌙</span>
+        <button type="button" class="theme-toggle" id="themeToggle" title="Design wechseln" aria-label="Design wechseln" aria-pressed="false">
+            <span id="themeIcon">{% icon "moon" "icon-moon" %}{% icon "sun" "icon-sun" %}</span>
         </button>
-        <form style="display:inline;" method="post" action="{% url 'portal:logout' %}">
+        <form method="post" action="{% url 'portal:logout' %}">
             {% csrf_token %}
-            <button type="submit" class="btn-logout">Abmelden</button>
+            <button type="submit" class="btn-logout nav-btn">{% icon "log-out" %} Abmelden</button>
         </form>
     </div>
+    {% endwith %}
     {% else %}
-    <a class="nav-brand" href="#"><img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly"></a>
+    <a class="nav-brand" href="{% url 'core:landing' %}" aria-label="Preceptly">
+        <img class="logo logo--on-light" src="{% static 'brand/preceptly-logo.svg' %}" alt="Preceptly" width="116" height="30">
+        <img class="logo logo--on-dark" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="" width="116" height="30">
+    </a>
     <div class="nav-right">
-        <button class="theme-toggle" id="themeToggle" title="Design wechseln" aria-label="Design wechseln">
-            <span id="themeIcon">🌙</span>
+        <button type="button" class="theme-toggle" id="themeToggle" title="Design wechseln" aria-label="Design wechseln" aria-pressed="false">
+            <span id="themeIcon">{% icon "moon" "icon-moon" %}{% icon "sun" "icon-sun" %}</span>
         </button>
     </div>
     {% endif %}
+  </div>
 </nav>
 <main id="main-content" class="container">
     {% if messages %}
@@ -449,7 +81,7 @@
 <!-- PWA Install Modal -->
 <div id="pwaOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwaModalTitle">
   <div class="pwa-modal">
-    <button class="pwa-modal-close" id="pwaModalClose" aria-label="Schließen">&#215;</button>
+    <button class="pwa-modal-close" id="pwaModalClose" aria-label="Schließen">{% icon "x" %}</button>
     <h2 id="pwaModalTitle">Zum Home-Bildschirm hinzufügen</h2>
     <p class="pwa-modal-subtitle">Füge das Preceptly-Portal zu deinem Home-Bildschirm hinzu, um schnell und bequem auf deine Termine und Nachrichten zuzugreifen.</p>
     <div class="pwa-tabs" role="tablist">
@@ -515,7 +147,7 @@
 </div>
 <!-- PWA Install Banner -->
 <div id="pwaBanner" class="pwa-banner" role="complementary" aria-label="Hinweis zur App-Installation">
-  <p>📲 Das Preceptly-Portal lässt sich als App auf deinem Home-Bildschirm nutzen.</p>
+  <p>Das Preceptly-Portal lässt sich als App auf deinem Home-Bildschirm nutzen.</p>
   <div class="pwa-banner-btns">
     <button type="button" class="btn btn-success" id="pwaBannerOpen">Zeig mir wie</button>
     <button type="button" class="btn btn-secondary" id="pwaBannerDismiss">Nicht jetzt</button>
@@ -536,7 +168,8 @@
     function applyTheme(t) {
         html.setAttribute('data-theme', t);
         try { localStorage.setItem('portal-theme', t); } catch(e) {}
-        if (icon) icon.textContent = t === 'dark' ? '☀️' : '🌙';
+        var toggle = document.getElementById('themeToggle');
+        if (toggle) toggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
     }
     applyTheme(theme);
 
@@ -816,12 +449,12 @@
 <div id="betaNoticeOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="betaNoticeTitle">
   <div class="pwa-modal">
     <button class="pwa-modal-close" id="betaNoticeClose" aria-label="{% trans 'Close' %}">&#215;</button>
-    <h2 id="betaNoticeTitle">🚧 {% trans "Preceptly is under active development" %}</h2>
+    <h2 id="betaNoticeTitle">{% trans "Preceptly is under active development" %}</h2>
     <p class="pwa-modal-subtitle" style="margin-bottom: 12px;">
       {% blocktrans %}You might run into the occasional bug — they get fixed as fast as possible. Thanks for your understanding, and please let me know if something doesn't work!{% endblocktrans %}
     </p>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;">
-      <a href="mailto:andreas@preceptly.de?subject=Preceptly%20Portal%20Feedback" class="btn btn-secondary" style="width: auto;">✉️ {% trans "Report a bug / send feedback" %}</a>
+      <a href="mailto:andreas@preceptly.de?subject=Preceptly%20Portal%20Feedback" class="btn btn-secondary" style="width: auto;">{% icon "mail" %} {% trans "Report a bug / send feedback" %}</a>
       <button type="button" class="btn btn-success" id="betaNoticeDismiss" style="width: auto;">{% trans "Got it" %}</button>
     </div>
     <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">

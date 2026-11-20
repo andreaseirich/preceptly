@@ -1,65 +1,64 @@
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
-{% block title %}Anmelden – Preceptly{% endblock %}
+{% block title %}{% trans "Login" %} – Preceptly{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'core/css/auth.css' %}">{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 100px auto; padding: 40px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="text-align: center; margin-bottom: 30px; color: var(--text-primary);">{% trans "Login to Preceptly" %}</h1>
+<div class="auth-card">
+    <h1 class="auth-title">{% trans "Login to Preceptly" %}</h1>
 
     {% if error %}
-    <div class="message error" style="margin-bottom: 20px;" role="alert">{{ error }}</div>
+    <div class="message error" role="alert">{{ error }}</div>
     {% elif form.errors %}
-    <div class="message error" style="margin-bottom: 20px;" role="alert">
+    <div class="message error" role="alert">
         {% trans "Invalid username or password. Please try again." %}
     </div>
     {% endif %}
 
     <form method="post" action="{% url 'core:login' %}">
         {% csrf_token %}
-        <div style="margin-bottom: 20px;">
-            <label for="id_username" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Username" %}:</label>
-            <input type="text" name="username" id="id_username" required autofocus aria-required="true" autocomplete="username"
-                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+        <div class="field">
+            <label for="id_username" class="field-label">{% trans "Username" %}:</label>
+            <input type="text" name="username" id="id_username" required autofocus aria-required="true" autocomplete="username">
         </div>
 
-        <div style="margin-bottom: 25px;">
-            <label for="id_password" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password" %}:</label>
-            <input type="password" name="password" id="id_password" required aria-required="true" autocomplete="current-password"
-                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+        <div class="field field--last">
+            <label for="id_password" class="field-label">{% trans "Password" %}:</label>
+            <input type="password" name="password" id="id_password" required aria-required="true" autocomplete="current-password">
         </div>
 
         <input type="hidden" name="next" value="{{ next|default:'/' }}">
 
-        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">
+        <button type="submit" class="btn btn-block">
             {% trans "Login" %}
         </button>
     </form>
 
-    <p style="margin: 12px 0 0; text-align: center;">
-        <a href="{% url 'core:password_reset' %}" style="display: inline-block; padding: 8px 4px; color: var(--accent); text-decoration: underline; font-size: 0.95em;">{% trans "Forgot your password?" %}</a>
+    <p class="auth-back">
+        <a href="{% url 'core:password_reset' %}" class="auth-link">{% trans "Forgot your password?" %}</a>
     </p>
 
-    <a href="{% url 'core:register' %}" class="btn btn-secondary" style="display: block; width: 100%; padding: 12px; font-size: 16px; margin-top: 12px; text-align: center; box-sizing: border-box;">
+    <a href="{% url 'core:register' %}" class="btn btn-secondary btn-block auth-mt">
         {% trans "Register" %}
     </a>
 
-    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center;">
-        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9em;">{% trans "For students and parents" %}</p>
-        <a href="{% url 'portal:login' %}" style="display: inline-block; margin-top: 4px; padding: 8px 4px; color: var(--accent); text-decoration: underline; font-size: 0.95em;">
+    <div class="auth-aside">
+        <p>{% trans "For students and parents" %}</p>
+        <a href="{% url 'portal:login' %}" class="auth-link">
             {% trans "Go to the portal login" %}
         </a>
     </div>
 
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary); font-size: 0.9em;">
-        <p style="margin: 0 0 10px 0;"><strong>{% trans "Demo Logins" %}:</strong></p>
-        <p style="margin: 5px 0;">{% trans "Premium" %}: <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo_premium</code> / <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo123</code></p>
-        <p style="margin: 5px 0;">{% trans "Standard" %}: <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo_user</code> / <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 3px;">demo123</code></p>
+    <div class="auth-aside auth-demo">
+        <p><strong>{% trans "Demo Logins" %}:</strong></p>
+        <p>{% trans "Premium" %}: <code>demo_premium</code> / <code>demo123</code></p>
+        <p>{% trans "Standard" %}: <code>demo_user</code> / <code>demo123</code></p>
     </div>
 
     {% if show_landing_link %}
-    <div style="margin-top: 15px; text-align: center;">
-        <a href="{% url 'core:landing' %}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9em;">
+    <div class="auth-back">
+        <a href="{% url 'core:landing' %}" >
             ← {% trans "Back to Landing Page" %}
         </a>
     </div>

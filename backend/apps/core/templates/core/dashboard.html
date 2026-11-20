@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 {% load currency %}
+{% load icons %}
 
 {% block title %}Dashboard – Preceptly{% endblock %}
 
@@ -10,7 +11,7 @@
 {% if not user.review %}
 <div class="alert-info" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <span>{% blocktrans %}Wie zufrieden bist du mit Preceptly? Eine kurze Bewertung hilft anderen Nachhilfelehrern, das Tool zu entdecken.{% endblocktrans %}</span>
-    <button type="button" class="btn btn-secondary" id="openReviewModal" style="width:auto; white-space:nowrap;">⭐ {% trans "Bewertung abgeben" %}</button>
+    <button type="button" class="btn btn-secondary" id="openReviewModal" style="width:auto; white-space:nowrap;">{% icon "star" %} {% trans "Bewertung abgeben" %}</button>
 </div>
 {% endif %}
 
@@ -33,9 +34,9 @@
             <td>{{ lesson.get_status_display }}</td>
             <td>
                 {% if lesson.conflicts %}
-                <span class="conflict-icon">⚠</span> <a href="{% url 'lessons:conflicts' lesson.pk %}" class="conflict" title="{% for c in lesson.conflicts %}{{ c.message }}{% if not forloop.last %} | {% endif %}{% endfor %}">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</a>
+                <span class="conflict-icon">{% icon "triangle-alert" %}</span> <a href="{% url 'lessons:conflicts' lesson.pk %}" class="conflict" title="{% for c in lesson.conflicts %}{{ c.message }}{% if not forloop.last %} | {% endif %}{% endfor %}">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</a>
                 {% else %}
-                <span style="color: #28a745;">✓ {% trans "OK" %}</span>
+                <span style="color: #28a745;">{% icon "check" %} {% trans "OK" %}</span>
                 {% endif %}
             </td>
         </tr>
@@ -67,9 +68,9 @@
             <td>{{ lesson.get_status_display }}</td>
             <td>
                 {% if lesson.conflicts %}
-                <span class="conflict-icon">⚠</span> <a href="{% url 'lessons:conflicts' lesson.pk %}" class="conflict" title="{% for c in lesson.conflicts %}{{ c.message }}{% if not forloop.last %} | {% endif %}{% endfor %}">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</a>
+                <span class="conflict-icon">{% icon "triangle-alert" %}</span> <a href="{% url 'lessons:conflicts' lesson.pk %}" class="conflict" title="{% for c in lesson.conflicts %}{{ c.message }}{% if not forloop.last %} | {% endif %}{% endfor %}">{% blocktrans count counter=lesson.conflicts|length %}{{ counter }} conflict{% plural %}{{ counter }} conflicts{% endblocktrans %}</a>
                 {% else %}
-                <span style="color: #28a745;">✓ {% trans "OK" %}</span>
+                <span style="color: #28a745;">{% icon "check" %} {% trans "OK" %}</span>
                 {% endif %}
             </td>
         </tr>
@@ -85,14 +86,14 @@
 <p class="tutorflow-kpi-hint">{% trans "Paid invoices only, grouped by billing period start month (not always the month lessons occurred)." %} <a href="{% url 'core:income' %}?year={{ current_year }}&month={{ current_month }}">{% trans "Income overview" %}</a> — {% trans "amounts by lesson status and notes." %}</p>
 
 {% if conflict_count > 0 %}
-<p class="conflict">⚠ {% blocktrans count counter=conflict_count %}{{ counter }} conflict in upcoming lessons!{% plural %}{{ counter }} conflicts in upcoming lessons!{% endblocktrans %}</p>
+<p class="conflict">{% icon "triangle-alert" %} {% blocktrans count counter=conflict_count %}{{ counter }} conflict in upcoming lessons!{% plural %}{{ counter }} conflicts in upcoming lessons!{% endblocktrans %}</p>
 {% endif %}
 
 {% if not user.review %}
 <div id="reviewModalOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
   <div class="pwa-modal">
     <button class="pwa-modal-close" id="reviewModalClose" aria-label="{% trans 'Close' %}">&#215;</button>
-    <h2 id="reviewModalTitle">⭐ {% trans "Deine Bewertung" %}</h2>
+    <h2 id="reviewModalTitle">{% icon "star" %} {% trans "Deine Bewertung" %}</h2>
     <p class="pwa-modal-subtitle">{% trans "Deine Bewertung erscheint erst nach kurzer Prüfung öffentlich auf der Info-Seite." %}</p>
     <form method="post" action="{% url 'core:submit_review' %}">
       {% csrf_token %}

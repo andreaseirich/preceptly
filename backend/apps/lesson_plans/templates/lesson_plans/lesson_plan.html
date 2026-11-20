@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}{% blocktrans with date=lesson.date student=lesson.contract.student %}Lesson Plan - {{ date }} - {{ student }}{% endblocktrans %} - Preceptly{% endblock %}
 
@@ -8,8 +9,8 @@
 
 <div style="margin-bottom: 20px;">
     <a href="{% url 'lessons:week' %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn">← {% trans "Back to Calendar" %}</a>
-    <a href="{% url 'lessons:update' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn btn-primary">✏️ {% trans "Edit Lesson" %}</a>
-    <a href="{% url 'lessons:detail' lesson.pk %}" class="btn btn-secondary">📋 {% trans "Lesson Details" %}</a>
+    <a href="{% url 'lessons:update' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn btn-primary">{% icon "pencil" %} {% trans "Edit Lesson" %}</a>
+    <a href="{% url 'lessons:detail' lesson.pk %}" class="btn btn-secondary">{% icon "clipboard-list" %} {% trans "Lesson Details" %}</a>
 </div>
 
 <div style="background: var(--bg-secondary); padding: 20px; border-radius: 5px; margin-bottom: 20px;">
@@ -38,7 +39,7 @@
 
 {% if has_conflicts %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">⚠ {% trans "Conflicts" %}</h2>
+    <h2 style="color: #dc3545; margin-top: 0;">{% icon "triangle-alert" %} {% trans "Conflicts" %}</h2>
     <p style="margin-bottom: 15px;">
         <a href="{% url 'lessons:conflicts' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn" style="background: #dc3545; color: white;">
             {% trans "Show Conflict Details" %}
@@ -52,11 +53,11 @@
             <li style="margin-bottom: 8px;">
                 <strong>
                     {% if conflict.type == 'lesson' or conflict.type == 'session' %}
-                        ⚠️ {% trans "Time overlap with another lesson" %}
+                        {% icon "triangle-alert" %} {% trans "Time overlap with another lesson" %}
                     {% elif conflict.type == 'blocked_time' %}
-                        🚫 {% trans "Time overlap with blocked time" %}
+                        {% icon "ban" %} {% trans "Time overlap with blocked time" %}
                     {% elif conflict.type == 'quota' %}
-                        📊 {% trans "Contract quota exceeded" %}
+                        {% icon "chart-column" %} {% trans "Contract quota exceeded" %}
                     {% endif %}
                 </strong>
                 <br><small>{{ conflict.message|default:"" }}</small>
@@ -76,7 +77,7 @@
 
 {% if has_lesson_plan %}
 <div style="background: var(--accent-tint); padding: 20px; border-radius: 5px; border-left: 4px solid var(--accent); margin-bottom: 20px;">
-    <h2 style="color: var(--accent); margin-top: 0;">📚 {% trans "Lesson Plan" %}</h2>
+    <h2 style="color: var(--accent); margin-top: 0;">{% icon "book-open" %} {% trans "Lesson Plan" %}</h2>
     
     {% for lesson_plan in lesson_plans %}
     <div style="background: var(--bg-secondary); padding: 15px; border-radius: 3px; margin-top: 15px; {% if not forloop.first %}opacity: 0.7;{% endif %}">
@@ -103,7 +104,7 @@
 
 {% if is_premium %}
 <div style="background: var(--accent-tint); padding: 20px; border-radius: 5px; border-left: 4px solid var(--accent); margin-bottom: 20px;">
-    <h2 style="color: var(--accent); margin-top: 0;">🤖 {% trans "AI Lesson Plan" %}</h2>
+    <h2 style="color: var(--accent); margin-top: 0;">{% icon "bot" %} {% trans "AI Lesson Plan" %}</h2>
     {% if has_lesson_plan %}
     <p>{% trans "A lesson plan has already been generated for this lesson. You can regenerate it below." %}</p>
     {% else %}
@@ -114,19 +115,19 @@
         <input type="hidden" name="next" value="{% url 'lesson_plans:lesson_plan' lesson_id=lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}">
         <button type="submit" class="btn" style="background: var(--accent); color: var(--on-accent, #fff);">
             {% if has_lesson_plan %}
-                🔄 {% trans "Regenerate AI Lesson Plan" %}
+                {% icon "refresh-cw" %} {% trans "Regenerate AI Lesson Plan" %}
             {% else %}
-                ✨ {% trans "Generate AI Lesson Plan" %}
+                {% icon "sparkles" %} {% trans "Generate AI Lesson Plan" %}
             {% endif %}
         </button>
     </form>
 </div>
 {% else %}
 <div class="box-section" style="margin-bottom: 20px; border-left: 4px solid var(--border-color);">
-    <h2 style="color: #6c757d; margin-top: 0;">🤖 {% trans "AI Lesson Plan" %} <span class="premium-badge">{% trans "Premium" %}</span></h2>
+    <h2 style="color: #6c757d; margin-top: 0;">{% icon "bot" %} {% trans "AI Lesson Plan" %} <span class="premium-badge">{% trans "Premium" %}</span></h2>
     <p>{% trans "AI-powered lesson plan generation is only available for premium users." %}</p>
     <button type="button" class="btn" style="background: #6c757d; color: white; cursor: not-allowed; opacity: 0.6;" disabled>
-        ✨ {% trans "Generate AI Lesson Plan" %}
+        {% icon "sparkles" %} {% trans "Generate AI Lesson Plan" %}
     </button>
 </div>
 {% endif %}

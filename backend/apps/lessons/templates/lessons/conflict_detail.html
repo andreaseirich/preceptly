@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}{% blocktrans with date=lesson.date %}Conflicts - {{ date }}{% endblocktrans %} - Preceptly{% endblock %}
 
@@ -78,7 +79,7 @@
 
 {% if quota_conflicts %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">📊 {% blocktrans count counter=quota_conflicts|length %}Contract Quota Conflict{% plural %}Contract Quota Conflicts ({{ counter }}){% endblocktrans %}</h2>
+    <h2 style="color: #dc3545; margin-top: 0;">{% icon "chart-column" %} {% blocktrans count counter=quota_conflicts|length %}Contract Quota Conflict{% plural %}Contract Quota Conflicts ({{ counter }}){% endblocktrans %}</h2>
     <ul>
         {% for conflict in quota_conflicts %}
         <li style="margin-bottom: 10px;">

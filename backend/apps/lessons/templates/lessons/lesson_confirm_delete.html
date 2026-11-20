@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}Lektion löschen – Preceptly{% endblock %}
 
@@ -11,7 +12,7 @@
     {% csrf_token %}
     {% if matching_recurring %}
     <div class="alert-warning" style="margin: 20px 0;">
-        <h3 style="margin-top: 0; color: var(--text-primary);">⚠️ {% trans "This lesson is part of a series" %}</h3>
+        <h3 style="margin-top: 0; color: var(--text-primary);">{% icon "triangle-alert" %} {% trans "This lesson is part of a series" %}</h3>
         <p>
             <strong>{% trans "Series:" %}</strong> {{ matching_recurring.get_active_weekdays_display }}, {{ matching_recurring.start_time }}
             ({% trans "Recurrence" %}: {{ matching_recurring.get_recurrence_type_display }})

@@ -1,6 +1,7 @@
 {% extends "core/base.html" %}
 {% load i18n %}
 {% load currency %}
+{% load icons %}
 
 {% block title %}{% trans "Income Surplus Statement (EÜR)" %} {{ year }} - Preceptly{% endblock %}
 
@@ -78,6 +79,6 @@
 </table>
 
 <p style="margin-top:32px; padding:12px 16px; background:var(--table-header-bg); border-left:4px solid var(--border-color); font-size:0.9em; max-width:600px;">
-    ⚠ {% trans "This overview is for guidance only and does not replace tax advice." %}
+    {% icon "triangle-alert" %} {% trans "This overview is for guidance only and does not replace tax advice." %}
 </p>
 {% endblock %}

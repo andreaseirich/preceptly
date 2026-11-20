@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 {% load list_tools %}
+{% load icons %}
 
 {% block title %}Lektionen – Preceptly{% endblock %}
 
@@ -32,9 +33,9 @@
             <td>{{ lesson.duration_minutes }} {% trans "Min." %}</td>
             <td>
                 {% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}
-                    {% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }}{% endif %}
+                    {% if lesson.travel_time_before_minutes > 0 %}{% icon "car" %} {{ lesson.travel_time_before_minutes }}{% endif %}
                     {% if lesson.travel_time_before_minutes > 0 and lesson.travel_time_after_minutes > 0 %} / {% endif %}
-                    {% if lesson.travel_time_after_minutes > 0 %}🚗 {{ lesson.travel_time_after_minutes }}{% endif %}
+                    {% if lesson.travel_time_after_minutes > 0 %}{% icon "car" %} {{ lesson.travel_time_after_minutes }}{% endif %}
                     {% trans "Min." %}
                 {% else %}
                     -
@@ -44,9 +45,9 @@
             <td>{{ lesson.get_status_display }}</td>
             <td>
                 {% if lesson.conflicts %}
-                <span class="conflict-icon">⚠</span> <span class="conflict">{{ lesson.conflicts|length }}</span>
+                <span class="conflict-icon">{% icon "triangle-alert" %}</span> <span class="conflict">{{ lesson.conflicts|length }}</span>
                 {% else %}
-                <span style="color: #28a745;">✓</span>
+                <span style="color: #28a745;">{% icon "check" %}<span class="sr-only">{% trans "OK" %}</span></span>
                 {% endif %}
             </td>
             <td>

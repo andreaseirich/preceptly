@@ -1,0 +1,22 @@
+/* Preceptly – Kalender in der Tafel-Ansicht (dunkel)
+ * Die Kalender-Vorlagen bringen ihr eigenes helles CSS mit; hier stehen nur die Überschreibungen für das dunkle Thema, ausgelagert aus core/base.html.
+ */
+[data-theme="dark"] .calendar-table th { background: var(--paper-sunk); border-color: var(--line); color: var(--ink); }
+[data-theme="dark"] .calendar-table td { border-color: var(--line); background: var(--paper-card); }
+[data-theme="dark"] .calendar-table td:not(.current-month) { background: rgba(233, 240, 234, 0.03); color: var(--ink-soft); }
+[data-theme="dark"] .calendar-note { color: var(--ink-soft); }
+[data-theme="dark"] .calendar-legend { background: var(--paper-card); border: 1px solid var(--line); }
+[data-theme="dark"] .lesson-past { background: rgba(233, 240, 234, 0.05) !important; color: var(--ink-soft) !important; }
+[data-theme="dark"] .lesson-future { background: rgba(102, 214, 187, 0.2) !important; color: var(--ink) !important; }
+[data-theme="dark"] .lesson-link { color: var(--ink) !important; }
+[data-theme="dark"] .blocked-time { background: rgba(242, 178, 74, 0.2) !important; color: #f7cc7b !important; border-left-color: var(--warning) !important; }
+[data-theme="dark"] .blocked-time a { color: #f7cc7b !important; }
+[data-theme="dark"] .week-calendar th { background: var(--paper-sunk); border-color: var(--line); }
+[data-theme="dark"] .week-calendar td { border-color: var(--line); background: var(--paper-card); }
+[data-theme="dark"] .week-calendar .time-slot { background: var(--paper-card); }
+[data-theme="dark"] .week-calendar .time-slot:hover { background: rgba(233, 240, 234, 0.05); }
+[data-theme="dark"] .week-calendar .time-label { background: rgba(233, 240, 234, 0.03); border-color: var(--line); }
+[data-theme="dark"] .week-calendar .today-header { background: rgba(102, 214, 187, 0.15) !important; }
+[data-theme="dark"] .create-dialog { background: var(--paper-card); color: var(--ink); }
+[data-theme="dark"] .create-dialog-overlay { background: rgba(0, 0, 0, 0.7); }
+[data-theme="dark"] .preview-tooltip { background: var(--paper-sunk); color: var(--ink); }

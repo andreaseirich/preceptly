@@ -1,69 +1,66 @@
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
-{% block title %}Registrierung – Preceptly{% endblock %}
+{% block title %}{% trans "Register" %} – Preceptly{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'core/css/auth.css' %}">{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 100px auto; padding: 40px; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="text-align: center; margin-bottom: 30px; color: var(--text-primary);">{% trans "Register" %}</h1>
+<div class="auth-card">
+    <h1 class="auth-title">{% trans "Register" %}</h1>
 
     {% if form.non_field_errors %}
-    <div class="message error" style="margin-bottom: 20px;" role="alert">
+    <div class="message error" role="alert">
         {% for err in form.non_field_errors %}{{ err }}{% if not forloop.last %} {% endif %}{% endfor %}
     </div>
     {% elif form.errors %}
-    <div class="message error" style="margin-bottom: 20px;" role="alert">
+    <div class="message error" role="alert">
         {% trans "Please correct the errors below." %}
     </div>
     {% endif %}
 
     <form method="post" action="{% url 'core:register' %}">
         {% csrf_token %}
-        <div style="margin-bottom: 20px;">
-            <label for="id_username" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Username" %}:</label>
+        <div class="field">
+            <label for="id_username" class="field-label">{% trans "Username" %}:</label>
             <input type="text" name="username" id="id_username" required autofocus aria-required="true"
                    {% if form.username.errors %}aria-describedby="id_username_errors"{% endif %}
                    value="{{ form.username.value|default:'' }}"
-                   maxlength="150" autocomplete="username"
-                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+                   maxlength="150" autocomplete="username">
             {% if form.username.errors %}
-            <div id="id_username_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.username.errors.0 }}</div>
+            <div id="id_username_errors" class="field-error" role="alert">{{ form.username.errors.0 }}</div>
             {% endif %}
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <label for="id_email" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Email address" %}:</label>
+        <div class="field">
+            <label for="id_email" class="field-label">{% trans "Email address" %}:</label>
             <input type="email" name="email" id="id_email" required aria-required="true"
                    aria-describedby="id_email_help{% if form.email.errors %} id_email_errors{% endif %}"
                    value="{{ form.email.value|default:'' }}"
-                   maxlength="254" autocomplete="email"
-                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+                   maxlength="254" autocomplete="email">
             {% if form.email.errors %}
-            <div id="id_email_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.email.errors.0 }}</div>
+            <div id="id_email_errors" class="field-error" role="alert">{{ form.email.errors.0 }}</div>
             {% endif %}
-            <small id="id_email_help" style="display: block; margin-top: 5px; color: var(--text-secondary); font-size: 0.85em;">{{ form.email.help_text }}</small>
+            <small id="id_email_help" class="field-help">{{ form.email.help_text }}</small>
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <label for="id_password1" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password" %}:</label>
+        <div class="field">
+            <label for="id_password1" class="field-label">{% trans "Password" %}:</label>
             <input type="password" name="password1" id="id_password1" required aria-required="true" autocomplete="new-password"
-                   {% if form.password1.errors %}aria-describedby="id_password1_errors"{% endif %}
-                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+                   {% if form.password1.errors %}aria-describedby="id_password1_errors"{% endif %}>
             {% if form.password1.errors %}
-            <div id="id_password1_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.password1.errors.0 }}</div>
+            <div id="id_password1_errors" class="field-error" role="alert">{{ form.password1.errors.0 }}</div>
             {% endif %}
             {% if form.password1.help_text %}
-            <small style="display: block; margin-top: 5px; color: var(--text-secondary); font-size: 0.85em;">{{ form.password1.help_text }}</small>
+            <small class="field-help">{{ form.password1.help_text }}</small>
             {% endif %}
         </div>
 
-        <div style="margin-bottom: 25px;">
-            <label for="id_password2" style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600;">{% trans "Password confirmation" %}:</label>
+        <div class="field field--last">
+            <label for="id_password2" class="field-label">{% trans "Password confirmation" %}:</label>
             <input type="password" name="password2" id="id_password2" required aria-required="true" autocomplete="new-password"
-                   {% if form.password2.errors %}aria-describedby="id_password2_errors"{% endif %}
-                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+                   {% if form.password2.errors %}aria-describedby="id_password2_errors"{% endif %}>
             {% if form.password2.errors %}
-            <div id="id_password2_errors" class="error" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;" role="alert">{{ form.password2.errors.0 }}</div>
+            <div id="id_password2_errors" class="field-error" role="alert">{{ form.password2.errors.0 }}</div>
             {% endif %}
         </div>
 
@@ -74,29 +71,29 @@
         </div>
 
         {% url 'core:legal_terms' as url_terms %}{% url 'core:legal_avv' as url_avv %}{% url 'core:legal_privacy' as url_privacy %}
-        <fieldset style="border: none; padding: 0; margin: 0 0 20px 0;">
-            <legend style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 600; font-size: 1em;">{% trans "Consent" %}</legend>
-            <label for="id_avv_consent" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                <input type="checkbox" name="avv_consent" id="id_avv_consent" required aria-required="true" style="margin-top: 3px; flex-shrink: 0;">
-                <span style="color: var(--text-secondary); font-size: 0.9em;">
+        <fieldset>
+            <legend>{% trans "Consent" %}</legend>
+            <label for="id_avv_consent" class="check-row">
+                <input type="checkbox" name="avv_consent" id="id_avv_consent" required aria-required="true" >
+                <span>
                     {% blocktrans with url_terms=url_terms url_avv=url_avv url_privacy=url_privacy %}I accept the <a href="{{ url_terms }}" target="_blank">Terms of Service</a>, <a href="{{ url_avv }}" target="_blank">Data Processing Agreement (AVV)</a>, and <a href="{{ url_privacy }}" target="_blank">Privacy Policy</a>.{% endblocktrans %}
                 </span>
             </label>
         </fieldset>
 
-        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">
+        <button type="submit" class="btn btn-block">
             {% trans "Register" %}
         </button>
     </form>
 
-    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center;">
-        <a href="{% url 'core:login' %}" style="color: var(--text-primary); text-decoration: none;">
+    <div class="auth-aside">
+        <a href="{% url 'core:login' %}" class="auth-link">
             {% trans "Already have an account? Log in" %}
         </a>
     </div>
 
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'core:landing' %}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9em;">
+    <div class="auth-back">
+        <a href="{% url 'core:landing' %}" >
             ← {% trans "Back to Landing Page" %}
         </a>
     </div>

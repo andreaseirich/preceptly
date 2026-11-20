@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 {% load currency %}
+{% load icons %}
 
 {% block title %}{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %} – Preceptly{% endblock %}
 
@@ -111,7 +112,7 @@
         <h1 style="margin-top:4px;">{% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %}</h1>
     </div>
     <span class="inv-status {{ invoice.status }}">
-        {% if invoice.status == "draft" %}⚪{% elif invoice.status == "sent" %}📤{% elif invoice.status == "cancelled" %}🚫{% else %}✅{% endif %}
+        {% if invoice.status == "draft" %}{% icon "circle" %}{% elif invoice.status == "sent" %}{% icon "upload" %}{% elif invoice.status == "cancelled" %}{% icon "ban" %}{% else %}{% icon "circle-check" %}{% endif %}
         {{ invoice.get_status_display }}
     </span>
 </div>
@@ -120,7 +121,7 @@
 {% if not billing_profile_complete %}
 {% url 'core:settings' as settings_url %}
 <div class="profile-warning" role="alert">
-    <span style="font-size:1.3em; flex-shrink:0;">⚠️</span>
+    <span style="font-size:1.3em; flex-shrink:0;">{% icon "triangle-alert" %}</span>
     <div>
         <strong>{% trans "Invoice details missing" %}</strong><br>
         {% blocktrans with url=settings_url|add:"#billing" %}To generate a PDF, please fill in your <a href="{{ url }}">invoice details</a> first (name, address, optional tax number).{% endblocktrans %}
@@ -148,7 +149,7 @@
                 <dd>{{ invoice.created_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
                 {% if invoice.paid_at %}
                 <dt>{% trans "Paid at" %}</dt>
-                <dd>{{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}" style="font-size:0.85em;">✎</a></dd>
+                <dd>{{ invoice.paid_at|date:"SHORT_DATE_FORMAT" }} <a href="{% url 'billing:invoice_set_paid_date' invoice.pk %}" style="font-size:0.85em;" aria-label="{% trans 'Edit' %}" title="{% trans 'Edit' %}">{% icon "pencil" %}</a></dd>
                 {% endif %}
             </dl>
         </div>
@@ -163,7 +164,7 @@
         <div class="inv-card-header">
             {% trans "Recipient" %}
             {% if not invoice.is_locked %}
-            <button class="edit-toggle" type="button" data-click="togglePayerEdit" id="payer-toggle-btn" aria-expanded="false">✎ {% trans "Edit" %}</button>
+            <button class="edit-toggle" type="button" data-click="togglePayerEdit" id="payer-toggle-btn" aria-expanded="false">{% icon "pencil" %} {% trans "Edit" %}</button>
             {% endif %}
         </div>
         <div class="inv-card-body" id="payer-display">
@@ -231,11 +232,11 @@
         <div class="inv-card-body">
             <div class="action-section">
                 {% if invoice.is_cancellation %}
-                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🔒</span> {% blocktrans with number=invoice.cancels.display_number %}Cancellation invoice for invoice {{ number }}.{% endblocktrans %} <a href="{% url 'billing:invoice_detail' invoice.cancels_id %}">{% trans "Show original" %}</a></p>
+                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">{% icon "lock" %}</span> {% blocktrans with number=invoice.cancels.display_number %}Cancellation invoice for invoice {{ number }}.{% endblocktrans %} <a href="{% url 'billing:invoice_detail' invoice.cancels_id %}">{% trans "Show original" %}</a></p>
                 {% elif invoice.status == "cancelled" %}
-                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🚫</span> {% blocktrans with number=invoice.cancellation.display_number %}Cancelled by cancellation invoice {{ number }}. Its lessons can be billed again.{% endblocktrans %} <a href="{% url 'billing:invoice_detail' invoice.cancellation.pk %}">{% trans "Show cancellation invoice" %}</a></p>
+                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">{% icon "ban" %}</span> {% blocktrans with number=invoice.cancellation.display_number %}Cancelled by cancellation invoice {{ number }}. Its lessons can be billed again.{% endblocktrans %} <a href="{% url 'billing:invoice_detail' invoice.cancellation.pk %}">{% trans "Show cancellation invoice" %}</a></p>
                 {% elif invoice.is_locked %}
-                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">🔒</span> {% trans "This invoice has been issued. Its content and PDF stay exactly as sent; only the payment status can still change." %}</p>
+                <p role="note" style="margin: 0 0 12px; font-size: 0.85em; color: var(--text-secondary);"><span aria-hidden="true">{% icon "lock" %}</span> {% trans "This invoice has been issued. Its content and PDF stay exactly as sent; only the payment status can still change." %}</p>
                 {% endif %}
 
                 <div class="action-label">PDF</div>
@@ -244,20 +245,20 @@
                     <form method="post" action="{% url 'billing:invoice_pdf_generate' invoice.pk %}">
                         {% csrf_token %}
                         <button type="submit" class="action-btn primary">
-                            <span class="icon">📑</span>
+                            <span class="icon">{% icon "file-text" %}</span>
                             <span>{% if invoice.invoice_pdf %}{% trans "Regenerate PDF" %}{% else %}{% trans "Generate PDF" %}{% endif %}</span>
                         </button>
                     </form>
                     {% endif %}
                     {% if invoice.invoice_pdf %}
                     <a href="{% url 'billing:invoice_pdf_download' invoice.pk %}" class="action-btn secondary" download>
-                        <span class="icon">📥</span>
+                        <span class="icon">{% icon "download" %}</span>
                         <span>{% trans "Download PDF" %}{% if invoice.invoice_pdf_created_at %}<br><span class="pdf-ts">{{ invoice.invoice_pdf_created_at|date:"SHORT_DATETIME_FORMAT" }}</span>{% endif %}</span>
                     </a>
                     {% endif %}
                 {% else %}
                     <button type="button" class="action-btn disabled" disabled aria-describedby="pdf-disabled-hint">
-                        <span class="icon" aria-hidden="true">📑</span>
+                        <span class="icon" aria-hidden="true">{% icon "file-text" %}</span>
                         <span>{% trans "Generate PDF" %}<br><span class="pdf-ts" id="pdf-disabled-hint">{% trans "Fill in invoice details first" %}</span></span>
                     </button>
                 {% endif %}
@@ -266,7 +267,7 @@
                 <div class="action-divider"></div>
                 <div class="action-label">{% trans "Document" %}</div>
                 <a href="{% url 'billing:invoice_document' invoice.pk %}" class="action-btn secondary" target="_blank">
-                    <span class="icon">📄</span><span>{% trans "View Document" %}</span>
+                    <span class="icon">{% icon "file-text" %}</span><span>{% trans "View Document" %}</span>
                 </a>
                 {% endif %}
 
@@ -277,13 +278,13 @@
                 <form method="post" action="{% url 'billing:invoice_mark_sent' invoice.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="action-btn warning">
-                        <span class="icon">✉️</span><span>{% trans "Mark as sent" %}</span>
+                        <span class="icon">{% icon "mail" %}</span><span>{% trans "Mark as sent" %}</span>
                     </button>
                 </form>
                 {% endif %}
                 {% if invoice.status == "draft" or invoice.status == "sent" %}
                 <a href="{% url 'billing:invoice_mark_paid' invoice.pk %}" class="action-btn success">
-                    <span class="icon">✅</span><span>{% trans "Mark as paid" %}</span>
+                    <span class="icon">{% icon "circle-check" %}</span><span>{% trans "Mark as paid" %}</span>
                 </a>
                 {% endif %}
                 {% if invoice.status == "paid" %}
@@ -299,7 +300,7 @@
                       data-confirm="{% if invoice.status == 'paid' %}{% trans 'Cancel this paid invoice? A cancellation invoice is created. Refund the payment you received outside Preceptly.' %}{% else %}{% trans 'Cancel this invoice? A cancellation invoice with its own number is created, and the lessons can be billed again.' %}{% endif %}">
                     {% csrf_token %}
                     <button type="submit" class="action-btn danger">
-                        <span class="icon" aria-hidden="true">🚫</span><span>{% trans "Cancel invoice" %}</span>
+                        <span class="icon" aria-hidden="true">{% icon "ban" %}</span><span>{% trans "Cancel invoice" %}</span>
                     </button>
                 </form>
                 {% endif %}
@@ -307,7 +308,7 @@
                 {% if not invoice.is_locked %}
                 <div class="action-divider"></div>
                 <a href="{% url 'billing:invoice_delete' invoice.pk %}" class="action-btn danger">
-                    <span class="icon">🗑️</span><span>{% trans "Delete invoice" %}</span>
+                    <span class="icon">{% icon "trash-2" %}</span><span>{% trans "Delete invoice" %}</span>
                 </a>
                 {% endif %}
             </div>

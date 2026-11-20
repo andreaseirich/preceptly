@@ -1,13 +1,15 @@
 {% load i18n %}
 {% load static %}
 {% load block_capture %}
+{% load icons %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <meta name="theme-color" content="#2c3e50">
+    <meta name="theme-color" content="#fffdf8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#162326" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Preceptly">
@@ -27,583 +29,105 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/icon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/icon-16x16.png' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
+    <link rel="preload" href="{% static 'fonts/source-sans-3-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/shell.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/calendar-theme.css' %}">
     <link rel="stylesheet" href="{% static 'core/list-tools.css' %}">
     <title>{{ page_title }}</title>
-    <style>
-        * { box-sizing: border-box; }
-        
-        /* CSS Variables for Light/Dark Mode */
-        :root {
-            /* Brand */
-            --brand-navy: #2c3e50;
-            --brand-navy-light: #3d5266;
-            --brand-navy-dark: #22303f;
-            --brand-teal: #1abc9c; /* decorative only — not for text/buttons on white (2.2:1) */
-
-            /* Interaction (replaces Bootstrap blue #007bff / #006fe6) */
-            --accent: #0d8069;         /* 4.87:1 on white (AA) */
-            --on-accent: #ffffff;  /* Schrift auf var(--accent) */
-            --marker: #b45309;  /* Sterne der Bewertungen, AA */
-            --accent-hover: #0b6f5c;   /* 6.10:1 on white (AA) */
-            --accent-tint: #e6f4f1;    /* selected rows, badge/info fills */
-            --focus-ring: rgba(13,128,105,.35);
-
-            /* Status */
-            --success: #2e7d32;  /* 5.13:1 */
-            --on-success: #ffffff;  /* Schrift auf var(--success) */
-            --warning: #b45309;  /* 5.02:1 */
-            --danger:  #b03a2e;  /* 6.02:1 */
-            --info:    #1565c0;  /* 5.13:1 — distinct from accent/success for neutral info actions */
-
-            /* Neutral */
-            --bg-primary: #f5f7f9;
-            --bg-secondary: #ffffff;
-            --bg-nav: var(--brand-navy);
-            --text-primary: var(--brand-navy-dark);
-            --text-secondary: #5a6b7b;
-            --text-nav: #ffffff;
-            --border-color: #d7dee5;
-            --shadow: rgba(0,0,0,0.1);
-            --hover-bg: var(--brand-navy-light);
-            --active-bg: var(--accent);
-            --table-header-bg: #f8f9fa;
-            --table-hover-bg: #f8f9fa;
-            --input-border: #d7dee5;
-            --input-focus: var(--focus-ring);
-        }
-
-        [data-theme="dark"] {
-            /* Accent adjusted for dark backgrounds (4.5:1 on #2d2d2d) */
-            --accent: #4dd0b3;
-            --on-accent: #1a1a1a;  /* Schrift auf var(--accent) */
-            --marker: #fbbf24;  /* Sterne der Bewertungen, AA */
-            --accent-hover: #6ee0c5;
-            --accent-tint: rgba(77,208,179,0.14);
-            --focus-ring: rgba(77,208,179,.45);
-            --success: #66bb6a;
-            --on-success: #1a1a1a;  /* Schrift auf var(--success) */
-            --warning: #f9a825;
-            --danger:  #ef5350;
-            --info:    #64b5f6;
-
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-nav: #1e1e1e;
-            --text-primary: #e0e0e0;
-            --text-secondary: #b0b0b0;
-            --text-nav: #ffffff;
-            --border-color: #404040;
-            --shadow: rgba(0,0,0,0.3);
-            --hover-bg: #3a3a3a;
-            --active-bg: var(--accent);
-            --table-header-bg: #353535;
-            --table-hover-bg: #3a3a3a;
-            --input-border: #404040;
-        }
-
-        /* Respect system preference */
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) {
-                --accent: #4dd0b3;
-                --on-accent: #1a1a1a;  /* Schrift auf var(--accent) */
-                --marker: #fbbf24;  /* Sterne der Bewertungen, AA */
-                --accent-hover: #6ee0c5;
-                --accent-tint: rgba(77,208,179,0.14);
-                --focus-ring: rgba(77,208,179,.45);
-                --success: #66bb6a;
-                --on-success: #1a1a1a;  /* Schrift auf var(--success) */
-                --warning: #f9a825;
-                --danger:  #ef5350;
-                --info:    #64b5f6;
-
-                --bg-primary: #1a1a1a;
-                --bg-secondary: #2d2d2d;
-                --bg-nav: #1e1e1e;
-                --text-primary: #e0e0e0;
-                --text-secondary: #b0b0b0;
-                --text-nav: #ffffff;
-                --border-color: #404040;
-                --shadow: rgba(0,0,0,0.3);
-                --hover-bg: #3a3a3a;
-                --active-bg: var(--accent);
-                --table-header-bg: #353535;
-                --table-hover-bg: #3a3a3a;
-                --input-border: #404040;
-            }
-        }
-        
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: var(--bg-primary); 
-            color: var(--text-primary); 
-            -webkit-font-smoothing: antialiased; 
-            -moz-osx-font-smoothing: grayscale;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            background: var(--bg-secondary); 
-            padding: 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px var(--shadow); 
-            min-height: calc(100vh - 80px); 
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        /* Navigation */
-        .site-header { position: sticky; top: 0; z-index: 1000; }
-        nav { background: var(--bg-nav); padding: 15px 0; margin-bottom: 30px; border-radius: 4px; box-shadow: 0 2px 4px var(--shadow); transition: background-color 0.3s ease; }
-        nav .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; }
-        nav .nav-brand { display: flex; align-items: center; padding: 0 8px 0 0; flex-shrink: 0; white-space: nowrap; }
-        nav .nav-brand img { height: 28px; width: auto; }
-        nav .nav-brand img.nav-brand-full { display: block; }
-        nav .nav-brand img.nav-brand-icon { display: none; width: 28px; }
-        nav .nav-links-brand { display: none; }
-        nav .nav-links { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; flex: 1; }
-        nav .nav-dropdown { position: relative; }
-        nav .nav-dropdown-toggle { background: transparent; color: white; border: none; font: inherit; padding: 8px 15px; border-radius: 3px; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
-        nav .nav-dropdown-toggle:hover, nav .nav-dropdown.open .nav-dropdown-toggle { background: var(--hover-bg); }
-        nav .nav-dropdown-caret { font-size: 0.75em; }
-        nav .nav-dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: var(--bg-nav); border-radius: 4px; box-shadow: 0 4px 10px var(--shadow); padding: 6px; z-index: 1001; max-height: 75vh; overflow-y: auto; }
-        nav .nav-dropdown-menu a { display: block; padding: 8px 12px; }
-        nav .nav-dropdown.open .nav-dropdown-menu,
-        nav .nav-dropdown:hover .nav-dropdown-menu,
-        nav .nav-dropdown:focus-within .nav-dropdown-menu { display: block; }
-        nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 3px; transition: background 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
-        nav a:hover { background: var(--hover-bg); }
-        nav a.active { background: var(--active-bg); }
-        
-        /* Dark Mode Toggle Button */
-        .theme-toggle { 
-            background: transparent; 
-            border: none; 
-            color: var(--text-nav); 
-            padding: 8px 10px; 
-            border-radius: 3px; 
-            cursor: pointer; 
-            font-size: 18px; 
-            transition: background 0.2s; 
-            min-width: 36px; 
-            -webkit-tap-highlight-color: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .theme-toggle:hover { background: rgba(255,255,255,0.1); }
-        nav .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        nav .nav-right form { margin: 0; }
-        nav .nav-right button { background: transparent; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 18px; transition: background 0.2s; min-width: 36px; -webkit-tap-highlight-color: transparent; }
-        nav .nav-right button:hover { background: rgba(255,255,255,0.1); }
-        nav .nav-right select { font-size: 14px; }
-        
-        /* Hamburger Menu */
-        .menu-toggle { display: none; background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; padding: 8px; -webkit-tap-highlight-color: transparent; }
-        .menu-toggle:focus { outline: none; }
-        
-        .messages { margin-bottom: 20px; }
-        .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-        .message { padding: 12px 15px; margin-bottom: 10px; border-radius: 4px; border-left: 4px solid; transition: background-color 0.3s ease, color 0.3s ease; }
-        .message.success { background: #d4edda; color: #155724; border-color: #28a745; }
-        .message.warning { background: #fff3cd; color: #856404; border-color: #ffc107; }
-        .message.error { background: #f8d7da; color: #721c24; border-color: #dc3545; }
-        [data-theme="dark"] .message.success { background: rgba(40, 167, 69, 0.2); color: #6cff8f; border-color: #28a745; }
-        [data-theme="dark"] .message.warning { background: rgba(255, 193, 7, 0.2); color: #ffd54f; border-color: #ffc107; }
-        [data-theme="dark"] .message.error { background: rgba(220, 53, 69, 0.2); color: #ff6b7a; border-color: #dc3545; }
-        .conflict { color: #dc3545; font-weight: bold; background: #fff3cd; padding: 2px 6px; border-radius: 3px; }
-        [data-theme="dark"] .conflict { color: #ff6b7a; background: rgba(255, 193, 7, 0.2); }
-        .conflict-icon { color: #dc3545; font-size: 1.2em; }
-        [data-theme="dark"] .conflict-icon { color: #ff6b7a; }
-        
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 1px 3px var(--shadow); }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
-        th { background: var(--table-header-bg); font-weight: 600; color: var(--text-primary); }
-        tr:hover { background: var(--table-hover-bg); }
-        
-        /* Buttons - Touch optimized */
-        .btn { display: inline-block; padding: 12px 24px; background: var(--accent); color: var(--on-accent, #fff); text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-size: 16px; transition: background 0.2s, transform 0.1s; -webkit-tap-highlight-color: transparent; min-height: 44px; min-width: 44px; touch-action: manipulation; }
-        .btn:hover { background: var(--accent-hover); }
-        .btn:active { transform: scale(0.98); }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:hover { background: #5a6268; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-danger:hover { background: #922f26; }
-        .btn-success { background: var(--success); color: var(--on-success, #fff); }
-        .btn-success:hover { background: #256428; }
-        .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
-        .btn-group .btn { margin-right: 0; }
-        .btn-group form { display: contents; }
-        .btn-group form .btn { text-align: inherit; }
-        .premium-badge { background: #ffc107; color: #856404; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold; margin-left: 8px; }
-        .skip-link {
-            position: absolute; left: -9999px; top: auto;
-            width: 1px; height: 1px; overflow: hidden;
-            background: var(--accent); color: var(--on-accent, #fff); padding: 8px 18px;
-            border-radius: 0 0 4px 4px; font-weight: 600;
-            z-index: 10000; text-decoration: none;
-        }
-        .skip-link:focus {
-            position: fixed; left: 50%; top: 0;
-            transform: translateX(-50%); width: auto;
-            height: auto; overflow: visible;
-        }
-
-        
-        /* Help / explanation callouts (income, reports, billing hints) */
-        .tutorflow-help-box {
-            font-size: 0.9em;
-            color: var(--text-secondary);
-            background: var(--table-header-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin: 12px 0 20px;
-            line-height: 1.55;
-        }
-        .tutorflow-help-box strong { color: var(--text-primary); }
-        .tutorflow-help-box ul { margin: 8px 0 0; padding-left: 1.25em; }
-        .tutorflow-help-box li { margin-bottom: 6px; }
-        .tutorflow-help-box p:last-child { margin-bottom: 0; }
-        .tutorflow-kpi-hint { font-size: 0.88em; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
-        
-        h1 { color: var(--text-primary); margin-top: 0; }
-        h2 { color: var(--text-secondary); margin-top: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
-        h3 { color: var(--text-secondary); }
-        p { color: var(--text-primary); }
-        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
-        .empty-state p { font-size: 1.1em; color: var(--text-secondary); }
-        a { color: var(--accent); }
-        a:hover { color: var(--accent-hover); }
-        
-        /* Form inputs - Touch optimized */
-        input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="time"], input[type="number"], input[type="tel"], input[type="url"], textarea, select { 
-            font-size: 16px; 
-            padding: 12px; 
-            border: 1px solid var(--input-border); 
-            border-radius: 4px; 
-            width: 100%; 
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            -webkit-appearance: none; 
-            -moz-appearance: none; 
-            appearance: none; 
-            touch-action: manipulation;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="time"]:focus, input[type="number"]:focus, input[type="tel"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--input-focus);
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 1100px) {
-            .container { padding: 15px; margin: 10px; border-radius: 0; }
-            nav { margin-bottom: 15px; border-radius: 0; }
-            nav .nav-container { padding: 0 15px; }
-            .menu-toggle { display: block; order: -1; }
-            nav .nav-brand { display: none; }
-            nav .nav-links-brand {
-                display: flex;
-                align-items: center;
-                padding: 16px 20px;
-                border-bottom: 1px solid var(--hover-bg);
-            }
-            nav .nav-links-brand img { height: 28px; width: auto; }
-            nav .nav-links {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                width: 100%;
-                max-height: 0;
-                background: var(--bg-nav);
-                flex-direction: column;
-                align-items: stretch;
-                padding: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease, background-color 0.3s ease;
-                box-shadow: 0 4px 10px var(--shadow);
-                border-top: 1px solid var(--hover-bg);
-                z-index: 999;
-            }
-            nav .nav-links.active { max-height: calc(100vh - 60px); overflow-y: auto; }
-            .nav-backdrop {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.5);
-                z-index: 998;
-            }
-            .nav-backdrop.active { display: block; }
-            nav .nav-links a {
-                display: block;
-                padding: 15px 20px;
-                border-bottom: 1px solid var(--hover-bg);
-                font-size: 16px;
-            }
-            nav .nav-dropdown-toggle {
-                display: block;
-                width: 100%;
-                text-align: left;
-                padding: 15px 20px;
-                border-bottom: 1px solid var(--hover-bg);
-                font-size: 16px;
-            }
-            nav .nav-dropdown-menu,
-            nav .nav-dropdown:hover .nav-dropdown-menu,
-            nav .nav-dropdown:focus-within .nav-dropdown-menu {
-                display: none;
-                position: static;
-                box-shadow: none;
-                background: var(--hover-bg);
-                border-radius: 0;
-                padding: 0;
-                /* Das ganze Menü scrollt schon (nav-links.active) - kein zweites Scroll-Feld darin. */
-                max-height: none;
-                overflow: visible;
-            }
-            nav .nav-dropdown.open .nav-dropdown-menu { display: block; }
-            nav .nav-dropdown-menu a { padding: 15px 20px 15px 40px; border-bottom: 1px solid var(--border-color); }
-            nav .nav-right { gap: 5px; margin-left: auto; }
-            table { font-size: 14px; }
-            th, td { padding: 8px 4px; }
-            .btn { padding: 12px 16px; font-size: 15px; width: 100%; }
-            .btn-group { flex-direction: column; }
-            .btn-group .btn { width: 100%; }
-            h1 { font-size: 24px; }
-            h2 { font-size: 20px; margin-top: 20px; }
-        }
-        
-        @media (max-width: 480px) {
-            .container { padding: 10px; margin: 5px; }
-            table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            th, td { padding: 6px 3px; white-space: nowrap; }
-        }
-        
-        /* Safe area for notched devices */
-        @supports (padding: max(0px)) {
-            nav { padding-top: max(15px, env(safe-area-inset-top)); }
-            .container { padding-bottom: max(30px, env(safe-area-inset-bottom)); }
-        }
-        
-        /* Calendar Dark Mode Styles */
-        [data-theme="dark"] .calendar-table th {
-            background: var(--table-header-bg);
-            border-color: var(--border-color);
-            color: var(--text-primary);
-        }
-        [data-theme="dark"] .calendar-table td {
-            border-color: var(--border-color);
-            background: var(--bg-secondary);
-        }
-        [data-theme="dark"] .calendar-table td:not(.current-month) {
-            background: rgba(255,255,255,0.03);
-            color: var(--text-secondary);
-        }
-        [data-theme="dark"] .calendar-note {
-            color: var(--text-secondary);
-        }
-        [data-theme="dark"] .calendar-legend {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-        }
-        [data-theme="dark"] .lesson-past {
-            background: rgba(255,255,255,0.05) !important;
-            color: var(--text-secondary) !important;
-        }
-        [data-theme="dark"] .lesson-future {
-            background: rgba(77,208,179,0.2) !important;
-            color: var(--text-primary) !important;
-        }
-        [data-theme="dark"] .lesson-link {
-            color: var(--text-primary) !important;
-        }
-        [data-theme="dark"] .blocked-time {
-            background: rgba(255, 193, 7, 0.2) !important;
-            color: #ffd54f !important;
-            border-left-color: #ffc107 !important;
-        }
-        [data-theme="dark"] .blocked-time a {
-            color: #ffd54f !important;
-        }
-        [data-theme="dark"] .week-calendar th {
-            background: var(--table-header-bg);
-            border-color: var(--border-color);
-        }
-        [data-theme="dark"] .week-calendar td {
-            border-color: var(--border-color);
-            background: var(--bg-secondary);
-        }
-        [data-theme="dark"] .week-calendar .time-slot {
-            background: var(--bg-secondary);
-        }
-        [data-theme="dark"] .week-calendar .time-slot:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        [data-theme="dark"] .week-calendar .time-label {
-            background: rgba(255,255,255,0.03);
-            border-color: var(--border-color);
-        }
-        [data-theme="dark"] .week-calendar .today-header {
-            background: rgba(77,208,179,0.15) !important;
-        }
-        [data-theme="dark"] .create-dialog {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-        [data-theme="dark"] .create-dialog-overlay {
-            background: rgba(0,0,0,0.7);
-        }
-        [data-theme="dark"] .preview-tooltip {
-            background: var(--bg-nav);
-            color: var(--text-nav);
-        }
-
-        /* Small outline buttons for table actions */
-        .btn-sm { display: inline-block; padding: 3px 9px; border-radius: 3px; border: 1px solid; font-size: 0.82em; cursor: pointer; text-decoration: none !important; background: transparent; transition: background 0.15s, color 0.15s; white-space: nowrap; line-height: 1.5; }
-        .btn-sm:active { transform: scale(0.97); }
-        .btn-sm-primary   { color: var(--info); border-color: var(--info); }
-        .btn-sm-primary:hover   { background: var(--info); color: #fff; }
-        .btn-sm-secondary { color: var(--text-secondary); border-color: var(--border-color); }
-        .btn-sm-secondary:hover { background: var(--bg-nav); color: #fff; }
-        .btn-sm-success   { color: var(--success); border-color: var(--success); }
-        .btn-sm-success:hover   { background: var(--success); color: var(--on-success, #fff); }
-        .btn-sm-warning   { color: var(--warning); border-color: var(--warning); }
-        .btn-sm-warning:hover   { background: var(--warning); color: #fff; }
-        .btn-sm-danger    { color: var(--danger); border-color: var(--danger); }
-        .btn-sm-danger:hover    { background: var(--danger); color: #fff; }
-        .table-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-        .alert-info { padding: 15px; background: var(--accent-tint); border: 1px solid rgba(13,128,105,0.3); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
-        [data-theme="dark"] .alert-info { border-color: rgba(77,208,179,0.35); }
-        .alert-warning { padding: 15px; background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.4); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
-        .alert-success { padding: 15px; background: rgba(40, 167, 69, 0.12); border: 1px solid rgba(40, 167, 69, 0.4); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
-        .alert-danger { padding: 15px; background: rgba(220, 53, 69, 0.12); border: 1px solid rgba(220, 53, 69, 0.4); border-radius: 8px; margin-bottom: 20px; color: var(--text-primary); }
-        .box-section { padding: 15px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 20px; }
-
-        /* PWA Install Modal */
-        .pwa-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:16px;}
-        .pwa-modal-overlay.open{display:flex;}
-        .pwa-modal{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;width:100%;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,.35);padding:24px;position:relative;max-height:90vh;overflow-y:auto;}
-        .pwa-modal h2{margin:0 0 6px;font-size:1.15em;border:none;padding:0;color:var(--text-primary);}
-        .pwa-modal-close{position:absolute;top:12px;right:12px;background:transparent;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);line-height:1;padding:4px 8px;border-radius:4px;min-width:auto;min-height:auto;}
-        .pwa-modal-close:hover{background:var(--hover-bg);color:var(--text-primary);}
-        .pwa-modal-subtitle{font-size:.88em;color:var(--text-secondary);margin-bottom:16px;}
-        .pwa-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border-color);margin-bottom:16px;}
-        .pwa-tab{background:transparent;border:none;padding:8px 12px;cursor:pointer;font-size:.85em;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:3px 3px 0 0;transition:color .15s,border-color .15s;white-space:nowrap;}
-        .pwa-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
-        .pwa-tab:hover:not(.active){color:var(--text-primary);}
-        .pwa-panel{display:none;}
-        .pwa-panel.active{display:block;}
-        .pwa-steps{list-style:none;margin:0;padding:0;}
-        .pwa-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
-        .pwa-step:last-child{margin-bottom:0;}
-        .pwa-step-num{flex-shrink:0;width:22px;height:22px;background:var(--accent);color:var(--on-accent, #fff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;margin-top:11px;}
-        .pwa-step-icon{flex-shrink:0;width:44px;height:44px;background:var(--accent-tint);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);}
-        .pwa-step-icon svg{stroke:currentColor;}
-        .pwa-step-text{font-size:.9em;color:var(--text-primary);line-height:1.45;padding-top:12px;}
-        /* PWA Install Banner */
-        .pwa-banner{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:460px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:14px 16px;z-index:1500;gap:12px;align-items:center;}
-        .pwa-banner.visible{display:flex;}
-        .pwa-banner p{margin:0;font-size:.88em;color:var(--text-primary);flex:1;line-height:1.4;}
-        .pwa-banner-btns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
-        .pwa-banner-btns .btn{width:auto;min-width:auto;font-size:.85em;padding:8px 12px;}
-    </style>
     {% block extra_css %}{% endblock %}
     <script src="{% static 'js/actions.js' %}" nonce="{{ csp_nonce }}" defer></script>
 </head>
 <body>
+    {% icon_sprite %}
     <a href="#main-content" class="skip-link">{% trans "Skip to main content" %}</a>
     <div class="site-header">
     <nav aria-label="{% trans 'Main navigation' %}">
+        {% with url_name=request.resolver_match.url_name app=request.resolver_match.app_name %}
         <div class="nav-container">
-            <a class="nav-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
-                <img class="nav-brand-full" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
-                <img class="nav-brand-icon" src="{% static 'brand/preceptly-icon.svg' %}" alt="Preceptly">
+            <a class="nav-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}" aria-label="Preceptly">
+                <img class="logo logo-full logo--on-light" src="{% static 'brand/preceptly-logo.svg' %}" alt="Preceptly" width="116" height="30">
+                <img class="logo logo-full logo--on-dark" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="" width="116" height="30">
+                <img class="logo logo-icon" src="{% static 'brand/preceptly-icon.svg' %}" alt="Preceptly" width="32" height="32">
             </a>
-            <button class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}">☰</button>
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="{% trans 'Toggle menu' %}" aria-expanded="false" aria-controls="navLinks">{% icon "menu" %}</button>
             <div class="nav-links" id="navLinks">
-                <a class="nav-links-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}">
-                    <img src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="Preceptly">
+                <a class="nav-links-brand" href="{% if user.is_authenticated %}{% url 'core:dashboard' %}{% else %}{% url 'core:landing' %}{% endif %}" aria-label="Preceptly">
+                    <img class="logo logo--on-light" src="{% static 'brand/preceptly-logo.svg' %}" alt="Preceptly" width="116" height="30">
+                    <img class="logo logo--on-dark" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="" width="116" height="30">
                 </a>
                 {% if user.is_authenticated %}
-                <a href="{% url 'core:dashboard' %}">📊 {% trans "Dashboard" %}</a>
+                <a href="{% url 'core:dashboard' %}"{% if url_name == 'dashboard' %} aria-current="page"{% endif %}>{% icon "layout-dashboard" "nav-icon" %} {% trans "Dashboard" %}</a>
                 <div class="nav-dropdown">
-                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownManage">
-                        👤 {% trans "Management" context "main nav dropdown" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                    <button type="button" class="nav-dropdown-toggle{% if app == 'contracts' or app == 'students' or app == 'lessons' or app == 'blocked_times' or app == 'calendar_sync' or url_name == 'settings' %} active{% endif %}" aria-expanded="false" aria-controls="navDropdownManage">
+                        {% icon "users" "nav-icon" %} {% trans "Management" context "main nav dropdown" %} {% icon "chevron-down" "nav-dropdown-caret" %}
                     </button>
-                    <div class="nav-dropdown-menu" id="navDropdownManage" role="menu">
-                        <a href="{% url 'contracts:list' %}" role="menuitem">👤 {% trans "Students" %}</a>
-                        <a href="{% url 'lessons:week' %}" role="menuitem">📅 {% trans "Calendar" %}</a>
-                        <a href="{% url 'contracts:institute_list' %}" role="menuitem">🏫 {% trans "Institutes" %}</a>
-                        <a href="{% url 'core:settings' %}" role="menuitem">⚙️ {% trans "Settings" %}</a>
+                    <div class="nav-dropdown-menu" id="navDropdownManage">
+                        <a href="{% url 'contracts:list' %}">{% icon "users" "nav-icon" %} {% trans "Students" %}</a>
+                        <a href="{% url 'lessons:week' %}">{% icon "calendar-days" "nav-icon" %} {% trans "Calendar" %}</a>
+                        <a href="{% url 'contracts:institute_list' %}">{% icon "school" "nav-icon" %} {% trans "Institutes" %}</a>
+                        <a href="{% url 'core:settings' %}">{% icon "settings" "nav-icon" %} {% trans "Settings" %}</a>
                     </div>
                 </div>
                 <div class="nav-dropdown">
-                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownBilling">
-                        💰 {% trans "Billing" context "main nav dropdown" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                    <button type="button" class="nav-dropdown-toggle{% if app == 'billing' or url_name == 'income' or url_name == 'reports' or url_name == 'tax_year' or url_name == 'euer' or url_name == 'expense_list' %} active{% endif %}" aria-expanded="false" aria-controls="navDropdownBilling">
+                        {% icon "wallet" "nav-icon" %} {% trans "Billing" context "main nav dropdown" %} {% icon "chevron-down" "nav-dropdown-caret" %}
                     </button>
-                    <div class="nav-dropdown-menu" id="navDropdownBilling" role="menu">
-                        <a href="{% url 'billing:invoice_list' %}" role="menuitem">🧾 {% trans "Invoices" %}</a>
-                        <a href="{% url 'core:income' %}" role="menuitem">💰 {% trans "Finance" %}</a>
+                    <div class="nav-dropdown-menu" id="navDropdownBilling">
+                        <a href="{% url 'billing:invoice_list' %}">{% icon "receipt" "nav-icon" %} {% trans "Invoices" %}</a>
+                        <a href="{% url 'core:income' %}">{% icon "banknote" "nav-icon" %} {% trans "Finance" %}</a>
                     </div>
                 </div>
                 {% endif %}
                 <div class="nav-dropdown">
-                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="navDropdownFaq">
-                        ❓ {% trans "FAQ" %} <span class="nav-dropdown-caret" aria-hidden="true">▾</span>
+                    <button type="button" class="nav-dropdown-toggle{% if url_name == 'faq' %} active{% endif %}" aria-expanded="false" aria-controls="navDropdownFaq">
+                        {% icon "circle-help" "nav-icon" %} {% trans "FAQ" %} {% icon "chevron-down" "nav-dropdown-caret" %}
                     </button>
-                    <div class="nav-dropdown-menu" id="navDropdownFaq" role="menu">
-                        <a href="{% url 'core:faq' %}" role="menuitem">{% trans "Overview" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#erste-schritte" role="menuitem">{% trans "Getting started & account" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#tarife" role="menuitem">{% trans "Plans & subscription" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#schueler" role="menuitem">{% trans "Students & contracts" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#stunden" role="menuitem">{% trans "Lessons" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#rechnungen" role="menuitem">{% trans "Invoices" %}</a>
-                        <a href="{% url 'core:faq' %}#einnahmen" role="menuitem">{% trans "Income & billing" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#steuern" role="menuitem">{% trans "Taxes & EÜR" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#berichte" role="menuitem">{% trans "Reports" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#gestaffelte-verguetung" role="menuitem">{% trans "Tiered pay" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#portal" role="menuitem">{% trans "Student & family portal" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#meetings" role="menuitem">{% trans "Online meetings" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#ki" role="menuitem">{% trans "AI lesson plans" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#kalender-sync" role="menuitem">{% trans "Calendar sync" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#app" role="menuitem">{% trans "App & notifications" context "FAQ nav dropdown" %}</a>
-                        <a href="{% url 'core:faq' %}#datenschutz" role="menuitem">{% trans "Privacy & security" context "FAQ nav dropdown" %}</a>
+                    <div class="nav-dropdown-menu" id="navDropdownFaq">
+                        <a href="{% url 'core:faq' %}">{% trans "Overview" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#erste-schritte">{% trans "Getting started & account" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#tarife">{% trans "Plans & subscription" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#schueler">{% trans "Students & contracts" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#stunden">{% trans "Lessons" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#rechnungen">{% trans "Invoices" %}</a>
+                        <a href="{% url 'core:faq' %}#einnahmen">{% trans "Income & billing" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#steuern">{% trans "Taxes & EÜR" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#berichte">{% trans "Reports" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#gestaffelte-verguetung">{% trans "Tiered pay" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#portal">{% trans "Student & family portal" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#meetings">{% trans "Online meetings" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#ki">{% trans "AI lesson plans" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#kalender-sync">{% trans "Calendar sync" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#app">{% trans "App & notifications" context "FAQ nav dropdown" %}</a>
+                        <a href="{% url 'core:faq' %}#datenschutz">{% trans "Privacy & security" context "FAQ nav dropdown" %}</a>
                     </div>
                 </div>
                 {% if user.is_authenticated %}
-                <a href="{% url 'core:tutor_messages_overview' %}">💬 {% trans "Messages" %}{% if unread_portal_count %} <span style="background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.75em;vertical-align:middle;">{{ unread_portal_count }}</span>{% endif %}</a>
+                <a href="{% url 'core:tutor_messages_overview' %}"{% if url_name == 'tutor_messages_overview' or url_name == 'tutor_messages' %} aria-current="page"{% endif %}>{% icon "message-circle" "nav-icon" %} {% trans "Messages" %}{% if unread_portal_count %} <span class="nav-badge">{{ unread_portal_count }}</span>{% endif %}</a>
                 {% endif %}
             </div>
             <div id="navBackdrop" class="nav-backdrop" aria-hidden="true"></div>
             <div class="nav-right">
-                <button class="theme-toggle" id="themeToggle" title="{% trans 'Toggle dark mode' %}" aria-label="{% trans 'Toggle dark mode' %}">
-                    <span id="themeIcon">🌙</span>
+                <button type="button" class="theme-toggle" id="themeToggle" title="{% trans 'Toggle dark mode' %}" aria-label="{% trans 'Toggle dark mode' %}" aria-pressed="false">
+                    <span id="themeIcon">{% icon "moon" "icon-moon" %}{% icon "sun" "icon-sun" %}</span>
                 </button>
                 {% if user.is_authenticated %}
-                <form method="post" action="{% url 'core:logout' %}" style="display: inline;">
+                <form method="post" action="{% url 'core:logout' %}">
                     {% csrf_token %}
-                    <button type="submit" title="{% trans 'Logout' %} ({{ user.username }})" aria-label="{% trans 'Logout' %} {{ user.username }}" class="btn-logout">🚪</button>
+                    <button type="submit" title="{% trans 'Logout' %} ({{ user.username }})" aria-label="{% trans 'Logout' %} {{ user.username }}" class="theme-toggle btn-logout">{% icon "log-out" %}</button>
                 </form>
                 {% else %}
-                {% if not user.is_authenticated %}
-                <a href="{% url 'core:landing' %}" title="{% trans 'Home' %}">🏠</a>
-                <a href="{% url 'core:login' %}" title="{% trans 'Login' %}">🔐</a>
-                {% else %}
-                <a href="{% url 'core:login' %}" title="{% trans 'Login' %}">🔐</a>
+                <a class="icon-btn" href="{% url 'core:landing' %}" title="{% trans 'Home' %}" aria-label="{% trans 'Home' %}">{% icon "house" %}</a>
+                <a class="icon-btn" href="{% url 'core:login' %}" title="{% trans 'Login' %}" aria-label="{% trans 'Login' %}">{% icon "log-in" %}</a>
                 {% endif %}
-                {% endif %}
-                <form action="{% url 'set_language' %}" method="post" style="display: inline-block; margin: 0;">
+                <form action="{% url 'set_language' %}" method="post">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ request.get_full_path }}">
-                        {% get_current_language as LANGUAGE_CODE %}
-                        {% get_available_languages as LANGUAGES %}
-                    <select name="language" data-autosubmit title="{% trans 'Change language' %}" aria-label="{% trans 'Change language' %}" style="background: #34495e; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-size: 14px; min-width: 50px;">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    <select name="language" class="lang-select" data-autosubmit title="{% trans 'Change language' %}" aria-label="{% trans 'Change language' %}">
                         {% for lang_code, lang_name in LANGUAGES %}
                         <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{% if lang_code == 'de' %}DE{% elif lang_code == 'en' %}EN{% else %}{{ lang_code|upper }}{% endif %}</option>
                         {% endfor %}
@@ -611,28 +135,29 @@
                 </form>
             </div>
         </div>
+        {% endwith %}
     </nav>
     
     {% if is_demo_user %}
-    <div role="status" aria-live="polite" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;">
-        {% load i18n %}{% trans "Demo account — data resets hourly. Do not enter real personal data." %}
+    <div class="status-banner status-banner--notice" role="status" aria-live="polite">
+        {% trans "Demo account — data resets daily. Do not enter real personal data." %}
     </div>
     {% endif %}
     {% if needs_email and request.resolver_match.url_name != "email_required" %}
-    <div role="status" style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-size:0.9em;font-weight:600;">
+    <div class="status-banner status-banner--notice" role="status">
         {% trans "Your account has no email address yet — without it, a forgotten password cannot be reset." %}
-        <a href="{% url 'core:email_required' %}?next={{ request.get_full_path|urlencode }}" style="color:#000;text-decoration:underline;white-space:nowrap;">{% trans "Add it now" %}</a>
+        <a href="{% url 'core:email_required' %}?next={{ request.get_full_path|urlencode }}">{% trans "Add it now" %}</a>
     </div>
     {% endif %}
     {% if needs_email_verification %}
-    <div role="status" style="background:var(--bg-secondary);border-bottom:1px solid var(--border-color);color:var(--text-primary);text-align:center;padding:6px 16px;font-size:0.9em;">
+    <div class="status-banner status-banner--plain" role="status">
         {% blocktrans with email=user.email %}Please confirm your email address {{ email }}.{% endblocktrans %}
-        <form method="post" action="{% url 'core:email_verify_resend' %}" style="display:inline;">
+        <form method="post" action="{% url 'core:email_verify_resend' %}" class="inline-form">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit" style="background:none;border:none;padding:6px 4px;color:var(--text-primary);text-decoration:underline;font:inherit;font-weight:600;cursor:pointer;">{% trans "Send confirmation link" %}</button>
+            <button type="submit" class="link-button">{% trans "Send confirmation link" %}</button>
         </form>
-        · <a href="{% url 'core:settings' %}?section=email" style="color:var(--text-primary);text-decoration:underline;padding:6px 4px;display:inline-block;">{% trans "Wrong address?" %}</a>
+        · <a href="{% url 'core:settings' %}?section=email">{% trans "Wrong address?" %}</a>
     </div>
     {% endif %}
     </div>
@@ -653,16 +178,16 @@
     <!-- Beta Notice Modal -->
     <div id="betaNoticeOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="betaNoticeTitle">
       <div class="pwa-modal">
-        <button class="pwa-modal-close" id="betaNoticeClose" aria-label="{% trans 'Close' %}">&#215;</button>
-        <h2 id="betaNoticeTitle">🚧 {% trans "Preceptly is under active development" %}</h2>
-        <p class="pwa-modal-subtitle" style="margin-bottom: 12px;">
+        <button class="pwa-modal-close" id="betaNoticeClose" aria-label="{% trans 'Close' %}">{% icon "x" %}</button>
+        <h2 id="betaNoticeTitle">{% trans "Preceptly is under active development" %}</h2>
+        <p class="pwa-modal-subtitle">
           {% blocktrans %}You might run into the occasional bug — they get fixed as fast as possible. Thanks for your understanding, and please let me know if something doesn't work!{% endblocktrans %}
         </p>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;">
-          <a href="mailto:andreas@preceptly.de?subject=Preceptly%20Feedback" class="btn btn-secondary" style="width: auto;">✉️ {% trans "Report a bug / send feedback" %}</a>
-          <button type="button" class="btn btn-success" id="betaNoticeDismiss" style="width: auto;">{% trans "Got it" %}</button>
+        <div class="modal-actions">
+          <a href="mailto:andreas@preceptly.de?subject=Preceptly%20Feedback" class="btn btn-secondary">{% icon "mail" %} {% trans "Report a bug / send feedback" %}</a>
+          <button type="button" class="btn" id="betaNoticeDismiss">{% trans "Got it" %}</button>
         </div>
-        <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 0.85em; color: var(--text-secondary); cursor: pointer;">
+        <label class="modal-check">
           <input type="checkbox" id="betaNoticeDontShow">
           {% trans "Don't show this again" %}
         </label>
@@ -774,8 +299,8 @@
         function setTheme(theme) {
             html.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            if (themeIcon) {
-                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            if (themeToggle) {
+                themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
             }
         }
         
@@ -1212,7 +737,7 @@
 <!-- PWA Install Modal -->
 <div id="pwaOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwaModalTitle">
   <div class="pwa-modal">
-    <button class="pwa-modal-close" id="pwaModalClose" aria-label="{% trans 'Close' %}">&#215;</button>
+    <button class="pwa-modal-close" id="pwaModalClose" aria-label="{% trans 'Close' %}">{% icon "x" %}</button>
     <h2 id="pwaModalTitle">{% trans "Add to home screen" %}</h2>
     <p class="pwa-modal-subtitle">{% trans "Add Preceptly to your home screen for quick, app-like access." %}</p>
     <div class="pwa-tabs" role="tablist">
@@ -1278,7 +803,7 @@
 </div>
 <!-- PWA Install Banner -->
 <div id="pwaBanner" class="pwa-banner" role="complementary" aria-label="{% trans 'App installation hint' %}">
-  <p>📲 {% trans "Preceptly can be used as an app on your home screen." %}</p>
+  <p>{% trans "Preceptly can be used as an app on your home screen." %}</p>
   <div class="pwa-banner-btns">
     <button type="button" class="btn btn-success" id="pwaBannerOpen">{% trans "Show me how" %}</button>
     <button type="button" class="btn btn-secondary" id="pwaBannerDismiss">{% trans "Not now" %}</button>

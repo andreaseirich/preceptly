@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}Nachrichten – Preceptly{% endblock %}
 
@@ -128,7 +129,7 @@
 
 <div class="chat-wrap">
     <div class="chat-header">
-        💬 Chat mit {{ student.full_name }}
+        {% icon "message-circle" %} Chat mit {{ student.full_name }}
         {% if chat_messages %}&nbsp;· {{ chat_messages|length }} Nachricht{% if chat_messages|length != 1 %}en{% endif %}{% endif %}
     </div>
     <ul role="list" aria-label="Nachrichtenverlauf" class="chat-scroll" id="chat-scroll" style="list-style: none; margin: 0; padding: 20px 16px;">
@@ -147,7 +148,7 @@
         {% endfor %}
     {% else %}
         <li class="chat-empty">
-            <p style="font-size:1.8em; margin-bottom:8px;">💬</p>
+            <p style="font-size:1.8em; margin-bottom:8px;">{% icon "message-circle" %}</p>
             <p>Noch keine Nachrichten.<br>Schreibe die erste!</p>
         </li>
     {% endif %}

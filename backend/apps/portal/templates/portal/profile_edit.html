@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load icons %}
 
 {% block title %}Mein Profil – Preceptly{% endblock %}
 
@@ -21,7 +22,7 @@
 {% if success_msgs %}
 <div role="status" aria-live="polite"
      style="background:#eafaf1; border:1px solid #27ae60; border-radius:6px; padding:12px 16px; margin-bottom:16px; color:#1e8449;">
-    {% for m in success_msgs %}<div>✓ {{ m }}</div>{% endfor %}
+    {% for m in success_msgs %}<div>{% icon "check" %} {{ m }}</div>{% endfor %}
 </div>
 {% endif %}
 
@@ -83,8 +84,8 @@
     </form>
 
     <div style="margin-top:16px;">
-        <span id="pushEnabledText" style="display:none; color:var(--text-secondary); font-size:0.9em;">✓ Push-Benachrichtigungen sind auf diesem Gerät aktiviert.</span>
-        <button type="button" class="btn btn-secondary" id="pushSubscribeBtn" style="display:none;">🔔 Push-Benachrichtigungen auf diesem Gerät aktivieren</button>
+        <span id="pushEnabledText" style="display:none; color:var(--text-secondary); font-size:0.9em;">{% icon "check" %} Push-Benachrichtigungen sind auf diesem Gerät aktiviert.</span>
+        <button type="button" class="btn btn-secondary" id="pushSubscribeBtn" style="display:none;">{% icon "bell" %} Push-Benachrichtigungen auf diesem Gerät aktivieren</button>
         <span id="pushUnsupportedText" style="display:none; color:var(--text-secondary); font-size:0.9em;">Push-Benachrichtigungen werden von diesem Browser nicht unterstützt.</span>
     </div>
 </div>
@@ -94,10 +95,10 @@
     <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">Kalender abonnieren</h2>
     <p style="color:var(--text-secondary); font-size:0.9em; margin-top:0;">Trage diesen Link einmalig als Kalender-Abo in Google Kalender, iCloud oder Outlook ein – neue Termine erscheinen dann automatisch (Aktualisierung alle paar Stunden). Nur lesend: Änderungen im externen Kalender wirken sich nicht auf Preceptly aus.</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <input type="text" readonly value="{{ ical_feed_url }}" id="icalFeedUrl" style="flex:1; min-width:220px;" data-select-on-click>
+        <input type="text" readonly value="{{ ical_feed_url }}" id="icalFeedUrl" aria-label="Adresse des Kalender-Abos" style="flex:1; min-width:220px;" data-select-on-click>
         <button type="button" class="btn btn-secondary" id="icalFeedCopyBtn">Kopieren</button>
     </div>
-    <p style="color:var(--text-secondary); font-size:0.8em; margin-top:8px;">⚠️ Dieser Link ist persönlich – nicht weitergeben.</p>
+    <p style="color:var(--text-secondary); font-size:0.8em; margin-top:8px;">{% icon "triangle-alert" %} Dieser Link ist persönlich – nicht weitergeben.</p>
     <form method="post" action="{% url 'portal:ical_feed_renew' %}" style="margin-top:4px;"
           data-confirm="Neuen Link erstellen? Der bisherige Link funktioniert danach nicht mehr und muss in deinem Kalender ersetzt werden.">
         {% csrf_token %}
@@ -128,7 +129,7 @@
 <div class="card" style="margin-bottom:24px;">
     <h2 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:8px;">App auf dem Home-Bildschirm</h2>
     <p style="color:var(--text-secondary); font-size:0.9em; margin-top:0;">Nutze das Preceptly-Portal wie eine App direkt von deinem Home-Bildschirm aus.</p>
-    <button type="button" class="btn" id="pwaSettingsInstallBtn">📲 Zum Home-Bildschirm hinzufügen</button>
+    <button type="button" class="btn" id="pwaSettingsInstallBtn">Zum Home-Bildschirm hinzufügen</button>
 </div>
 
 <!-- Passwort ändern -->

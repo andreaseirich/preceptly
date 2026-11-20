@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load list_tools %}
 {% load currency %}
+{% load icons %}
 
 {% block title %}Rechnungen – Preceptly{% endblock %}
 
@@ -9,7 +10,7 @@
 <h1>{% trans "Invoices" %}</h1>
 
 <div class="btn-group" style="margin-bottom: 20px;">
-    <a href="{% url 'billing:invoice_create' %}" class="btn btn-success">➕ {% trans "Create New Invoice" %}</a>
+    <a href="{% url 'billing:invoice_create' %}" class="btn btn-success">{% icon "plus" %} {% trans "Create New Invoice" %}</a>
 </div>
 
 {% filter_bar %}

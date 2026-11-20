@@ -9,6 +9,7 @@
     {% if erecht24_html %}
         {{ erecht24_html|safe }}
     {% else %}
+        <h1>{% trans "Privacy Policy" %}</h1>
         <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
         <div class="legal-placeholder-box">
             <strong>{% trans "Controller" %}:</strong>

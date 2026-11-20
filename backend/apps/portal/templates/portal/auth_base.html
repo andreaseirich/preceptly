@@ -1,0 +1,59 @@
+{% load static i18n icons %}<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#fffdf8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#162326" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
+    <link rel="preload" href="{% static 'fonts/source-sans-3-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/portal-shell.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
+    <title>{% block title %}Preceptly Portal{% endblock %}</title>
+    <script nonce="{{ csp_nonce }}">
+    (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('portal-theme'); } catch (e) {}
+        var dark = saved ? saved === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+    </script>
+</head>
+<body class="portal auth-page">
+{% icon_sprite %}
+<a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+<header class="auth-page-head">
+    <a class="nav-brand" href="{% url 'portal:login' %}" aria-label="Preceptly Portal">
+        <img class="logo logo--on-light" src="{% static 'brand/preceptly-logo.svg' %}" alt="Preceptly" width="116" height="30">
+        <img class="logo logo--on-dark" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="" width="116" height="30">
+    </a>
+    <button type="button" class="theme-toggle" id="themeToggle" title="Design wechseln" aria-label="Design wechseln" aria-pressed="false">
+        <span id="themeIcon">{% icon "moon" "icon-moon" %}{% icon "sun" "icon-sun" %}</span>
+    </button>
+</header>
+<main id="main-content">
+{% block content %}{% endblock %}
+</main>
+{% include "portal/_legal_footer.html" %}
+<script nonce="{{ csp_nonce }}">
+(function () {
+    var toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+    function reflect() { toggle.setAttribute('aria-pressed', document.documentElement.getAttribute('data-theme') === 'dark' ? 'true' : 'false'); }
+    reflect();
+    toggle.addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('portal-theme', next); } catch (e) {}
+        reflect();
+    });
+})();
+</script>
+</body>
+</html>

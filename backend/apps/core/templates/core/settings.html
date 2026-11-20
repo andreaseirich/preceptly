@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}{% trans "Settings" %} – Preceptly{% endblock %}
 
@@ -55,10 +56,10 @@
 <div class="settings-layout" id="settings-layout" data-initial-section="{{ settings_initial_section|default:'' }}">
     <div class="settings-nav">
         <div class="settings-tabs" aria-label="{% trans 'Settings sections' %}">
-            <a class="settings-tab" href="#settings-account"><span class="settings-tab-icon" aria-hidden="true">👤</span><span>{% trans "Account & subscription" %}</span></a>
-            <a class="settings-tab" href="#settings-scheduling"><span class="settings-tab-icon" aria-hidden="true">📅</span><span>{% trans "Scheduling & booking" %}</span></a>
-            <a class="settings-tab" href="#settings-billing"><span class="settings-tab-icon" aria-hidden="true">🧾</span><span>{% trans "Invoices" %}</span></a>
-            <a class="settings-tab" href="#settings-notifications"><span class="settings-tab-icon" aria-hidden="true">🔔</span><span>{% trans "Notifications & app" %}</span></a>
+            <a class="settings-tab" href="#settings-account"><span class="settings-tab-icon" aria-hidden="true">{% icon "user" %}</span><span>{% trans "Account & subscription" %}</span></a>
+            <a class="settings-tab" href="#settings-scheduling"><span class="settings-tab-icon" aria-hidden="true">{% icon "calendar-days" %}</span><span>{% trans "Scheduling & booking" %}</span></a>
+            <a class="settings-tab" href="#settings-billing"><span class="settings-tab-icon" aria-hidden="true">{% icon "receipt" %}</span><span>{% trans "Invoices" %}</span></a>
+            <a class="settings-tab" href="#settings-notifications"><span class="settings-tab-icon" aria-hidden="true">{% icon "bell" %}</span><span>{% trans "Notifications & app" %}</span></a>
         </div>
     </div>
 
@@ -342,9 +343,9 @@
             {% if calendar_connection %}
                 <p><strong>{% trans "Status" %}:</strong>
                     {% if calendar_connection.last_sync_error %}
-                        ⚠️ {{ calendar_connection.last_sync_error }}
+                        {% icon "triangle-alert" %} {{ calendar_connection.last_sync_error }}
                     {% elif calendar_connection.last_synced_at %}
-                        ✓ {% blocktrans with when=calendar_connection.last_synced_at %}Last synced {{ when }}{% endblocktrans %}
+                        {% icon "check" %} {% blocktrans with when=calendar_connection.last_synced_at %}Last synced {{ when }}{% endblocktrans %}
                     {% else %}
                         {% trans "Waiting for first sync…" %}
                     {% endif %}
@@ -359,7 +360,7 @@
                 {% endwith %}
                 {% if calendar_sync_conflict_count %}
                     <p style="color: var(--accent-warning, #c0392b);">
-                        ⚠️ <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
+                        {% icon "triangle-alert" %} <a href="{% url 'calendar_sync:conflicts' %}">{% blocktrans count count=calendar_sync_conflict_count %}{{ count }} conflict needs your attention{% plural %}{{ count }} conflicts need your attention{% endblocktrans %}</a>
                     </p>
                 {% endif %}
                 <p style="font-size: 0.9em; margin-top: 10px;">
@@ -513,8 +514,8 @@
                 </div>
             </form>
             <div style="margin-top: 15px;">
-                <span id="pushEnabledText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">✓ {% trans "Push notifications are enabled on this device." %}</span>
-                <button type="button" class="btn" id="pushSubscribeBtn" style="display: none;">🔔 {% trans "Enable push notifications on this device" %}</button>
+                <span id="pushEnabledText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">{% icon "check" %} {% trans "Push notifications are enabled on this device." %}</span>
+                <button type="button" class="btn" id="pushSubscribeBtn" style="display: none;">{% icon "bell" %} {% trans "Enable push notifications on this device" %}</button>
                 <span id="pushUnsupportedText" style="display: none; color: var(--text-secondary); font-size: 0.9em;">{% trans "Push notifications are not supported in this browser." %}</span>
             </div>
         </section>
@@ -523,7 +524,7 @@
             <h3 id="pwa-install-title">{% trans "App on home screen" %}</h3>
             <p class="settings-desc">{% trans "Use Preceptly as an app directly from your home screen – fast and convenient, without a browser." %}</p>
             <button type="button" class="btn" id="pwaSettingsInstallBtn">
-                📲 {% trans "Add to home screen" %}
+                {% trans "Add to home screen" %}
             </button>
         </section>
     </section>

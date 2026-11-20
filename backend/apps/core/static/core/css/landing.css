@@ -1,0 +1,155 @@
+/* Preceptly – Designsystem „Kladde“: Startseite
+ * Setzt tokens.css, base.css und components.css voraus. Die Inhaltsfläche der Tutor-App verschwindet hier, damit die Abschnitte über die
+ * volle Breite laufen können (Papierband, abgesetzte Fläche, wieder Papier).
+ */
+
+.container:has(> .lp) { max-width: none; padding: 0; background: transparent; border: 0; box-shadow: none; border-radius: 0; margin: calc(-1 * var(--space-5)) 0 0; min-height: 0; }
+
+.lp-wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--space-5); }
+.lp-section { padding: var(--space-8) 0; }
+.lp-section--sunk { background: var(--paper-sunk); border-block: 1px solid var(--line); }
+.lp-section h2 {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+  font-size: clamp(1.7rem, 1.25rem + 1.7vw, 2.5rem);
+  text-align: center;
+}
+.lp-sub { text-align: center; color: var(--ink-soft); max-width: 62ch; margin: 0 auto var(--space-6); font-size: 1.1rem; }
+
+/* Kopfbereich: liniertes Papier mit Randlinie */
+.lp-hero {
+  position: relative;
+  padding: var(--space-8) 0 var(--space-7);
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 35px, var(--rule) 35px, var(--rule) 36px);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+.lp-hero::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: max(20px, calc(50% - 560px - 20px));
+  width: 2px;
+  background: var(--accent);
+  opacity: 0.2;
+}
+.lp-hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: var(--space-7); align-items: center; }
+.lp-eyebrow { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); margin: 0 0 var(--space-3); }
+.lp-hero h1 { font-size: clamp(2.3rem, 1.4rem + 3.4vw, 3.7rem); line-height: 1.07; margin: 0 0 var(--space-4); letter-spacing: -0.02em; }
+.lp-lead { font-size: 1.28rem; line-height: 1.5; color: var(--ink-soft); max-width: 34em; margin: 0; }
+.lp-cta { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: var(--space-5) 0 var(--space-3); }
+.lp-cta .btn { padding: 14px 28px; font-size: 1.05rem; }
+.lp-fine { color: var(--ink-soft); font-size: 0.95rem; margin: 0; }
+
+/* Tagesplan-Zeichnung */
+.lp-day {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-4);
+  transform: rotate(1.2deg);
+}
+.lp-day-head { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--line); }
+.lp-day-head strong { font-family: var(--font-display); font-size: 1.2rem; }
+.lp-day-head span { color: var(--ink-soft); font-size: 0.9rem; }
+.lp-slot { display: grid; grid-template-columns: 4.6em 1fr auto; gap: var(--space-3); align-items: center; padding: 10px 12px; margin-bottom: var(--space-2); border-radius: var(--radius-md); background: var(--accent-tint); border-left: 4px solid var(--accent); font-size: 0.95rem; }
+.lp-slot:last-child { margin-bottom: 0; }
+.lp-slot time { font-variant-numeric: tabular-nums; font-weight: 650; }
+.lp-slot--conflict { background: var(--danger-tint); border-left-color: var(--danger); }
+.lp-slot-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 0.82rem; font-weight: 650; color: var(--ink-soft); white-space: nowrap; }
+.lp-slot--conflict .lp-slot-tag { color: var(--danger); }
+
+/* Portal-Hinweis */
+.lp-portal { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-6); padding: var(--space-4) var(--space-5); background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.lp-portal h2 { all: unset; font-family: var(--font-display); font-weight: 650; font-size: 1.2rem; display: block; margin-bottom: 2px; }
+.lp-portal p { margin: 0; color: var(--ink-soft); }
+
+/* Karten und Raster */
+.lp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
+.lp-grid--5 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } /* fünf Karten: eine Reihe statt 4 + 1 */
+.lp-grid--left { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); } /* wenige Karten: nicht auf volle Breite strecken */
+.lp-card { background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-5); box-shadow: var(--shadow-sm); position: relative; }
+.lp-card h3 { margin: var(--space-3) 0 var(--space-2); font-family: var(--font-display); font-size: 1.2rem; }
+.lp-card p { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+/* Lange deutsche Wörter („Dokumentenverwaltung“) dürfen getrennt werden, statt über den Kartenrand zu laufen */
+.lp-card h3, .lp-card p { hyphens: auto; hyphenate-limit-chars: 14 6 6; overflow-wrap: break-word; } /* nur sehr lange Wörter trennen */
+.lp-grid--5 .lp-card { padding: var(--space-4); }
+.lp-grid--5 .lp-card h3 { font-size: 1.08rem; }
+.lp-icon { width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--accent-tint); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; }
+.lp-icon svg { width: 24px; height: 24px; }
+.lp-badge { position: absolute; top: var(--space-4); right: var(--space-4); font-size: 0.78rem; font-weight: 700; padding: 2px 10px; border-radius: var(--radius-pill); background: var(--highlight); color: var(--on-highlight); }
+
+.lp-problem .lp-card { box-shadow: none; background: var(--paper-card); }
+.lp-problem .lp-card p { color: var(--ink); font-size: 1.05rem; }
+
+.lp-group { margin-bottom: var(--space-6); }
+.lp-group:last-child { margin-bottom: 0; }
+.lp-group-label { display: inline-block; margin: 0 0 var(--space-4); padding: 4px 14px; border-radius: var(--radius-pill); background: var(--ink); color: var(--paper-card); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; }
+.lp-more { color: var(--ink-soft); margin: var(--space-4) 0 0; }
+
+/* Ablauf */
+.lp-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5); counter-reset: step; }
+.lp-steps li { counter-increment: step; position: relative; padding-top: 4rem; }
+.lp-steps li::before { content: counter(step); position: absolute; top: 0; left: 0; font-family: var(--font-display); font-size: 3rem; font-weight: 650; line-height: 1; color: var(--accent); }
+.lp-steps li::after { content: ""; position: absolute; top: 1.75rem; left: 2.2rem; right: 0; border-top: 2px dashed var(--line-strong); opacity: 0.5; }
+.lp-steps li:last-child::after { display: none; }
+.lp-steps h3 { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: 1.25rem; }
+.lp-steps p { margin: 0; color: var(--ink-soft); }
+
+/* Datenschutz-Streifen */
+.lp-trust { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
+.lp-trust-item { display: flex; gap: var(--space-4); align-items: flex-start; }
+.lp-trust-item h3 { margin: 0 0 var(--space-1); font-size: 1.1rem; }
+.lp-trust-item p { margin: 0; color: var(--ink-soft); }
+
+/* Preise */
+.lp-pricing { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); align-items: stretch; }
+.lp-plan { position: relative; display: flex; flex-direction: column; background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); }
+.lp-plan h3 { margin: 0; font-family: var(--font-display); font-size: 1.35rem; }
+.lp-plan.featured { border: 2px solid var(--accent); box-shadow: var(--shadow-md); }
+.lp-recommended { position: absolute; top: -13px; left: var(--space-5); background: var(--highlight); color: var(--on-highlight); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 12px; border-radius: var(--radius-pill); }
+.lp-price { font-family: var(--font-display); font-size: 2.3rem; font-weight: 650; line-height: 1.1; margin: var(--space-3) 0 0; font-variant-numeric: tabular-nums; }
+.lp-period { color: var(--ink-soft); font-size: 0.95rem; margin-bottom: var(--space-4); }
+.lp-plan ul { list-style: none; margin: 0 0 var(--space-5); padding: 0; flex: 1; }
+.lp-plan li { position: relative; padding-left: 26px; margin-bottom: var(--space-2); font-size: 1rem; }
+.lp-plan li::before { content: ""; position: absolute; left: 0; top: 0.35em; width: 16px; height: 16px; background: var(--accent); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.lp-plan li.lp-limit::before { background: var(--ink-soft); }
+.lp-plan .btn { width: 100%; }
+.lp-legal { text-align: center; color: var(--ink-soft); font-size: 0.95rem; margin: var(--space-5) auto 0; max-width: 60ch; }
+
+/* Geschichte und Bewertungen */
+.lp-story { max-width: 720px; margin: 0 auto; text-align: center; }
+.lp-story .lp-sub { margin-bottom: var(--space-4); }
+.lp-rating { font-size: 1.1rem; margin: 0 0 var(--space-4); }
+.lp-rating strong { color: var(--marker); }
+.lp-quote { margin: var(--space-4) 0 0; text-align: left; }
+.lp-quote blockquote { margin: 0; }
+.lp-quote .lp-stars { color: var(--marker); letter-spacing: 2px; margin: 0 0 6px; }
+.lp-quote footer { font-size: 0.9rem; color: var(--ink-soft); margin-top: var(--space-2); }
+
+/* Demo */
+.lp-demo { max-width: 640px; margin: 0 auto; text-align: center; }
+.lp-demo-creds { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); margin: var(--space-5) 0; text-align: left; }
+.lp-demo-cred { background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); }
+.lp-demo-cred strong { display: block; margin-bottom: var(--space-2); }
+.lp-demo-cred code { background: var(--paper-sunk); border: 1px solid var(--line); padding: 1px 8px; border-radius: var(--radius-sm); }
+
+@media (max-width: 1000px) {
+  .lp-pricing { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lp-hero-grid { grid-template-columns: 1fr; gap: var(--space-6); }
+  .lp-day { transform: none; max-width: 460px; }
+}
+@media (max-width: 640px) {
+  .lp-hero::before { left: 8px; }
+  .lp-section { padding: var(--space-7) 0; }
+  .lp-hero { padding: var(--space-7) 0 var(--space-6); }
+  .lp-wrap { padding: 0 var(--space-4); }
+  .lp-pricing { grid-template-columns: 1fr; }
+  .lp-cta .btn { width: 100%; }
+  .lp-portal { padding: var(--space-4); }
+  .lp-steps li::after { display: none; }
+  .lp-slot { grid-template-columns: 4.2em 1fr; }
+  .lp-slot-tag { grid-column: 2; }
+}

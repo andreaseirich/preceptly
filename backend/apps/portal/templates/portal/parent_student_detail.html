@@ -1,5 +1,6 @@
 {% extends "portal/base.html" %}
 {% load list_tools %}
+{% load icons %}
 
 {% block title %}{{ student.full_name }} – Preceptly Portal{% endblock %}
 
@@ -86,7 +87,7 @@
 {% endif %}
 
 <div style="margin-top:30px;">
-    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_calendar_week' student.pk %}" style="margin-right:8px;">📅 Kalender</a>
+    <a class="btn-sm btn-sm-secondary" href="{% url 'portal:parent_calendar_week' student.pk %}" style="margin-right:8px;">{% icon "calendar-days" %} Kalender</a>
     <a class="btn-sm btn-sm-primary" href="{% url 'portal:messages' student.pk %}">
         Nachrichten öffnen
     </a>

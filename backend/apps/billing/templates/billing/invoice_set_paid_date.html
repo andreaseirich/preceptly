@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}{% trans "Change payment date" %} – {% blocktrans with id=invoice.id %}Invoice {{ id }}{% endblocktrans %} - Preceptly{% endblock %}
 
@@ -14,7 +15,7 @@
         <input type="date" id="paid_date" name="paid_date" value="{{ current_date }}" required style="margin-top: 6px;">
     </div>
     <div class="btn-group">
-        <button type="submit" class="btn">✓ {% trans "Save" %}</button>
+        <button type="submit" class="btn">{% icon "check" %} {% trans "Save" %}</button>
         <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>

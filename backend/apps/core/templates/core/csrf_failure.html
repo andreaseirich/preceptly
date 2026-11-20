@@ -3,49 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitzung abgelaufen - Preceptly</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #2c3e50;
-            color: #f0f0f0;
-            margin: 0;
-            padding: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .box {
-            background: #34495e;
-            border-radius: 10px;
-            padding: 28px 24px;
-            max-width: 460px;
-            width: 100%;
-        }
-        h1 {
-            font-size: 1.3em;
-            margin-top: 0;
-        }
-        ol {
-            padding-left: 20px;
-            line-height: 1.6;
-        }
-        a.btn {
-            display: inline-block;
-            margin-top: 16px;
-            background: #2ecc71;
-            color: #16211f;
-            text-decoration: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-    </style>
+    <meta name="color-scheme" content="light dark">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="{% static 'icons/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{% static 'brand/preceptly-icon.svg' %}">
+    <link rel="preload" href="{% static 'fonts/source-sans-3-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
+    <title>Sitzung abgelaufen – Preceptly</title>
 </head>
-<body>
-    <div class="box">
-        <h1>⚠️ Sitzung abgelaufen oder Cookies blockiert</h1>
+<body class="auth-page">
+<main id="main-content">
+    <div class="auth-card auth-card--wide">
+        <p class="auth-brand">
+            <img class="logo logo--on-light" src="{% static 'brand/preceptly-logo.svg' %}" alt="Preceptly" width="116" height="30">
+            <img class="logo logo--on-dark" src="{% static 'brand/preceptly-logo-dark.svg' %}" alt="" width="116" height="30">
+        </p>
+        <h1 class="auth-title">Sitzung abgelaufen oder Cookies blockiert</h1>
         <p>Deine Anfrage konnte nicht sicher verarbeitet werden. Das passiert meistens, wenn dein Browser Cookies für diese Seite blockiert oder die Seite über einen alten Link/Lesezeichen geöffnet wurde.</p>
         <p>So behebst du es:</p>
         <ol>
@@ -54,7 +30,8 @@
             <li>Falls auf dem iPhone eine Bildschirmzeit-Einschränkung aktiv ist ("Sperre für sensible Websites"/"Sperre für sensible Daten"), muss preceptly.de dort erlaubt sein</li>
             <li>Lade die Seite neu und versuche es erneut</li>
         </ol>
-        <a class="btn" href="/">Zur Startseite</a>
+        <a class="btn btn-block auth-mt" href="/">Zur Startseite</a>
     </div>
+</main>
 </body>
 </html>

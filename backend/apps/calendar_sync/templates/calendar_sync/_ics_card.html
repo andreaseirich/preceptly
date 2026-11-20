@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load icons %}
 <section class="settings-card" id="calendar-import" aria-labelledby="calendar-import-title">
     <h3 id="calendar-import-title">{% trans "Calendar by address (Google)" %}</h3>
     <p class="settings-desc">{% blocktrans %}Block the times of a Google Calendar in Preceptly. You paste the secret iCal address of the calendar; Preceptly reads its appointments (title and time only) and turns them into blocked times. This only reads: nothing is ever written to your calendar. Runs automatically every few minutes.{% endblocktrans %}</p>
@@ -13,9 +14,9 @@
                 {% if not source.sync_enabled %}
                     {% trans "Paused" %}
                 {% elif source.error_text %}
-                    ⚠️ {{ source.error_text }}
+                    {% icon "triangle-alert" %} {{ source.error_text }}
                 {% elif source.last_synced_at %}
-                    ✓ {% blocktrans with when=source.last_synced_at|date:"d.m.Y H:i" %}Last synced {{ when }}{% endblocktrans %}
+                    {% icon "check" %} {% blocktrans with when=source.last_synced_at|date:"d.m.Y H:i" %}Last synced {{ when }}{% endblocktrans %}
                 {% else %}
                     {% trans "Waiting for first sync…" %}
                 {% endif %}
@@ -33,9 +34,9 @@
                 <p style="margin: 0; color: var(--text-secondary);">{% blocktrans with found=s.own.found ok=s.own.ok %}Own Preceptly lessons in this calendar: {{ found }} (not imported as blocked times), {{ ok }} match.{% endblocktrans %}</p>
                 {% if s.own.changed or s.own.gone or s.own.missing %}
                 <ul style="margin: 4px 0 0 18px; padding: 0;">
-                    {% if s.own.changed %}<li>⚠️ {% blocktrans with count=s.own.changed %}Different time than in Preceptly: {{ count }}{% endblocktrans %} ({% for d in s.own.details.changed %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.changed > s.own.details.changed|length %}, …{% endif %})</li>{% endif %}
-                    {% if s.own.gone %}<li>⚠️ {% blocktrans with count=s.own.gone %}No longer in Preceptly (deleted or cancelled): {{ count }}{% endblocktrans %} ({% for d in s.own.details.gone %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.gone > s.own.details.gone|length %}, …{% endif %})</li>{% endif %}
-                    {% if s.own.missing %}<li>⚠️ {% blocktrans with count=s.own.missing %}Missing in this calendar: {{ count }}{% endblocktrans %} ({% for d in s.own.details.missing %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.missing > s.own.details.missing|length %}, …{% endif %})</li>{% endif %}
+                    {% if s.own.changed %}<li>{% icon "triangle-alert" %} {% blocktrans with count=s.own.changed %}Different time than in Preceptly: {{ count }}{% endblocktrans %} ({% for d in s.own.details.changed %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.changed > s.own.details.changed|length %}, …{% endif %})</li>{% endif %}
+                    {% if s.own.gone %}<li>{% icon "triangle-alert" %} {% blocktrans with count=s.own.gone %}No longer in Preceptly (deleted or cancelled): {{ count }}{% endblocktrans %} ({% for d in s.own.details.gone %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.gone > s.own.details.gone|length %}, …{% endif %})</li>{% endif %}
+                    {% if s.own.missing %}<li>{% icon "triangle-alert" %} {% blocktrans with count=s.own.missing %}Missing in this calendar: {{ count }}{% endblocktrans %} ({% for d in s.own.details.missing %}{{ d.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.own.missing > s.own.details.missing|length %}, …{% endif %})</li>{% endif %}
                 </ul>
                 <p style="margin: 4px 0 0 0; color: var(--text-secondary);">{% trans "Calendar apps update copies on their own schedule, so short differences are normal." %}</p>
                 {% endif %}

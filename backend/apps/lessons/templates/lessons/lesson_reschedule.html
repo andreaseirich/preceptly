@@ -29,7 +29,7 @@
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button type="submit" class="btn btn-primary">Verschieben</button>
-            <a href="{{ request.GET.next|default:'javascript:history.back()' }}" class="btn">Abbrechen</a>
+            <a href="{% url 'lessons:detail' lesson.pk %}" class="btn btn-secondary" data-history-back>Abbrechen</a>
         </div>
     </div>
 </form>

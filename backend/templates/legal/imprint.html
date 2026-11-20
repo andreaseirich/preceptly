@@ -9,6 +9,7 @@
     {% if erecht24_html %}
         {{ erecht24_html|safe }}
     {% else %}
+        <h1>{% trans "Imprint" %}</h1>
         <p class="legal-meta">{% blocktrans with date=last_updated %}Last updated: {{ date }}{% endblocktrans %}</p>
         <div class="legal-section">
             <h2>{% trans "Responsible according to §5 TMG" %}</h2>

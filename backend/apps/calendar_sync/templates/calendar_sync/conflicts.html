@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
+{% load icons %}
 
 {% block title %}{% trans "Calendar Sync Conflicts" %} – Preceptly{% endblock %}
 
@@ -12,7 +13,7 @@
 </div>
 
 {% if not conflicts %}
-    <p>{% trans "No open conflicts." %} 🎉</p>
+    <p>{% trans "No open conflicts." %} {% icon "sparkles" %}</p>
 {% else %}
     {% for conflict in conflicts %}
     <div class="box-section" style="margin-bottom: 16px; max-width: 640px;">

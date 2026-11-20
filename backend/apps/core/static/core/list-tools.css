@@ -9,7 +9,7 @@
 .list-filter label { font-size: 0.85em; color: var(--text-secondary); }
 .list-filter input, .list-filter select {
     min-height: 40px; padding: 6px 10px; font: inherit;
-    background: var(--bg-primary); color: var(--text-primary);
+    background: var(--bg-secondary); color: var(--text-primary);
     border: 1px solid var(--border-color); border-radius: 4px;
 }
 .list-filter input[type="search"] { min-width: 220px; }

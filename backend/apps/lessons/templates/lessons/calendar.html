@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load i18n %}
 {% load lesson_filters %}
+{% load icons %}
 
 {% block title %}{% blocktrans with month=month_label year=year %}Calendar {{ month }} {{ year }}{% endblocktrans %} - Preceptly{% endblock %}
 
@@ -41,7 +42,7 @@
                     {% if plan.blocked_times %}<a href="{% url 'blocked_times:create' %}?date={{ day.date|date:'Y-m-d' }}&year={{ year }}&month={{ month }}" 
                        style="color: var(--text-secondary); text-decoration: none; margin-left: 5px; font-size: 0.8em;"
                        title="{% trans 'Add blocked time' %}">
-                        🚫
+                        {% icon "ban" %}
                     </a>{% endif %}
                     {% else %}
                     {{ day.date.day }}
@@ -55,8 +56,8 @@
                         <a href="{% url 'lessons:detail' lesson.pk %}" 
                            class="lesson-link"
                            style="text-decoration: none; color: var(--text-primary); display: block;"
-                           title="{% if lesson.travel_time_before_minutes > 0 %}🚗 {{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → 🚗 {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %}">
-                            {% if lesson.travel_time_before_minutes > 0 %}<span style="font-size: 0.8em;">🚗</span>{% endif %}
+                           title="{% if lesson.travel_time_before_minutes > 0 %}{{ lesson.travel_time_before_minutes }} {% trans 'Min.' %} → {% endif %}{{ lesson.contract.student.full_name }} - {{ lesson.start_time|time:'H:i' }} ({{ lesson.duration_minutes }} {% trans 'Min.' %}){% if lesson.travel_time_after_minutes > 0 %} → {{ lesson.travel_time_after_minutes }} {% trans 'Min.' %}{% endif %}">
+                            {% if lesson.travel_time_before_minutes > 0 %}<span style="font-size: 0.8em;">{% icon "car" %}</span>{% endif %}
                             <strong>{{ lesson.start_time|time:"H:i" }}</strong> 
                             {{ lesson.contract.student.first_name }}
                             <small style="opacity: 0.8;">({{ lesson.duration_minutes }}{% if lesson.travel_time_before_minutes > 0 or lesson.travel_time_after_minutes > 0 %}+{{ lesson.travel_time_before_minutes|add:lesson.travel_time_after_minutes }}{% endif %} {% trans "Min." %})</small>
@@ -64,7 +65,7 @@
                             {% with conflict_reasons_text=conflicts_by_lesson|dict_get:lesson.id|conflict_reasons %}
                             <a href="{% url 'lessons:conflicts' lesson.pk %}" 
                                style="color: #dc3545; text-decoration: none; margin-left: 5px;"
-                               title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Show conflict details' %}{% endif %}">⚠ {% trans "Details" %}</a>
+                               title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Show conflict details' %}{% endif %}">{% icon "triangle-alert" %} {% trans "Details" %}</a>
                             {% endwith %}
                             {% endif %}
                         </a>
@@ -80,7 +81,7 @@
                         <a href="{% url 'blocked_times:detail' blocked_time.pk %}?year={{ year }}&month={{ month }}" 
                            style="text-decoration: none; color: var(--text-secondary); display: block;"
                            title="{% trans 'View/edit blocked time' %}">
-                            🚫 <strong>{{ blocked_time.start_datetime|time:"H:i" }}</strong> {{ blocked_time.title }}
+                            {% icon "ban" %} <strong>{{ blocked_time.start_datetime|time:"H:i" }}</strong> {{ blocked_time.title }}
                         </a>
                     </div>
                     {% endfor %}
@@ -96,8 +97,8 @@
 <div class="calendar-legend" style="margin-top: 20px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
     <strong>{% trans "Legend:" %}</strong>
     <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: var(--accent-tint); border-left: 3px solid var(--accent); color: var(--text-primary);">{% trans "Lesson (clickable to edit)" %}</span>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: var(--accent-tint); border-left: 3px solid #dc3545; color: var(--text-primary);">⚠ {% trans "Conflict" %}</span>
-    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(255, 193, 7, 0.2); border-left: 3px solid #ffc107; color: var(--text-primary);">🚫 {% trans "Blocked Time (clickable to edit)" %}</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: var(--accent-tint); border-left: 3px solid #dc3545; color: var(--text-primary);">{% icon "triangle-alert" %} {% trans "Conflict" %}</span>
+    <span style="display: inline-block; margin-left: 10px; padding: 3px 8px; background: rgba(255, 193, 7, 0.2); border-left: 3px solid #ffc107; color: var(--text-primary);">{% icon "ban" %} {% trans "Blocked Time (clickable to edit)" %}</span>
     <span style="display: inline-block; margin-left: 10px; color: var(--accent); border-bottom: 1px dashed var(--accent);">{% trans "Days (clickable to create)" %}</span>
 </div>
 {% endblock %}

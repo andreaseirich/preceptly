@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load icons %}
 
 {% block title %}Wochenansicht {% if portal_user.role == "parent" %}{{ student.first_name }} {% endif %}– {{ week_start|date:"d.m." }}–{{ week_end|date:"d.m.Y" }} – Preceptly Portal{% endblock %}
 
@@ -14,11 +15,11 @@
 <div class="btn-group">
     {% if portal_user.role == "parent" %}
     <a href="{% url 'portal:parent_calendar_week' student_pk %}?year={{ prev_week.year }}&month={{ prev_week.month }}&day={{ prev_week.day }}" class="btn">← Vorige Woche</a>
-    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">📅 Monatsansicht</a>
+    <a href="{% url 'portal:parent_calendar' student_pk %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">{% icon "calendar-days" %} Monatsansicht</a>
     <a href="{% url 'portal:parent_calendar_week' student_pk %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn">Nächste Woche →</a>
     {% else %}
     <a href="{% url 'portal:calendar_week' %}?year={{ prev_week.year }}&month={{ prev_week.month }}&day={{ prev_week.day }}" class="btn">← Vorige Woche</a>
-    <a href="{% url 'portal:calendar' %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">📅 Monatsansicht</a>
+    <a href="{% url 'portal:calendar' %}?year={{ week_start.year }}&month={{ week_start.month }}" class="btn">{% icon "calendar-days" %} Monatsansicht</a>
     <a href="{% url 'portal:calendar_week' %}?year={{ next_week.year }}&month={{ next_week.month }}&day={{ next_week.day }}" class="btn">Nächste Woche →</a>
     {% endif %}
 </div>
