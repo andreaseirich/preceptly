@@ -2,8 +2,9 @@
 
 **Stand:** 21.11.2026 · Auftrag von Andreas: Preceptly „gestalterisch, inhaltlich und technisch“ vollständig überarbeiten.
 **Nicht veröffentlicht, nicht gemergt, nicht gepusht.** Der Stand liegt auf dem Zweig `redesign/preview` in der Arbeitskopie `/root/agents/tutorflow-redesign`.
-**Abschließender Stand:** Der oberste Commit des Zweigs (`git log -1 redesign/preview`) enthält dieses Dokument. Der Commit mit dem gesamten Code davor ist
-`6832107` (enthält Code, Übersetzungen und Tests). Test-Suite auf diesem Code: 1824 Tests, alle bestanden (5 übersprungen).
+**Abschließender Stand:** Der oberste Commit des Zweigs (`git log -1 redesign/preview`) enthält dieses Dokument und ist der zur Veröffentlichung vorgesehene Stand. Der Commit mit dem
+gesamten Code davor ist `a0356f9` (Code, Übersetzungen und Tests; darin die letzte Textkorrektur zur Tarifbeschreibung vom 21.11.2026). Test-Suite: vollständig 1824 Tests, alle bestanden
+(5 übersprungen), am Stand `6832107`; seitdem änderten sich nur Texte, Übersetzungen, PRD und Tests (`a0356f9`), die gezielt nachgeprüft wurden (Abschnitt „Tests“).
 
 ## Ausgangslage
 
@@ -51,7 +52,7 @@ mit `aria-label` am Knopf.
 
 | Entscheidung | Umsetzung |
 |---|---|
-| **Free-Tarif:** „Free“ und die Zahlen 5 Schüler / 8 Rechnungen passen, sofern sie dem tatsächlichen Verhalten entsprechen | Das tatsächliche Verhalten wurde im Code geprüft (nächster Abschnitt). Es ist ein **Hinweis, keine Sperre**; der Wortlaut sagt deshalb „Gedacht für bis zu 5 Schüler / 8 Rechnungen im Monat“ und nennt Auslöser und Zählregeln. „Free“ steht jetzt überall in der Oberfläche (Startseite, FAQ, Einstellungen, Meldungen, Demo-Zugang). Technische Tarifkennungen (`free`), Zahlungszuordnungen und Vertragsbedingungen sind unverändert |
+| **Free-Tarif:** „Free“ und die Zahlen 5 Schüler / 8 Rechnungen passen, sofern sie dem tatsächlichen Verhalten entsprechen | Das tatsächliche Verhalten wurde im Code geprüft (nächster Abschnitt). Es ist ein **Hinweis, keine Sperre**; der Wortlaut sagt deshalb „Gedacht für bis zu 5 Schülerverträge / 8 Rechnungen im Monat“ und nennt Auslöser und Zählregeln (gezählt werden Verträge, nicht verschiedene Personen; nächster Abschnitt). „Free“ steht jetzt überall in der Oberfläche (Startseite, FAQ, Einstellungen, Meldungen, Demo-Zugang). Technische Tarifkennungen (`free`), Zahlungszuordnungen und Vertragsbedingungen sind unverändert |
 | **Ansprache im Portal:** durchgehend „du“, auch gegenüber Eltern; Rechtstexte und verbindliche Dokumente unverändert | „Deine Kinder“, „mit deinem Konto“ im Elternportal; „Was möchtest du löschen?“; Meldung an Tutoren in `students/views.py`. **Unverändert** bleiben: Rechtstexte, Abo-Bestätigung und Widerruf (`core/email/subscription_confirmation.txt`, `revocation_confirm.html`, `views_erecht24_revocation.py`), die Zahlungsaufforderung im PDF (`pdf_service.py`), die Datenschutz-Overrides (`legal_overrides.py`) und Meldungen für Betreiber (`ai/client.py`, Verwaltungsbefehle). Die „Sie“ in der Portal-FAQ meinen „sie (Mehrzahl)“ |
 | **Mobile Tabellen:** seitlich scrollbar genügt; nur der Tabellenbereich scrollt, Aktionen bleiben erreichbar, weitere Spalten erkennbar | Bis 820 px wird die Tabelle selbst zum Scrollbereich (`overflow-x: auto`, `overscroll-behavior-x: contain`), die Seite scrollt nicht mit. Schatten an den Rändern zeigen verborgene Spalten. Bis 640 px bleibt die letzte Spalte mit den Aktionen (Details, Bearbeiten, Löschen) rechts stehen (`position: sticky`), die Knöpfe stehen untereinander und halten die Spalte schmal. Browserprüfung am 390-px-Viewport: siehe unten |
 | **Ausgenommene Bereiche:** Meetingraum, E-Mail-Vorlagen, PDF-Rechnung nicht neu gestalten; Regressionen durch gemeinsame Styles prüfen | Alle drei bringen ihr eigenes Gerüst mit und laden **keines** der neuen Stylesheets. Geprüft durch Dateivergleich (keine Änderung seit `ce2ea1f`) und durch einen Renderlauf im unveränderten und im neuen Stand (Abschnitt „Regressionsvergleich“): kein Unterschied außer Datenbank-Kennungen |
@@ -62,11 +63,16 @@ mit `aria-label` am Knopf.
 Geprüft in `apps/core/free_limits.py`, `apps/billing/views.py`, `apps/core/feature_flags.py`, PRD und den bestehenden Tests; abgesichert durch
 `apps/core/tests/test_free_tier_wording.py`.
 
-- **Es sind weiche Grenzen.** Beim 6. Schüler und bei der 9. Rechnung eines Kalendermonats erscheint ein Hinweis mit Link zu den Preisen. Gespeichert wird trotzdem, es wird
-  nichts gesperrt. (Meine Aussage vom 20.11., die Grenzen würden „durchgesetzt“, war ungenau.)
+- **Es sind weiche Grenzen.** Beim Anlegen des 6. Vertrags und der 9. Rechnung eines Kalendermonats erscheint ein Hinweis mit Link zu den bezahlten Tarifen, danach bei jedem
+  weiteren Anlegen. Gespeichert wird trotzdem, es wird nichts gesperrt, und die Nutzung geht normal weiter. (Meine Aussage vom 20.11., die Grenzen würden „durchgesetzt“, war ungenau.)
 - **Gilt nur für Free-Konten, die ab dem 02.07.2026 (12:00 UTC) angelegt wurden.** Ältere Free-Konten und alle bezahlten Tarife bekommen keinen Hinweis.
-- **Schüler:** Es zählt jeder Vertrag des Kontos, auch beendete oder inaktive. Die Meldung sagte früher „aktive Schüler“; das stimmte nicht und ist korrigiert.
-  Der Hinweis erscheint über „Schüler anlegen“ und über „Vertrag anlegen“.
+- **„Schüler“ sind Verträge, nicht Personen.** Es gibt keine eigene Schüler-Tabelle: Vor- und Nachname stehen am Vertrag (`Contract`) und sind nicht eindeutig. Gezählt wird `Contract` des Kontos:
+  - Dieselbe Person mit zwei Verträgen (zum Beispiel zwei Fächer oder ein neuer Vertrag nach einem beendeten) **zählt zweimal**.
+  - **Beendete** (`end_date` gesetzt) und **inaktive** (`is_active` aus) Verträge zählen mit, bis sie gelöscht werden; Löschen nimmt sie aus der Zählung. Früher stand in der Meldung „aktive Schüler“; das stimmte nicht.
+  - Der Hinweis erscheint über „Schüler anlegen“ und über „Vertrag anlegen“, wenn bereits 5 Verträge bestehen (der 6. und jeder weitere löst ihn aus).
+  - **Textkorrektur vom 21.11.2026 (`a0356f9`):** Startseite, FAQ, PRD und die Meldungen sagten „5 Schüler“, „Grenze erreicht“ und „für unbegrenzte Schüler/Rechnungen“. Das las sich wie eine Personenzahl und
+    wie eine harte Grenze, obwohl ein Free-Konto nie gesperrt wird und ein Upgrade nichts Neues verspricht. Jetzt: „bis zu 5 Schülerverträge“, „Gezählt werden Verträge, nicht verschiedene Personen“, der
+    Auslöser (6. Vertrag, 9. Rechnung) und „Gesperrt wird nichts“. **Die Zähllogik, Tarifkennungen, Zahlungszuordnungen und Vertragsbedingungen sind unverändert.**
 - **Rechnungen:** Es zählt jede Rechnung, die **im laufenden Kalendermonat angelegt** wurde, unabhängig vom Zeitraum der abgerechneten Stunden. Alle Status zählen
   (Entwurf, versendet, bezahlt, storniert). **Stornorechnungen sind eigene Rechnungen und zählen mit:** Wer eine Rechnung aus dem Vormonat storniert, belegt eine Rechnung
   im laufenden Monat. Der Hinweis erscheint beim Anlegen über „Rechnung erstellen“; das Anlegen einer Stornorechnung zeigt ihn nicht, zählt aber.
@@ -80,6 +86,7 @@ Geprüft in `apps/core/free_limits.py`, `apps/billing/views.py`, `apps/core/feat
 - **Entfernt:** „Private Tutoren verlieren 2–3 Stunden pro Woche …“ (ohne Beleg), „Kostet weniger als eine Stunde – spart dir Stunden Verwaltungsaufwand“
   und „der Wechsel rechnet sich schon bei der ersten Rechnung“ (nicht belegbar), das Etikett „Premium“ an Funktionen (es gibt Free, Starter, Pro, Business), der Tarifname „Basic“.
 - **Anrede:** In der Tutor-Oberfläche und im Portal steht überall „du“ (siehe Entscheidungen). 33 Texte waren förmlich und wurden in der `.po` umgestellt.
+- **Tarifbeschreibung (21.11.2026, zweite Korrektur):** Free-Grenzen heißen „Schülerverträge“, beschreiben die Zählung nach Verträgen und stellen klar, dass nur Hinweise erscheinen (siehe „Free-Tarif“).
 - **Demo-Hinweis:** „Daten werden stündlich zurückgesetzt“ stimmte nie; es ist täglich (seit Commit 2470578).
 - **Vertragsbezeichnung:** „28.00€/unit“ in der deutschen Oberfläche heißt jetzt „28,00 €/Einheit“ (Zahl lokalisiert, `unit` übersetzt).
 - Übersetzbare Titel und Beschriftungen, die fest auf Deutsch standen (Anmelden, Registrierung, Fußzeile, Löschseite), folgen jetzt der Sprache.
@@ -115,6 +122,13 @@ mitzählen) griff im ersten Lauf nicht, weil der Mustertext nicht traf; sie wurd
 Wochenblöcke, Icons, Theme-Knopf, Anmeldeseiten, `javascript:`-Link) stehen in `mutate.sh`, `mutate2.sh`, `mutate3.sh`; ein Fall in `mutate.sh` („Textmarker als Schriftfarbe“) war ein
 Leerlauf und wurde in `mutate2.sh` durch eine echte Mutation ersetzt. Eine Gesamtzahl über beide Wellen ist hier bewusst nicht angegeben.
 
+**Nach der Textkorrektur (`a0356f9`)**, gezielt statt einer neuen Gesamtserie: `test_free_tier_wording`, `test_page_structure`, `students.test_free_plan_limits`, `calendar_sync.test_calendar_site_texts`,
+`test_faq_pages`, `test_i18n`, `portal.test_portal_language`, `test_component_colours` und die App `billing` (193 Tests). Zwei neue Verhaltenstests schlugen zunächst fehl; Ursache war der Testaufbau (die
+Meldung der ersten Anlage wartete in der Sitzung und erschien beim zweiten Aufruf zusätzlich), nicht das Programm. Nach der Korrektur lief die Datei erneut (28 Tests mit `test_landing_ai_claim`), alle
+bestanden; die übrigen Dateien waren von der Korrektur nicht berührt. Mutationstest dazu (`py-patches/mutate6.py`): **10 eingebaute Fehler, alle gefangen** (verschiedene Personen statt Verträge gezählt, nur aktive
+oder nur Verträge ohne Enddatum gezählt, Hinweis schon beim 5. Vertrag, Meldung wieder als „Grenze erreicht“, FAQ und Startseite wieder mit „Schüler“, FAQ ohne Zählregel, Rechnungsmeldung ohne „nichts gesperrt“
+oder mit „unbegrenzt“). `ruff format --check` und `ruff check` über `backend/apps` und `backend/tutorflow` sind sauber.
+
 Neu:
 
 - `apps/core/tests/test_design_tokens.py` rechnet die Kontraste (WCAG 2.1 AA) **aus `tokens.css`** nach, in beiden Themen, und gleicht den Block „Gerät dunkel“ mit
@@ -123,8 +137,9 @@ Neu:
   ein Wächter gegen die bekannten zu schwachen festen Farbwerte in Seitenvorlagen.
 - `apps/core/tests/test_icons.py`: nur bekannte Icon-Namen, **kein `{% icon %}` in einem Attribut**, `{% load icons %}` vorhanden, keine Emojis als Icons in Seitenvorlagen.
 - `apps/core/tests/test_page_structure.py`: genau eine `<h1>` je öffentlicher Seite in DE und EN, Fakten der Startseite gegen den Code, Anrede, Anmeldeseiten.
-- `apps/core/tests/test_free_tier_wording.py`: Wortlaut von Startseite, FAQ und Meldungen gegen die Konstanten; Zählregeln der Rechnungen (Monat, Storno, Status, Monatsgrenze in
-  deutscher Zeit) und der Schüler (auch beendete).
+- `apps/core/tests/test_free_tier_wording.py`: Wortlaut von Startseite, FAQ und Meldungen gegen die Konstanten (die Zahl gilt „Schülerverträgen“, nie „Schülern“); Zählregeln der Rechnungen (Monat, Storno, Status,
+  Monatsgrenze in deutscher Zeit); Zählregeln der Verträge über den echten Anlegeweg: derselbe Mensch mit mehreren Verträgen zählt mehrfach, beendete (`end_date`) und inaktive Verträge zählen, Löschen senkt die Zahl,
+  der Hinweis kommt beim 6. und nicht beim 5. Vertrag und bei jedem weiteren, gespeichert wird immer, deutscher und englischer Text.
 - `apps/portal/test_portal_language.py`: Portal bleibt mit englischem Sprachcookie deutsch; die englische Start- und Anmeldeseite nennen es.
 - `apps/core/tests/test_next_redirects.py`: `?next=` intern befolgt, fünf externe Schreibweisen abgelehnt (Tutor-Anmeldung, Portal-Anmeldung, Sprachwahl).
 - `apps/core/tests/test_theme_shell.py`, `apps/students/test_delete_confirm.py`, `apps/lessons/tests/test_week_block_colours.py`, `apps/lessons/tests/test_reschedule_cancel_link.py`.
@@ -212,16 +227,89 @@ Die Vorschau bleibt nur so isoliert, wie sie unten beschrieben ist.
 
 ## Veröffentlichen und Zurücknehmen
 
-**Veröffentlichen** (erst nach ausdrücklicher Freigabe von Andreas):
+Geprüft am 21.11.2026 gegen den tatsächlichen Stand von Hauptklon, GitHub und Railway (nur lesend; der Hauptklon wurde nicht verändert). **Die Veröffentlichung braucht Andreas'
+ausdrückliche Freigabe.** Bis dahin ist nichts gemergt, gepusht oder deployt.
 
-1. Zweig prüfen: `git log main..redesign/preview`, volle Test-Suite, CI.
-2. Auf dem ai-server in `/root/agents/tutorflow`: `git fetch /root/agents/tutorflow-redesign redesign/preview && git merge --no-ff FETCH_HEAD` (oder als Pull Request).
-3. `bash /root/bin/preceptly-push.sh` (wartet auf CI und Railway). Railway deployt erst bei grünem CI.
-4. Danach live prüfen: Startseite, Anmeldung, Dashboard, Wochenansicht, Portal-Login (auch mit englischem Sprachcookie), 404, jeweils hell und dunkel, DE und EN.
+### Stand vor der Veröffentlichung
 
-**Zurücknehmen:** `git revert -m 1 <Merge-Commit>` und erneut pushen. Es gibt **keine Datenbankänderung** und keine Migration; die neuen Dateien (Stylesheets,
-Schriften, `apps/portal/language.py`) liegen nur im Code, die Middleware steht in `tutorflow/settings.py`. Der Service Worker (`sw.js`) legt `/static/` „cache first“ ab, aber die Dateinamen
-tragen einen Hash (Manifest-Speicher): Nach Deploy oder Zurücknehmen gibt es keine veralteten Stylesheets, HTML kommt immer zuerst aus dem Netz.
+- Hauptklon `/root/agents/tutorflow`: Zweig `main` auf `ce2ea1f`, Arbeitsbaum sauber (nur der nicht versionierte Ordner `.agent_knowledge/`). GitHub `origin/main`: ebenfalls `ce2ea1f`.
+- Seit der Abzweigung gibt es **keinen** Commit auf `main`. `redesign/preview` lässt sich deshalb vorspulen (**Fast-Forward**): kein Merge-Commit, keine Konflikte. `git merge-tree` liefert einen
+  sauberen Baum, der mit dem Baum der Zweigspitze identisch ist.
+- Der Zweig enthält keine Migration und ändert weder Abhängigkeiten noch `Dockerfile`, `railway.json`, `scripts/` oder die Workflows. Außerhalb von `backend/`, `docs/` und `PRD.md` ändert er nur
+  `CLAUDE.md` (Abschnitt „Gestaltung“ für Agenten).
+- Zur Veröffentlichung vorgesehen ist die **Spitze von `redesign/preview`** (`git rev-parse redesign/preview`). Der Code liegt in `a0356f9`; darüber liegt nur dieses Dokument.
+
+### Probelauf (getrennter Klon, `tools/publish_rehearsal.sh`)
+
+Der Klon `/root/agents/tutorflow-publish-check` entsteht aus dem Hauptklon (nur gelesen) und hat keinen Remote, ein Push von dort ist nicht möglich.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Zweig holen, Fast-Forward nach `main` | möglich; 0 Commits auf `main` seit der Abzweigung |
+| Konfliktprobe (`git merge-tree`) | sauber; Baum gleich dem Baum der Zweigspitze |
+| Rücknahme: ein Revert über den ganzen Bereich | gelingt ohne Konflikt; der Baum danach ist **Byte für Byte der von `ce2ea1f`** |
+| CI-Schritt „Repo hygiene“ (`scripts/repo_hygiene_check.sh`) | bestanden (Schriften `.woff2` sind versioniert, nicht von `.gitignore` erfasst) |
+| CI-Schritt „Django deploy check“ (`check --deploy --fail-level WARNING`) | bestanden |
+| `ruff format --check`, `ruff check`, `compileall` | bestanden |
+| `pip-audit -r requirements-dev.txt` (CI-Schritt „Dependency audit“) | keine bekannten Schwachstellen; die Abhängigkeiten sind unverändert |
+
+### Der Weg bis zur Produktion (aus Repository, Skript und GitHub gelesen)
+
+1. **Push aus dem Hauptklon** mit `/root/bin/preceptly-push.sh`. Der Pre-Push-Hook startet `ruff check`, `compileall` und die **vollständige Test-Suite**. Auf dem Zweig brauchte sie 848 s.
+2. **GitHub Actions** auf `main`: *CI* (Hygiene, `pip-audit`, `check --deploy`, `ruff format`/`ruff check`, `compileall`, alle Tests; zuletzt rund 14 bis 18 Minuten), *Hygiene*, *CodeQL*, *Dependency Submission*.
+   Der Branch-Schutz verlangt die Prüfungen `test` und `hygiene`, gilt aber nicht für Administratoren (`enforce_admins` aus); Signaturen und Reviews sind nicht Pflicht. Ein direkter Push geht daher wie bisher.
+3. **Railway** (Projekt `tender-caring`, Umgebung `production`, Dienst `preceptly`, `www.preceptly.de`): Docker-Build, dann `scripts/entrypoint.sh` mit `migrate --noinput`, `collectstatic --noinput` und `daphne`. `compilemessages`
+   läuft im Build **nicht**; die Datei `django.mo` ist versioniert und im Commit neu übersetzt.
+   Bei den letzten beiden Commits stand der Railway-Status 22 und 28 Sekunden **nach dem Ende der CI** auf `success`, obwohl er Sekunden nach dem Push auf `in_progress` ging. Das passt zu einem Deployment, das auf die CI wartet.
+   Die Einstellung selbst ist von hier aus nicht lesbar; bei roter CI daher trotzdem Railway ansehen.
+4. Gesamtdauer: Hook rund 14 Minuten, CI rund 14 bis 18 Minuten, Deployment unter 2 Minuten, also etwa **30 bis 35 Minuten**.
+
+### Schritte (erst nach ausdrücklicher Freigabe)
+
+0. **Vorab prüfen:** `git -C /root/agents/tutorflow ls-remote origin main` zeigt `ce2ea1f…`, `git -C /root/agents/tutorflow status --short` ist sauber. Ist `main` weitergelaufen (zum Beispiel durch einen
+   Dependabot-Commit), zuerst `bash /root/agents/tutorflow-redesign-tools/publish_rehearsal.sh` wiederholen und das Ergebnis neu bewerten.
+1. **Zeitgrenze anheben:** In `/root/bin/preceptly-push.sh` steht `timeout 900 git push`, und die 900 s gelten einschließlich des Hooks. Die Suite braucht rund 850 s, die Reserve ist unter einer Minute.
+   Läuft der Hook länger, bricht das Skript mit „TESTS FAILED - not pushed“ ab und pusht nichts (kein Schaden, aber ein verlorener Lauf). Vorher auf `timeout 1800 git push` stellen (Werkzeug, kein Anwendungscode).
+2. **Zweig übernehmen:** `cd /root/agents/tutorflow && git fetch /root/agents/tutorflow-redesign redesign/preview && git merge --ff-only FETCH_HEAD`.
+   Danach muss `git rev-parse HEAD` die vorgesehene Commit-Nummer zeigen. Bewusst **kein** `--no-ff`: So wird genau der geprüfte Commit veröffentlicht, ohne zusätzlichen ungeprüften Merge-Commit.
+3. `bash /root/bin/preceptly-push.sh`; Fortschritt in `/tmp/pd.log` (Tests, Push, CI, Railway).
+4. Prüfen, dass alle Läufe grün sind: `gh run list --repo andreaseirich/preceptly --commit <Hash>` und `railway status` (Online) aus `/root/agents/tutorflow/backend`.
+
+### Live-Prüfung danach
+
+Nur Lesezugriffe und das Demo-Konto (Testdaten, wird täglich zurückgesetzt, versendet keine E-Mails). Keine echten Konten, keine Zahlungen, keine neue Registrierung.
+
+1. **Technik:** Startseite (Deutsch und Englisch per Sprachcookie) liefert 200, genau ein `<h1>`, den Text „Gedacht für bis zu 5 Schülerverträge“ beziehungsweise „Intended for up to 5 student contracts“; Content-Security-Policy-Kopf vorhanden;
+   `tokens.<Hash>.css` und die beiden `.woff2`-Dateien liefern 200 (Schriften mit `font/woff2`); `/faq/`, `/login/`, Rechtstexte und eine nicht vorhandene Adresse (404) im neuen Aussehen.
+2. **Browser (hell und dunkel, Deutsch und Englisch, 1440 und 390 px):** Startseite mit Preisen und Fußnote, Anmeldung, Demo-Anmeldung, Dashboard, Wochen- und Monatsansicht, Schülerliste, Löschseite eines Demo-Schülers (nur öffnen und abbrechen),
+   Mobilmenü, Themenwechsel, Sprachwechsel; eine Stunde im Demo-Konto anlegen, verschieben (mit Abbrechen) und wieder löschen.
+3. **`?next=`:** Anmeldeseite mit `?next=https://example.org/` führt nach der Anmeldung nicht dorthin.
+4. **Portal:** Anmeldeseite, mit englischem Sprachcookie bleibt sie deutsch.
+5. **eRecht24-Widerrufsbutton:** Hier ist er zum ersten Mal prüfbar, weil das Skript in den lokalen Läufen blockiert war. Sichtprüfung in der Fußzeile (hell und dunkel) und die Konsole auf Fehler und CSP-Meldungen ansehen.
+6. **Protokolle:** `railway logs` auf Fehler seit dem Start ansehen; GitHub-Läufe grün.
+
+### Zurücknehmen
+
+- **Schnell (Railway):** Im Dashboard beim Dienst `preceptly` unter *Deployments* das Deployment von `ce2ea1f` wieder ausspielen. Das ist die kürzeste Dauer, wurde hier aber **nicht ausprobiert**.
+- **Über Git (im Probelauf bis auf den Baum nachgestellt):**
+  ```
+  cd /root/agents/tutorflow
+  git revert --no-commit ce2ea1f..<Spitze von redesign/preview>
+  git commit -m "revert: Kladde redesign (restores ce2ea1f)"
+  bash /root/bin/preceptly-push.sh
+  ```
+  Danach laufen Hook, CI und Railway wie oben (30 bis 35 Minuten). Sind inzwischen weitere Commits auf `main` hinzugekommen, bleibt die Rücknahme gültig, solange diese nicht dieselben Zeilen geändert haben; sonst sind Konflikte von Hand zu lösen.
+- **Daten:** Es gibt keine Migration und keine Datenbankänderung, also nichts zurückzurechnen. Der Service Worker legt `/static/` „cache first“ ab, aber die Dateinamen tragen einen Hash (Manifest-Speicher), und HTML kommt immer zuerst aus dem Netz:
+  Nach Deployment oder Rücknahme gibt es keine veralteten Stylesheets.
+
+### Wesentliche Risiken bei der Veröffentlichung
+
+- **Alle Nutzer sehen die neue Oberfläche auf einmal** (Tutor-App und Portal). Es gibt keine stufenweise Freigabe.
+- **Nur Chromium geprüft.** Safari, Firefox, echte Handys und Screenreader nicht.
+- **Umgebung der Produktion nicht nachgebildet:** PostgreSQL, Daphne mit WebSockets, TLS/HSTS, Railway-Proxy. Die Änderung berührt keine davon, ein Befund käme erst live.
+- **eRecht24-Widerrufsbutton** ungeprüft bis zur Live-Prüfung (Punkt 5); er sitzt in jeder Seite der Tutor-App.
+- **Zeitgrenze des Push-Skripts** (Schritt 1) und ein möglicher neuer `pip-audit`-Befund oder ein Dependabot-Commit zwischen Prüfung und Push. Beides kostet Zeit, gefährdet aber nicht den Stand von `main`.
+- **Das Portal ist nur deutsch** (bewusst); wer mit englischem Sprachcookie ins Portal kommt, bekommt Deutsch.
 
 ## Verbleibende Prüfgrenzen
 
@@ -229,7 +317,7 @@ tragen einen Hash (Manifest-Speicher): Nach Deploy oder Zurücknehmen gibt es ke
 - **Nur Chromium** (Chrome for Testing). Safari, Firefox, echte Handys, Screenreader und die Tastaturbedienung außerhalb der gemessenen Tab-Stopps wurden nicht geprüft. Seitliches Scrollen einer
   Tabelle per Tastatur hängt vom Browser ab: Die Seite macht den Scrollbereich nicht selbst fokussierbar (kein `tabindex`), und das Verhalten der Browser dafür wurde nicht geprüft.
 - **eRecht24-Widerrufsbutton:** Das Skript `widerrufsbutton-cdn.e-recht24.de` wird in jeder Seite der Tutor-App geladen. Es wurde in allen Läufen **blockiert** und blieb damit eine **ungeprüfte externe
-  Integration**: Weder sein Verhalten noch sein Aussehen, noch die Wirkung der neuen CSP/Stile darauf wurden getestet. Die Einbindung und alle rechtlichen Inhalte sind unverändert. Das Stylesheet
+  Integration**: Weder sein Verhalten noch sein Aussehen, noch die Wirkung der neuen CSP/Stile darauf wurden getestet. Die Einbindung und alle rechtlichen Inhalte sind unverändert. Prüfbar wird der Button erst live (Abschnitt „Live-Prüfung“, Punkt 5). Das Stylesheet
   zielt nur mit `#eRecht24RevocationButton` auf den Knopf (Umriss in der Fußzeile).
 - Das Hinweisfenster „in aktiver Entwicklung“ erscheint beim ersten Aufruf je Tab (auch im Portal) und fängt Klicks ab, bis man es schließt. Das ist **bestehendes Verhalten**, nicht Teil
   dieses Auftrags und unverändert.
