@@ -82,7 +82,7 @@ ein allgemeines CRM oder mehrere Werkzeuge zusammenstecken muss.
 
 | Tarif | Umfang |
 |---|---|
-| **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 ein Hinweis auf die bezahlten Tarife ab 5 Schülern und ab 8 Rechnungen pro Monat (gespeichert wird trotzdem). Keine Dokumente, keine Portal-Buchung |
+| **Free** | Stunden, Kalender, Konflikte, Rechnungen — für Konten ab dem 02.07.2026 ein Hinweis auf die bezahlten Tarife beim Anlegen des 6. Schülervertrags und der 9. Rechnung eines Kalendermonats (gespeichert wird trotzdem; gezählt werden Verträge, nicht verschiedene Personen, beendete eingeschlossen). Keine Dokumente, keine Portal-Buchung |
 | **Starter** | + Serientermine, Sperrzeiten, Statusfilter der Rechnungsliste, Schüler-Portal; **höchstens 3 Dokumente je Schüler**, **höchstens 3 Portal-Buchungen je Monat** (nur Einzeltermine) |
 | **Pro** | + unbegrenzte Dokumente, unbegrenzte Portal-Buchungen und **Serien im Portal**, Familien-Zugang (mehrere Kinder an einem Konto), Meeting-Räume, KI-Unterrichtspläne, EÜR-Export, Berichte |
 | **Business** | alles aus Pro, dazu bevorzugter Support und früher Zugang zu neuen Funktionen |
@@ -94,7 +94,7 @@ Maßgeblich ist `backend/apps/core/feature_flags.py`.
 
 | Grenze | Wo |
 |---|---|
-| Free: Hinweis ab 5 Schülern / 8 Rechnungen pro Monat (Konten ab 02.07.2026), kein Sperren | `students/views.py`, `billing/views.py` |
+| Free: Hinweis beim 6. Schülervertrag / bei der 9. Rechnung im Kalendermonat (Konten ab 02.07.2026), kein Sperren; gezählt werden alle Verträge (auch beendete) und alle im Monat angelegten Rechnungen | `students/views.py`, `billing/views.py` |
 | Dokumente: Free keine, Starter 3 je Schüler — beim Tutor und im Portal | `document_limit_reached()` |
 | Portal-Buchungen: Free keine, Starter 3 je Tutor und Kalendermonat, gezählt nach Anlagedatum | `portal_booking_limit_reached()` |
 | Serien im Portal selbst anlegen: erst ab Pro | `Feature.FEATURE_PORTAL_RECURRING` |

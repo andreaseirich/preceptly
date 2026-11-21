@@ -954,8 +954,8 @@ msgid "Rechnungsempfänger aktualisiert."
 msgstr "Rechnungsempfänger aktualisiert."
 
 #: apps/billing/views.py:285
-msgid "Free plan: the limit of 8 invoices per month has been reached. Your invoice was created — <a href=\"{}\">upgrade to a paid plan</a> for unlimited invoices."
-msgstr "Free-Tarif: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Tarif upgraden</a> für unbegrenzte Rechnungen."
+msgid "Free plan: you have now created more than 8 invoices this calendar month. The Free plan is intended for up to 8 per month; every invoice created in the month counts, including cancellation invoices. Your invoice was created and nothing is blocked. <a href=\"{}\">See the paid plans</a>"
+msgstr "Free-Tarif: Du hast in diesem Kalendermonat jetzt mehr als 8 Rechnungen angelegt. Der Free-Tarif ist für bis zu 8 im Monat gedacht; es zählt jede in diesem Monat angelegte Rechnung, auch Stornorechnungen. Deine Rechnung wurde erstellt, gesperrt ist nichts. <a href=\"{}\">Zu den bezahlten Tarifen</a>"
 
 
 #: apps/billing/views.py:295
@@ -6488,8 +6488,8 @@ msgid "No students available."
 msgstr "Keine Schüler vorhanden."
 
 #: apps/students/views.py:65
-msgid "Free plan: the limit of 5 students has been reached. Your student was saved — <a href=\"{}\">upgrade to a paid plan</a> for unlimited students."
-msgstr "Free-Tarif: Die Grenze von 5 Schülern ist erreicht. Dein Schüler wurde gespeichert – <a href=\"{}\">Auf einen bezahlten Tarif upgraden</a> für unbegrenzte Schüler."
+msgid "Free plan: you now have more than 5 student contracts. The Free plan is intended for up to 5; every contract counts, including ended ones and several for the same person. Your entry was saved and nothing is blocked. <a href=\"{}\">See the paid plans</a>"
+msgstr "Free-Tarif: Du hast jetzt mehr als 5 Schülerverträge. Der Free-Tarif ist für bis zu 5 gedacht; es zählt jeder Vertrag, auch beendete und mehrere derselben Person. Dein Eintrag wurde gespeichert, gesperrt ist nichts. <a href=\"{}\">Zu den bezahlten Tarifen</a>"
 
 
 #: apps/students/views.py:75
@@ -8078,14 +8078,14 @@ msgstr "Einheit"
 msgid "Page not found"
 msgstr "Seite nicht gefunden"
 
-msgid "Intended for up to 5 students"
-msgstr "Gedacht für bis zu 5 Schüler"
+msgid "Intended for up to 5 student contracts"
+msgstr "Gedacht für bis zu 5 Schülerverträge"
 
 msgid "Intended for up to 8 invoices per month"
 msgstr "Gedacht für bis zu 8 Rechnungen im Monat"
 
-msgid "On the Free plan, Preceptly shows a notice pointing to the paid plans from the 6th student and from the 9th invoice in a calendar month. Nothing is blocked and everything is saved. Every student contract counts as a student (including ended ones); every invoice created in that month counts, including cancellation invoices."
-msgstr "Im Free-Tarif zeigt Preceptly ab dem 6. Schüler und ab der 9. Rechnung in einem Kalendermonat einen Hinweis auf die bezahlten Tarife. Es wird nichts gesperrt, alles wird gespeichert. Als Schüler zählt jeder Vertrag (auch beendete), als Rechnung jede in diesem Monat angelegte Rechnung, auch Stornorechnungen."
+msgid "On the Free plan, Preceptly shows a notice pointing to the paid plans when you create the 6th student contract and when you create the 9th invoice in a calendar month, and again for each one after that. Nothing is blocked: everything is saved and you can keep using Preceptly as usual. Contracts are counted, not different people: if the same person has two contracts, both count. Ended and inactive contracts count as long as they are not deleted. Every invoice created in that month counts, including cancellation invoices."
+msgstr "Im Free-Tarif zeigt Preceptly einen Hinweis auf die bezahlten Tarife, wenn du den 6. Schülervertrag anlegst und wenn du in einem Kalendermonat die 9. Rechnung anlegst, und danach bei jedem weiteren. Gesperrt wird nichts: Alles wird gespeichert, und du kannst Preceptly wie gewohnt weiter nutzen. Gezählt werden Verträge, nicht verschiedene Personen: Hat dieselbe Person zwei Verträge, zählen beide. Beendete und inaktive Verträge zählen mit, solange sie nicht gelöscht sind. Bei den Rechnungen zählt jede, die in diesem Kalendermonat angelegt wurde, auch Stornorechnungen."
 
 msgid "The portal is currently available in German only."
 msgstr "Das Portal gibt es derzeit nur auf Deutsch."

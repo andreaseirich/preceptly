@@ -43,8 +43,9 @@ def warn_if_student_limit_reached(request) -> None:
         request,
         format_html(
             _(
-                "Free plan: the limit of 5 students has been reached. "
-                'Your student was saved — <a href="{}">upgrade to a paid plan</a> for unlimited students.'
+                "Free plan: you now have more than 5 student contracts. "
+                "The Free plan is intended for up to 5; every contract counts, including ended ones and several for the same person. "
+                'Your entry was saved and nothing is blocked. <a href="{}">See the paid plans</a>'
             ),
             reverse("core:landing") + "#pricing",
         ),

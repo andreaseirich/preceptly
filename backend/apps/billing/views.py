@@ -329,8 +329,9 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                     self.request,
                     format_html(
                         _(
-                            "Free plan: the limit of 8 invoices per month has been reached. "
-                            'Your invoice was created — <a href="{}">upgrade to a paid plan</a> for unlimited invoices.'
+                            "Free plan: you have now created more than 8 invoices this calendar month. "
+                            "The Free plan is intended for up to 8 per month; every invoice created in the month counts, including cancellation invoices. "
+                            'Your invoice was created and nothing is blocked. <a href="{}">See the paid plans</a>'
                         ),
                         reverse("core:landing") + "#pricing",
                     ),

@@ -63,9 +63,9 @@ class LandingFactsTest(TestCase):
         en = self.get("en").content.decode()
 
         # Wortlaut und Zählregeln prüft test_free_tier_wording; hier nur: Die Zahlen kommen aus den Konstanten
-        self.assertIn(f"Gedacht für bis zu {FREE_STUDENT_LIMIT} Schüler", de)
+        self.assertIn(f"Gedacht für bis zu {FREE_STUDENT_LIMIT} Schülerverträge", de)
         self.assertIn(f"Gedacht für bis zu {FREE_INVOICE_MONTHLY_LIMIT} Rechnungen im Monat", de)
-        self.assertIn(f"Intended for up to {FREE_STUDENT_LIMIT} students", en)
+        self.assertIn(f"Intended for up to {FREE_STUDENT_LIMIT} student contracts", en)
         self.assertIn(f"Intended for up to {FREE_INVOICE_MONTHLY_LIMIT} invoices per month", en)
 
     def test_there_is_no_plan_called_premium(self):
