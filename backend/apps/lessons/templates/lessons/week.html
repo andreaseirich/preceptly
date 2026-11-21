@@ -144,7 +144,7 @@ window.I18N = Object.assign(window.I18N || {}, {
                                         {% endwith %}
                                         {% endif %}<br>
                                         <small style="opacity: 0.9;">{{ lesson.start_time|time:'H:i' }} - {{ lesson.duration_minutes }} {% trans "Min." %}</small>
-                                        {% if lesson.status == 'paid' %}<small style="display: block; opacity: 0.8;">{% icon "check" %} {% trans "Paid" %}</small>{% endif %}
+                                        {% if lesson.status == 'paid' %}<small style="display: block;">{% icon "check" %} {% trans "Paid" %}</small>{% endif %}
                                     </div>
                                     <a href="{% url 'lessons:update' lesson.pk %}?year={{ weekday.date.year }}&month={{ weekday.date.month }}&day={{ weekday.date.day }}" 
                                        class="lesson-edit"

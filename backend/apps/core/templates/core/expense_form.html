@@ -17,7 +17,7 @@
         </label>
         {{ field }}
         {% if field.errors %}
-        <div id="{{ field.id_for_label }}_errors" role="alert" style="color:#dc3545; margin:4px 0 0;">
+        <div id="{{ field.id_for_label }}_errors" role="alert" style="color:var(--danger); margin:4px 0 0;">
             <ul style="padding-left:16px; margin: 0;">
                 {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
             </ul>

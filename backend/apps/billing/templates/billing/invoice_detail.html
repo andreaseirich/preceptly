@@ -46,12 +46,12 @@
 .action-btn.primary:hover   { background: var(--accent-hover); }
 .action-btn.secondary { background: var(--bg-nav); color: var(--text-primary); border: 1px solid var(--border-color); }
 .action-btn.secondary:hover { background: var(--border-color); }
-.action-btn.success   { background: #16a34a; color: #fff; }
-.action-btn.success:hover   { background: #15803d; }
-.action-btn.warning   { background: #d97706; color: #fff; }
-.action-btn.warning:hover   { background: #b45309; }
-.action-btn.danger    { background: transparent; color: #dc3545; border: 1px solid #dc3545; }
-.action-btn.danger:hover    { background: #dc3545; color: #fff; }
+.action-btn.success   { background: var(--success); color: var(--on-success); }
+.action-btn.success:hover   { background: var(--success); filter: brightness(0.92); }
+.action-btn.warning   { background: var(--warning); color: var(--paper-card); }
+.action-btn.warning:hover   { background: var(--warning); filter: brightness(0.92); }
+.action-btn.danger    { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.action-btn.danger:hover    { background: var(--danger); color: var(--on-danger); }
 .action-btn.disabled,
 .action-btn:disabled  { background: var(--bg-nav); color: var(--text-secondary); cursor: not-allowed; opacity: 0.55; border: 1px solid var(--border-color); }
 .action-btn .icon { font-size: 1.05em; flex-shrink: 0; }
@@ -61,7 +61,7 @@
 .pdf-ts { font-size: 0.75em; color: currentColor; opacity: 0.7; }
 
 .profile-warning { display: flex; gap: 12px; align-items: flex-start; padding: 12px 15px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4); border-radius: 8px; font-size: 0.9em; line-height: 1.5; margin-bottom: 18px; }
-.profile-warning a { color: #d97706; font-weight: 600; }
+.profile-warning a { color: var(--warning); font-weight: 600; }
 [data-theme="dark"] .profile-warning a { color: #fbbf24; }
 
 .payer-edit-form { display: none; padding-top: 10px; }
@@ -180,7 +180,7 @@
             <form method="post" action="{% url 'billing:invoice_update_payer' invoice.pk %}">
                 {% csrf_token %}
                 <div style="margin-bottom:10px;">
-                    <label for="id_payer_name" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">{% trans "Name" %} <span style="color:#dc3545;">*</span></label>
+                    <label for="id_payer_name" style="display:block; font-size:0.85em; color:var(--text-secondary); margin-bottom:4px;">{% trans "Name" %} <span style="color:var(--danger);">*</span></label>
                     <input type="text" name="payer_name" id="id_payer_name" value="{{ invoice.payer_name }}" maxlength="200" required style="width:100%; box-sizing:border-box;">
                 </div>
                 <div style="margin-bottom:12px;">

@@ -257,7 +257,7 @@ class PortalInviteView(LoginRequiredMixin, View):
                     messages.error(
                         request,
                         "Die Einladung konnte nicht erstellt werden. "
-                        "Bitte kontaktieren Sie den Support, falls das Problem bestehen bleibt.",
+                        "Bitte kontaktiere den Support, falls das Problem bestehen bleibt.",
                     )
                     return redirect("contracts:detail", pk=pk)
 

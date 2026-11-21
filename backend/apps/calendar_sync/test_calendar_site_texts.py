@@ -59,7 +59,7 @@ class SiteTextsTest(TestCase):
     def test_the_landing_page_keeps_starter_features_out_of_the_free_group(self):
         html = self.page("/", "de")
 
-        free_start = html.index("Im kostenlosen Tarif enthalten")
+        free_start = html.index("Im Free-Tarif enthalten")
         starter_start = html.index("Ab dem Starter-Tarif enthalten")
         pro_start = html.index("Ab dem Pro-Tarif enthalten")
         free_group = html[free_start:starter_start]

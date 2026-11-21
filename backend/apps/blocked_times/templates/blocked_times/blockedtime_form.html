@@ -40,28 +40,28 @@
             <label for="{{ form.title.id_for_label }}">Titel:</label>
             {{ form.title }}
             {% if form.title.errors %}
-            <div id="{{ form.title.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.title.errors }}</div>
+            <div id="{{ form.title.html_name }}_errors" role="alert" style="color: var(--danger); font-size: 0.9em; margin-top: 5px;">{{ form.title.errors }}</div>
             {% endif %}
         </p>
         <p>
             <label for="{{ form.description.id_for_label }}">Beschreibung:</label>
             {{ form.description }}
             {% if form.description.errors %}
-            <div id="{{ form.description.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.description.errors }}</div>
+            <div id="{{ form.description.html_name }}_errors" role="alert" style="color: var(--danger); font-size: 0.9em; margin-top: 5px;">{{ form.description.errors }}</div>
             {% endif %}
         </p>
         <p>
             <label for="{{ form.start_datetime.id_for_label }}">Startdatum und -zeit:</label>
             {{ form.start_datetime }}
             {% if form.start_datetime.errors %}
-            <div id="{{ form.start_datetime.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.start_datetime.errors }}</div>
+            <div id="{{ form.start_datetime.html_name }}_errors" role="alert" style="color: var(--danger); font-size: 0.9em; margin-top: 5px;">{{ form.start_datetime.errors }}</div>
             {% endif %}
         </p>
         <p>
             <label for="{{ form.end_datetime.id_for_label }}">Enddatum und -zeit:</label>
             {{ form.end_datetime }}
             {% if form.end_datetime.errors %}
-            <div id="{{ form.end_datetime.html_name }}_errors" role="alert" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">{{ form.end_datetime.errors }}</div>
+            <div id="{{ form.end_datetime.html_name }}_errors" role="alert" style="color: var(--danger); font-size: 0.9em; margin-top: 5px;">{{ form.end_datetime.errors }}</div>
             {% endif %}
         </p>
         <p>

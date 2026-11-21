@@ -52,7 +52,7 @@
             <td>{% blocktrans with minutes=contract.unit_duration_minutes %}{{ minutes }} Min.{% endblocktrans %}</td>
             <td>{{ contract.start_date }}</td>
             <td>{{ contract.end_date|default:_("unlimited") }}</td>
-            <td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td>
+            <td>{% if contract.is_active %}<span style="color: var(--success);">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td>
             <td>
                 {% if summary %}
                 {% if summary.carried_over_units %}

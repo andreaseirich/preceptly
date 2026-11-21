@@ -82,7 +82,7 @@
 
 {% if not kleinunternehmer_ok %}
 <div class="alert-danger" style="padding:16px; margin-bottom:24px;">
-    <strong style="color:#dc3545;">&#10007; {% trans "Limit exceeded" %}</strong><br>
+    <strong style="color:var(--danger);">&#10007; {% trans "Limit exceeded" %}</strong><br>
     {% blocktrans with limit=kleinunternehmer_limit total=total_profit %}Your profit of {{ total }} EUR exceeds the Kleinunternehmer limit of {{ limit }} EUR. You may need to charge VAT.{% endblocktrans %}
 </div>
 {% elif kleinunternehmer_warning %}

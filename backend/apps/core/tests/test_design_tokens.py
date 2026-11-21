@@ -82,6 +82,7 @@ class TextContrastTest(SimpleTestCase):
             ("on-accent", "accent"),
             ("on-accent", "accent-hover"),
             ("on-success", "success"),
+            ("on-danger", "danger"),
             ("on-highlight", "highlight"),
         ]
         for theme in ("light", "dark"):

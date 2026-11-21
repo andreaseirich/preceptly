@@ -181,12 +181,12 @@
                            value="{{ email_change_form.new_email.value|default:'' }}"
                            {% if email_change_form.new_email.errors %}aria-invalid="true" aria-describedby="id_new_email_errors"{% endif %}
                            style="width: 100%; box-sizing: border-box;">
-                    {% if email_change_form.new_email.errors %}<p id="id_new_email_errors" style="color: #dc3545; margin: 0;" role="alert">{{ email_change_form.new_email.errors.0 }}</p>{% endif %}
+                    {% if email_change_form.new_email.errors %}<p id="id_new_email_errors" style="color: var(--danger); margin: 0;" role="alert">{{ email_change_form.new_email.errors.0 }}</p>{% endif %}
                     <label for="id_current_password" class="settings-label">{% trans "Current password" %}</label>
                     <input type="password" name="current_password" id="id_current_password" required autocomplete="current-password"
                            {% if email_change_form.current_password.errors %}aria-invalid="true" aria-describedby="id_current_password_errors"{% endif %}
                            style="width: 100%; box-sizing: border-box;">
-                    {% if email_change_form.current_password.errors %}<p id="id_current_password_errors" style="color: #dc3545; margin: 0;" role="alert">{{ email_change_form.current_password.errors.0 }}</p>{% endif %}
+                    {% if email_change_form.current_password.errors %}<p id="id_current_password_errors" style="color: var(--danger); margin: 0;" role="alert">{{ email_change_form.current_password.errors.0 }}</p>{% endif %}
                     <div><button type="submit" name="change_email" value="1" class="btn btn-secondary">{% trans "Send confirmation link" %}</button></div>
                 </div>
                 <p class="settings-desc" style="margin-top: 10px;">{% trans "The email address stored for payments with Stripe stays unchanged." %}</p>
@@ -200,7 +200,7 @@
                     {{ email_form.email }}
                     <button type="submit" name="save_email" class="btn btn-secondary">{% trans "Save" %}</button>
                 </div>
-                {% if email_form.email.errors %}<p style="color: #dc3545; margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
+                {% if email_form.email.errors %}<p style="color: var(--danger); margin-top: 5px;" role="alert">{{ email_form.email.errors.0 }}</p>{% endif %}
             </form>
             {% endif %}
         </section>
@@ -422,11 +422,11 @@
                 {% csrf_token %}
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; max-width: 680px;">
                     <div style="grid-column: 1 / -1;">
-                        <label for="id_billing_name" class="settings-label">{% trans "Name / Company" %} <span style="color: #dc3545;">*</span></label>
+                        <label for="id_billing_name" class="settings-label">{% trans "Name / Company" %} <span style="color: var(--danger);">*</span></label>
                         <input type="text" name="billing_name" id="id_billing_name" maxlength="200" value="{{ profile.billing_name }}" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "e.g. Maria Müller" %}" required>
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <label for="id_billing_address" class="settings-label">{% trans "Address" %} <span style="color: #dc3545;">*</span></label>
+                        <label for="id_billing_address" class="settings-label">{% trans "Address" %} <span style="color: var(--danger);">*</span></label>
                         <textarea name="billing_address" id="id_billing_address" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="{% trans "Street + no., ZIP City" %}" required>{{ profile.billing_address }}</textarea>
                     </div>
                     <div>

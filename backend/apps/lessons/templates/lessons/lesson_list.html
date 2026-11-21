@@ -47,7 +47,7 @@
                 {% if lesson.conflicts %}
                 <span class="conflict-icon">{% icon "triangle-alert" %}</span> <span class="conflict">{{ lesson.conflicts|length }}</span>
                 {% else %}
-                <span style="color: #28a745;">{% icon "check" %}<span class="sr-only">{% trans "OK" %}</span></span>
+                <span style="color: var(--success);">{% icon "check" %}<span class="sr-only">{% trans "OK" %}</span></span>
                 {% endif %}
             </td>
             <td>

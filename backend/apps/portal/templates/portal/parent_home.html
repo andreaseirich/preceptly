@@ -68,8 +68,8 @@
     margin: 0;
 }
 .unread-badge {
-    background: #dc3545;
-    color: #fff;
+    background: var(--danger);
+    color: var(--on-danger);
     font-size: 0.72em;
     font-weight: 700;
     padding: 2px 7px;
@@ -132,7 +132,7 @@
 .meeting-dot {
     width: 8px;
     height: 8px;
-    background: #27ae60;
+    background: var(--success);
     border-radius: 50%;
     flex-shrink: 0;
     animation: live-dot 1.2s ease-in-out infinite;
@@ -186,12 +186,12 @@
 }
 .action-btn.unread-hint {
     border-color: rgba(220,53,69,0.4);
-    color: #dc3545 !important;
+    color: var(--danger) !important;
 }
 .action-btn .btn-badge {
     margin-left: auto;
-    background: #dc3545;
-    color: #fff;
+    background: var(--danger);
+    color: var(--on-danger);
     font-size: 0.72em;
     font-weight: 700;
     padding: 1px 5px;
@@ -202,7 +202,7 @@
 {% endblock %}
 
 {% block content %}
-<h1 style="margin-bottom: 16px;">Ihre Kinder</h1>
+<h1 style="margin-bottom: 16px;">Deine Kinder</h1>
 <div style="margin-bottom:20px;"><a class="btn btn-secondary" href="{% url 'portal:profile' %}">{% icon "settings" %} Profil bearbeiten</a></div>
 
 {% if students_data %}
@@ -282,6 +282,6 @@
 </div>
 
 {% else %}
-<div class="empty-state"><p>Keine Schüler mit Ihrem Konto verknüpft.</p></div>
+<div class="empty-state"><p>Keine Schüler mit deinem Konto verknüpft.</p></div>
 {% endif %}
 {% endblock %}

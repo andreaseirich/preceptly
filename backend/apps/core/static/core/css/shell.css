@@ -97,10 +97,10 @@ nav .nav-right select.lang-select,
   font-size: 0.95rem;
   font-weight: 600;
   background-color: transparent;
-  border-color: var(--line);
+  border-color: var(--line-strong);
   cursor: pointer;
 }
-nav .nav-right select.lang-select:hover { border-color: var(--line-strong); }
+nav .nav-right select.lang-select:hover { border-color: var(--ink-soft); }
 .nav-badge { background: var(--danger); color: var(--paper-card); border-radius: var(--radius-pill); padding: 1px 7px; font-size: 0.78rem; font-weight: 700; line-height: 1.4; }
 
 /* Menü-Knopf (nur schmal sichtbar) */
@@ -131,6 +131,7 @@ nav .nav-right select.lang-select:hover { border-color: var(--line-strong); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .site-footer { --footer-bg: #0a1315; } }
 .site-footer a { color: var(--footer-link); text-decoration: none; padding: 6px 4px; display: inline-block; }
 .site-footer a:hover { color: #fff; text-decoration: underline; }
+.site-footer :focus-visible { outline-color: var(--footer-ink); } /* Türkis auf dem Marineband hatte 2,2:1 */
 .site-footer .footer-container { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-3); text-align: center; }
 .site-footer .footer-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-1) var(--space-4); }
 .site-footer .footer-meta { font-size: 0.9rem; color: var(--footer-meta); }

@@ -303,6 +303,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         from apps.core.feature_flags import FREE_INVOICE_MONTHLY_LIMIT, is_new_free_user
+        from apps.core.free_limits import invoices_created_this_month
 
         period_start = form.cleaned_data["period_start"]
         period_end = form.cleaned_data["period_end"]
@@ -311,12 +312,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
 
         show_invoice_limit_warning = False
         if is_new_free_user(self.request.user):
-            now = timezone.now()
-            month_count = Invoice.objects.filter(
-                owner=self.request.user,
-                created_at__year=now.year,
-                created_at__month=now.month,
-            ).count()
+            month_count = invoices_created_this_month(self.request.user)
             if month_count >= FREE_INVOICE_MONTHLY_LIMIT:
                 show_invoice_limit_warning = True
 

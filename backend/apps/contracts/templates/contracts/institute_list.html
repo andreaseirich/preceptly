@@ -52,7 +52,7 @@
                             <p style="margin:0;">{% trans "Estimated date" %}: {{ p.estimated_date|date:"d.m.Y" }}</p>
                         {% endif %}
                     {% else %}
-                        <p style="margin:0; color: #28a745;">{% trans "Maximum tier reached" %}</p>
+                        <p style="margin:0; color: var(--success);">{% trans "Maximum tier reached" %}</p>
                     {% endif %}
                 {% else %}
                     <span style="color:var(--text-secondary);">—</span>

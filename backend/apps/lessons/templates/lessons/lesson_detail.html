@@ -15,7 +15,7 @@
     {% if plan.meetings %}
     <form method="post" action="{% url 'meeting:start' lesson.pk %}">
         {% csrf_token %}
-        <button type="submit" class="btn" style="background:#27ae60;">{% icon "video" %} Meeting starten</button>
+        <button type="submit" class="btn btn-success">{% icon "video" %} Meeting starten</button>
     </form>
     {% endif %}
 </div>
@@ -111,7 +111,7 @@
             <th scope="row" style="padding: 8px; color: var(--text-secondary);">Schüler aktiv:</th>
             <td style="padding: 8px;">
                 {% if contract.is_active %}
-                    <span style="color: #16a34a;">{% icon "check" %} Aktiv</span>
+                    <span style="color: var(--success);">{% icon "check" %} Aktiv</span>
                 {% else %}
                     <span style="color: var(--text-secondary);">{% icon "x" %} Inaktiv</span>
                 {% endif %}
@@ -143,9 +143,9 @@
 
 {% if has_conflicts %}
 <div class="alert-warning" style="margin-bottom: 20px; border-left: 4px solid #dc3545;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% icon "triangle-alert" %} Konflikte</h2>
+    <h2 style="color: var(--danger); margin-top: 0;">{% icon "triangle-alert" %} Konflikte</h2>
     <p style="margin-bottom: 15px;">
-        <a href="{% url 'lessons:conflicts' lesson.pk %}" class="btn" style="background: #dc3545; color: white;">
+        <a href="{% url 'lessons:conflicts' lesson.pk %}" class="btn btn-danger">
             Konflikt-Details anzeigen
         </a>
     </p>
@@ -220,17 +220,17 @@
     {% endif %}
     
     {% if quota_conflicts %}
-    <h3 style="margin-top: 20px; color: #dc3545;">{% icon "triangle-alert" %} {% icon "triangle-alert" %} Vertragsquote überschritten ({{ quota_conflicts|length }})</h3>
+    <h3 style="margin-top: 20px; color: var(--danger);">{% icon "triangle-alert" %} {% icon "triangle-alert" %} Vertragsquote überschritten ({{ quota_conflicts|length }})</h3>
     <div class="alert-danger" style="margin-top: 10px;">
         {% for quota_conflict in quota_conflicts %}
-        <p style="margin: 5px 0; color: #dc3545;">
+        <p style="margin: 5px 0; color: var(--danger);">
             <strong>{{ quota_conflict.message }}</strong><br>
             <small>
                 Geplant: {{ quota_conflict.planned_total }} | Tatsächlich: {{ quota_conflict.actual_total }}
             </small>
         </p>
         {% endfor %}
-        <p style="margin-top: 10px; font-size: 0.9em; color: #dc3545;">
+        <p style="margin-top: 10px; font-size: 0.9em; color: var(--danger);">
             <strong>Hinweis:</strong> Diese Stunde überschreitet die geplante Quote bis Ende {{ quota_conflicts.0.month }}.{{ quota_conflicts.0.year }}.
         </p>
     </div>
@@ -280,7 +280,7 @@
 </div>
 {% else %}
 <div class="box-section" style="margin-bottom: 20px; border-left: 4px solid #6c757d;">
-    <h2 style="color: #6c757d; margin-top: 0;">{% icon "bot" %} KI-Lektionsplan <span class="premium-badge">{% trans "Premium" %}</span></h2>
+    <h2 style="color: var(--ink-soft); margin-top: 0;">{% icon "bot" %} KI-Lektionsplan <span class="premium-badge">{% trans "Premium" %}</span></h2>
     <p>KI-Lektionspläne sind nur für Premium-Nutzer verfügbar.</p>
     <button type="button" class="btn" style="background: #6c757d; color: white; cursor: not-allowed; opacity: 0.6;" disabled>
         {% icon "sparkles" %} KI-Lektionsplan generieren

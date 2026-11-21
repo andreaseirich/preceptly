@@ -7,7 +7,7 @@
 [data-theme="dark"] .calendar-note { color: var(--ink-soft); }
 [data-theme="dark"] .calendar-legend { background: var(--paper-card); border: 1px solid var(--line); }
 [data-theme="dark"] .lesson-past { background: rgba(233, 240, 234, 0.05) !important; color: var(--ink-soft) !important; }
-[data-theme="dark"] .lesson-future { background: rgba(102, 214, 187, 0.2) !important; color: var(--ink) !important; }
+[data-theme="dark"] .lesson-future { background: rgba(102, 214, 187, 0.14) !important; color: var(--ink) !important; }
 [data-theme="dark"] .lesson-link { color: var(--ink) !important; }
 [data-theme="dark"] .blocked-time { background: rgba(242, 178, 74, 0.2) !important; color: #f7cc7b !important; border-left-color: var(--warning) !important; }
 [data-theme="dark"] .blocked-time a { color: #f7cc7b !important; }

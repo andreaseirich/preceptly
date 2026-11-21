@@ -954,14 +954,9 @@ msgid "Rechnungsempfänger aktualisiert."
 msgstr "Rechnungsempfänger aktualisiert."
 
 #: apps/billing/views.py:285
-msgid ""
-"Free plan: the limit of 8 invoices per month has been reached. Your invoice "
-"was created — <a href=\"{}\">upgrade to a paid plan</a> for unlimited "
-"invoices."
-msgstr ""
-"Kostenloser Plan: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine "
-"Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Plan upgraden</"
-"a> für unbegrenzte Rechnungen."
+msgid "Free plan: the limit of 8 invoices per month has been reached. Your invoice was created — <a href=\"{}\">upgrade to a paid plan</a> for unlimited invoices."
+msgstr "Free-Tarif: Die monatliche Grenze von 8 Rechnungen ist erreicht. Deine Rechnung wurde erstellt – <a href=\"{}\">Auf einen bezahlten Tarif upgraden</a> für unbegrenzte Rechnungen."
+
 
 #: apps/billing/views.py:295
 #, python-brace-format
@@ -3765,7 +3760,8 @@ msgstr ""
 
 #: apps/core/templates/core/landing.html:231
 msgid "Included in the free plan"
-msgstr "Im kostenlosen Tarif enthalten"
+msgstr "Im Free-Tarif enthalten"
+
 
 #: apps/core/templates/core/landing.html:235
 msgid "Smart Scheduling"
@@ -3932,7 +3928,8 @@ msgstr ""
 #: apps/core/templates/core/landing.html:314
 #: apps/core/templates/core/settings.html:78
 msgid "Free"
-msgstr "Kostenlos"
+msgstr "Free"
+
 
 #: apps/core/templates/core/landing.html:315
 msgid "No credit card required"
@@ -6491,13 +6488,9 @@ msgid "No students available."
 msgstr "Keine Schüler vorhanden."
 
 #: apps/students/views.py:65
-msgid ""
-"Free plan: the limit of 5 active students has been reached. Your student was "
-"saved — <a href=\"{}\">upgrade to a paid plan</a> for unlimited students."
-msgstr ""
-"Kostenloser Plan: Die Grenze von 5 aktiven Schülern ist erreicht. Dein "
-"Schüler wurde gespeichert – <a href=\"{}\">Auf einen bezahlten Plan "
-"upgraden</a> für unbegrenzte Schüler."
+msgid "Free plan: the limit of 5 students has been reached. Your student was saved — <a href=\"{}\">upgrade to a paid plan</a> for unlimited students."
+msgstr "Free-Tarif: Die Grenze von 5 Schülern ist erreicht. Dein Schüler wurde gespeichert – <a href=\"{}\">Auf einen bezahlten Tarif upgraden</a> für unbegrenzte Schüler."
+
 
 #: apps/students/views.py:75
 msgid "Student successfully created."
@@ -8020,7 +8013,8 @@ msgid "For self-employed tutors"
 msgstr "Für selbstständige Nachhilfelehrer"
 
 msgid "Free plan"
-msgstr "Kostenloser Tarif"
+msgstr "Free-Tarif"
+
 
 msgid "From first student to first invoice"
 msgstr "Vom ersten Schüler bis zur ersten Rechnung"
@@ -8083,3 +8077,15 @@ msgstr "Einheit"
 
 msgid "Page not found"
 msgstr "Seite nicht gefunden"
+
+msgid "Intended for up to 5 students"
+msgstr "Gedacht für bis zu 5 Schüler"
+
+msgid "Intended for up to 8 invoices per month"
+msgstr "Gedacht für bis zu 8 Rechnungen im Monat"
+
+msgid "On the Free plan, Preceptly shows a notice pointing to the paid plans from the 6th student and from the 9th invoice in a calendar month. Nothing is blocked and everything is saved. Every student contract counts as a student (including ended ones); every invoice created in that month counts, including cancellation invoices."
+msgstr "Im Free-Tarif zeigt Preceptly ab dem 6. Schüler und ab der 9. Rechnung in einem Kalendermonat einen Hinweis auf die bezahlten Tarife. Es wird nichts gesperrt, alles wird gespeichert. Als Schüler zählt jeder Vertrag (auch beendete), als Rechnung jede in diesem Monat angelegte Rechnung, auch Stornorechnungen."
+
+msgid "The portal is currently available in German only."
+msgstr "Das Portal gibt es derzeit nur auf Deutsch."

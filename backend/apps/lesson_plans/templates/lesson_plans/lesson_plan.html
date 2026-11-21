@@ -39,9 +39,9 @@
 
 {% if has_conflicts %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% icon "triangle-alert" %} {% trans "Conflicts" %}</h2>
+    <h2 style="color: var(--danger); margin-top: 0;">{% icon "triangle-alert" %} {% trans "Conflicts" %}</h2>
     <p style="margin-bottom: 15px;">
-        <a href="{% url 'lessons:conflicts' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn" style="background: #dc3545; color: white;">
+        <a href="{% url 'lessons:conflicts' lesson.pk %}?year={{ year }}&month={{ month }}&day={{ day }}" class="btn btn-danger">
             {% trans "Show Conflict Details" %}
         </a>
     </p>
@@ -124,7 +124,7 @@
 </div>
 {% else %}
 <div class="box-section" style="margin-bottom: 20px; border-left: 4px solid var(--border-color);">
-    <h2 style="color: #6c757d; margin-top: 0;">{% icon "bot" %} {% trans "AI Lesson Plan" %} <span class="premium-badge">{% trans "Premium" %}</span></h2>
+    <h2 style="color: var(--ink-soft); margin-top: 0;">{% icon "bot" %} {% trans "AI Lesson Plan" %} <span class="premium-badge">{% trans "Premium" %}</span></h2>
     <p>{% trans "AI-powered lesson plan generation is only available for premium users." %}</p>
     <button type="button" class="btn" style="background: #6c757d; color: white; cursor: not-allowed; opacity: 0.6;" disabled>
         {% icon "sparkles" %} {% trans "Generate AI Lesson Plan" %}

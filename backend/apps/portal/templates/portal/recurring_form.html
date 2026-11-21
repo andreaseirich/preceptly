@@ -30,12 +30,12 @@
       <div>
         <label for="id_start_time" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Uhrzeit</label>
         <input type="time" id="id_start_time" name="start_time" required aria-required="true"
-          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+          style="width:100%; padding:8px 12px; border:1px solid var(--input-border); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
       </div>
       <div>
         <label for="id_recurrence_type" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Wiederholung</label>
         <select id="id_recurrence_type" name="recurrence_type"
-          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+          style="width:100%; padding:8px 12px; border:1px solid var(--input-border); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
           <option value="weekly">Wöchentlich</option>
           <option value="biweekly">Zweiwöchentlich</option>
           <option value="monthly">Monatlich</option>
@@ -47,19 +47,19 @@
       <div>
         <label for="id_start_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Startdatum</label>
         <input type="date" id="id_start_date" name="start_date" min="{{ today }}" required aria-required="true"
-          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+          style="width:100%; padding:8px 12px; border:1px solid var(--input-border); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
       </div>
       <div>
         <label for="id_end_date" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Enddatum (optional)</label>
         <input type="date" id="id_end_date" name="end_date" min="{{ today }}"
-          style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+          style="width:100%; padding:8px 12px; border:1px solid var(--input-border); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
       </div>
     </div>
 
     <div style="margin-bottom:20px;">
       <label for="id_topic" style="display:block; margin-bottom:4px; color:var(--text-secondary); font-size:0.88em;">Thema / Notizen (optional)</label>
       <input type="text" id="id_topic" name="topic" placeholder="z. B. Mathematik"
-        style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
+        style="width:100%; padding:8px 12px; border:1px solid var(--input-border); border-radius:4px; background:var(--bg-primary); color:var(--text-primary);">
     </div>
 
     <div style="font-size:0.88em; color:var(--text-secondary); margin-bottom:16px;">

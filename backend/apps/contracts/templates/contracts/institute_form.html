@@ -17,7 +17,7 @@
     <label for="{{ form.institute_name.id_for_label }}"><strong>{% trans "Institute name" %}</strong></label><br>
     {{ form.institute_name }}
     {% if form.institute_name.errors %}
-      <p style="color:#dc3545; margin-top:4px;">{{ form.institute_name.errors.0 }}</p>
+      <p style="color:var(--danger); margin-top:4px;">{{ form.institute_name.errors.0 }}</p>
     {% endif %}
   </div>
 
@@ -38,7 +38,7 @@
 
   <div style="display:none;">{{ form.tiers }}</div>
   {% if form.tiers.errors %}
-    <p style="color:#dc3545;">{{ form.tiers.errors.0 }}</p>
+    <p style="color:var(--danger);">{{ form.tiers.errors.0 }}</p>
   {% endif %}
 
   <div style="margin-bottom: 1.2em;">

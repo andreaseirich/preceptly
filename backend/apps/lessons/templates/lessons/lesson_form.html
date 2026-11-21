@@ -39,62 +39,62 @@
         <p>
             <label for="{{ form.contract.id_for_label }}">{% trans "Vertrag:" %}</label>
             {{ form.contract }}
-            {% if form.contract.errors %}<div id="{{ form.contract.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.contract.errors }}</div>{% endif %}
+            {% if form.contract.errors %}<div id="{{ form.contract.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.contract.errors }}</div>{% endif %}
         </p>
         <p>
             <label for="{{ form.date.id_for_label }}">{% trans "Datum:" %}</label>
             {{ form.date }}
-            {% if form.date.errors %}<div id="{{ form.date.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.date.errors }}</div>{% endif %}
+            {% if form.date.errors %}<div id="{{ form.date.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.date.errors }}</div>{% endif %}
         </p>
         <p>
             <label for="{{ form.start_time.id_for_label }}">{% trans "Startzeit:" %}</label>
             {{ form.start_time }}
-            {% if form.start_time.errors %}<div id="{{ form.start_time.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.start_time.errors }}</div>{% endif %}
+            {% if form.start_time.errors %}<div id="{{ form.start_time.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.start_time.errors }}</div>{% endif %}
         </p>
         <p>
             <label for="{{ form.duration_minutes.id_for_label }}">{% trans "Dauer (Minuten):" %}</label>
             {{ form.duration_minutes }}
-            {% if form.duration_minutes.errors %}<div id="{{ form.duration_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.duration_minutes.errors }}</div>{% endif %}
+            {% if form.duration_minutes.errors %}<div id="{{ form.duration_minutes.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.duration_minutes.errors }}</div>{% endif %}
         </p>
         <p>
             <label for="{{ form.travel_time_before_minutes.id_for_label }}">{% trans "Fahrzeit vorher (Minuten):" %}</label>
             {{ form.travel_time_before_minutes }}
-            {% if form.travel_time_before_minutes.errors %}<div id="{{ form.travel_time_before_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.travel_time_before_minutes.errors }}</div>{% endif %}
+            {% if form.travel_time_before_minutes.errors %}<div id="{{ form.travel_time_before_minutes.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.travel_time_before_minutes.errors }}</div>{% endif %}
         </p>
         <p>
             <label for="{{ form.travel_time_after_minutes.id_for_label }}">{% trans "Fahrzeit nachher (Minuten):" %}</label>
             {{ form.travel_time_after_minutes }}
-            {% if form.travel_time_after_minutes.errors %}<div id="{{ form.travel_time_after_minutes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.travel_time_after_minutes.errors }}</div>{% endif %}
+            {% if form.travel_time_after_minutes.errors %}<div id="{{ form.travel_time_after_minutes.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.travel_time_after_minutes.errors }}</div>{% endif %}
         </p>
         {% if form.travel_time_after_minutes.help_text %}<p class="form-help" style="font-size:0.85em; color: var(--text-secondary); margin-top:-6px;">{{ form.travel_time_after_minutes.help_text }}</p>{% endif %}
         <p>
             <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
             {{ form.notes }}
             {% if form.notes.help_text %}<span class="form-help" style="display:block; font-size:0.85em; color: var(--text-secondary); margin-top:4px;">{{ form.notes.help_text }}</span>{% endif %}
-            {% if form.notes.errors %}<div id="{{ form.notes.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.notes.errors }}</div>{% endif %}
+            {% if form.notes.errors %}<div id="{{ form.notes.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.notes.errors }}</div>{% endif %}
         </p>
         {% if form.homework %}
         <div class="form-group">
           <label for="{{ form.homework.id_for_label }}">{{ form.homework.label }}</label>
           {{ form.homework }}
-          {% if form.homework.errors %}<div id="{{ form.homework.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.homework.errors }}</div>{% endif %}
+          {% if form.homework.errors %}<div id="{{ form.homework.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.homework.errors }}</div>{% endif %}
         </div>
         {% endif %}
         {% if form.meeting_url %}
         <div class="form-group">
           <label for="{{ form.meeting_url.id_for_label }}">{{ form.meeting_url.label }}</label>
           {{ form.meeting_url }}
-          {% if form.meeting_url.errors %}<div id="{{ form.meeting_url.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.meeting_url.errors }}</div>{% endif %}
+          {% if form.meeting_url.errors %}<div id="{{ form.meeting_url.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.meeting_url.errors }}</div>{% endif %}
         </div>
         {% endif %}
         <p style="padding: 10px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
             <label for="{{ form.tutor_no_show.id_for_label }}" style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
                 {{ form.tutor_no_show }}
-                <span>{{ form.tutor_no_show.label }}{% if form.tutor_no_show.help_text %}<br><small style="font-weight: normal; color: #6c757d;">{{ form.tutor_no_show.help_text }}</small>{% endif %}</span>
+                <span>{{ form.tutor_no_show.label }}{% if form.tutor_no_show.help_text %}<br><small style="font-weight: normal; color: var(--ink-soft);">{{ form.tutor_no_show.help_text }}</small>{% endif %}</span>
             </label>
         </p>
         {% if form.tutor_no_show.errors %}
-        <div id="{{ form.tutor_no_show.html_name }}_errors" role="alert" style="color: #dc3545;">{{ form.tutor_no_show.errors.0 }}</div>
+        <div id="{{ form.tutor_no_show.html_name }}_errors" role="alert" style="color: var(--danger);">{{ form.tutor_no_show.errors.0 }}</div>
         {% endif %}
     </div>
     

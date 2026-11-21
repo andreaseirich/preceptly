@@ -34,6 +34,7 @@
         <div>
           <h2 id="lp-portal-title">{% trans "Student or parent?" %}</h2>
           <p>{% trans "Appointments, materials and messages from your tutor — all in one place." %} {% trans "You get access through an email invitation from your tutor." %}</p>
+          {% if LANGUAGE_CODE != "de" %}<p class="lp-fine">{% trans "The portal is currently available in German only." %}</p>{% endif %}
         </div>
         <a class="btn btn-secondary" href="{% url 'portal:login' %}">{% trans "Go to the portal login" %} {% icon "arrow-right" %}</a>
       </aside>
@@ -135,8 +136,8 @@
           <div class="lp-price">0 €</div>
           <div class="lp-period">{% trans "No credit card required" %}</div>
           <ul>
-            <li class="lp-limit">{% trans "Up to 5 students" %}</li>
-            <li class="lp-limit">{% trans "Up to 8 invoices per month" %}</li>
+            <li class="lp-limit">{% trans "Intended for up to 5 students" %}</li>
+            <li class="lp-limit">{% trans "Intended for up to 8 invoices per month" %}</li>
             <li>{% trans "Scheduling & conflict detection" %}</li>
             <li>{% trans "Students & contracts" %}</li>
             <li>{% trans "Invoices & PDF billing" %}</li>
@@ -188,6 +189,7 @@
         </div>
       </div>
       <p class="lp-legal">{% trans "No VAT is charged pursuant to § 19 UStG (German small business regulation). The prices are final prices." %}</p>
+      <p class="lp-legal" id="free-limits">{% trans "On the Free plan, Preceptly shows a notice pointing to the paid plans from the 6th student and from the 9th invoice in a calendar month. Nothing is blocked and everything is saved. Every student contract counts as a student (including ended ones); every invoice created in that month counts, including cancellation invoices." %}</p>
     </div>
   </section>
 

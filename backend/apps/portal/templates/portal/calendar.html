@@ -51,7 +51,7 @@
                     {% endfor %}
                     {% for slot in day.busy %}{% if not slot.is_own %}
                     <div style="background: rgba(239,68,68,0.12); border-left: 3px solid #ef4444; padding: 3px 5px; margin-bottom: 3px; border-radius: 0 2px 2px 0; font-size: 0.82em; color: var(--text-secondary);">
-                        <strong>{{ slot.start }}</strong>–{{ slot.end }} <span style="opacity:0.7;">Belegt</span>
+                        <strong>{{ slot.start }}</strong>–{{ slot.end }} <span>Belegt</span>
                     </div>
                     {% endif %}{% endfor %}
                 </div>

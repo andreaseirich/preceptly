@@ -62,10 +62,11 @@ class LandingFactsTest(TestCase):
         de = self.get("de").content.decode()
         en = self.get("en").content.decode()
 
-        self.assertIn(f"Bis zu {FREE_STUDENT_LIMIT} Schüler", de)
-        self.assertIn(f"Bis zu {FREE_INVOICE_MONTHLY_LIMIT} Rechnungen pro Monat", de)
-        self.assertIn(f"Up to {FREE_STUDENT_LIMIT} students", en)
-        self.assertIn(f"Up to {FREE_INVOICE_MONTHLY_LIMIT} invoices per month", en)
+        # Wortlaut und Zählregeln prüft test_free_tier_wording; hier nur: Die Zahlen kommen aus den Konstanten
+        self.assertIn(f"Gedacht für bis zu {FREE_STUDENT_LIMIT} Schüler", de)
+        self.assertIn(f"Gedacht für bis zu {FREE_INVOICE_MONTHLY_LIMIT} Rechnungen im Monat", de)
+        self.assertIn(f"Intended for up to {FREE_STUDENT_LIMIT} students", en)
+        self.assertIn(f"Intended for up to {FREE_INVOICE_MONTHLY_LIMIT} invoices per month", en)
 
     def test_there_is_no_plan_called_premium(self):
         """Tarife heißen Free, Starter, Pro und Business; „Premium“ als Etikett an Funktionen führte in die Irre."""

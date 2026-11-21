@@ -35,7 +35,7 @@
     {% if contract.default_travel_time_before_minutes or contract.default_travel_time_after_minutes %}<tr><th scope="row">{% trans "Standard travel time" %}</th><td>{% blocktrans with before=contract.default_travel_time_before_minutes after=contract.default_travel_time_after_minutes %}{{ before }} min before, {{ after }} min after{% endblocktrans %}</td></tr>{% endif %}
     <tr><th scope="row">{% trans "Contract start" %}</th><td>{{ contract.start_date }}</td></tr>
     <tr><th scope="row">{% trans "Contract end" %}</th><td>{{ contract.end_date|default:_("unlimited") }}</td></tr>
-    <tr><th scope="row">Status</th><td>{% if contract.is_active %}<span style="color: #28a745;">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
+    <tr><th scope="row">Status</th><td>{% if contract.is_active %}<span style="color: var(--success);">{% trans "Active" %}</span>{% else %}<span style="color: var(--text-secondary);">{% trans "Inactive" %}</span>{% endif %}</td></tr>
     <tr><th scope="row">{% trans "Created" %}</th><td>{{ contract.created_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
     <tr><th scope="row">{% trans "Last updated" %}</th><td>{{ contract.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
 </table>
@@ -114,7 +114,7 @@
     <div style="margin-bottom: 0.75em; padding-bottom: 0.75em; {% if not forloop.last %}border-bottom: 1px solid var(--border-color);{% endif %}">
       <strong>{{ pl.parent.user.email|default:pl.parent.user.username }}</strong>
       {% if pl.is_active %}
-        <span style="color: #28a745;">— {% icon "check" %} aktiv</span>
+        <span style="color: var(--success);">— {% icon "check" %} aktiv</span>
         <form method="post" action="{% url 'students:portal_login_reminder' contract.pk %}" style="margin-top: 0.5em; display:inline-block;">
           {% csrf_token %}
           <button type="submit" class="btn-sm btn-sm-secondary">{% icon "mail" %} Login-Erinnerung senden</button>

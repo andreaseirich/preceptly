@@ -79,6 +79,7 @@
   --on-success: #ffffff;
   --warning: #92450a;
   --danger: #a8321f;
+  --on-danger: #ffffff; /* Schrift auf Danger-Flächen: 6,7:1 */
   --info: #1b5fa8;
   --success-tint: #e4f1e3;
   --warning-tint: #fbefd5;
@@ -133,6 +134,7 @@
   --on-success: #0c2410;
   --warning: #f2b24a;
   --danger: #ff8a7a;
+  --on-danger: #2a0f0b; /* dunkle Schrift auf dem hellen Rot: 7,9:1 */
   --info: #7fb8f5;
   --success-tint: rgba(123, 216, 138, 0.14);
   --warning-tint: rgba(242, 178, 74, 0.14);
@@ -174,6 +176,7 @@
     --on-success: #0c2410;
     --warning: #f2b24a;
     --danger: #ff8a7a;
+    --on-danger: #2a0f0b; /* dunkle Schrift auf dem hellen Rot: 7,9:1 */
     --info: #7fb8f5;
     --success-tint: rgba(123, 216, 138, 0.14);
     --warning-tint: rgba(242, 178, 74, 0.14);

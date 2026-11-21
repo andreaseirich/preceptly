@@ -48,6 +48,7 @@
         <a href="{% url 'portal:login' %}" class="auth-link">
             {% trans "Go to the portal login" %}
         </a>
+        {% if LANGUAGE_CODE != "de" %}<p class="field-help">{% trans "The portal is currently available in German only." %}</p>{% endif %}
     </div>
 
     <div class="auth-aside auth-demo">

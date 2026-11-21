@@ -64,7 +64,7 @@
                             {% if lesson.id in conflicts_by_lesson %}
                             {% with conflict_reasons_text=conflicts_by_lesson|dict_get:lesson.id|conflict_reasons %}
                             <a href="{% url 'lessons:conflicts' lesson.pk %}" 
-                               style="color: #dc3545; text-decoration: none; margin-left: 5px;"
+                               style="color: var(--danger); text-decoration: none; margin-left: 5px;"
                                title="{% if conflict_reasons_text %}{% trans 'Conflict:' %} {{ conflict_reasons_text }}{% else %}{% trans 'Show conflict details' %}{% endif %}">{% icon "triangle-alert" %} {% trans "Details" %}</a>
                             {% endwith %}
                             {% endif %}

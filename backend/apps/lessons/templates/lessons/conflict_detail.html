@@ -21,7 +21,7 @@
 
 {% if conflict_lessons or conflict_blocked_times or quota_conflicts %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% trans "Conflict reasons" %}</h2>
+    <h2 style="color: var(--danger); margin-top: 0;">{% trans "Conflict reasons" %}</h2>
     <ul style="margin-bottom: 0;">
         {% for conflict in conflicts %}
         <li style="margin-bottom: 8px;"><strong>{{ conflict.message }}</strong></li>
@@ -32,7 +32,7 @@
 
 {% if conflict_lessons %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h2>
+    <h2 style="color: var(--danger); margin-top: 0;">{% blocktrans count counter=conflict_lessons|length %}Conflicting Lesson{% plural %}Conflicting Lessons ({{ counter }}){% endblocktrans %}</h2>
     
     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
         <thead>
@@ -62,7 +62,7 @@
 
 {% if conflict_blocked_times %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% blocktrans count counter=conflict_blocked_times|length %}Conflicting Blocked Time{% plural %}Conflicting Blocked Times ({{ counter }}){% endblocktrans %}</h2>
+    <h2 style="color: var(--danger); margin-top: 0;">{% blocktrans count counter=conflict_blocked_times|length %}Conflicting Blocked Time{% plural %}Conflicting Blocked Times ({{ counter }}){% endblocktrans %}</h2>
     <ul>
         {% for blocked_time in conflict_blocked_times %}
         <li style="margin-bottom: 10px;">
@@ -79,7 +79,7 @@
 
 {% if quota_conflicts %}
 <div class="alert-danger" style="margin-bottom: 20px;">
-    <h2 style="color: #dc3545; margin-top: 0;">{% icon "chart-column" %} {% blocktrans count counter=quota_conflicts|length %}Contract Quota Conflict{% plural %}Contract Quota Conflicts ({{ counter }}){% endblocktrans %}</h2>
+    <h2 style="color: var(--danger); margin-top: 0;">{% icon "chart-column" %} {% blocktrans count counter=quota_conflicts|length %}Contract Quota Conflict{% plural %}Contract Quota Conflicts ({{ counter }}){% endblocktrans %}</h2>
     <ul>
         {% for conflict in quota_conflicts %}
         <li style="margin-bottom: 10px;">
