@@ -332,10 +332,13 @@ Themenwahl“ kam nirgends vor. Seitdem gibt es die Matrix (Browser) und den Wä
 Korrektur (`/login/`) 1244 Prüfungen mit 180 Verstößen in 12 von 16 Fällen (je 60 bei Ausrichtung, Escape-Schließen und Fokus-Rückgabe; die vier Fälle ohne JavaScript haben keine Schublade) und gegen die Spiegelung des korrigierten Stands
 (`/login/`, `/`, `/dashboard/`) 3732 Prüfungen ohne Verstoß in 48 Fällen.
 
-**Weiterhin offen (kein Fehler der Anwendung oder nicht Teil der Korrektur):**
+**Geprüft, kein Handlungsbedarf (22.11.2026):**
 
-- Der Sprunglink des eRecht24-Widgets überdeckt bei Tastaturfokus kurz das Logo. Das ist das Verhalten des Drittanbieter-Skripts und wird nicht verändert.
-- Einzelne Antworten der Anmeldeseiten brauchten kurz nach dem Deployment 1,8 bis 2,6 s (sonst unter 1,1 s); keine Fehler im Protokoll, kein Vergleichswert. Eine Beobachtung, kein Fehler.
+- **Sprunglink des eRecht24-Widgets:** Auf der Startseite gibt es zwei Sprunglinks, beide `position: fixed` am oberen Rand und nur bei Tastaturfokus sichtbar. Der erste Tab geht auf den des Widgets („Zum Widerrufsformular springen“, links oben, `z-index` 9999), der zweite auf unseren („Zum Hauptinhalt springen“, mittig, `z-index` 10000). Der Widget-Link überdeckt bei Fokus kurz das Logo, wie jeder Sprunglink die Kopfzeile überdeckt. Eine Änderung hieße, die Darstellung eines rechtlich relevanten Drittanbieter-Widgets mit eigenen Regeln zu überschreiben (fragil, ohne Nutzen); sie unterbleibt. Ungewöhnlich ist nur die Reihenfolge (Widerrufslink vor „Zum Hauptinhalt springen“); sie ist die Vorgabe des Anbieters.
+- **Antwortzeiten:** Die 1,8 bis 2,6 s einzelner Antworten der Anmeldeseiten kurz nach dem Deployment kamen vom frisch gestarteten Container. Spätere Messung: 75 Abrufe, 0,22 bis 0,40 s bis zum ersten Byte, statische Dateien gleich schnell (0,23 s), rund 0,2 s davon Netz (DNS, TCP, TLS); kein Ausreißer.
+
+**Weiterhin offen (nicht Teil der Korrektur):**
+
 - Weitere deutsche Festtexte im Dashboard-Quelltext (zum Beispiel das `aria-label` der Stundentabelle) sind nicht Teil dieser Korrektur und wurden nicht geändert.
 
 ### Wesentliche Risiken
