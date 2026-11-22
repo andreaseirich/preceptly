@@ -94,7 +94,7 @@
 {% if contract_details %}
 <h2>{% trans "Top 5 students by revenue (selected month)" %}</h2>
 <p class="tutorflow-kpi-hint">{% trans "Amounts from paid invoices linked to each contract; lesson count = taught/paid sessions dated in the selected month." %}</p>
-<table class="table" aria-label="Top 5 Schüler nach Umsatz">
+<table class="table" aria-label="{% trans 'Top 5 students by revenue' %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Student" %}</th>

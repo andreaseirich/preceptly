@@ -17,7 +17,7 @@
 
 <h2>{% trans "Today's Lessons" %}</h2>
 {% if today_lessons %}
-<table aria-label="Heutige Stunden">
+<table aria-label="{% trans "Today's Lessons" %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Time" %}</th>
@@ -49,7 +49,7 @@
 
 <h2>{% trans "Upcoming Lessons (7 days)" %}</h2>
 {% if upcoming_lessons %}
-<table aria-label="Kommende Stunden">
+<table aria-label="{% trans 'Upcoming lessons' %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Date" %}</th>

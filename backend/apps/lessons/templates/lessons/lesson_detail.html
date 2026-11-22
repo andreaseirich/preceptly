@@ -28,7 +28,7 @@
 
 <div class="box-section" style="margin-bottom: 20px;">
     <h2>Details</h2>
-    <table style="width: 100%;" aria-label="Lektionsdetails">
+    <table style="width: 100%;" aria-label="{% trans 'Lesson details' %}">
         <tr style="border-bottom: 1px solid var(--border-color);">
             <th scope="row" style="padding: 8px; color: var(--text-secondary); width: 35%;">{% trans "Date:" %}</th>
             <td style="padding: 8px; color: var(--text-primary);">{{ lesson.date|date:"d.m.Y" }}</td>
@@ -179,7 +179,7 @@
     
     {% if conflict_lessons %}
     <h3>Kollidierende Stunden ({{ conflict_lessons|length }})</h3>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" aria-label="Kollidierende Stunden">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" aria-label="{% trans 'Conflicting lessons' %}">
         <thead>
             <tr style="background: var(--table-header-bg);">
                 <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">Datum</th>
@@ -263,7 +263,7 @@
         <input type="hidden" name="next" value="{% url 'lessons:detail' lesson.pk %}?year={{ year|default:lesson.date.year }}&month={{ month|default:lesson.date.month }}&day={{ day|default:lesson.date.day }}">
         <div style="margin-bottom: 10px;">
             <label for="id_extra_notes" style="display: block; margin-bottom: 4px;">Zusätzliche Hinweise für die KI (optional)</label>
-            <textarea name="extra_notes" id="id_extra_notes" rows="3" maxlength="2000" style="width: 100%;" placeholder="z. B. Schwerpunkte, Schwächen des Schülers, besondere Wünsche..."></textarea>
+            <textarea name="extra_notes" id="id_extra_notes" rows="3" maxlength="2000" style="width: 100%;" placeholder="{% trans 'e.g. focus areas, weak points of the student, special requests...' %}"></textarea>
         </div>
         <div style="margin-bottom: 10px;">
             <label for="id_extra_pdf" style="display: block; margin-bottom: 4px;">Material als PDF hochladen (optional, max. 5 MB)</label>

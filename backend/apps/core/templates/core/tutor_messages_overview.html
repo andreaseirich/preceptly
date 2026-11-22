@@ -75,7 +75,7 @@
 <p style="color:var(--text-secondary); font-size:0.88em; margin-bottom:18px;">
     {{ threads|length }} Chat{% if threads|length != 1 %}s{% endif %} mit Schülern und Eltern im Portal
 </p>
-<section aria-label="Nachrichtenübersicht">
+<section aria-label="{% trans 'Message overview' %}">
 <div class="thread-list">
 {% for t in threads %}
 <a class="thread-card" href="{% url 'core:tutor_messages' t.contract.pk %}">

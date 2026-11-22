@@ -27,7 +27,7 @@
 <p class="tutorflow-kpi-hint">{% trans "Only lessons on invoices marked paid. Each lesson counts in the calendar month it actually took place - not the month the invoice's billing period starts." %}</p>
 
 <h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% trans "lessons dated in this month" %})</span></h3>
-<table aria-label="Beträge nach Stundenstatus">
+<table aria-label="{% trans 'Amounts by lesson status' %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Status" %}</th>
@@ -61,7 +61,7 @@
 
 <h3>{% trans "Monthly Breakdown" %}</h3>
 <p class="tutorflow-kpi-hint">{% trans "The recognized revenue column sums lessons that took place in that month and are on a paid invoice." %}</p>
-<table class="table" aria-label="Monatsübersicht">
+<table class="table" aria-label="{% trans 'Monthly overview' %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Month" %}</th>
@@ -99,7 +99,7 @@
 </table>
 
 <h3>{% trans "Amounts by lesson status" %} <span class="text-muted" style="font-weight: normal; font-size: 0.88em;">({% blocktrans with yr=year %}lessons dated in {{ yr }}{% endblocktrans %})</span></h3>
-<table aria-label="Beträge nach Stundenstatus (Jahresansicht)">
+<table aria-label="{% trans 'Amounts by lesson status (year view)' %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Status" %}</th>

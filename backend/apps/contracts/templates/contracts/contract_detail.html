@@ -15,7 +15,7 @@
 </div>
 
 <h2>Persönliche Daten</h2>
-<table aria-label="Persönliche Daten">
+<table aria-label="{% trans 'Personal data' %}">
     <tr><th scope="row">{% trans "First Name" %}</th><td>{{ contract.first_name }}</td></tr>
     <tr><th scope="row">{% trans "Last Name" %}</th><td>{{ contract.last_name }}</td></tr>
     {% if contract.email %}<tr><th scope="row">Schüler-E-Mail</th><td>{{ contract.email }}</td></tr>{% endif %}
@@ -71,7 +71,7 @@
 
 <h2>Stunden</h2>
 {% if contract.sessions.all %}
-<table aria-label="Lektionen">
+<table aria-label="{% trans 'Lessons table' %}">
     <thead>
         <tr>
             <th scope="col">Datum</th>
@@ -187,9 +187,9 @@
   {% endfor %}
   <form method="post" action="{% url 'students:progress_note_create' contract.pk %}" style="margin-top: 1em;">
     {% csrf_token %}
-    <label for="progress_note_text" class="sr-only">{% trans "Fortschrittsnotiz hinzufügen" %}</label>
-    <textarea name="text" id="progress_note_text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Fortschrittsnotiz hinzufügen...' %}"></textarea>
-    <button type="submit" class="btn-sm btn-sm-primary" style="margin-top: 6px;">{% trans "Speichern" %}</button>
+    <label for="progress_note_text" class="sr-only">{% trans "Add progress note" %}</label>
+    <textarea name="text" id="progress_note_text" rows="3" class="form-control" style="width: 100%; resize: vertical;" placeholder="{% trans 'Add progress note...' %}"></textarea>
+    <button type="submit" class="btn-sm btn-sm-primary" style="margin-top: 6px;">{% trans "Save" %}</button>
   </form>
 </div>
 {% endblock %}

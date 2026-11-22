@@ -12,7 +12,7 @@
 <form method="post">
     {% csrf_token %}
     <div class="btn-group">
-        <button type="submit" class="btn btn-danger" aria-label="Vertrag löschen">{% trans "Delete" %}</button>
+        <button type="submit" class="btn btn-danger" aria-label="{% trans 'Delete contract' %}">{% trans "Delete" %}</button>
         <a href="{% url 'contracts:detail' contract.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>

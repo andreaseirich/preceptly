@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Neue Oberfläche für Tutor-App, Portal und öffentliche Seiten (Tokens, Schriften, Icons; hell, dunkel und „Gerät dunkel“), „du“ im Portal, Free-Tarif als weiche Hinweise auf Schülerverträge, Portal nur deutsch. Veröffentlicht als `0f4e7e2` (22.11.2026, 14:10 UTC, ausgeliefert 14:24 UTC). Einzelheiten, Prüfungen und Grenzen: `docs/features/feat-designsystem-kladde.md`.
 - Fix: Die Kopfzeile zeigte im dunklen Thema (Gerät dunkel) bis 1100 px Schriftzug und Icon zugleich und lief auf öffentlichen Seiten bei 360 und 390 px seitlich über (Sprachwahl abgeschnitten). Ursache war die Spezifität der Logo-Regeln in `components.css`; Korrektur über `:where()`, Wächter `test_logo_cascade.py`, Browser-Matrix `scripts/browser/header-logo-regression.cjs`.
 - Fix: Mobilmenü: Escape schließt das offene Menü und gibt den Fokus zurück, die Überschriften der aufklappbaren Bereiche stehen linksbündig neben dem Symbol; der Bewertungsablauf im Dashboard folgt der Sprache (englische Quelltexte, deutsche Texte unverändert).
+- Fix: Feste deutsche `aria-label`, `title`, `placeholder` und ein deutscher Quelltext in der Tutor-App sind übersetzbar (englische Quelltexte, deutsche Texte unverändert); Wächter `test_fixed_texts_i18n.py`.
 
 ### Audit (2026-07-11) — Fixes erledigt (2026-07-11)
 Three security/quality audits completed; all medium findings fixed. Findings documented in `docs/audits/`:

@@ -41,7 +41,7 @@
     </div>
     {% endif %}
     <div class="btn-group">
-        <button type="submit" class="btn btn-danger" aria-label="Lektion löschen">{% trans "Confirm Delete" %}</button>
+        <button type="submit" class="btn btn-danger" aria-label="{% trans 'Delete lesson' %}">{% trans "Confirm Delete" %}</button>
         <a href="{% url 'lessons:detail' object.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
     </div>
 </form>

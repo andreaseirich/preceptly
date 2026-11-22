@@ -79,7 +79,7 @@
     <h2>{% blocktrans count counter=billable_lessons|length %}Available Lesson ({{ counter }}){% plural %}Available Lessons ({{ counter }}){% endblocktrans %}</h2>
     <p>{% trans "These lessons will be automatically included in the invoice:" %}</p>
     
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;" aria-label="Abrechnungsfähige Lektionen">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;" aria-label="{% trans 'Billable lessons' %}">
         <thead>
             <tr style="background: var(--table-header-bg);">
                 <th scope="col" style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">{% trans "Date" %}</th>

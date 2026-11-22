@@ -13,7 +13,7 @@
 </div>
 
 <h2>{% trans "Details" %}</h2>
-<table aria-label="Wiederkehrende Lektion">
+<table aria-label="{% trans 'Recurring lesson' %}">
     <tr><th scope="row">{% trans "Student" %}</th><td><a href="{% url 'contracts:detail' recurring_lesson.contract.student.pk %}">{{ recurring_lesson.contract.student }}</a></td></tr>
     <tr><th scope="row">{% trans "Weekdays" %}</th><td>{{ recurring_lesson.get_active_weekdays_display }}</td></tr>
     <tr><th scope="row">{% trans "Start Date" %}</th><td>{{ recurring_lesson.start_date }}</td></tr>

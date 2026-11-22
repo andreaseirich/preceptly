@@ -150,6 +150,7 @@ Neu:
   Überschriften erweitert. Sie läuft nicht in der CI (sie braucht einen Browser); die Anleitung steht im Kopf der Datei.
 - `apps/core/tests/test_mobile_nav.py`: Das Menü-Skript schließt das offene Menü bei Escape und gibt den Fokus zurück; im Mobilmenü stehen die Überschriften neben dem Symbol und der Pfeil am rechten Rand (Quelltext von `base.html`, `shell.css`).
 - `apps/core/tests/test_review_prompt_i18n.py`: Hinweis, Knopf und Dialog des Bewertungsablaufs im Dashboard folgen der Sprache; die deutsche Oberfläche zeigt wörtlich die bisherigen Texte.
+- `apps/core/tests/test_fixed_texts_i18n.py`: Wächter gegen feste deutsche `aria-label`, `title`, `placeholder` und `alt` sowie deutsche `trans`-Quelltexte in den Vorlagen der Tutor-App; dazu die Sprachprüfung der Studentenliste.
 - Angepasst, weil sich Markup bewusst geändert hat (die Absicht der Tests bleibt): `test_contrast_tokens.py` (liest `tokens.css`),
   `test_calendar_site_texts.py` (Gruppen „Im Free-Tarif“, „Ab dem Pro-Tarif“; zusätzlich: Meetingräume und KI stehen nur dort), `test_faq_pages.py` (das Icon-Sprite ist kein
   Sprunglink), `test_i18n.py`, `test_week_view_click_behavior.py` (SVG statt Emoji), `portal/test_login_page.py`, `portal/test_week_picker.py`,
@@ -337,9 +338,11 @@ Korrektur (`/login/`) 1244 Prüfungen mit 180 Verstößen in 12 von 16 Fällen (
 - **Sprunglink des eRecht24-Widgets:** Auf der Startseite gibt es zwei Sprunglinks, beide `position: fixed` am oberen Rand und nur bei Tastaturfokus sichtbar. Der erste Tab geht auf den des Widgets („Zum Widerrufsformular springen“, links oben, `z-index` 9999), der zweite auf unseren („Zum Hauptinhalt springen“, mittig, `z-index` 10000). Der Widget-Link überdeckt bei Fokus kurz das Logo, wie jeder Sprunglink die Kopfzeile überdeckt. Eine Änderung hieße, die Darstellung eines rechtlich relevanten Drittanbieter-Widgets mit eigenen Regeln zu überschreiben (fragil, ohne Nutzen); sie unterbleibt. Ungewöhnlich ist nur die Reihenfolge (Widerrufslink vor „Zum Hauptinhalt springen“); sie ist die Vorgabe des Anbieters.
 - **Antwortzeiten:** Die 1,8 bis 2,6 s einzelner Antworten der Anmeldeseiten kurz nach dem Deployment kamen vom frisch gestarteten Container. Spätere Messung: 75 Abrufe, 0,22 bis 0,40 s bis zum ersten Byte, statische Dateien gleich schnell (0,23 s), rund 0,2 s davon Netz (DNS, TCP, TLS); kein Ausreißer.
 
-**Weiterhin offen (nicht Teil der Korrektur):**
-
-- Weitere deutsche Festtexte im Dashboard-Quelltext (zum Beispiel das `aria-label` der Stundentabelle) sind nicht Teil dieser Korrektur und wurden nicht geändert.
+**Behoben: feste deutsche Texte in der Tutor-App.** Eine Durchsicht aller Vorlagen der Tutor-App (Portal, E-Mails, Rechtstexte, PDF, Meetingraum und FAQ sind bewusst deutsch beziehungsweise ausgenommen) fand 25 feste deutsche Stellen:
+22 `aria-label`, `title` und `placeholder` (zum Beispiel „Heutige Stunden“, „Schülerliste“, „Dokument löschen“) und drei deutsche Quelltexte („Fortschrittsnotiz hinzufügen“ zweimal, „Speichern“). Screenreader lasen sie in der englischen
+Oberfläche deutsch vor. Die Quelltexte sind jetzt englisch (vorhandene Einträge wie `Today's Lessons`, `Amounts by lesson status` und `Save` wurden wiederverwendet, 18 neue angelegt, zwei vorhandene deutsche Einträge umgestellt), die deutsche Fassung ist wörtlich der bisherige Text.
+Der Wächter `apps/core/tests/test_fixed_texts_i18n.py` findet solche Stellen künftig; er schlug vor der Änderung fehl. Fehlalarme bleiben außen vor: der Fachbegriff „EÜR“ und ein Personenname im Beispieltext. Getestet: 873 Tests in `core` und `billing`,
+469 in `contracts`, `lessons`, `students` und den verwandten Tests, alle bestanden. Es gibt nichts mehr, was in diesem Abschnitt offen ist.
 
 ### Wesentliche Risiken
 

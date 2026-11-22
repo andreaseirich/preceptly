@@ -2276,11 +2276,11 @@ msgid "Noch keine Fortschrittsnotizen."
 msgstr "Noch keine Fortschrittsnotizen."
 
 #: apps/contracts/templates/contracts/contract_detail.html:162
-msgid "Fortschrittsnotiz hinzufügen"
+msgid "Add progress note"
 msgstr "Fortschrittsnotiz hinzufügen"
 
 #: apps/contracts/templates/contracts/contract_detail.html:163
-msgid "Fortschrittsnotiz hinzufügen..."
+msgid "Add progress note..."
 msgstr "Fortschrittsnotiz hinzufügen..."
 
 #: apps/contracts/templates/contracts/contract_detail.html:164
@@ -8092,3 +8092,57 @@ msgstr "Im Free-Tarif zeigt Preceptly einen Hinweis auf die bezahlten Tarife, we
 
 msgid "The portal is currently available in German only."
 msgstr "Das Portal gibt es derzeit nur auf Deutsch."
+
+msgid "Delete contract"
+msgstr "Vertrag löschen"
+
+msgid "Personal data"
+msgstr "Persönliche Daten"
+
+msgid "Student list"
+msgstr "Schülerliste"
+
+msgid "Delete lesson"
+msgstr "Lektion löschen"
+
+msgid "Delete document"
+msgstr "Dokument löschen"
+
+msgid "Top 5 students by revenue"
+msgstr "Top 5 Schüler nach Umsatz"
+
+msgid "Message overview"
+msgstr "Nachrichtenübersicht"
+
+msgid "Billable lessons"
+msgstr "Abrechnungsfähige Lektionen"
+
+msgid "Monthly overview"
+msgstr "Monatsübersicht"
+
+msgid "Amounts by lesson status (year view)"
+msgstr "Beträge nach Stundenstatus (Jahresansicht)"
+
+msgid "e.g. focus areas, weak points of the student, special requests..."
+msgstr "z. B. Schwerpunkte, Schwächen des Schülers, besondere Wünsche..."
+
+msgid "Lessons table"
+msgstr "Lektionen"
+
+msgid "Recurring lesson"
+msgstr "Wiederkehrende Lektion"
+
+msgid "Recurring lessons"
+msgstr "Wiederkehrende Lektionen"
+
+msgid "Lesson list"
+msgstr "Lektionsliste"
+
+msgid "Lesson details"
+msgstr "Lektionsdetails"
+
+msgid "Conflicting lessons"
+msgstr "Kollidierende Stunden"
+
+msgid "Upcoming lessons"
+msgstr "Kommende Stunden"

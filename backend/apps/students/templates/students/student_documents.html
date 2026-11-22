@@ -72,7 +72,7 @@
         <form method="post" action="{% url 'students:document_delete' student.pk doc.pk %}"
           style="display:inline" data-confirm="Dokument löschen?">
           {% csrf_token %}
-          <button type="submit" class="btn-sm btn-sm-danger" aria-label="Dokument löschen" title="Dokument löschen">{% icon "x" %}</button>
+          <button type="submit" class="btn-sm btn-sm-danger" aria-label="{% trans 'Delete document' %}" title="{% trans 'Delete document' %}">{% icon "x" %}</button>
         </form>
       </td>
     </tr>
