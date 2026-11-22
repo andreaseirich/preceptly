@@ -1,10 +1,11 @@
 # Designsystem „Kladde“: Überarbeitung von Gestaltung, Texten und Technik
 
-**Stand:** 21.11.2026 · Auftrag von Andreas: Preceptly „gestalterisch, inhaltlich und technisch“ vollständig überarbeiten.
-**Nicht veröffentlicht, nicht gemergt, nicht gepusht.** Der Stand liegt auf dem Zweig `redesign/preview` in der Arbeitskopie `/root/agents/tutorflow-redesign`.
-**Abschließender Stand:** Der oberste Commit des Zweigs (`git log -1 redesign/preview`) enthält dieses Dokument und ist der zur Veröffentlichung vorgesehene Stand. Der Commit mit dem
-gesamten Code davor ist `a0356f9` (Code, Übersetzungen und Tests; darin die letzte Textkorrektur zur Tarifbeschreibung vom 21.11.2026). Test-Suite: vollständig 1824 Tests, alle bestanden
-(5 übersprungen), am Stand `6832107`; seitdem änderten sich nur Texte, Übersetzungen, PRD und Tests (`a0356f9`), die gezielt nachgeprüft wurden (Abschnitt „Tests“).
+**Stand:** 22.11.2026 · Auftrag von Andreas: Preceptly „gestalterisch, inhaltlich und technisch“ vollständig überarbeiten.
+**Veröffentlicht am 22.11.2026** als `0f4e7e2` auf `main` (Push 14:10 UTC, von Railway ausgeliefert 14:24 UTC; Abschnitt „Veröffentlichen und Zurücknehmen“). Entwickelt wurde es auf dem Zweig `redesign/preview`
+in der Arbeitskopie `/root/agents/tutorflow-redesign`. Der oberste Commit von `main` (`git log -1`) enthält zusätzlich die Korrektur der Kopfzeile im dunklen Thema, die Browser-Regressionsprüfung dafür
+und dieses Dokument.
+**Tests:** vollständig 1824 Tests OK (21.11., Stand `6832107`) und 1834 Tests OK im Pre-Push-Hook der Veröffentlichung (22.11., `0f4e7e2`, jeweils 5 übersprungen); zu den Änderungen danach siehe „Tests“ und
+„Nachträgliche Korrektur“.
 
 ## Ausgangslage
 
@@ -143,6 +144,10 @@ Neu:
 - `apps/portal/test_portal_language.py`: Portal bleibt mit englischem Sprachcookie deutsch; die englische Start- und Anmeldeseite nennen es.
 - `apps/core/tests/test_next_redirects.py`: `?next=` intern befolgt, fünf externe Schreibweisen abgelehnt (Tutor-Anmeldung, Portal-Anmeldung, Sprachwahl).
 - `apps/core/tests/test_theme_shell.py`, `apps/students/test_delete_confirm.py`, `apps/lessons/tests/test_week_block_colours.py`, `apps/lessons/tests/test_reschedule_cancel_link.py`.
+- `apps/core/tests/test_logo_cascade.py` (22.11.2026): Wächter für die Kaskade der Logo-Regeln am Stylesheet (Themen-Selektoren in `:where()`; die Regel, die den Schriftzug bis 1100 px ausblendet, schlägt jede Themen-Regel);
+  mit der alten CSS-Datei fällt er durch.
+- `scripts/browser/header-logo-regression.cjs` (22.11.2026): Browser-Matrix für die Kopfzeile (Logovariante, Sprachwahl, Navigation, Überlauf), siehe „Nachträgliche Korrektur“. Sie läuft nicht in der CI (sie braucht einen Browser);
+  die Anleitung steht im Kopf der Datei.
 - Angepasst, weil sich Markup bewusst geändert hat (die Absicht der Tests bleibt): `test_contrast_tokens.py` (liest `tokens.css`),
   `test_calendar_site_texts.py` (Gruppen „Im Free-Tarif“, „Ab dem Pro-Tarif“; zusätzlich: Meetingräume und KI stehen nur dort), `test_faq_pages.py` (das Icon-Sprite ist kein
   Sprunglink), `test_i18n.py`, `test_week_view_click_behavior.py` (SVG statt Emoji), `portal/test_login_page.py`, `portal/test_week_picker.py`,
@@ -208,6 +213,8 @@ Dazu: Seit `ce2ea1f` hat sich keine E-Mail-Vorlage, kein PDF-Code und kein `room
 
 ## Vorschau und Isolation (präzise)
 
+*Stand 22.11.2026: Der Zweig ist veröffentlicht. Dieser Abschnitt beschreibt die Isolation der Vorschau-Phase davor; der Klon `/root/agents/tutorflow-redesign` hat weiterhin keinen Remote.*
+
 **Was tatsächlich fehlt (Anbindung an das Deployment):** Der Klon `/root/agents/tutorflow-redesign` hat **keinen Remote** (`git remote` ist leer; `origin` wurde nach dem Klonen entfernt).
 Von dort aus kann also nichts zu GitHub gepusht werden. Veröffentlicht wird Preceptly über GitHub-Actions und Railway nach einem Push des Hauptklons (`/root/bin/preceptly-push.sh`);
 diesen Weg gibt es aus dem Klon nicht. Der Zweig `redesign/preview` existiert nur in diesem Klon.
@@ -227,97 +234,109 @@ Die Vorschau bleibt nur so isoliert, wie sie unten beschrieben ist.
 
 ## Veröffentlichen und Zurücknehmen
 
-Geprüft am 21.11.2026 gegen den tatsächlichen Stand von Hauptklon, GitHub und Railway (nur lesend; der Hauptklon wurde nicht verändert). **Die Veröffentlichung braucht Andreas'
-ausdrückliche Freigabe.** Bis dahin ist nichts gemergt, gepusht oder deployt.
+**Stand 22.11.2026: veröffentlicht.** Andreas gab die Veröffentlichung von `0f4e7e2` ausdrücklich frei. `redesign/preview` wurde per Fast-Forward in `main` übernommen und um 14:10 UTC gepusht, Railway lieferte es um 14:24 UTC aus.
+Danach fand die Live-Prüfung einen Fehler in der Kopfzeile im dunklen Thema; die Korrektur (nächster Abschnitt) steht im obersten Commit von `main` (`git log -1`), zusammen mit diesem Dokument. Der Klon
+`/root/agents/tutorflow-redesign` hat weiterhin keinen Remote; veröffentlicht wird aus dem Hauptklon `/root/agents/tutorflow`.
 
-### Stand vor der Veröffentlichung
+### Verlauf vom 22.11.2026 (UTC)
 
-- Hauptklon `/root/agents/tutorflow`: Zweig `main` auf `ce2ea1f`, Arbeitsbaum sauber (nur der nicht versionierte Ordner `.agent_knowledge/`). GitHub `origin/main`: ebenfalls `ce2ea1f`.
-- Seit der Abzweigung gibt es **keinen** Commit auf `main`. `redesign/preview` lässt sich deshalb vorspulen (**Fast-Forward**): kein Merge-Commit, keine Konflikte. `git merge-tree` liefert einen
-  sauberen Baum, der mit dem Baum der Zweigspitze identisch ist.
-- Der Zweig enthält keine Migration und ändert weder Abhängigkeiten noch `Dockerfile`, `railway.json`, `scripts/` oder die Workflows. Außerhalb von `backend/`, `docs/` und `PRD.md` ändert er nur
-  `CLAUDE.md` (Abschnitt „Gestaltung“ für Agenten).
-- Zur Veröffentlichung vorgesehen ist die **Spitze von `redesign/preview`** (`git rev-parse redesign/preview`). Der Code liegt in `a0356f9`; darüber liegt nur dieses Dokument.
+| Zeit | Schritt | Ergebnis |
+|---|---|---|
+| 13:55 | Vorab-Prüfung | `origin/main` = Hauptklon = `ce2ea1f`, Hauptklon sauber, Zweigspitze `0f4e7e2`, Pre-Push-Hook seit 18.06. unverändert |
+| 13:55 | Zeitgrenze im Push-Skript | nur Zeile 8: `timeout 900 git push` → `timeout 1800 git push` (Hooks und Schutzprüfungen unverändert); Original: `/root/bin/preceptly-push.sh.bak-20261122-vor-timeout` |
+| 13:56–14:10 | `git merge --ff-only`, dann `preceptly-push.sh` | Hook: `ruff check`, `compileall`, **1834 Tests OK (5 übersprungen) in 845 s**; Push `ce2ea1f..0f4e7e2` um 14:10 |
+| 14:10–14:24 | GitHub Actions | Hygiene, Dependency Submission und CodeQL grün (14 s bis 2 min), **CI grün um 14:23:55 (13 min 6 s)** |
+| 14:10:52–14:24:22 | Railway | Deployment `in_progress` ab 14:10:52, `success` um 14:24:22; Containerstart 14:24 UTC, „No migrations to apply“, danach keine Fehler und keine Neustarts im Protokoll |
+| 14:24 | Ausgeliefert | `railway status --json` → `meta.commitHash` = `0f4e7e2f3f8fbfeb9dc9790e585bbdb0728072d3` (SUCCESS, Instanz RUNNING); GitHub-`main`, Hauptklon und Zweigspitze zeigen auf denselben Commit |
 
-### Probelauf (getrennter Klon, `tools/publish_rehearsal.sh`)
+- **„Online“ reicht nicht als Nachweis.** In Railway ist kein Healthcheck konfiguriert (`healthcheckPath` leer); „Online“ heißt nur, dass der Container läuft. Die Version belegt `meta.commitHash`.
+- **Abhängigkeit von der CI:** Die Railway-Einstellung „auf CI warten“ ist per CLI nicht lesbar (`railway status --json` enthält keinen passenden Schlüssel, `railway config pull` braucht das Railway-TypeScript-SDK). Der Zeitverlauf
+  spricht dafür: Bei drei Commits stand das Deployment 22, 28 und 27 Sekunden nach dem CI-Ende auf `success`, obwohl es Sekunden nach dem Push auf `in_progress` ging. Belegt ist das Verhalten, nicht die Einstellung.
+- **Zeitgrenze:** Der Hook brauchte 845 s. Die frühere Grenze von 900 s für `git push` samt Hook hätte kaum gereicht und bei Überschreitung nichts gepusht („TESTS FAILED - not pushed“).
 
-Der Klon `/root/agents/tutorflow-publish-check` entsteht aus dem Hauptklon (nur gelesen) und hat keinen Remote, ein Push von dort ist nicht möglich.
+### Live-Prüfung (so ausgeführt)
+
+Passwörter gibt der Agent nicht in Anmeldeformulare der Produktion ein, auch nicht die öffentlichen Demo-Zugänge; Andreas meldete sich selbst im Browserfenster an.
+
+- **Ohne Anmeldung (HTTP):** 11 Seiten 200, 404-Seite 404, je genau ein `<h1>`; neue Free-Texte vorhanden, alter Text fehlt; alle Stylesheets und beide Schriften 200; CSP mit `font-src 'self'` und Skript-Nonce; Sprachwechsel setzt
+  `django_language`; ein externes `next` im Sprachwechsel (drei Schreibweisen) landet immer auf `https://preceptly.de/`; das Portal bleibt mit englischem Cookie deutsch; `/students/` ohne Sitzung leitet auf die Anmeldung mit `next` um.
+- **Ohne Anmeldung (frischer Browserkontext, 36 Prüfungen, 0 Fehler):** Themenwechsel bleibt nach dem Neuladen, Sprachwechsel DE/EN/DE, alle öffentlichen Seiten ohne Konsolenfehler und CSP-Verstöße, mobil kein Überlauf, Menü öffnet und schließt.
+- **Angemeldet (Demo-Konto, Business):** Dashboard, Themenwechsel, Sprachwechsel DE/EN/DE, Wochenansicht mit „Nächste Woche“, Monatskalender, Schülerliste, Löschseite (öffnet; „Abbrechen“ lässt alle vier Schüler stehen), „Termin verschieben“ mit
+  „Abbrechen“, `?next=` (extern → Dashboard, intern wird befolgt), mobil 390 px (Menü, Stundenliste: nur die Tabelle scrollt, Aktionen bleiben sichtbar).
+- **Portal-Anmeldung** hell und dunkel; **eRecht24:** Skript und Modal-Dateien geladen, Element vom Widget ergänzt, keine CSP-Meldung (der Button wurde nicht bedient).
+- **Nicht geprüft:** angemeldeter Portalbereich (kein Portal-Konto, Einladungen sind in der Demo gesperrt), Anlegen und Löschen von Datensätzen in der Produktion, Anmeldung mit `?next=` über das Formular, andere Browser als Chromium.
+
+### Nachträgliche Korrektur: Kopfzeile im dunklen Thema (22.11.2026)
+
+**Befund (Live-Prüfung):** Bei dunkler Geräteeinstellung zeigte die Kopfzeile bis 1100 px Breite Schriftzug **und** Icon. Auf öffentlichen Seiten kam bei 360 und 390 px das Home-Symbol hinzu: Sprachwahl und Anmelden-Symbol ragten aus dem Fenster, die
+Seite scrollte seitlich (bei 390 px rechte Kante der Sprachwahl bei 431 px). Hell und ab 1101 px war alles in Ordnung.
+
+**Ursache:** CSS-Spezifität. `shell.css` blendet den Schriftzug bis 1100 px mit `nav .nav-brand .logo-full { display: none }` aus (0,2,1). Im Block `@media (prefers-color-scheme: dark)` setzte
+`:root:not([data-theme="light"]) .logo--on-dark { display: block }` (0,3,0, `components.css`) ihn wieder ein. Die Bedingung `:not([data-theme="light"])` trifft auch dann, wenn das Seitenskript `data-theme="dark"` gesetzt hat, deshalb trat der Fehler
+mit und ohne gespeicherte Themenwahl auf. Der Fall „Thema ausdrücklich dunkel auf heller Geräteeinstellung“ blieb heil, weil `[data-theme="dark"] .logo--on-dark` (0,2,0) verliert.
+
+**Korrektur:** In `components.css` stehen die Themen-Selektoren der Logo-Fassung jetzt in `:where()` (Spezifität 0,1,0, wie `.logo--on-dark`). Sie wählen nur noch die Fassung und überstimmen keine Layout-Regel; unter gleicher Spezifität entscheidet die Reihenfolge
+(dunkle Fassung zuletzt, im Kommentar vermerkt). Es gibt keine zusätzliche überschreibende Sonderregel, `shell.css` ist unverändert.
+
+**Prüfung:**
 
 | Prüfung | Ergebnis |
 |---|---|
-| Zweig holen, Fast-Forward nach `main` | möglich; 0 Commits auf `main` seit der Abzweigung |
-| Konfliktprobe (`git merge-tree`) | sauber; Baum gleich dem Baum der Zweigspitze |
-| Rücknahme: ein Revert über den ganzen Bereich | gelingt ohne Konflikt; der Baum danach ist **Byte für Byte der von `ce2ea1f`** |
-| CI-Schritt „Repo hygiene“ (`scripts/repo_hygiene_check.sh`) | bestanden (Schriften `.woff2` sind versioniert, nicht von `.gitignore` erfasst) |
-| CI-Schritt „Django deploy check“ (`check --deploy --fail-level WARNING`) | bestanden |
-| `ruff format --check`, `ruff check`, `compileall` | bestanden |
-| `pip-audit -r requirements-dev.txt` (CI-Schritt „Dependency audit“) | keine bekannten Schwachstellen; die Abhängigkeiten sind unverändert |
+| Browser-Matrix `scripts/browser/header-logo-regression.cjs` gegen die **fehlerhafte Live-Seite** (`/login/`) | 1004 Prüfungen, **86 Verstöße in 6 von 16 Fällen**: Gerät dunkel ohne gespeicherte Wahl und mit gespeichert dunkel (je de/en) sowie ohne JavaScript; alle hellen Fälle und „Gerät dunkel, gespeichert hell“ bestanden |
+| dieselbe Matrix gegen die Spiegelung des korrigierten Stands (`/login/`, `/`, `/dashboard/`) | 3012 Prüfungen, **0 Verstöße in 48 Fällen** (öffentliche und angemeldete Kopfzeile; 360, 390, 768, 1099, 1100, 1101, 1440 px; Gerät hell/dunkel × gespeichert keins/hell/dunkel × de/en, dazu ohne JS) |
+| Wächter `apps/core/tests/test_logo_cascade.py` (5 Tests) | besteht; **mit der alten CSS-Datei schlägt er fehl** (5 Fehlschläge, 1 Fehler) |
+| verwandte Tests (`test_logo_cascade`, `test_component_colours`, `test_theme_shell`, `test_design_tokens`, `test_icons`) | 46 Tests OK |
 
-### Der Weg bis zur Produktion (aus Repository, Skript und GitHub gelesen)
+Die Matrix prüft je Fall: Thema im Dokument, genau die vorgesehene Logovariante in der Marke (bis 1100 px nur das Icon, ab 1101 px nur der Schriftzug in der Fassung des wirksamen Themas), Menüknopf nur bis 1100 px, Themenknopf, Konto-Symbole und Sprachwahl vollständig im
+Fenster, Navigation erreichbar (bis 1100 px nach dem Öffnen der Schublade, deren Logo ebenfalls zum Thema passt; das Menü schließt wieder) und keinen seitlichen Überlauf.
 
-1. **Push aus dem Hauptklon** mit `/root/bin/preceptly-push.sh`. Der Pre-Push-Hook startet `ruff check`, `compileall` und die **vollständige Test-Suite**. Auf dem Zweig brauchte sie 848 s.
-2. **GitHub Actions** auf `main`: *CI* (Hygiene, `pip-audit`, `check --deploy`, `ruff format`/`ruff check`, `compileall`, alle Tests; zuletzt rund 14 bis 18 Minuten), *Hygiene*, *CodeQL*, *Dependency Submission*.
-   Der Branch-Schutz verlangt die Prüfungen `test` und `hygiene`, gilt aber nicht für Administratoren (`enforce_admins` aus); Signaturen und Reviews sind nicht Pflicht. Ein direkter Push geht daher wie bisher.
-3. **Railway** (Projekt `tender-caring`, Umgebung `production`, Dienst `preceptly`, `www.preceptly.de`): Docker-Build, dann `scripts/entrypoint.sh` mit `migrate --noinput`, `collectstatic --noinput` und `daphne`. `compilemessages`
-   läuft im Build **nicht**; die Datei `django.mo` ist versioniert und im Commit neu übersetzt.
-   Bei den letzten beiden Commits stand der Railway-Status 22 und 28 Sekunden **nach dem Ende der CI** auf `success`, obwohl er Sekunden nach dem Push auf `in_progress` ging. Das passt zu einem Deployment, das auf die CI wartet.
-   Die Einstellung selbst ist von hier aus nicht lesbar; bei roter CI daher trotzdem Railway ansehen.
-4. Gesamtdauer: Hook rund 14 Minuten, CI rund 14 bis 18 Minuten, Deployment unter 2 Minuten, also etwa **30 bis 35 Minuten**.
+**Warum es vorher nicht auffiel:** Die Vorab-Prüfungen maßen Kontraste und den Überlauf der Seiten, aber nicht, welche Logovariante je Breite sichtbar ist, und sie setzten das Thema immer ausdrücklich. Die Kombination „dunkle Geräteeinstellung + schmaler Bildschirm + keine gespeicherte
+Themenwahl“ kam nirgends vor. Seitdem gibt es die Matrix (Browser) und den Wächter (Stylesheet, läuft im Test-Lauf der CI).
 
-### Schritte (erst nach ausdrücklicher Freigabe)
+### Ablauf für künftige Veröffentlichungen (so bewährt)
 
-0. **Vorab prüfen:** `git -C /root/agents/tutorflow ls-remote origin main` zeigt `ce2ea1f…`, `git -C /root/agents/tutorflow status --short` ist sauber. Ist `main` weitergelaufen (zum Beispiel durch einen
-   Dependabot-Commit), zuerst `bash /root/agents/tutorflow-redesign-tools/publish_rehearsal.sh` wiederholen und das Ergebnis neu bewerten.
-1. **Zeitgrenze anheben:** In `/root/bin/preceptly-push.sh` steht `timeout 900 git push`, und die 900 s gelten einschließlich des Hooks. Die Suite braucht rund 850 s, die Reserve ist unter einer Minute.
-   Läuft der Hook länger, bricht das Skript mit „TESTS FAILED - not pushed“ ab und pusht nichts (kein Schaden, aber ein verlorener Lauf). Vorher auf `timeout 1800 git push` stellen (Werkzeug, kein Anwendungscode).
-2. **Zweig übernehmen:** `cd /root/agents/tutorflow && git fetch /root/agents/tutorflow-redesign redesign/preview && git merge --ff-only FETCH_HEAD`.
-   Danach muss `git rev-parse HEAD` die vorgesehene Commit-Nummer zeigen. Bewusst **kein** `--no-ff`: So wird genau der geprüfte Commit veröffentlicht, ohne zusätzlichen ungeprüften Merge-Commit.
-3. `bash /root/bin/preceptly-push.sh`; Fortschritt in `/tmp/pd.log` (Tests, Push, CI, Railway).
-4. Prüfen, dass alle Läufe grün sind: `gh run list --repo andreaseirich/preceptly --commit <Hash>` und `railway status` (Online) aus `/root/agents/tutorflow/backend`.
-
-### Live-Prüfung danach
-
-Nur Lesezugriffe und das Demo-Konto (Testdaten, wird täglich zurückgesetzt, versendet keine E-Mails). Keine echten Konten, keine Zahlungen, keine neue Registrierung.
-
-1. **Technik:** Startseite (Deutsch und Englisch per Sprachcookie) liefert 200, genau ein `<h1>`, den Text „Gedacht für bis zu 5 Schülerverträge“ beziehungsweise „Intended for up to 5 student contracts“; Content-Security-Policy-Kopf vorhanden;
-   `tokens.<Hash>.css` und die beiden `.woff2`-Dateien liefern 200 (Schriften mit `font/woff2`); `/faq/`, `/login/`, Rechtstexte und eine nicht vorhandene Adresse (404) im neuen Aussehen.
-2. **Browser (hell und dunkel, Deutsch und Englisch, 1440 und 390 px):** Startseite mit Preisen und Fußnote, Anmeldung, Demo-Anmeldung, Dashboard, Wochen- und Monatsansicht, Schülerliste, Löschseite eines Demo-Schülers (nur öffnen und abbrechen),
-   Mobilmenü, Themenwechsel, Sprachwechsel; eine Stunde im Demo-Konto anlegen, verschieben (mit Abbrechen) und wieder löschen.
-3. **`?next=`:** Anmeldeseite mit `?next=https://example.org/` führt nach der Anmeldung nicht dorthin.
-4. **Portal:** Anmeldeseite, mit englischem Sprachcookie bleibt sie deutsch.
-5. **eRecht24-Widerrufsbutton:** Hier ist er zum ersten Mal prüfbar, weil das Skript in den lokalen Läufen blockiert war. Sichtprüfung in der Fußzeile (hell und dunkel) und die Konsole auf Fehler und CSP-Meldungen ansehen.
-6. **Protokolle:** `railway logs` auf Fehler seit dem Start ansehen; GitHub-Läufe grün.
+0. Vorab: `git -C /root/agents/tutorflow ls-remote origin main` zeigt den erwarteten Stand, `git -C /root/agents/tutorflow status --short` ist sauber. Ist `main` weitergelaufen (zum Beispiel durch Dependabot), zuerst
+   `bash /root/agents/tutorflow-redesign-tools/publish_rehearsal.sh` und das Ergebnis neu bewerten.
+1. Zweig übernehmen: `cd /root/agents/tutorflow && git fetch /root/agents/tutorflow-redesign redesign/preview && git merge --ff-only FETCH_HEAD`; `git rev-parse HEAD` muss die vorgesehene Commit-Nummer zeigen. Bewusst **kein** `--no-ff`.
+2. `bash /root/bin/preceptly-push.sh` (die Zeitgrenze steht jetzt auf 1800 s; Hook rund 14 Minuten, danach CI rund 14 Minuten, Deployment unter 1 Minute). Fortschritt in `/tmp/pd.log`. Von außen sichtbar: `gh run list --commit <Hash>`.
+3. Nachweis des ausgelieferten Commits: `railway status --json` → `meta.commitHash` des aktiven Deployments, nicht „Online“.
+4. Live-Prüfung wie oben; zusätzlich `node scripts/browser/header-logo-regression.cjs --base https://preceptly.de --paths /login/` in einem frischen Browserkontext (Anleitung im Kopf der Datei).
 
 ### Zurücknehmen
 
-- **Schnell (Railway):** Im Dashboard beim Dienst `preceptly` unter *Deployments* das Deployment von `ce2ea1f` wieder ausspielen. Das ist die kürzeste Dauer, wurde hier aber **nicht ausprobiert**.
+- **Schnell (Railway):** Im Dashboard beim Dienst `preceptly` unter *Deployments* das Deployment des vorigen Commits wieder ausspielen. Das wurde nicht ausprobiert.
 - **Über Git (im Probelauf bis auf den Baum nachgestellt):**
   ```
   cd /root/agents/tutorflow
-  git revert --no-commit ce2ea1f..<Spitze von redesign/preview>
-  git commit -m "revert: Kladde redesign (restores ce2ea1f)"
+  git revert --no-commit <Basis>..<Spitze>
+  git commit -m "revert: <Beschreibung>"
   bash /root/bin/preceptly-push.sh
   ```
-  Danach laufen Hook, CI und Railway wie oben (30 bis 35 Minuten). Sind inzwischen weitere Commits auf `main` hinzugekommen, bleibt die Rücknahme gültig, solange diese nicht dieselben Zeilen geändert haben; sonst sind Konflikte von Hand zu lösen.
-- **Daten:** Es gibt keine Migration und keine Datenbankänderung, also nichts zurückzurechnen. Der Service Worker legt `/static/` „cache first“ ab, aber die Dateinamen tragen einen Hash (Manifest-Speicher), und HTML kommt immer zuerst aus dem Netz:
-  Nach Deployment oder Rücknahme gibt es keine veralteten Stylesheets.
+  Für das Redesign ist `<Basis>` = `ce2ea1f`. Danach laufen Hook, CI und Railway wie oben (30 bis 35 Minuten). Es gibt keine Migration und keine Datenbankänderung. Der Service Worker legt `/static/` „cache first“ ab, aber die Dateinamen tragen einen
+  Hash, und HTML kommt immer zuerst aus dem Netz: Nach Deployment oder Rücknahme gibt es keine veralteten Stylesheets.
 
-### Wesentliche Risiken bei der Veröffentlichung
+### Offene Auffälligkeiten (bewusst nicht Teil der Korrektur)
+
+- Escape schließt das mobile Menü nicht (Tippen auf den Knopf oder daneben schließt es). Ob das früher anders war, ist nicht belegt.
+- Der Sprunglink des eRecht24-Widgets überdeckt bei Tastaturfokus kurz das Logo (Drittanbieter).
+- Die drei aufklappbaren Überschriften im Mobilmenü sind zentriert, die Links linksbündig.
+- Der Bewertungshinweis im Dashboard bleibt in der englischen Oberfläche deutsch (Quelltext ohne Übersetzung, schon vor dem Redesign).
+- Einzelne Antworten der Anmeldeseiten brauchten kurz nach dem Deployment 1,8 bis 2,6 s (sonst unter 1,1 s); keine Fehler im Protokoll, kein Vergleichswert.
+
+### Wesentliche Risiken
 
 - **Alle Nutzer sehen die neue Oberfläche auf einmal** (Tutor-App und Portal). Es gibt keine stufenweise Freigabe.
 - **Nur Chromium geprüft.** Safari, Firefox, echte Handys und Screenreader nicht.
-- **Umgebung der Produktion nicht nachgebildet:** PostgreSQL, Daphne mit WebSockets, TLS/HSTS, Railway-Proxy. Die Änderung berührt keine davon, ein Befund käme erst live.
-- **eRecht24-Widerrufsbutton** ungeprüft bis zur Live-Prüfung (Punkt 5); er sitzt in jeder Seite der Tutor-App.
-- **Zeitgrenze des Push-Skripts** (Schritt 1) und ein möglicher neuer `pip-audit`-Befund oder ein Dependabot-Commit zwischen Prüfung und Push. Beides kostet Zeit, gefährdet aber nicht den Stand von `main`.
+- **Umgebung der Produktion nicht nachgebildet** (PostgreSQL, Daphne mit WebSockets, TLS, Railway-Proxy). Die Änderung berührt sie nicht; Befunde zeigen sich erst live.
 - **Das Portal ist nur deutsch** (bewusst); wer mit englischem Sprachcookie ins Portal kommt, bekommt Deutsch.
 
 ## Verbleibende Prüfgrenzen
 
-- Es gab keine Produktion und keine Staging-Umgebung; geprüft wurde gegen Demodaten in der lokalen Datenbank.
+- Vor der Veröffentlichung gab es keine Produktion und keine Staging-Umgebung; geprüft wurde gegen Demodaten in der lokalen Datenbank. Nach der Veröffentlichung wurde live geprüft (Abschnitt „Veröffentlichen und Zurücknehmen“).
 - **Nur Chromium** (Chrome for Testing). Safari, Firefox, echte Handys, Screenreader und die Tastaturbedienung außerhalb der gemessenen Tab-Stopps wurden nicht geprüft. Seitliches Scrollen einer
   Tabelle per Tastatur hängt vom Browser ab: Die Seite macht den Scrollbereich nicht selbst fokussierbar (kein `tabindex`), und das Verhalten der Browser dafür wurde nicht geprüft.
 - **eRecht24-Widerrufsbutton:** Das Skript `widerrufsbutton-cdn.e-recht24.de` wird in jeder Seite der Tutor-App geladen. Es wurde in allen Läufen **blockiert** und blieb damit eine **ungeprüfte externe
-  Integration**: Weder sein Verhalten noch sein Aussehen, noch die Wirkung der neuen CSP/Stile darauf wurden getestet. Die Einbindung und alle rechtlichen Inhalte sind unverändert. Prüfbar wird der Button erst live (Abschnitt „Live-Prüfung“, Punkt 5). Das Stylesheet
+  Integration**: Weder sein Verhalten noch sein Aussehen, noch die Wirkung der neuen CSP/Stile darauf wurden getestet. Die Einbindung und alle rechtlichen Inhalte sind unverändert. **Nachtrag 22.11.2026:** Live geprüft: Skript und Modal-Dateien wurden geladen, das Widget hat das Element ergänzt, es gab keine CSP-Meldung; bedient wurde der Button nicht. Das Stylesheet
   zielt nur mit `#eRecht24RevocationButton` auf den Knopf (Umriss in der Fußzeile).
 - Das Hinweisfenster „in aktiver Entwicklung“ erscheint beim ersten Aufruf je Tab (auch im Portal) und fängt Klicks ab, bis man es schließt. Das ist **bestehendes Verhalten**, nicht Teil
   dieses Auftrags und unverändert.

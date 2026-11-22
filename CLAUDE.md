@@ -110,7 +110,8 @@ müssen grün sein.
   Dateien: `docs/features/feat-designsystem-kladde.md`), nicht in einen Inline-`<style>`-Block.
   Symbole sind `{% icon "name" %}` (Zeichnungen in `apps/core/icon_paths.py`), **keine Emojis**;
   `{% icon %}` nie in einem Attribut. Anmelde- und Fehlerseiten nutzen `auth-card` aus `auth.css`.
-  Anrede in der Tutor-Oberfläche: „du“. Wächter-Tests: `test_design_tokens.py`, `test_icons.py`
+  Anrede in der Tutor-Oberfläche: „du“. Wächter-Tests: `test_design_tokens.py`, `test_icons.py`, `test_logo_cascade.py`. Themen-Selektoren, die `display` setzen, gehören in `:where()`, damit sie keine Layout-Regel überstimmen; nach Änderungen an
+  Kopfzeile, Logo oder Themen-Regeln `scripts/browser/header-logo-regression.cjs` laufen lassen (Anleitung im Dateikopf)
 
 ## Sicherheit
 

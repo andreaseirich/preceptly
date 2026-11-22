@@ -236,14 +236,17 @@
 .modal-check { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4); font-size: 0.9rem; font-weight: 500; color: var(--ink-soft); cursor: pointer; }
 .inline-form { display: inline; }
 
-/* Logo: helle Fassung auf Papier, weiße Fassung auf der Tafel */
+/* Logo: helle Fassung auf Papier, weiße Fassung auf der Tafel.
+   Die Themen-Selektoren stehen in :where() und haben damit keine eigene Spezifität (wie `.logo--on-dark`, 0,1,0): Sie wählen nur die Fassung und überstimmen
+   keine Layout-Regel. Sonst schlüge „Gerät dunkel“ (0,3,0) die Regel `nav .nav-brand .logo-full { display: none }` (0,2,1, shell.css, bis 1100 px) und blendete den
+   Schriftzug neben dem Icon wieder ein. Unter gleicher Spezifität entscheidet die Reihenfolge: Die dunkle Fassung steht zuletzt. Wächter: test_logo_cascade.py */
 .logo { height: 30px; width: auto; display: block; }
 .logo--on-dark { display: none; }
-[data-theme="dark"] .logo--on-light { display: none; }
-[data-theme="dark"] .logo--on-dark { display: block; }
+:where([data-theme="dark"]) .logo--on-light { display: none; }
+:where([data-theme="dark"]) .logo--on-dark { display: block; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .logo--on-light { display: none; }
-  :root:not([data-theme="light"]) .logo--on-dark { display: block; }
+  :where(:root:not([data-theme="light"])) .logo--on-light { display: none; }
+  :where(:root:not([data-theme="light"])) .logo--on-dark { display: block; }
 }
 
 /* Umschalter Hell/Dunkel: zeigt den Mond im hellen, die Sonne im dunklen Thema */
