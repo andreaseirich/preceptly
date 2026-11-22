@@ -3293,13 +3293,15 @@ msgstr ""
 
 #: apps/core/templates/core/dashboard.html:19
 msgid ""
+"How satisfied are you with Preceptly? A short review helps other tutors "
+"discover the tool."
+msgstr ""
 "Wie zufrieden bist du mit Preceptly? Eine kurze Bewertung hilft anderen "
 "Nachhilfelehrern, das Tool zu entdecken."
-msgstr ""
 
 #: apps/core/templates/core/dashboard.html:20
-msgid "Bewertung abgeben"
-msgstr ""
+msgid "Leave a review"
+msgstr "Bewertung abgeben"
 
 #: apps/core/templates/core/dashboard.html:24
 msgid "Today's Lessons"
@@ -3386,26 +3388,27 @@ msgstr[0] "%(counter)s Konflikt in kommenden Unterrichtsstunden!"
 msgstr[1] "%(counter)s Konflikte in kommenden Unterrichtsstunden!"
 
 #: apps/core/templates/core/dashboard.html:102
-msgid "Deine Bewertung"
-msgstr ""
+msgid "Your review"
+msgstr "Deine Bewertung"
 
 #: apps/core/templates/core/dashboard.html:103
 msgid ""
+"Your review appears publicly on the info page only after a short check."
+msgstr ""
 "Deine Bewertung erscheint erst nach kurzer Prüfung öffentlich auf der Info-"
 "Seite."
-msgstr ""
 
 #: apps/core/templates/core/dashboard.html:116
 msgid "Feedback (optional)"
 msgstr "Feedback (optional)"
 
 #: apps/core/templates/core/dashboard.html:117
-msgid "Was gefällt dir, was fehlt noch?"
-msgstr ""
+msgid "What do you like, what is still missing?"
+msgstr "Was gefällt dir, was fehlt noch?"
 
 #: apps/core/templates/core/dashboard.html:118
-msgid "Absenden"
-msgstr ""
+msgid "Submit"
+msgstr "Absenden"
 
 #: apps/core/templates/core/euer.html:5 apps/core/templates/core/euer.html:9
 msgid "Income Surplus Statement (EÜR)"

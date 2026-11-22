@@ -373,6 +373,14 @@
                     closeMenu();
                 });
             });
+
+            // Escape closes the open menu and hands the focus back to the toggle (keyboard users)
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && navLinks.classList.contains('active')) {
+                    closeMenu();
+                    menuToggle.focus();
+                }
+            });
         }
 
         // Nav dropdowns (Management / Billing): click/Enter to toggle for

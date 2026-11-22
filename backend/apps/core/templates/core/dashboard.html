@@ -10,8 +10,8 @@
 
 {% if not user.review %}
 <div class="alert-info" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-    <span>{% blocktrans %}Wie zufrieden bist du mit Preceptly? Eine kurze Bewertung hilft anderen Nachhilfelehrern, das Tool zu entdecken.{% endblocktrans %}</span>
-    <button type="button" class="btn btn-secondary" id="openReviewModal" style="width:auto; white-space:nowrap;">{% icon "star" %} {% trans "Bewertung abgeben" %}</button>
+    <span>{% blocktrans %}How satisfied are you with Preceptly? A short review helps other tutors discover the tool.{% endblocktrans %}</span>
+    <button type="button" class="btn btn-secondary" id="openReviewModal" style="width:auto; white-space:nowrap;">{% icon "star" %} {% trans "Leave a review" %}</button>
 </div>
 {% endif %}
 
@@ -93,8 +93,8 @@
 <div id="reviewModalOverlay" class="pwa-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
   <div class="pwa-modal">
     <button class="pwa-modal-close" id="reviewModalClose" aria-label="{% trans 'Close' %}">&#215;</button>
-    <h2 id="reviewModalTitle">{% icon "star" %} {% trans "Deine Bewertung" %}</h2>
-    <p class="pwa-modal-subtitle">{% trans "Deine Bewertung erscheint erst nach kurzer Prüfung öffentlich auf der Info-Seite." %}</p>
+    <h2 id="reviewModalTitle">{% icon "star" %} {% trans "Your review" %}</h2>
+    <p class="pwa-modal-subtitle">{% trans "Your review appears publicly on the info page only after a short check." %}</p>
     <form method="post" action="{% url 'core:submit_review' %}">
       {% csrf_token %}
       <div class="star-rating" style="display:flex; flex-direction:row-reverse; justify-content:flex-end; gap:4px; font-size:1.8em; margin-bottom:16px;">
@@ -108,8 +108,8 @@
         .star-rating input:checked ~ label { color: var(--marker, #e2a33d) !important; }
       </style>
       <label for="id_review_comment" style="display:block; font-weight:600; margin-bottom:4px;">{% trans "Feedback (optional)" %}</label>
-      <textarea name="comment" id="id_review_comment" class="form-control" rows="3" style="width:100%; box-sizing:border-box;" placeholder="{% trans 'Was gefällt dir, was fehlt noch?' %}"></textarea>
-      <button type="submit" class="btn" style="margin-top:16px; width:auto;">{% trans "Absenden" %}</button>
+      <textarea name="comment" id="id_review_comment" class="form-control" rows="3" style="width:100%; box-sizing:border-box;" placeholder="{% trans 'What do you like, what is still missing?' %}"></textarea>
+      <button type="submit" class="btn" style="margin-top:16px; width:auto;">{% trans "Submit" %}</button>
     </form>
   </div>
 </div>

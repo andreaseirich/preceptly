@@ -11,6 +11,8 @@
  * Erwartung:        bis 1100 px nur das Icon in der Marke, ab 1101 px nur der Schriftzug in der Fassung des wirksamen Themas (gespeichert, sonst Geräteeinstellung);
  *                   Menüknopf nur bis 1100 px; Themenknopf, Abmelden bzw. Home/Anmelden und Sprachwahl liegen vollständig im Fenster; die Navigation ist erreichbar
  *                   (bis 1100 px nach dem Öffnen der Schublade, deren Logo ebenfalls zum Thema passt); kein seitlicher Überlauf der Seite.
+ *                   In der geöffneten Schublade (bis 1100 px): Beschriftungen der aufklappbaren Bereiche neben dem Symbol, Pfeile am rechten Rand; Escape schließt das Menü und
+ *                   gibt den Fokus an den Menüknopf zurück (Befunde der Live-Prüfung vom 22.11.2026).
  *
  * Aufruf:   PLAYWRIGHT_DIR=<Ordner mit node_modules/playwright-core> [CHROME_PATH=<Chrome>] \
  *           node scripts/browser/header-logo-regression.cjs --base https://beispiel.example [--paths /login/,/] [--widths 360,390] [--route modul.cjs] [--verbose]
@@ -49,7 +51,21 @@ function measure() {
   const right = [...document.querySelectorAll("nav .nav-right button, nav .nav-right a, nav .nav-right select")].filter(shown);
   const select = document.querySelector("nav .nav-right select[name=language]");
   const links = [...document.querySelectorAll("#navLinks > a:not(.nav-links-brand), #navLinks .nav-dropdown-toggle")].filter(shown);
+  // Symbol → Beschriftung und Pfeil → rechter Rand der aufklappbaren Überschriften (eine zentrierte Beschriftung ergäbe große Abstände)
+  const labelGaps = [];
+  const caretGaps = [];
+  for (const t of [...document.querySelectorAll("#navLinks .nav-dropdown-toggle")].filter(shown)) {
+    const icon = t.querySelector("svg");
+    const caret = t.querySelector(".nav-dropdown-caret");
+    const walker = document.createTreeWalker(t, NodeFilter.SHOW_TEXT); // ohne Rückruf: Der Browser führt ohne JavaScript keinen aus
+    let text = walker.nextNode();
+    while (text && !text.textContent.trim()) text = walker.nextNode();
+    if (icon && text) { const r = document.createRange(); r.selectNodeContents(text); labelGaps.push(Math.round(r.getBoundingClientRect().left - icon.getBoundingClientRect().right)); }
+    if (caret) caretGaps.push(Math.round(t.getBoundingClientRect().right - caret.getBoundingClientRect().right));
+  }
   return {
+    labelGaps,
+    caretGaps,
     vw,
     theme: document.documentElement.getAttribute("data-theme"),
     brand: [...document.querySelectorAll("nav .nav-brand img")].filter(shown).map(file),
@@ -131,6 +147,16 @@ function check(label, name, pass, detail = "") {
             check(label, `${at}: Schublade: Navigation sichtbar und im Fenster`, o.linksCount >= 1 && o.linksOutside.length === 0, `außerhalb: ${o.linksOutside.join(", ")} (gezählt ${o.linksCount})`);
             check(label, `${at}: Schublade: genau ein Logo in der Fassung des Themas`, JSON.stringify(o.panelLogos) === JSON.stringify([wordmark]), `sichtbar: ${o.panelLogos.join(", ") || "nichts"}`);
             check(label, `${at}: Marke bleibt bei offener Schublade das Icon`, JSON.stringify(o.brand) === JSON.stringify(["preceptly-icon.svg"]), `sichtbar: ${o.brand.join(", ")}`);
+            check(label, `${at}: Schublade: Beschriftungen der aufklappbaren Bereiche stehen neben dem Symbol`, o.labelGaps.length >= 1 && o.labelGaps.every((g) => g <= 24), `Abstand Symbol→Beschriftung: ${o.labelGaps.join(", ")} px`);
+            check(label, `${at}: Schublade: Pfeile stehen am rechten Rand`, o.caretGaps.length >= 1 && o.caretGaps.every((g) => g <= 40), `Abstand Pfeil→Rand: ${o.caretGaps.join(", ")} px`);
+            // Der Klick auf den Menüknopf hat diesen schon fokussiert; erst den Fokus in die Schublade setzen, sonst sagt der Fokus-Check nichts aus
+            await page.evaluate(() => { const el = document.querySelector("#navLinks .nav-dropdown-toggle, #navLinks a:not(.nav-links-brand)"); if (el) el.focus(); });
+            await page.keyboard.press("Escape");
+            await page.waitForTimeout(350);
+            const esc = await page.evaluate(() => ({ expanded: document.getElementById("menuToggle").getAttribute("aria-expanded"), focus: document.activeElement && document.activeElement.id }));
+            check(label, `${at}: Escape schließt das Menü`, esc.expanded === "false", `aria-expanded=${esc.expanded}`);
+            check(label, `${at}: Escape gibt den Fokus an den Menüknopf zurück`, esc.focus === "menuToggle", `Fokus auf: ${esc.focus || "nichts"}`);
+            if (esc.expanded === "false") { await page.click("#menuToggle"); await page.waitForTimeout(350); } // wieder öffnen, damit der Klick auf den Hintergrund-Layer geprüft wird
             await page.mouse.click(Math.max(w - 8, 4), HEIGHT - 20); // Klick auf den Hintergrund-Layer schließt das Menü
             await page.waitForTimeout(350);
             const cl = await page.evaluate(measure);

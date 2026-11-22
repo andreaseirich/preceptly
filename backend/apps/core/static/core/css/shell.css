@@ -167,7 +167,8 @@ nav .nav-right select.lang-select:hover { border-color: var(--ink-soft); }
   .nav-backdrop { display: none; position: fixed; inset: 0; background: rgba(15, 26, 28, 0.5); z-index: 998; }
   .nav-backdrop.active { display: block; }
   nav .nav-links a, nav .nav-dropdown-toggle { display: flex; width: 100%; padding: 15px var(--space-5); border-radius: 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
-  nav .nav-dropdown-toggle { justify-content: space-between; }
+  nav .nav-dropdown-toggle { justify-content: flex-start; }
+  nav .nav-dropdown-toggle .nav-dropdown-caret { margin-left: auto; }
   nav .nav-dropdown::after { display: none; }
   nav .nav-dropdown-menu,
   nav .nav-dropdown:hover .nav-dropdown-menu,

@@ -2,8 +2,8 @@
 
 **Stand:** 22.11.2026 · Auftrag von Andreas: Preceptly „gestalterisch, inhaltlich und technisch“ vollständig überarbeiten.
 **Veröffentlicht am 22.11.2026** als `0f4e7e2` auf `main` (Push 14:10 UTC, von Railway ausgeliefert 14:24 UTC; Abschnitt „Veröffentlichen und Zurücknehmen“). Entwickelt wurde es auf dem Zweig `redesign/preview`
-in der Arbeitskopie `/root/agents/tutorflow-redesign`. Der oberste Commit von `main` (`git log -1`) enthält zusätzlich die Korrektur der Kopfzeile im dunklen Thema, die Browser-Regressionsprüfung dafür
-und dieses Dokument.
+in der Arbeitskopie `/root/agents/tutorflow-redesign`. Am selben Tag folgte als `2e7d597` (ausgeliefert 17:17 UTC) die Korrektur der Kopfzeile im dunklen Thema samt Browser-Regressionsprüfung; die Behebung der übrigen Auffälligkeiten der
+Live-Prüfung steht im Abschnitt „Auffälligkeiten der Live-Prüfung“.
 **Tests:** vollständig 1824 Tests OK (21.11., Stand `6832107`) und 1834 Tests OK im Pre-Push-Hook der Veröffentlichung (22.11., `0f4e7e2`, jeweils 5 übersprungen); zu den Änderungen danach siehe „Tests“ und
 „Nachträgliche Korrektur“.
 
@@ -146,8 +146,10 @@ Neu:
 - `apps/core/tests/test_theme_shell.py`, `apps/students/test_delete_confirm.py`, `apps/lessons/tests/test_week_block_colours.py`, `apps/lessons/tests/test_reschedule_cancel_link.py`.
 - `apps/core/tests/test_logo_cascade.py` (22.11.2026): Wächter für die Kaskade der Logo-Regeln am Stylesheet (Themen-Selektoren in `:where()`; die Regel, die den Schriftzug bis 1100 px ausblendet, schlägt jede Themen-Regel);
   mit der alten CSS-Datei fällt er durch.
-- `scripts/browser/header-logo-regression.cjs` (22.11.2026): Browser-Matrix für die Kopfzeile (Logovariante, Sprachwahl, Navigation, Überlauf), siehe „Nachträgliche Korrektur“. Sie läuft nicht in der CI (sie braucht einen Browser);
-  die Anleitung steht im Kopf der Datei.
+- `scripts/browser/header-logo-regression.cjs` (22.11.2026): Browser-Matrix für die Kopfzeile (Logovariante, Sprachwahl, Navigation, Überlauf), siehe „Nachträgliche Korrektur“; danach um Escape im Mobilmenü sowie die Ausrichtung der
+  Überschriften erweitert. Sie läuft nicht in der CI (sie braucht einen Browser); die Anleitung steht im Kopf der Datei.
+- `apps/core/tests/test_mobile_nav.py`: Das Menü-Skript schließt das offene Menü bei Escape und gibt den Fokus zurück; im Mobilmenü stehen die Überschriften neben dem Symbol und der Pfeil am rechten Rand (Quelltext von `base.html`, `shell.css`).
+- `apps/core/tests/test_review_prompt_i18n.py`: Hinweis, Knopf und Dialog des Bewertungsablaufs im Dashboard folgen der Sprache; die deutsche Oberfläche zeigt wörtlich die bisherigen Texte.
 - Angepasst, weil sich Markup bewusst geändert hat (die Absicht der Tests bleibt): `test_contrast_tokens.py` (liest `tokens.css`),
   `test_calendar_site_texts.py` (Gruppen „Im Free-Tarif“, „Ab dem Pro-Tarif“; zusätzlich: Meetingräume und KI stehen nur dort), `test_faq_pages.py` (das Icon-Sprite ist kein
   Sprunglink), `test_i18n.py`, `test_week_view_click_behavior.py` (SVG statt Emoji), `portal/test_login_page.py`, `portal/test_week_picker.py`,
@@ -235,7 +237,7 @@ Die Vorschau bleibt nur so isoliert, wie sie unten beschrieben ist.
 ## Veröffentlichen und Zurücknehmen
 
 **Stand 22.11.2026: veröffentlicht.** Andreas gab die Veröffentlichung von `0f4e7e2` ausdrücklich frei. `redesign/preview` wurde per Fast-Forward in `main` übernommen und um 14:10 UTC gepusht, Railway lieferte es um 14:24 UTC aus.
-Danach fand die Live-Prüfung einen Fehler in der Kopfzeile im dunklen Thema; die Korrektur (nächster Abschnitt) steht im obersten Commit von `main` (`git log -1`), zusammen mit diesem Dokument. Der Klon
+Danach fand die Live-Prüfung einen Fehler in der Kopfzeile im dunklen Thema; die Korrektur (Abschnitt „Nachträgliche Korrektur“) wurde als `2e7d597` veröffentlicht (CI grün, 17:17 UTC ausgeliefert, `commitHash` in Railway geprüft). Der Klon
 `/root/agents/tutorflow-redesign` hat weiterhin keinen Remote; veröffentlicht wird aus dem Hauptklon `/root/agents/tutorflow`.
 
 ### Verlauf vom 22.11.2026 (UTC)
@@ -296,7 +298,8 @@ Themenwahl“ kam nirgends vor. Seitdem gibt es die Matrix (Browser) und den Wä
 ### Ablauf für künftige Veröffentlichungen (so bewährt)
 
 0. Vorab: `git -C /root/agents/tutorflow ls-remote origin main` zeigt den erwarteten Stand, `git -C /root/agents/tutorflow status --short` ist sauber. Ist `main` weitergelaufen (zum Beispiel durch Dependabot), zuerst
-   `bash /root/agents/tutorflow-redesign-tools/publish_rehearsal.sh` und das Ergebnis neu bewerten.
+   `bash /root/agents/tutorflow-redesign-tools/publish_rehearsal.sh` und das Ergebnis neu bewerten (das Skript legt den Wegwerf-Klon `/root/agents/tutorflow-publish-check` bei Bedarf aus dem Hauptklon neu an; er hat keinen Remote
+   und wurde am 22.11.2026 nach der Veröffentlichung gelöscht).
 1. Zweig übernehmen: `cd /root/agents/tutorflow && git fetch /root/agents/tutorflow-redesign redesign/preview && git merge --ff-only FETCH_HEAD`; `git rev-parse HEAD` muss die vorgesehene Commit-Nummer zeigen. Bewusst **kein** `--no-ff`.
 2. `bash /root/bin/preceptly-push.sh` (die Zeitgrenze steht jetzt auf 1800 s; Hook rund 14 Minuten, danach CI rund 14 Minuten, Deployment unter 1 Minute). Fortschritt in `/tmp/pd.log`. Von außen sichtbar: `gh run list --commit <Hash>`.
 3. Nachweis des ausgelieferten Commits: `railway status --json` → `meta.commitHash` des aktiven Deployments, nicht „Online“.
@@ -315,13 +318,25 @@ Themenwahl“ kam nirgends vor. Seitdem gibt es die Matrix (Browser) und den Wä
   Für das Redesign ist `<Basis>` = `ce2ea1f`. Danach laufen Hook, CI und Railway wie oben (30 bis 35 Minuten). Es gibt keine Migration und keine Datenbankänderung. Der Service Worker legt `/static/` „cache first“ ab, aber die Dateinamen tragen einen
   Hash, und HTML kommt immer zuerst aus dem Netz: Nach Deployment oder Rücknahme gibt es keine veralteten Stylesheets.
 
-### Offene Auffälligkeiten (bewusst nicht Teil der Korrektur)
+### Auffälligkeiten der Live-Prüfung
 
-- Escape schließt das mobile Menü nicht (Tippen auf den Knopf oder daneben schließt es). Ob das früher anders war, ist nicht belegt.
-- Der Sprunglink des eRecht24-Widgets überdeckt bei Tastaturfokus kurz das Logo (Drittanbieter).
-- Die drei aufklappbaren Überschriften im Mobilmenü sind zentriert, die Links linksbündig.
-- Der Bewertungshinweis im Dashboard bleibt in der englischen Oberfläche deutsch (Quelltext ohne Übersetzung, schon vor dem Redesign).
-- Einzelne Antworten der Anmeldeseiten brauchten kurz nach dem Deployment 1,8 bis 2,6 s (sonst unter 1,1 s); keine Fehler im Protokoll, kein Vergleichswert.
+**Behoben** (im Commit, der diesen Abschnitt enthält):
+
+- **Escape im Mobilmenü:** Escape schloss nur die Dropdowns, nicht das offene Mobilmenü. Jetzt schließt Escape das Menü und setzt den Fokus auf den Menüknopf (`base.html`, im vorhandenen Menü-Skript).
+- **Überschriften im Mobilmenü:** Die aufklappbaren Bereiche standen zentriert, die Links linksbündig. `justify-content: space-between` verteilte Symbol, Beschriftung und Pfeil auf drei Kinder. Jetzt steht die Beschriftung
+  neben dem Symbol und der Pfeil per `margin-left: auto` am rechten Rand (`shell.css`, die bestehende Regel wurde geändert, es gibt keine Zusatzregel).
+- **Bewertungsablauf im Dashboard:** Hinweis, Knopf und Dialog (sechs Texte) hatten deutsche Quelltexte mit leerer Übersetzung und blieben in der englischen Oberfläche deutsch. Jetzt sind die Quelltexte englisch wie im übrigen Projekt, und die
+  deutsche Oberfläche zeigt wörtlich die bisherigen Texte (`dashboard.html`, `django.po`).
+
+**Prüfung:** Die neuen Tests (`test_mobile_nav.py`, `test_review_prompt_i18n.py`) schlagen auf dem Stand davor fehl und bestehen danach; zusammen mit den verwandten Tests 108 Tests OK. Die erweiterte Browser-Matrix meldete live vor der
+Korrektur (`/login/`) 1244 Prüfungen mit 180 Verstößen in 12 von 16 Fällen (je 60 bei Ausrichtung, Escape-Schließen und Fokus-Rückgabe; die vier Fälle ohne JavaScript haben keine Schublade) und gegen die Spiegelung des korrigierten Stands
+(`/login/`, `/`, `/dashboard/`) 3732 Prüfungen ohne Verstoß in 48 Fällen.
+
+**Weiterhin offen (kein Fehler der Anwendung oder nicht Teil der Korrektur):**
+
+- Der Sprunglink des eRecht24-Widgets überdeckt bei Tastaturfokus kurz das Logo. Das ist das Verhalten des Drittanbieter-Skripts und wird nicht verändert.
+- Einzelne Antworten der Anmeldeseiten brauchten kurz nach dem Deployment 1,8 bis 2,6 s (sonst unter 1,1 s); keine Fehler im Protokoll, kein Vergleichswert. Eine Beobachtung, kein Fehler.
+- Weitere deutsche Festtexte im Dashboard-Quelltext (zum Beispiel das `aria-label` der Stundentabelle) sind nicht Teil dieser Korrektur und wurden nicht geändert.
 
 ### Wesentliche Risiken
 
