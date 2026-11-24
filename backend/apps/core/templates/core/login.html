@@ -7,12 +7,14 @@
 {% block content %}
 <div class="auth-card">
     <h1 class="auth-title">{% trans "Login to Preceptly" %}</h1>
+    <p class="field-help">{% trans "This is the tutor login. Parents and students sign in at the portal:" %} <a href="{% url 'portal:login' %}" class="auth-link">{% trans "Go to the portal login" %}</a></p>
 
     {% if error %}
-    <div class="message error" role="alert">{{ error }}</div>
+    <div class="message error" role="alert">{{ error }}<br>{% trans "Parent or student? Please use the portal login." %} <a href="{% url 'portal:login' %}" class="auth-link">{% trans "Go to the portal login" %}</a></div>
     {% elif form.errors %}
     <div class="message error" role="alert">
-        {% trans "Invalid username or password. Please try again." %}
+        {% trans "Invalid username or password. Please try again." %}<br>
+        {% trans "Parent or student? Please use the portal login." %} <a href="{% url 'portal:login' %}" class="auth-link">{% trans "Go to the portal login" %}</a>
     </div>
     {% endif %}
 

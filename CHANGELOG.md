@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fix (2026-11-24) — Anmelde-Hinweise für Eltern und Schüler
+- Einladungs-Mail und Aktivierungsseite nennen die Adresse des Portals (`/portal/login/`) und sagen, dass man sich dort mit der E-Mail-Adresse anmeldet, nicht in der Tutor-Anmeldung. Die Tutor-Anmeldung zeigt oben einen Portal-Hinweis, die Fehlermeldung verweist aufs Portal.
+
 ### Feature (2026-11-24) — Bewertungen von Eltern und Schülern (nicht veröffentlicht)
 - Eltern, und volljährige Schüler, können im Portal die Terminbuchung bewerten (Sterne, Kommentar, Anzeigename, Pflicht-Einwilligung, jederzeit zurückziehbar). Nach Freigabe in der bestehenden Moderation erscheinen sie im Abschnitt „Stimmen von Eltern und Schülern“ der Startseite; die Tutor-Zahlen bleiben unberührt. Migration `0037` (drei neue Felder). Einzelheiten: `docs/features/feat-portal-bewertungen.md`.
 - Datenschutzerklärung: neuer Abschnitt „Bewertungen von Eltern und Schülern“ (Entwurf, Preceptly als Verantwortlicher, Einwilligung, Widerruf); Aktualisierungsdatum 24.11.2026.

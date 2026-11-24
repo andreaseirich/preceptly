@@ -10,5 +10,9 @@ Preceptly — Portal-Einladung
 Aktiviere dein Konto hier:
 {{ activate_url }}
 
+Danach meldest du dich im Portal an (nicht über die Anmeldung für Tutoren auf der Startseite):
+{{ login_url }}
+Dafür brauchst du deine E-Mail-Adresse, an die diese Einladung ging, und das Passwort, das du bei der Aktivierung festlegst.
+
 ---
 Preceptly — {{ site_url }}

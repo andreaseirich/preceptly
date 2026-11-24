@@ -13,6 +13,7 @@
     {% else %}
     <h1 class="auth-title">Willkommen, {{ student.full_name }}!</h1>
     <p class="auth-sub">Lege dein Passwort fest, um dein Konto zu aktivieren. Du wirst dich später mit deiner E-Mail-Adresse anmelden.</p>
+    <p class="auth-sub">Später meldest du dich hier an: <strong>{{ request.get_host }}{% url 'portal:login' %}</strong> – mit deiner E-Mail-Adresse, nicht über die Anmeldung für Tutoren auf der Startseite.</p>
 
     {% if error %}
     <div class="alert-warning" role="alert">{{ error }}</div>

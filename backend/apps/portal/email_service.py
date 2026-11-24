@@ -39,6 +39,7 @@ def send_portal_invite(student, portal_link, recipient_email, role="student"):
         "tutor_name": tutor_name,
         "role": role,
         "site_url": site_url,
+        "login_url": f"{site_url}/portal/login/",
     }
 
     subject = _("Dein Preceptly Portal-Zugang")

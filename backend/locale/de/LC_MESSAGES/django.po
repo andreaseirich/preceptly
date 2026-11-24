@@ -8184,3 +8184,9 @@ msgstr "Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die 
 
 msgid "You can withdraw your consent at any time with “Withdraw review” in the portal; the review is then deleted immediately. The withdrawal does not affect the lawfulness of the processing carried out before it. The review is also deleted when your portal account is deleted. Otherwise we keep it as long as it is pending or published."
 msgstr "Sie können Ihre Einwilligung jederzeit mit „Bewertung zurückziehen“ im Portal widerrufen; die Bewertung wird dann sofort gelöscht. Der Widerruf berührt die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung nicht. Die Bewertung wird auch gelöscht, wenn Ihr Portal-Konto gelöscht wird. Andernfalls speichern wir sie, solange sie aussteht oder veröffentlicht ist."
+
+msgid "This is the tutor login. Parents and students sign in at the portal:"
+msgstr "Das ist die Anmeldung für Tutoren. Eltern und Schüler melden sich im Portal an:"
+
+msgid "Parent or student? Please use the portal login."
+msgstr "Elternteil oder Schüler? Bitte nutze den Portal-Login."
