@@ -1,0 +1,15 @@
+Preceptly — Neues Kind im Portal
+================================
+
+{{ tutor_name }} hat {{ contract.first_name }} zu deinem Portal-Zugang hinzugefügt.
+
+Du brauchst kein neues Passwort: Melde dich wie bisher mit deiner E-Mail-Adresse ({{ recipient_email }}) und deinem Passwort an. Dort siehst du jetzt auch {{ contract.first_name }}.
+
+Zum Portal-Login (nicht die Anmeldung für Tutoren auf der Startseite):
+{{ login_url }}
+
+Passwort vergessen? Hier zurücksetzen:
+{{ password_reset_url }}
+
+---
+Preceptly — {{ site_url }}

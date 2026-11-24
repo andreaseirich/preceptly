@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fix (2026-11-24) — Zweites Kind am selben Eltern-Konto
+- Wird für ein weiteres Kind dieselbe E-Mail-Adresse eingeladen oder die Familie von Hand verknüpft, ist das Kind sofort im Portal sichtbar, wenn das Konto schon aktiviert ist. Die Eltern bekommen eine Info-Mail ohne Aktivierungslink (kein zweites Passwort, das das erste überschreibt). Ist das Konto noch nicht aktiviert, werden die übrigen Kinder bei der Aktivierung mit freigeschaltet. Vorher blieb die Verknüpfung inaktiv: keine Mail, das Kind unsichtbar (Familie Charlier).
+
 ### Fix (2026-11-24) — Anmelde-Hinweise für Eltern und Schüler
 - Einladungs-Mail und Aktivierungsseite nennen die Adresse des Portals (`/portal/login/`) und sagen, dass man sich dort mit der E-Mail-Adresse anmeldet, nicht in der Tutor-Anmeldung. Die Tutor-Anmeldung zeigt oben einen Portal-Hinweis, die Fehlermeldung verweist aufs Portal.
 

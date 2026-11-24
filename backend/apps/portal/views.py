@@ -544,6 +544,9 @@ class PortalActivateView(View):
         link.invite_token = uuid.uuid4().hex
         link.invite_token_created_at = None
         link.save()
+        from apps.portal.family import activate_pending_siblings
+
+        activate_pending_siblings(portal_user, link)
         # Session-Fixation-Schutz: Session-Key vor dem Setzen rotieren
         request.session.cycle_key()
         request.session["portal_user_id"] = portal_user.pk

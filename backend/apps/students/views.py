@@ -34,6 +34,7 @@ from apps.core.list_filters import SearchFilter
 from apps.core.list_mixin import SortFilterListMixin
 from apps.core.tier_gate import deny
 from apps.core.upload_validation import validate_file_magic
+from apps.portal.family import link_child_to_account
 from apps.portal.identity import portal_login_conflict
 from apps.portal.models import (
     ParentStudentLink,
@@ -145,6 +146,23 @@ class StudentDeleteView(LoginRequiredMixin, DeleteView):
             return super().form_valid(form)
 
 
+def _tell_parent_about_new_child(request, contract, recipient_email):
+    """Info-Mail an das Eltern-Konto; ein Mail-Fehler macht die Verknüpfung nicht rückgängig."""
+    from apps.portal.email_service import send_family_child_added
+
+    if not recipient_email:
+        return
+    try:
+        send_family_child_added(
+            contract, recipient_email, request.user.get_full_name() or request.user.username
+        )
+    except Exception:
+        logger.exception("Family child mail failed for contract_id=%s", contract.pk)
+        messages.warning(
+            request, "Das Kind ist verknüpft, die Info-Mail konnte aber nicht gesendet werden."
+        )
+
+
 class FamilyLinkView(LoginRequiredMixin, View):
     """Verknüpft zwei Verträge desselben Tutors zu einem gemeinsamen
     Portal-Familien-Konto (übergeordnete Mehrkind-Ansicht)."""
@@ -181,13 +199,17 @@ class FamilyLinkView(LoginRequiredMixin, View):
             if other_django_user.is_active:
                 other_django_user.is_active = False
                 other_django_user.save(update_fields=["is_active"])
-            ParentStudentLink.objects.get_or_create(parent=account, contract=contract_b)
+            visible = link_child_to_account(account, contract_b)
+            if visible:
+                _tell_parent_about_new_child(request, contract_b, account.user.email)
         else:
             existing_link = link_a or link_b
             missing_contract = contract_b if link_a else contract_a
-            ParentStudentLink.objects.get_or_create(
-                parent=existing_link.parent, contract=missing_contract
-            )
+            visible = link_child_to_account(existing_link.parent, missing_contract)
+            if visible:
+                _tell_parent_about_new_child(
+                    request, missing_contract, existing_link.parent.user.email
+                )
 
         messages.success(
             request,
@@ -270,12 +292,20 @@ class PortalInviteView(LoginRequiredMixin, View):
                         "andere E-Mail-Adresse verwenden.",
                     )
                     return redirect("contracts:detail", pk=pk)
-                ParentStudentLink.objects.get_or_create(parent=existing_portal, contract=contract)
-                messages.warning(
-                    request,
-                    "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto — "
-                    "als Familien-Zugang mit diesem Kind verknüpft.",
-                )
+                visible = link_child_to_account(existing_portal, contract)
+                if visible:
+                    _tell_parent_about_new_child(request, contract, existing_user.email)
+                    messages.success(
+                        request,
+                        "Diese E-Mail-Adresse hat bereits ein aktives Portal-Konto — das Kind ist "
+                        "jetzt dort sichtbar, die Eltern bekommen eine Info-Mail.",
+                    )
+                else:
+                    messages.warning(
+                        request,
+                        "Hinweis: Diese E-Mail-Adresse hat bereits ein Portal-Konto, das noch nicht "
+                        "aktiviert ist. Das Kind erscheint, sobald die Eltern es aktivieren.",
+                    )
                 return redirect("contracts:detail", pk=pk)
 
             # Alt-Zugänge werden beim Login über die Vertrags-E-Mail gefunden:

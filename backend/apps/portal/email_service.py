@@ -205,6 +205,33 @@ def send_login_reminder(contract, recipient_email, tutor_name, role="student", r
     )
 
 
+def send_family_child_added(contract, recipient_email, tutor_name):
+    """Meldet einem Elternteil mit aktivem Konto, dass ein weiteres Kind hinzugefügt wurde (ohne neue Aktivierung)."""
+    try:
+        validate_email(recipient_email)
+    except ValidationError:
+        raise ValueError(f"Ungültige Empfänger-E-Mail-Adresse: {recipient_email!r}") from None
+    if not hasattr(settings, "SITE_URL"):
+        raise ImproperlyConfigured("settings.SITE_URL muss konfiguriert sein.")
+    site_url = settings.SITE_URL
+    context = {
+        "contract": contract,
+        "recipient_email": recipient_email,
+        "tutor_name": tutor_name,
+        "site_url": site_url,
+        "login_url": f"{site_url}/portal/login/",
+        "password_reset_url": f"{site_url}/portal/password-reset/",
+    }
+    send_mail(
+        subject=_("Neues Kind in deinem Preceptly-Portal"),
+        message=render_to_string("portal/email/child_added.txt", context),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[recipient_email],
+        html_message=render_to_string("portal/email/child_added.html", context),
+        fail_silently=False,
+    )
+
+
 def send_change_notification_portal(tutor, notice):
     """Benachrichtigung an den Tutor nach Absage, Verschiebung oder Serienende im
     Portal: E-Mail und/oder Push, je nach NotificationPreference (Typ "portal_change").
