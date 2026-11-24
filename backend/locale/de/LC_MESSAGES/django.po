@@ -8169,3 +8169,18 @@ msgstr "Kann nicht freigegeben werden (ohne Einwilligung)"
 
 msgid "This review cannot be approved: consent or display name is missing."
 msgstr "Diese Bewertung kann nicht freigegeben werden: Einwilligung oder Anzeigename fehlt."
+
+msgid "Reviews from parents and students"
+msgstr "Bewertungen von Eltern und Schülern"
+
+msgid "Parents and adult students who use the portal can rate how easy it is to book lessons through Preceptly. For these reviews Preceptly (not the tutor) is the controller. We publish approved reviews to present Preceptly. Taking part is voluntary."
+msgstr "Eltern und volljährige Schüler, die das Portal nutzen, können bewerten, wie einfach die Terminbuchung über Preceptly ist. Für diese Bewertungen ist Preceptly (nicht der Tutor) Verantwortlicher. Wir veröffentlichen freigegebene Bewertungen, um Preceptly vorzustellen. Die Teilnahme ist freiwillig."
+
+msgid "We process the display name you enter (a first name), your star rating, your optional comment of up to 1000 characters, the link to your portal account (so that there is one review per account and you can withdraw it) and the time of your consent. Your user name and e-mail address are never shown. The comment is shown as you wrote it, so please do not mention names of children or tutors."
+msgstr "Wir verarbeiten den von Ihnen eingegebenen Anzeigenamen (einen Vornamen), Ihre Sternebewertung, Ihren optionalen Kommentar von höchstens 1000 Zeichen, die Zuordnung zu Ihrem Portal-Konto (damit es je Konto eine Bewertung gibt und Sie sie zurückziehen können) und den Zeitpunkt der Einwilligung. Benutzername und E-Mail-Adresse werden nie angezeigt. Der Kommentar wird so angezeigt, wie Sie ihn geschrieben haben; bitte nennen Sie darin keine Namen von Kindern oder Tutoren."
+
+msgid "The legal basis is your consent (Art. 6(1)(a) GDPR), which you give with the checkbox when you submit the review. A review is shown on the start page of preceptly.de only after our approval."
+msgstr "Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie beim Absenden der Bewertung mit dem Kästchen erteilen. Eine Bewertung erscheint erst nach unserer Freigabe auf der Startseite von preceptly.de."
+
+msgid "You can withdraw your consent at any time with “Withdraw review” in the portal; the review is then deleted immediately. The withdrawal does not affect the lawfulness of the processing carried out before it. The review is also deleted when your portal account is deleted. Otherwise we keep it as long as it is pending or published."
+msgstr "Sie können Ihre Einwilligung jederzeit mit „Bewertung zurückziehen“ im Portal widerrufen; die Bewertung wird dann sofort gelöscht. Der Widerruf berührt die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung nicht. Die Bewertung wird auch gelöscht, wenn Ihr Portal-Konto gelöscht wird. Andernfalls speichern wir sie, solange sie aussteht oder veröffentlicht ist."

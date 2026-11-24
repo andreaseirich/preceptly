@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Feature (2026-11-24) — Bewertungen von Eltern und Schülern (nicht veröffentlicht)
 - Eltern, und volljährige Schüler, können im Portal die Terminbuchung bewerten (Sterne, Kommentar, Anzeigename, Pflicht-Einwilligung, jederzeit zurückziehbar). Nach Freigabe in der bestehenden Moderation erscheinen sie im Abschnitt „Stimmen von Eltern und Schülern“ der Startseite; die Tutor-Zahlen bleiben unberührt. Migration `0037` (drei neue Felder). Einzelheiten: `docs/features/feat-portal-bewertungen.md`.
+- Datenschutzerklärung: neuer Abschnitt „Bewertungen von Eltern und Schülern“ (Entwurf, Preceptly als Verantwortlicher, Einwilligung, Widerruf); Aktualisierungsdatum 24.11.2026.
 
 ### Design (2026-11-22) — Designsystem „Kladde“ veröffentlicht
 - Neue Oberfläche für Tutor-App, Portal und öffentliche Seiten (Tokens, Schriften, Icons; hell, dunkel und „Gerät dunkel“), „du“ im Portal, Free-Tarif als weiche Hinweise auf Schülerverträge, Portal nur deutsch. Veröffentlicht als `0f4e7e2` (22.11.2026, 14:10 UTC, ausgeliefert 14:24 UTC). Einzelheiten, Prüfungen und Grenzen: `docs/features/feat-designsystem-kladde.md`.

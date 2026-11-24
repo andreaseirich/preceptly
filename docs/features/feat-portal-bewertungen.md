@@ -30,10 +30,14 @@ Eltern und Schüler erleben die Terminbuchung über Preceptly selbst. Ihre Sicht
 - Startseite: `LandingView` trennt `approved_reviews` (Tutoren, Zahlen) und `family_reviews`.
 - Moderation: `moderate_review` verweigert die Freigabe ohne Einwilligung oder Anzeigenamen; die Vorlage zeigt Herkunft, Anzeigename und Einwilligung.
 
-## Datenschutz (offen, Entscheidung bei Andreas)
+## Datenschutz (Entwurf, Prüfung durch Andreas offen)
 
-Die Datenschutzerklärung entsteht aus dem eRecht24-Generator und den Overrides (`legal_overrides.py`). Sie sollte die Verarbeitung nennen: Zweck (öffentliche Bewertungen auf der Startseite), Daten (Anzeigename, Bewertung, Kommentar, Zeitpunkt der Einwilligung),
-Rechtsgrundlage (Einwilligung, Art. 6 Abs. 1 lit. a DSGVO), Widerruf im Portal, Speicherdauer (bis zum Widerruf oder zur Löschung des Kontos). Das ist **nicht** Teil dieser Umsetzung und wird nicht ohne Freigabe geändert. Bis dahin steht die Information im Einwilligungstext der Karte.
+Die Datenschutzerklärung hat einen neuen Abschnitt „Bewertungen von Eltern und Schülern“ (Vorlage `templates/legal/privacy.html`, hinter „Schüler- und Elternportal“, deutsch und englisch). Er steht in einem **eigenen Commit**, damit er getrennt geprüft oder verworfen werden kann.
+Inhalt: **Preceptly (nicht der Tutor) ist Verantwortlicher** für diese Bewertungen (im Portal sonst der Tutor); verarbeitete Daten (Anzeigename, Sternebewertung, optionaler Kommentar bis 1000 Zeichen, Zuordnung zum Portal-Konto, Zeitpunkt der Einwilligung);
+Benutzername und E-Mail werden nie angezeigt; Rechtsgrundlage Einwilligung (Art. 6 Abs. 1 lit. a DSGVO); Anzeige erst nach Freigabe; Widerruf jederzeit mit „Bewertung zurückziehen“ (sofortige Löschung), Löschung mit dem Portal-Konto, Speicherung solange ausstehend oder veröffentlicht.
+Das Aktualisierungsdatum steht jetzt auf 24.11.2026 (Erklärung, Preceptly-Teil und AVV; vorhandene Tests koppeln die Daten). Der AVV ist inhaltlich unverändert: Die Bewertungen sind keine Verarbeitung im Auftrag der Tutoren.
+`apps/core/tests/test_privacy_reviews.py` bindet den Text an das Verhalten (Verantwortlicher, Daten, Rechtsgrundlage, Widerrufsworte, Grenzen aus dem Formular).
+**Das ist ein Entwurf für einen Rechtstext.** Er sollte vor der Veröffentlichung von Andreas (gegebenenfalls juristisch) gelesen werden; Speicherdauer und Formulierung sind seine Entscheidung. Das Datum ist bei späterer Veröffentlichung anzupassen.
 
 ## Prüfung (24.11.2026)
 
