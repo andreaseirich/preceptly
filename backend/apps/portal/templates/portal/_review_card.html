@@ -1,0 +1,55 @@
+{% comment %}Karte „Bewertung abgeben“ im Portal-Dashboard (docs/features/feat-portal-bewertungen.md). Erwartet `card` aus apps.portal.reviews.review_card.{% endcomment %}
+{% with review=card.review %}
+<section aria-labelledby="review-title" style="margin-top:32px; padding:20px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:12px;">
+    <h2 id="review-title" style="margin-top:0;">Wie einfach ist die Terminbuchung?</h2>
+    <p>Deine Meinung hilft anderen Familien und Tutoren, Preceptly kennenzulernen. Bitte nenne keine Namen von Kindern oder Tutoren.</p>
+
+    {% if review %}
+    <div class="alert-info" style="margin-bottom:16px;">
+        <strong>Deine Bewertung: {{ review.rating }} von 5</strong>
+        {% if review.is_approved %}
+        – veröffentlicht auf der Startseite.
+        {% else %}
+        – wartet auf Freigabe und ist noch nicht öffentlich.
+        {% endif %}
+        {% if review.comment %}<br>„{{ review.comment }}“{% endif %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'portal:review_submit' %}">
+        {% csrf_token %}
+        <fieldset style="border:0; padding:0; margin:0 0 12px;">
+            <legend style="font-weight:600;">Sterne (1 = sehr umständlich, 5 = sehr einfach)</legend>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                {% for i in "12345" %}
+                <label style="display:flex; align-items:center; gap:4px;">
+                    <input type="radio" name="rating" value="{{ i }}" required{% if review and review.rating|stringformat:"d" == i %} checked{% endif %}> {{ i }}
+                </label>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <label for="review_display_name" style="display:block; font-weight:600; margin-bottom:4px;">Vorname, wie er angezeigt werden soll</label>
+        <input type="text" id="review_display_name" name="display_name" minlength="2" maxlength="30" required autocomplete="given-name"
+               value="{{ review.display_name|default:'' }}" class="form-control" style="max-width:280px; margin-bottom:12px;">
+
+        <label for="review_comment" style="display:block; font-weight:600; margin-bottom:4px;">Kommentar (optional)</label>
+        <textarea id="review_comment" name="comment" rows="3" maxlength="{{ card.comment_max }}" class="form-control"
+                  style="width:100%; box-sizing:border-box; margin-bottom:12px;">{{ review.comment|default:'' }}</textarea>
+
+        <label style="display:flex; gap:8px; align-items:flex-start; margin-bottom:12px;">
+            <input type="checkbox" name="consent" required{% if review.publish_consent_at %} checked{% endif %} style="margin-top:4px;">
+            <span>Ich willige ein, dass mein Vorname und meine Bewertung öffentlich auf der Startseite von preceptly.de angezeigt werden.
+            Ich kann das jederzeit mit „Bewertung zurückziehen“ widerrufen.</span>
+        </label>
+        <button type="submit" class="btn" style="width:auto;">{% if review %}Bewertung aktualisieren{% else %}Bewertung abschicken{% endif %}</button>
+    </form>
+
+    {% if review %}
+    <form method="post" action="{% url 'portal:review_withdraw' %}" style="margin-top:12px;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary" style="width:auto;">Bewertung zurückziehen</button>
+    </form>
+    {% endif %}
+</section>
+{% endwith %}

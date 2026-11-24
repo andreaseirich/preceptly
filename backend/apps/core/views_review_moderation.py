@@ -36,9 +36,16 @@ def moderate_review(request, pk):
     review = get_object_or_404(Review, pk=pk)
     action = request.POST.get("action")
     if action == "approve":
-        review.is_approved = True
-        review.save(update_fields=["is_approved"])
-        messages.success(request, _("Review approved."))
+        if review.source != "tutor" and (
+            review.publish_consent_at is None or not review.display_name.strip()
+        ):
+            messages.error(
+                request, _("This review cannot be approved: consent or display name is missing.")
+            )
+        else:
+            review.is_approved = True
+            review.save(update_fields=["is_approved"])
+            messages.success(request, _("Review approved."))
     elif action == "reject":
         review.is_approved = False
         review.save(update_fields=["is_approved"])

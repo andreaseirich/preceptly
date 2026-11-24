@@ -8146,3 +8146,26 @@ msgstr "Kollidierende Stunden"
 
 msgid "Upcoming lessons"
 msgstr "Kommende Stunden"
+
+msgid "Voices of parents and students"
+msgstr "Stimmen von Eltern und Schülern"
+
+msgid "How families experience booking lessons with their tutor through Preceptly."
+msgstr "Wie Familien die Terminbuchung bei ihrem Tutor über Preceptly erleben."
+
+msgctxt "reviewer role"
+msgid "parent"
+msgstr "Elternteil"
+
+msgctxt "reviewer role"
+msgid "student"
+msgstr "Schüler"
+
+msgid "Consent to publish given on"
+msgstr "Einwilligung zur Veröffentlichung erteilt am"
+
+msgid "Cannot be approved (no consent)"
+msgstr "Kann nicht freigegeben werden (ohne Einwilligung)"
+
+msgid "This review cannot be approved: consent or display name is missing."
+msgstr "Diese Bewertung kann nicht freigegeben werden: Einwilligung oder Anzeigename fehlt."

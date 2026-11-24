@@ -2,6 +2,7 @@ from django.urls import path
 
 from apps.portal import views
 from apps.portal.views_ical_feed import ical_feed
+from apps.portal.views_reviews import PortalReviewView, PortalReviewWithdrawView
 
 app_name = "portal"
 
@@ -90,6 +91,8 @@ urlpatterns = [
         name="meeting_status",
     ),
     path("faq/", views.PortalFAQView.as_view(), name="faq"),
+    path("review/", PortalReviewView.as_view(), name="review_submit"),
+    path("review/withdraw/", PortalReviewWithdrawView.as_view(), name="review_withdraw"),
     path("profile/", views.PortalProfileEditView.as_view(), name="profile"),
     path(
         "profile/calendar-feed/renew/",

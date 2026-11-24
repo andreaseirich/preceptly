@@ -109,4 +109,5 @@
 <div class="empty-state"><p>Noch keine vergangenen Stunden.</p></div>
 {% endif %}
 </div>
+{% if review_card %}{% include "portal/_review_card.html" with card=review_card %}{% endif %}
 {% endblock %}

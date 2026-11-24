@@ -32,6 +32,7 @@ from apps.core.log_safety import safe_log_value
 from apps.core.upload_validation import sanitize_doc_name, validate_file_magic
 from apps.lessons.models import Lesson as _Lesson
 from apps.portal.models import ParentStudentLink, PortalMessage, PortalUser, StudentPortalLink
+from apps.portal.reviews import review_card
 
 logger = logging.getLogger(__name__)
 
@@ -264,6 +265,7 @@ class StudentHomeView(View):
                 "recent": recent,
                 "chat_messages": chat_messages,
                 "portal_user": portal_user,
+                "review_card": review_card(portal_user),
             },
         )
 
@@ -366,6 +368,7 @@ class ParentHomeView(View):
             {
                 "students_data": students_data,
                 "portal_user": portal_user,
+                "review_card": review_card(portal_user),
             },
         )
 

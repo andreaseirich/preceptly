@@ -284,4 +284,5 @@
 {% else %}
 <div class="empty-state"><p>Keine Schüler mit deinem Konto verknüpft.</p></div>
 {% endif %}
+{% if review_card %}{% include "portal/_review_card.html" with card=review_card %}{% endif %}
 {% endblock %}

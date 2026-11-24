@@ -16,7 +16,8 @@
     {% for review in reviews %}
     <div class="box-section" style="margin-bottom: 16px; max-width: 640px;">
         <p>
-            <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+            <strong>{% if review.source == "tutor" %}{{ review.user.get_full_name|default:review.user.username }}{% else %}{{ review.display_name|default:"?" }}{% endif %}</strong>
+            <span style="color: var(--text-secondary);">({{ review.get_source_display }})</span>
             — {{ review.rating }}/5
             {% if review.is_approved %}
                 <span style="color: var(--accent, #0d8069);">{% icon "check" %} {% trans "Approved" %}</span>
@@ -27,9 +28,13 @@
         {% if review.comment %}
         <p style="white-space: pre-wrap;">{{ review.comment }}</p>
         {% endif %}
+        {% if review.source != "tutor" %}
+        <p style="font-size: 0.85em;">{% if review.publish_consent_at %}{% trans "Consent to publish given on" %} {{ review.publish_consent_at }}{% else %}{% trans "Cannot be approved (no consent)" %}{% endif %}</p>
+        {% endif %}
         <p style="font-size: 0.85em; color: var(--text-secondary);">{{ review.updated_at }}</p>
         <div style="display: flex; gap: 10px;">
-            {% if not review.is_approved %}
+            {% if not review.is_approved and review.source != "tutor" and not review.publish_consent_at %}
+            {% elif not review.is_approved %}
             <form method="post" action="{% url 'core:moderate_review' review.pk %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="approve">

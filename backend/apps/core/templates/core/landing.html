@@ -215,6 +215,25 @@
     </div>
   </section>
 
+  {% if family_reviews %}
+  <!-- Stimmen von Eltern und Schülern -->
+  <section class="lp-section" aria-labelledby="lp-family-title">
+    <div class="lp-wrap lp-story">
+      <h2 id="lp-family-title">{% trans "Voices of parents and students" %}</h2>
+      <p class="lp-sub">{% trans "How families experience booking lessons with their tutor through Preceptly." %}</p>
+      {% for review in family_reviews %}
+      <div class="lp-card lp-quote">
+        <blockquote>
+          <p class="lp-stars" aria-label="{{ review.rating }} / 5">{{ review.stars_display }}</p>
+          <p>„{{ review.comment }}“</p>
+          <footer>— {{ review.display_name }}, {% if review.source == "parent" %}{% trans "parent" context "reviewer role" %}{% else %}{% trans "student" context "reviewer role" %}{% endif %}</footer>
+        </blockquote>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <!-- Demo -->
   <section class="lp-section" aria-labelledby="lp-demo-title">
     <div class="lp-wrap lp-demo">

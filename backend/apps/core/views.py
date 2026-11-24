@@ -59,14 +59,21 @@ class LandingPageView(TemplateView):
         from django.db.models import Avg, Count
 
         context = super().get_context_data(**kwargs)
-        approved = list(
-            Review.objects.filter(is_approved=True).exclude(comment="").select_related("user")[:6]
-        )
+        tutor_reviews = Review.objects.filter(is_approved=True, source="tutor")
+        approved = list(tutor_reviews.exclude(comment="").select_related("user")[:6])
         for review in approved:
             review.stars_display = "\u2605" * review.rating + "\u2606" * (5 - review.rating)
-        stats = Review.objects.filter(is_approved=True).aggregate(
-            avg=Avg("rating"), count=Count("id")
+        stats = tutor_reviews.aggregate(avg=Avg("rating"), count=Count("id"))
+        # Stimmen von Eltern und Schülern: nur freigegeben, mit Einwilligung, Anzeigename und Kommentar; fließen nicht in die Tutor-Zahlen ein
+        family = list(
+            Review.objects.filter(is_approved=True, publish_consent_at__isnull=False)
+            .exclude(source="tutor")
+            .exclude(comment="")
+            .exclude(display_name="")[:6]
         )
+        for review in family:
+            review.stars_display = "\u2605" * review.rating + "\u2606" * (5 - review.rating)
+        context["family_reviews"] = family
         context["approved_reviews"] = approved
         context["review_average"] = stats["avg"]
         context["review_count"] = stats["count"]

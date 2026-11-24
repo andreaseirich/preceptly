@@ -444,6 +444,24 @@ class Review(models.Model):
         help_text="1 (schlecht) bis 5 (sehr gut)",
     )
     comment = models.TextField(blank=True)
+    SOURCE_CHOICES = [("tutor", "Tutor"), ("parent", "Elternteil"), ("student", "Schüler")]
+    source = models.CharField(
+        max_length=10,
+        choices=SOURCE_CHOICES,
+        default="tutor",
+        db_index=True,
+        help_text="Wer bewertet: Tutor (Standard, alle bisherigen Bewertungen) oder ein Portal-Konto (Elternteil, Schüler).",
+    )
+    display_name = models.CharField(
+        max_length=30,
+        blank=True,
+        help_text="Vorname, wie er öffentlich erscheint. Nur bei Bewertungen aus dem Portal; nie Benutzername oder E-Mail.",
+    )
+    publish_consent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Zeitpunkt der Einwilligung zur öffentlichen Anzeige (Nachweis). Bewertungen aus dem Portal brauchen sie zur Freigabe.",
+    )
     is_approved = models.BooleanField(
         default=False,
         db_index=True,
@@ -464,7 +482,11 @@ class Review(models.Model):
         # A resubmitted/edited review needs a fresh look before it can go
         # public again - don't let a stale approval carry over silently.
         if self.pk:
-            previous = Review.objects.filter(pk=self.pk).values_list("rating", "comment").first()
-            if previous and previous != (self.rating, self.comment):
+            previous = (
+                Review.objects.filter(pk=self.pk)
+                .values_list("rating", "comment", "display_name")
+                .first()
+            )
+            if previous and previous != (self.rating, self.comment, self.display_name):
                 self.is_approved = False
         super().save(*args, **kwargs)
