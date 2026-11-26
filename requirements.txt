@@ -9,7 +9,7 @@ daphne==4.2.3
 # before; the floor keeps a build from ever resolving an older one (see SECURITY.md).
 Twisted>=26.10.0
 certifi==2026.11.20
-charset-normalizer==3.5.2
+charset-normalizer==3.5.3
 Django==6.1.3
 dj-database-url==3.1.2
 idna==3.20
