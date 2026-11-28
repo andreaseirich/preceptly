@@ -46,6 +46,16 @@ def _add_months(first_of_month: date, months: int) -> date:
     return date(index // 12, index % 12 + 1, 1)
 
 
+def _ensure_demo_password(user: User) -> None:
+    """Set the public demo password only if it does not match.
+
+    set_password() creates a new hash every time, and Django then ends all sessions of the account: the visitor who
+    has just logged in (and triggered the daily refresh) and everybody else in the demo.
+    """
+    if not user.check_password("demo123"):
+        user.set_password("demo123")
+
+
 class Command(BaseCommand):
     help = "Creates demo data for Preceptly"
 
@@ -118,7 +128,7 @@ class Command(BaseCommand):
             username="demo_premium",
             defaults={"email": "premium@example.com", "is_staff": True, "is_active": True},
         )
-        premium_user.set_password("demo123")
+        _ensure_demo_password(premium_user)
         premium_user.is_staff = True
         premium_user.is_active = True
         premium_user.save()
@@ -135,7 +145,7 @@ class Command(BaseCommand):
             username="demo_user",
             defaults={"email": "demo_user@example.com", "is_staff": True, "is_active": True},
         )
-        non_premium_user.set_password("demo123")
+        _ensure_demo_password(non_premium_user)
         non_premium_user.is_staff = True
         non_premium_user.is_active = True
         non_premium_user.save()

@@ -36,8 +36,8 @@ Tag. Das folgt dem Muster der Log-Bereinigung (`RequestLogMiddleware._maybe_purg
   neuen Versuch.
 - **Nur Demo-Konten lösen es aus, und nur dort, wo es sie schon gibt.** Es wird nie eine Demo angelegt, wo keine ist (die Konten haben ein
   öffentliches Passwort).
-- **Die Konten und ihre Profile bleiben** (`seed_demo_data --refresh`), sonst bräche ein laufender Login ab. Das Passwort wird auf `demo123`
-  und die Tarifstufe auf Business (`demo_premium`) bzw. Free (`demo_user`) zurückgesetzt.
+- **Die Konten und ihre Profile bleiben** (`seed_demo_data --refresh`), sonst bräche ein laufender Login ab. Ein geändertes Passwort wird auf `demo123`
+  zurückgesetzt (siehe Nachtrag 28.11.2026) und die Tarifstufe auf Business (`demo_premium`) bzw. Free (`demo_user`) zurückgesetzt.
 - **Eine Transaktion:** Schlägt das Neuerzeugen fehl, bleibt der alte Stand. Die Demo ist nie halb leer.
 - **Besucher-Reste gehen mit:** Weil die Demo öffentlich ist, können Besucher mehr hinterlassen als Verträge: Kalenderverbindungen (iCloud),
   geheime Google-Adressen, Abo-Links, Push-Abos, Ausgaben und Portal-Konten. Das wird beim Auffrischen entfernt. Der Login-Nutzer hinter
@@ -76,6 +76,19 @@ Beim Deploy wird nichts automatisch geändert: Der erste Zugriff eines Demo-Kont
   `apps/blocked_times/test_recurring_holder.py`.
 - Unverändert: Die Demo-Konten haben `is_staff=True` (ohne Superuser und Berechtigungen, öffnet nur ein leeres Admin-Fenster; die
   Statistikseite hat einen eigenen Passwortschutz). `--clear` löscht weiterhin die Konten selbst.
+
+## Nachtrag 28.11.2026: Erster Login des Tages endete wieder auf der Anmeldung
+
+- **Befund** (reproduziert in einer lokalen Kopie): `POST /login/` 302, der nächste Zugriff frischt die Demo auf, `/dashboard/` leitet zur
+  Anmeldung. Der zweite Login klappt.
+- **Ursache:** Der Seed rief bei jedem Lauf `set_password("demo123")` auf. Jeder Aufruf erzeugt einen neuen Hash, und Django verwirft dann
+  alle Sitzungen des Kontos, auch die anderer Demo-Besucher. Bestehende Konten zu behalten reichte also nicht.
+- **Lösung:** Das Passwort wird nur noch gesetzt, wenn `check_password("demo123")` fehlschlägt (neues oder geändertes Passwort). Ein
+  geändertes Passwort wird weiterhin zurückgesetzt; die alten Sitzungen dieses Kontos enden dabei, und das ist so gewollt.
+- **Warum die Tests das nicht bemerkten:** Django prüft die Sitzung am Anfang der Anfrage, also vor der Auffrischung. Der Middleware-Test
+  stellte nur eine Anfrage. `RefreshKeepsSessionsTest` prüft jetzt die folgende Anfrage: erster Login des Tages, andere offene
+  Demo-Sitzungen und das Zurücksetzen eines geänderten Passworts.
+- Der Handbefehl `reset_demo_passwords` setzt das Passwort weiterhin immer neu (beendet Demo-Sitzungen); er läuft nicht automatisch.
 
 ## Code
 
