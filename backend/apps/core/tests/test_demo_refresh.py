@@ -16,8 +16,9 @@ from unittest import mock
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.blocked_times.models import BlockedTime
 from apps.calendar_sync.models import TutorCalendarFeed
@@ -391,8 +392,6 @@ class MiddlewareTest(TestCase):
         seed_on(date(2025, 11, 1), "--refresh")
 
     def upcoming(self, username):
-        from django.utils import timezone
-
         return Lesson.objects.filter(
             contract__user__username=username, date__gt=timezone.localdate()
         ).count()
@@ -451,6 +450,63 @@ class MiddlewareTest(TestCase):
                 response = self.client.get(reverse("core:dashboard"))
 
         self.assertEqual(response.status_code, 200)
+
+
+class RefreshKeepsSessionsTest(TestCase):
+    """Befund 28.11.2026: Der erste Login eines Demo-Kontos am Tag landete wieder auf der Anmeldung. Der Seed setzte das Passwort bei
+    jedem Lauf neu; mit dem neuen Hash verwirft Django alle Sitzungen dieses Kontos. Django prüft die Sitzung vor der Auffrischung,
+    der Abbruch zeigt sich also erst bei der nächsten Anfrage. Die Tests brauchen deshalb immer eine zweite."""
+
+    def setUp(self):
+        cache.clear()
+        seed_on(date(2025, 11, 1), "--refresh")
+
+    def assert_still_logged_in(self, client, username):
+        response = client.get(reverse("core:dashboard"))
+        self.assertEqual(response.status_code, 200, f"{username} wurde abgemeldet")
+        self.assertEqual(response.context["user"].username, username)
+
+    def test_the_first_login_of_the_day_survives_the_refresh(self):
+        for username in ("demo_premium", "demo_user"):
+            with self.subTest(username=username):
+                cache.clear()
+                client = Client()
+                self.assertTrue(client.login(username=username, password="demo123"))
+
+                client.get("/")  # löst die Auffrischung aus
+
+                self.assertEqual(cache.get(_lock_key(timezone.localdate())), "done")
+                self.assert_still_logged_in(client, username)
+
+    def test_other_demo_visitors_stay_logged_in(self):
+        visitors = []
+        for username in ("demo_premium", "demo_premium", "demo_user"):
+            client = Client()
+            client.force_login(User.objects.get(username=username))
+            visitors.append((client, username))
+
+        seed_on(date(2026, 11, 21), "--refresh")
+        cache.set(_lock_key(timezone.localdate()), "done")
+
+        for client, username in visitors:
+            with self.subTest(username=username):
+                self.assert_still_logged_in(client, username)
+
+    def test_a_changed_password_is_reset_and_ends_the_old_sessions(self):
+        user = User.objects.get(username="demo_user")
+        user.set_password("von-einem-besucher-geaendert")
+        user.save()
+        changer = Client()
+        changer.force_login(user)
+        bystander = Client()
+        bystander.force_login(User.objects.get(username="demo_premium"))
+
+        seed_on(date(2026, 11, 21), "--refresh")
+        cache.set(_lock_key(timezone.localdate()), "done")
+
+        self.assertTrue(User.objects.get(username="demo_user").check_password("demo123"))
+        self.assertEqual(changer.get(reverse("core:dashboard")).status_code, 302)
+        self.assert_still_logged_in(bystander, "demo_premium")
 
 
 class RecurringSeriesStillWorkTest(TestCase):

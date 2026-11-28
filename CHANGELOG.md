@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fix (2026-11-28) — Erster Demo-Login des Tages blieb nicht angemeldet
+- Die tägliche Auffrischung setzte das Demo-Passwort jedes Mal neu, und damit verwarf Django alle Sitzungen der Demo-Konten. Das Passwort wird jetzt nur noch gesetzt, wenn es nicht (mehr) stimmt. Einzelheiten: `docs/features/feat-demo-daten-verschieben.md`.
+
 ### Fix (2026-11-24) — Zweites Kind am selben Eltern-Konto
 - Wird für ein weiteres Kind dieselbe E-Mail-Adresse eingeladen oder die Familie von Hand verknüpft, ist das Kind sofort im Portal sichtbar, wenn das Konto schon aktiviert ist. Die Eltern bekommen eine Info-Mail ohne Aktivierungslink (kein zweites Passwort, das das erste überschreibt). Ist das Konto noch nicht aktiviert, werden die übrigen Kinder bei der Aktivierung mit freigeschaltet. Vorher blieb die Verknüpfung inaktiv: keine Mail, das Kind unsichtbar (Familie Charlier).
 
